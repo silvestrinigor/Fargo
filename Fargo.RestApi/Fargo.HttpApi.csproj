@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fargo.AppHost\Fargo.AppHost.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
+    <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
