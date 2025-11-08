@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.AppHost\Fargo.AppHost.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
     <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
   </ItemGroup>

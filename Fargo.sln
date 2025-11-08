@@ -19,9 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.Infrastructure", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.HttpApi", "src\Fargo.RestApi\Fargo.HttpApi.csproj", "{27E10523-9435-4D7F-84B0-3C5C5A7B49A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.AppHost", "src\Fargo.AppHost\Fargo.AppHost.AppHost\Fargo.AppHost.csproj", "{52E37BD2-C7BE-46B4-A903-3C1E7AAF5184}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.AppHost", "src\Fargo.AppHost\Fargo.AppHost.csproj", "{52E37BD2-C7BE-46B4-A903-3C1E7AAF5184}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.ServiceDefaults", "src\Fargo.AppHost\Fargo.AppHost.ServiceDefaults\Fargo.ServiceDefaults.csproj", "{58035AE4-2A29-86A3-43F4-3F901DBE0F71}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.ServiceDefaults", "src\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj", "{58035AE4-2A29-86A3-43F4-3F901DBE0F71}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.Web", "src\Fargo.Web\Fargo.Web.csproj", "{8FC52839-FA90-A6AB-5978-934D7BFA3911}"
 EndProject
