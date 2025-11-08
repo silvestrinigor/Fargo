@@ -4,9 +4,9 @@ namespace Fargo.Application.Contracts;
 
 public interface IArticleApplicationService
 {
-    Task<ArticleDto?> GetArticleAsync(Guid guid);
-    Task<IEnumerable<ArticleDto>> GetArticlesAsync();
-    Task<ArticleDto> CreateArticleAsync(ArticleDto articleCreateDto);
+    Task<EntityDto?> GetArticleAsync(Guid guid);
+    Task<IEnumerable<EntityDto>> GetArticlesAsync();
+    Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto);
     Task DeleteArticleAsync(Guid guid);
-    Task UpdateArticleAsync(ArticleDto articleUpdateDto);
+    Task UpdateArticleAsync(EntityDto articleUpdateDto);
 }

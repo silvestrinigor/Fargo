@@ -4,19 +4,19 @@ using Fargo.Core.Entities;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Fargo.Infrastructure.ExternalServices;
+namespace Fargo.Infrastructure.ExternalServices.Fargo;
 
-public class FagoHttpClientService(HttpClient httpClient) : IArticleHttpClientService
+public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClientService
 {
     private readonly HttpClient httpClient = httpClient;
 
-    public async Task<ArticleDto> CreateArticleAsync(ArticleDto articleCreateDto)
+    public async Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto)
     {
         var response = await httpClient.PostAsJsonAsync("/articles", articleCreateDto);
 
         var content = await response.Content.ReadAsStringAsync();
 
-        var articleDto = JsonSerializer.Deserialize<ArticleDto>(content, new JsonSerializerOptions
+        var articleDto = JsonSerializer.Deserialize<EntityDto>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -31,13 +31,13 @@ public class FagoHttpClientService(HttpClient httpClient) : IArticleHttpClientSe
         throw new NotImplementedException();
     }
 
-    public async Task<ArticleDto?> GetArticleAsync(Guid guid)
+    public async Task<EntityDto?> GetArticleAsync(Guid guid)
     {
         var response = await httpClient.GetAsync($"/articles/{guid}");
 
         var content = await response.Content.ReadAsStringAsync();
 
-        var articleDto = JsonSerializer.Deserialize<ArticleDto>(content, new JsonSerializerOptions
+        var articleDto = JsonSerializer.Deserialize<EntityDto>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -47,13 +47,13 @@ public class FagoHttpClientService(HttpClient httpClient) : IArticleHttpClientSe
         return articleDto;
     }
 
-    public async Task<IEnumerable<ArticleDto>> GetArticlesAsync()
+    public async Task<IEnumerable<EntityDto>> GetArticlesAsync()
     {
         var response = await httpClient.GetAsync("/articles");
 
         var content = await response.Content.ReadAsStringAsync();
 
-        var articlesDtos = JsonSerializer.Deserialize<IEnumerable<ArticleDto>>(content, new JsonSerializerOptions
+        var articlesDtos = JsonSerializer.Deserialize<IEnumerable<EntityDto>>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
@@ -63,7 +63,7 @@ public class FagoHttpClientService(HttpClient httpClient) : IArticleHttpClientSe
         return articlesDtos;
     }
 
-    public Task UpdateArticleAsync(ArticleDto articleUpdateDto)
+    public Task UpdateArticleAsync(EntityDto articleUpdateDto)
     {
         throw new NotImplementedException();
     }

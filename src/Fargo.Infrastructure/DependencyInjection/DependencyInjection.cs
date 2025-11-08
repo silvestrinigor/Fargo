@@ -9,8 +9,8 @@ using Fargo.Infrastructure.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Fargo.Infrastructure.ExternalServices;
 using Fargo.Core.Contracts;
+using Fargo.Infrastructure.ExternalServices.Fargo;
 
 namespace Fargo.Infrastructure.DependencyInjection;
 
@@ -18,7 +18,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<FagoContext>(opt =>
+        services.AddDbContext<FargoContext>(opt =>
             opt.UseInMemoryDatabase("Fargo"));
 
         services.AddScoped<IArticleApplicationService, ArticleApplicationService>();
@@ -27,7 +27,7 @@ public static class DependencyInjection
 
         services.AddScoped<IArticleRepository, ArticleRepository>();
 
-        services.AddScoped<IUnitOfWork, FagoUnitOfWork>();
+        services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 
         return services;
     }
@@ -37,7 +37,7 @@ public static class DependencyInjection
 
         services.AddScoped<IArticleApplicationService, ArticleApplicationHttpClientService>();
 
-        services.AddHttpClient<IArticleHttpClientService, FagoHttpClientService>(client =>
+        services.AddHttpClient<IArticleHttpClientService, ArticleHttpClientService>(client =>
         {
             client.BaseAddress = new("https+http://apiservice");
         });
@@ -49,7 +49,7 @@ public static class DependencyInjection
     {
         using (var scope = services.CreateScope())
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<FagoContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<FargoContext>();
             dbContext.Database.EnsureCreated();
         }
 

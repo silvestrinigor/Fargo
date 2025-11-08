@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Fargo.AppHost\Fargo.AppHost.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
     <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />

@@ -3,7 +3,7 @@ using Fargo.Application.Contracts.UnitOfWork;
 
 namespace Fargo.Infrastructure.UnitOfWork;
 
-public class FagoUnitOfWork(FagoContext fagoContext) : IUnitOfWork
+public class FargoUnitOfWork(FargoContext fagoContext) : IUnitOfWork
 {
     public async Task SaveChangesAsync()
     {

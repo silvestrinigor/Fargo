@@ -5,12 +5,12 @@ namespace Fargo.Application.Extensions;
 
 public static class ArticleExtension
 {
-    public static ArticleDto ToDto(this Article article)
+    public static EntityDto ToDto(this Article article)
     {
-        return new ArticleDto() { Name = article.Name, Description = article.Description, Guid = article.Guid};
+        return new EntityDto() { Name = article.Name, Description = article.Description, Guid = article.Guid};
     }
 
-    public static Article Update(this Article article, ArticleDto articleDto)
+    public static Article Update(this Article article, EntityDto articleDto)
     {
         return article;
     }

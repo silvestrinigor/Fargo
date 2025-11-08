@@ -8,17 +8,17 @@ public class ArticleApplicationHttpClientService(IArticleHttpClientService artic
 {
     private readonly IArticleHttpClientService articleApplicationExternalService = articleApplicationExternalService;
 
-    public async Task<ArticleDto> CreateArticleAsync(ArticleDto articleCreateDto)
+    public async Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto)
     {
         return await articleApplicationExternalService.CreateArticleAsync(articleCreateDto);
     }
 
-    public async Task<ArticleDto?> GetArticleAsync(Guid guid)
+    public async Task<EntityDto?> GetArticleAsync(Guid guid)
     {
         return await articleApplicationExternalService.GetArticleAsync(guid);
     }
 
-    public async Task<IEnumerable<ArticleDto>> GetArticlesAsync()
+    public async Task<IEnumerable<EntityDto>> GetArticlesAsync()
     {
         return await articleApplicationExternalService.GetArticlesAsync();
     }
@@ -27,7 +27,7 @@ public class ArticleApplicationHttpClientService(IArticleHttpClientService artic
         await articleApplicationExternalService.DeleteArticleAsync(guid);
     }
 
-    public async Task UpdateArticleAsync(ArticleDto articleUpdateDto)
+    public async Task UpdateArticleAsync(EntityDto articleUpdateDto)
     {
         await articleApplicationExternalService.UpdateArticleAsync(articleUpdateDto);
     }

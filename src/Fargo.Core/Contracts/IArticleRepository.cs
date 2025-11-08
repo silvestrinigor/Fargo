@@ -2,10 +2,7 @@
 
 namespace Fargo.Core.Contracts;
 
-public interface IArticleRepository
+public interface IArticleRepository : IEntityRepository<Article>
 {
-    Task<Article?> GetAsync(Guid guid);
-    Task<IEnumerable<Article>> GetAsync();
-    void Add(Article area);
-    void Remove(Article area);
+
 }

@@ -12,14 +12,14 @@ public class ArticleApplicationService(IArticleFactory articleFactory, IArticleR
     private readonly IArticleFactory articleFactory = articleFactory;
     private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-    public async Task<ArticleDto?> GetArticleAsync(Guid guid)
+    public async Task<EntityDto?> GetArticleAsync(Guid guid)
     {
         var article = await articleRepository.GetAsync(guid);
 
         return article?.ToDto();
     }
 
-    public async Task<ArticleDto> CreateArticleAsync(ArticleDto articleCreateDto) 
+    public async Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto) 
     {
         ArgumentNullException.ThrowIfNullOrEmpty(articleCreateDto.Name);
 
@@ -43,14 +43,14 @@ public class ArticleApplicationService(IArticleFactory articleFactory, IArticleR
         await unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ArticleDto>> GetArticlesAsync()
+    public async Task<IEnumerable<EntityDto>> GetArticlesAsync()
     {
         var articles = await articleRepository.GetAsync();
 
         return articles.Select(article => article.ToDto());
     }
 
-    public Task UpdateArticleAsync(ArticleDto articleUpdateDto)
+    public Task UpdateArticleAsync(EntityDto articleUpdateDto)
     {
         throw new NotImplementedException();
     }

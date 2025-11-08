@@ -4,9 +4,10 @@ using Fargo.Infrastructure.Configurations;
 
 namespace Fargo.Infrastructure.Contexts;
 
-public class FagoContext(DbContextOptions<FagoContext> options) : DbContext(options)
+public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(options)
 {
     public DbSet<Article> Articles { get; set; }
+    public DbSet<Container> Containers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -15,8 +16,7 @@ public class FagoContext(DbContextOptions<FagoContext> options) : DbContext(opti
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(FagoContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(FargoContext).Assembly);
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
     }
 }
- 

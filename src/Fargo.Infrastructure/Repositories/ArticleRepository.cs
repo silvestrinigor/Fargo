@@ -5,21 +5,21 @@ using Fargo.Core.Contracts;
 
 namespace Fargo.Infrastructure.Repositories;
 
-internal class ArticleRepository(FagoContext fagoContext) : IArticleRepository
+internal class ArticleRepository(FargoContext fagoContext) : IArticleRepository
 {
-    private readonly FagoContext fagoContext = fagoContext;
+    private readonly FargoContext fargoContext = fagoContext;
 
-    public void Add(Article article) => fagoContext.Articles.Add(article);
+    public void Add(Article article) => fargoContext.Articles.Add(article);
 
-    public async Task<Article?> GetAsync(Guid guid) => await fagoContext.Articles.Where(x => x.Guid == guid).FirstOrDefaultAsync();
+    public async Task<Article?> GetAsync(Guid guid) => await fargoContext.Articles.Where(x => x.Guid == guid).FirstOrDefaultAsync();
 
     public async Task<IEnumerable<Article>> GetAsync()
     {
-        return await fagoContext.Articles.ToListAsync();
+        return await fargoContext.Articles.ToListAsync();
     }
 
     public void Remove(Article article)
     {
-        fagoContext.Articles.Remove(article);
+        fargoContext.Articles.Remove(article);
     }
 }

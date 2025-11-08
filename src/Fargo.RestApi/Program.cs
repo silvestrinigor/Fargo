@@ -18,7 +18,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapFagoArticle();
+app.MapFargoArticle();
+
+app.MapFargoContainer();
 
 app.Services.InitInfrastructure();
 

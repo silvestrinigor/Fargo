@@ -1,6 +1,6 @@
 ﻿namespace Fargo.Application.Dtos;
 
-public class ArticleDto
+public class EntityDto
 {
     public Guid Guid { get; set; }
     public string? Name { get; set; }
