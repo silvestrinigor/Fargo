@@ -10,4 +10,6 @@ public interface IContainerApplicationService
     Task DeleteContainerAsync(Guid guid);
     Task UpdateContainerAsync(EntityDto articleUpdateDto);
     Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid);
+    Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid);
 }
+ 

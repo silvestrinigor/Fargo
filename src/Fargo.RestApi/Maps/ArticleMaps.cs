@@ -17,7 +17,7 @@ public static class ArticleMaps
         webApplication.MapPost("/articles/", async ([FromBody] EntityDto articleCreateDto, [FromServices] IArticleApplicationService articleApplicationService)
             => await articleApplicationService.CreateArticleAsync(articleCreateDto));
 
-        webApplication.MapPatch("/articles/", async ([FromBody] EntityDto articleUpdateDto, [FromServices] IArticleApplicationService articleApplicationService)
+        webApplication.MapPatch("/articles/{article}", async (Guid article, [FromBody] EntityDto articleUpdateDto, [FromServices] IArticleApplicationService articleApplicationService)
             => await articleApplicationService.UpdateArticleAsync(articleUpdateDto));
 
         webApplication.MapDelete("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService articleApplicationService)

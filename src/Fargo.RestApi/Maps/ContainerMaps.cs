@@ -17,7 +17,7 @@ public static class ContainerMaps
         webApplication.MapPost("/containers/", async ([FromBody] EntityDto articleCreateDto, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.CreateContainerAsync(articleCreateDto));
 
-        webApplication.MapPatch("/containers/", async ([FromBody] EntityDto articleUpdateDto, [FromServices] IContainerApplicationService containerApplicationService)
+        webApplication.MapPatch("/containers/{container}", async (Guid container, [FromBody] EntityDto articleUpdateDto, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.UpdateContainerAsync(articleUpdateDto));
 
         webApplication.MapDelete("/containers/{container}", async (Guid container, [FromServices] IContainerApplicationService containerApplicationService)
@@ -25,5 +25,8 @@ public static class ContainerMaps
 
         webApplication.MapPut("/containers/{container}/entities/{entity}", async (Guid container, Guid entity, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.InsertEntityIntoContainer(container, entity));
+        
+        webApplication.MapDelete("/containers/{container}/entities/{entity}", async (Guid container, Guid entity, [FromServices] IContainerApplicationService containerApplicationService)
+            => await containerApplicationService.RemoveEntityFromContainer(container, entity));
     }
 }

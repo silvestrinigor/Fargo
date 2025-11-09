@@ -31,6 +31,11 @@ public class ContainerApplicationHttpClientService(IContainerHttpClientService c
         await containerHttpClientService.InsertEntityIntoContainer(containerGuid, entityGuid);
     }
 
+    public async Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid)
+    {
+        await containerHttpClientService.RemoveEntityFromContainer(containerGuid, entityGuid);
+    }
+
     public async Task UpdateContainerAsync(EntityDto articleUpdateDto)
     {
         await containerHttpClientService.UpdateContainerAsync(articleUpdateDto);

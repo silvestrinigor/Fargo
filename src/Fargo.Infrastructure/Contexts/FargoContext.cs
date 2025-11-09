@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Fargo.Core.Entities;
 using Fargo.Infrastructure.Configurations;
+using Fargo.Core.Entities.Abstracts;
 
 namespace Fargo.Infrastructure.Contexts;
 
@@ -8,6 +9,7 @@ public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(op
 {
     public DbSet<Article> Articles { get; set; }
     public DbSet<Container> Containers { get; set; }
+    public DbSet<DetailedEntity> DetailedEntities { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -18,5 +20,7 @@ public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(op
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FargoContext).Assembly);
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+        modelBuilder.ApplyConfiguration(new ContainerConfiguration());
+        modelBuilder.ApplyConfiguration(new DetailedEntityConfiguration());
     }
 }

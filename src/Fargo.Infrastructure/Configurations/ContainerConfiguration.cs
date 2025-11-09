@@ -8,14 +8,5 @@ public class ContainerConfiguration : IEntityTypeConfiguration<Container>
 {
     public void Configure(EntityTypeBuilder<Container> builder)
     {
-        builder
-            .HasKey(a => a.Guid);
-        builder
-            .Property(a => a.Name)
-            .IsRequired()
-            .HasMaxLength(200);
-        builder
-            .Property(a => a.CreatedAt)
-            .IsRequired();
     }
 }

@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB27D30
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.Domain.Tests", "tests\Fargo.Domain.Tests\Fargo.Domain.Tests.csproj", "{6547A245-E278-42C7-A717-7E255EB9F731}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fargo.WebComponents", "src\Fargo.WebComponents\Fargo.WebComponents.csproj", "{85D73643-EF82-8342-0A2C-9E11CD29E89D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{6547A245-E278-42C7-A717-7E255EB9F731}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6547A245-E278-42C7-A717-7E255EB9F731}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6547A245-E278-42C7-A717-7E255EB9F731}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85D73643-EF82-8342-0A2C-9E11CD29E89D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85D73643-EF82-8342-0A2C-9E11CD29E89D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85D73643-EF82-8342-0A2C-9E11CD29E89D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85D73643-EF82-8342-0A2C-9E11CD29E89D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +86,7 @@ Global
 		{58035AE4-2A29-86A3-43F4-3F901DBE0F71} = {6B5A18E2-102C-45CF-8EE3-1A900B96A6A3}
 		{8FC52839-FA90-A6AB-5978-934D7BFA3911} = {6B5A18E2-102C-45CF-8EE3-1A900B96A6A3}
 		{6547A245-E278-42C7-A717-7E255EB9F731} = {0AB27D30-8655-46B0-8DA7-E2FF646D1112}
+		{85D73643-EF82-8342-0A2C-9E11CD29E89D} = {6B5A18E2-102C-45CF-8EE3-1A900B96A6A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {764B0199-2240-4D86-843D-3C20BFC77438}
