@@ -1,20 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Fargo.Core.Entities;
-using Fargo.Infrastructure.Configurations;
+﻿using Fargo.Core.Entities;
 using Fargo.Core.Entities.Abstracts;
+using Fargo.Infrastructure.Persistence.Configurations;
+using Microsoft.EntityFrameworkCore;
 
-namespace Fargo.Infrastructure.Contexts;
+namespace Fargo.Infrastructure.Persistence;
 
 public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(options)
 {
+    public DbSet<Entity> Entities { get; set; }
     public DbSet<Article> Articles { get; set; }
     public DbSet<Container> Containers { get; set; }
-    public DbSet<DetailedEntity> DetailedEntities { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseInMemoryDatabase("Fargo");
-    }
+        => optionsBuilder.UseInMemoryDatabase("Fargo");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,13 +1,13 @@
 ﻿using Fargo.Application.Dtos;
 
-namespace Fargo.Application.Contracts;
+namespace Fargo.Application.Contracts.Http;
 
-public interface IArticleApplicationService
+public interface IArticleHttpClientService
 {
     Task<EntityDto?> GetArticleAsync(Guid guid);
     Task<IEnumerable<EntityDto>> GetArticlesAsync();
     Task<IEnumerable<Guid>> GetArticlesGuidsAsync();
     Task<EntityDto> CreateArticleAsync(EntityCreateDto articleCreateDto);
     Task DeleteArticleAsync(Guid guid);
-    Task UpdateArticleAsync(Guid articleGuid, EntityUpdateDto articleUpdateDto);
+    Task UpdateArticleAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto);
 }

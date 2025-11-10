@@ -14,18 +14,24 @@ public static class ContainerMaps
         webApplication.MapGet("/containers/", async ([FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.GetContainerAsync());
 
-        webApplication.MapPost("/containers/", async ([FromBody] EntityDto articleCreateDto, [FromServices] IContainerApplicationService containerApplicationService)
+        webApplication.MapGet("/containers/guids/", async ([FromServices] IContainerApplicationService containerApplicationService)
+            => await containerApplicationService.GetContainersGuidsAsync());
+
+        webApplication.MapPost("/containers/", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.CreateContainerAsync(articleCreateDto));
 
-        webApplication.MapPatch("/containers/{container}", async (Guid container, [FromBody] EntityDto articleUpdateDto, [FromServices] IContainerApplicationService containerApplicationService)
-            => await containerApplicationService.UpdateContainerAsync(articleUpdateDto));
+        webApplication.MapPatch("/containers/{container}", async (Guid container, [FromBody] EntityUpdateDto containerUpdateDto, [FromServices] IContainerApplicationService containerApplicationService)
+            => await containerApplicationService.UpdateContainerAsync(container, containerUpdateDto));
 
         webApplication.MapDelete("/containers/{container}", async (Guid container, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.DeleteContainerAsync(container));
 
+        webApplication.MapGet("/containers/{container}/entities/", async (Guid container, [FromServices] IContainerApplicationService containerApplicationService)
+            => await containerApplicationService.GetContainerEntitiesAsync(container));
+
         webApplication.MapPut("/containers/{container}/entities/{entity}", async (Guid container, Guid entity, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.InsertEntityIntoContainer(container, entity));
-        
+
         webApplication.MapDelete("/containers/{container}/entities/{entity}", async (Guid container, Guid entity, [FromServices] IContainerApplicationService containerApplicationService)
             => await containerApplicationService.RemoveEntityFromContainer(container, entity));
     }

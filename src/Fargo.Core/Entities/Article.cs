@@ -5,7 +5,7 @@ namespace Fargo.Core.Entities;
 /// <summary>  
 /// Represents a particular item.
 /// </summary>
-public class Article : DetailedEntity
+public class Article : Entity
 {
     public Article() : base()
     {
@@ -13,7 +13,7 @@ public class Article : DetailedEntity
 
     public Article(string name) : base(name) { }
 
-    public Article(string name, Guid guid) : base(name,guid)
+    public Article(string name, Guid guid) : base(name, guid)
     {
     }
 }

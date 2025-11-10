@@ -1,5 +1,5 @@
 ﻿using Fargo.Application.Contracts;
-using Fargo.Application.Contracts.ExternalServices;
+using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
 
 namespace Fargo.Application.Services;
@@ -8,7 +8,7 @@ public class ArticleApplicationHttpClientService(IArticleHttpClientService artic
 {
     private readonly IArticleHttpClientService articleApplicationExternalService = articleApplicationExternalService;
 
-    public async Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto)
+    public async Task<EntityDto> CreateArticleAsync(EntityCreateDto articleCreateDto)
     {
         return await articleApplicationExternalService.CreateArticleAsync(articleCreateDto);
     }
@@ -27,8 +27,13 @@ public class ArticleApplicationHttpClientService(IArticleHttpClientService artic
         await articleApplicationExternalService.DeleteArticleAsync(guid);
     }
 
-    public async Task UpdateArticleAsync(EntityDto articleUpdateDto)
+    public async Task UpdateArticleAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto)
     {
-        await articleApplicationExternalService.UpdateArticleAsync(articleUpdateDto);
+        await articleApplicationExternalService.UpdateArticleAsync(containerGuid, articleUpdateDto);
+    }
+
+    public Task<IEnumerable<Guid>> GetArticlesGuidsAsync()
+    {
+        throw new NotImplementedException();
     }
 }

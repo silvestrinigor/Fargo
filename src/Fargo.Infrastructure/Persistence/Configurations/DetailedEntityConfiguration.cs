@@ -1,17 +1,12 @@
 ﻿using Fargo.Core.Entities.Abstracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Fargo.Infrastructure.Configurations;
+namespace Fargo.Infrastructure.Persistence.Configurations;
 
-public class DetailedEntityConfiguration : IEntityTypeConfiguration<DetailedEntity>
+public class DetailedEntityConfiguration : IEntityTypeConfiguration<Entity>
 {
-    public void Configure(EntityTypeBuilder<DetailedEntity> builder)
+    public void Configure(EntityTypeBuilder<Entity> builder)
     {
         builder
             .HasKey(a => a.Guid);

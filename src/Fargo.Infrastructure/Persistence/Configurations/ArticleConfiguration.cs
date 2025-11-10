@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Fargo.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Fargo.Core.Entities;
 
-namespace Fargo.Infrastructure.Configurations;
+namespace Fargo.Infrastructure.Persistence.Configurations;
 
 public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 {

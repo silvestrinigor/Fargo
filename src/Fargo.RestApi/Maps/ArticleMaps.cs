@@ -14,11 +14,14 @@ public static class ArticleMaps
         webApplication.MapGet("/articles/", async ([FromServices] IArticleApplicationService articleApplicationService)
             => await articleApplicationService.GetArticlesAsync());
 
-        webApplication.MapPost("/articles/", async ([FromBody] EntityDto articleCreateDto, [FromServices] IArticleApplicationService articleApplicationService)
+        webApplication.MapGet("/articles/guids/", async ([FromServices] IArticleApplicationService articleApplicationService)
+            => await articleApplicationService.GetArticlesGuidsAsync());
+
+        webApplication.MapPost("/articles/", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IArticleApplicationService articleApplicationService)
             => await articleApplicationService.CreateArticleAsync(articleCreateDto));
 
-        webApplication.MapPatch("/articles/{article}", async (Guid article, [FromBody] EntityDto articleUpdateDto, [FromServices] IArticleApplicationService articleApplicationService)
-            => await articleApplicationService.UpdateArticleAsync(articleUpdateDto));
+        webApplication.MapPatch("/articles/{article}", async (Guid article, [FromBody] EntityUpdateDto articleUpdateDto, [FromServices] IArticleApplicationService articleApplicationService)
+            => await articleApplicationService.UpdateArticleAsync(article, articleUpdateDto));
 
         webApplication.MapDelete("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService articleApplicationService)
             => await articleApplicationService.DeleteArticleAsync(article));

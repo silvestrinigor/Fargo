@@ -1,35 +1,35 @@
 ﻿using Fargo.Application.Contracts;
-using Fargo.Application.Contracts.UnitOfWork;
+using Fargo.Application.Contracts.Persistence;
 using Fargo.Application.Dtos;
 using Fargo.Application.Extensions;
 using Fargo.Core.Contracts;
+using Fargo.Core.Entities;
 
 namespace Fargo.Application.Services;
 
-public class ArticleApplicationService(IArticleFactory articleFactory, IArticleRepository articleRepository, IUnitOfWork unitOfWork) : IArticleApplicationService
+public class ArticleApplicationService(IArticleRepository articleRepository, IUnitOfWork unitOfWork) : IArticleApplicationService
 {
     private readonly IArticleRepository articleRepository = articleRepository;
-    private readonly IArticleFactory articleFactory = articleFactory;
     private readonly IUnitOfWork unitOfWork = unitOfWork;
 
     public async Task<EntityDto?> GetArticleAsync(Guid guid)
     {
         var article = await articleRepository.GetAsync(guid);
 
-        return article?.ToDto();
+        return article?.ToEntityDto();
     }
 
-    public async Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto) 
+    public async Task<EntityDto> CreateArticleAsync(EntityCreateDto articleCreateDto)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(articleCreateDto.Name);
 
-        var article = articleFactory.Create(articleCreateDto.Name);
+        var article = new Article(articleCreateDto.Name);
 
         articleRepository.Add(article);
 
         await unitOfWork.SaveChangesAsync();
 
-        return article.ToDto();
+        return article.ToEntityDto();
     }
 
     public async Task DeleteArticleAsync(Guid guid)
@@ -47,11 +47,24 @@ public class ArticleApplicationService(IArticleFactory articleFactory, IArticleR
     {
         var articles = await articleRepository.GetAsync();
 
-        return articles.Select(article => article.ToDto());
+        return articles.Select(article => article.ToEntityDto());
     }
 
-    public Task UpdateArticleAsync(EntityDto articleUpdateDto)
+    public async Task UpdateArticleAsync(Guid articleGuid, EntityUpdateDto articleUpdateDto)
     {
-        throw new NotImplementedException();
+        var article = await articleRepository.GetAsync(articleGuid);
+
+        ArgumentNullException.ThrowIfNull(article);
+
+        article.UpdateEntityProperties(articleUpdateDto);
+
+        await unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<Guid>> GetArticlesGuidsAsync()
+    {
+        var articlesGuids = await articleRepository.GetGuidsAsync();
+
+        return articlesGuids;
     }
 }

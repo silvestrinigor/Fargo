@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fargo.Infrastructure.Configurations;
+namespace Fargo.Infrastructure.Persistence.Configurations;
 
 public class ContainerConfiguration : IEntityTypeConfiguration<Container>
 {
     public void Configure(EntityTypeBuilder<Container> builder)
     {
+        builder.Navigation(x => x.Entities)
+               .UsePropertyAccessMode(PropertyAccessMode.Property);
     }
 }

@@ -1,13 +1,8 @@
 ﻿using Fargo.Core.Entities.Abstracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fargo.Core.Entities;
 
-public class Area : DetailedEntity
+public class Area : Entity
 {
     private readonly List<Guid> ChildAreas = [];
 

@@ -1,12 +1,12 @@
 ﻿using Fargo.Application.Contracts;
-using Fargo.Application.Contracts.ExternalServices;
+using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
 
 namespace Fargo.Application.Services;
 
 public class ContainerApplicationHttpClientService(IContainerHttpClientService containerHttpClientService) : IContainerApplicationService
 {
-    public async Task<EntityDto> CreateContainerAsync(EntityDto articleCreateDto)
+    public async Task<EntityDto> CreateContainerAsync(EntityCreateDto articleCreateDto)
     {
         return await containerHttpClientService.CreateContainerAsync(articleCreateDto);
     }
@@ -26,6 +26,16 @@ public class ContainerApplicationHttpClientService(IContainerHttpClientService c
         return await containerHttpClientService.GetContainerAsync();
     }
 
+    public Task<IEnumerable<EntityDto>> GetContainerEntitiesAsync(Guid containerGuid)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<IEnumerable<Guid>> GetContainersGuidsAsync()
+    {
+        return await containerHttpClientService.GetContainersGuidsAsync();
+    }
+
     public async Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid)
     {
         await containerHttpClientService.InsertEntityIntoContainer(containerGuid, entityGuid);
@@ -36,8 +46,8 @@ public class ContainerApplicationHttpClientService(IContainerHttpClientService c
         await containerHttpClientService.RemoveEntityFromContainer(containerGuid, entityGuid);
     }
 
-    public async Task UpdateContainerAsync(EntityDto articleUpdateDto)
+    public async Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto)
     {
-        await containerHttpClientService.UpdateContainerAsync(articleUpdateDto);
+        await containerHttpClientService.UpdateContainerAsync(containerGuid, articleUpdateDto);
     }
 }

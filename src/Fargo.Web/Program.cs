@@ -4,7 +4,7 @@ using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClientInfrastructure(builder.Configuration);
+builder.Services.AddExternalInfrastructure();
 
 builder.AddServiceDefaults();
 

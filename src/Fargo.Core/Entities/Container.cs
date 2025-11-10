@@ -1,5 +1,5 @@
-﻿using Fargo.Core.Entities.Abstracts;
-using System.Collections.ObjectModel;
+﻿using Fargo.Core.Collections;
+using Fargo.Core.Entities.Abstracts;
 
 namespace Fargo.Core.Entities;
 
@@ -7,31 +7,13 @@ namespace Fargo.Core.Entities;
 /// Container is a entity that can hold other entities.
 /// A entity can be in only one container at a time.
 /// </summary>
-public class Container : DetailedEntity
+public class Container : Entity
 {
-    public ReadOnlyCollection<Guid> ChildEntities => childEntities.ToList().AsReadOnly();
+    public IEnumerable<Entity> Entities => entities;
 
-    private readonly HashSet<Guid> childEntities = [];
+    internal readonly EntityCollection<Entity> entities = [];
 
-    public Container() : base()
-    {
-    }
-
-    public Container(string name) : base(name)
-    {
-    }
-
-    public Container(string name, Guid guid) : base(name, guid)
-    {
-    }
-
-    internal void AddChildEntity(Guid entityGuid)
-    {
-        childEntities.Add(entityGuid);
-    }
-
-    internal void RemoveChildEntity(Guid entityGuid)
-    {
-        childEntities.Remove(entityGuid);
-    }
+    public Container() : base() { }
+    public Container(string name) : base(name) { }
+    public Container(string name, Guid guid) : base(name, guid) { }
 }

@@ -1,34 +1,33 @@
-﻿using Fargo.Application.Contracts.ExternalServices;
+﻿using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
-using Fargo.Core.Entities;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Fargo.Infrastructure.ExternalServices.Fargo;
+namespace Fargo.Infrastructure.Http.Fargo;
 
 public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClientService
 {
     private readonly HttpClient httpClient = httpClient;
+    private readonly JsonSerializerOptions jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
-    public async Task<EntityDto> CreateArticleAsync(EntityDto articleCreateDto)
+    public async Task<EntityDto> CreateArticleAsync(EntityCreateDto articleCreateDto)
     {
         var response = await httpClient.PostAsJsonAsync("/articles", articleCreateDto);
 
-        var content = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
 
-        var articleDto = JsonSerializer.Deserialize<EntityDto>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-
-        ArgumentNullException.ThrowIfNull(articleDto);
-
-        return articleDto;
+        return await response.Content.ReadFromJsonAsync<EntityDto>(jsonSerializerOptions) 
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task DeleteArticleAsync(Guid guid)
+    public async Task DeleteArticleAsync(Guid guid)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.DeleteAsync($"/articles/{guid}");
+
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<EntityDto?> GetArticleAsync(Guid guid)
@@ -63,7 +62,12 @@ public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClien
         return articlesDtos;
     }
 
-    public Task UpdateArticleAsync(EntityDto articleUpdateDto)
+    public Task<IEnumerable<Guid>> GetArticlesGuidsAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateArticleAsync(Guid articleGuid, EntityUpdateDto articleUpdateDto)
     {
         throw new NotImplementedException();
     }
