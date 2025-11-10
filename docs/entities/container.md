@@ -1,8 +1,6 @@
 # Container
 
-A `Container` is a versatile entity that can hold various items, including other containers, allowing for hierarchical organization. Containers can be used to group related items together, making it easier to manage and navigate complex structures.
-
-An object that can be used to hold or transport something.
+An entity that can be used to hold or transport entities.
 
 ## Rules
 
