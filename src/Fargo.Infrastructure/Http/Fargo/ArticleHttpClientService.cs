@@ -66,8 +66,5 @@ public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClien
         var response = await httpClient.PatchAsJsonAsync($"/articles/{articleGuid}", articleUpdateDto);
 
         response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<IEnumerable<Guid>>(jsonSerializerOptions)
-            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 }
