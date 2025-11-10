@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
+using System;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -34,41 +35,39 @@ public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClien
     {
         var response = await httpClient.GetAsync($"/articles/{guid}");
 
-        var content = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
 
-        var articleDto = JsonSerializer.Deserialize<EntityDto>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-
-        ArgumentNullException.ThrowIfNull(articleDto);
-
-        return articleDto;
+        return await response.Content.ReadFromJsonAsync<EntityDto>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
     public async Task<IEnumerable<EntityDto>> GetArticlesAsync()
     {
-        var response = await httpClient.GetAsync("/articles");
+        var response = await httpClient.GetAsync("/articles/");
 
-        var content = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
 
-        var articlesDtos = JsonSerializer.Deserialize<IEnumerable<EntityDto>>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-
-        ArgumentNullException.ThrowIfNull(articlesDtos);
-
-        return articlesDtos;
+        return await response.Content.ReadFromJsonAsync<IEnumerable<EntityDto>>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task<IEnumerable<Guid>> GetArticlesGuidsAsync()
+    public async Task<IEnumerable<Guid>> GetArticlesGuidsAsync()
     {
-        throw new NotImplementedException();
+        var response = await httpClient.GetAsync("/articles/guids");
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IEnumerable<Guid>>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task UpdateArticleAsync(Guid articleGuid, EntityUpdateDto articleUpdateDto)
+    public async Task UpdateArticleAsync(Guid articleGuid, EntityUpdateDto articleUpdateDto)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.PatchAsJsonAsync($"/articles/{articleGuid}", articleUpdateDto);
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IEnumerable<Guid>>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 }
