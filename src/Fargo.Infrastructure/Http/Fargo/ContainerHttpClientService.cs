@@ -8,21 +8,19 @@ namespace Fargo.Infrastructure.Http.Fargo;
 public class ContainerHttpClientService(HttpClient httpClient) : IContainerHttpClientService
 {
     private readonly HttpClient httpClient = httpClient;
+    private readonly JsonSerializerOptions jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     public async Task<EntityDto> CreateContainerAsync(EntityCreateDto entityDto)
     {
         var response = await httpClient.PostAsJsonAsync("/containers", entityDto);
 
-        var content = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
 
-        var containerResponseDto = JsonSerializer.Deserialize<EntityDto>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-
-        ArgumentNullException.ThrowIfNull(containerResponseDto);
-
-        return containerResponseDto;
+        return await response.Content.ReadFromJsonAsync<EntityDto>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
     public Task DeleteContainerAsync(Guid guid)
