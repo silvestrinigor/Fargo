@@ -1,6 +1,9 @@
 # Item
 
-An **Item** represents a distinct object or entity within a system, application, or context. 
-Items can vary widely in nature depending on the domain they are used in, such as inventory systems, 
-e-commerce platforms, content management systems, and more.
+An individual article.
 
+## Rules
+
+1. Every item is related with one article.
+1. The item article can't change.
+1. Item can't be created if the article don't have unit concept.
