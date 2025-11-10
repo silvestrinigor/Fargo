@@ -26,9 +26,9 @@ public class ContainerApplicationHttpClientService(IContainerHttpClientService c
         return await containerHttpClientService.GetContainerAsync();
     }
 
-    public Task<IEnumerable<EntityDto>> GetContainerEntitiesAsync(Guid containerGuid)
+    public async Task<IEnumerable<EntityDto>> GetContainerEntitiesAsync(Guid containerGuid)
     {
-        throw new NotImplementedException();
+        return await containerHttpClientService.GetContainerEntitiesAsync(containerGuid);
     }
 
     public async Task<IEnumerable<Guid>> GetContainersGuidsAsync()

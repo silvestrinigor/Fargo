@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
+using System;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -15,7 +16,7 @@ public class ContainerHttpClientService(HttpClient httpClient) : IContainerHttpC
 
     public async Task<EntityDto> CreateContainerAsync(EntityCreateDto entityDto)
     {
-        var response = await httpClient.PostAsJsonAsync("/containers", entityDto);
+        var response = await httpClient.PostAsJsonAsync("/containers", entityDto, jsonSerializerOptions);
 
         response.EnsureSuccessStatusCode();
 
@@ -23,38 +24,70 @@ public class ContainerHttpClientService(HttpClient httpClient) : IContainerHttpC
             ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task DeleteContainerAsync(Guid guid)
+    public async Task DeleteContainerAsync(Guid guid)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.DeleteAsync($"/containers/{guid}");
+
+        response.EnsureSuccessStatusCode();
     }
 
-    public Task<EntityDto?> GetContainerAsync(Guid guid)
+    public async Task<EntityDto?> GetContainerAsync(Guid guid)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.GetAsync($"/containers/{guid}");
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<EntityDto?>(jsonSerializerOptions);
     }
 
-    public Task<IEnumerable<EntityDto>> GetContainerAsync()
+    public async Task<IEnumerable<EntityDto>> GetContainerAsync()
     {
-        throw new NotImplementedException();
+        var response = await httpClient.GetAsync($"/containers");
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IEnumerable<EntityDto>>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task<IEnumerable<Guid>> GetContainersGuidsAsync()
+    public async Task<IEnumerable<EntityDto>> GetContainerEntitiesAsync(Guid containerGuid)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.GetAsync($"/containers/{containerGuid}/entities");
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IEnumerable<EntityDto>>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid)
+    public async Task<IEnumerable<Guid>> GetContainersGuidsAsync()
     {
-        throw new NotImplementedException();
+        var response = await httpClient.GetAsync($"/containers/guids");
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IEnumerable<Guid>>(jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid)
+    public async Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.PutAsync($"/containers/{containerGuid}/entities/{entityGuid}", null);
+
+        response.EnsureSuccessStatusCode();
     }
 
-    public Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto)
+    public async Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid)
     {
-        throw new NotImplementedException();
+        var response = await httpClient.DeleteAsync($"/containers/{containerGuid}/entities/{entityGuid}");
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto)
+    {
+        var response = await httpClient.PatchAsJsonAsync($"/containers/{containerGuid}", articleUpdateDto, jsonSerializerOptions);
+
+        response.EnsureSuccessStatusCode();
     }
 }

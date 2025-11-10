@@ -16,7 +16,7 @@ public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClien
 
     public async Task<EntityDto> CreateArticleAsync(EntityCreateDto articleCreateDto)
     {
-        var response = await httpClient.PostAsJsonAsync("/articles", articleCreateDto);
+        var response = await httpClient.PostAsJsonAsync("/articles", articleCreateDto, jsonSerializerOptions);
 
         response.EnsureSuccessStatusCode();
 
@@ -63,7 +63,7 @@ public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClien
 
     public async Task UpdateArticleAsync(Guid articleGuid, EntityUpdateDto articleUpdateDto)
     {
-        var response = await httpClient.PatchAsJsonAsync($"/articles/{articleGuid}", articleUpdateDto);
+        var response = await httpClient.PatchAsJsonAsync($"/articles/{articleGuid}", articleUpdateDto, jsonSerializerOptions);
 
         response.EnsureSuccessStatusCode();
     }
