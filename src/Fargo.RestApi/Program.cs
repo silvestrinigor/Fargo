@@ -1,4 +1,5 @@
 using Fargo.HttpApi.Maps;
+using Fargo.ServiceDefaults;
 using Fargo.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
