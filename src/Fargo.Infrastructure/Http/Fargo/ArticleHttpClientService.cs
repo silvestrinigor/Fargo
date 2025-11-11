@@ -1,6 +1,5 @@
 ﻿using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
-using System;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -20,7 +19,7 @@ public class ArticleHttpClientService(HttpClient httpClient) : IArticleHttpClien
 
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<EntityDto>(jsonSerializerOptions) 
+        return await response.Content.ReadFromJsonAsync<EntityDto>(jsonSerializerOptions)
             ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
