@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations;
 
-public class DetailedEntityConfiguration : IEntityTypeConfiguration<Entity>
+public class EntityConfiguration : IEntityTypeConfiguration<Entity>
 {
     public void Configure(EntityTypeBuilder<Entity> builder)
     {

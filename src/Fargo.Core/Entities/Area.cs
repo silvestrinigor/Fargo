@@ -1,10 +1,13 @@
-﻿using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Core.Collections;
+using Fargo.Core.Entities.Abstracts;
 
 namespace Fargo.Core.Entities;
 
 public class Area : Entity
 {
-    private readonly List<Guid> ChildAreas = [];
+    public IEnumerable<Entity> Entities => entities;
+
+    internal readonly EntityCollection<Entity> entities = [];
 
     public Area() : base()
     {

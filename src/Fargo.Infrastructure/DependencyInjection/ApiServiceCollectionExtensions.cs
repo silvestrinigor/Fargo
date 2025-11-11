@@ -19,6 +19,10 @@ public static class ApiServiceCollectionExtensions
 
         services.AddScoped<IEntityMainRepository, EntityRepository>();
 
+        services.AddScoped<AreaService>();
+        services.AddScoped<IAreaApplicationService, AreaApplicationService>();
+        services.AddScoped<IAreaRepository, AreaRepository>();
+
         services.AddScoped<IArticleApplicationService, ArticleApplicationService>();
         services.AddScoped<IArticleRepository, ArticleRepository>();
 

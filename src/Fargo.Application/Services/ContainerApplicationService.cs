@@ -88,7 +88,7 @@ public class ContainerApplicationService(ContainerService containerService, IEnt
         var entity = await containerRepository.GetEntityContainer(entityGuid);
         ArgumentNullException.ThrowIfNull(entity);
 
-        containerService.RemoveEntityFromContainer(container, entity);
+        ContainerService.RemoveEntityFromContainer(container, entity);
 
         await unitOfWork.SaveChangesAsync();
     }

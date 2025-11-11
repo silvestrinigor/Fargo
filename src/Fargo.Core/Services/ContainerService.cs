@@ -14,7 +14,7 @@ public class ContainerService(IContainerRepository containerRepository)
         fromContainer?.entities.Remove(entity);
         container.entities.Add(entity);
     }
-    public void RemoveEntityFromContainer(Container container, Entity entity)
+    public static void RemoveEntityFromContainer(Container container, Entity entity)
     {
         container.entities.Remove(entity);
     }

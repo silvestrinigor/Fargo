@@ -8,6 +8,7 @@ namespace Fargo.Infrastructure.Persistence;
 public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(options)
 {
     public DbSet<Entity> Entities { get; set; }
+    public DbSet<Area> Areas { get; set; }
     public DbSet<Article> Articles { get; set; }
     public DbSet<Container> Containers { get; set; }
 
@@ -17,8 +18,9 @@ public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FargoContext).Assembly);
+        modelBuilder.ApplyConfiguration(new EntityConfiguration());
+        modelBuilder.ApplyConfiguration(new AreaConfiguration());
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
         modelBuilder.ApplyConfiguration(new ContainerConfiguration());
-        modelBuilder.ApplyConfiguration(new DetailedEntityConfiguration());
     }
 }
