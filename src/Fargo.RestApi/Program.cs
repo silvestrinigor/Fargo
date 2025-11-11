@@ -23,6 +23,8 @@ app.MapFargoArticle();
 
 app.MapFargoContainer();
 
+app.MapFargoArea();
+
 app.Services.InitInfrastructure();
 
 app.UseExceptionHandler();
