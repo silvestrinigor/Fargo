@@ -5,7 +5,6 @@ using Fargo.Application.Extensions;
 using Fargo.Core.Contracts;
 using Fargo.Core.Entities;
 using Fargo.Core.Services;
-using System;
 
 namespace Fargo.Application.Services;
 
@@ -26,7 +25,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
 
         await unitOfWork.SaveChangesAsync();
 
-        return area.ToEntityDto(); 
+        return area.ToEntityDto();
     }
 
     public async Task DeleteAreaAsync(Guid guid)

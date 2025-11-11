@@ -1,11 +1,6 @@
 ﻿using Fargo.Application.Contracts;
 using Fargo.Application.Contracts.Http;
 using Fargo.Application.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fargo.Application.Services;
 
