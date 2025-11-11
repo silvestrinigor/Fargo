@@ -69,14 +69,14 @@ public class ContainerHttpClientService(HttpClient httpClient) : IContainerHttpC
             ?? throw new InvalidOperationException("Deserialization returned null.");
     }
 
-    public async Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid)
+    public async Task InsertEntityIntoContainerAsync(Guid containerGuid, Guid entityGuid)
     {
         var response = await httpClient.PutAsync($"/containers/{containerGuid}/entities/{entityGuid}", null);
 
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid)
+    public async Task RemoveEntityFromContainerAsync(Guid containerGuid, Guid entityGuid)
     {
         var response = await httpClient.DeleteAsync($"/containers/{containerGuid}/entities/{entityGuid}");
 

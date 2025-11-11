@@ -8,9 +8,9 @@ public interface IContainerHttpClientService
     Task<IEnumerable<EntityDto>> GetContainerAsync();
     Task<IEnumerable<Guid>> GetContainersGuidsAsync();
     Task<IEnumerable<EntityDto>> GetContainerEntitiesAsync(Guid containerGuid);
-    Task<EntityDto> CreateContainerAsync(EntityCreateDto articleCreateDto);
+    Task<EntityDto> CreateContainerAsync(EntityCreateDto containerCreateDto);
     Task DeleteContainerAsync(Guid guid);
-    Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto);
-    Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid);
-    Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid);
+    Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto containerUpdateDto);
+    Task InsertEntityIntoContainerAsync(Guid containerGuid, Guid entityGuid);
+    Task RemoveEntityFromContainerAsync(Guid containerGuid, Guid entityGuid);
 }

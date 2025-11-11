@@ -30,9 +30,9 @@ public static class ContainerMaps
             => await containerApplicationService.GetContainerEntitiesAsync(container));
 
         webApplication.MapPut("/containers/{container}/entities/{entity}", async (Guid container, Guid entity, [FromServices] IContainerApplicationService containerApplicationService)
-            => await containerApplicationService.InsertEntityIntoContainer(container, entity));
+            => await containerApplicationService.InsertEntityIntoContainerAsync(container, entity));
 
         webApplication.MapDelete("/containers/{container}/entities/{entity}", async (Guid container, Guid entity, [FromServices] IContainerApplicationService containerApplicationService)
-            => await containerApplicationService.RemoveEntityFromContainer(container, entity));
+            => await containerApplicationService.RemoveEntityFromContainerAsync(container, entity));
     }
 }

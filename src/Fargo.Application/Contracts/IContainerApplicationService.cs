@@ -7,10 +7,10 @@ public interface IContainerApplicationService
     Task<EntityDto?> GetContainerAsync(Guid guid);
     Task<IEnumerable<EntityDto>> GetContainerAsync();
     Task<IEnumerable<Guid>> GetContainersGuidsAsync();
-    Task<EntityDto> CreateContainerAsync(EntityCreateDto articleCreateDto);
+    Task<EntityDto> CreateContainerAsync(EntityCreateDto containerCreateDto);
     Task DeleteContainerAsync(Guid guid);
-    Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto);
+    Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto containerUpdateDto);
     Task<IEnumerable<EntityDto>> GetContainerEntitiesAsync(Guid containerGuid);
-    Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid);
-    Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid);
+    Task InsertEntityIntoContainerAsync(Guid containerGuid, Guid entityGuid);
+    Task RemoveEntityFromContainerAsync(Guid containerGuid, Guid entityGuid);
 }

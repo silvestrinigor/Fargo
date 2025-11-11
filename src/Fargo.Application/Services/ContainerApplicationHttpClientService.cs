@@ -36,14 +36,14 @@ public class ContainerApplicationHttpClientService(IContainerHttpClientService c
         return await containerHttpClientService.GetContainersGuidsAsync();
     }
 
-    public async Task InsertEntityIntoContainer(Guid containerGuid, Guid entityGuid)
+    public async Task InsertEntityIntoContainerAsync(Guid containerGuid, Guid entityGuid)
     {
-        await containerHttpClientService.InsertEntityIntoContainer(containerGuid, entityGuid);
+        await containerHttpClientService.InsertEntityIntoContainerAsync(containerGuid, entityGuid);
     }
 
-    public async Task RemoveEntityFromContainer(Guid containerGuid, Guid entityGuid)
+    public async Task RemoveEntityFromContainerAsync(Guid containerGuid, Guid entityGuid)
     {
-        await containerHttpClientService.RemoveEntityFromContainer(containerGuid, entityGuid);
+        await containerHttpClientService.RemoveEntityFromContainerAsync(containerGuid, entityGuid);
     }
 
     public async Task UpdateContainerAsync(Guid containerGuid, EntityUpdateDto articleUpdateDto)
