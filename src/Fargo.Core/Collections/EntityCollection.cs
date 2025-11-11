@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Fargo.Core.Collections;
 
-public class EntityCollection<TEntity> : ICollection<TEntity> where TEntity : Entity
+public class EntityCollection<TEntity> : IReadOnlyCollection<TEntity>, ICollection<TEntity> where TEntity : Entity
 {
     private readonly ICollection<TEntity> entities = [];
 

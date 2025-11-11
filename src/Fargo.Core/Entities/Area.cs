@@ -5,13 +5,11 @@ namespace Fargo.Core.Entities;
 
 public class Area : Entity
 {
-    public IEnumerable<Entity> Entities => entities;
+    public IReadOnlyCollection<Entity> Entities => entities;
 
     internal readonly EntityCollection<Entity> entities = [];
 
-    public Area() : base()
-    {
-    }
+    public Area() : base() { }
 
     public Area(string name) : base(name)
     {

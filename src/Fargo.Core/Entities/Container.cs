@@ -9,7 +9,7 @@ namespace Fargo.Core.Entities;
 /// </summary>
 public class Container : Entity
 {
-    public IEnumerable<Entity> Entities => entities;
+    public IReadOnlyCollection<Entity> Entities => entities;
 
     internal readonly EntityCollection<Entity> entities = [];
 
