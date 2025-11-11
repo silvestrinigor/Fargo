@@ -7,13 +7,7 @@ namespace Fargo.Core.Entities;
 /// </summary>
 public class Article : Entity
 {
-    public Article() : base()
-    {
-    }
-
+    public Article() : base() { }
     public Article(string name) : base(name) { }
-
-    public Article(string name, Guid guid) : base(name, guid)
-    {
-    }
+    public Article(string name, Guid guid) : base(name, guid) { }
 }
