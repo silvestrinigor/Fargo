@@ -11,13 +11,13 @@ public static class AreaMaps
         webApplication.MapGet("/areas/{area}", async (Guid area, [FromServices] IAreaApplicationService areaApplicationService)
             => await areaApplicationService.GetAreaAsync(area));
 
-        webApplication.MapGet("/areas/", async ([FromServices] IAreaApplicationService areaApplicationService)
+        webApplication.MapGet("/areas", async ([FromServices] IAreaApplicationService areaApplicationService)
             => await areaApplicationService.GetAreaAsync());
 
-        webApplication.MapGet("/areas/guids/", async ([FromServices] IAreaApplicationService areaApplicationService)
+        webApplication.MapGet("/areas/guids", async ([FromServices] IAreaApplicationService areaApplicationService)
             => await areaApplicationService.GetAreaGuidsAsync());
 
-        webApplication.MapPost("/areas/", async ([FromBody] EntityCreateDto areaCreateDto, [FromServices] IAreaApplicationService areaApplicationService)
+        webApplication.MapPost("/areas", async ([FromBody] EntityCreateDto areaCreateDto, [FromServices] IAreaApplicationService areaApplicationService)
             => await areaApplicationService.CreateAreaAsync(areaCreateDto));
 
         webApplication.MapPatch("/areas/{area}", async (Guid area, [FromBody] EntityUpdateDto areaUpdateDto, [FromServices] IAreaApplicationService areaApplicationService)
@@ -26,7 +26,7 @@ public static class AreaMaps
         webApplication.MapDelete("/areas/{area}", async (Guid area, [FromServices] IAreaApplicationService areaApplicationService)
             => await areaApplicationService.DeleteAreaAsync(area));
 
-        webApplication.MapGet("/areas/{area}/entities/", async (Guid area, [FromServices] IAreaApplicationService areaApplicationService)
+        webApplication.MapGet("/areas/{area}/entities", async (Guid area, [FromServices] IAreaApplicationService areaApplicationService)
             => await areaApplicationService.GetAreaEntitiesAsync(area));
 
         webApplication.MapPut("/areas/{area}/entities/{entity}", async (Guid area, Guid entity, [FromServices] IAreaApplicationService areaApplicationService)
