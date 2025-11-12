@@ -10,6 +10,7 @@ public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(op
     public DbSet<Entity> Entities { get; set; }
     public DbSet<Area> Areas { get; set; }
     public DbSet<Article> Articles { get; set; }
+    public DbSet<ArticleItem> ArticleItems { get; set; }
     public DbSet<Container> Containers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -21,6 +22,8 @@ public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new EntityConfiguration());
         modelBuilder.ApplyConfiguration(new AreaConfiguration());
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+        modelBuilder.ApplyConfiguration(new ArticleItemConfiguration());
         modelBuilder.ApplyConfiguration(new ContainerConfiguration());
+        modelBuilder.ApplyConfiguration(new PartitionConfiguration());
     }
 }

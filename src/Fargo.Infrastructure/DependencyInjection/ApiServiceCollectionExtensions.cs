@@ -30,6 +30,10 @@ public static class ApiServiceCollectionExtensions
         services.AddScoped<IContainerRepository, ContainerRepository>();
         services.AddScoped<IContainerApplicationService, ContainerApplicationService>();
 
+        services.AddScoped<PartitionService>();
+        services.AddScoped<IPartitionApplicationService, PartitionApplicationService>();
+        services.AddScoped<IPartitionRepository, PartitionRepository>();
+
         services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 
         return services;
