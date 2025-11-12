@@ -71,4 +71,6 @@ _Source: Oxford Languages via Google, accessed Nov 12, 2025._
 
 ### User
 
-A person who uses or operate the system.
+A person who uses or operates something, especially a computer or other machine.
+
+_Source: Oxford Languages via Google, accessed Nov 12, 2025._
