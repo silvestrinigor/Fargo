@@ -2,22 +2,22 @@
 using Fargo.Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.HttpApi.Maps
+namespace Fargo.HttpApi.EndpointRouteBuilder
 {
-    public static class PartitionMaps
+    public static class PartitionEndpointRouteBuilder
     {
         public static void MapFargoPartition(this IEndpointRouteBuilder webApplication)
         {
             webApplication.MapGet("/partitions/{partition}", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionAsync(partition));
 
-            webApplication.MapGet("/partitions/", async ([FromServices] IPartitionApplicationService containerApplicationService)
+            webApplication.MapGet("/partitions", async ([FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionAsync());
 
-            webApplication.MapGet("/partitions/guids/", async ([FromServices] IPartitionApplicationService containerApplicationService)
+            webApplication.MapGet("/partitions/guids", async ([FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionGuidsAsync());
 
-            webApplication.MapPost("/partitions/", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IPartitionApplicationService containerApplicationService)
+            webApplication.MapPost("/partitions", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.CreatePartitoinAsync(articleCreateDto));
 
             webApplication.MapPatch("/partitions/{partition}", async (Guid partition, [FromBody] EntityUpdateDto containerUpdateDto, [FromServices] IPartitionApplicationService containerApplicationService)
@@ -26,7 +26,7 @@ namespace Fargo.HttpApi.Maps
             webApplication.MapDelete("/partitions/{partition}", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.DeletePartitionAsync(partition));
 
-            webApplication.MapGet("/partitions/{partition}/entities/", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
+            webApplication.MapGet("/partitions/{partition}/entities", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionEntitiesAsync(partition));
 
             webApplication.MapPut("/partitions/{partition}/entities/{entity}", async (Guid partition, Guid entity, [FromServices] IPartitionApplicationService containerApplicationService)
@@ -37,4 +37,3 @@ namespace Fargo.HttpApi.Maps
         }
     }
 }
-

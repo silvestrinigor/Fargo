@@ -1,4 +1,4 @@
-using Fargo.HttpApi.Maps;
+using Fargo.HttpApi.EndpointRouteBuilder;
 using Fargo.Infrastructure.DependencyInjection;
 using Fargo.ServiceDefaults;
 
@@ -19,11 +19,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.MapFargoArea();
+
 app.MapFargoArticle();
 
 app.MapFargoContainer();
 
-app.MapFargoArea();
+app.MapFargoPartition();
 
 app.Services.InitInfrastructure();
 
