@@ -1,5 +1,6 @@
 using Fargo.Infrastructure.DependencyInjection;
 using Fargo.Web.Components;
+using Fargo.ServiceDefaults;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
