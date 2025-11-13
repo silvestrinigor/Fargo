@@ -6,24 +6,24 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
 {
     public static class ArticleEndpointRouteBuilder
     {
-        public static void MapFargoArticle(this IEndpointRouteBuilder endpointRouteBuilder)
+        public static void MapFargoArticle(this IEndpointRouteBuilder builder)
         {
-            endpointRouteBuilder.MapGet("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService articleApplicationService)
+            builder.MapGet("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService articleApplicationService)
                 => await articleApplicationService.GetArticleAsync(article));
 
-            endpointRouteBuilder.MapGet("/articles", async ([FromServices] IArticleApplicationService articleApplicationService)
+            builder.MapGet("/articles", async ([FromServices] IArticleApplicationService articleApplicationService)
                 => await articleApplicationService.GetArticlesAsync());
 
-            endpointRouteBuilder.MapGet("/articles/guids", async ([FromServices] IArticleApplicationService articleApplicationService)
+            builder.MapGet("/articles/guids", async ([FromServices] IArticleApplicationService articleApplicationService)
                 => await articleApplicationService.GetArticlesGuidsAsync());
 
-            endpointRouteBuilder.MapPost("/articles", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IArticleApplicationService articleApplicationService)
+            builder.MapPost("/articles", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IArticleApplicationService articleApplicationService)
                 => await articleApplicationService.CreateArticleAsync(articleCreateDto));
 
-            endpointRouteBuilder.MapPatch("/articles/{article}", async (Guid article, [FromBody] EntityUpdateDto articleUpdateDto, [FromServices] IArticleApplicationService articleApplicationService)
+            builder.MapPatch("/articles/{article}", async (Guid article, [FromBody] EntityUpdateDto articleUpdateDto, [FromServices] IArticleApplicationService articleApplicationService)
                 => await articleApplicationService.UpdateArticleAsync(article, articleUpdateDto));
 
-            endpointRouteBuilder.MapDelete("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService articleApplicationService)
+            builder.MapDelete("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService articleApplicationService)
                 => await articleApplicationService.DeleteArticleAsync(article));
         }
     }
