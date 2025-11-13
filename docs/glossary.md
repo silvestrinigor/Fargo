@@ -10,6 +10,11 @@ A region or part of a town, a country, or the world.
 
 _Source: Oxford Languages via Google, accessed Nov 12, 2025._
 
+### Article
+
+A particular item or object.
+
+_Source: Oxford Languages via Google, accessed Nov 13, 2025._
 
 ## B
 
