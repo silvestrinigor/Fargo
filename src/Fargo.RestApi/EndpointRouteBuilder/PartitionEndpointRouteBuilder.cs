@@ -6,33 +6,33 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
 {
     public static class PartitionEndpointRouteBuilder
     {
-        public static void MapFargoPartition(this IEndpointRouteBuilder webApplication)
+        public static void MapFargoPartition(this IEndpointRouteBuilder endpointRouteBuilder)
         {
-            webApplication.MapGet("/partitions/{partition}", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapGet("/partitions/{partition}", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionAsync(partition));
 
-            webApplication.MapGet("/partitions", async ([FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapGet("/partitions", async ([FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionAsync());
 
-            webApplication.MapGet("/partitions/guids", async ([FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapGet("/partitions/guids", async ([FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionGuidsAsync());
 
-            webApplication.MapPost("/partitions", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapPost("/partitions", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.CreatePartitoinAsync(articleCreateDto));
 
-            webApplication.MapPatch("/partitions/{partition}", async (Guid partition, [FromBody] EntityUpdateDto containerUpdateDto, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapPatch("/partitions/{partition}", async (Guid partition, [FromBody] EntityUpdateDto containerUpdateDto, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.UpdatePartitionAsync(partition, containerUpdateDto));
 
-            webApplication.MapDelete("/partitions/{partition}", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapDelete("/partitions/{partition}", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.DeletePartitionAsync(partition));
 
-            webApplication.MapGet("/partitions/{partition}/entities", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapGet("/partitions/{partition}/entities", async (Guid partition, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.GetPartitionEntitiesAsync(partition));
 
-            webApplication.MapPut("/partitions/{partition}/entities/{entity}", async (Guid partition, Guid entity, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapPut("/partitions/{partition}/entities/{entity}", async (Guid partition, Guid entity, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.InsertEntityIntoPartitionAsync(partition, entity));
 
-            webApplication.MapDelete("/partitions/{partition}/entities/{entity}", async (Guid partition, Guid entity, [FromServices] IPartitionApplicationService containerApplicationService)
+            endpointRouteBuilder.MapDelete("/partitions/{partition}/entities/{entity}", async (Guid partition, Guid entity, [FromServices] IPartitionApplicationService containerApplicationService)
                 => await containerApplicationService.RemoveEntityFromPartitionAsync(partition, entity));
         }
     }
