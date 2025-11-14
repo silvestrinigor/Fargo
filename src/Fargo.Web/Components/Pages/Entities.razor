@@ -5,10 +5,13 @@
 
 <PageTitle>Entities</PageTitle>
 
+<FluentHeader>
+    Entities Management
+</FluentHeader>
+
 <FluentTreeView @bind-CurrentSelected=currentSelected OnExpandedChange="HandleOnExpandedChanged">
     <FluentTreeItem Text="Root item 1">
         <FluentTreeItem Text="Flowers">
-            <FluentTreeItem Disabled="true" Text="Daisy" />
             <FluentTreeItem Text="Sunflower" />
             <FluentTreeItem Text="Rose" />
         </FluentTreeItem>
@@ -27,9 +30,6 @@
     </FluentTreeItem>
     <FluentTreeItem Text="Root item 3 - Leaf Erikson" />
 </FluentTreeView>
-
-<p>Current selected tree item is @currentSelected?.Text</p>
-<p>Most recently expanded/collapsed tree item is @currentAffected?.Text</p>
 
 @code {
     FluentTreeItem? currentSelected;
