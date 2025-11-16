@@ -6,7 +6,7 @@ namespace Fargo.Core.Entities.Abstracts
     {
         public required string Name { get; set; }
         public string Description { get; set; } = string.Empty;
-        public required EEntityType EntityType { get; init; }
+        public EEntityType EntityType { get; protected init; }
         public DateTime CreatedAt { get; init; } = DateTime.Now;
     }
 }

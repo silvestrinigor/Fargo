@@ -4,7 +4,6 @@ using Fargo.Application.Dtos;
 using Fargo.Application.Extensions;
 using Fargo.Core.Contracts;
 using Fargo.Core.Entities;
-using Fargo.Core.Enums;
 using Fargo.Core.Services;
 
 namespace Fargo.Application.Services;
@@ -18,9 +17,9 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
 
     public async Task<EntityDto> CreateAreaAsync(EntityCreateDto areaCreateDto)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(areaCreateDto.Name);
+        ArgumentNullException.ThrowIfNull(areaCreateDto.Name);
 
-        var area = new Area { Name = areaCreateDto.Name, EntityType = EEntityType.Area };
+        var area = new Area { Name = areaCreateDto.Name };
 
         areaRepository.Add(area);
 
