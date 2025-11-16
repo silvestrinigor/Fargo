@@ -19,7 +19,7 @@ namespace Fargo.Application.Services
         {
             if (!await areaRepository.AnyAsync())
             {
-                var root = new Area { Name = "Root Area", Guid = AreaService.AreaRootGuid, EntityType = EEntityType.Area };
+                var root = new Area { Name = "Root Area", Guid = AreaService.AreaRootGuid, EntityType = EEntityType.Area, IsGlobalArea = true };
                 areaRepository.Add(root);
                 await unitOfWork.SaveChangesAsync();
             }    

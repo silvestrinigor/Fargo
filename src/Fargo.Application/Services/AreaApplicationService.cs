@@ -47,7 +47,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
         return area?.ToEntityDto();
     }
 
-    public async Task<IEnumerable<EntityDto>> GetAreaAsync()
+    public async Task<IEnumerable<EntityDto>> GetAreasAsync()
     {
         var articles = await areaRepository.GetAsync();
 
@@ -56,10 +56,12 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
 
     public async Task<IEnumerable<EntityDto>> GetAreaEntitiesAsync(Guid areaGuid)
     {
-        throw new NotImplementedException();
+        var entities = await areaRepository.GetAreaEntitiesAsync(areaGuid);
+
+        return entities.Select(entity => entity.ToEntityDto());
     }
 
-    public async Task<IEnumerable<Guid>> GetAreaGuidsAsync()
+    public async Task<IEnumerable<Guid>> GetAreasGuidsAsync()
     {
         var articles = await areaRepository.GetGuidsAsync();
 

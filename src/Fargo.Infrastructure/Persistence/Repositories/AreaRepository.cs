@@ -21,26 +21,26 @@ public class AreaRepository(FargoContext fargoContext) : IAreaRepository
     public async Task<IEnumerable<Guid>> GetGuidsAsync()
         => await fargoContext.Areas.Select(x => x.Guid).ToListAsync();
 
-    public void Remove(Area container)
+    public void Remove(Area area)
     {
-        fargoContext.Areas.Remove(container);
+        fargoContext.Areas.Remove(area);
     }
 
-    public void Add(Area container)
+    public void Add(Area area)
     {
-        fargoContext.Areas.Add(container);
-
-        if (container.IsGlobalArea)
-            return;
-
-        var globalArea = fargoContext.Areas.First(x => x.IsGlobalArea);        
+        fargoContext.Areas.Add(area);
 
         fargoContext.AreaClosure.Add(new AreaClosure
         {
-            AncestorGuid = container.Guid,
-            DescendantGuid = container.Guid,
+            AncestorGuid = area.Guid,
+            DescendantGuid = area.Guid,
             Depth = 0
         });
+
+        if (area.IsGlobalArea)
+            return;
+
+        var globalArea = fargoContext.Areas.First(x => x.IsGlobalArea);        
 
         var ancestors = fargoContext.AreaClosure
             .Where(x => x.DescendantGuid == globalArea.Guid)
@@ -51,18 +51,21 @@ public class AreaRepository(FargoContext fargoContext) : IAreaRepository
             fargoContext.AreaClosure.Add(new AreaClosure
             {
                 AncestorGuid = ancestor.AncestorGuid,
-                DescendantGuid = container.Guid,
+                DescendantGuid = area.Guid,
                 Depth = ancestor.Depth + 1
             });
         }
     }
 
-    public async Task<IEnumerable<Entity>> GetAreaEntities(Guid areaGuid)
-        => await fargoContext.AreaClosure.Where(x => x.AncestorGuid != null && x.AncestorGuid == areaGuid)
-            .Join(fargoContext.Entities,
+    public async Task<IEnumerable<Entity>> GetAreaEntitiesAsync(Guid areaGuid)
+        => await fargoContext.AreaClosure
+            .Where(x => x.AncestorGuid == areaGuid && x.Depth > 0)
+            .Join(
+                fargoContext.Entities,
                 closure => closure.DescendantGuid,
                 entity => entity.Guid,
-                (closure, entity) => entity)
+                (closure, entity) => entity
+            )
             .ToListAsync();
 
     public async Task AddEntityIntoAreaAsync(Area areaGuid, Entity entityGuid)

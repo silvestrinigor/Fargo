@@ -11,13 +11,13 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
             public void MapFargoArea()
             {
                 builder.MapGet("/areas", async ([FromServices] IAreaApplicationService service)
-                    => await service.GetAreaAsync());
+                    => await service.GetAreasAsync());
 
                 builder.MapGet("/areas/{area}", async (Guid area, [FromServices] IAreaApplicationService service)
                     => await service.GetAreaAsync(area));
 
                 builder.MapGet("/areas/guids", async ([FromServices] IAreaApplicationService service)
-                    => await service.GetAreaGuidsAsync());
+                    => await service.GetAreasGuidsAsync());
 
                 builder.MapGet("/areas/{area}/entities", async (Guid area, [FromServices] IAreaApplicationService service)
                     => await service.GetAreaEntitiesAsync(area));

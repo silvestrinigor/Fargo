@@ -23,7 +23,7 @@ public class AreaApplicationHttpClientService(IAreaHttpClientService areaHttpCli
         return await areaHttpClientService.GetAreaAsync(guid);
     }
 
-    public async Task<IEnumerable<EntityDto>> GetAreaAsync()
+    public async Task<IEnumerable<EntityDto>> GetAreasAsync()
     {
         return await areaHttpClientService.GetAreaAsync();
     }
@@ -33,7 +33,7 @@ public class AreaApplicationHttpClientService(IAreaHttpClientService areaHttpCli
         return await areaHttpClientService.GetAreaEntitiesAsync(areaGuid);
     }
 
-    public async Task<IEnumerable<Guid>> GetAreaGuidsAsync()
+    public async Task<IEnumerable<Guid>> GetAreasGuidsAsync()
     {
         return await areaHttpClientService.GetAreaGuidsAsync();
     }
