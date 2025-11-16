@@ -4,6 +4,7 @@ using Fargo.Application.Dtos;
 using Fargo.Application.Extensions;
 using Fargo.Core.Contracts;
 using Fargo.Core.Entities;
+using Fargo.Core.Enums;
 using Fargo.Core.Services;
 
 namespace Fargo.Application.Services;
@@ -19,7 +20,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
     {
         ArgumentNullException.ThrowIfNullOrEmpty(areaCreateDto.Name);
 
-        var area = new Area(areaCreateDto.Name);
+        var area = new Area { Name = areaCreateDto.Name, EntityType = EEntityType.Area };
 
         areaRepository.Add(area);
 
@@ -55,9 +56,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
 
     public async Task<IEnumerable<EntityDto>> GetAreaEntitiesAsync(Guid areaGuid)
     {
-        var entities = await areaRepository.GetAreaEntities(areaGuid);
-
-        return entities.Select(article => article.ToEntityDto());
+        throw new NotImplementedException();
     }
 
     public async Task<IEnumerable<Guid>> GetAreaGuidsAsync()
@@ -67,7 +66,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
         return articles;
     }
 
-    public async Task InsertEntityIntoAreaAsync(Guid areaGuid, Guid entityGuid)
+    public async Task AddEntityIntoAreaAsync(Guid areaGuid, Guid entityGuid)
     {
         var area = await areaRepository.GetAsync(areaGuid);
         ArgumentNullException.ThrowIfNull(area);
@@ -75,7 +74,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
         var entity = await entityMainRepository.GetAsync(entityGuid);
         ArgumentNullException.ThrowIfNull(entity);
 
-        await areaService.InsertEntityIntoArea(area, entity);
+        await areaService.AddEntityIntoAreaAsync(area, entity);
 
         await unitOfWork.SaveChangesAsync();
     }
@@ -88,7 +87,7 @@ public class AreaApplicationService(AreaService areaService, IEntityMainReposito
         var entity = await entityMainRepository.GetAsync(entityGuid);
         ArgumentNullException.ThrowIfNull(entity);
 
-        AreaService.RemoveEntityFromArea(area, entity);
+        await areaService.RemoveEntityFromAreaAsync(area, entity);
 
         await unitOfWork.SaveChangesAsync();
     }

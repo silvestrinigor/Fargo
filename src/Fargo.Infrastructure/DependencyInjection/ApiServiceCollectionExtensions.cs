@@ -1,4 +1,5 @@
 ﻿using Fargo.Application.Contracts;
+using Fargo.Application.Contracts.Http;
 using Fargo.Application.Contracts.Persistence;
 using Fargo.Application.Services;
 using Fargo.Core.Contracts;
@@ -36,15 +37,22 @@ public static class ApiServiceCollectionExtensions
 
         services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 
+        services.AddScoped<IRootEntitiesService, RootEntitiesService>();
+
+        services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+
         return services;
     }
 
-    public static IServiceProvider InitInfrastructure(this IServiceProvider services)
+    public async static Task<IServiceProvider> InitInfrastructureAsync(this IServiceProvider services)
     {
         using (var scope = services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<FargoContext>();
             dbContext.Database.EnsureCreated();
+
+            var service = scope.ServiceProvider.GetRequiredService<IRootEntitiesService>();
+            await service.EnsureRootAreaExistAsync();
         }
 
         return services;

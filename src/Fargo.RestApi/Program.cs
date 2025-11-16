@@ -27,7 +27,7 @@ app.MapFargoContainer();
 
 app.MapFargoPartition();
 
-app.Services.InitInfrastructure();
+await app.Services.InitInfrastructureAsync();
 
 app.UseExceptionHandler();
 

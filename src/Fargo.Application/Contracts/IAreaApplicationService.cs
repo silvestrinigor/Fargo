@@ -11,6 +11,6 @@ public interface IAreaApplicationService
     Task DeleteAreaAsync(Guid guid);
     Task UpdateAreaAsync(Guid containerGuid, EntityUpdateDto areaUpdateDto);
     Task<IEnumerable<EntityDto>> GetAreaEntitiesAsync(Guid areaGuid);
-    Task InsertEntityIntoAreaAsync(Guid areaGuid, Guid entityGuid);
+    Task AddEntityIntoAreaAsync(Guid areaGuid, Guid entityGuid);
     Task RemoveEntityFromAreaAsync(Guid areaGuid, Guid entityGuid);
 }

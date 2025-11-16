@@ -1,27 +1,12 @@
-﻿
-namespace Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Core.Enums;
 
-/// <summary>
-///
-/// </summary>
-public abstract class Entity : BaseEntity
+namespace Fargo.Core.Entities.Abstracts
 {
-    public string Name { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; } = DateTime.Now;
-
-    public Entity() : base()
+    public abstract class Entity : Base
     {
-        Name = string.Empty;
-    }
-
-    public Entity(string name) : base()
-    {
-        Name = name;
-    }
-
-    public Entity(string name, Guid guid) : base(guid)
-    {
-        Name = name;
+        public required string Name { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public required EEntityType EntityType { get; init; }
+        public DateTime CreatedAt { get; init; } = DateTime.Now;
     }
 }

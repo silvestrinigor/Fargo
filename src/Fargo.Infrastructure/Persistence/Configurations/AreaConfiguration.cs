@@ -8,7 +8,6 @@ public class AreaConfiguration : IEntityTypeConfiguration<Area>
 {
     public void Configure(EntityTypeBuilder<Area> builder)
     {
-        builder.Navigation(x => x.Entities)
-               .UsePropertyAccessMode(PropertyAccessMode.Property);
+        builder.Property(x => x.IsGlobalArea);
     }
 }

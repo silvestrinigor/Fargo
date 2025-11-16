@@ -23,7 +23,7 @@ public class ArticleApplicationService(IArticleRepository articleRepository, IUn
     {
         ArgumentNullException.ThrowIfNullOrEmpty(articleCreateDto.Name);
 
-        var article = new Article(articleCreateDto.Name);
+        var article = new Article { Name = articleCreateDto.Name, EntityType = Core.Enums.EEntityType.Article};
 
         articleRepository.Add(article);
 

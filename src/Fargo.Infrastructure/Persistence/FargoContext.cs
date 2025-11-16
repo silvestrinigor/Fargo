@@ -3,27 +3,32 @@ using Fargo.Core.Entities.Abstracts;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fargo.Infrastructure.Persistence;
-
-public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(options)
+namespace Fargo.Infrastructure.Persistence
 {
-    public DbSet<Entity> Entities { get; set; }
-    public DbSet<Area> Areas { get; set; }
-    public DbSet<Article> Articles { get; set; }
-    public DbSet<ArticleItem> ArticleItems { get; set; }
-    public DbSet<Container> Containers { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseInMemoryDatabase("Fargo");
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(options)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(FargoContext).Assembly);
-        modelBuilder.ApplyConfiguration(new EntityConfiguration());
-        modelBuilder.ApplyConfiguration(new AreaConfiguration());
-        modelBuilder.ApplyConfiguration(new ArticleConfiguration());
-        modelBuilder.ApplyConfiguration(new ArticleItemConfiguration());
-        modelBuilder.ApplyConfiguration(new ContainerConfiguration());
-        modelBuilder.ApplyConfiguration(new PartitionConfiguration());
+        public DbSet<Entity> Entities { get; set; }
+        public DbSet<Area> Areas { get; set; }
+        public DbSet<AreaClosure> AreaClosure { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<ArticleItem> ArticleItems { get; set; }
+        public DbSet<Container> Containers { get; set; }
+        public DbSet<SystemSetting> SystemSettings { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            => optionsBuilder.UseInMemoryDatabase("Fargo");
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(FargoContext).Assembly);
+            modelBuilder.ApplyConfiguration(new EntityConfiguration());
+            modelBuilder.ApplyConfiguration(new AreaConfiguration());
+            modelBuilder.ApplyConfiguration(new AreaClosureConfiguration());
+            modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+            modelBuilder.ApplyConfiguration(new ArticleItemConfiguration());
+            modelBuilder.ApplyConfiguration(new ContainerConfiguration());
+            modelBuilder.ApplyConfiguration(new PartitionConfiguration());
+            modelBuilder.ApplyConfiguration(new SystemSettingConfiguration());
+        }
     }
 }

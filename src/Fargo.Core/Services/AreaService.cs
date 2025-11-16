@@ -1,21 +1,24 @@
 ﻿using Fargo.Core.Contracts;
 using Fargo.Core.Entities;
+using Fargo.Core.Constants;
 using Fargo.Core.Entities.Abstracts;
 
-namespace Fargo.Core.Services;
-
-public class AreaService(IAreaRepository areaRepository)
+namespace Fargo.Core.Services
 {
-    private readonly IAreaRepository areaRepository = areaRepository;
+    public class AreaService(IAreaRepository areaRepository)
+    {
+        public static Guid AreaRootGuid { get; } = Guid.Parse(EntitiesConstants.AreaRootGuid);
 
-    public async Task InsertEntityIntoArea(Area area, Entity entity)
-    {
-        var fromArea = await areaRepository.GetEntityArea(entity.Guid);
-        fromArea?.entities.Remove(entity);
-        area.entities.Add(entity);
-    }
-    public static void RemoveEntityFromArea(Area area, Entity entity)
-    {
-        area.entities.Remove(entity);
+        private readonly IAreaRepository areaRepository = areaRepository;
+
+        public async Task AddEntityIntoAreaAsync(Area area, Entity entity)
+        {
+            await areaRepository.AddEntityIntoAreaAsync(area, entity);
+        }
+
+        public async Task RemoveEntityFromAreaAsync(Area area, Entity entity)
+        {
+            await areaRepository.RemoveEntityFromAreaAsync(area, entity);
+        }
     }
 }

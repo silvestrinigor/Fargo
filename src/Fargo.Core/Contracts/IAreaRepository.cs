@@ -5,6 +5,8 @@ namespace Fargo.Core.Contracts;
 
 public interface IAreaRepository : IEntityRepository<Area>
 {
-    Task<Area?> GetEntityArea(Guid guid);
-    Task<IEnumerable<Entity>> GetAreaEntities(Guid areaGuid);
+    Task<bool> AnyAsync();
+    Task<IEnumerable<Entity>> GetAreaEntities(Guid area);
+    Task AddEntityIntoAreaAsync(Area areaGuid, Entity entityGuid);
+    Task RemoveEntityFromAreaAsync(Area areaGuid, Entity entityGuid);
 }

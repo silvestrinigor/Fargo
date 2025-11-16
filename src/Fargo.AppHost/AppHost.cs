@@ -9,6 +9,4 @@ builder.AddProject<Projects.Fargo_Web>("webfrontend")
     .WithReference(apiService)
     .WaitFor(apiService);
 
-builder.AddProject<Projects.Fargo_FluentWeb>("fargo-fluent-web");
-
 builder.Build().Run();

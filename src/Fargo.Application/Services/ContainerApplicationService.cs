@@ -19,7 +19,7 @@ public class ContainerApplicationService(ContainerService containerService, IEnt
     {
         ArgumentNullException.ThrowIfNullOrEmpty(articleCreateDto.Name);
 
-        var container = new Container(articleCreateDto.Name);
+        var container = new Container { Name = articleCreateDto.Name, EntityType = Core.Enums.EEntityType.Container};
 
         containerRepository.Add(container);
 

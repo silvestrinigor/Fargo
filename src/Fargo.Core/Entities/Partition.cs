@@ -1,10 +1,14 @@
-﻿using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Core.Collections;
+using Fargo.Core.Entities.Abstracts;
 
-namespace Fargo.Core.Entities;
-
-public class Partition : Node
+namespace Fargo.Core.Entities
 {
-    public Partition() : base() { }
-    public Partition(string name) : base(name) { }
-    public Partition(string name, Guid guid) : base(name, guid) { }
+    public class Partition : Entity
+    {
+        public IReadOnlyCollection<Entity> Entities => entities;
+
+        internal readonly EntityCollection<Entity> entities = [];
+    }
 }
+
+

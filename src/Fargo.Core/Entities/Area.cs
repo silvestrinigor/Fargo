@@ -1,10 +1,9 @@
 ﻿using Fargo.Core.Entities.Abstracts;
 
-namespace Fargo.Core.Entities;
-
-public class Area : Node
+namespace Fargo.Core.Entities
 {
-    public Area() : base() { }
-    public Area(string name) : base(name) { }
-    public Area(string name, Guid guid) : base(name, guid) { }
-} 
+    public class Area : Entity 
+    {
+        public bool IsGlobalArea { get; init; } = false;
+    }
+}

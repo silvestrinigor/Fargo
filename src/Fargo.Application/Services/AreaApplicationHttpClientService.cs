@@ -38,7 +38,7 @@ public class AreaApplicationHttpClientService(IAreaHttpClientService areaHttpCli
         return await areaHttpClientService.GetAreaGuidsAsync();
     }
 
-    public async Task InsertEntityIntoAreaAsync(Guid areaGuid, Guid entityGuid)
+    public async Task AddEntityIntoAreaAsync(Guid areaGuid, Guid entityGuid)
     {
         await areaHttpClientService.InsertEntityIntoAreaAsync(areaGuid, entityGuid);
     }

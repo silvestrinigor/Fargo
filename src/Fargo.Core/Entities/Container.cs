@@ -1,10 +1,13 @@
-﻿using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Core.Collections;
+using Fargo.Core.Entities.Abstracts;
 
-namespace Fargo.Core.Entities;
 
-public class Container : Node
+namespace Fargo.Core.Entities
 {
-    public Container() : base() { }
-    public Container(string name) : base(name) { }
-    public Container(string name, Guid guid) : base(name, guid) { }
+    public class Container : Entity
+    {
+        public IReadOnlyCollection<Entity> Entities => entities;
+
+        internal readonly EntityCollection<Entity> entities = [];
+    }
 }
