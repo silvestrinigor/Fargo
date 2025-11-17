@@ -1,6 +1,4 @@
-﻿using Fargo.Core.Entities.Abstracts;
-
-namespace Fargo.Core.Entities
+﻿namespace Fargo.Infrastructure.Persistence.Models
 {
     public class AreaClosure
     {

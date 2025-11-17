@@ -1,6 +1,7 @@
 ﻿using Fargo.Core.Entities;
 using Fargo.Core.Entities.Abstracts;
 using Fargo.Infrastructure.Persistence.Configurations;
+using Fargo.Infrastructure.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence

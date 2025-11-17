@@ -1,5 +1,5 @@
-﻿using Fargo.Core.Entities;
-using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Core.Entities.Abstracts;
+using Fargo.Infrastructure.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

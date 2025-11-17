@@ -1,32 +1,41 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-	"name": "C# (.NET)",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
-	"features": {
-		"ghcr.io/devcontainers/features/dotnet:2": {},
-		"ghcr.io/nikiforovall/devcontainer-features/dotnet-csharpier:1": {},
-		"ghcr.io/dotnet/aspire-devcontainer-feature/dotnetaspire:1": {}
-	}
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5000, 5001],
-	// "portsAttributes": {
-	//		"5001": {
-	//			"protocol": "https"
-	//		}
-	// }
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+    "name": "Fargo Dev Container",
+    "image": "mcr.microsoft.com/dotnet/sdk:10.0",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "version": "2"
+        },
+        "ghcr.io/devcontainers/features/powershell:1": {
+            "version": "latest"
+        },
+        "ghcr.io/azure/azure-dev/azd:0": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers/features/dotnet:2": {
+            "version": "none",
+            "dotnetRuntimeVersions": "10.0",
+            "aspNetCoreRuntimeVersions": "10.0"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.vscode-node-azure-pack",
+                "GitHub.copilot",
+                "GitHub.vscode-github-actions",
+                "ms-dotnettools.csdevkit"
+            ]
+        }
+    },
+    "postCreateCommand": "dotnet restore",
+    "hostRequirements": {
+        "memory": "8gb",
+        "cpus": 4
+    },
+    "remoteEnv": {
+        "DOTNET_MULTILEVEL_LOOKUP": "0",
+        "TARGET": "net10.0"
+    }
 }
