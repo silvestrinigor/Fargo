@@ -1,6 +1,6 @@
-﻿using Fargo.Application.Contracts;
-using Fargo.Application.Contracts.Http;
+﻿using Fargo.Application.Interfaces.Http;
 using Fargo.Application.Services;
+using Fargo.Application.Services.Interfaces;
 using Fargo.Infrastructure.Http.Fargo;
 using Microsoft.Extensions.DependencyInjection;
 

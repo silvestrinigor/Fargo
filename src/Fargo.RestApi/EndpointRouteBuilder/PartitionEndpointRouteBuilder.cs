@@ -1,5 +1,5 @@
-﻿using Fargo.Application.Contracts;
-using Fargo.Application.Dtos;
+﻿using Fargo.Application.Dtos;
+using Fargo.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.EndpointRouteBuilder

@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.Core\Fargo.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Solicitations\Queries\" />
+    <PackageReference Include="UnitsNet" Version="5.75.0" />
+    <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.0" />
   </ItemGroup>
 
 </Project>

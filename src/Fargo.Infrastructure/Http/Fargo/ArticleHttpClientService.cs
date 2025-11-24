@@ -1,5 +1,5 @@
-﻿using Fargo.Application.Contracts.Http;
-using Fargo.Application.Dtos;
+﻿using Fargo.Application.Dtos;
+using Fargo.Application.Interfaces.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 

@@ -1,5 +1,5 @@
-﻿using Fargo.Application.Contracts;
-using Fargo.Application.Dtos;
+﻿using Fargo.Application.Interfaces.Solicitations.Commands;
+using Fargo.Application.Solicitations.Commands.ContainerCommands.CreateContainer;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.EndpointRouteBuilder
@@ -22,8 +22,8 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
                 builder.MapGet("/containers/{container}/entities", async (Guid container, [FromServices] IContainerApplicationService service)
                     => await service.GetContainerEntitiesAsync(container));
 
-                builder.MapPost("/containers", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IContainerApplicationService service)
-                    => await service.CreateContainerAsync(articleCreateDto));
+                builder.MapPost("/containers", async ([FromBody] CreateContainerCommand articleCreateCommand, [FromServices] ICommandHandler<CreateContainerCommand, Task> handler)
+                    => await handler.Handle(articleCreateCommand));
 
                 builder.MapPatch("/containers/{container}", async (Guid container, [FromBody] EntityUpdateDto containerUpdateDto, [FromServices] IContainerApplicationService service)
                     => await service.UpdateContainerAsync(container, containerUpdateDto));

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/Fargo.Application/Fargo.Application.csproj" />
+  <Project Path="src/Fargo.Core/Fargo.Domain.csproj" />
+  <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
+</Solution>

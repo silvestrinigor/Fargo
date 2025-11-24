@@ -1,15 +1,6 @@
-﻿using Fargo.Core.Entities.Abstracts;
-using Fargo.Core.Enums;
+﻿using Fargo.Domain.Abstracts.Entities;
 
-namespace Fargo.Core.Entities
+namespace Fargo.Domain.Entities
 {
-    public class Area : Entity
-    {
-        public bool IsGlobalArea { get; init; } = false;
-
-        public Area()
-        {
-            EntityType = EEntityType.Area;
-        }
-    }
+    public class Area : NamedEntity;
 }

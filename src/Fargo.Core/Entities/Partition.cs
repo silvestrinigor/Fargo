@@ -1,14 +1,8 @@
-﻿using Fargo.Core.Collections;
-using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Domain.Abstracts.Entities;
 
-namespace Fargo.Core.Entities
+namespace Fargo.Domain.Entities
 {
-    public class Partition : Entity
-    {
-        public IReadOnlyCollection<Entity> Entities => entities;
-
-        internal readonly EntityCollection<Entity> entities = [];
-    }
+    public class Partition : NamedEntity;
 }
 
 

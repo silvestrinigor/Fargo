@@ -1,7 +1,7 @@
-﻿using Fargo.Application.Contracts;
-using Fargo.Application.Contracts.Http;
-using Fargo.Application.Contracts.Persistence;
+﻿using Fargo.Application.Interfaces.Http;
+using Fargo.Application.Interfaces.Persistence;
 using Fargo.Application.Services;
+using Fargo.Application.Services.Interfaces;
 using Fargo.Core.Contracts;
 using Fargo.Core.Services;
 using Fargo.Infrastructure.Persistence;

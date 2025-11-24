@@ -1,9 +1,10 @@
-﻿using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Domain.Abstracts.Entities;
 
-namespace Fargo.Core.Entities
+namespace Fargo.Domain.Entities
 {
-    public class ArticleItem : Entity
+    public class ArticleItem : NamedEntity // TODO:? Change the class name to ArticleUnit?
     {
         public required Article Article { get; init; }
+        public Container? Container { get; internal set; }
     }
 }

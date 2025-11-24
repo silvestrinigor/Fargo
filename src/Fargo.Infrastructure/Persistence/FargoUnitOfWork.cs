@@ -1,9 +1,12 @@
-﻿using Fargo.Application.Contracts.Persistence;
+﻿using Fargo.Application.Interfaces.Persistence;
 
-namespace Fargo.Infrastructure.Persistence;
-
-public class FargoUnitOfWork(FargoContext fagoContext) : IUnitOfWork
+namespace Fargo.Infrastructure.Persistence
 {
-    public async Task<int> SaveChangesAsync()
-        => await fagoContext.SaveChangesAsync();
+    public class FargoUnitOfWork(FargoContext fagoContext) : IUnitOfWork
+    {
+        private readonly FargoContext fargoContext = fagoContext;
+
+        public async Task<int> SaveChangesAsync()
+            => await fargoContext.SaveChangesAsync();
+    }
 }
