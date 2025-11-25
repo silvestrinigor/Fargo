@@ -14,7 +14,7 @@ namespace Fargo.Application.Solicitations.Commands.ContainerCommands.CreateConta
         {
             var container = new Container { Name = command.Name };
 
-            await containerRepository.AddContainerAsync(container);
+            containerRepository.AddContainer(container);
 
             await unitOfWork.SaveChangesAsync();
         }
