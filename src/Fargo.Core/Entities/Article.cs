@@ -5,16 +5,22 @@ namespace Fargo.Domain.Entities
 {
     public class Article : NamedEntity
     {
-        public Mass? Mass { get; private set; }
-        public Length? Length { get; private set; }
-        public Length? Width { get; private set; }
-        public Length? Height { get; private set; }
-        public Density? Density => Mass is not null && Volume is not null 
-            ? Mass / Volume
-            : null;
+        public Mass? Mass { get; init; }
+        public Length? Length { get; init; }
+        public Length? Width { get; init; }
+        public Length? Height { get; init; }
         public Volume? Volume => Length is not null && Width is not null && Height is not null
             ? Length * Width * Height
             : null;
-        public TimeSpan? ShelfLife { get; set; }
+        public Density? Density => Mass is not null && Volume is not null 
+            ? Mass / Volume
+            : null;
+        public TimeSpan? ShelfLife { get; init; }
     }
+
+    // types of set:
+    // Bulk - When the article can't be understand as a unit
+    // Item - When the article can be understand as a unit
+    // Bunch - A bunch of itens of the same article
+    //   - If     
 }
