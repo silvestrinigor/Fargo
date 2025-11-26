@@ -1,18 +1,21 @@
 ﻿using Fargo.Domain.Abstracts.Entities;
+using UnitsNet;
 
 namespace Fargo.Domain.Entities
 {
     public class Container : NamedEntity
     {
+        public Place? Place { get; internal set; }
+
         public event EventHandler? EntityAdded;
         public event EventHandler? EntityRemoved;
 
-        private void OnArticleItemAdded()
+        private void OnEntityAdded()
         {
             EntityAdded?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnArticleItemRemoved()
+        private void OnEntityRemoved()
         {
             EntityRemoved?.Invoke(this, EventArgs.Empty);
         }
@@ -26,13 +29,13 @@ namespace Fargo.Domain.Entities
              */
             item.Container?.Remove(item);
             item.Container = this;
-            OnArticleItemAdded();
+            OnEntityAdded();
         }
 
         public void Remove(ArticleItem item)
         {
             if (item.Container == this) item.Container = null;
-            OnArticleItemRemoved();
+            OnEntityRemoved();
         }
     }
 }
