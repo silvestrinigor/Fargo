@@ -1,9 +1,9 @@
-﻿namespace Fargo.Domain.Abstracts.Entities
+namespace Fargo.Domain.Abstracts.Entities
 {
-    public abstract class NamedEntity : Entity
+    public abstract class NamedEntityOptional : Entity
     {
-        public required string Name { get; set => SetField(ref field, value, OnNameChanged); }
-        public string Description { get; set => SetField(ref field, value, OnDescriptionChanged); } = string.Empty;
+        public string? Name { get; set => SetField(ref field, value, OnNameChanged); }
+        public string? Description { get; set => SetField(ref field, value, OnDescriptionChanged); }
 
         public event EventHandler? NameChanged;
         public event EventHandler? DescriptionChanged;

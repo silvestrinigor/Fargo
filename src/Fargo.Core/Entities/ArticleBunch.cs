@@ -2,7 +2,7 @@ using Fargo.Domain.Abstracts.Entities;
 
 namespace Fargo.Domain.Entities
 {
-    public class ArticleBunch : Entity // TODO:? Change the class name to ArticleUnit?
+    public class ArticleBunch : NamedEntityOptional // TODO:? Change the class name to ArticleUnit?
     {
         public required Article Article { get; init; }
         public required int Quantity { get; init; }

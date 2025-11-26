@@ -3,7 +3,7 @@ using UnitsNet;
 
 namespace Fargo.Domain.Entities
 {
-    public class Container : NamedEntity
+    public class Container : NamedEntityOptional
     {
         public Place? Place { get; internal set; }
 
