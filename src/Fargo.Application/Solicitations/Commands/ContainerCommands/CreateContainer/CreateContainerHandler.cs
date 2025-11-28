@@ -5,16 +5,16 @@ using Fargo.Domain.Interfaces.Repositories;
 
 namespace Fargo.Application.Solicitations.Commands.ContainerCommands.CreateContainer
 {
-    public sealed class CreateContainerHandler(IContainerRepository containerRepository, IUnitOfWork unitOfWork) : ICommandHandler<CreateContainerCommand, Task>
+    public sealed class CreateContainerHandler(IItemRepository itemRepository, IUnitOfWork unitOfWork) : ICommandHandler<CreateContainerCommand, Task>
     {
-        private readonly IContainerRepository containerRepository = containerRepository;
+        private readonly IItemRepository itemRepository = itemRepository;
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task Handle(CreateContainerCommand command)
         {
             var container = new Container { Name = command.Name };
 
-            containerRepository.AddContainer(container);
+            itemRepository.Add(container);
 
             await unitOfWork.SaveChangesAsync();
         }

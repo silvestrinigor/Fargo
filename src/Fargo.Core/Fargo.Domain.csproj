@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\Entities\" />
+    <Folder Include="Enum\" />
   </ItemGroup>
 
 </Project>

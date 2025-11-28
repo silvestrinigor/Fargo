@@ -1,41 +1,34 @@
-﻿using Fargo.Domain.Abstracts.Entities;
-using UnitsNet;
-
-namespace Fargo.Domain.Entities
+﻿namespace Fargo.Domain.Entities
 {
-    public class Container : NamedEntityOptional
+    public class Container : Item
     {
-        public Place? Place { get; internal set; }
+        public event EventHandler? ItemAdded;
+        public event EventHandler? ItemRemoved;
 
-        public event EventHandler? EntityAdded;
-        public event EventHandler? EntityRemoved;
-
-        private void OnEntityAdded()
+        private void OnItemAdded()
         {
-            EntityAdded?.Invoke(this, EventArgs.Empty);
+            ItemAdded?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnEntityRemoved()
+        private void OnItemRemoved()
         {
-            EntityRemoved?.Invoke(this, EventArgs.Empty);
+            ItemRemoved?.Invoke(this, EventArgs.Empty);
         }
 
-        public void Add(ArticleItem item)
+        public void Add(Item item)
         {
-            /*
-             * WHY: older container remove(item)
-             * to generate event of entity removed
-             * and in future can implement a validation for remove a item from a container
-             */
-            item.Container?.Remove(item);
+            if (item.Container == this) return;
+            if (item == this) throw new InvalidOperationException("Cannot add container to itself.");
+            if (item.Container != this.Container) throw new InvalidOperationException("Item is in a different container.");
             item.Container = this;
-            OnEntityAdded();
+            OnItemAdded();
         }
 
-        public void Remove(ArticleItem item)
+        public void Remove(Item item)
         {
-            if (item.Container == this) item.Container = null;
-            OnEntityRemoved();
+            if (item.Container != this) throw new InvalidOperationException("Item is in a child container or different container.");
+            item.Container = this.Container;
+            OnItemRemoved();
         }
     }
 }

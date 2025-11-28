@@ -12,7 +12,7 @@ namespace Fargo.Infrastructure.Persistence
         public DbSet<Area> Areas { get; set; }
         public DbSet<AreaClosure> AreaClosure { get; set; }
         public DbSet<Article> Articles { get; set; }
-        public DbSet<ArticleItem> ArticleItems { get; set; }
+        public DbSet<Item> ArticleItems { get; set; }
         public DbSet<Container> Containers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

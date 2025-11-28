@@ -2,5 +2,5 @@
 
 namespace Fargo.Application.Solicitations.Commands.ArticleCommands.CreateArticle
 {
-    public sealed record CreateArticleCommand(string Name) : ICommand<CreateArticleCommand, Task>;
+    public sealed record CreateArticleCommand(string? Name, string? Description) : ICommand<CreateArticleCommand, Task>;
 }
