@@ -1,9 +1,4 @@
-﻿using Fargo.Application.Interfaces.Http;
-using Fargo.Application.Interfaces.Persistence;
-using Fargo.Application.Services;
-using Fargo.Application.Services.Interfaces;
-using Fargo.Core.Contracts;
-using Fargo.Core.Services;
+﻿using Fargo.Application.Interfaces.Persistence;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +13,6 @@ public static class ApiServiceCollectionExtensions
         services.AddDbContext<FargoContext>(opt =>
             opt.UseInMemoryDatabase("Fargo"));
 
-        services.AddScoped<IEntityMainRepository, EntityRepository>();
-
-        services.AddScoped<AreaService>();
         services.AddScoped<IAreaApplicationService, AreaApplicationService>();
         services.AddScoped<IAreaRepository, AreaRepository>();
 
@@ -35,11 +27,9 @@ public static class ApiServiceCollectionExtensions
         services.AddScoped<IPartitionApplicationService, PartitionApplicationService>();
         services.AddScoped<IPartitionRepository, PartitionRepository>();
 
+
+
         services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
-
-        services.AddScoped<IRootEntitiesService, RootEntitiesService>();
-
-        services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 
         return services;
     }
@@ -50,9 +40,6 @@ public static class ApiServiceCollectionExtensions
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<FargoContext>();
             dbContext.Database.EnsureCreated();
-
-            var service = scope.ServiceProvider.GetRequiredService<IRootEntitiesService>();
-            await service.EnsureRootAreaExistAsync();
         }
 
         return services;

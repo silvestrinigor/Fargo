@@ -1,21 +1,29 @@
-﻿using Fargo.Core.Entities.Abstracts;
+﻿using Fargo.Domain.Abstracts.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fargo.Infrastructure.Persistence.Configurations;
-
-public class EntityConfiguration : IEntityTypeConfiguration<Entity>
+namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    public void Configure(EntityTypeBuilder<Entity> builder)
+    public class EntityConfiguration : IEntityTypeConfiguration<Entity>
     {
-        builder
-            .HasKey(a => a.Guid);
-        builder
-            .Property(a => a.Name)
-            .IsRequired()
-            .HasMaxLength(200);
-        builder
-            .Property(a => a.CreatedAt)
-            .IsRequired();
+        public void Configure(EntityTypeBuilder<Entity> builder)
+        {
+            builder
+                .HasKey(a => a.Guid);
+            builder
+                .Property(a => a.Name)
+                .HasMaxLength(200);
+            builder
+                .Property(a => a.Description)
+                .HasMaxLength(1000);
+            builder
+                .HasOne<Entity>()
+                .WithMany()
+                .HasForeignKey(a => a.Parent)
+                .OnDelete(DeleteBehavior.Restrict);
+            builder
+                .Property(a => a.CreatedAt)
+                .IsRequired();
+        }
     }
 }

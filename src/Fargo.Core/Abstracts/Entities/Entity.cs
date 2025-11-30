@@ -4,6 +4,9 @@
     {
         public Guid Guid { get; init; } = Guid.NewGuid();
         public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+        public string? Name { get; set => SetField(ref field, value, OnNameChanged); }
+        public string? Description { get; set => SetField(ref field, value, OnDescriptionChanged); }
+        public virtual Guid? Parent { get; internal set; }
 
         public override bool Equals(object? obj) =>
             obj is Entity other && Guid.Equals(other.Guid);
@@ -20,9 +23,6 @@
 
         public static bool operator !=(Entity? left, Entity? right) =>
             !(left == right);
-
-        public string? Name { get; set => SetField(ref field, value, OnNameChanged); }
-        public string? Description { get; set => SetField(ref field, value, OnDescriptionChanged); }
 
         public event EventHandler? NameChanged;
         public event EventHandler? DescriptionChanged;

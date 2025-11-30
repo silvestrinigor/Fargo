@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Entities;
+﻿using Fargo.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +8,6 @@ public class ContainerConfiguration : IEntityTypeConfiguration<Container>
 {
     public void Configure(EntityTypeBuilder<Container> builder)
     {
-        builder.Navigation(x => x.Entities)
-               .UsePropertyAccessMode(PropertyAccessMode.Property);
+        
     }
 }

@@ -1,13 +1,14 @@
-﻿using Fargo.Core.Entities;
+﻿using Fargo.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    public class ArticleItemConfiguration : IEntityTypeConfiguration<ArticleItem>
+    public class ItemConfiguration : IEntityTypeConfiguration<Item>
     {
-        public void Configure(EntityTypeBuilder<ArticleItem> builder)
+        public void Configure(EntityTypeBuilder<Item> builder)
         {
+
         }
     }
 }

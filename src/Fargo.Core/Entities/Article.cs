@@ -17,10 +17,4 @@ namespace Fargo.Domain.Entities
             : null;
         public TimeSpan? ShelfLife { get; init; }
     }
-
-    // types of set:
-    // Bulk - When the article can't be understand as a unit
-    // Item - When the article can be understand as a unit
-    // Bunch - A bunch of itens of the same article
-    //   - If     
 }
