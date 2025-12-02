@@ -1,9 +1,10 @@
-﻿namespace Fargo.Application.Solicitations.Queries.ContainerQueries.GetContainerInformation
+﻿namespace Fargo.Application.Solicitations.Responses
 {
     public sealed record ContainerInformation(
         Guid Guid,
         string? Name,
         string? Description,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        Guid? Parent
     );
 }

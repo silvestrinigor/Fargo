@@ -23,4 +23,18 @@ public class ContainerRepository(FargoContext fargoContext) : IContainerReposito
     {
         fargoContext.Containers.Remove(container);
     }
+
+    public async Task<IEnumerable<Guid>> GetChildEntitiesGuidsAsync(Guid containerGuid)
+    {
+        return await fargoContext.Entities
+            .Where(e => e.ParentGuid == containerGuid)
+            .Select(e => e.Guid)
+            .ToListAsync();
+    }
+
+    public async Task<bool> HasChildEntitiesAsync(Guid containerGuid)
+    {
+        return await fargoContext.Entities
+            .AnyAsync(e => e.ParentGuid == containerGuid);
+    }
 }

@@ -1,9 +1,10 @@
-﻿namespace Fargo.Application.Solicitations.Queries.ArticleQueries.GetArticleInformation
+﻿namespace Fargo.Application.Solicitations.Responses
 {
     public sealed record ArticleInformation(
         Guid Guid,
         string? Name,
         string? Description,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        Guid? Parent
     );
 }

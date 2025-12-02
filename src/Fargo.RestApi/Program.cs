@@ -19,13 +19,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapFargoArea();
-
 app.MapFargoArticle();
 
 app.MapFargoContainer();
 
-app.MapFargoPartition();
+app.MapFargoItem();
 
 await app.Services.InitInfrastructureAsync();
 

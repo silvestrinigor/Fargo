@@ -19,7 +19,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
             builder
                 .HasOne<Entity>()
                 .WithMany()
-                .HasForeignKey(a => a.Parent)
+                .HasForeignKey(a => a.ParentGuid)
                 .OnDelete(DeleteBehavior.Restrict);
             builder
                 .Property(a => a.CreatedAt)

@@ -7,5 +7,7 @@ namespace Fargo.Domain.Interfaces.Repositories
         Task<Container?> GetByGuidAsync(Guid guid);
         void Add(Container container);
         void Remove(Container container);
+        Task<IEnumerable<Guid>> GetChildEntitiesGuidsAsync(Guid containerGuid);
+        Task<bool> HasChildEntitiesAsync(Guid containerGuid);
     }
 }

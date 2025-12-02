@@ -23,4 +23,9 @@ internal class ArticleRepository(FargoContext fagoContext) : IArticleRepository
     {
         fargoContext.Articles.Remove(article);
     }
+
+    public Task<bool> HasItensAssociated(Guid articleGuid)
+    {
+        return fargoContext.Items.AnyAsync(i => i.ArticleGuid == articleGuid);
+    }
 }

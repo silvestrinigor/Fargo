@@ -1,4 +1,7 @@
 ﻿using Fargo.Application.Interfaces.Persistence;
+using Fargo.Application.Interfaces.Services;
+using Fargo.Application.Services;
+using Fargo.Domain.Interfaces.Repositories;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -13,21 +16,19 @@ public static class ApiServiceCollectionExtensions
         services.AddDbContext<FargoContext>(opt =>
             opt.UseInMemoryDatabase("Fargo"));
 
-        services.AddScoped<IAreaApplicationService, AreaApplicationService>();
-        services.AddScoped<IAreaRepository, AreaRepository>();
+        services.AddScoped<IArticleService, ArticleService>();
 
-        services.AddScoped<IArticleApplicationService, ArticleApplicationService>();
+        services.AddScoped<IItemService, ItemService>();
+
+        services.AddScoped<IContainerService, ContainerService>();
+
+        services.AddScoped<IEntityRepository, EntityRepository>();
+
         services.AddScoped<IArticleRepository, ArticleRepository>();
 
-        services.AddScoped<ContainerService>();
+        services.AddScoped<IItemRepository, ItemRepository>();
+
         services.AddScoped<IContainerRepository, ContainerRepository>();
-        services.AddScoped<IContainerApplicationService, ContainerApplicationService>();
-
-        services.AddScoped<PartitionService>();
-        services.AddScoped<IPartitionApplicationService, PartitionApplicationService>();
-        services.AddScoped<IPartitionRepository, PartitionRepository>();
-
-
 
         services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 

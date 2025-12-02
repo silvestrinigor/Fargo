@@ -7,5 +7,6 @@ namespace Fargo.Domain.Interfaces.Repositories
         Task<Article?> GetByGuidAsync(Guid guid);
         void Add(Article article);
         void Remove(Article article);
+        Task<bool> HasItensAssociated(Guid articleGuid);
     }
 }

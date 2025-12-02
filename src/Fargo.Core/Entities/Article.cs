@@ -1,20 +1,19 @@
 ﻿using Fargo.Domain.Abstracts.Entities;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace Fargo.Domain.Entities
 {
     public class Article : Entity
     {
-        public Mass? Mass { get; init; }
-        public Length? Length { get; init; }
-        public Length? Width { get; init; }
-        public Length? Height { get; init; }
-        public Volume? Volume => Length is not null && Width is not null && Height is not null
-            ? Length * Width * Height
-            : null;
-        public Density? Density => Mass is not null && Volume is not null
-            ? Mass / Volume
-            : null;
+        public decimal? Mass { get; init; }
+        public MassUnit MassUnit { get; init; } = MassUnit.Kilogram;
+        public decimal? Length { get; init; }
+        public LengthUnit LengthUnit { get; init; } = LengthUnit.Meter;
+        public decimal? Width { get; init; }
+        public LengthUnit WidthUnit { get; init; } = LengthUnit.Meter;
+        public decimal? Height { get; init; }
+        public LengthUnit HeightUnit { get; init; } = LengthUnit.Meter;
         public TimeSpan? ShelfLife { get; init; }
     }
 }

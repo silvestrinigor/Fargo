@@ -1,5 +1,6 @@
-﻿using Fargo.Application.Dtos;
-using Fargo.Application.Services.Interfaces;
+﻿using Fargo.Application.Interfaces.Services;
+using Fargo.Application.Solicitations.Commands.ArticleCommands;
+using Fargo.Application.Solicitations.Queries.ArticleQueries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.EndpointRouteBuilder
@@ -10,23 +11,14 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
         {
             public void MapFargoArticle()
             {
-                builder.MapGet("/articles", async ([FromServices] IArticleApplicationService service)
-                    => await service.GetArticlesAsync());
+                builder.MapGet("/articles/{article}", async (Guid article, [FromServices] IArticleService service)
+                    => await service.GetArticleAsync(new ArticleQuery(article)));
 
-                builder.MapGet("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService service)
-                    => await service.GetArticleAsync(article));
+                builder.MapPost("/articles", async ([FromBody] ArticleCreateCommand command, [FromServices] IArticleService service)
+                    => await service.CreateArticleAsync(command));
 
-                builder.MapGet("/articles/guids", async ([FromServices] IArticleApplicationService articleApplicationService)
-                    => await articleApplicationService.GetArticlesGuidsAsync());
-
-                builder.MapPost("/articles", async ([FromBody] EntityCreateDto articleCreateDto, [FromServices] IArticleApplicationService service)
-                    => await service.CreateArticleAsync(articleCreateDto));
-
-                builder.MapPatch("/articles/{article}", async (Guid article, [FromBody] EntityUpdateDto articleUpdateDto, [FromServices] IArticleApplicationService service)
-                    => await service.UpdateArticleAsync(article, articleUpdateDto));
-
-                builder.MapDelete("/articles/{article}", async (Guid article, [FromServices] IArticleApplicationService service)
-                    => await service.DeleteArticleAsync(article));
+                builder.MapDelete("/articles/{article}", async (Guid article, [FromServices] IArticleService service)
+                    => await service.DeleteArticleAsync(new ArticleDeleteCommand(article)));
             }
         }
     }

@@ -4,6 +4,8 @@ namespace Fargo.Domain.Entities
 {
     public class Container : Entity
     {
+        public Guid? ItemGuid { get; set; }
+
         public event EventHandler? ItemAdded;
         public event EventHandler? ItemRemoved;
 
@@ -19,17 +21,17 @@ namespace Fargo.Domain.Entities
 
         public virtual void Add(Entity entity)
         {
-            if (entity.Parent == this.Guid) return;
-            if (entity == this) throw new InvalidOperationException("Cannot add container to itself.");
-            if (entity.Parent != this.Parent) throw new InvalidOperationException("Entity is in a different container.");
-            entity.Parent = this.Guid;
+            if (entity.ParentGuid == this.Guid) return;
+            if (entity == this) throw new InvalidOperationException("Cannot add entity to itself.");
+            if (entity.ParentGuid != this.ParentGuid) throw new InvalidOperationException("Entity is in a different parent or inside a child entity.");
+            entity.ParentGuid = this.Guid;
             OnItemAdded();
         }
 
         public virtual void Remove(Entity entity)
         {
-            if (entity.Parent != this.Guid) throw new InvalidOperationException("Entity is in a child container or outside of this container.");
-            entity.Parent = this.Parent;
+            if (entity.ParentGuid != this.Guid) throw new InvalidOperationException("Entity is in a child entity or outside of this container.");
+            entity.ParentGuid = this.ParentGuid;
             OnItemRemoved();
         }
     }
