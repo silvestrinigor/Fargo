@@ -6,7 +6,6 @@
         public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
         public string? Name { get; set => SetField(ref field, value, OnNameChanged); }
         public string? Description { get; set => SetField(ref field, value, OnDescriptionChanged); }
-        public virtual Guid? ParentGuid { get; internal set; }
 
         public override bool Equals(object? obj) =>
             obj is Entity other && Guid.Equals(other.Guid);
