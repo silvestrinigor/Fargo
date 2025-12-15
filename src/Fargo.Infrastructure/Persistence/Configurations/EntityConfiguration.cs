@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    public class EntityConfiguration : IEntityTypeConfiguration<Entity>
+    public class EntityConfiguration : IEntityTypeConfiguration<Named>
     {
-        public void Configure(EntityTypeBuilder<Entity> builder)
+        public void Configure(EntityTypeBuilder<Named> builder)
         {
             builder
                 .HasKey(a => a.Guid);
@@ -17,7 +17,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .Property(a => a.Description)
                 .HasMaxLength(1000);
             builder
-                .HasOne<Entity>()
+                .HasOne<Named>()
                 .WithMany()
                 .HasForeignKey(a => a.ParentGuid)
                 .OnDelete(DeleteBehavior.Restrict);

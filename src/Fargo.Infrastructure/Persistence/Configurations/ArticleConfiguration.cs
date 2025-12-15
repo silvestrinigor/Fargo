@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Articles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnitsNet;
@@ -6,9 +6,9 @@ using UnitsNet.Units;
 
 namespace Fargo.Infrastructure.Persistence.Configurations;
 
-public class ArticleConfiguration : IEntityTypeConfiguration<Article>
+public class ArticleConfiguration : IEntityTypeConfiguration<ItemArticle>
 {
-    public void Configure(EntityTypeBuilder<Article> builder)
+    public void Configure(EntityTypeBuilder<ItemArticle> builder)
     {
         builder.Property(x => x.Mass)
             .HasColumnType("decimal(38,18)")

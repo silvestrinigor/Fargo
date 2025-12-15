@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Articles;
 using Fargo.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,18 +8,18 @@ internal class ArticleRepository(FargoContext fagoContext) : IArticleRepository
 {
     private readonly FargoContext fargoContext = fagoContext;
 
-    public void Add(Article article)
+    public void Add(ItemArticle article)
     {
         fargoContext.Articles.Add(article);
     }
 
-    public async Task<Article?> GetByGuidAsync(Guid guid)
+    public async Task<ItemArticle?> GetByGuidAsync(Guid guid)
     {
         return await fargoContext.Articles
             .FirstOrDefaultAsync(a => a.Guid == guid);
     }
 
-    public void Remove(Article article)
+    public void Remove(ItemArticle article)
     {
         fargoContext.Articles.Remove(article);
     }

@@ -3,7 +3,7 @@ using Fargo.Application.Interfaces.Services;
 using Fargo.Application.Solicitations.Commands.ArticleCommands;
 using Fargo.Application.Solicitations.Queries.ArticleQueries;
 using Fargo.Application.Solicitations.Responses;
-using Fargo.Domain.Entities;
+using Fargo.Domain.Entities.Articles;
 using Fargo.Domain.Interfaces.Repositories;
 
 namespace Fargo.Application.Services
@@ -15,7 +15,7 @@ namespace Fargo.Application.Services
 
         public async Task<Guid> CreateArticleAsync(ArticleCreateCommand command)
         {
-            var article = new Article { Name = command.Name }; 
+            var article = new Article { Name = command.Name };
 
             articleRepository.Add(article);
 

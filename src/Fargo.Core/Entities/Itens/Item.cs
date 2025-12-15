@@ -1,0 +1,36 @@
+﻿using Fargo.Domain.Abstracts.Entities;
+using Fargo.Domain.Entities.Articles;
+
+namespace Fargo.Domain.Entities.Itens
+{
+    public partial class Item : Named
+    {
+        public required Article Article { get; init; }
+        public Item? Container 
+        {
+            get;
+            private set
+            {
+                if (this.Article.TemperatureMin.HasValue)
+                {
+                    if (value?.Article.ContainerTemperature is null)
+                        throw new InvalidOperationException("Cannot place item with defined minimum temperature into a container with undefined temperature.");
+
+                    if (value.Article.ContainerTemperature < this.Article.TemperatureMin)
+                        throw new InvalidOperationException("Container's temperature is below item's minimum temperature.");
+                }
+
+                if (this.Article.TemperatureMax.HasValue)
+                {
+                    if (value?.Article.ContainerTemperature is null)
+                        throw new InvalidOperationException("Cannot place item with defined maximum temperature into a container with undefined temperature.");
+
+                    if (value.Article.ContainerTemperature > this.Article.TemperatureMax)
+                        throw new InvalidOperationException("Container's temperature exceeds item's maximum temperature.");
+                }
+
+                field = value;
+            }
+        }
+    }
+}
