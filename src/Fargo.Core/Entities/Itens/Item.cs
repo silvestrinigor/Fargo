@@ -1,12 +1,18 @@
 ﻿using Fargo.Domain.Abstracts.Entities;
 using Fargo.Domain.Entities.Articles;
+using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Domain.Entities.Itens
 {
-    public partial class Item : Named
+    public partial class Item : Entity
     {
+        public Name? Name { get; set; }
+        
+        public Description? Description { get; set; }
+
         public required Article Article { get; init; }
-        public Item? Container 
+
+        public Item? Container
         {
             get;
             private set
