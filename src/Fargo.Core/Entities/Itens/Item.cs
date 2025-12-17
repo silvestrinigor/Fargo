@@ -10,7 +10,15 @@ namespace Fargo.Domain.Entities.Itens
         
         public Description? Description { get; set; }
 
-        public required Article Article { get; init; }
+        public required Article Article
+        {
+            get;
+            init
+            {
+                field = value.IsItem
+                    ? value : throw new InvalidOperationException("Article must be a ItemArticle.");
+            }
+        }
 
         public Item? Container
         {
