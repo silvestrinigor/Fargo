@@ -13,7 +13,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         {
             static void action()
             {
-                _ = new Fargo.Domain.Entities.Articles.Article
+                _ = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
                 {
                     Mass = -5.Kilograms()
                 };
@@ -30,7 +30,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         {
             static void action()
             {
-                _ = new Fargo.Domain.Entities.Articles.Article
+                _ = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
                 {
                     Length = -10.Meters()
                 };
@@ -47,7 +47,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         {
             static void action()
             {
-                _ = new Fargo.Domain.Entities.Articles.Article
+                _ = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
                 {
                     Width = -3.Meters()
                 };
@@ -64,7 +64,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         {
             static void action()
             {
-                _ = new Fargo.Domain.Entities.Articles.Article
+                _ = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
                 {
                     Height = -7.Meters()
                 };
@@ -81,7 +81,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         {
             static void action()
             {
-                _ = new Fargo.Domain.Entities.Articles.Article
+                _ = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
                 {
                     TemperatureMin = 10.DegreesCelsius(),
                     TemperatureMax = 5.DegreesCelsius()
@@ -97,7 +97,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         [Fact]
         public void CreateArticle_WithLengthWidthHeight_ShouldCalculateVolume()
         {
-            var article = new Fargo.Domain.Entities.Articles.Article
+            var article = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
             {
                 Length = 2.Meters(),
                 Width = 3.Meters(),
@@ -111,7 +111,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         [Fact]
         public void CreateArticle_WithMassAndVolume_ShouldCalculateDensity()
         {
-            var article = new Fargo.Domain.Entities.Articles.Article
+            var article = new Fargo.Domain.Entities.Articles.PhysicalProductArticle
             {
                 Mass = 12.Kilograms(),
                 Length = 2.Meters(),

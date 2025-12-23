@@ -4,9 +4,9 @@ namespace Fargo.Domain.Interfaces.Repositories
 {
     public interface IArticleRepository
     {
-        Task<Article?> GetByGuidAsync(Guid guid);
-        void Add(Article article);
-        void Remove(Article article);
+        Task<PhysicalProductArticle?> GetByGuidAsync(Guid guid);
+        void Add(PhysicalProductArticle article);
+        void Remove(PhysicalProductArticle article);
         Task<bool> HasItensAssociated(Guid articleGuid);
     }
 }

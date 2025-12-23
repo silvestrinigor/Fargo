@@ -13,7 +13,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemIsNotContainer_ShouldThrowException()
         {
-            var article = new Article
+            var article = new PhisicalItemArticle
             {
                 IsContainer = false
             };
@@ -23,7 +23,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             };
             var child = new Item
             {
-                Article = new Article()
+                Article = new PhisicalItemArticle()
             };
 
             void action() => item.Add(child);
@@ -38,7 +38,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemMassCapacityExceeded_ShouldThrowException()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
                 ContainerMassCapacity = 10.Kilograms()
@@ -47,7 +47,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var heavyArticle = new Article
+            var heavyArticle = new PhisicalItemArticle
             {
                 Mass = 11.Kilograms()
             };
@@ -68,7 +68,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemVolumeCapacityExceeded_ShouldThrowException()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
                 ContainerVolumeCapacity = 5.CubicMeters()
@@ -77,7 +77,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var largeArticle = new Article
+            var largeArticle = new PhisicalItemArticle
             {
                 Length = 3.Meters(),
                 Width = 2.Meters(),
@@ -100,7 +100,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemMaxTemperatureExceeded_ShouldThrowException()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 TemperatureMax = 50.DegreesCelsius(),
                 IsContainer = true,
@@ -109,7 +109,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var hotArticle = new Article
+            var hotArticle = new PhisicalItemArticle
             {
                 TemperatureMax = 49.DegreesCelsius()
             };
@@ -130,7 +130,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemMinTemperatureExceeded_ShouldThrowException()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 TemperatureMin = 0.DegreesCelsius(),
                 IsContainer = true,
@@ -139,7 +139,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var coldArticle = new Article
+            var coldArticle = new PhisicalItemArticle
             {
                 TemperatureMin = 1.DegreesCelsius()
             };
@@ -159,7 +159,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemIsItself_ShouldThrowException()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
             };
@@ -180,7 +180,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenItemContainerIsNotContainerContainer_ShouldThrowException()
         {
-            var grandContainerArticle = new Article
+            var grandContainerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
             };
@@ -188,7 +188,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = grandContainerArticle
             };
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
             };
@@ -197,7 +197,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
                 Article = containerArticle
             };
             grandContainerItem.Add(containerItem);
-            var itemArticle = new Article { };
+            var itemArticle = new PhisicalItemArticle { };
             var item = new Item
             {
                 Article = itemArticle
@@ -215,7 +215,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Add_WhenAllConditionsMet_ShouldAddItemSuccessfully()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
             };
@@ -223,7 +223,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var itemArticle = new Article
+            var itemArticle = new PhisicalItemArticle
             {
                 Length = 3.Meters(),
                 Width = 2.Meters(),
@@ -245,7 +245,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Remove_WhenItemNotInContainer_ShouldThrowException()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
             };
@@ -253,7 +253,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var itemArticle = new Article
+            var itemArticle = new PhisicalItemArticle
             {
                 Length = 3.Meters(),
                 Width = 2.Meters(),
@@ -276,7 +276,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
         [Fact]
         public void Remove_WhenItemInContainer_ShouldRemoveItemSuccessfully()
         {
-            var containerArticle = new Article
+            var containerArticle = new PhisicalItemArticle
             {
                 IsContainer = true,
             };
@@ -284,7 +284,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 Article = containerArticle
             };
-            var itemArticle = new Article { };
+            var itemArticle = new PhisicalItemArticle { };
             var item = new Item
             {
                 Article = itemArticle
