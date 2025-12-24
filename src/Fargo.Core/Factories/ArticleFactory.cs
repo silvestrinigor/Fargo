@@ -7,9 +7,9 @@ namespace Fargo.Domain.Factories
     {
         public event EventHandler? ArticleCreated;
 
-        public PhysicalProductArticle CreateItemArticle()
+        public Article CreateItemArticle()
         {
-            var article = new PhysicalProductArticle
+            var article = new Article
             {
                 IsContainer = false
             };
@@ -19,9 +19,9 @@ namespace Fargo.Domain.Factories
             return article;
         }
 
-        public PhysicalProductArticle CreateContainerArticle(Mass? massCapacity, Volume? volumeCapacity, Temperature? temperature)
+        public Article CreateContainerArticle(Mass? massCapacity, Volume? volumeCapacity, Temperature? temperature)
         {
-            var article = new PhysicalProductArticle
+            var article = new Article
             {
                 IsContainer = true,
                 ContainerMassCapacity = massCapacity,
