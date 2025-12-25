@@ -1,6 +1,6 @@
 ﻿using Fargo.Domain.Entities.Itens;
 
-namespace Fargo.Domain.Interfaces.Repositories
+namespace Fargo.Domain.Repositories
 {
     public interface IItemRepository
     {

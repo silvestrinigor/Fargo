@@ -4,7 +4,7 @@ namespace Fargo.Domain.Entities.Articles
 {
     public class ArticleContainerExtension
     {
-        public Mass? MassCapacity 
+        public Mass? MassCapacity
         {
             get;
             init => field =

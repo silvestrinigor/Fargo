@@ -1,4 +1,4 @@
-﻿namespace Fargo.Domain.Interfaces.Repositories
+﻿namespace Fargo.Domain.Repositories
 {
     public interface IContainerRepository
     {

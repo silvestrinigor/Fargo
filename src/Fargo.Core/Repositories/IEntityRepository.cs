@@ -1,6 +1,6 @@
 ﻿using Fargo.Domain.Abstracts.Entities;
 
-namespace Fargo.Domain.Interfaces.Repositories
+namespace Fargo.Domain.Repositories
 {
     public interface IEntityRepository
     {
