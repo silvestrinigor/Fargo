@@ -18,6 +18,7 @@ namespace Fargo.Domain.Entities.Itens
         public Article Article
         { 
             get;
+            private init;
         }
 
         public ItemContainerExtension? ContainerExtension

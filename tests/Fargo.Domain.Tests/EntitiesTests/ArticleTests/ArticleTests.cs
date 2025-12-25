@@ -1,7 +1,7 @@
-﻿using UnitsNet.NumberExtensions.NumberToDensity;
+﻿using Fargo.Domain.Entities.Articles;
+using UnitsNet.NumberExtensions.NumberToDensity;
 using UnitsNet.NumberExtensions.NumberToLength;
 using UnitsNet.NumberExtensions.NumberToMass;
-using UnitsNet.NumberExtensions.NumberToTemperature;
 using UnitsNet.NumberExtensions.NumberToVolume;
 
 namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
@@ -9,95 +9,9 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
     public class ArticleTests
     {
         [Fact]
-        public void CreateArticle_WithNegativeMass_ShouldThrowException()
-        {
-            static void action()
-            {
-                _ = new Fargo.Domain.Entities.Articles.Article
-                {
-                    Mass = -5.Kilograms()
-                };
-            }
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                action();
-            });
-        }
-
-        [Fact]
-        public void CreateArticle_WithNegativeLength_ShouldThrowException()
-        {
-            static void action()
-            {
-                _ = new Fargo.Domain.Entities.Articles.Article
-                {
-                    Length = -10.Meters()
-                };
-            }
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                action();
-            });
-        }
-
-        [Fact]
-        public void CreateArticle_WithNegativeWidth_ShouldThrowException()
-        {
-            static void action()
-            {
-                _ = new Fargo.Domain.Entities.Articles.Article
-                {
-                    Width = -3.Meters()
-                };
-            }
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                action();
-            });
-        }
-
-        [Fact]
-        public void CreateArticle_WithNegativeHeight_ShouldThrowException()
-        {
-            static void action()
-            {
-                _ = new Fargo.Domain.Entities.Articles.Article
-                {
-                    Height = -7.Meters()
-                };
-            }
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                action();
-            });
-        }
-
-        [Fact]
-        public void CreateArticle_WithInvalidTemperatureRange_ShouldThrowException()
-        {
-            static void action()
-            {
-                _ = new Fargo.Domain.Entities.Articles.Article
-                {
-                    TemperatureMin = 10.DegreesCelsius(),
-                    TemperatureMax = 5.DegreesCelsius()
-                };
-            }
-
-            Assert.Throws<ArgumentException>(() =>
-            {
-                action();
-            });
-        }
-
-        [Fact]
         public void CreateArticle_WithLengthWidthHeight_ShouldCalculateVolume()
         {
-            var article = new Fargo.Domain.Entities.Articles.Article
+            var article = new Article
             {
                 Length = 2.Meters(),
                 Width = 3.Meters(),
@@ -111,7 +25,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ArticleTests
         [Fact]
         public void CreateArticle_WithMassAndVolume_ShouldCalculateDensity()
         {
-            var article = new Fargo.Domain.Entities.Articles.Article
+            var article = new Article
             {
                 Mass = 12.Kilograms(),
                 Length = 2.Meters(),

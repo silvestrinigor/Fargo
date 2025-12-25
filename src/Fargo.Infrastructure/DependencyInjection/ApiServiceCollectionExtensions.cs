@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Interfaces.Persistence;
-using Fargo.Application.Interfaces.Services;
+﻿using Fargo.Application.Persistence;
 using Fargo.Application.Services;
 using Fargo.Domain.Interfaces.Repositories;
 using Fargo.Infrastructure.Persistence;

@@ -2,7 +2,7 @@
 using Fargo.Application.Solicitations.Queries.ContainerQueries;
 using Fargo.Application.Solicitations.Responses;
 
-namespace Fargo.Application.Interfaces.Services
+namespace Fargo.Application.Services
 {
     public interface IContainerService
     {

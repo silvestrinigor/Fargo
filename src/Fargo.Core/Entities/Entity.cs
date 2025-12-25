@@ -2,7 +2,17 @@
 {
     public abstract class Entity : IEquatable<Entity>
     {
-        public Guid Guid { get; init; } = Guid.NewGuid();
+        public Guid Guid
+        { 
+            get; 
+            init; 
+        } = Guid.NewGuid();
+
+        public DateTime CreatedAt 
+        { 
+            get; 
+            init; 
+        } = DateTime.UtcNow;
 
         public bool Equals(Entity? other)
         {

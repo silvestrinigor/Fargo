@@ -3,7 +3,7 @@ using Fargo.Application.Solicitations.Queries.ArticleQueries;
 using Fargo.Application.Solicitations.Responses;
 using Fargo.Domain.Entities;
 
-namespace Fargo.Application.Interfaces.Services
+namespace Fargo.Application.Services
 {
     public interface IArticleService
     {

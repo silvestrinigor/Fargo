@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Interfaces.Persistence;
-using Fargo.Application.Interfaces.Services;
+﻿using Fargo.Application.Persistence;
 using Fargo.Application.Solicitations.Commands.ItemCommands;
 using Fargo.Application.Solicitations.Queries.ItensQueries;
 using Fargo.Application.Solicitations.Responses;

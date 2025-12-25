@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Interfaces.Services;
+﻿using Fargo.Application.Services;
 using Fargo.Application.Solicitations.Commands.ContainerCommands;
 using Fargo.Application.Solicitations.Queries.ContainerQueries;
 using Microsoft.AspNetCore.Mvc;

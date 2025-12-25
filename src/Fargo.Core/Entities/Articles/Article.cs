@@ -112,12 +112,12 @@ namespace Fargo.Domain.Entities.Articles
         private bool IsDensityCalculableFromMassVolume
             => Volume is not null && Mass is not null;
 
-        public ArticleContainerExtension? Container
+        public ArticleContainerExtension? ContainerExtension
         {
             get;
             init;
         }
 
-        public bool IsContainer => Container is not null;
+        public bool IsContainer => ContainerExtension is not null;
     }
 }

@@ -22,5 +22,14 @@ namespace Fargo.Domain.Entities.Articles
                 ? throw new ArticleNegativeCapacityException()
                 : value;
         }
+
+        public int? ItensQuantityCapacity
+        { 
+            get;
+            init => field =
+                value is not null && value < 0
+                ? throw new ArticleNegativeCapacityException()
+                : value;
+        }
     }
 }

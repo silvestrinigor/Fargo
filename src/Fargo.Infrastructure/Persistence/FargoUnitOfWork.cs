@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Interfaces.Persistence;
+﻿using Fargo.Application.Persistence;
 
 namespace Fargo.Infrastructure.Persistence
 {

@@ -8,14 +8,15 @@ namespace Fargo.Domain.Entities.Itens
     {
         public ItemContainerExtension(Item item)
         {
-            MassAvailableCapacity = item.Article.Container?.MassCapacity;
-            VolumeAvailableCapacity = item.Article.Container?.VolumeCapacity;
+            MassAvailableCapacity = item.Article.ContainerExtension?.MassCapacity;
+            VolumeAvailableCapacity = item.Article.ContainerExtension?.VolumeCapacity;
+            ItensQuantityAvailableCapacity = item.Article.ContainerExtension?.ItensQuantityCapacity;
             Item = item;
         }
 
         public Mass? MassAvailableCapacity 
         { 
-            get; 
+            get;
             private set;
         }
 
@@ -25,13 +26,19 @@ namespace Fargo.Domain.Entities.Itens
             private set;
         }
 
-        public bool IsLocked 
-        { 
+        public int? ItensQuantityAvailableCapacity
+        {
             get; 
             private set; 
         }
 
-        public Description? LockReason 
+        public bool IsLocked
+        { 
+            get; 
+            private set; 
+        } = false;
+
+        public Description? LockReason
         {  
             get; 
             private set; 
@@ -82,16 +89,26 @@ namespace Fargo.Domain.Entities.Itens
             if (IsLocked)
                 throw new ContainerLockedException();
 
+            if (VolumeAvailableCapacity is not null && item.Article.Volume is null)
+                throw new LackOfInformationException();
+
+            if (MassAvailableCapacity is not null && item.Article.Mass is null)
+                throw new LackOfInformationException();
+
             if (VolumeAvailableCapacity < item.Article.Volume)
                 throw new InsufficientAvailableCapacityException();
 
             if (MassAvailableCapacity < item.Article.Mass)
                 throw new InsufficientAvailableCapacityException();
 
+            if (ItensQuantityAvailableCapacity < 1)
+                throw new InsufficientAvailableCapacityException();
+
             item.ParentContainer = this.Item;
 
             MassAvailableCapacity -= item.Article.Mass;
             VolumeAvailableCapacity -= item.Article.Volume;
+            ItensQuantityAvailableCapacity--;
 
             OnItemInserted();
         }
@@ -115,6 +132,7 @@ namespace Fargo.Domain.Entities.Itens
 
             MassAvailableCapacity += item.Article.Mass;
             VolumeAvailableCapacity += item.Article.Volume;
+            ItensQuantityAvailableCapacity++;
 
             OnItemRemoved();
         }

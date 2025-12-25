@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Interfaces.Persistence;
+﻿namespace Fargo.Application.Persistence;
 
 public interface IUnitOfWork
 {
