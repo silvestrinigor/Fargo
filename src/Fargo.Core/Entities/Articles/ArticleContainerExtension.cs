@@ -1,4 +1,5 @@
-﻿using UnitsNet;
+﻿using Fargo.Domain.Exceptions.Entities.Articles;
+using UnitsNet;
 
 namespace Fargo.Domain.Entities.Articles
 {
@@ -9,7 +10,7 @@ namespace Fargo.Domain.Entities.Articles
             get;
             init => field =
                 value is not null && value < Mass.Zero
-                ? throw new InvalidOperationException()
+                ? throw new ArticleNegativeCapacityException()
                 : value;
         }
 
@@ -18,7 +19,7 @@ namespace Fargo.Domain.Entities.Articles
             get;
             init => field =
                 value is not null && value < Volume.Zero
-                ? throw new InvalidOperationException()
+                ? throw new ArticleNegativeCapacityException()
                 : value;
         }
     }

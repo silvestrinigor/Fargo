@@ -1,4 +1,5 @@
-﻿using Fargo.Domain.ValueObjects.Entities;
+﻿using Fargo.Domain.Exceptions.Entities.Itens;
+using Fargo.Domain.ValueObjects.Entities;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities.Itens
@@ -7,24 +8,21 @@ namespace Fargo.Domain.Entities.Itens
     {
         public ItemContainerExtension(Item item)
         {
-            if (!item.Article.IsContainer)
-                throw new InvalidOperationException("Item is not a container.");
-
             MassAvailableCapacity = item.Article.Container?.MassCapacity;
             VolumeAvailableCapacity = item.Article.Container?.VolumeCapacity;
-            this.item = item;
+            Item = item;
         }
 
         public Mass? MassAvailableCapacity 
         { 
             get; 
-            private set; 
+            private set;
         }
 
         public Volume? VolumeAvailableCapacity 
         { 
             get; 
-            private set; 
+            private set;
         }
 
         public bool IsLocked 
@@ -39,72 +37,20 @@ namespace Fargo.Domain.Entities.Itens
             private set; 
         }
 
-        private readonly Item item;
+        public Item Item
+        {
+            get;
+            private init => field
+                = !value.Article.IsContainer
+                ? throw new ItemIsNotContainerException()
+                : value;
+        }
 
         public void Lock(Description? reason = null)
         {
             IsLocked = true;
             LockReason = reason;
             OnLocked();
-        }
-
-        public void Unlock()
-        { 
-            IsLocked = false; 
-            LockReason = null;
-            OnUnlocked();
-        }
-
-        public void Insert(Item item)
-        {
-            if (item.Container == this.item)
-                throw new InvalidOperationException("Item is already inside the container.");
-
-            if (IsLocked)
-                throw new InvalidOperationException("Itens can't be inserted inside a locked container.");
-
-            if (VolumeAvailableCapacity < item.Article.Volume)
-                throw new InvalidOperationException("Container don't have volume capacity to add this item.");
-
-            if (MassAvailableCapacity < item.Article.Mass)
-                throw new InvalidOperationException("Container don't have mass capacity to add this item.");
-
-            item.Container = this.item;
-
-            MassAvailableCapacity -= item.Article.Mass;
-            VolumeAvailableCapacity -= item.Article.Volume;
-
-            OnItemInserted();
-        }
-
-        public void Remove(Item item)
-        {
-            if (item.Container != this.item)
-                throw new InvalidOperationException("Item is not inside this container.");
-
-            if (IsLocked)
-                throw new InvalidOperationException("Itens can't be removed from a locked container.");
-
-            item.Container = this.item.Container;
-
-            MassAvailableCapacity += item.Article.Mass;
-            VolumeAvailableCapacity += item.Article.Volume;
-
-            OnItemRemoved();
-        }
-
-        public event EventHandler? ItemInserted;
-
-        protected virtual void OnItemInserted()
-        {
-            ItemInserted?.Invoke(this, EventArgs.Empty);
-        }
-
-        public event EventHandler? ItemRemoved;
-
-        protected virtual void OnItemRemoved()
-        {
-            ItemRemoved?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler? Locked;
@@ -114,11 +60,70 @@ namespace Fargo.Domain.Entities.Itens
             Locked?.Invoke(this, EventArgs.Empty);
         }
 
+        public void Unlock()
+        { 
+            IsLocked = false; 
+            LockReason = null;
+            OnUnlocked();
+        }
+
         public event EventHandler? Unlocked;
 
         protected virtual void OnUnlocked()
         {
             Unlocked?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Insert(Item item)
+        {
+            if (item.ParentContainer == this.Item)
+                throw new ItemAlreadyInsideContainerException();
+
+            if (IsLocked)
+                throw new ContainerLockedException();
+
+            if (VolumeAvailableCapacity < item.Article.Volume)
+                throw new InsufficientAvailableCapacityException();
+
+            if (MassAvailableCapacity < item.Article.Mass)
+                throw new InsufficientAvailableCapacityException();
+
+            item.ParentContainer = this.Item;
+
+            MassAvailableCapacity -= item.Article.Mass;
+            VolumeAvailableCapacity -= item.Article.Volume;
+
+            OnItemInserted();
+        }
+
+        public event EventHandler? ItemInserted;
+
+        protected virtual void OnItemInserted()
+        {
+            ItemInserted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Remove(Item item)
+        {
+            if (item.ParentContainer != this.Item)
+                throw new ContainerOutOfItemRangeException();
+
+            if (IsLocked)
+                throw new ContainerLockedException();
+
+            item.ParentContainer = this.Item.ParentContainer;
+
+            MassAvailableCapacity += item.Article.Mass;
+            VolumeAvailableCapacity += item.Article.Volume;
+
+            OnItemRemoved();
+        }
+
+        public event EventHandler? ItemRemoved;
+
+        protected virtual void OnItemRemoved()
+        {
+            ItemRemoved?.Invoke(this, EventArgs.Empty);
         }
     }
 }

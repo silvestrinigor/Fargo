@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities.Articles;
+using Fargo.Domain.Exceptions.Entities.Itens;
 
 namespace Fargo.Domain.Entities.Itens
 {
@@ -14,23 +15,40 @@ namespace Fargo.Domain.Entities.Itens
                 : null;
         }
 
-        public Article Article { get; }
+        public Article Article
+        { 
+            get;
+        }
 
-        public ItemContainerExtension? ContainerExtension {  get; }
-
-        public Item? Container
+        public ItemContainerExtension? ContainerExtension
         {
             get;
-            internal set => field
-                = value == this
-                ? throw new InvalidOperationException("Cannot place item into itself.")
-                : !value?.Article.IsContainer ?? false
-                ? throw new InvalidOperationException("The specified item is not a container.")
-                : field is not null && value is not null && value != field.Container && value.Container != field.Container
-                ? throw new InvalidOperationException(" ")
+            private init => field
+                = value is not null && value.Item != this
+                ? throw new InvalidOperationException("Container extension item should be this one.")
                 : value;
         }
 
-        public bool IsInContainer => Container is not null;
+        public Item? ParentContainer
+        {
+            get;
+            internal set
+            {
+                field
+                = value == this
+                ? throw new ItemParentEqualsItemException()
+                : !value?.Article.IsContainer ?? false
+                ? throw new ItemIsNotContainerException()
+                : field is not null && value is not null && value != field.ParentContainer && value.ParentContainer != field.ParentContainer
+                ? throw new ContainerOutOfItemRangeException()
+                : value;
+
+                InsertedInContainerAt = DateTime.UtcNow;
+            }
+        }
+
+        public DateTime? InsertedInContainerAt { get; private set; }
+
+        public bool IsInContainer => ParentContainer is not null;
     }
 }

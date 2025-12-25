@@ -1,4 +1,5 @@
-﻿using UnitsNet;
+﻿using Fargo.Domain.Exceptions.Entities.Articles;
+using UnitsNet;
 
 namespace Fargo.Domain.Entities.Articles
 {
@@ -8,88 +9,109 @@ namespace Fargo.Domain.Entities.Articles
         {
             get => field is not null
                 ? field
-                : Width is not null && Height is not null && Volume is not null
+                : IsLengthCalculableFromWidthHeightVolume
                 ? Volume / Width / Height
                 : null;
 
-            init => field 
-                = Width is not null && Height is not null && Volume is not null
-                ? throw new InvalidOperationException()
+            init => field
+                = field is null && IsLengthCalculableFromWidthHeightVolume
+                ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
         }
+
+        private bool IsLengthCalculableFromWidthHeightVolume
+            => Width is not null && Height is not null && Volume is not null;
 
         public Length? Width
         {
             get => field is not null
                 ? field
-                : Length is not null && Height is not null && Volume is not null
+                : IsWidthCalculableFromLengthHeightVolume
                 ? Volume / Length / Height
                 : null;
 
-            init => field 
-                = Length is not null && Height is not null && Volume is not null
-                ? throw new InvalidOperationException()
+            init => field
+                = field is null && IsWidthCalculableFromLengthHeightVolume
+                ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
         }
+
+        private bool IsWidthCalculableFromLengthHeightVolume
+            => Length is not null && Height is not null && Volume is not null;
 
         public Length? Height 
         {
             get => field is not null
                 ? field
-                : Length is not null && Width is not null && Volume is not null
+                : IsHeightCalculableFromLengthWidthVolume
                 ? Volume / Length / Width
                 : null;
 
-            init => field 
-                = Length is not null && Width is not null && Volume is not null
-                ? throw new InvalidOperationException()
+            init => field
+                = field is null && IsHeightCalculableFromLengthWidthVolume
+                ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
         }
+
+        private bool IsHeightCalculableFromLengthWidthVolume
+            => Length is not null && Width is not null && Volume is not null;
 
         public Mass? Mass 
         {
             get => field is not null
                 ? field
-                : Volume is not null && Density is not null
+                : IsMassCalculableFromVolumeDensity
                 ? Density * Volume
                 : null;
 
-            init => field 
-                = Volume is not null && Density is not null
-                ? throw new InvalidOperationException()
+            init => field
+                = field is null && IsMassCalculableFromVolumeDensity
+                ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
         }
+
+        private bool IsMassCalculableFromVolumeDensity
+            => Volume is not null && Density is not null;
 
         public Volume? Volume
         {
             get => field is not null
                 ? field
-                : Length is not null && Width is not null && Height is not null
+                : IsVolumeCalculableFromLengthWidthHeight
                 ? Length * Width * Height
-                : Mass is not null && Density is not null
+                : IsVolumeCalculableFromMassDensity
                 ? Mass / Density
                 : null;
 
-            init => field 
-                = Length is not null && Width is not null && Height is not null
-                ? throw new InvalidOperationException()
-                : Mass is not null && Density is not null
-                ? throw new InvalidOperationException()
+            init => field
+                = field is null && IsVolumeCalculableFromLengthWidthHeight || IsVolumeCalculableFromMassDensity
+                ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
         }
+
+        private bool IsVolumeCalculableFromLengthWidthHeight
+            => Length is not null && Width is not null && Height is not null;
+
+        private bool IsVolumeCalculableFromMassDensity
+            => Mass is not null && Density is not null;
 
         public Density? Density
         {
             get => field is not null 
                 ? field 
-                : Mass / Volume;
+                : IsDensityCalculableFromMassVolume
+                ? Mass / Volume
+                : null;
 
-            init => field 
-                = Volume is not null && Mass is not null
-                ? throw new InvalidOperationException()
+            init => field
+                = field is null && IsDensityCalculableFromMassVolume
+                ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
         }
-    
+
+        private bool IsDensityCalculableFromMassVolume
+            => Volume is not null && Mass is not null;
+
         public ArticleContainerExtension? Container
         {
             get;

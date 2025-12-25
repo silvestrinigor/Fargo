@@ -32,7 +32,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(item, child.Container);
+            Assert.NotEqual(item, child.ParentContainer);
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(containerItem, heavyItem.Container);
+            Assert.NotEqual(containerItem, heavyItem.ParentContainer);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(containerItem, largeItem.Container);
+            Assert.NotEqual(containerItem, largeItem.ParentContainer);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(containerItem, hotItem.Container);
+            Assert.NotEqual(containerItem, hotItem.ParentContainer);
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(containerItem, coldItem.Container);
+            Assert.NotEqual(containerItem, coldItem.ParentContainer);
         }
 
         [Fact]
@@ -174,7 +174,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(containerItem.Container, containerItem);
+            Assert.NotEqual(containerItem.ParentContainer, containerItem);
         }
 
         [Fact]
@@ -209,7 +209,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
             {
                 action();
             });
-            Assert.NotEqual(grandContainerItem, item.Container);
+            Assert.NotEqual(grandContainerItem, item.ParentContainer);
         }
 
         [Fact]
@@ -237,7 +237,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
 
             containerItem.Add(item);
 
-            Assert.Equal(containerItem, item.Container);
+            Assert.Equal(containerItem, item.ParentContainer);
             Assert.Equal(10.Kilograms(), containerItem.ContainedMass);
             Assert.Equal(6.CubicMeters(), containerItem.ContainedVolume);
         }
@@ -293,7 +293,7 @@ namespace Fargo.Domain.Tests.EntitiesTests.ItemTests
 
             containerItem.Remove(item);
 
-            Assert.Equal(item.Container, containerItem.Container);
+            Assert.Equal(item.ParentContainer, containerItem.ParentContainer);
             Assert.Equal(Mass.Zero, containerItem.ContainedMass);
             Assert.Equal(Volume.Zero, containerItem.ContainedVolume);
         }
