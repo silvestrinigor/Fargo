@@ -3,22 +3,13 @@ using Fargo.Domain.Repositories;
 
 namespace Fargo.Domain.Services
 {
-    public class ArticleService(IArticleRepository articleRepository)
+    public class ArticleService(IArticleRepository articleRepository) : IArticleService
     {
         private readonly IArticleRepository articleRepository = articleRepository;
 
-        public Article CreateArticle(Article article)
+        internal Article CreateNewEntity(Article entity)
         {
-            articleRepository.Add(article);
-            OnArticleCreated();
-            return article;
-        }
-
-        public event EventHandler? ArticleCreated;
-
-        private void OnArticleCreated()
-        {
-            ArticleCreated?.Invoke(this, EventArgs.Empty);
+            throw new NotImplementedException();
         }
     }
 }

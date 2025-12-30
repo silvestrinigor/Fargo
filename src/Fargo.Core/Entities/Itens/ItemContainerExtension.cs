@@ -8,9 +8,12 @@ namespace Fargo.Domain.Entities.Itens
     {
         public ItemContainerExtension(Item item)
         {
-            MassAvailableCapacity = item.Article.ContainerExtension?.MassCapacity;
-            VolumeAvailableCapacity = item.Article.ContainerExtension?.VolumeCapacity;
-            ItensQuantityAvailableCapacity = item.Article.ContainerExtension?.ItensQuantityCapacity;
+            if (item.Article.ContainerInformation is null)
+                throw new ItemIsNotContainerException();
+
+            MassAvailableCapacity = item.Article.ContainerInformation?.MassCapacity;
+            VolumeAvailableCapacity = item.Article.ContainerInformation?.VolumeCapacity;
+            ItensQuantityAvailableCapacity = item.Article.ContainerInformation?.ItensQuantityCapacity;
             Item = item;
         }
 
@@ -30,6 +33,14 @@ namespace Fargo.Domain.Entities.Itens
         {
             get; 
             private set; 
+        }
+
+        public Temperature? Temperature
+        { 
+            get => field is not null
+                ? field
+                : Item.Article.ContainerInformation?.DefaultTemperature;
+            init;
         }
 
         public bool IsLocked
@@ -57,28 +68,12 @@ namespace Fargo.Domain.Entities.Itens
         {
             IsLocked = true;
             LockReason = reason;
-            OnLocked();
-        }
-
-        public event EventHandler? Locked;
-
-        protected virtual void OnLocked()
-        {
-            Locked?.Invoke(this, EventArgs.Empty);
         }
 
         public void Unlock()
         { 
             IsLocked = false; 
             LockReason = null;
-            OnUnlocked();
-        }
-
-        public event EventHandler? Unlocked;
-
-        protected virtual void OnUnlocked()
-        {
-            Unlocked?.Invoke(this, EventArgs.Empty);
         }
 
         public void Insert(Item item)
@@ -109,15 +104,6 @@ namespace Fargo.Domain.Entities.Itens
             MassAvailableCapacity -= item.Article.Mass;
             VolumeAvailableCapacity -= item.Article.Volume;
             ItensQuantityAvailableCapacity--;
-
-            OnItemInserted();
-        }
-
-        public event EventHandler? ItemInserted;
-
-        protected virtual void OnItemInserted()
-        {
-            ItemInserted?.Invoke(this, EventArgs.Empty);
         }
 
         public void Remove(Item item)
@@ -133,15 +119,6 @@ namespace Fargo.Domain.Entities.Itens
             MassAvailableCapacity += item.Article.Mass;
             VolumeAvailableCapacity += item.Article.Volume;
             ItensQuantityAvailableCapacity++;
-
-            OnItemRemoved();
-        }
-
-        public event EventHandler? ItemRemoved;
-
-        protected virtual void OnItemRemoved()
-        {
-            ItemRemoved?.Invoke(this, EventArgs.Empty);
         }
     }
 }

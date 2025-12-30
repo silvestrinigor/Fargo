@@ -3,33 +3,39 @@ using UnitsNet;
 
 namespace Fargo.Domain.Entities.Articles
 {
-    public class ArticleContainerExtension
+    public class ArticleContainerInformation
     {
         public Mass? MassCapacity
         {
             get;
-            init => field =
+            set => field =
                 value is not null && value < Mass.Zero
-                ? throw new ArticleNegativeCapacityException()
+                ? throw new ArticleNegativePropertyException()
                 : value;
         }
 
         public Volume? VolumeCapacity
         {
             get;
-            init => field =
+            set => field =
                 value is not null && value < Volume.Zero
-                ? throw new ArticleNegativeCapacityException()
+                ? throw new ArticleNegativePropertyException()
                 : value;
         }
 
         public int? ItensQuantityCapacity
         { 
             get;
-            init => field =
+            set => field =
                 value is not null && value < 0
-                ? throw new ArticleNegativeCapacityException()
+                ? throw new ArticleNegativePropertyException()
                 : value;
+        }
+
+        public Temperature? DefaultTemperature
+        {
+            get;
+            set;
         }
     }
 }

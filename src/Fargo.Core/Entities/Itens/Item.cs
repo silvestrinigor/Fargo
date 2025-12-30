@@ -1,11 +1,13 @@
 ﻿using Fargo.Domain.Entities.Articles;
 using Fargo.Domain.Exceptions.Entities.Itens;
+using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Domain.Entities.Itens
 {
-    public class Item : OptionalNamedEntity
+    public class Item : Entity
     {
-        public Item(Article article)
+        internal Item(Article article, Name? name = null, Description? description = null) : base(name, description)
         {
             Article = article;
 
@@ -15,11 +17,29 @@ namespace Fargo.Domain.Entities.Itens
                 : null;
         }
 
+        public Item(IItemService service, Article article, Name? name = null, Description? description = null) : this(article, name, description)
+        {
+            service.CreateNewEntity(this);
+        }
+
         public Article Article
         { 
             get;
             private init;
         }
+
+        public DateTime? ManufacturedAt
+        {
+            get;
+            init => field 
+                = value > DateTime.Now
+                ? throw new InvalidOperationException()
+                : value;
+
+        } = DateTime.UtcNow;
+
+        public DateTime? ExpirationDate
+            => ManufacturedAt + Article.ShelfLife;
 
         public ItemContainerExtension? ContainerExtension
         {
@@ -43,12 +63,8 @@ namespace Fargo.Domain.Entities.Itens
                 : field is not null && value is not null && value != field.ParentContainer && value.ParentContainer != field.ParentContainer
                 ? throw new ContainerOutOfItemRangeException()
                 : value;
-
-                InsertedInContainerAt = DateTime.UtcNow;
             }
         }
-
-        public DateTime? InsertedInContainerAt { get; private set; }
 
         public bool IsInContainer => ParentContainer is not null;
     }

@@ -1,10 +1,31 @@
 ﻿using Fargo.Domain.Exceptions.Entities.Articles;
+using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects.Entities;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities.Articles
 {
-    public class Article : OptionalNamedEntity
+    public class Article : Entity
     {
+        internal Article(Name? name = null, Description? description = null) : base(name, description) { }
+
+        public Article(IArticleService service, Name? name = null, Description? description = null) : this(name, description)
+        {
+            service.CreateNewEntity(this);
+        }
+
+        public TimeSpan? ShelfLife
+        { 
+            get;
+            set
+            {
+                field 
+                    = value is not null && value < TimeSpan.Zero
+                    ? throw new ArticleNegativePropertyException()
+                    : value;
+            }
+        }
+
         public Length? Length
         {
             get => field is not null
@@ -13,10 +34,13 @@ namespace Fargo.Domain.Entities.Articles
                 ? Volume / Width / Height
                 : null;
 
-            init => field
+            set
+            {
+                field
                 = field is null && IsLengthCalculableFromWidthHeightVolume
                 ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
+            }
         }
 
         private bool IsLengthCalculableFromWidthHeightVolume
@@ -30,7 +54,7 @@ namespace Fargo.Domain.Entities.Articles
                 ? Volume / Length / Height
                 : null;
 
-            init => field
+            set => field
                 = field is null && IsWidthCalculableFromLengthHeightVolume
                 ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
@@ -47,7 +71,7 @@ namespace Fargo.Domain.Entities.Articles
                 ? Volume / Length / Width
                 : null;
 
-            init => field
+            set => field
                 = field is null && IsHeightCalculableFromLengthWidthVolume
                 ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
@@ -64,7 +88,7 @@ namespace Fargo.Domain.Entities.Articles
                 ? Density * Volume
                 : null;
 
-            init => field
+            set => field
                 = field is null && IsMassCalculableFromVolumeDensity
                 ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
@@ -83,7 +107,7 @@ namespace Fargo.Domain.Entities.Articles
                 ? Mass / Density
                 : null;
 
-            init => field
+            set => field
                 = field is null && IsVolumeCalculableFromLengthWidthHeight || IsVolumeCalculableFromMassDensity
                 ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
@@ -103,7 +127,7 @@ namespace Fargo.Domain.Entities.Articles
                 ? Mass / Volume
                 : null;
 
-            init => field
+            set => field
                 = field is null && IsDensityCalculableFromMassVolume
                 ? throw new ArticleCalculatedRedundantValueSetException()
                 : value;
@@ -112,12 +136,8 @@ namespace Fargo.Domain.Entities.Articles
         private bool IsDensityCalculableFromMassVolume
             => Volume is not null && Mass is not null;
 
-        public ArticleContainerExtension? ContainerExtension
-        {
-            get;
-            init;
-        }
+        public ArticleContainerInformation? ContainerInformation { get; init; }
 
-        public bool IsContainer => ContainerExtension is not null;
+        public bool IsContainer => ContainerInformation is not null;
     }
 }
