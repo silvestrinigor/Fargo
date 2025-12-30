@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.ValueObjects.Entities;
+﻿using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
 {

@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.ValueObjects.Entities;
+﻿using Fargo.Domain.ValueObjects;
 using UnitsNet;
 
 namespace Fargo.Application.Solicitations.Commands.ArticleCommands
@@ -12,6 +12,14 @@ namespace Fargo.Application.Solicitations.Commands.ArticleCommands
         Length? Height,
         Mass? Mass,
         Volume? Volume,
-        Density? Density
+        Density? Density,
+        ArticleCreateCommandContainerInformation ContainerInformation
+        );
+
+    public sealed record ArticleCreateCommandContainerInformation(
+        Mass? MassCapacity,
+        Volume? VolumeCapacity,
+        int? ItensQuantityCapacity,
+        Temperature? DefaultTemperature
         );
 }

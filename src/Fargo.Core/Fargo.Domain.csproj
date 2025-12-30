@@ -11,8 +11,4 @@
     <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Exceptions\ValueObjects\" />
-  </ItemGroup>
-
 </Project>

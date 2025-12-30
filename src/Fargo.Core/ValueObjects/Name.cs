@@ -1,4 +1,4 @@
-﻿namespace Fargo.Domain.ValueObjects.Entities
+﻿namespace Fargo.Domain.ValueObjects
 {
     public readonly struct Name(string value) : IEquatable<Name>
     {

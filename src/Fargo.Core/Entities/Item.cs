@@ -1,5 +1,4 @@
-﻿using Fargo.Domain.Exceptions.Entities.Itens;
-using Fargo.Domain.ValueObjects.Entities;
+﻿using Fargo.Domain.ValueObjects;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities
@@ -25,11 +24,15 @@ namespace Fargo.Domain.Entities
         public DateTime? ManufacturedAt
         {
             get;
-            init => field 
-                = value > DateTime.Now
-                ? throw new InvalidOperationException()
-                : value;
+            init
+            {
+                if (value > DateTime.Now)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(ManufacturedAt), "Cannot be in future.");
+                }
 
+                field = value;
+            }
         } = DateTime.UtcNow;
 
         public DateTime? ExpirationDate
@@ -38,68 +41,157 @@ namespace Fargo.Domain.Entities
         public ItemContainerExtension? ContainerExtension
         {
             get;
-            private init => field
-                = value is not null && value.Item != this
-                ? throw new InvalidOperationException("Container extension item should be this one.")
-                : value;
+            private init
+            {
+                if (value is not null && !Article.IsContainer)
+                {
+                    throw new InvalidOperationException("Container extension should be null when item is not a container.");
+                }
+
+                if (value is not null && value.Item != this)
+                {
+                    throw new ArgumentException("Container extension item should refer to this.", nameof(ContainerExtension));
+                }
+
+                field = value;
+            }
         }
 
         public Item? ParentContainer
         {
             get;
-            internal set
+            private set
             {
-                field
-                = value == this
-                ? throw new ItemParentEqualsItemException()
-                : !value?.Article.IsContainer ?? false
-                ? throw new ItemIsNotContainerException()
-                : field is not null && value is not null && value != field.ParentContainer && value.ParentContainer != field.ParentContainer
-                ? throw new ContainerOutOfItemRangeException()
-                : value;
+                if (value == this)
+                {
+                    throw new ArgumentException("Parent container cannot contains itself.", nameof(ParentContainer));
+                }
+
+                if (!value?.Article.IsContainer ?? false)
+                {
+                    throw new ArgumentException("Parent container must be a container.", nameof(ParentContainer));
+                }
+
+                if (value is not null && value.ParentContainer != this.ParentContainer && value != this.ParentContainer?.ParentContainer)
+                {
+                    throw new ArgumentException(
+                        "The new parent container must be inside the current parent container or be the current grandparent container.", 
+                        nameof(ParentContainer));
+                }
+
+                field = value;
             }
         }
 
         public bool IsInContainer => ParentContainer is not null;
+
+        internal void DefineParentContainer(Item? container)
+        {
+            if (container is not null &&
+                container.ContainerExtension?.Item is null &&
+                (this.Article.MinimumContainerTemperature is not null || this.Article.MaximumContainerTemperature is not null))
+            {
+                throw new ArgumentException(
+                    "Parent container must provide temperature data when this item has minimum or maximum container temperature requirements.",
+                    nameof(container));
+            }
+
+            if (this.Article.MinimumContainerTemperature > container?.ContainerExtension?.Temperature)
+            {
+                throw new InvalidOperationException("Cannot set container parrent when the container temperature is bellow the item minimum container temperature requirements.");
+            }
+
+            if (this.Article.MaximumContainerTemperature < container?.ContainerExtension?.Temperature)
+            {
+                throw new InvalidOperationException("Cannot set container parrent when the container temperature is bigger than the item maximum container temperature requirements.");
+            }
+
+            ParentContainer = container;
+        }
+
+        public void InsertIntoContainer(Item? container)
+        {
+
+        }
+
+        public void RemoveFromContainer()
+        {
+
+        }
     }
 
     public class ItemContainerExtension
     {
         public ItemContainerExtension(Item item)
         {
-            if (item.Article.ContainerInformation is null)
-                throw new ItemIsNotContainerException();
-
-            MassAvailableCapacity = item.Article.ContainerInformation?.MassCapacity;
-            VolumeAvailableCapacity = item.Article.ContainerInformation?.VolumeCapacity;
-            ItensQuantityAvailableCapacity = item.Article.ContainerInformation?.ItensQuantityCapacity;
             Item = item;
         }
 
-        public Mass? MassAvailableCapacity
+        public IReadOnlyCollection<Item> ContainedItens => containedItens;
+
+        private readonly HashSet<Item> containedItens = [];
+
+        public Mass? ContainedMass
         {
-            get;
-            private set;
+            get
+            {
+                Mass? containedMass = Mass.Zero;
+
+                foreach(var item in ContainedItens)
+                {
+                    if (item.Article.Mass is null)
+                    {
+                        return null;
+                    }
+
+                    containedMass += item.Article.Mass;
+                }
+
+                return containedMass;
+            }
+        }
+
+        public Mass? MassAvailableCapacity
+            => Item.Article.ContainerInformation?.MassCapacity - ContainedMass;
+
+        public Volume? ContainedVolume
+        {
+            get
+            {
+                Volume? containedVolume = Volume.Zero;
+
+                foreach (var item in ContainedItens)
+                {
+                    if (item.Article.Volume is null)
+                    {
+                        return null;
+                    }
+
+                    containedVolume += item.Article.Volume;
+                }
+
+                return containedVolume;
+            }
         }
 
         public Volume? VolumeAvailableCapacity
-        {
-            get;
-            private set;
-        }
+            => Item.Article.ContainerInformation?.VolumeCapacity - ContainedVolume;
 
         public int? ItensQuantityAvailableCapacity
-        {
-            get;
-            private set;
-        }
+            => Item.Article.ContainerInformation?.ItensQuantityCapacity - ContainedItens.Count;
 
         public Temperature? Temperature
         {
-            get => field is not null
-                ? field
-                : Item.Article.ContainerInformation?.DefaultTemperature;
-            init;
+            get
+            {
+                if (field is not null)
+                {
+                    return field;
+                }
+
+                return Item.Article.ContainerInformation?.DefaultTemperature;
+            }
+            set;
         }
 
         public bool IsLocked
@@ -117,10 +209,15 @@ namespace Fargo.Domain.Entities
         public Item Item
         {
             get;
-            private init => field
-                = !value.Article.IsContainer
-                ? throw new ItemIsNotContainerException()
-                : value;
+            private init
+            {
+                if (!value.Article.IsContainer)
+                {
+                    throw new InvalidOperationException("Cannot create item container extension when the item is not a container.");
+                }
+
+                field = value;
+            }
         }
 
         public void Lock(Description? reason = null)
@@ -135,50 +232,77 @@ namespace Fargo.Domain.Entities
             LockReason = null;
         }
 
-        public void Insert(Item item)
+        public void Add(Item item)
         {
             if (item.ParentContainer == this.Item)
-                throw new ItemAlreadyInsideContainerException();
+            {
+                return;
+            }
 
             if (IsLocked)
-                throw new ContainerLockedException();
+            {
+                throw new InvalidOperationException("Cannot insert item when container is locked.");
+            }
 
             if (VolumeAvailableCapacity is not null && item.Article.Volume is null)
-                throw new LackOfInformationException();
+            {
+                throw new ArgumentException("Cannot insert item with no volume information inside a contianer with volume capacity.", nameof(item));
+            }            
 
             if (MassAvailableCapacity is not null && item.Article.Mass is null)
-                throw new LackOfInformationException();
+            {
+                throw new ArgumentException("Cannot insert item with no mass information inside a container with mass capacity.", nameof(item));
+            }
 
             if (VolumeAvailableCapacity < item.Article.Volume)
-                throw new InsufficientAvailableCapacityException();
+            {
+                throw new InvalidOperationException("Cannot insert this item when the available volume capacity is lower than the item volume.");
+            }
 
             if (MassAvailableCapacity < item.Article.Mass)
-                throw new InsufficientAvailableCapacityException();
+            {
+                throw new InvalidOperationException("Cannot insert this item when the available mass capacity is lower than the item mass.");
+            }
 
             if (ItensQuantityAvailableCapacity < 1)
-                throw new InsufficientAvailableCapacityException();
+            {
+                throw new InvalidOperationException("Cannot insert this item when the available itens quantity capacity is lower than 0.");
+            }
 
-            item.ParentContainer = this.Item;
+            item.DefineParentContainer(this.Item);
 
-            MassAvailableCapacity -= item.Article.Mass;
-            VolumeAvailableCapacity -= item.Article.Volume;
-            ItensQuantityAvailableCapacity--;
+            containedItens.Add(item);
+        }
+
+        public void InsertForced(Item item)
+        {
+            item.DefineParentContainerForced(this.Item);
+            
+            containedItens.Add(item);
         }
 
         public void Remove(Item item)
         {
             if (item.ParentContainer != this.Item)
-                throw new ContainerOutOfItemRangeException();
+            {
+                throw new ArgumentException("Item parent container is not this.", nameof(item));
+            }
 
             if (IsLocked)
-                throw new ContainerLockedException();
+            {
+                throw new InvalidOperationException("Cannot remove item when container is locked.");
+            }
+            
+            item.DefineParentContainer(this.Item.ParentContainer);
+            
+            containedItens.Remove(item);
+        }
 
-            item.ParentContainer = this.Item.ParentContainer;
+        public void RemoveForced(Item item)
+        {
+            item.DefineParentContainerForced(this.Item.ParentContainer);
 
-            MassAvailableCapacity += item.Article.Mass;
-            VolumeAvailableCapacity += item.Article.Volume;
-            ItensQuantityAvailableCapacity++;
+            containedItens.Remove(item);
         }
     }
-
 }
