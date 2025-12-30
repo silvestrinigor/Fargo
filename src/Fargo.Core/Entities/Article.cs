@@ -1,18 +1,12 @@
 ﻿using Fargo.Domain.Exceptions.Entities.Articles;
-using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects.Entities;
 using UnitsNet;
 
-namespace Fargo.Domain.Entities.Articles
+namespace Fargo.Domain.Entities
 {
     public class Article : Entity
     {
-        internal Article(Name? name = null, Description? description = null) : base(name, description) { }
-
-        public Article(IArticleService service, Name? name = null, Description? description = null) : this(name, description)
-        {
-            service.CreateNewEntity(this);
-        }
+        public Article(Name? name = null, Description? description = null) : base(name, description) { }
 
         public TimeSpan? ShelfLife
         { 
@@ -121,7 +115,7 @@ namespace Fargo.Domain.Entities.Articles
 
         public Density? Density
         {
-            get => field is not null 
+            get => field is not null
                 ? field 
                 : IsDensityCalculableFromMassVolume
                 ? Mass / Volume
@@ -140,4 +134,41 @@ namespace Fargo.Domain.Entities.Articles
 
         public bool IsContainer => ContainerInformation is not null;
     }
+
+    public class ArticleContainerInformation
+    {
+        public Mass? MassCapacity
+        {
+            get;
+            set => field =
+                value is not null && value < Mass.Zero
+                ? throw new ArticleNegativePropertyException()
+                : value;
+        }
+
+        public Volume? VolumeCapacity
+        {
+            get;
+            set => field =
+                value is not null && value < Volume.Zero
+                ? throw new ArticleNegativePropertyException()
+                : value;
+        }
+
+        public int? ItensQuantityCapacity
+        {
+            get;
+            set => field =
+                value is not null && value < 0
+                ? throw new ArticleNegativePropertyException()
+                : value;
+        }
+
+        public Temperature? DefaultTemperature
+        {
+            get;
+            set;
+        }
+    }
+
 }

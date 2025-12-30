@@ -1,13 +1,12 @@
-﻿using Fargo.Domain.Services;
-using Fargo.Domain.ValueObjects.Entities;
+﻿using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Domain.Entities
 {
     public abstract class Entity : IEquatable<Entity>
     {
-        internal Entity() { }
+        public Entity() { }
 
-        internal Entity(Name? name, Description? description)
+        public Entity(Name? name, Description? description)
         {
             NameDescriptionInformation = new EntityNameDescriptionInformation
             {
@@ -59,5 +58,20 @@ namespace Fargo.Domain.Entities
 
         public bool HasNameDescriptionInformation
             => NameDescriptionInformation is not null;
+    }
+
+    public class EntityNameDescriptionInformation
+    {
+        public Name? Name
+        {
+            get;
+            set;
+        }
+
+        public Description? Description
+        {
+            get;
+            set;
+        }
     }
 }

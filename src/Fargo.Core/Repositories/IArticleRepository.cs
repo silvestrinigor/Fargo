@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities.Articles;
+﻿using Fargo.Domain.Entities;
 
 namespace Fargo.Domain.Repositories
 {

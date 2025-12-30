@@ -1,6 +1,7 @@
-﻿namespace Fargo.Application.Persistence;
-
-public interface IUnitOfWork
+﻿namespace Fargo.Application.Persistence
 {
-    Task<int> SaveChangesAsync();
+    public interface IUnitOfWork
+    {
+        Task<int> SaveChangesAsync();
+    }
 }

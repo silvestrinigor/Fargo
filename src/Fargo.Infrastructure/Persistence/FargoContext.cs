@@ -1,5 +1,4 @@
-﻿using Fargo.Domain.Entities.Articles;
-using Fargo.Domain.Entities.Itens;
+﻿using Fargo.Domain.Entities;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 

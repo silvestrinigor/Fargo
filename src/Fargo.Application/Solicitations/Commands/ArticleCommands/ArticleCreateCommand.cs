@@ -1,7 +1,17 @@
-﻿namespace Fargo.Application.Solicitations.Commands.ArticleCommands
+﻿using Fargo.Domain.ValueObjects.Entities;
+using UnitsNet;
+
+namespace Fargo.Application.Solicitations.Commands.ArticleCommands
 {
     public sealed record ArticleCreateCommand(
-        string? Name, 
-        string? Description
+        Name? Name,
+        Description? Description,
+        TimeSpan? ShelfLife,
+        Length? Length,
+        Length? Width,
+        Length? Height,
+        Mass? Mass,
+        Volume? Volume,
+        Density? Density
         );
 }
