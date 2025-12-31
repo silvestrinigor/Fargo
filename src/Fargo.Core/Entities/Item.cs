@@ -1,5 +1,4 @@
 ﻿using Fargo.Domain.ValueObjects;
-using System.ComponentModel;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities
@@ -21,6 +20,8 @@ namespace Fargo.Domain.Entities
             get;
             private init;
         }
+
+        public bool IsContainer => Article.IsContainer;
 
         public DateTime? ManufacturedAt
         {
@@ -44,12 +45,17 @@ namespace Fargo.Domain.Entities
             get;
             private init
             {
-                if (value is not null && !Article.IsContainer)
+                if (value is not null && !IsContainer)
                 {
                     throw new InvalidOperationException("Container extension should be null when item is not a container.");
                 }
 
-                if (value is not null && value.Item != this)
+                if (value is null && IsContainer)
+                {
+                    throw new InvalidOperationException("Container extension should not be null when item is a container.");
+                }
+
+                if (value is not null && value.ItemReference != this)
                 {
                     throw new ArgumentException("Container extension item should refer to this.", nameof(ContainerExtension));
                 }
@@ -68,7 +74,7 @@ namespace Fargo.Domain.Entities
                     throw new ArgumentException("Parent container cannot be equals the child.", nameof(ParentContainer));
                 }
 
-                if (!value?.Article.IsContainer ?? false)
+                if (!value?.IsContainer ?? false)
                 {
                     throw new ArgumentException("Parent container must be a container.", nameof(ParentContainer));
                 }
@@ -86,10 +92,14 @@ namespace Fargo.Domain.Entities
 
         public bool IsInContainer => ParentContainer is not null;
 
-        public void InsertIntoContainer(Item? container)
+        public void InsertIntoContainer(Item container)
         {
-            if (container is not null &&
-                container.ContainerExtension?.Item is null &&
+            if (container == ParentContainer)
+            {
+                return;
+            }
+
+            if (container.ContainerExtension?.Temperature is null &&
                 (this.Article.MinimumContainerTemperature is not null || this.Article.MaximumContainerTemperature is not null))
             {
                 throw new ArgumentException(
@@ -107,9 +117,11 @@ namespace Fargo.Domain.Entities
                 throw new InvalidOperationException("Cannot set container parrent when the container temperature is bigger than the item maximum container temperature requirements.");
             }
 
+            container?.ContainerExtension?.ValidateAdd(this);
+
             ParentContainer = container;
 
-            container?.ContainerExtension?.Add(this);
+            container?.ContainerExtension?.containedItens.Add(this);
         }
 
         public void RemoveFromContainer()
@@ -127,9 +139,25 @@ namespace Fargo.Domain.Entities
 
     public class ItemContainerExtension
     {
-        public ItemContainerExtension(Item item)
+        internal ItemContainerExtension(Item item)
         {
-            Item = item;
+            if (!item.Article.IsContainer)
+            {
+                throw new InvalidOperationException("Cannot create item container extension when the item is not a container.");
+            }
+
+            if (item.Article.ContainerInformation is null)
+            {
+                throw new InvalidOperationException("Item container extension cannot be created when the item article container information is null.");
+            }
+
+            ItemReference = item;
+        }
+
+        internal Item ItemReference
+        {
+            get;
+            private init;
         }
 
         public IReadOnlyCollection<Item> ContainedItens => containedItens;
@@ -157,7 +185,7 @@ namespace Fargo.Domain.Entities
         }
 
         public Mass? MassAvailableCapacity
-            => Item.Article.ContainerInformation?.MassCapacity - ContainedMass;
+            => ItemReference.Article.ContainerInformation?.MassCapacity - ContainedMass;
 
         public Volume? ContainedVolume
         {
@@ -180,24 +208,35 @@ namespace Fargo.Domain.Entities
         }
 
         public Volume? VolumeAvailableCapacity
-            => Item.Article.ContainerInformation?.VolumeCapacity - ContainedVolume;
+            => ItemReference.Article.ContainerInformation?.VolumeCapacity - ContainedVolume;
 
         public int? ItensQuantityAvailableCapacity
-            => Item.Article.ContainerInformation?.ItensQuantityCapacity - ContainedItens.Count;
+            => ItemReference.Article.ContainerInformation?.ItensQuantityCapacity - ContainedItens.Count;
 
         public Temperature? Temperature
         {
             get
             {
-                if (field is not null)
+                if (TemperatureDefault is false)
                 {
                     return field;
                 }
 
-                return Item.Article.ContainerInformation?.DefaultTemperature;
+                return ItemReference.Article.ContainerInformation?.DefaultTemperature;
             }
-            set;
+            set
+            {
+                field = value;
+
+                TemperatureDefault = false;
+            }
         }
+
+        public bool TemperatureDefault
+        { 
+            get;
+            set;
+        } = true;
 
         public bool IsLocked
         {
@@ -209,20 +248,6 @@ namespace Fargo.Domain.Entities
         {
             get;
             private set;
-        }
-
-        public Item Item
-        {
-            get;
-            private init
-            {
-                if (!value.Article.IsContainer)
-                {
-                    throw new InvalidOperationException("Cannot create item container extension when the item is not a container.");
-                }
-
-                field = value;
-            }
         }
 
         public void Lock(Description? reason = null)
@@ -237,9 +262,9 @@ namespace Fargo.Domain.Entities
             LockReason = null;
         }
 
-        public void Add(Item item)
+        public void ValidateAdd(Item item)
         {
-            if (item.ParentContainer == this.Item)
+            if (item.ParentContainer == this.ItemReference)
             {
                 return;
             }
@@ -275,9 +300,9 @@ namespace Fargo.Domain.Entities
             }
         }
 
-        public void Remove(Item item)
+        public void ValidateRemove(Item item)
         {
-            if (item.ParentContainer != this.Item)
+            if (item.ParentContainer != this.ItemReference)
             {
                 throw new ArgumentException("Item parent container is not this.", nameof(item));
             }
@@ -286,7 +311,6 @@ namespace Fargo.Domain.Entities
             {
                 throw new InvalidOperationException("Cannot remove item when container is locked.");
             }
-            containedItens.Remove(item);
         }
     }
 }
