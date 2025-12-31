@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.ValueObjects;
+using System.ComponentModel;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities
@@ -64,7 +65,7 @@ namespace Fargo.Domain.Entities
             {
                 if (value == this)
                 {
-                    throw new ArgumentException("Parent container cannot contains itself.", nameof(ParentContainer));
+                    throw new ArgumentException("Parent container cannot be equals the child.", nameof(ParentContainer));
                 }
 
                 if (!value?.Article.IsContainer ?? false)
@@ -85,7 +86,7 @@ namespace Fargo.Domain.Entities
 
         public bool IsInContainer => ParentContainer is not null;
 
-        internal void DefineParentContainer(Item? container)
+        public void InsertIntoContainer(Item? container)
         {
             if (container is not null &&
                 container.ContainerExtension?.Item is null &&
@@ -107,16 +108,20 @@ namespace Fargo.Domain.Entities
             }
 
             ParentContainer = container;
-        }
 
-        public void InsertIntoContainer(Item? container)
-        {
-
+            container?.ContainerExtension?.Add(this);
         }
 
         public void RemoveFromContainer()
         {
+            if (ParentContainer is null)
+            {
+                return;
+            }
 
+            ParentContainer.ContainerExtension?.containedItens.Remove(this);
+
+            ParentContainer = ParentContainer?.ParentContainer;
         }
     }
 
@@ -129,7 +134,7 @@ namespace Fargo.Domain.Entities
 
         public IReadOnlyCollection<Item> ContainedItens => containedItens;
 
-        private readonly HashSet<Item> containedItens = [];
+        internal readonly HashSet<Item> containedItens = [];
 
         public Mass? ContainedMass
         {
@@ -268,17 +273,6 @@ namespace Fargo.Domain.Entities
             {
                 throw new InvalidOperationException("Cannot insert this item when the available itens quantity capacity is lower than 0.");
             }
-
-            item.DefineParentContainer(this.Item);
-
-            containedItens.Add(item);
-        }
-
-        public void InsertForced(Item item)
-        {
-            item.DefineParentContainerForced(this.Item);
-            
-            containedItens.Add(item);
         }
 
         public void Remove(Item item)
@@ -292,16 +286,6 @@ namespace Fargo.Domain.Entities
             {
                 throw new InvalidOperationException("Cannot remove item when container is locked.");
             }
-            
-            item.DefineParentContainer(this.Item.ParentContainer);
-            
-            containedItens.Remove(item);
-        }
-
-        public void RemoveForced(Item item)
-        {
-            item.DefineParentContainerForced(this.Item.ParentContainer);
-
             containedItens.Remove(item);
         }
     }
