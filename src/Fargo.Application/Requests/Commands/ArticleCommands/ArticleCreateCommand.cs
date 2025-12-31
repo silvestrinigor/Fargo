@@ -13,13 +13,11 @@ namespace Fargo.Application.Solicitations.Commands.ArticleCommands
         Mass? Mass,
         Volume? Volume,
         Density? Density,
-        ArticleCreateCommandContainerInformation ContainerInformation
-        );
+        ArticleCreateCommandContainerInformation ContainerInformation);
 
     public sealed record ArticleCreateCommandContainerInformation(
         Mass? MassCapacity,
         Volume? VolumeCapacity,
         int? ItensQuantityCapacity,
-        Temperature? DefaultTemperature
-        );
+        Temperature? DefaultTemperature);
 }

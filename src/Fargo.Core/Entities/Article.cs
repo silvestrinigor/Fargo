@@ -3,16 +3,35 @@ using UnitsNet;
 
 namespace Fargo.Domain.Entities
 {
+    /// <summary>
+    /// Represents a physical article or item with associated descriptive, dimensional, and physical properties.
+    /// </summary>
+    /// <remarks>
+    /// The Article class provides properties for common physical characteristics such as dimensions,
+    /// mass, volume, density, and shelf life, as well as container information. Some properties may be automatically
+    /// calculated from others if not explicitly set. For example, if length, width, and height are provided, the volume
+    /// can be derived automatically. Attempting to set a property that is currently calculable from other properties
+    /// will result in an exception. This class is intended for use in scenarios where detailed tracking of an item's
+    /// physical attributes is required, such as inventory or logistics systems.
+    /// </remarks>
     public class Article : Entity
     {
+        /// <summary>
+        /// Initializes a new instance of the Article class with the specified name and description.
+        /// </summary>
+        /// <param name="name">The name to assign to the entity. Can be null if the entity does not have a name.</param>
+        /// <param name="description">The description to assign to the entity. Can be null if the entity does not have a description.</param>
         public Article(Name? name = null, Description? description = null) : base(name, description) { }
 
+        /// <summary>
+        /// Gets or sets the maximum duration for which the item remains usable or safe to use.
+        /// </summary>
         public TimeSpan? ShelfLife
         {
             get;
             set
             {
-                if (value is not null && value < TimeSpan.Zero)
+                if (value < TimeSpan.Zero)
                 {
                     throw new ArgumentOutOfRangeException(nameof(ShelfLife), "Cannot be negative.");
                 }
@@ -21,6 +40,14 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets or sets the length of the object along the X-axis.
+        /// </summary>
+        /// <remarks>
+        /// If the length can be calculated from the width, height, and volume, this property
+        /// returns the computed value and cannot be set directly. Otherwise, the value is stored and retrieved as
+        /// specified.
+        /// </remarks>
         public Length? LengthX
         {
             get
@@ -40,7 +67,7 @@ namespace Fargo.Domain.Entities
 
             set
             {
-                if (field is not null && IsLengthCalculableFromWidthHeightVolume)
+                if (field is null && IsLengthCalculableFromWidthHeightVolume)
                 {
                     throw new InvalidOperationException("Cannot set length x when the value is calculable from other properties.");
                 }
@@ -52,6 +79,14 @@ namespace Fargo.Domain.Entities
         private bool IsLengthCalculableFromWidthHeightVolume
             => LengthY is not null && LengthZ is not null && Volume is not null;
 
+        /// <summary>
+        /// Gets or sets the length of the object along the Y-axis.
+        /// </summary>
+        /// <remarks>
+        /// If the length along the Y-axis can be calculated from the volume and the other
+        /// dimensions, this property returns the computed value. Attempting to set this property when it is calculable
+        /// from other properties will result in an exception.
+        /// </remarks>
         public Length? LengthY
         {
             get
@@ -83,6 +118,14 @@ namespace Fargo.Domain.Entities
         private bool IsWidthCalculableFromLengthHeightVolume
             => LengthX is not null && LengthZ is not null && Volume is not null;
 
+        /// <summary>
+        /// Gets or sets the length of the object along the Z-axis, if specified or calculable.
+        /// </summary>
+        /// <remarks>
+        /// If the value is not explicitly set and the height can be calculated from the volume
+        /// and the X and Y lengths, this property returns the computed value. Attempting to set this property when the
+        /// value is calculable from other properties will result in an exception.
+        /// </remarks>
         public Length? LengthZ 
         {
             get
@@ -114,6 +157,15 @@ namespace Fargo.Domain.Entities
         private bool IsHeightCalculableFromLengthWidthVolume
             => LengthX is not null && LengthY is not null && Volume is not null;
 
+        /// <summary>
+        /// Gets or sets the volume of the object, if it is not calculable from other properties.
+        /// </summary>
+        /// <remarks>
+        /// If the volume can be determined from the object's dimensions (length, width, and
+        /// height) or from its mass and density, this property returns the calculated value and cannot be set directly.
+        /// Attempting to set the volume when it is calculable from other properties will result in an
+        /// exception.
+        /// </remarks>
         public Volume? Volume
         {
             get
@@ -153,6 +205,14 @@ namespace Fargo.Domain.Entities
         private bool IsVolumeCalculableFromMassDensity
             => Mass is not null && Density is not null;
 
+        /// <summary>
+        /// Gets or sets the mass of the object, if specified or calculable from other properties.
+        /// </summary>
+        /// <remarks>
+        /// If the mass is not explicitly set and both density and volume are available, the mass
+        /// is calculated as the product of density and volume. Attempting to set the mass when it is calculable from
+        /// density and volume will result in an exception.
+        /// </remarks>
         public Mass? Mass 
         {
             get
@@ -184,6 +244,12 @@ namespace Fargo.Domain.Entities
         private bool IsMassCalculableFromVolumeDensity
             => Volume is not null && Density is not null;
 
+        /// <summary>
+        /// Gets or sets the density value for the object, if explicitly specified.
+        /// </summary>
+        /// <remarks>If the density is not explicitly set and can be calculated from mass and volume, this
+        /// property returns the computed value. Attempting to set the density when it is calculable from other
+        /// properties will result in an exception.</remarks>
         public Density? Density
         {
             get
@@ -215,6 +281,12 @@ namespace Fargo.Domain.Entities
         private bool IsDensityCalculableFromMassVolume
             => Volume is not null && Mass is not null;
 
+        /// <summary>
+        /// Gets or sets the minimum allowable temperature for the container.
+        /// </summary>
+        /// <remarks>The value must not exceed the value of <see cref="MaximumContainerTemperature"/>.
+        /// Setting this property to a value greater than <see cref="MaximumContainerTemperature"/> will throw an
+        /// exception.</remarks>
         public Temperature? MinimumContainerTemperature 
         { 
             get;
@@ -229,6 +301,12 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum allowable temperature for the container.
+        /// </summary>
+        /// <remarks>Setting this property to a value lower than <see cref="MinimumContainerTemperature"/>
+        /// will result in an <see cref="ArgumentOutOfRangeException"/>. Use this property to enforce upper temperature
+        /// limits for container contents.</remarks>
         public Temperature? MaximumContainerTemperature
         { 
             get; 
@@ -243,13 +321,22 @@ namespace Fargo.Domain.Entities
             }
         }
 
-        public ArticleContainerInformation? ContainerInformation { get; init; }
+        /// <summary>
+        /// Gets or sets on init the container-specific information for this article, if it functions as a container.
+        /// </summary>
+        public ArticleContainer? ContainerInformation { get; init; }
 
+        /// <summary>
+        /// Gets a value indicating whether this item represents a container.
+        /// </summary>
         public bool IsContainer => ContainerInformation is not null;
     }
 
-    public class ArticleContainerInformation
+    public class ArticleContainer
     {
+        /// <summary>
+        /// Gets or sets the maximum mass capacity allowed.
+        /// </summary>
         public Mass? MassCapacity
         {
             get;
@@ -264,6 +351,9 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum volume capacity.
+        /// </summary>
         public Volume? VolumeCapacity
         {
             get;
@@ -278,6 +368,9 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum allowed quantity of items.
+        /// </summary>
         public int? ItensQuantityCapacity
         {
             get;
@@ -292,6 +385,9 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets or sets the default temperature of the container.
+        /// </summary>
         public Temperature? DefaultTemperature
         {
             get;

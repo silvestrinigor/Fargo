@@ -12,7 +12,7 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
             public void MapFargoArticle()
             {
                 builder.MapGet("/articles/{article}", async (Guid article, [FromServices] IArticleService service)
-                    => await service.GetArticleAsync(new ArticleQuery(article)));
+                    => await service.GetArticleAsync(new ArticleSingleQuery(article)));
 
                 builder.MapPost("/articles", async ([FromBody] ArticleCreateCommand command, [FromServices] IArticleService service)
                     => await service.CreateArticleAsync(command));

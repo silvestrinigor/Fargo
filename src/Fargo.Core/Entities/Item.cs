@@ -3,26 +3,52 @@ using UnitsNet;
 
 namespace Fargo.Domain.Entities
 {
+    /// <summary>
+    /// Represents an item with associated article information, optional descriptive metadata, and container
+    /// capabilities. Supports tracking of manufacturing and expiration dates, as well as hierarchical containment
+    /// within other items.
+    /// </summary>
+    /// <remarks>An item may represent a physical or logical entity, such as a product or a container. If the
+    /// associated article is a container, the item can hold other items using its container extension. Items can be
+    /// inserted into or removed from container items, supporting nested containment scenarios. Thread safety is not
+    /// guaranteed; callers should ensure appropriate synchronization if accessing instances from multiple
+    /// threads.</remarks>
     public class Item : Entity
     {
+        /// <summary>
+        /// Initializes a new instance of the Item class with the specified article, name, and description.
+        /// </summary>
+        /// <param name="article">The article that defines the characteristics and behavior of the item. Cannot be null.</param>
         public Item(Article article, Name? name = null, Description? description = null) : base(name, description)
         {
             Article = article;
 
             ContainerExtension
                 = article.IsContainer
-                ? new ItemContainerExtension(this)
+                ? new ItemContainer(this)
                 : null;
         }
 
+        /// <summary>
+        /// Gets the article associated with this instance.
+        /// </summary>
         public Article Article
         { 
             get;
             private init;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the current item is a container that can hold other items.
+        /// </summary>
         public bool IsContainer => Article.IsContainer;
 
+        /// <summary>
+        /// Gets the date and time when the item was manufactured.
+        /// </summary>
+        /// <remarks>The value must not be set to a future date and time. By default, this property is
+        /// initialized to the current UTC date and time. This property can only be set during object
+        /// initialization.</remarks>
         public DateTime? ManufacturedAt
         {
             get;
@@ -36,11 +62,28 @@ namespace Fargo.Domain.Entities
                 field = value;
             }
         } = DateTime.UtcNow;
-
+        
+        /// <summary>
+        /// Gets the date and time when the article expires, if available.
+        /// </summary>
+        /// <remarks>The expiration date is calculated by adding the article's shelf life to its
+        /// manufacturing date. If either the manufacturing date or shelf life is not set, the expiration date will be
+        /// null.</remarks>
         public DateTime? ExpirationDate
             => ManufacturedAt + Article.ShelfLife;
 
-        public ItemContainerExtension? ContainerExtension
+        /// <summary>
+        /// Gets a value indicating whether the item has expired based on its expiration date.
+        /// </summary>
+        public bool IsExpired
+            => ExpirationDate is not null && DateTime.UtcNow > ExpirationDate;
+
+        /// <summary>
+        /// Gets the container extension associated with this item, if the item represents a container; otherwise, null.
+        /// </summary>
+        /// <remarks>The value is only set when the item is a container. If the item is not a container,
+        /// this property is always null. The container extension's ItemReference must refer to this item.</remarks>
+        public ItemContainer? ContainerExtension
         {
             get;
             private init
@@ -64,6 +107,12 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets the parent container of this item, if any.
+        /// </summary>
+        /// <remarks>The parent container must be a valid container and cannot be the item itself. When
+        /// setting this property, the new parent must either be within the current parent container or be the current
+        /// grandparent container. This property is read-only outside the class.</remarks>
         public Item? ParentContainer
         {
             get;
@@ -74,7 +123,7 @@ namespace Fargo.Domain.Entities
                     throw new ArgumentException("Parent container cannot be equals the child.", nameof(ParentContainer));
                 }
 
-                if (!value?.IsContainer ?? false)
+                if (value is not null && !value.IsContainer)
                 {
                     throw new ArgumentException("Parent container must be a container.", nameof(ParentContainer));
                 }
@@ -90,45 +139,45 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this object is contained within a parent container.
+        /// </summary>
         public bool IsInContainer => ParentContainer is not null;
 
+        /// <summary>
+        /// Inserts the current item into the specified container.
+        /// </summary>
+        /// <param name="container">The container into which this item will be inserted. Cannot be null and must not be locked.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the specified container is locked.</exception>
         public void InsertIntoContainer(Item container)
         {
-            if (container == ParentContainer)
+            if (container.ContainerExtension!.IsLocked)
             {
-                return;
+                throw new InvalidOperationException("Cannot insert item when container is locked.");
             }
-
-            if (container.ContainerExtension?.Temperature is null &&
-                (this.Article.MinimumContainerTemperature is not null || this.Article.MaximumContainerTemperature is not null))
-            {
-                throw new ArgumentException(
-                    "Parent container must provide temperature data when this item has minimum or maximum container temperature requirements.",
-                    nameof(container));
-            }
-
-            if (this.Article.MinimumContainerTemperature > container?.ContainerExtension?.Temperature)
-            {
-                throw new InvalidOperationException("Cannot set container parrent when the container temperature is bellow the item minimum container temperature requirements.");
-            }
-
-            if (this.Article.MaximumContainerTemperature < container?.ContainerExtension?.Temperature)
-            {
-                throw new InvalidOperationException("Cannot set container parrent when the container temperature is bigger than the item maximum container temperature requirements.");
-            }
-
-            container?.ContainerExtension?.ValidateAdd(this);
 
             ParentContainer = container;
 
             container?.ContainerExtension?.containedItens.Add(this);
         }
 
+        /// <summary>
+        /// Removes this item from its parent container, if it is currently contained within one.
+        /// </summary>
+        /// <remarks>If the item is not currently contained in a parent container, this method performs no
+        /// action. After removal, the item's parent container reference is updated to the next parent in the hierarchy,
+        /// if any.</remarks>
+        /// <exception cref="InvalidOperationException">Thrown if the parent container is locked and items cannot be removed.</exception>
         public void RemoveFromContainer()
         {
             if (ParentContainer is null)
             {
                 return;
+            }
+
+            if (ParentContainer.ContainerExtension!.IsLocked)
+            {
+                throw new InvalidOperationException("Cannot remove item when container is locked.");
             }
 
             ParentContainer.ContainerExtension?.containedItens.Remove(this);
@@ -137,9 +186,24 @@ namespace Fargo.Domain.Entities
         }
     }
 
-    public class ItemContainerExtension
+    /// <summary>
+    /// Represents a container item that can hold other items, providing access to its contents, capacity, and related
+    /// container properties.
+    /// </summary>
+    /// <remarks>An ItemContainer exposes information and operations for items that are designated as
+    /// containers. It allows querying the items contained, their total mass and volume, available capacity, and
+    /// temperature settings. The container can be locked to prevent modifications, with an optional reason provided.
+    /// Instances of this class are only valid for items whose article supports container functionality.</remarks>
+    public class ItemContainer
     {
-        internal ItemContainerExtension(Item item)
+        /// <summary>
+        /// Initializes a new instance of the ItemContainer class for the specified item, provided that the item
+        /// represents a container.
+        /// </summary>
+        /// <param name="item">The item to associate with this container extension. The item must represent a container and have valid
+        /// container information.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the specified item does not represent a container, or if its container information is null.</exception>
+        internal ItemContainer(Item item)
         {
             if (!item.Article.IsContainer)
             {
@@ -154,16 +218,25 @@ namespace Fargo.Domain.Entities
             ItemReference = item;
         }
 
+        /// <summary>
+        /// Gets the referenced item associated with this instance.
+        /// </summary>
         internal Item ItemReference
         {
             get;
             private init;
         }
 
+        /// <summary>
+        /// Gets the collection of items contained within this instance.
+        /// </summary>
         public IReadOnlyCollection<Item> ContainedItens => containedItens;
 
         internal readonly HashSet<Item> containedItens = [];
 
+        /// <summary>
+        /// Gets the total mass of all contained items, or null if any item does not have a defined mass.
+        /// </summary>
         public Mass? ContainedMass
         {
             get
@@ -183,10 +256,10 @@ namespace Fargo.Domain.Entities
                 return containedMass;
             }
         }
-
+        
         public Mass? MassAvailableCapacity
             => ItemReference.Article.ContainerInformation?.MassCapacity - ContainedMass;
-
+        
         public Volume? ContainedVolume
         {
             get
@@ -260,57 +333,6 @@ namespace Fargo.Domain.Entities
         {
             IsLocked = false;
             LockReason = null;
-        }
-
-        public void ValidateAdd(Item item)
-        {
-            if (item.ParentContainer == this.ItemReference)
-            {
-                return;
-            }
-
-            if (IsLocked)
-            {
-                throw new InvalidOperationException("Cannot insert item when container is locked.");
-            }
-
-            if (VolumeAvailableCapacity is not null && item.Article.Volume is null)
-            {
-                throw new ArgumentException("Cannot insert item with no volume information inside a contianer with volume capacity.", nameof(item));
-            }            
-
-            if (MassAvailableCapacity is not null && item.Article.Mass is null)
-            {
-                throw new ArgumentException("Cannot insert item with no mass information inside a container with mass capacity.", nameof(item));
-            }
-
-            if (VolumeAvailableCapacity < item.Article.Volume)
-            {
-                throw new InvalidOperationException("Cannot insert this item when the available volume capacity is lower than the item volume.");
-            }
-
-            if (MassAvailableCapacity < item.Article.Mass)
-            {
-                throw new InvalidOperationException("Cannot insert this item when the available mass capacity is lower than the item mass.");
-            }
-
-            if (ItensQuantityAvailableCapacity < 1)
-            {
-                throw new InvalidOperationException("Cannot insert this item when the available itens quantity capacity is lower than 0.");
-            }
-        }
-
-        public void ValidateRemove(Item item)
-        {
-            if (item.ParentContainer != this.ItemReference)
-            {
-                throw new ArgumentException("Item parent container is not this.", nameof(item));
-            }
-
-            if (IsLocked)
-            {
-                throw new InvalidOperationException("Cannot remove item when container is locked.");
-            }
         }
     }
 }

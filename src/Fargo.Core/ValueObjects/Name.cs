@@ -24,5 +24,8 @@
 
         public static bool operator !=(Name left, Name right)
             => !left.Equals(right);
+
+        public override string ToString()
+            => Value;
     }
 }

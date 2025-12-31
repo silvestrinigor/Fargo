@@ -2,7 +2,6 @@
 using Fargo.Application.Solicitations.Commands.ArticleCommands;
 using Fargo.Application.Solicitations.Queries.ArticleQueries;
 using Fargo.Application.Solicitations.Responses;
-using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Services
@@ -14,32 +13,6 @@ namespace Fargo.Application.Services
 
         public async Task<Guid> CreateArticleAsync(ArticleCreateCommand command)
         {
-            var articleContainerInformation 
-                = command.ContainerInformation is not null
-                ? new ArticleContainerInformation
-                {
-                    MassCapacity = command.ContainerInformation.MassCapacity,
-                    VolumeCapacity = command.ContainerInformation.VolumeCapacity,
-                    ItensQuantityCapacity = command.ContainerInformation.ItensQuantityCapacity,
-                    DefaultTemperature = command.ContainerInformation.DefaultTemperature,
-                }
-                : null;
-
-            var article = new Article
-                (
-                    name: command.Name,
-                    description: command.Description
-                )
-                {
-                    ShelfLife = command.ShelfLife,
-                    LengthX = command.Length,
-                    LengthY = command.Width,
-                    LengthZ = command.Height,
-                    Volume = command.Volume,
-                    Mass = command.Mass,
-                    Density = command.Density,
-                    ContainerInformation = articleContainerInformation
-                };
 
             articleRepository.Add(article);
 
@@ -65,7 +38,7 @@ namespace Fargo.Application.Services
             await unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<ArticleInformation?> GetArticleAsync(ArticleQuery query)
+        public async Task<ArticleInformation?> GetArticleAsync(ArticleSingleQuery query)
         {
             var article = await articleRepository.GetByGuidAsync(query.ArticleGuid);
 

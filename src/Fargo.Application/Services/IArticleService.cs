@@ -8,7 +8,7 @@ namespace Fargo.Application.Services
     public interface IArticleService
     {
         Task<Guid> CreateArticleAsync(ArticleCreateCommand command);
-        Task<ArticleInformation?> GetArticleAsync(ArticleQuery getArticleQuery);
+        Task<ArticleInformation?> GetArticleAsync(ArticleSingleQuery getArticleQuery);
         Task DeleteArticleAsync(ArticleDeleteCommand command);
     }
 }
