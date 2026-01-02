@@ -4,14 +4,11 @@ namespace Fargo.Application.Dtos
 {
     public record ItemDto(
         Guid Guid,
-        Name? Name,
-        Description? Description
+        Guid ArticleGuid,
+        DateTime CreatedAt
         );
 
     public record ItemCreateDto(
-        Name? Name,
-        Description? Description,
-        Guid ArticleGuid,
-        DateTime? ManufacturedAt
+        Guid ArticleGuid
         );
 }

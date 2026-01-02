@@ -2,13 +2,17 @@
 {
     public readonly struct Description(string value) : IEquatable<Description>
     {
-        public string Value { get; } 
-            = string.IsNullOrWhiteSpace(value)
-            ? throw new ArgumentException("Description cannot be empty.", nameof(value))
-            : value;
+        public string Value { get; } = string.IsNullOrWhiteSpace(value)
+                ? throw new ArgumentException("Description cannot be empty.", nameof(value))
+                : value;
+
+        public Description() : this(string.Empty) { }
 
         public static Description NewDescription(string value)
             => new(value);
+
+        public static Description Empty
+            => new();
 
         public bool Equals(Description other)
             => Value == other.Value;

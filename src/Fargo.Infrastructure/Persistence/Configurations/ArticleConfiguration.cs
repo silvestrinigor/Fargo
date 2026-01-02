@@ -9,7 +9,19 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Article> builder)
         {
             builder
-                .Property(x => x.ShelfLife);
+                .HasKey(x => x.Guid);
+
+            builder
+                .Property(x => x.CreatedAt)
+                .IsRequired();
+
+            builder
+                .Property(x => x.Name)
+                .IsRequired();
+
+            builder
+                .Property(x => x.Description)
+                .IsRequired();
         }
     }
 }

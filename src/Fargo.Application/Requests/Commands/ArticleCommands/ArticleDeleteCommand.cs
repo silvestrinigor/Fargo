@@ -22,7 +22,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 
             repository.Remove(article);
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

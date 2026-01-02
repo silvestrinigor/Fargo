@@ -8,7 +8,17 @@ namespace Fargo.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Item> builder)
         {
+            builder
+                .HasKey(x => x.Guid);
 
+            builder
+                .Property(x => x.CreatedAt)
+                .IsRequired();
+
+            builder
+                .HasOne(x => x.Article)
+                .WithMany()
+                .IsRequired();
         }
     }
 }

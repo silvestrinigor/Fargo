@@ -15,7 +15,7 @@ namespace Fargo.Application.Requests.Commands.ItensCommands
 
             repository.Remove(item);
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

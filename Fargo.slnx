@@ -6,6 +6,5 @@
   <Project Path="src/Fargo.RestApi/Fargo.HttpApi.csproj" />
   <Project Path="src/Fargo.ServiceDefaults/Fargo.ServiceDefaults.csproj" />
   <Project Path="src/Fargo.Web/Fargo.Web.csproj" />
-  <Project Path="src/Fargo.WebComponents/Fargo.WebComponents.csproj" />
   <Project Path="tests/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
 </Solution>

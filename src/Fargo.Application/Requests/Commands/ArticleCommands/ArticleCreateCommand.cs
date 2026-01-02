@@ -18,35 +18,11 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
             {
                 Name = command.Article.Name,
                 Description = command.Article.Description,
-
-                ShelfLife = command.Article.ShelfLife!,
-                MaximumContainerTemperature = command.Article.MaxContainerTemperature,
-                MinimumContainerTemperature = command.Article.MinContainerTemperature,
-
-                Measures = new ArticleMeasures
-                {
-                    LengthX = command.Article.Measures?.X,
-                    LengthY = command.Article.Measures?.Y,
-                    LengthZ = command.Article.Measures?.Z,
-                    Mass = command.Article.Measures?.Mass,
-                    Volume = command.Article.Measures?.Volume,
-                    Density = command.Article.Measures?.Density,
-                },
-
-                Container = command.Article.Container is not null
-                ? new ArticleContainer
-                {
-                    MassCapacity = command.Article.Container.MassCapacity,
-                    VolumeCapacity = command.Article.Container.VolumeCapacity,
-                    ItensQuantityCapacity = command.Article.Container.ItensQuantityCapacity,
-                    DefaultTemperature = command.Article.Container.DefaultTemperature
-                }
-                : null
             };
             
             repository.Add(article);
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return article.Guid;
         }

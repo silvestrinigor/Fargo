@@ -13,25 +13,7 @@ namespace Fargo.Application.Extensions
                     article.Guid,
                     article.Name,
                     article.Description,
-                    article.ShelfLife,
-                    article.MaximumContainerTemperature,
-                    article.MinimumContainerTemperature,
-                    new MeasuresDto(                    
-                        article.Measures.LengthX,
-                        article.Measures.LengthY,
-                        article.Measures.LengthZ,
-                        article.Measures.Volume,
-                        article.Measures.Mass,
-                        article.Measures.Density
-                        ),
-                    article.Container is not null
-                    ? new ContainerInformationDto(
-                        article.Container.MassCapacity,
-                        article.Container.VolumeCapacity,
-                        article.Container.ItensQuantityCapacity,
-                        article.Container.DefaultTemperature
-                        )
-                    : null
+                    article.CreatedAt
                     );
             }
         }

@@ -1,9 +1,11 @@
-﻿using Fargo.Application.Services;
-using Fargo.Application.Solicitations.Commands.ItemCommands;
-using Fargo.Application.Solicitations.Queries.ItensQueries;
+﻿using Fargo.Application.Dtos;
+using Fargo.Application.Mediators;
+using Fargo.Application.Requests.Commands.ItensCommands;
+using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.HttpApi.EndpointRouteBuilders;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.HttpApi.EndpointRouteBuilder
+namespace Fargo.HttpApi.EndpointRouteBuilders
 {
     public static class ItemEndpointRouteBuilder
     {
@@ -11,14 +13,14 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
         {
             public void MapFargoItem()
             {
-                builder.MapGet("/items/{item}", async (Guid item, [FromServices] IItemService service)
-                    => await service.GetItemAsync(new GetItemQuery(item)));
+                builder.MapGet("/items/{itemGuid}", async (Guid itemGuid, [FromServices] IQueryHandlerAsync<ItemSingleQuery, ItemDto> handler)
+                    => await handler.HandleAsync(new ItemSingleQuery(itemGuid)));
 
-                builder.MapPost("/items", async ([FromBody] CreateItemCommand command, [FromServices] IItemService service)
-                    => await service.CreateItemAsync(command));
+                builder.MapPost("/items", async ([FromBody] ItemCreateCommand command, [FromServices] ICommandHandlerAsync<ItemCreateCommand, Guid> handler)
+                    => await handler.HandleAsync(command));
 
-                builder.MapDelete("/items/{item}", async (Guid item, [FromServices] IItemService service)
-                    => await service.DeleteItemAsync(new DeleteItemCommand(item)));
+                builder.MapDelete("/items/{itemGuid}", async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler)
+                    => await handler.HandleAsync(new ItemDeleteCommand(itemGuid)));
             }
         }
     }
