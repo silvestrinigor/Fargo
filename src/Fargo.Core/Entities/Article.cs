@@ -1,4 +1,5 @@
-﻿using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.Enums;
+using Fargo.Domain.ValueObjects;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities
@@ -16,12 +17,15 @@ namespace Fargo.Domain.Entities
     /// </remarks>
     public class Article : Entity
     {
-        /// <summary>
-        /// Initializes a new instance of the Article class with the specified name and description.
-        /// </summary>
-        /// <param name="name">The name to assign to the entity. Can be null if the entity does not have a name.</param>
-        /// <param name="description">The description to assign to the entity. Can be null if the entity does not have a description.</param>
-        public Article(Name? name = null, Description? description = null) : base(name, description) { }
+        public Article() : base(EntityType.Article)
+        {
+        }
+
+        public Article(Name? name, Description? description = null) : base(EntityType.Article)
+        {
+            Name = name;
+            Description = description;
+        }
 
         /// <summary>
         /// Gets or sets the maximum duration for which the item remains usable or safe to use.
@@ -34,6 +38,46 @@ namespace Fargo.Domain.Entities
                 if (value < TimeSpan.Zero)
                 {
                     throw new ArgumentOutOfRangeException(nameof(ShelfLife), "Cannot be negative.");
+                }
+
+                field = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum allowable temperature for the container.
+        /// </summary>
+        /// <remarks>The value must not exceed the value of <see cref="MaximumContainerTemperature"/>.
+        /// Setting this property to a value greater than <see cref="MaximumContainerTemperature"/> will throw an
+        /// exception.</remarks>
+        public Temperature? MinimumContainerTemperature 
+        { 
+            get;
+            set
+            {
+                if (value > MaximumContainerTemperature)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(MinimumContainerTemperature), "Cannot be bigger than maximum container temperature.");
+                }
+
+                field = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum allowable temperature for the container.
+        /// </summary>
+        /// <remarks>Setting this property to a value lower than <see cref="MinimumContainerTemperature"/>
+        /// will result in an <see cref="ArgumentOutOfRangeException"/>. Use this property to enforce upper temperature
+        /// limits for container contents.</remarks>
+        public Temperature? MaximumContainerTemperature
+        { 
+            get; 
+            set
+            {
+                if (value < MinimumContainerTemperature)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(MaximumContainerTemperature), "Cannot be lower than minimum container temperature.");
                 }
 
                 field = value;
@@ -61,7 +105,7 @@ namespace Fargo.Domain.Entities
                 {
                     return Volume / LengthY / LengthZ;
                 }
-                
+
                 return null;
             }
 
@@ -126,13 +170,13 @@ namespace Fargo.Domain.Entities
         /// and the X and Y lengths, this property returns the computed value. Attempting to set this property when the
         /// value is calculable from other properties will result in an exception.
         /// </remarks>
-        public Length? LengthZ 
+        public Length? LengthZ
         {
             get
             {
                 if (field is not null)
                 {
-                    return field; 
+                    return field;
                 }
 
                 if (IsHeightCalculableFromLengthWidthVolume)
@@ -172,7 +216,7 @@ namespace Fargo.Domain.Entities
             {
                 if (field is not null)
                 {
-                    return field; 
+                    return field;
                 }
 
                 if (IsVolumeCalculableFromLengthWidthHeight)
@@ -213,7 +257,7 @@ namespace Fargo.Domain.Entities
         /// is calculated as the product of density and volume. Attempting to set the mass when it is calculable from
         /// density and volume will result in an exception.
         /// </remarks>
-        public Mass? Mass 
+        public Mass? Mass
         {
             get
             {
@@ -282,55 +326,16 @@ namespace Fargo.Domain.Entities
             => Volume is not null && Mass is not null;
 
         /// <summary>
-        /// Gets or sets the minimum allowable temperature for the container.
-        /// </summary>
-        /// <remarks>The value must not exceed the value of <see cref="MaximumContainerTemperature"/>.
-        /// Setting this property to a value greater than <see cref="MaximumContainerTemperature"/> will throw an
-        /// exception.</remarks>
-        public Temperature? MinimumContainerTemperature 
-        { 
-            get;
-            set
-            {
-                if (value > MaximumContainerTemperature)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(MinimumContainerTemperature), "Cannot be bigger than maximum container temperature.");
-                }
-
-                field = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum allowable temperature for the container.
-        /// </summary>
-        /// <remarks>Setting this property to a value lower than <see cref="MinimumContainerTemperature"/>
-        /// will result in an <see cref="ArgumentOutOfRangeException"/>. Use this property to enforce upper temperature
-        /// limits for container contents.</remarks>
-        public Temperature? MaximumContainerTemperature
-        { 
-            get; 
-            set
-            {
-                if (value < MinimumContainerTemperature)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(MaximumContainerTemperature), "Cannot be lower than minimum container temperature.");
-                }
-
-                field = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets on init the container-specific information for this article, if it functions as a container.
         /// </summary>
-        public ArticleContainer? ContainerInformation { get; init; }
+        public ArticleContainer? Container { get; init; }
 
         /// <summary>
         /// Gets a value indicating whether this item represents a container.
         /// </summary>
-        public bool IsContainer => ContainerInformation is not null;
+        public bool IsContainer => Container is not null;
     }
+
 
     public class ArticleContainer
     {

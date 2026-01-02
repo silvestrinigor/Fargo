@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Dtos.EntitiesDtos;
+﻿using Fargo.Application.Dtos;
 using Fargo.Domain.Entities;
 
 namespace Fargo.Application.Extensions
@@ -10,16 +10,29 @@ namespace Fargo.Application.Extensions
             public ArticleDto ToDto()
             {
                 return new ArticleDto(
-                    article.NameDescriptionInformation?.Name,
-                    article.NameDescriptionInformation?.Description,
+                    article.Guid,
+                    article.Name,
+                    article.Description,
                     article.ShelfLife,
-                    article.LengthX,
-                    article.LengthY,
-                    article.LengthZ,
-                    article.Mass,
-                    article.Volume,
-                    article.Density
-                );
+                    article.MaximumContainerTemperature,
+                    article.MinimumContainerTemperature,
+                    new MeasuresDto(                    
+                        article.Measures.LengthX,
+                        article.Measures.LengthY,
+                        article.Measures.LengthZ,
+                        article.Measures.Volume,
+                        article.Measures.Mass,
+                        article.Measures.Density
+                        ),
+                    article.Container is not null
+                    ? new ContainerInformationDto(
+                        article.Container.MassCapacity,
+                        article.Container.VolumeCapacity,
+                        article.Container.ItensQuantityCapacity,
+                        article.Container.DefaultTemperature
+                        )
+                    : null
+                    );
             }
         }
     }

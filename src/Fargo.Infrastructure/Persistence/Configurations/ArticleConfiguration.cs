@@ -1,27 +1,16 @@
 ﻿using Fargo.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UnitsNet;
-using UnitsNet.Units;
 
-namespace Fargo.Infrastructure.Persistence.Configurations;
-
-public class ArticleConfiguration : IEntityTypeConfiguration<Article>
+namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    public void Configure(EntityTypeBuilder<Article> builder)
+    public class ArticleConfiguration : IEntityTypeConfiguration<Article>
     {
-        builder.OwnsOne(x => x.Mass, mass =>
+        public void Configure(EntityTypeBuilder<Article> builder)
         {
-            mass.Property("")
-                .HasColumnName("Mass_Value")
-                .HasColumnType("decimal(38,18)");
-
-            mass.Property(m => m.Unit)
-                .HasColumnName("Mass_Unit")
-                .HasConversion(
-                    u => u.ToString(),
-                    u => Enum.Parse<MassUnit>(u)
-                );
-        });
+            builder
+                .Property(x => x.ShelfLife);
+        }
     }
 }
+

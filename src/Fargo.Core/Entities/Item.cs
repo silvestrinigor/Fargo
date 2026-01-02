@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Enums;
 using UnitsNet;
 
 namespace Fargo.Domain.Entities
@@ -19,10 +20,10 @@ namespace Fargo.Domain.Entities
         /// Initializes a new instance of the Item class with the specified article, name, and description.
         /// </summary>
         /// <param name="article">The article that defines the characteristics and behavior of the item. Cannot be null.</param>
-        public Item(Article article, Name? name = null, Description? description = null) : base(name, description)
+        public Item(Article article) : base(EntityType.Item)
         {
             Article = article;
-
+            
             ContainerExtension
                 = article.IsContainer
                 ? new ItemContainer(this)
@@ -210,7 +211,7 @@ namespace Fargo.Domain.Entities
                 throw new InvalidOperationException("Cannot create item container extension when the item is not a container.");
             }
 
-            if (item.Article.ContainerInformation is null)
+            if (item.Article.Container is null)
             {
                 throw new InvalidOperationException("Item container extension cannot be created when the item article container information is null.");
             }
@@ -258,7 +259,7 @@ namespace Fargo.Domain.Entities
         }
         
         public Mass? MassAvailableCapacity
-            => ItemReference.Article.ContainerInformation?.MassCapacity - ContainedMass;
+            => ItemReference.Article.Container?.MassCapacity - ContainedMass;
         
         public Volume? ContainedVolume
         {
@@ -281,10 +282,10 @@ namespace Fargo.Domain.Entities
         }
 
         public Volume? VolumeAvailableCapacity
-            => ItemReference.Article.ContainerInformation?.VolumeCapacity - ContainedVolume;
+            => ItemReference.Article.Container?.VolumeCapacity - ContainedVolume;
 
         public int? ItensQuantityAvailableCapacity
-            => ItemReference.Article.ContainerInformation?.ItensQuantityCapacity - ContainedItens.Count;
+            => ItemReference.Article.Container?.ItensQuantityCapacity - ContainedItens.Count;
 
         public Temperature? Temperature
         {
@@ -295,7 +296,7 @@ namespace Fargo.Domain.Entities
                     return field;
                 }
 
-                return ItemReference.Article.ContainerInformation?.DefaultTemperature;
+                return ItemReference.Article.Container?.DefaultTemperature;
             }
             set
             {

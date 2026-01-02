@@ -1,4 +1,5 @@
-﻿using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.Enums;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
 {
@@ -12,23 +13,16 @@ namespace Fargo.Domain.Entities
     /// name and description metadata.</remarks>
     public abstract class Entity : IEquatable<Entity>
     {
-        /// <summary>
-        /// Initializes a new instance of the Entity class.
-        /// </summary>
-        public Entity() { }
-
-        /// <summary>
-        /// Initializes a new instance of the Entity class with the specified name and description.
-        /// </summary>
-        /// <param name="name">The name to assign to the entity. Can be null if the entity does not have a name.</param>
-        /// <param name="description">The description to assign to the entity. Can be null if the entity does not have a description.</param>
-        public Entity(Name? name, Description? description)
+        public Entity(EntityType entityType)
         {
-            NameDescriptionInformation = new EntityNameDescriptionInformation
-            {
-                Name = name,
-                Description = description
-            };
+            EntityType = entityType;
+        }
+
+        public Entity(Name? name, Description? description, EntityType entityType)
+        {
+            Name = name;
+            Description = description;
+            EntityType = entityType;
         }
 
         /// <summary>
@@ -50,6 +44,24 @@ namespace Fargo.Domain.Entities
             get; 
             init; 
         } = DateTime.UtcNow;
+
+        public Name? Name
+        {
+            get;
+            set;
+        }
+
+        public Description? Description
+        {
+            get;
+            set;
+        }
+
+        public EntityType EntityType
+        {
+            get;
+            protected init;
+        }
 
         public bool Equals(Entity? other)
         {
@@ -73,29 +85,5 @@ namespace Fargo.Domain.Entities
 
         public static bool operator !=(Entity? left, Entity? right)
             => !Equals(left, right);
-
-        public EntityNameDescriptionInformation? NameDescriptionInformation
-        {
-            get;
-            protected init;
-        }
-
-        public bool HasNameDescriptionInformation
-            => NameDescriptionInformation is not null;
-    }
-
-    public class EntityNameDescriptionInformation
-    {
-        public Name? Name
-        {
-            get;
-            set;
-        }
-
-        public Description? Description
-        {
-            get;
-            set;
-        }
     }
 }

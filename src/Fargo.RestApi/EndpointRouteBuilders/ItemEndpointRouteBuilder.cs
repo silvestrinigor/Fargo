@@ -7,7 +7,7 @@ namespace Fargo.HttpApi.EndpointRouteBuilder
 {
     public static class ItemEndpointRouteBuilder
     {
-        extension (IEndpointRouteBuilder builder)
+        extension(IEndpointRouteBuilder builder)
         {
             public void MapFargoItem()
             {
