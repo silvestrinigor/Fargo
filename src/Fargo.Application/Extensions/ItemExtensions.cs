@@ -3,7 +3,7 @@ using Fargo.Domain.Entities;
 
 namespace Fargo.Application.Extensions
 {
-    public static class ItemDtoExtensions
+    public static class ItemExtensions
     {
         extension(Item item)
         {
