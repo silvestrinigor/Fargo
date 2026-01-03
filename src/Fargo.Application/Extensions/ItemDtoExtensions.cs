@@ -11,7 +11,7 @@ namespace Fargo.Application.Extensions
             {
                 return new ItemDto(
                     item.Guid,
-                    item.Article.Guid,
+                    item.ArticleGuid,
                     item.CreatedAt
                     );
             }
