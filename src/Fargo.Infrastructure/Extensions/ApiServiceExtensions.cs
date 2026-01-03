@@ -26,7 +26,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandlerAsync<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ItemDeleteCommand>, ItemDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto>, ItemSingleQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<ItemAllQuery, IEnumerable<ItemDto>>, ItemAllQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
 
                 services.AddScoped<IArticleRepository, ArticleRepository>();
 

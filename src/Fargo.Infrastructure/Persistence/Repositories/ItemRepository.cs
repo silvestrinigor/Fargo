@@ -13,9 +13,16 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             context.Items.Add(item);
         }
 
-        public async Task<IEnumerable<Item>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Item>> GetManyAsync(Guid? articleGuid = null, CancellationToken cancellationToken = default)
         {
-            return await context.Items.ToListAsync(cancellationToken);
+            var query = context.Items.AsQueryable();
+
+            if (articleGuid is not null)
+            {
+                query = query.Where(x => x.ArticleGuid == articleGuid.Value);
+            }
+
+            return await query.ToListAsync(cancellationToken);
         }
 
         public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
