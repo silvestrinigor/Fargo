@@ -9,7 +9,7 @@ namespace Fargo.Infrastructure.Converters
         public override Description Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.String)
-                throw new JsonException("Name must be a string.");
+                throw new JsonException("Description must be a string.");
 
             var value = reader.GetString()!;
 
