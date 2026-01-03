@@ -18,6 +18,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
             builder
                 .HasOne(x => x.Article)
                 .WithMany()
+                .HasForeignKey(x => x.ArticleGuid)
                 .IsRequired();
         }
     }
