@@ -26,5 +26,8 @@
 
         public static bool operator !=(Description left, Description right)
             => !left.Equals(right);
+
+        public override string ToString()
+            => Value;
     }
 }
