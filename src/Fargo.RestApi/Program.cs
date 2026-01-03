@@ -1,4 +1,4 @@
-using Fargo.HttpApi.EndpointRouteBuilders;
+using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
