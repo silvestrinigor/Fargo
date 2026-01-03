@@ -15,7 +15,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
         {
-            return await context.Items.SingleAsync(x => x.Guid == itemGuid, cancellationToken);
+            return await context.Items.FirstOrDefaultAsync(x => x.Guid == itemGuid, cancellationToken);
         }
 
         public void Remove(Item item)
