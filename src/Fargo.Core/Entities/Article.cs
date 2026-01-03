@@ -26,6 +26,6 @@ namespace Fargo.Domain.Entities
         {
             get;
             init;
-        } = DateTime.Now;
+        } = DateTime.UtcNow;
     }
 }

@@ -4,7 +4,7 @@
     {
         public Guid Guid { get; init; } = Guid.NewGuid();
 
-        public DateTime CreatedAt { get; init; } = DateTime.Now;
+        public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
         public Guid ArticleGuid { get; private init; }
 
