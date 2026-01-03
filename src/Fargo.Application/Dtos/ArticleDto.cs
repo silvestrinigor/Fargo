@@ -5,7 +5,7 @@ namespace Fargo.Application.Dtos
     public record ArticleDto(
         Guid Guid,
         Name Name,
-        Description? Description,
+        Description Description,
         DateTime CreatedAt
         );
 
