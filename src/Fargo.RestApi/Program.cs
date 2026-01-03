@@ -13,12 +13,11 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddInfrastructure();
 
-builder.Services
-    .ConfigureHttpJsonOptions(options =>
-    {
-        options.SerializerOptions.Converters.Add(new NameJsonConverter());
-        options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
-    });
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new NameJsonConverter());
+    options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
+});
 
 var app = builder.Build();
 
