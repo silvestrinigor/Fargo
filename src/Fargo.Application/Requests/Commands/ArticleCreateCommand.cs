@@ -4,11 +4,9 @@ using Fargo.Application.Persistence;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands.ArticleCommands
+namespace Fargo.Application.Requests.Commands
 {
-    public sealed record ArticleCreateCommand(
-        ArticleCreateDto Article
-        ) : ICommand<Guid>;
+    public sealed record ArticleCreateCommand(ArticleCreateDto Article) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(IArticleRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ArticleCreateCommand, Guid>
     {
@@ -19,7 +17,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 Name = command.Article.Name,
                 Description = command.Article.Description,
             };
-            
+
             repository.Add(article);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

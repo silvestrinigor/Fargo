@@ -3,7 +3,7 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Mediators;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Queries.ArticleQueries
+namespace Fargo.Application.Requests.Queries
 {
     public sealed record ArticleSingleQuery(Guid ArticleGuid) : IQuery<ArticleDto>;
 
@@ -11,7 +11,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     {
         public async Task<ArticleDto> HandleAsync(ArticleSingleQuery query, CancellationToken cancellationToken = default)
         {
-            var article = await repository.GetByGuidAsync(query.ArticleGuid)
+            var article = await repository.GetByGuidAsync(query.ArticleGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Article not found.");
 
             return article.ToDto();

@@ -1,5 +1,4 @@
-﻿using Fargo.Domain.Entities.Articles;
-using UnitsNet.NumberExtensions.NumberToDensity;
+﻿using UnitsNet.NumberExtensions.NumberToDensity;
 using UnitsNet.NumberExtensions.NumberToLength;
 using UnitsNet.NumberExtensions.NumberToMass;
 using UnitsNet.NumberExtensions.NumberToVolume;

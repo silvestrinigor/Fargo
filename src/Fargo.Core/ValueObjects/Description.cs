@@ -2,9 +2,7 @@
 {
     public readonly struct Description(string value) : IEquatable<Description>
     {
-        public string Value { get; } = string.IsNullOrWhiteSpace(value)
-                ? throw new ArgumentException("Description cannot be empty.", nameof(value))
-                : value;
+        public string Value { get; } = value;
 
         public Description() : this(string.Empty) { }
 

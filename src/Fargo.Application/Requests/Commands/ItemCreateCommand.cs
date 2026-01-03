@@ -4,7 +4,7 @@ using Fargo.Application.Persistence;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands.ItensCommands
+namespace Fargo.Application.Requests.Commands
 {
     public sealed record ItemCreateCommand(
         ItemCreateDto Item
@@ -14,7 +14,7 @@ namespace Fargo.Application.Requests.Commands.ItensCommands
     {
         public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
         {
-            var article = await articleRepository.GetByGuidAsync(command.Item.ArticleGuid)
+            var article = await articleRepository.GetByGuidAsync(command.Item.ArticleGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Item not found.");
 
             var item = new Item

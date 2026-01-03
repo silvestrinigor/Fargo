@@ -4,28 +4,28 @@ namespace Fargo.Domain.Entities
 {
     public class Article
     {
-        public Guid Guid 
-        { 
+        public Guid Guid
+        {
             get;
             init;
         } = Guid.NewGuid();
 
         public required Name Name
-        { 
+        {
             get;
             set;
         }
 
-        public Description Description 
-        { 
+        public Description Description
+        {
             get;
             set;
         } = Description.Empty;
 
-        public DateTime CreatedAt 
-        { 
-            get; 
-            init; 
+        public DateTime CreatedAt
+        {
+            get;
+            init;
         } = DateTime.Now;
     }
 }

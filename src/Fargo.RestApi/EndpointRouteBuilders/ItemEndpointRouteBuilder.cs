@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Dtos;
 using Fargo.Application.Mediators;
-using Fargo.Application.Requests.Commands.ItensCommands;
-using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Application.Requests.Commands;
+using Fargo.Application.Requests.Queries;
 using Fargo.HttpApi.EndpointRouteBuilders;
 using Microsoft.AspNetCore.Mvc;
 

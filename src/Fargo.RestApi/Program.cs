@@ -1,5 +1,6 @@
-using Fargo.HttpApi.EndpointRouteBuilder;
-using Fargo.Infrastructure.DependencyInjection;
+using Fargo.HttpApi.EndpointRouteBuilders;
+using Fargo.Infrastructure.Converters;
+using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,13 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddInfrastructure();
 
+builder.Services
+    .ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.Converters.Add(new NameJsonConverter());
+        options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
+    });
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -20,8 +28,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapFargoArticle();
-
-app.MapFargoContainer();
 
 app.MapFargoItem();
 

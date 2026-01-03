@@ -1,7 +1,7 @@
-﻿using Fargo.Application.Requests.Commands.ArticleCommands;
-using Fargo.Application.Requests.Queries.ArticleQueries;
+﻿using Fargo.Application.Dtos;
 using Fargo.Application.Mediators;
-using Fargo.Application.Dtos;
+using Fargo.Application.Requests.Commands;
+using Fargo.Application.Requests.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.EndpointRouteBuilders
@@ -12,14 +12,14 @@ namespace Fargo.HttpApi.EndpointRouteBuilders
         {
             public void MapFargoArticle()
             {
-                builder.MapGet("/articles/{article}", async (Guid article, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto> handler)
-                    => await handler.HandleAsync(new ArticleSingleQuery(article)));
+                builder.MapGet("/articles/{articleGuid}", async (Guid articleGuid, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto> handler)
+                    => await handler.HandleAsync(new ArticleSingleQuery(articleGuid)));
 
                 builder.MapPost("/articles", async ([FromBody] ArticleCreateCommand command, [FromServices] ICommandHandlerAsync<ArticleCreateCommand, Guid> handler)
                     => await handler.HandleAsync(command));
 
-                builder.MapDelete("/articles/{article}", async (Guid article, [FromServices] ICommandHandlerAsync<ArticleDeleteCommand> handler)
-                    => await handler.HandleAsync(new ArticleDeleteCommand(article)));
+                builder.MapDelete("/articles/{articleGuid}", async (Guid articleGuid, [FromServices] ICommandHandlerAsync<ArticleDeleteCommand> handler)
+                    => await handler.HandleAsync(new ArticleDeleteCommand(articleGuid)));
             }
         }
     }
