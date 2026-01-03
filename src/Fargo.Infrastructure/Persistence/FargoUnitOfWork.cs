@@ -6,7 +6,7 @@ namespace Fargo.Infrastructure.Persistence
     {
         private readonly FargoContext fargoContext = fagoContext;
 
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             => await fargoContext.SaveChangesAsync(cancellationToken);
     }
 }
