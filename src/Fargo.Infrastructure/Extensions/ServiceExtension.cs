@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Infrastructure.Extensions
 {
-    public static class ServiceExtensions
+    public static class ServiceExtension
     {
         extension(IServiceCollection services)
         {
