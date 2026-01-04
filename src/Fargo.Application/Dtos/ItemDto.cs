@@ -5,8 +5,4 @@
         Guid ArticleGuid,
         DateTime CreatedAt
         );
-
-    public record ItemCreateDto(
-        Guid ArticleGuid
-        );
 }

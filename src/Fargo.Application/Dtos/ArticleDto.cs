@@ -8,9 +8,4 @@ namespace Fargo.Application.Dtos
         Description Description,
         DateTime CreatedAt
         );
-
-    public record ArticleCreateDto(
-        Name Name,
-        Description Description
-        );
 }
