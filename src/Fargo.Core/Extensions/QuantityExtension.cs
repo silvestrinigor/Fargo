@@ -2,7 +2,7 @@
 
 namespace Fargo.Domain.Extensions
 {
-    public static class NotNegativeUnitsNetExtension
+    public static class QuantityExtension
     {
         extension<T>(T quantity) where T : IQuantity
         {
