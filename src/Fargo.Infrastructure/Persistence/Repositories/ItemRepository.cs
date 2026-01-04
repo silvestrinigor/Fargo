@@ -22,12 +22,16 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 query = query.Where(x => x.ArticleGuid == articleGuid.Value);
             }
 
-            return await query.ToListAsync(cancellationToken);
+            return await query
+                .Include(x => x.Article)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
         {
-            return await context.Items.FirstOrDefaultAsync(x => x.Guid == itemGuid, cancellationToken);
+            return await context.Items
+                .Include(x => x.Article)
+                .FirstOrDefaultAsync(x => x.Guid == itemGuid, cancellationToken);
         }
 
         public void Remove(Item item)

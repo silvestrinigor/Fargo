@@ -8,7 +8,7 @@
 
         public Guid ArticleGuid { get; private init; }
 
-        public required Article Article 
+        public required Article Article
         { 
             get; 
             init
