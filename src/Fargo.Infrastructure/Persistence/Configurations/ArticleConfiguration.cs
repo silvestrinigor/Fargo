@@ -12,10 +12,6 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .HasKey(x => x.Guid);
 
             builder
-                .Property(x => x.CreatedAt)
-                .IsRequired();
-
-            builder
                 .Property(x => x.Name)
                 .IsRequired();
 

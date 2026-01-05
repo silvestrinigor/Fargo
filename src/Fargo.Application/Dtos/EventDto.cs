@@ -4,8 +4,9 @@ namespace Fargo.Application.Dtos
 {
     public sealed record EventDto(
         Guid Guid,
-        Guid EntityGuid,
+        Guid RelatedEntityGuid,
         DateTime OccurredAt,
-        EventType EventType
+        EventType EventType,
+        object? EventData
         );
 }

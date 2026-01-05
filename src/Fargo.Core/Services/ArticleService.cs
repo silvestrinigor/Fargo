@@ -1,8 +1,9 @@
 ﻿using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
 using Fargo.Domain.Events;
+using Fargo.Domain.Extensions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.EventsValueObjects;
 
 namespace Fargo.Domain.Services
 {
@@ -54,9 +55,9 @@ namespace Fargo.Domain.Services
         {
             var newEvent = new Event
             {
-                EntityGuid = e.ArticleGuid,
-                OccurredAt = e.Article.CreatedAt,
-                EventType = EventType.ArticleCreated
+                EventType = Enums.EventType.ArticleCreated,
+                RelatedEntityGuid = e.ArticleGuid,
+                EventData = new ArticleCreatedEventData(e.Article.Name)
             };
 
             eventRepository.Add(newEvent);
@@ -87,8 +88,8 @@ namespace Fargo.Domain.Services
         {
             var newEvent = new Event
             {
-                EntityGuid = e.ArticleGuid,
-                EventType = EventType.ArticleDeleted
+                EventType = Enums.EventType.ArticleDeleted,
+                RelatedEntityGuid = e.ArticleGuid
             };
 
             eventRepository.Add(newEvent);

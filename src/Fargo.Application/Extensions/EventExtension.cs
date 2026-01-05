@@ -11,9 +11,10 @@ namespace Fargo.Application.Extensions
             {
                 return new EventDto(
                     Guid: @event.Guid,
-                    EntityGuid: @event.EntityGuid,
+                    RelatedEntityGuid: @event.RelatedEntityGuid,
                     OccurredAt: @event.OccurredAt,
-                    EventType: @event.EventType
+                    EventType: @event.EventType,
+                    EventData: @event.EventData
                     );
             }
         }

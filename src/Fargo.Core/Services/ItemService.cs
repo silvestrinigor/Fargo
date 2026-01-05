@@ -50,9 +50,8 @@ namespace Fargo.Domain.Services
         {
             var newEvent = new Event
             {
-                EntityGuid = e.ItemGuid,
-                OccurredAt = e.Item.CreatedAt,
-                EventType = EventType.ItemCreated
+                EventType = EventType.ItemCreated,
+                RelatedEntityGuid = e.ItemGuid
             };
 
             eventRepository.Add(newEvent);
@@ -76,9 +75,8 @@ namespace Fargo.Domain.Services
         {
             var newEvent = new Event
             {
-                EntityGuid = e.ItemGuid,
-                OccurredAt = DateTime.UtcNow,
-                EventType = EventType.ItemDeleted
+                EventType = EventType.ItemDeleted,
+                RelatedEntityGuid = e.ItemGuid
             };
 
             eventRepository.Add(newEvent);

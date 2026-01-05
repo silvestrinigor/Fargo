@@ -1,8 +1,6 @@
 ﻿using Fargo.Application.Dtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands

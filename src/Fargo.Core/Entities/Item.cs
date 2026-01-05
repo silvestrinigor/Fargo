@@ -2,11 +2,10 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Item : IEntityTyped
+    public class Item : IEntity
     {
         internal Item() 
         { 
-            EntityType = EntityType.Item;
         }
 
         public Guid Guid 
@@ -14,17 +13,6 @@ namespace Fargo.Domain.Entities
             get; 
             init; 
         } = Guid.NewGuid();
-
-        public EntityType EntityType
-        {
-            get;
-        }
-
-        public DateTime CreatedAt 
-        { 
-            get; 
-            init; 
-        } = DateTime.UtcNow;
 
         public Guid ArticleGuid 
         { 

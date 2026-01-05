@@ -2,12 +2,9 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Event : IEntityTyped
+    public class Event : IEntity
     {
-        internal Event() 
-        { 
-            EntityType = EntityType.Event;
-        }
+        internal Event() { }
 
         public Guid Guid
         {
@@ -15,24 +12,25 @@ namespace Fargo.Domain.Entities
             init;
         } = Guid.NewGuid();
 
-        public EntityType EntityType 
-        { 
-            get;
-        }
-
         public DateTime OccurredAt
         {
             get;
             init;
         } = DateTime.UtcNow;
 
-        public required Guid EntityGuid
-        {
+        public required Guid RelatedEntityGuid
+        { 
             get;
             init;
         }
 
         public required EventType EventType
+        {
+            get;
+            init;
+        }
+
+        public object? EventData
         {
             get;
             init;

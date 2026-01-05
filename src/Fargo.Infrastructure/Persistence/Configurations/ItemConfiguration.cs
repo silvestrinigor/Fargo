@@ -12,10 +12,6 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .HasKey(x => x.Guid);
 
             builder
-                .Property(x => x.CreatedAt)
-                .IsRequired();
-
-            builder
                 .HasOne(x => x.Article)
                 .WithMany()
                 .HasForeignKey(x => x.ArticleGuid)

@@ -1,6 +1,8 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.ValueObjects.EventsValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Text.Json;
 
 namespace Fargo.Infrastructure.Persistence.Configurations
 {
@@ -8,7 +10,15 @@ namespace Fargo.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Event> builder)
         {
-            builder.HasKey(e => e.Guid);
+            builder
+                .HasKey(e => e.Guid);
+
+            builder
+                .Property(x => x.EventData)
+                .HasConversion(
+                v => JsonSerializer.Serialize<ArticleCreatedEventData?>(v as ArticleCreatedEventData),
+                v => JsonSerializer.Deserialize<ArticleCreatedEventData?>(v)
+                );
         }
     }
 }

@@ -2,7 +2,6 @@
 {
     public record ItemDto(
         Guid Guid,
-        Guid ArticleGuid,
-        DateTime CreatedAt
+        Guid ArticleGuid
         );
 }
