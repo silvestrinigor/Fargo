@@ -43,6 +43,9 @@ namespace Fargo.HttpApi.Extensions
 
             public void MapFargoEvent()
             {
+                builder.MapGet("/events/{eventGuid}", async (Guid eventGuid, [FromServices] IQueryHandlerAsync<EventSingleQuery, EventDto> handler)
+                    => await handler.HandleAsync(new EventSingleQuery(eventGuid)));
+
                 builder.MapGet("/events", async ([FromQuery] Guid entityGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler)
                     => await handler.HandleAsync(new EventAllFromEntityQuery(entityGuid)));
             }

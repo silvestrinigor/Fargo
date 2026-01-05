@@ -11,6 +11,8 @@ namespace Fargo.Application.Requests.Queries
 
     public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>
     {
+        private readonly IItemReadRepository repository = repository;
+
         public async Task<IEnumerable<ItemDto>> HandleAsync(ItemManyQuery query, CancellationToken cancellationToken = default)
         {
             var itens = await repository.GetManyAsync(query.ArticleGuid, cancellationToken);

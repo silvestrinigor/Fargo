@@ -9,6 +9,8 @@ namespace Fargo.Application.Requests.Queries
 
     public sealed class ArticleAllQueryHandler(IArticleReadRepository repository) : IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>>
     {
+        private readonly IArticleReadRepository repository = repository;
+
         public async Task<IEnumerable<ArticleDto>> HandleAsync(ArticleAllQuery query, CancellationToken cancellationToken = default)
         {
             var articles = await repository.GetAllAsync(cancellationToken);

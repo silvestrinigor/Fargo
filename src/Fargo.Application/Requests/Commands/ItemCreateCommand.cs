@@ -3,6 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands
 {
@@ -10,25 +11,20 @@ namespace Fargo.Application.Requests.Commands
         ItemCreateDto Item
         ) : ICommand<Guid>;
 
-    public sealed class ItemCreateCommandHandler(IItemRepository itemRepository, IArticleRepository articleRepository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ItemCreateCommand, Guid>
+    public sealed class ItemCreateCommandHandler(ItemService itemService, ArticleService articleService, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ItemCreateCommand, Guid>
     {
-        private readonly IItemRepository itemRepository = itemRepository;
+        private readonly ItemService itemService = itemService;
 
-        private readonly IArticleRepository articleRepository = articleRepository;
+        private readonly ArticleService articleService = articleService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
         {
-            var article = await articleRepository.GetByGuidAsync(command.Item.ArticleGuid, cancellationToken)
+            var article = await articleService.GetArticle(command.Item.ArticleGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Item not found.");
 
-            var item = new Item
-            {
-                Article = article
-            };
-
-            itemRepository.Add(item);
+            var item = itemService.CreateItem(article);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

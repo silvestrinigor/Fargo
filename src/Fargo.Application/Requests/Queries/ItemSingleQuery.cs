@@ -9,6 +9,8 @@ namespace Fargo.Application.Requests.Queries
 
     public sealed class ItemSingleQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemSingleQuery, ItemDto>
     {
+        private readonly IItemReadRepository repository = repository;
+
         public async Task<ItemDto> HandleAsync(ItemSingleQuery query, CancellationToken cancellationToken = default)
         {
             var item = await repository.GetByGuidAsync(query.ItemGuid, cancellationToken)

@@ -31,16 +31,20 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
 
                 services.AddScoped<IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>, EventAllFromEntityQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<EventSingleQuery, EventDto>, EventSingleQueryHandler>();
 
                 services.AddScoped<ArticleService>();
 
-                services.AddScoped<EventService>();
+                services.AddScoped<ItemService>();
 
                 services.AddScoped<IArticleRepository, ArticleRepository>();
+                services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
 
                 services.AddScoped<IItemRepository, ItemRepository>();
+                services.AddScoped<IItemReadRepository, ItemReadRepository>();
 
                 services.AddScoped<IEventRepository, EventRepository>();
+                services.AddScoped<IEventReadRepository, EventReadRepository>();
 
                 services.AddDbContext<FargoContext>(opt =>
                     opt.UseInMemoryDatabase("Fargo"));

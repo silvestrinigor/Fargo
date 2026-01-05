@@ -1,16 +1,25 @@
-﻿using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.Enums;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
 {
-    public class Article
+    public class Article : IEntityTyped
     {
-        internal Article() { }
+        internal Article()
+        {
+            EntityType = EntityType.Article;
+        }
 
         public Guid Guid
         {
             get;
             init;
         } = Guid.NewGuid();
+
+        public EntityType EntityType 
+        {
+            get; 
+        }
 
         public required Name Name
         {

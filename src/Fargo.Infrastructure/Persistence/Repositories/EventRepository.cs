@@ -1,6 +1,5 @@
 ﻿using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Repositories
 {

@@ -11,8 +11,17 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public async Task<IEnumerable<Event>> GetAllEventsFromEntity(Guid entityGuid, CancellationToken cancellationToken = default)
         {
             return await context.Events
+                .AsNoTracking()
                 .Where(e => e.EntityGuid == entityGuid)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<Event?> GetEventByGuid(Guid eventGuid, CancellationToken cancellationToken = default)
+        {
+            return await context.Events
+                .AsNoTracking()
+                .Where(x => x.Guid == eventGuid)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

@@ -11,7 +11,5 @@ namespace Fargo.Domain.Repositories
         void Remove(Article article);
         
         Task<bool> HasItensAssociated(Guid articleGuid, CancellationToken cancellationToken = default);
-
-        Task<bool> Exists(Guid articleGuid, CancellationToken cancellationToken = default);
     }
 }

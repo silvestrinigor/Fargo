@@ -10,6 +10,8 @@ namespace Fargo.Application.Requests.Queries
 
     public sealed class EventAllFromEntityQueryHandler(IEventReadRepository repository) : IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>
     {
+        private readonly IEventReadRepository repository = repository;
+
         public async Task<IEnumerable<EventDto>> HandleAsync(EventAllFromEntityQuery query, CancellationToken cancellationToken = default)
         {
             var events = await repository.GetAllEventsFromEntity(

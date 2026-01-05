@@ -3,7 +3,6 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Events;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
-using System.Threading;
 
 namespace Fargo.Domain.Services
 {

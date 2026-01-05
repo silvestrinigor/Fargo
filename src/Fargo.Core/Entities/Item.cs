@@ -1,14 +1,36 @@
-﻿namespace Fargo.Domain.Entities
+﻿using Fargo.Domain.Enums;
+
+namespace Fargo.Domain.Entities
 {
-    public class Item
+    public class Item : IEntityTyped
     {
-        internal Item() { }
+        internal Item() 
+        { 
+            EntityType = EntityType.Item;
+        }
 
-        public Guid Guid { get; init; } = Guid.NewGuid();
+        public Guid Guid 
+        { 
+            get; 
+            init; 
+        } = Guid.NewGuid();
 
-        public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+        public EntityType EntityType
+        {
+            get;
+        }
 
-        public Guid ArticleGuid { get; private init; }
+        public DateTime CreatedAt 
+        { 
+            get; 
+            init; 
+        } = DateTime.UtcNow;
+
+        public Guid ArticleGuid 
+        { 
+            get; 
+            private init; 
+        }
 
         public required Article Article
         { 
