@@ -40,6 +40,12 @@ namespace Fargo.HttpApi.Extensions
                 builder.MapDelete("/items/{itemGuid}", async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler)
                     => await handler.HandleAsync(new ItemDeleteCommand(itemGuid)));
             }
+
+            public void MapFargoEvent()
+            {
+                builder.MapGet("/events", async ([FromQuery] Guid entityGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler)
+                    => await handler.HandleAsync(new EventAllFromEntityQuery(entityGuid)));
+            }
         }
     }
 }

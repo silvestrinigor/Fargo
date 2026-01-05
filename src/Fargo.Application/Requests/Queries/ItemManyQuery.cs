@@ -9,7 +9,7 @@ namespace Fargo.Application.Requests.Queries
         Guid? ArticleGuid
         ) : IQuery<IEnumerable<ItemDto>>;
 
-    public sealed class ItemManyQueryHandler(IItemRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>
+    public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>
     {
         public async Task<IEnumerable<ItemDto>> HandleAsync(ItemManyQuery query, CancellationToken cancellationToken = default)
         {

@@ -4,6 +4,7 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
@@ -18,6 +19,7 @@ namespace Fargo.Infrastructure.Extensions
         {
             public IServiceCollection AddInfrastructure()
             {
+
                 services.AddScoped<ICommandHandlerAsync<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<ArticleSingleQuery, ArticleDto>, ArticleSingleQueryHandler>();
@@ -28,9 +30,17 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto>, ItemSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
 
+                services.AddScoped<IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>, EventAllFromEntityQueryHandler>();
+
+                services.AddScoped<ArticleService>();
+
+                services.AddScoped<EventService>();
+
                 services.AddScoped<IArticleRepository, ArticleRepository>();
 
                 services.AddScoped<IItemRepository, ItemRepository>();
+
+                services.AddScoped<IEventRepository, EventRepository>();
 
                 services.AddDbContext<FargoContext>(opt =>
                     opt.UseInMemoryDatabase("Fargo"));

@@ -4,13 +4,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Repositories
 {
-    public class ItemRepository(FargoContext context) : IItemRepository
+    internal class ItemReadRepository(FargoContext context) : IItemReadRepository
     {
         private readonly FargoContext context = context;
 
-        public void Add(Item item)
+        public async Task<IEnumerable<Item>> GetManyAsync(Guid? articleGuid = null, CancellationToken cancellationToken = default)
         {
-            context.Items.Add(item);
+            var query = context.Items.AsQueryable();
+
+            if (articleGuid is not null)
+            {
+                query = query.Where(x => x.ArticleGuid == articleGuid.Value);
+            }
+
+            return await query
+                .Include(x => x.Article)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
@@ -18,11 +27,6 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             return await context.Items
                 .Include(x => x.Article)
                 .FirstOrDefaultAsync(x => x.Guid == itemGuid, cancellationToken);
-        }
-
-        public void Remove(Item item)
-        {
-            context.Items.Remove(item);
         }
     }
 }

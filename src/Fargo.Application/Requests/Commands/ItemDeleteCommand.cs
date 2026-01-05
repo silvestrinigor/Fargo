@@ -8,6 +8,10 @@ namespace Fargo.Application.Requests.Commands
 
     public sealed class ItemDeleteCommandHandler(IItemRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ItemDeleteCommand>
     {
+        private readonly IItemRepository repository = repository;
+
+        private readonly IUnitOfWork unitOfWork = unitOfWork;
+
         public async Task HandleAsync(ItemDeleteCommand command, CancellationToken cancellationToken = default)
         {
             var item = await repository.GetByGuidAsync(command.ItemGuid, cancellationToken)

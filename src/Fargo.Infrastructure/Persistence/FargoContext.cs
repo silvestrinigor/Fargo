@@ -10,6 +10,8 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<Item> Items { get; set; }
 
+        public DbSet<Event> Events { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -18,7 +20,10 @@ namespace Fargo.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+
             modelBuilder.ApplyConfiguration(new ItemConfiguration());
+
+            modelBuilder.ApplyConfiguration(new EventConfiguration());
         }
     }
 }

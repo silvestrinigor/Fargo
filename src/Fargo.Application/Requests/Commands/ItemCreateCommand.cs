@@ -12,6 +12,12 @@ namespace Fargo.Application.Requests.Commands
 
     public sealed class ItemCreateCommandHandler(IItemRepository itemRepository, IArticleRepository articleRepository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ItemCreateCommand, Guid>
     {
+        private readonly IItemRepository itemRepository = itemRepository;
+
+        private readonly IArticleRepository articleRepository = articleRepository;
+
+        private readonly IUnitOfWork unitOfWork = unitOfWork;
+
         public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
         {
             var article = await articleRepository.GetByGuidAsync(command.Item.ArticleGuid, cancellationToken)

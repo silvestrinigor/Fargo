@@ -1,26 +1,24 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands
 {
     public sealed record ArticleDeleteCommand(Guid ArticleGuid) : ICommand;
 
-    public sealed class ArticleDeleteCommandHandler(IArticleRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ArticleDeleteCommand>
+    public sealed class ArticleDeleteCommandHandler(ArticleService articleService, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ArticleDeleteCommand>
     {
+        private readonly ArticleService articleService = articleService;
+
+        private readonly IUnitOfWork unitOfWork = unitOfWork;
+
         public async Task HandleAsync(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var hasItens = await repository.HasItensAssociated(command.ArticleGuid, cancellationToken);
-
-            if (hasItens)
-            {
-                throw new InvalidOperationException("Cannot delete article with associated items.");
-            }
-
-            var article = await repository.GetByGuidAsync(command.ArticleGuid, cancellationToken)
+            var article = await articleService.GetArticle(command.ArticleGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Article not found.");
 
-            repository.Remove(article);
+            await articleService.DeleteArticleAsync(article, cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

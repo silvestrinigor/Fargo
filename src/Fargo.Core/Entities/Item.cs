@@ -2,6 +2,8 @@
 {
     public class Item
     {
+        internal Item() { }
+
         public Guid Guid { get; init; } = Guid.NewGuid();
 
         public DateTime CreatedAt { get; init; } = DateTime.UtcNow;

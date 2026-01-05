@@ -4,6 +4,8 @@ namespace Fargo.Domain.Entities
 {
     public class Article
     {
+        internal Article() { }
+
         public Guid Guid
         {
             get;

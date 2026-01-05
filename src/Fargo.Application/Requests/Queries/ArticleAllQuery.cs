@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Queries
 {
     public sealed record ArticleAllQuery() : IQuery<IEnumerable<ArticleDto>>;
 
-    public sealed class ArticleAllQueryHandler(IArticleRepository repository) : IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>>
+    public sealed class ArticleAllQueryHandler(IArticleReadRepository repository) : IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>>
     {
         public async Task<IEnumerable<ArticleDto>> HandleAsync(ArticleAllQuery query, CancellationToken cancellationToken = default)
         {
