@@ -12,7 +12,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         {
             return await context.Events
                 .AsNoTracking()
-                .Where(e => e.RelatedEntityGuid == entityGuid)
+                .Where(e => e.EntityGuid == entityGuid)
                 .ToListAsync(cancellationToken);
         }
 

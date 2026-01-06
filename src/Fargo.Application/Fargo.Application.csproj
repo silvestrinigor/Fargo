@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fargo.Core\Fargo.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Converters\" />
+  </ItemGroup>
+
 </Project>

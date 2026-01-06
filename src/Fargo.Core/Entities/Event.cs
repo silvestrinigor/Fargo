@@ -1,7 +1,6 @@
 ﻿using Fargo.Domain.Enums;
 using Fargo.Domain.Events;
 using Fargo.Domain.ValueObjects.EventsValueObjects;
-using System.Text.Json;
 
 namespace Fargo.Domain.Entities
 {
@@ -9,38 +8,34 @@ namespace Fargo.Domain.Entities
     {
         internal Event() { }
 
-        public Event(ArticleCreatedEventArgs eventArgs) 
+        public Event(ArticleCreatedEventArgs eventArgs)
         {
-            RelatedEntityGuid = eventArgs.Article.Guid;
+            EntityGuid = eventArgs.Article.Guid;
 
             EventType = EventType.ArticleCreated;
 
-            EventJsonData = JsonSerializer.Serialize(
-                new ArticleCreatedEventData(eventArgs.Article.Name)
-                );
+            EventData = new ArticleCreatedEventData(eventArgs.Article.Name);
         }
 
         public Event(ArticleDeletedEventArgs eventArgs)
         {
-            RelatedEntityGuid = eventArgs.ArticleGuid;
+            EntityGuid = eventArgs.ArticleGuid;
 
             EventType = EventType.ArticleDeleted;
         }
 
         public Event(ItemCreatedEventArgs eventArgs)
         {
-            RelatedEntityGuid = eventArgs.Item.Guid;
+            EntityGuid = eventArgs.Item.Guid;
 
             EventType = EventType.ItemCreated;
 
-            EventJsonData = JsonSerializer.Serialize(
-                new ItemCreatedEventData(eventArgs.Item.ArticleGuid)
-                );
+            EventData = new ItemCreatedEventData(eventArgs.Item.ArticleGuid);
         }
 
         public Event(ItemDeletedEventArgs eventArgs)
         {
-            RelatedEntityGuid = eventArgs.ItemGuid;
+            EntityGuid = eventArgs.ItemGuid;
 
             EventType = EventType.ItemDeleted;
         }
@@ -57,7 +52,7 @@ namespace Fargo.Domain.Entities
             init;
         } = DateTime.UtcNow;
 
-        public Guid RelatedEntityGuid
+        public Guid EntityGuid
         { 
             get;
             private init;
@@ -69,7 +64,7 @@ namespace Fargo.Domain.Entities
             private init;
         }
 
-        public string? EventJsonData
+        public IEventData? EventData
         {
             get;
             private init;

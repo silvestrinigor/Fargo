@@ -2,5 +2,5 @@
 {
     public record ItemCreatedEventData(
         Guid ArticleGuid
-        );
+        ) : IEventData;
 }

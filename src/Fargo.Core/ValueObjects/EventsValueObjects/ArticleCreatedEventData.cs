@@ -1,4 +1,6 @@
 ﻿namespace Fargo.Domain.ValueObjects.EventsValueObjects
 {
-    public record ArticleCreatedEventData(Name ArticleName);
+    public record ArticleCreatedEventData(
+        Name ArticleName
+        ) : IEventData;
 }

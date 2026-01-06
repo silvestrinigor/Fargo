@@ -1,6 +1,7 @@
 ﻿using Fargo.Application.Dtos;
 using Fargo.Domain.Entities;
-using System.Net.Http.Json;
+using Fargo.Domain.Enums;
+using Fargo.Domain.ValueObjects.EventsValueObjects;
 using System.Text.Json;
 
 namespace Fargo.Application.Extensions
@@ -11,15 +12,41 @@ namespace Fargo.Application.Extensions
         {
             public EventDto ToDto()
             {
-                return new EventDto(
-                    Guid: @event.Guid,
-                    RelatedEntityGuid: @event.RelatedEntityGuid,
-                    OccurredAt: @event.OccurredAt,
-                    EventType: @event.EventType,
-                    EventData: @event.EventJsonData is not null 
-                    ? JsonSerializer.Deserialize<JsonElement>(@event.EventJsonData)
-                    : null
-                    );
+                return @event.EventType switch
+                {
+                    EventType.ArticleCreated =>
+                    new EventDto(
+                        Guid: @event.Guid,
+                        RelatedEntityGuid: @event.EntityGuid,
+                        OccurredAt: @event.OccurredAt,
+                        EventType: @event.EventType,
+                        EventData: 
+                            JsonSerializer.SerializeToElement(
+                                @event.EventData as ArticleCreatedEventData
+                                )
+                        ),
+
+                    EventType.ItemCreated =>
+                    new EventDto(
+                        Guid: @event.Guid,
+                        RelatedEntityGuid: @event.EntityGuid,
+                        OccurredAt: @event.OccurredAt,
+                        EventType: @event.EventType,
+                        EventData:
+                            JsonSerializer.SerializeToElement(
+                                @event.EventData as ItemCreatedEventData
+                                )
+                        ),
+
+                    _ => 
+                    new EventDto(
+                        Guid: @event.Guid,
+                        RelatedEntityGuid: @event.EntityGuid,
+                        OccurredAt: @event.OccurredAt,
+                        EventType: @event.EventType,
+                        EventData: null
+                        )
+                };
             }
         }
     }
