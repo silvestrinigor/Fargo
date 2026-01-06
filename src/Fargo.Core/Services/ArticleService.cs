@@ -4,6 +4,7 @@ using Fargo.Domain.Extensions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 using Fargo.Domain.ValueObjects.EventsValueObjects;
+using System.Text.Json;
 
 namespace Fargo.Domain.Services
 {
@@ -13,11 +14,15 @@ namespace Fargo.Domain.Services
 
         private readonly IEventRepository eventRepository;
 
-        public ArticleService(IArticleRepository articleRepository, IEventRepository eventRepository)
+        private readonly JsonSerializerOptions? jsonSerializerOptions;
+
+        public ArticleService(IArticleRepository articleRepository, IEventRepository eventRepository, JsonSerializerOptions? jsonSerializerOptions = null)
         {
             this.articleRepository = articleRepository;
 
             this.eventRepository = eventRepository;
+
+            this.jsonSerializerOptions = jsonSerializerOptions;
 
             ArticleCreated += HandleArticleCreated;
 
@@ -53,7 +58,7 @@ namespace Fargo.Domain.Services
 
         private void HandleArticleCreated(object? sender, ArticleCreatedEventArgs e)
         {
-            var newEvent = new Event(e);
+            var newEvent = new Event(e, jsonSerializerOptions);
 
             eventRepository.Add(newEvent);
         }

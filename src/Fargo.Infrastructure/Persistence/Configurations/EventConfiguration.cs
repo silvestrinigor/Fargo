@@ -15,7 +15,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .HasKey(e => e.Guid);
 
             builder
-                .Property(x => x.EventData)
+                .Property(x => x.EventSerializedData)
                 .HasConversion(
                     x => x != null ? JsonSerializer.Serialize(x.ToEventDataEnvelope()) : null,
                     x => x != null ? JsonSerializer.Deserialize<EventDataEnvelope>(x)!.ToEventData() : null

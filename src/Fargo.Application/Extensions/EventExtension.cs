@@ -22,7 +22,7 @@ namespace Fargo.Application.Extensions
                         EventType: @event.EventType,
                         EventData: 
                             JsonSerializer.SerializeToElement(
-                                @event.EventData as ArticleCreatedEventData
+                                @event.EventSerializedData as ArticleCreatedEventData
                                 )
                         ),
 
@@ -34,7 +34,7 @@ namespace Fargo.Application.Extensions
                         EventType: @event.EventType,
                         EventData:
                             JsonSerializer.SerializeToElement(
-                                @event.EventData as ItemCreatedEventData
+                                @event.EventSerializedData as ItemCreatedEventData
                                 )
                         ),
 

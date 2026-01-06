@@ -1,6 +1,7 @@
 ﻿using Fargo.Domain.Enums;
 using Fargo.Domain.Events;
 using Fargo.Domain.ValueObjects.EventsValueObjects;
+using System.Text.Json;
 
 namespace Fargo.Domain.Entities
 {
@@ -8,13 +9,16 @@ namespace Fargo.Domain.Entities
     {
         internal Event() { }
 
-        public Event(ArticleCreatedEventArgs eventArgs)
+        public Event(ArticleCreatedEventArgs eventArgs, JsonSerializerOptions? jsonSerializerOptions = null)
         {
             EntityGuid = eventArgs.Article.Guid;
 
             EventType = EventType.ArticleCreated;
 
-            EventData = new ArticleCreatedEventData(eventArgs.Article.Name);
+            EventSerializedData = JsonSerializer.SerializeToElement(
+                new ArticleCreatedEventData(eventArgs.Article.Name),
+                jsonSerializerOptions
+                );
         }
 
         public Event(ArticleDeletedEventArgs eventArgs)
@@ -24,13 +28,16 @@ namespace Fargo.Domain.Entities
             EventType = EventType.ArticleDeleted;
         }
 
-        public Event(ItemCreatedEventArgs eventArgs)
+        public Event(ItemCreatedEventArgs eventArgs, JsonSerializerOptions? jsonSerializerOptions = null)
         {
             EntityGuid = eventArgs.Item.Guid;
 
             EventType = EventType.ItemCreated;
 
-            EventData = new ItemCreatedEventData(eventArgs.Item.ArticleGuid);
+            EventSerializedData = JsonSerializer.SerializeToElement(
+                new ItemCreatedEventData(eventArgs.Item.ArticleGuid),
+                jsonSerializerOptions
+                );
         }
 
         public Event(ItemDeletedEventArgs eventArgs)
@@ -64,7 +71,7 @@ namespace Fargo.Domain.Entities
             private init;
         }
 
-        public IEventData? EventData
+        public JsonElement? EventSerializedData
         {
             get;
             private init;

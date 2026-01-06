@@ -1,7 +1,6 @@
 ﻿using Fargo.Domain.ValueObjects.EventsValueObjects;
 using Fargo.Infrastructure.Enums;
 using Fargo.Infrastructure.ValueObjects;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text.Json;
 
 namespace Fargo.Infrastructure.Extensions

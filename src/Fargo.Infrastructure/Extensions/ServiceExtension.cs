@@ -47,7 +47,8 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IEventReadRepository, EventReadRepository>();
 
                 services.AddDbContext<FargoContext>(opt =>
-                    opt.UseInMemoryDatabase("Fargo"));
+                    opt.UseInMemoryDatabase("Fargo")
+                    );
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 
