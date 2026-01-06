@@ -1,10 +1,49 @@
 ﻿using Fargo.Domain.Enums;
+using Fargo.Domain.Events;
+using Fargo.Domain.ValueObjects.EventsValueObjects;
+using System.Text.Json;
 
 namespace Fargo.Domain.Entities
 {
     public class Event : IEntity
     {
         internal Event() { }
+
+        public Event(ArticleCreatedEventArgs eventArgs) 
+        {
+            RelatedEntityGuid = eventArgs.Article.Guid;
+
+            EventType = EventType.ArticleCreated;
+
+            EventJsonData = JsonSerializer.Serialize(
+                new ArticleCreatedEventData(eventArgs.Article.Name)
+                );
+        }
+
+        public Event(ArticleDeletedEventArgs eventArgs)
+        {
+            RelatedEntityGuid = eventArgs.ArticleGuid;
+
+            EventType = EventType.ArticleDeleted;
+        }
+
+        public Event(ItemCreatedEventArgs eventArgs)
+        {
+            RelatedEntityGuid = eventArgs.Item.Guid;
+
+            EventType = EventType.ItemCreated;
+
+            EventJsonData = JsonSerializer.Serialize(
+                new ItemCreatedEventData(eventArgs.Item.ArticleGuid)
+                );
+        }
+
+        public Event(ItemDeletedEventArgs eventArgs)
+        {
+            RelatedEntityGuid = eventArgs.ItemGuid;
+
+            EventType = EventType.ItemDeleted;
+        }
 
         public Guid Guid
         {
@@ -18,22 +57,22 @@ namespace Fargo.Domain.Entities
             init;
         } = DateTime.UtcNow;
 
-        public required Guid RelatedEntityGuid
+        public Guid RelatedEntityGuid
         { 
             get;
-            init;
+            private init;
         }
 
-        public required EventType EventType
+        public EventType EventType
         {
             get;
-            init;
+            private init;
         }
 
-        public object? EventData
+        public string? EventJsonData
         {
             get;
-            init;
+            private init;
         }
     }
 }

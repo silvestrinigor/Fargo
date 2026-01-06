@@ -48,11 +48,7 @@ namespace Fargo.Domain.Services
 
         private void HandleItemCreated(object? sender, ItemCreatedEventArgs e)
         {
-            var newEvent = new Event
-            {
-                EventType = EventType.ItemCreated,
-                RelatedEntityGuid = e.ItemGuid
-            };
+            var newEvent = new Event(e);
 
             eventRepository.Add(newEvent);
         }
@@ -73,11 +69,7 @@ namespace Fargo.Domain.Services
 
         private void HandleItemDeleted(object? sender, ItemDeletedEventArgs e)
         {
-            var newEvent = new Event
-            {
-                EventType = EventType.ItemDeleted,
-                RelatedEntityGuid = e.ItemGuid
-            };
+            var newEvent = new Event(e);
 
             eventRepository.Add(newEvent);
         }

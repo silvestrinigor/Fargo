@@ -1,4 +1,6 @@
 ﻿using Fargo.Domain.Enums;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Fargo.Application.Dtos
 {
@@ -7,6 +9,6 @@ namespace Fargo.Application.Dtos
         Guid RelatedEntityGuid,
         DateTime OccurredAt,
         EventType EventType,
-        object? EventData
+        JsonElement? EventData
         );
 }

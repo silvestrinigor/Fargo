@@ -53,12 +53,7 @@ namespace Fargo.Domain.Services
 
         private void HandleArticleCreated(object? sender, ArticleCreatedEventArgs e)
         {
-            var newEvent = new Event
-            {
-                EventType = Enums.EventType.ArticleCreated,
-                RelatedEntityGuid = e.ArticleGuid,
-                EventData = new ArticleCreatedEventData(e.Article.Name)
-            };
+            var newEvent = new Event(e);
 
             eventRepository.Add(newEvent);
         }
@@ -86,11 +81,7 @@ namespace Fargo.Domain.Services
 
         private void HandleArticleDeleted(object? sender, ArticleDeletedEventArgs e)
         {
-            var newEvent = new Event
-            {
-                EventType = Enums.EventType.ArticleDeleted,
-                RelatedEntityGuid = e.ArticleGuid
-            };
+            var newEvent = new Event(e);
 
             eventRepository.Add(newEvent);
         }
