@@ -17,10 +17,6 @@ namespace Fargo.Domain.Services
             this.articleRepository = articleRepository;
 
             this.eventRepository = eventRepository;
-
-            ArticleCreated += HandleArticleCreated;
-
-            ArticleDeleted += HandleArticleDeleted;
         }
 
         public async Task<Article?> GetArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
@@ -38,6 +34,10 @@ namespace Fargo.Domain.Services
 
             articleRepository.Add(article);
 
+            var newEvent = new ArticleCreatedEvent(article);
+
+            eventRepository.Add(newEvent);
+
             OnArticleCreated(article);
 
             return article;
@@ -48,13 +48,6 @@ namespace Fargo.Domain.Services
         private void OnArticleCreated(Article article)
         {
             ArticleCreated?.Invoke(this, new ArticleCreatedEventArgs(article));
-        }
-
-        private void HandleArticleCreated(object? sender, ArticleCreatedEventArgs e)
-        {
-            var newEvent = new ArticleCreatedEvent(e.Article);
-
-            eventRepository.Add(newEvent);
         }
 
         public async Task DeleteArticleAsync(Article article, CancellationToken cancellationToken = default)
@@ -68,6 +61,10 @@ namespace Fargo.Domain.Services
 
             articleRepository.Remove(article);
 
+            var newEvent = new ArticleDeletedEvent(article);
+
+            eventRepository.Add(newEvent);
+
             OnArticleDeleted(article);
         }
 
@@ -76,13 +73,6 @@ namespace Fargo.Domain.Services
         private void OnArticleDeleted(Article article)
         {
             ArticleDeleted?.Invoke(this, new ArticleDeletedEventArgs(article));
-        }
-
-        private void HandleArticleDeleted(object? sender, ArticleDeletedEventArgs e)
-        {
-            var newEvent = new ArticleDeletedEvent(e.Article);
-
-            eventRepository.Add(newEvent);
         }
     }
 }

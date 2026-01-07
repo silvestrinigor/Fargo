@@ -15,9 +15,6 @@ namespace Fargo.Domain.Services
         {
             this.itemRepository = itemRepository;
             this.eventRepository = eventRepository;
-
-            ItemCreated += HandleItemCreated;
-            ItemDeleted += HandleItemDeleted;
         }
 
         public async Task<Item?> GetItemAsync(Guid itemGuid, CancellationToken cancellationToken = default)
@@ -34,6 +31,10 @@ namespace Fargo.Domain.Services
 
             itemRepository.Add(item);
 
+            var newEvent = new ItemCreatedEvent(item);
+
+            eventRepository.Add(newEvent);
+
             OnItemCreated(item);
 
             return item;
@@ -46,16 +47,13 @@ namespace Fargo.Domain.Services
             ItemCreated?.Invoke(this, new ItemCreatedEventArgs(item));
         }
 
-        private void HandleItemCreated(object? sender, ItemCreatedEventArgs e)
-        {
-            var newEvent = new ItemCreatedEvent(e.Item);
-
-            eventRepository.Add(newEvent);
-        }
-
         public void DeleteItem(Item item)
         {
             itemRepository.Remove(item);
+
+            var newEvent = new ItemDeletedEvent(item);
+
+            eventRepository.Add(newEvent);
 
             OnItemDeleted(item);
         }
@@ -65,13 +63,6 @@ namespace Fargo.Domain.Services
         private void OnItemDeleted(Item item)
         {
             ItemDeleted?.Invoke(this, new ItemDeletedEventArgs(item));
-        }
-
-        private void HandleItemDeleted(object? sender, ItemDeletedEventArgs e)
-        {
-            var newEvent = new ItemDeletedEvent(e.Item);
-
-            eventRepository.Add(newEvent);
         }
     }
 }
