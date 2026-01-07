@@ -12,6 +12,12 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .HasKey(x => x.Guid);
 
             builder
+                .HasIndex(x => new { x.ModelGuid, x.OccurredAt });
+
+            builder
+                .HasIndex(x => x.OccurredAt);
+
+            builder
                 .UseTptMappingStrategy();
         }
     }
