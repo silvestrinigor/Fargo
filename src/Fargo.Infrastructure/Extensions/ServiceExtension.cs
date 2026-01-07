@@ -19,7 +19,6 @@ namespace Fargo.Infrastructure.Extensions
         {
             public IServiceCollection AddInfrastructure()
             {
-
                 services.AddScoped<ICommandHandlerAsync<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<ArticleSingleQuery, ArticleDto>, ArticleSingleQueryHandler>();
@@ -33,6 +32,9 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>, EventAllFromEntityQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<EventSingleQuery, EventDto?>, EventSingleQueryHandler>();
 
+                services.AddScoped<IQueryHandlerAsync<ModelSingleQuery, ModelDto?>, ModelSingleQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>>, ModelManyQueryHandler>();
+
                 services.AddScoped<ArticleService>();
 
                 services.AddScoped<ItemService>();
@@ -45,6 +47,9 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IEventRepository, EventRepository>();
                 services.AddScoped<IEventReadRepository, EventReadRepository>();
+
+                services.AddScoped<IModelRepository, ModelRepository>();
+                services.AddScoped<IModelReadRepository, ModelReadRepository>();
 
                 services.AddDbContext<FargoContext>(opt =>
                     opt.UseInMemoryDatabase("Fargo")

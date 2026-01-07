@@ -4,7 +4,7 @@ namespace Fargo.Domain.Repositories
 {
     public interface IEventReadRepository
     {
-        Task<IEnumerable<Event>> GetAllEventsFromEntity(Guid entityGuid, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Event>> GetAllEventsFromModel(Guid? modelGuid, CancellationToken cancellationToken = default);
 
         Task<Event?> GetEventByGuid(Guid eventGuid, CancellationToken cancellationToken = default);
     }

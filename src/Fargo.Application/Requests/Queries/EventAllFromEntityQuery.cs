@@ -6,7 +6,8 @@ using Fargo.Domain.Repositories;
 namespace Fargo.Application.Requests.Queries
 {
     public sealed record EventAllFromEntityQuery(
-        Guid EntityGuid) : IQuery<IEnumerable<EventDto>>;
+        Guid? EntityGuid
+        ) : IQuery<IEnumerable<EventDto>>;
 
     public sealed class EventAllFromEntityQueryHandler(IEventReadRepository repository) : IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>
     {
@@ -14,7 +15,7 @@ namespace Fargo.Application.Requests.Queries
 
         public async Task<IEnumerable<EventDto>> HandleAsync(EventAllFromEntityQuery query, CancellationToken cancellationToken = default)
         {
-            var events = await repository.GetAllEventsFromEntity(
+            var events = await repository.GetAllEventsFromModel(
                 query.EntityGuid,
                 cancellationToken);
 

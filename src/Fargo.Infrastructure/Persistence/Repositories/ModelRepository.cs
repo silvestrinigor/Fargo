@@ -13,11 +13,11 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             context.Models.Add(model);
         }
 
-        public async Task<Model?> GetByGuidAsync(Guid guid)
+        public async Task<Model?> GetByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
         {
             return await context.Models
                 .Where(model => model.Guid == guid)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public void Remove(Model model)

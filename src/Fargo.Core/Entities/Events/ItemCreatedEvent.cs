@@ -15,7 +15,11 @@ namespace Fargo.Domain.Entities.Events
             ItemArticleGuid = item.ArticleGuid;
         }
 
-        public override EventType EventType => EventType.ItemCreated;
+        public override EventType EventType
+        {
+            get;
+            protected init;
+        } = EventType.ItemCreated;
 
         public Guid ItemArticleGuid
         {

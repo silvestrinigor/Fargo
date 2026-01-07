@@ -8,11 +8,11 @@ namespace Fargo.Infrastructure.Persistence.Repositories
     {
         private readonly FargoContext context = context;
 
-        public async Task<IEnumerable<Event>> GetAllEventsFromEntity(Guid entityGuid, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Event>> GetAllEventsFromModel(Guid? modelGuid, CancellationToken cancellationToken = default)
         {
             return await context.Events
                 .AsNoTracking()
-                .Where(e => e.ModelGuid == entityGuid)
+                .Where(e => e.ModelGuid == modelGuid)
                 .ToListAsync(cancellationToken);
         }
 

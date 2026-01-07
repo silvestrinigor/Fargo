@@ -7,7 +7,11 @@ namespace Fargo.Domain.Entities.Models
     {
         internal Item() { }
 
-        public override ModelType ModelType => ModelType.Item;
+        public override ModelType ModelType
+        {
+            get;
+            protected init;
+        } = ModelType.Item;
 
         public Guid ArticleGuid
         { 

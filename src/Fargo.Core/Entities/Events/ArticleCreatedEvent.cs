@@ -15,7 +15,11 @@ namespace Fargo.Domain.Entities.Events
             ArticleName = article.Name;
         }
 
-        public override EventType EventType => EventType.ArticleCreated;
+        public override EventType EventType
+        {
+            get;
+            protected init;
+        } = EventType.ArticleCreated;
 
         public Name ArticleName
         {

@@ -13,8 +13,9 @@ namespace Fargo.Domain.Entities.Events.Abstracts
         } = Guid.NewGuid();
 
         public abstract EventType EventType 
-        { 
+        {
             get;
+            protected init;
         }
 
         public DateTime OccurredAt

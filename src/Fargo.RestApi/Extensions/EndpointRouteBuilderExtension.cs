@@ -47,13 +47,16 @@ namespace Fargo.HttpApi.Extensions
                 builder.MapGet("/events/{eventGuid}", async (Guid eventGuid, [FromServices] IQueryHandlerAsync<EventSingleQuery, EventDto?> handler)
                     => await handler.HandleAsync(new EventSingleQuery(eventGuid)));
 
-                builder.MapGet("/events", async ([FromQuery] Guid relatedEntityGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler)
-                    => await handler.HandleAsync(new EventAllFromEntityQuery(relatedEntityGuid)));
+                builder.MapGet("/events", async ([FromQuery] Guid? modelGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler)
+                    => await handler.HandleAsync(new EventAllFromEntityQuery(modelGuid)));
             }
 
-            public void MapFargoModels()
+            public void MapFargoModel()
             {
-                builder.MapGet("/models", async ([FromQuery] ModelType modelType, [FromServices] IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>> handler)
+                builder.MapGet("/models/{modelGuid}", async (Guid modelGuid, [FromServices] IQueryHandlerAsync<ModelSingleQuery, ModelDto?> handler)
+                    => await handler.HandleAsync(new ModelSingleQuery(modelGuid)));
+
+                builder.MapGet("/models", async ([FromQuery] ModelType? modelType, [FromServices] IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>> handler)
                     => await handler.HandleAsync(new ModelManyQuery(modelType)));
             }
         }

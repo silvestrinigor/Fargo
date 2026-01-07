@@ -13,6 +13,10 @@ namespace Fargo.Domain.Entities.Events
             ModelGuid = article.Guid;
         }
 
-        public override EventType EventType => EventType.ArticleDeleted;
+        public override EventType EventType
+        {
+            get;
+            protected init;
+        } = EventType.ArticleDeleted;
     }
 }

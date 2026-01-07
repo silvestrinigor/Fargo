@@ -8,7 +8,11 @@ namespace Fargo.Domain.Entities.Models
     {
         internal Article() { }
 
-        public override ModelType ModelType => ModelType.Article;
+        public override ModelType ModelType
+        {
+            get;
+            protected init;
+        } = ModelType.Article;
 
         public required Name Name
         {

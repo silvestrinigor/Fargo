@@ -17,9 +17,17 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
         }
 
-        public Task<IEnumerable<Model>> GetManyAsync(ModelType? modelType = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Model>> GetManyAsync(ModelType? modelType = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var query = context.Models.AsQueryable();
+
+            if (modelType != null)
+            {
+                query = query.Where(x => x.ModelType == modelType);
+            }
+
+            return await query
+                .ToListAsync(cancellationToken);
         }
     }
 }
