@@ -2,19 +2,15 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Item : IEntity
+    public class Item : Entity
     {
+        public override EntityType EntityType => EntityType.Item;
+
         internal Item() 
         { 
         }
 
-        public Guid Guid 
-        { 
-            get; 
-            init; 
-        } = Guid.NewGuid();
-
-        public Guid ArticleGuid 
+        public Guid ArticleGuid
         { 
             get; 
             private init; 

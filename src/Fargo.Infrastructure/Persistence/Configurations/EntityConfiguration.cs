@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    public class EventConfiguration : IEntityTypeConfiguration<Event>
+    public class EntityConfiguration : IEntityTypeConfiguration<Entity>
     {
-        public void Configure(EntityTypeBuilder<Event> builder)
+        public void Configure(EntityTypeBuilder<Entity> builder)
         {
+            builder
+                .HasKey(x => x.Guid);
         }
     }
 }

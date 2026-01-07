@@ -1,8 +1,6 @@
 ﻿using Fargo.Application.Dtos;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects.EventsValueObjects;
-using System.Text.Json;
 
 namespace Fargo.Application.Extensions
 {
@@ -12,41 +10,10 @@ namespace Fargo.Application.Extensions
         {
             public EventDto ToDto()
             {
-                return @event.EventType switch
-                {
-                    EventType.ArticleCreated =>
-                    new EventDto(
-                        Guid: @event.Guid,
-                        RelatedEntityGuid: @event.EntityGuid,
-                        OccurredAt: @event.OccurredAt,
-                        EventType: @event.EventType,
-                        EventData: 
-                            JsonSerializer.SerializeToElement(
-                                @event.EventSerializedData as ArticleCreatedEventData
-                                )
-                        ),
-
-                    EventType.ItemCreated =>
-                    new EventDto(
-                        Guid: @event.Guid,
-                        RelatedEntityGuid: @event.EntityGuid,
-                        OccurredAt: @event.OccurredAt,
-                        EventType: @event.EventType,
-                        EventData:
-                            JsonSerializer.SerializeToElement(
-                                @event.EventSerializedData as ItemCreatedEventData
-                                )
-                        ),
-
-                    _ => 
-                    new EventDto(
-                        Guid: @event.Guid,
-                        RelatedEntityGuid: @event.EntityGuid,
-                        OccurredAt: @event.OccurredAt,
-                        EventType: @event.EventType,
-                        EventData: null
-                        )
-                };
+                return new EventDto(
+                    Guid: @event.Guid,
+                    OccurredAt: @event.OccurredAt
+                    );
             }
         }
     }

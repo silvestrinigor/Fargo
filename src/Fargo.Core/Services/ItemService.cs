@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Entities.Events;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Events;
 using Fargo.Domain.Repositories;
@@ -12,13 +13,10 @@ namespace Fargo.Domain.Services
 
         private readonly IEventRepository eventRepository;
 
-        private readonly JsonSerializerOptions? jsonSerializerOptions;
-
-        public ItemService(IItemRepository itemRepository, IEventRepository eventRepository, JsonSerializerOptions? jsonSerializerOptions)
+        public ItemService(IItemRepository itemRepository, IEventRepository eventRepository)
         {
             this.itemRepository = itemRepository;
             this.eventRepository = eventRepository;
-            this.jsonSerializerOptions = jsonSerializerOptions;
 
             ItemCreated += HandleItemCreated;
             ItemDeleted += HandleItemDeleted;
@@ -52,7 +50,7 @@ namespace Fargo.Domain.Services
 
         private void HandleItemCreated(object? sender, ItemCreatedEventArgs e)
         {
-            var newEvent = new Event(e, jsonSerializerOptions);
+            var newEvent = new ItemCreatedEvent(e.Item);
 
             eventRepository.Add(newEvent);
         }
@@ -73,7 +71,7 @@ namespace Fargo.Domain.Services
 
         private void HandleItemDeleted(object? sender, ItemDeletedEventArgs e)
         {
-            var newEvent = new Event(e);
+            var newEvent = new ItemDeletedEvent(e.ItemGuid);
 
             eventRepository.Add(newEvent);
         }

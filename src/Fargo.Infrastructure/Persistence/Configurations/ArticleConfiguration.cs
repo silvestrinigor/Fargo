@@ -9,9 +9,6 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Article> builder)
         {
             builder
-                .HasKey(x => x.Guid);
-
-            builder
                 .Property(x => x.Name)
                 .IsRequired();
 

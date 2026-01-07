@@ -9,9 +9,6 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Item> builder)
         {
             builder
-                .HasKey(x => x.Guid);
-
-            builder
                 .HasOne(x => x.Article)
                 .WithMany()
                 .HasForeignKey(x => x.ArticleGuid)
