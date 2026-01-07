@@ -13,6 +13,9 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(x => x.ArticleGuid)
                 .IsRequired();
+
+            builder
+                .HasIndex(x => x.ArticleGuid);
         }
     }
 }
