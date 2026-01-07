@@ -12,6 +12,9 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         {
             builder
                 .HasKey(x => x.Guid);
+
+            builder
+                .UseTptMappingStrategy();
         }
     }
 }

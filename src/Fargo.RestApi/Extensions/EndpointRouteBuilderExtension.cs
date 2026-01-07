@@ -14,7 +14,7 @@ namespace Fargo.HttpApi.Extensions
         {
             public void MapFargoArticle()
             {
-                builder.MapGet("/articles/{articleGuid}", async (Guid articleGuid, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto> handler)
+                builder.MapGet("/articles/{articleGuid}", async (Guid articleGuid, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?> handler)
                     => await handler.HandleAsync(new ArticleSingleQuery(articleGuid)));
 
                 builder.MapGet("/articles", async ([FromServices] IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>> handler)

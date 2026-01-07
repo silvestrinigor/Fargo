@@ -16,6 +16,9 @@ namespace Fargo.Infrastructure.Persistence.Configurations
 
             builder
                 .Property(x => x.ModelType);
+            
+            builder
+                .UseTptMappingStrategy();
         }
     }
 }
