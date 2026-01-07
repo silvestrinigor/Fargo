@@ -14,7 +14,7 @@ namespace Fargo.Application.Requests.Commands
 
         public async Task HandleAsync(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var article = await articleService.GetArticle(command.ArticleGuid, cancellationToken)
+            var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Article not found.");
 
             await articleService.DeleteArticleAsync(article, cancellationToken);

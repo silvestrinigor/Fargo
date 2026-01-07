@@ -19,7 +19,7 @@ namespace Fargo.Application.Requests.Commands
 
         public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
         {
-            var article = await articleService.GetArticle(command.Item.ArticleGuid, cancellationToken)
+            var article = await articleService.GetArticleAsync(command.Item.ArticleGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Item not found.");
 
             var item = itemService.CreateItem(article);

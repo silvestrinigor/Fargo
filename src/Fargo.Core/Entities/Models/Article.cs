@@ -1,13 +1,14 @@
-﻿using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Entities.Models.Abstracts;
+using Fargo.Domain.Enums;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Domain.Entities
+namespace Fargo.Domain.Entities.Models
 {
-    public class Article : Entity
+    public class Article : Model
     {
-        public override EntityType EntityType => EntityType.Article;
-
         internal Article() { }
+
+        public override ModelType ModelType => ModelType.Article;
 
         public required Name Name
         {

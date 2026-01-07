@@ -1,14 +1,13 @@
-﻿using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Entities.Models.Abstracts;
+using Fargo.Domain.Enums;
 
-namespace Fargo.Domain.Entities
+namespace Fargo.Domain.Entities.Models
 {
-    public class Item : Entity
+    public class Item : Model
     {
-        public override EntityType EntityType => EntityType.Item;
+        internal Item() { }
 
-        internal Item() 
-        { 
-        }
+        public override ModelType ModelType => ModelType.Item;
 
         public Guid ArticleGuid
         { 

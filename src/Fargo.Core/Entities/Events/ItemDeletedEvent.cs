@@ -1,16 +1,18 @@
-﻿using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Entities.Events.Abstracts;
+using Fargo.Domain.Entities.Models;
+using Fargo.Domain.Enums;
 
 namespace Fargo.Domain.Entities.Events
 {
     public class ItemDeletedEvent : Event
     {
-        public override EventType EventType => EventType.ItemDeleted;
-
         private ItemDeletedEvent() { }
         
-        internal ItemDeletedEvent(Guid itemGuid)
+        internal ItemDeletedEvent(Item item)
         {
-            EntityGuid = itemGuid;
+            ModelGuid = item.Guid;
         }
+
+        public override EventType EventType => EventType.ItemDeleted;
     }
 }

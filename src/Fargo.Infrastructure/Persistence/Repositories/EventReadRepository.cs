@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Events.Abstracts;
 using Fargo.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +12,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         {
             return await context.Events
                 .AsNoTracking()
-                .Where(e => e.EntityGuid == entityGuid)
+                .Where(e => e.ModelGuid == entityGuid)
                 .ToListAsync(cancellationToken);
         }
 

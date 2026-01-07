@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Models;
 using Fargo.Domain.Entities.Events;
 using Fargo.Domain.Events;
 using Fargo.Domain.Repositories;
@@ -23,7 +23,7 @@ namespace Fargo.Domain.Services
             ArticleDeleted += HandleArticleDeleted;
         }
 
-        public async Task<Article?> GetArticle(Guid articleGuid, CancellationToken cancellationToken = default)
+        public async Task<Article?> GetArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
         {
             return await articleRepository.GetByGuidAsync(articleGuid, cancellationToken);
         }
@@ -80,7 +80,7 @@ namespace Fargo.Domain.Services
 
         private void HandleArticleDeleted(object? sender, ArticleDeletedEventArgs e)
         {
-            var newEvent = new ArticleDeletedEvent(e.ArticleGuid);
+            var newEvent = new ArticleDeletedEvent(e.Article);
 
             eventRepository.Add(newEvent);
         }

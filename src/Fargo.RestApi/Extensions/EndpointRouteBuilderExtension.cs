@@ -2,6 +2,7 @@
 using Fargo.Application.Mediators;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Queries;
+using Fargo.Domain.Enums;
 using Fargo.HttpApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,6 +49,12 @@ namespace Fargo.HttpApi.Extensions
 
                 builder.MapGet("/events", async ([FromQuery] Guid relatedEntityGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler)
                     => await handler.HandleAsync(new EventAllFromEntityQuery(relatedEntityGuid)));
+            }
+
+            public void MapFargoModels()
+            {
+                builder.MapGet("/models", async ([FromQuery] ModelType modelType, [FromServices] IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>> handler)
+                    => await handler.HandleAsync(new ModelManyQuery(modelType)));
             }
         }
     }

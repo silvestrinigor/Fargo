@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Events.Abstracts;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Infrastructure.Persistence.Repositories

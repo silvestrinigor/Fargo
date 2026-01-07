@@ -1,9 +1,7 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Models;
 using Fargo.Domain.Entities.Events;
-using Fargo.Domain.Enums;
 using Fargo.Domain.Events;
 using Fargo.Domain.Repositories;
-using System.Text.Json;
 
 namespace Fargo.Domain.Services
 {
@@ -22,7 +20,7 @@ namespace Fargo.Domain.Services
             ItemDeleted += HandleItemDeleted;
         }
 
-        public async Task<Item?> GetItem(Guid itemGuid, CancellationToken cancellationToken = default)
+        public async Task<Item?> GetItemAsync(Guid itemGuid, CancellationToken cancellationToken = default)
         {
             return await itemRepository.GetByGuidAsync(itemGuid, cancellationToken);
         }
@@ -71,7 +69,7 @@ namespace Fargo.Domain.Services
 
         private void HandleItemDeleted(object? sender, ItemDeletedEventArgs e)
         {
-            var newEvent = new ItemDeletedEvent(e.ItemGuid);
+            var newEvent = new ItemDeletedEvent(e.Item);
 
             eventRepository.Add(newEvent);
         }

@@ -1,5 +1,5 @@
 ﻿using Fargo.Application.Dtos;
-using Fargo.Domain.Entities;
+using Fargo.Domain.Entities.Events.Abstracts;
 using Fargo.Domain.Enums;
 
 namespace Fargo.Application.Extensions
@@ -12,7 +12,9 @@ namespace Fargo.Application.Extensions
             {
                 return new EventDto(
                     Guid: @event.Guid,
-                    OccurredAt: @event.OccurredAt
+                    OccurredAt: @event.OccurredAt,
+                    ModelGuid: @event.ModelGuid,
+                    EventType: @event.EventType
                     );
             }
         }

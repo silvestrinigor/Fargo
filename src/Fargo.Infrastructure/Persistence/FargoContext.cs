@@ -1,13 +1,15 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Models;
 using Fargo.Domain.Entities.Events;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
+using Fargo.Domain.Entities.Events.Abstracts;
+using Fargo.Domain.Entities.Models.Abstracts;
 
 namespace Fargo.Infrastructure.Persistence
 {
     public class FargoContext(DbContextOptions<FargoContext> options) : DbContext(options)
     {
-        public DbSet<Entity> Entities { get; set; }
+        public DbSet<Model> Models { get; set; }
 
         public DbSet<Article> Articles { get; set; }
 
@@ -30,7 +32,7 @@ namespace Fargo.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new EntityConfiguration());
+            modelBuilder.ApplyConfiguration(new ModelConfiguration());
 
             modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 

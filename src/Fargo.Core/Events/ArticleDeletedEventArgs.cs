@@ -1,9 +1,9 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.Models;
 
 namespace Fargo.Domain.Events
 {
     public sealed class ArticleDeletedEventArgs(Article article) : EventArgs
     {
-        public Guid ArticleGuid { get; } = article.Guid;
+        public Article Article { get; } = article;
     }
 }
