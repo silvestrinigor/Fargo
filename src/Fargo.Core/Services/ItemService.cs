@@ -1,5 +1,5 @@
-﻿using Fargo.Domain.Entities.Models;
-using Fargo.Domain.Entities.Events;
+﻿using Fargo.Domain.Entities.Events;
+using Fargo.Domain.Entities.Models;
 using Fargo.Domain.Events;
 using Fargo.Domain.Repositories;
 

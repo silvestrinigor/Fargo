@@ -7,7 +7,7 @@ namespace Fargo.Domain.Entities.Events
     public class ItemDeletedEvent : Event
     {
         private ItemDeletedEvent() { }
-        
+
         internal ItemDeletedEvent(Item item)
         {
             ModelGuid = item.Guid;

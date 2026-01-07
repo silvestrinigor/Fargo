@@ -4,7 +4,7 @@ namespace Fargo.Domain.Entities.Events.Abstracts
 {
     public abstract class Event : IEntity
     {
-        internal Event() { } 
+        internal Event() { }
 
         public Guid Guid
         {
@@ -12,7 +12,7 @@ namespace Fargo.Domain.Entities.Events.Abstracts
             init;
         } = Guid.NewGuid();
 
-        public abstract EventType EventType 
+        public abstract EventType EventType
         {
             get;
             protected init;

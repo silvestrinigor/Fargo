@@ -1,9 +1,9 @@
-﻿using Fargo.Domain.Entities.Models;
-using Fargo.Domain.Entities.Events;
+﻿using Fargo.Domain.Entities.Events;
+using Fargo.Domain.Entities.Events.Abstracts;
+using Fargo.Domain.Entities.Models;
+using Fargo.Domain.Entities.Models.Abstracts;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
-using Fargo.Domain.Entities.Events.Abstracts;
-using Fargo.Domain.Entities.Models.Abstracts;
 
 namespace Fargo.Infrastructure.Persistence
 {

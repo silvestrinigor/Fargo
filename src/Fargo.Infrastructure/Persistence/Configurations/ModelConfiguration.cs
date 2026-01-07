@@ -1,7 +1,4 @@
-﻿using Fargo.Domain.Entities.Events;
-using Fargo.Domain.Entities.Models;
-using Fargo.Domain.Entities.Models.Abstracts;
-using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Entities.Models.Abstracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,7 +13,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
 
             builder
                 .Property(x => x.ModelType);
-            
+
             builder
                 .UseTptMappingStrategy();
         }

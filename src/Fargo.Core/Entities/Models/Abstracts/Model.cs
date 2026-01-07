@@ -8,13 +8,13 @@ namespace Fargo.Domain.Entities.Models.Abstracts
 
         public Guid Guid
         {
-            get; 
+            get;
             init;
         } = Guid.NewGuid();
 
         public abstract ModelType ModelType
-        { 
-            get; 
+        {
+            get;
             protected init;
         }
     }

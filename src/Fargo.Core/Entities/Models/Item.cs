@@ -14,14 +14,14 @@ namespace Fargo.Domain.Entities.Models
         } = ModelType.Item;
 
         public Guid ArticleGuid
-        { 
-            get; 
-            private init; 
+        {
+            get;
+            private init;
         }
 
         public required Article Article
-        { 
-            get; 
+        {
+            get;
             init
             {
                 ArticleGuid = value.Guid;
