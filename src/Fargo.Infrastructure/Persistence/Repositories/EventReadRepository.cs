@@ -10,9 +10,16 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Event>> GetAllEventsFromModel(Guid? modelGuid, CancellationToken cancellationToken = default)
         {
+            var query = context.Events
+                .AsQueryable()
+                .AsNoTracking();
+
+            if (modelGuid is not null)
+            {
+                query = query.Where(e => e.ModelGuid == modelGuid);
+            }
+
             return await context.Events
-                .AsNoTracking()
-                .Where(e => e.ModelGuid == modelGuid)
                 .ToListAsync(cancellationToken);
         }
 

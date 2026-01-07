@@ -12,6 +12,7 @@ namespace Fargo.Domain.Entities.Events
         internal ArticleCreatedEvent(Article article)
         {
             ModelGuid = article.Guid;
+
             ArticleName = article.Name;
         }
 

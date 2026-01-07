@@ -10,7 +10,9 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Item>> GetManyAsync(Guid? articleGuid = null, CancellationToken cancellationToken = default)
         {
-            var query = context.Items.AsQueryable();
+            var query = context.Items
+                .AsQueryable()
+                .AsNoTracking();
 
             if (articleGuid is not null)
             {
@@ -25,6 +27,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
         {
             return await context.Items
+                .AsNoTracking()
                 .Include(x => x.Article)
                 .FirstOrDefaultAsync(x => x.Guid == itemGuid, cancellationToken);
         }

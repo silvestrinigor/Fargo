@@ -1,6 +1,5 @@
 ﻿using Fargo.Application.Dtos;
 using Fargo.Domain.Entities.Events.Abstracts;
-using Fargo.Domain.Enums;
 
 namespace Fargo.Application.Extensions
 {

@@ -19,7 +19,9 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Model>> GetManyAsync(ModelType? modelType = null, CancellationToken cancellationToken = default)
         {
-            var query = context.Models.AsQueryable();
+            var query = context.Models
+                .AsQueryable()
+                .AsNoTracking();
 
             if (modelType != null)
             {

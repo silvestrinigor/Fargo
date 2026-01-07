@@ -17,7 +17,8 @@ namespace Fargo.Application.Requests.Queries
         {
             var events = await repository.GetAllEventsFromModel(
                 query.EntityGuid,
-                cancellationToken);
+                cancellationToken
+                );
 
             return events.Select(e => e.ToDto());
         }

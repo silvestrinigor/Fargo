@@ -18,4 +18,3 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         }
     }
 }
-

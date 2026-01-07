@@ -5,18 +5,17 @@ using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Queries
 {
-    public sealed record ItemSingleQuery(Guid ItemGuid) : IQuery<ItemDto>;
+    public sealed record ItemSingleQuery(Guid ItemGuid) : IQuery<ItemDto?>;
 
-    public sealed class ItemSingleQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemSingleQuery, ItemDto>
+    public sealed class ItemSingleQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemSingleQuery, ItemDto?>
     {
         private readonly IItemReadRepository repository = repository;
 
-        public async Task<ItemDto> HandleAsync(ItemSingleQuery query, CancellationToken cancellationToken = default)
+        public async Task<ItemDto?> HandleAsync(ItemSingleQuery query, CancellationToken cancellationToken = default)
         {
-            var item = await repository.GetByGuidAsync(query.ItemGuid, cancellationToken)
-                ?? throw new InvalidOperationException("Item not found.");
+            var item = await repository.GetByGuidAsync(query.ItemGuid, cancellationToken);
 
-            return item.ToDto();
+            return item?.ToDto();
         }
     }
 }

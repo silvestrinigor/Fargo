@@ -1,6 +1,4 @@
-﻿using Fargo.Domain.Entities.Events;
-using Fargo.Domain.Entities.Events.Abstracts;
-using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Entities.Events.Abstracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

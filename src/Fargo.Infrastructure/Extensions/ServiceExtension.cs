@@ -26,7 +26,7 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<ICommandHandlerAsync<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ItemDeleteCommand>, ItemDeleteCommandHandler>();
-                services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto>, ItemSingleQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
 
                 services.AddScoped<IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>, EventAllFromEntityQueryHandler>();
@@ -48,7 +48,6 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IEventRepository, EventRepository>();
                 services.AddScoped<IEventReadRepository, EventReadRepository>();
 
-                services.AddScoped<IModelRepository, ModelRepository>();
                 services.AddScoped<IModelReadRepository, ModelReadRepository>();
 
                 services.AddDbContext<FargoContext>(opt =>
