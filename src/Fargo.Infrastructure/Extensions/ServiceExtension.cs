@@ -51,7 +51,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IModelReadRepository, ModelReadRepository>();
 
                 services.AddDbContext<FargoContext>(opt =>
-                    opt.UseSqlServer("Data Source=127.0.0.1,1433;Persist Security Info=True;User ID=sa;Password=StrongP@ssw0rd!;Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Application Name=\"SQL Server Management Studio\";Command Timeout=30")
+                    opt.UseSqlServer("Data Source=127.0.0.1,1433;Database=Fago;Persist Security Info=True;User ID=sa;Password=StrongP@ssw0rd!;Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Application Name=\"SQL Server Management Studio\";Command Timeout=30")
                     );
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
