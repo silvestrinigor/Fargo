@@ -16,72 +16,72 @@ namespace Fargo.HttpApi.Extensions
             {
                 builder.MapGet(
                     "/articles/{articleGuid}", 
-                    async (Guid articleGuid, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?> handler)
-                    => await handler.HandleAsync(new ArticleSingleQuery(articleGuid)));
+                    async (Guid articleGuid, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ArticleSingleQuery(articleGuid), cancellationToken));
 
                 builder.MapGet(
                     "/articles", 
-                    async ([FromServices] IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>> handler)
-                    => await handler.HandleAsync(new ArticleAllQuery()));
+                    async ([FromServices] IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ArticleAllQuery(), cancellationToken));
 
                 builder.MapPost(
                     "/articles", 
-                    async ([FromBody] ArticleCreateCommand command, [FromServices] ICommandHandlerAsync<ArticleCreateCommand, Guid> handler)
-                    => await handler.HandleAsync(command));
+                    async ([FromBody] ArticleCreateCommand command, [FromServices] ICommandHandlerAsync<ArticleCreateCommand, Guid> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(command, cancellationToken));
 
                 builder.MapDelete(
                     "/articles/{articleGuid}", 
-                    async (Guid articleGuid, [FromServices] ICommandHandlerAsync<ArticleDeleteCommand> handler)
-                    => await handler.HandleAsync(new ArticleDeleteCommand(articleGuid)));
+                    async (Guid articleGuid, [FromServices] ICommandHandlerAsync<ArticleDeleteCommand> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ArticleDeleteCommand(articleGuid), cancellationToken));
             }
 
             public void MapFargoItem()
             {
                 builder.MapGet(
                     "/items/{itemGuid}", 
-                    async (Guid itemGuid, [FromServices] IQueryHandlerAsync<ItemSingleQuery, ItemDto?> handler)
-                    => await handler.HandleAsync(new ItemSingleQuery(itemGuid)));
+                    async (Guid itemGuid, [FromServices] IQueryHandlerAsync<ItemSingleQuery, ItemDto?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ItemSingleQuery(itemGuid), cancellationToken));
 
                 builder.MapGet(
                     "/items", 
-                    async ([FromQuery] Guid? articleGuid, [FromServices] IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>> handler)
-                    => await handler.HandleAsync(new ItemManyQuery(articleGuid)));
+                    async ([FromQuery] Guid? articleGuid, [FromServices] IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ItemManyQuery(articleGuid), cancellationToken));
 
                 builder.MapPost(
                     "/items", 
-                    async ([FromBody] ItemCreateCommand command, [FromServices] ICommandHandlerAsync<ItemCreateCommand, Guid> handler)
-                    => await handler.HandleAsync(command));
+                    async ([FromBody] ItemCreateCommand command, [FromServices] ICommandHandlerAsync<ItemCreateCommand, Guid> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(command, cancellationToken));
 
                 builder.MapDelete(
                     "/items/{itemGuid}", 
-                    async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler)
-                    => await handler.HandleAsync(new ItemDeleteCommand(itemGuid)));
+                    async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken));
             }
 
             public void MapFargoEvent()
             {
                 builder.MapGet(
                     "/events/{eventGuid}", 
-                    async (Guid eventGuid, [FromServices] IQueryHandlerAsync<EventSingleQuery, EventDto?> handler)
-                    => await handler.HandleAsync(new EventSingleQuery(eventGuid)));
+                    async (Guid eventGuid, [FromServices] IQueryHandlerAsync<EventSingleQuery, EventDto?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new EventSingleQuery(eventGuid), cancellationToken));
 
                 builder.MapGet(
                     "/events", 
-                    async ([FromQuery] Guid? modelGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler)
-                    => await handler.HandleAsync(new EventAllFromEntityQuery(modelGuid)));
+                    async ([FromQuery] Guid? modelGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new EventAllFromEntityQuery(modelGuid), cancellationToken));
             }
 
             public void MapFargoModel()
             {
                 builder.MapGet(
                     "/models/{modelGuid}", 
-                    async (Guid modelGuid, [FromServices] IQueryHandlerAsync<ModelSingleQuery, ModelDto?> handler)
-                    => await handler.HandleAsync(new ModelSingleQuery(modelGuid)));
+                    async (Guid modelGuid, [FromServices] IQueryHandlerAsync<ModelSingleQuery, ModelDto?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ModelSingleQuery(modelGuid), cancellationToken));
 
                 builder.MapGet(
                     "/models", 
-                    async ([FromQuery] ModelType? modelType, [FromServices] IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>> handler)
-                    => await handler.HandleAsync(new ModelManyQuery(modelType)));
+                    async ([FromQuery] ModelType? modelType, [FromServices] IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ModelManyQuery(modelType), cancellationToken));
             }
         }
     }
