@@ -12,6 +12,8 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<Item> Items { get; set; }
 
+        public DbSet<User> Users { get; set; }
+
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder
@@ -30,6 +32,10 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
             modelBuilder.ApplyConfiguration(new ItemConfiguration());
+
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+
+            modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
         }
     }
 }

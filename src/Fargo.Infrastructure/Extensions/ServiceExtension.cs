@@ -33,6 +33,13 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
 
+                services.AddScoped<ICommandHandlerAsync<UserCreateCommand, Guid>, UserCreateCommandHandler>();
+                services.AddScoped<ICommandHandlerAsync<UserDeleteCommand>, UserDeleteCommandHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserSingleQuery, UserDto?>, UserSingleQueryHandler>();
+                services.AddScoped<ICommandHandlerAsync<UserSetPermissionCommand>, UserSetPermissionCommandHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<UserPermissionDto>>, UserPermissionAllQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>>, UserAllQueryHandler>();
+
                 services.AddScoped<ArticleService>();
 
                 services.AddScoped<ItemService>();
@@ -42,6 +49,9 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IItemRepository, ItemRepository>();
                 services.AddScoped<IItemReadRepository, ItemReadRepository>();
+
+                services.AddScoped<IUserRepository, UserRepository>();
+                services.AddScoped<IUserReadRepository, UserReadRepository>();
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 

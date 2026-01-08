@@ -5,6 +5,8 @@
         CreateArticle,
         DeleteArticle,
         CreateItem,
-        DeleteItem
+        DeleteItem,
+        CreateUser,
+        DeleteUser
     }
 }

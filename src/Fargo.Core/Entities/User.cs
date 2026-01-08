@@ -5,7 +5,7 @@ namespace Fargo.Domain.Entities
 {
     public class User
     {
-        internal User() : base() { }
+        public User() : base() { }
 
         public Guid Guid
         {
@@ -25,35 +25,31 @@ namespace Fargo.Domain.Entities
             set;
         } = Description.Empty;
 
-        public required PasswordHash PasswordHash
-        { 
-            get;
-            init;
-        }
+        public IReadOnlyCollection<UserPermission> Permissions => permissions;
 
-        private readonly HashSet<Permission> permissions = [];
+        private readonly HashSet<UserPermission> permissions = [];
 
-        public void SetPermission(ActionType permissionType, GrantType grantType)
+        public void SetPermission(ActionType actionType, GrantType grantType)
         {
-            var permission = permissions.Where(x => x.PermissionType == permissionType).SingleOrDefault();
+            var permission = permissions.Where(x => x.ActionType == actionType).SingleOrDefault();
 
             if (permission is not null)
             {
                 permission.GrantType = grantType;
+
                 return;
             }
 
-            if (permission is null)
-            {
-                permission = new Permission
-                {
-                    UserGuid = this.Guid,
-                    PermissionType = permissionType,
-                    GrantType = grantType
-                };
+            permissions.Add(new UserPermission(
+                this,
+                actionType,
+                grantType
+                ));
+        }
 
-                permissions.Add(permission);
-            }
+        public bool HasPermission(ActionType actionType)
+        {
+            return permissions.Where(x => x.ActionType == actionType).SingleOrDefault()?.GrantType == GrantType.Granted;
         }
     }
 }

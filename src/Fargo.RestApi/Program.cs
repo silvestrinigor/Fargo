@@ -42,6 +42,8 @@ app.MapFargoArticle();
 
 app.MapFargoItem();
 
+app.MapFargoUser();
+
 await app.Services.InitInfrastructureAsync();
 
 app.UseExceptionHandler();

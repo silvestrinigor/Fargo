@@ -4,6 +4,7 @@ using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Queries;
 using Fargo.HttpApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -55,6 +56,39 @@ namespace Fargo.HttpApi.Extensions
                     "/items/{itemGuid}",
                     async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken));
+            }
+
+            public void MapFargoUser()
+            {
+                builder.MapGet(
+                    "/users/{userGuid}",
+                    async (Guid userGuid, [FromQuery] DateTime? atDateTime, [FromServices] IQueryHandlerAsync<UserSingleQuery, UserDto?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserSingleQuery(userGuid, atDateTime), cancellationToken));
+
+                builder.MapGet(
+                    "/users",
+                    async ([FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserAllQuery(new PaginationDto(page, limit)), cancellationToken));
+
+                builder.MapPost(
+                    "/users",
+                    async ([FromBody] UserCreateCommand command, [FromServices] ICommandHandlerAsync<UserCreateCommand, Guid> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(command, cancellationToken));
+
+                builder.MapDelete(
+                    "/users/{userGuid}",
+                    async (Guid userGuid, [FromServices] ICommandHandlerAsync<UserDeleteCommand> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserDeleteCommand(userGuid), cancellationToken));
+
+                builder.MapGet(
+                    "/users/{userGuid}/permissions",
+                    async (Guid userGuid, [FromQuery] DateTime? atDateTime, [FromServices] IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<UserPermissionDto>?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserPermissionAllQuery(userGuid, atDateTime), cancellationToken));
+
+                builder.MapPatch(
+                    "/users/{userGuid}/permissions",
+                    async (Guid userGuid, [FromBody] UserPermissionDto permission, [FromServices] ICommandHandlerAsync<UserSetPermissionCommand> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserSetPermissionCommand(userGuid, permission), cancellationToken));
             }
         }
     }
