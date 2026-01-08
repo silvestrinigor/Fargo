@@ -12,7 +12,8 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .HasOne(x => x.Article)
                 .WithMany()
                 .HasForeignKey(x => x.ArticleGuid)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder
                 .HasIndex(x => x.ArticleGuid);
