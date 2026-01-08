@@ -18,11 +18,5 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Where(x => x.Guid == articleGuid)
                 .FirstOrDefaultAsync(cancellationToken);
-
-        public async Task<bool> HasItensAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
-            => await context.Items
-                .AsNoTracking()
-                .Where(x => x.Article.Guid == articleGuid)
-                .AnyAsync(cancellationToken);
     }
 }

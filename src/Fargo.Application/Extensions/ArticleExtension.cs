@@ -8,13 +8,11 @@ namespace Fargo.Application.Extensions
         extension(Article article)
         {
             public ArticleDto ToDto()
-            {
-                return new ArticleDto(
+                => new(
                     article.Guid,
                     article.Name,
                     article.Description
                     );
-            }
         }
     }
 }

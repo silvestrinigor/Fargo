@@ -7,7 +7,5 @@ namespace Fargo.Domain.Repositories
         Task<Article?> GetByGuidAsync(Guid articleGuid, CancellationToken cancellationToken = default);
 
         Task<IEnumerable<Article>> GetAllAsync(CancellationToken cancellationToken = default);
-
-        Task<bool> HasItensAssociated(Guid articleGuid, CancellationToken cancellationToken = default);
     }
 }

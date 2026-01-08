@@ -8,14 +8,12 @@ namespace Fargo.Application.Extensions
         extension(Event @event)
         {
             public EventDto ToDto()
-            {
-                return new EventDto(
+                => new(
                     Guid: @event.Guid,
                     OccurredAt: @event.OccurredAt,
                     ModelGuid: @event.ModelGuid,
                     EventType: @event.EventType
                     );
-            }
         }
     }
 }

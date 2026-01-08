@@ -8,12 +8,10 @@ namespace Fargo.Application.Extensions
         extension(Model model)
         {
             public ModelDto ToDto()
-            {
-                return new ModelDto(
+                => new(
                     model.Guid,
                     model.ModelType
                     );
-            }
         }
     }
 }
