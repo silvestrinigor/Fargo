@@ -8,9 +8,11 @@ namespace Fargo.Infrastructure.Persistence.Repositories
     {
         private readonly FargoContext context = context;
 
-        public async Task<IEnumerable<User>> GetAllAsync(int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<User>> GetAllAsync(DateTime? atDateTime = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
         {
-            var query = context.Users.AsQueryable();
+            var query = atDateTime is not null
+                ? context.Users.TemporalAsOf(atDateTime.Value)
+                : context.Users.AsQueryable();
 
             if (skip.HasValue)
             {

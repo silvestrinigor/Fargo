@@ -9,12 +9,15 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public async Task<IEnumerable<Article>> GetAllAsync(
+            DateTime? atDateTime = null,
             int? skip = null,
             int? take = null,
             CancellationToken cancellationToken = default
             )
         {
-            var query = context.Articles.AsQueryable();
+            var query = atDateTime is not null
+                ? context.Articles.TemporalAsOf(atDateTime.Value)
+                : context.Articles.AsQueryable();
 
             if (skip.HasValue)
             {
@@ -38,7 +41,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         {
             var query = atDateTime is not null
                 ? context.Articles.TemporalAsOf(atDateTime.Value)
-                : context.Articles;
+                : context.Articles.AsQueryable();
 
             return await query
                 .AsNoTracking()

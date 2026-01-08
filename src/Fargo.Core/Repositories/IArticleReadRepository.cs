@@ -6,6 +6,6 @@ namespace Fargo.Domain.Repositories
     {
         Task<Article?> GetByGuidAsync(Guid articleGuid, DateTime? atDateTime = null, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<Article>> GetAllAsync(int? skip = null, int? take = null, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Article>> GetAllAsync(DateTime? atDateTime = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default);
     }
 }

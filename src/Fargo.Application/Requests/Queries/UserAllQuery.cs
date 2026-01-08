@@ -6,6 +6,7 @@ using Fargo.Domain.Repositories;
 namespace Fargo.Application.Requests.Queries
 {
     public sealed record UserAllQuery(
+        DateTime? AtDateTime,
         PaginationDto Pagination
         ) : IQuery<IEnumerable<UserDto>>;
 
@@ -15,7 +16,7 @@ namespace Fargo.Application.Requests.Queries
 
         public async Task<IEnumerable<UserDto>> HandleAsync(UserAllQuery query, CancellationToken cancellationToken = default)
         {
-            var users = await repository.GetAllAsync(query.Pagination.Skip, query.Pagination.Limit, cancellationToken);
+            var users = await repository.GetAllAsync(query.AtDateTime, query.Pagination.Skip, query.Pagination.Limit, cancellationToken);
 
             return users.Select(x => x.ToDto());
         }

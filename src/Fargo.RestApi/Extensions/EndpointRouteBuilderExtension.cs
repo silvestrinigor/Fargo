@@ -4,7 +4,6 @@ using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Queries;
 using Fargo.HttpApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -21,8 +20,8 @@ namespace Fargo.HttpApi.Extensions
 
                 builder.MapGet(
                     "/articles",
-                    async ([FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleAllQuery(new PaginationDto(page, limit)), cancellationToken));
+                    async ([FromQuery] DateTime? atDateTime, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ArticleAllQuery(atDateTime, new PaginationDto(page, limit)), cancellationToken));
 
                 builder.MapPost(
                     "/articles",
@@ -44,8 +43,8 @@ namespace Fargo.HttpApi.Extensions
 
                 builder.MapGet(
                     "/items",
-                    async ([FromQuery] Guid? articleGuid, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ItemManyQuery(articleGuid, new PaginationDto(page, limit)), cancellationToken));
+                    async ([FromQuery] Guid? articleGuid, [FromQuery] DateTime? atDateTime, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new ItemManyQuery(articleGuid, atDateTime, new PaginationDto(page, limit)), cancellationToken));
 
                 builder.MapPost(
                     "/items",
@@ -56,7 +55,7 @@ namespace Fargo.HttpApi.Extensions
                     "/items/{itemGuid}",
                     async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken));
-            }
+            } 
 
             public void MapFargoUser()
             {
@@ -67,8 +66,8 @@ namespace Fargo.HttpApi.Extensions
 
                 builder.MapGet(
                     "/users",
-                    async ([FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new UserAllQuery(new PaginationDto(page, limit)), cancellationToken));
+                    async ([FromQuery] int? page, [FromQuery] DateTime? atDateTime, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserAllQuery(atDateTime, new PaginationDto(page, limit)), cancellationToken));
 
                 builder.MapPost(
                     "/users",
