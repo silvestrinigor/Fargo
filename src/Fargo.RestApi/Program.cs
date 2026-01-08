@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthorization();
+
 builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
@@ -31,6 +33,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -39,8 +44,6 @@ if (app.Environment.IsDevelopment())
 app.MapFargoArticle();
 
 app.MapFargoItem();
-
-app.MapFargoEvent();
 
 await app.Services.InitInfrastructureAsync();
 

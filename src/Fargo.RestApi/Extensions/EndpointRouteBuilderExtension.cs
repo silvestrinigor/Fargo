@@ -56,19 +56,6 @@ namespace Fargo.HttpApi.Extensions
                     async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken));
             }
-
-            public void MapFargoEvent()
-            {
-                builder.MapGet(
-                    "/events/{eventGuid}", 
-                    async (Guid eventGuid, [FromServices] IQueryHandlerAsync<EventSingleQuery, EventDto?> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new EventSingleQuery(eventGuid), cancellationToken));
-
-                builder.MapGet(
-                    "/events",
-                    async ([FromQuery] Guid? modelGuid, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new EventAllFromEntityQuery(modelGuid, new PaginationDto(page,limit)), cancellationToken));
-            }
         }
     }
 }

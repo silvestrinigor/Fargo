@@ -3,6 +3,7 @@
     public enum ModelType
     {
         Article,
-        Item
+        Item,
+        User
     }
 }
