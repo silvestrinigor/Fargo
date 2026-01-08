@@ -31,10 +31,12 @@ namespace Fargo.Infrastructure.Persistence
         {
             configurationBuilder
                 .Properties<Name>()
+                .HaveMaxLength(100)
                 .HaveConversion<NameStringConverter>();
 
             configurationBuilder
                 .Properties<Description>()
+                .HaveMaxLength(500)
                 .HaveConversion<DescriptionStringConverter>();
         }
 

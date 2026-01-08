@@ -5,6 +5,8 @@
         public string Value { get; }
             = string.IsNullOrWhiteSpace(value)
             ? throw new ArgumentException("Name cannot be empty.", nameof(value))
+            : value.Length > 100
+            ? throw new ArgumentOutOfRangeException(nameof(value), value, "Name cannot exceed 100 characters.")
             : value;
 
         public static Name NewName(string value)
