@@ -2,9 +2,11 @@
 {
     public readonly struct Description(string value) : IEquatable<Description>
     {
+        public const int MaxLength = 500;
+
         public string Value { get; }
-            = value.Length > 500
-            ? throw new ArgumentOutOfRangeException(nameof(value), value, "Name cannot exceed 500 characters.")
+            = value.Length > MaxLength
+            ? throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.")
             : value;
 
         public Description() : this(string.Empty) { }
