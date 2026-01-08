@@ -18,6 +18,6 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             => await context.Items
                 .Include(x => x.Article)
                 .Where(x => x.Guid == itemGuid)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
     }
 }

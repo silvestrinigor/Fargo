@@ -17,7 +17,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public async Task<Article?> GetByGuidAsync(Guid articleGuid, CancellationToken cancellationToken = default)
             => await context.Articles
                 .Where(x => x.Guid == articleGuid)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
 
         public async Task<bool> HasItensAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
             => await context.Items

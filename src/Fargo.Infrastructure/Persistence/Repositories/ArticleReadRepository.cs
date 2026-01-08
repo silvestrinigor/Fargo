@@ -43,7 +43,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             return await query
                 .AsNoTracking()
                 .Where(x => x.Guid == articleGuid)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
         }
     }
 }

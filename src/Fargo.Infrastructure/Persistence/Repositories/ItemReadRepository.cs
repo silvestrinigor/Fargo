@@ -39,7 +39,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Include(x => x.Article)
                 .Where(x => x.Guid == itemGuid)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
         }
     }
 }
