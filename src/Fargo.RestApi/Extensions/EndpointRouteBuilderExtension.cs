@@ -65,9 +65,9 @@ namespace Fargo.HttpApi.Extensions
                     => await handler.HandleAsync(new EventSingleQuery(eventGuid), cancellationToken));
 
                 builder.MapGet(
-                    "/events", 
-                    async ([FromQuery] Guid? modelGuid, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new EventAllFromEntityQuery(modelGuid), cancellationToken));
+                    "/events",
+                    async ([FromQuery] Guid? modelGuid, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new EventAllFromEntityQuery(modelGuid, new PaginationDto(page,limit)), cancellationToken));
             }
         }
     }
