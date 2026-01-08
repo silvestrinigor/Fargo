@@ -17,9 +17,9 @@ builder.Services.AddProblemDetails();
 
 var connectionString = builder.Configuration.GetConnectionString("FargoDatabase");
 
-builder.Services.AddDbContext<FargoContext>(opt => 
+builder.Services.AddDbContext<FargoContext>(opt =>
     opt.UseSqlServer(
-        connectionString, 
+        connectionString,
         sql => sql.MigrationsAssembly(typeof(FargoContext).Assembly.FullName)
     ));
 

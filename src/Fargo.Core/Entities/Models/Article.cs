@@ -1,17 +1,16 @@
-﻿using Fargo.Domain.Entities.Models.Abstracts;
-using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities.Models
 {
-    public class Article : Model
+    public class Article : IEntity
     {
         internal Article() { }
 
-        public override ModelType ModelType
+        public Guid Guid
         {
             get;
-        } = ModelType.Article;
+            init;
+        } = Guid.NewGuid();
 
         public required Name Name
         {

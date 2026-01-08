@@ -14,7 +14,7 @@ namespace Fargo.HttpApi.Extensions
             public void MapFargoArticle()
             {
                 builder.MapGet(
-                    "/articles/{articleGuid}", 
+                    "/articles/{articleGuid}",
                     async (Guid articleGuid, [FromQuery] DateTime? atDateTime, [FromServices] IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ArticleSingleQuery(articleGuid, atDateTime), cancellationToken));
 
@@ -24,12 +24,12 @@ namespace Fargo.HttpApi.Extensions
                     => await handler.HandleAsync(new ArticleAllQuery(new PaginationDto(page, limit)), cancellationToken));
 
                 builder.MapPost(
-                    "/articles", 
+                    "/articles",
                     async ([FromBody] ArticleCreateCommand command, [FromServices] ICommandHandlerAsync<ArticleCreateCommand, Guid> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(command, cancellationToken));
 
                 builder.MapDelete(
-                    "/articles/{articleGuid}", 
+                    "/articles/{articleGuid}",
                     async (Guid articleGuid, [FromServices] ICommandHandlerAsync<ArticleDeleteCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ArticleDeleteCommand(articleGuid), cancellationToken));
             }
@@ -42,17 +42,17 @@ namespace Fargo.HttpApi.Extensions
                     => await handler.HandleAsync(new ItemSingleQuery(itemGuid, atDateTime), cancellationToken));
 
                 builder.MapGet(
-                    "/items", 
+                    "/items",
                     async ([FromQuery] Guid? articleGuid, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemManyQuery(articleGuid, new PaginationDto(page, limit)), cancellationToken));
 
                 builder.MapPost(
-                    "/items", 
+                    "/items",
                     async ([FromBody] ItemCreateCommand command, [FromServices] ICommandHandlerAsync<ItemCreateCommand, Guid> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(command, cancellationToken));
 
                 builder.MapDelete(
-                    "/items/{itemGuid}", 
+                    "/items/{itemGuid}",
                     async (Guid itemGuid, [FromServices] ICommandHandlerAsync<ItemDeleteCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken));
             }
