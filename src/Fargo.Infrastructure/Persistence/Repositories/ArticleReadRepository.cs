@@ -9,25 +9,20 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public async Task<IEnumerable<Article>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await context.Articles
+            => await context.Articles
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
-        }
 
         public async Task<Article?> GetByGuidAsync(Guid articleGuid, CancellationToken cancellationToken = default)
-        {
-            return await context.Articles
+            => await context.Articles
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Guid == articleGuid, cancellationToken);
-        }
+                .Where(x => x.Guid == articleGuid)
+                .FirstOrDefaultAsync(cancellationToken);
 
         public async Task<bool> HasItensAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
-        {
-            return await context.Items
+            => await context.Items
                 .AsNoTracking()
                 .Where(x => x.Article.Guid == articleGuid)
                 .AnyAsync(cancellationToken);
-        }
     }
 }

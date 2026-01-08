@@ -10,26 +10,15 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public async Task<Model?> GetByGuidAsync(Guid modelGuid, CancellationToken cancellationToken = default)
-        {
-            return await context.Models
+            => await context.Models
                 .AsNoTracking()
                 .Where(x => x.Guid == modelGuid)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-        }
 
         public async Task<IEnumerable<Model>> GetManyAsync(ModelType? modelType = null, CancellationToken cancellationToken = default)
-        {
-            var query = context.Models
-                .AsQueryable()
-                .AsNoTracking();
-
-            if (modelType != null)
-            {
-                query = query.Where(x => x.ModelType == modelType);
-            }
-
-            return await query
+            => await context.Models
+                .AsNoTracking()
+                .Where(x => modelType == null || x.ModelType == modelType)
                 .ToListAsync(cancellationToken);
-        }
     }
 }

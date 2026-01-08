@@ -8,13 +8,9 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public void Add(Event @event)
-        {
-            context.Events.Add(@event);
-        }
+            => context.Events.Add(@event);
 
         public void Remove(Event @event)
-        {
-            context.Events.Remove(@event);
-        }
+            => context.Events.Remove(@event);
     }
 }

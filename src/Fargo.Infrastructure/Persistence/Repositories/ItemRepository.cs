@@ -9,20 +9,15 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public void Add(Item item)
-        {
-            context.Items.Add(item);
-        }
-
-        public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
-        {
-            return await context.Items
-                .Include(x => x.Article)
-                .FirstOrDefaultAsync(x => x.Guid == itemGuid, cancellationToken);
-        }
+            => context.Items.Add(item);
 
         public void Remove(Item item)
-        {
-            context.Items.Remove(item);
-        }
+            => context.Items.Remove(item);
+
+        public async Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
+            => await context.Items
+                .Include(x => x.Article)
+                .Where(x => x.Guid == itemGuid)
+                .FirstOrDefaultAsync(cancellationToken);
     }
 }
