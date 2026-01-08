@@ -4,10 +4,12 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Security;
 using Fargo.Domain.Services;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
+using Fargo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +21,8 @@ namespace Fargo.Infrastructure.Extensions
         {
             public IServiceCollection AddInfrastructure()
             {
+                services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
+
                 services.AddScoped<ICommandHandlerAsync<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();

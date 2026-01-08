@@ -1,8 +1,8 @@
 ﻿using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Domain.Entities.Models
+namespace Fargo.Domain.Entities
 {
-    public class Article : IEntity
+    public class Article
     {
         internal Article() { }
 

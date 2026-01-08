@@ -1,6 +1,6 @@
-﻿namespace Fargo.Domain.Entities.Models
+﻿namespace Fargo.Domain.Entities
 {
-    public class Item : IEntity
+    public class Item
     {
         internal Item() { }
 
