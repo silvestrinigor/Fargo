@@ -1,7 +1,10 @@
 using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Extensions;
+using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,12 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
 builder.Services.AddProblemDetails();
+
+var connectionString = builder.Configuration.GetConnectionString("FargoDatabase");
+
+builder.Services.AddDbContext<FargoContext>(opt =>
+    opt.UseSqlServer(connectionString)
+    );
 
 builder.Services.AddInfrastructure();
 
