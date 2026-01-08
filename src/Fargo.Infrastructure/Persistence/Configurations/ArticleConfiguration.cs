@@ -9,7 +9,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Article> builder)
         {
             builder
-                .Property(x => x.Name)
+                .Property(x => x.Name)  
                 .IsRequired();
 
             builder

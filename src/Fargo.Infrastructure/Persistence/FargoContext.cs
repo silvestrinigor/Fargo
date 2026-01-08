@@ -2,6 +2,8 @@
 using Fargo.Domain.Entities.Events.Abstracts;
 using Fargo.Domain.Entities.Models;
 using Fargo.Domain.Entities.Models.Abstracts;
+using Fargo.Domain.ValueObjects;
+using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,9 +27,15 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<ItemDeletedEvent> ItemDeletedEvents { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
+            configurationBuilder
+                .Properties<Name>()
+                .HaveConversion<NameStringConverter>();
 
+            configurationBuilder
+                .Properties<Description>()
+                .HaveConversion<DescriptionStringConverter>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
