@@ -4,8 +4,8 @@ namespace Fargo.Domain.Repositories
 {
     public interface IItemReadRepository
     {
-        Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default);
+        Task<Item?> GetByGuidAsync(Guid itemGuid, DateTime? atDateTime = null, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<Item>> GetManyAsync(Guid? ArticleGuid = null, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Item>> GetManyAsync(Guid? ArticleGuid = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default);
     }
 }

@@ -6,18 +6,11 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Services
 {
-    public class ArticleService
+    public class ArticleService(IArticleRepository articleRepository, IEventRepository eventRepository)
     {
-        private readonly IArticleRepository articleRepository;
+        private readonly IArticleRepository articleRepository = articleRepository;
 
-        private readonly IEventRepository eventRepository;
-
-        public ArticleService(IArticleRepository articleRepository, IEventRepository eventRepository)
-        {
-            this.articleRepository = articleRepository;
-
-            this.eventRepository = eventRepository;
-        }
+        private readonly IEventRepository eventRepository = eventRepository;
 
         public async Task<Article?> GetArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
         {
@@ -34,7 +27,7 @@ namespace Fargo.Domain.Services
 
             articleRepository.Add(article);
 
-            var newEvent = new ArticleCreatedEvent(article);
+            var newEvent = new ModelCreatedEvent(article);
 
             eventRepository.Add(newEvent);
 
@@ -61,7 +54,7 @@ namespace Fargo.Domain.Services
 
             articleRepository.Remove(article);
 
-            var newEvent = new ArticleDeletedEvent(article);
+            var newEvent = new ModelDeletedEvent(article);
 
             eventRepository.Add(newEvent);
 

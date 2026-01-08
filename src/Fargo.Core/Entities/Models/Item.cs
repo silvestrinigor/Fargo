@@ -10,7 +10,6 @@ namespace Fargo.Domain.Entities.Models
         public override ModelType ModelType
         {
             get;
-            protected init;
         } = ModelType.Item;
 
         public Guid ArticleGuid

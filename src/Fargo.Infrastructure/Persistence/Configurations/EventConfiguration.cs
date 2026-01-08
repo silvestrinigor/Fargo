@@ -1,4 +1,6 @@
-﻿using Fargo.Domain.Entities.Events.Abstracts;
+﻿using Fargo.Domain.Entities.Events;
+using Fargo.Domain.Entities.Events.Abstracts;
+using Fargo.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,7 +20,12 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .HasIndex(x => x.OccurredAt);
 
             builder
-                .UseTptMappingStrategy();
+                .HasDiscriminator(x => x.EventType)
+                .HasValue<ModelCreatedEvent>(EventType.ModelCreated)
+                .HasValue<ModelDeletedEvent>(EventType.ModelDeleted);
+
+            builder
+                .UseTphMappingStrategy();
         }
     }
 }

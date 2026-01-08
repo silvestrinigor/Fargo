@@ -11,7 +11,6 @@ namespace Fargo.Domain.Entities.Models
         public override ModelType ModelType
         {
             get;
-            protected init;
         } = ModelType.Article;
 
         public required Name Name

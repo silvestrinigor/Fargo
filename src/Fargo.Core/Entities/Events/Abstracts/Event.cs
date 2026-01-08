@@ -1,10 +1,17 @@
-﻿using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Entities.Models.Abstracts;
+using Fargo.Domain.Enums;
 
 namespace Fargo.Domain.Entities.Events.Abstracts
 {
     public abstract class Event : IEntity
     {
         internal Event() { }
+
+        internal Event(Model model)
+        {
+            ModelGuid = model.Guid;
+            ModelType = model.ModelType;
+        }
 
         public Guid Guid
         {
@@ -27,7 +34,13 @@ namespace Fargo.Domain.Entities.Events.Abstracts
         public Guid ModelGuid
         {
             get;
-            init;
+            private init;
+        }
+
+        public ModelType ModelType
+        {
+            get;
+            private init;
         }
     }
 }

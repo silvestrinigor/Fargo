@@ -4,7 +4,6 @@ using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,9 +15,11 @@ builder.Services.AddProblemDetails();
 
 var connectionString = builder.Configuration.GetConnectionString("FargoDatabase");
 
-builder.Services.AddDbContext<FargoContext>(opt =>
-    opt.UseSqlServer(connectionString)
-    );
+builder.Services.AddDbContext<FargoContext>(opt => 
+    opt.UseSqlServer(
+        connectionString, 
+        sql => sql.MigrationsAssembly(typeof(FargoContext).Assembly.FullName)
+    ));
 
 builder.Services.AddInfrastructure();
 
@@ -40,8 +41,6 @@ app.MapFargoArticle();
 app.MapFargoItem();
 
 app.MapFargoEvent();
-
-app.MapFargoModel();
 
 await app.Services.InitInfrastructureAsync();
 

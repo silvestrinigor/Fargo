@@ -9,6 +9,15 @@ namespace Fargo.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Item> builder)
         {
             builder
+                .ToTable(t => t.IsTemporal());
+
+            builder
+                .HasKey(x => x.Guid);
+
+            builder
+                .Property(x => x.ModelType);
+
+            builder
                 .HasOne(x => x.Article)
                 .WithMany()
                 .HasForeignKey(x => x.ArticleGuid)

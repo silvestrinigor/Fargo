@@ -7,7 +7,7 @@ namespace Fargo.Application.Dtos
         Guid Guid,
         DateTime OccurredAt,
         Guid ModelGuid,
-        EventType EventType,
-        JsonElement? EventData = null
+        ModelType ModelType,
+        EventType EventType
         );
 }

@@ -5,17 +5,11 @@ using Fargo.Domain.Repositories;
 
 namespace Fargo.Domain.Services
 {
-    public class ItemService
+    public class ItemService(IItemRepository itemRepository, IEventRepository eventRepository)
     {
-        private readonly IItemRepository itemRepository;
+        private readonly IItemRepository itemRepository = itemRepository;
 
-        private readonly IEventRepository eventRepository;
-
-        public ItemService(IItemRepository itemRepository, IEventRepository eventRepository)
-        {
-            this.itemRepository = itemRepository;
-            this.eventRepository = eventRepository;
-        }
+        private readonly IEventRepository eventRepository = eventRepository;
 
         public async Task<Item?> GetItemAsync(Guid itemGuid, CancellationToken cancellationToken = default)
         {
@@ -31,7 +25,7 @@ namespace Fargo.Domain.Services
 
             itemRepository.Add(item);
 
-            var newEvent = new ItemCreatedEvent(item);
+            var newEvent = new ModelCreatedEvent(item);
 
             eventRepository.Add(newEvent);
 
@@ -51,7 +45,7 @@ namespace Fargo.Domain.Services
         {
             itemRepository.Remove(item);
 
-            var newEvent = new ItemDeletedEvent(item);
+            var newEvent = new ModelDeletedEvent(item);
 
             eventRepository.Add(newEvent);
 

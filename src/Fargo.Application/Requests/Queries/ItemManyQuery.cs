@@ -6,7 +6,8 @@ using Fargo.Domain.Repositories;
 namespace Fargo.Application.Requests.Queries
 {
     public sealed record ItemManyQuery(
-        Guid? ArticleGuid
+        Guid? ArticleGuid,
+        PaginationDto Pagination
         ) : IQuery<IEnumerable<ItemDto>>;
 
     public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>
@@ -15,7 +16,7 @@ namespace Fargo.Application.Requests.Queries
 
         public async Task<IEnumerable<ItemDto>> HandleAsync(ItemManyQuery query, CancellationToken cancellationToken = default)
         {
-            var itens = await repository.GetManyAsync(query.ArticleGuid, cancellationToken);
+            var itens = await repository.GetManyAsync(query.ArticleGuid, query.Pagination.Skip, query.Pagination.Limit, cancellationToken);
 
             return itens.Select(x => x.ToDto());
         }

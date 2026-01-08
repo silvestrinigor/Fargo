@@ -32,9 +32,6 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandlerAsync<EventAllFromEntityQuery, IEnumerable<EventDto>>, EventAllFromEntityQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<EventSingleQuery, EventDto?>, EventSingleQueryHandler>();
 
-                services.AddScoped<IQueryHandlerAsync<ModelSingleQuery, ModelDto?>, ModelSingleQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<ModelManyQuery, IEnumerable<ModelDto>>, ModelManyQueryHandler>();
-
                 services.AddScoped<ArticleService>();
 
                 services.AddScoped<ItemService>();
@@ -47,8 +44,6 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IEventRepository, EventRepository>();
                 services.AddScoped<IEventReadRepository, EventReadRepository>();
-
-                services.AddScoped<IModelReadRepository, ModelReadRepository>();
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 

@@ -5,7 +5,10 @@ using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Queries
 {
-    public sealed record ItemSingleQuery(Guid ItemGuid) : IQuery<ItemDto?>;
+    public sealed record ItemSingleQuery(
+        Guid ItemGuid,
+        DateTime? AtDateTime
+        ) : IQuery<ItemDto?>;
 
     public sealed class ItemSingleQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemSingleQuery, ItemDto?>
     {
@@ -13,7 +16,7 @@ namespace Fargo.Application.Requests.Queries
 
         public async Task<ItemDto?> HandleAsync(ItemSingleQuery query, CancellationToken cancellationToken = default)
         {
-            var item = await repository.GetByGuidAsync(query.ItemGuid, cancellationToken);
+            var item = await repository.GetByGuidAsync(query.ItemGuid, query.AtDateTime, cancellationToken);
 
             return item?.ToDto();
         }

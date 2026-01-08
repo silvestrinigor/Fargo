@@ -15,7 +15,6 @@ namespace Fargo.Domain.Entities.Models.Abstracts
         public abstract ModelType ModelType
         {
             get;
-            protected init;
         }
     }
 }

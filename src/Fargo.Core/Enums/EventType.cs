@@ -2,9 +2,7 @@
 {
     public enum EventType
     {
-        ArticleCreated,
-        ArticleDeleted,
-        ItemCreated,
-        ItemDeleted
+        ModelCreated,
+        ModelDeleted,
     }
 }
