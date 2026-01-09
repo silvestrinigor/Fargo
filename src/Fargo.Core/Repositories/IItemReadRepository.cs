@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.ArticleItems;
 
 namespace Fargo.Domain.Repositories
 {
@@ -11,6 +11,7 @@ namespace Fargo.Domain.Repositories
             );
 
         Task<IEnumerable<Item>> GetManyAsync(
+            Guid? parentItemGuid = null,
             Guid? articleGuid = null, 
             DateTime? atDateTime = null, 
             int? skip = null, 

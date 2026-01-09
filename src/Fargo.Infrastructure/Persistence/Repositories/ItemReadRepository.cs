@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities;
+﻿using Fargo.Domain.Entities.ArticleItems;
 using Fargo.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +9,12 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public async Task<IEnumerable<Item>> GetManyAsync(
+            Guid? parentItemGuid = null,
             Guid? articleGuid = null, 
             DateTime? atDateTime = null, 
             int? skip = null, 
             int? take = null, 
-            CancellationToken cancellationToken = default
-            )
+            CancellationToken cancellationToken = default)
         {
             var query = atDateTime is not null
                 ? context.Items.TemporalAsOf(atDateTime.Value)
@@ -32,7 +32,9 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
             return await query
                 .AsNoTracking()
-                .Where(x => articleGuid == null || x.ArticleGuid == articleGuid.Value)
+                .Where(x => 
+                    (articleGuid == null || x.ArticleGuid == articleGuid.Value) &&
+                    (parentItemGuid == null || x.ParentItemGuid == parentItemGuid.Value))
                 .Include(x => x.Article)
                 .ToListAsync(cancellationToken);
         }
@@ -40,8 +42,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public async Task<Item?> GetByGuidAsync(
             Guid itemGuid, 
             DateTime? atDateTime, 
-            CancellationToken cancellationToken = default
-            )
+            CancellationToken cancellationToken = default)
         {
             var query = atDateTime is not null
                 ? context.Items.TemporalAsOf(atDateTime.Value)

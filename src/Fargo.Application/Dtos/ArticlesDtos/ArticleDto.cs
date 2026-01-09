@@ -1,6 +1,6 @@
 ﻿using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Dtos
+namespace Fargo.Application.Dtos.ArticlesDtos
 {
     public record ArticleDto(
         Guid Guid,

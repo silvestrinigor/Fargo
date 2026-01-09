@@ -1,5 +1,6 @@
-﻿using Fargo.Application.Dtos;
+﻿using Fargo.Application.Dtos.ArticlesDtos;
 using Fargo.Application.Mediators;
+using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands
@@ -10,10 +11,13 @@ namespace Fargo.Application.Requests.Commands
         ) : ICommand;
 
     public sealed class ArticleUpdateCommandHandler(
-        ArticleService articleService
+        ArticleService articleService,
+        IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<ArticleUpdateCommand>
     {
         private readonly ArticleService articleService = articleService;
+
+        private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task HandleAsync(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
         {
@@ -29,6 +33,8 @@ namespace Fargo.Application.Requests.Commands
             {
                 article.Description = command.Article.Description.Value;
             }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Fargo.Application.Dtos;
-using Fargo.Domain.Entities;
+using Fargo.Domain.Entities.ArticleItems;
 
 namespace Fargo.Application.Extensions
 {
@@ -10,7 +10,8 @@ namespace Fargo.Application.Extensions
             public ItemDto ToDto()
                 => new(
                     item.Guid,
-                    item.ArticleGuid
+                    item.ArticleGuid,
+                    item.ParentItemGuid
                     );
         }
     }

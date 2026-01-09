@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Entities.ArticleItems;
 using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Persistence.Configurations;

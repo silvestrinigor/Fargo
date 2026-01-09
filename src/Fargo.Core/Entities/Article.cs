@@ -23,5 +23,11 @@ namespace Fargo.Domain.Entities
             get;
             set;
         } = Description.Empty;
+
+        public bool IsContainer
+        {
+            get; 
+            init;
+        }
     }
 }

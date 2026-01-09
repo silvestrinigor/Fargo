@@ -1,8 +1,6 @@
 ﻿namespace Fargo.Application.Dtos
 {
-    public record ItemDto(
-        Guid Guid,
-        Guid ArticleGuid,
+    public record ItemUpdateDto(
         Guid? ParentItemGuid
         );
 }
