@@ -9,9 +9,9 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         private readonly FargoContext context = context;
 
         public async Task<IEnumerable<User>> GetAllAsync(
-            DateTime? atDateTime = null, 
-            int? skip = null, 
-            int? take = null, 
+            DateTime? atDateTime = null,
+            int? skip = null,
+            int? take = null,
             CancellationToken cancellationToken = default)
         {
             var query = atDateTime is not null
@@ -23,7 +23,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 query = query.Skip(skip.Value);
             }
 
-            if(take.HasValue)
+            if (take.HasValue)
             {
                 query = query.Take(take.Value);
             }
@@ -35,8 +35,8 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         }
 
         public async Task<User?> GetByGuidAsync(
-            Guid userGuid, 
-            DateTime? atDateTime = null, 
+            Guid userGuid,
+            DateTime? atDateTime = null,
             CancellationToken cancellationToken = default)
         {
             var query = atDateTime is not null

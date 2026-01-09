@@ -5,7 +5,7 @@ namespace Fargo.Domain.Repositories
     public interface IItemRepository
     {
         Task<Item?> GetByGuidAsync(
-            Guid itemGuid, 
+            Guid itemGuid,
             CancellationToken cancellationToken = default
             );
 

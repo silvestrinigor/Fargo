@@ -5,7 +5,7 @@ namespace Fargo.Domain.Repositories
     public interface IArticleRepository
     {
         Task<Article?> GetByGuidAsync(
-            Guid articleGuid, 
+            Guid articleGuid,
             CancellationToken cancellationToken = default
             );
 
@@ -14,7 +14,7 @@ namespace Fargo.Domain.Repositories
         void Remove(Article article);
 
         Task<bool> HasItensAssociated(
-            Guid articleGuid, 
+            Guid articleGuid,
             CancellationToken cancellationToken = default
             );
     }

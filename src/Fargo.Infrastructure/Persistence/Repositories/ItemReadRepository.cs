@@ -10,10 +10,10 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Item>> GetManyAsync(
             Guid? parentItemGuid = null,
-            Guid? articleGuid = null, 
-            DateTime? atDateTime = null, 
-            int? skip = null, 
-            int? take = null, 
+            Guid? articleGuid = null,
+            DateTime? atDateTime = null,
+            int? skip = null,
+            int? take = null,
             CancellationToken cancellationToken = default)
         {
             var query = atDateTime is not null
@@ -32,7 +32,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
             return await query
                 .AsNoTracking()
-                .Where(x => 
+                .Where(x =>
                     (articleGuid == null || x.ArticleGuid == articleGuid.Value) &&
                     (parentItemGuid == null || x.ParentItemGuid == parentItemGuid.Value))
                 .Include(x => x.Article)
@@ -40,8 +40,8 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         }
 
         public async Task<Item?> GetByGuidAsync(
-            Guid itemGuid, 
-            DateTime? atDateTime, 
+            Guid itemGuid,
+            DateTime? atDateTime,
             CancellationToken cancellationToken = default)
         {
             var query = atDateTime is not null

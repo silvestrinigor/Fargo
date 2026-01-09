@@ -13,10 +13,10 @@ namespace Fargo.Domain.Entities
             init;
         } = Guid.NewGuid();
 
-        public required Name Name 
-        { 
-            get; 
-            init; 
+        public required Name Name
+        {
+            get;
+            init;
         }
 
         public Description Description

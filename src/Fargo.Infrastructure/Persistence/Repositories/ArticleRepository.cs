@@ -15,7 +15,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             => context.Articles.Remove(article);
 
         public async Task<Article?> GetByGuidAsync(
-            Guid articleGuid, 
+            Guid articleGuid,
             CancellationToken cancellationToken = default
             )
             => await context.Articles
@@ -24,7 +24,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 );
 
         public async Task<bool> HasItensAssociated(
-            Guid articleGuid, 
+            Guid articleGuid,
             CancellationToken cancellationToken = default
             )
             => await context.Items

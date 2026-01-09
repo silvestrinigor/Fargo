@@ -30,12 +30,12 @@
         public Guid? ParentItemGuid
         {
             get;
-            private set; 
+            private set;
         }
 
         public Item? ParentItem
         {
-            get; 
+            get;
             internal set
             {
                 if (value is not null && !value.Article.IsContainer)

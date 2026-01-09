@@ -8,33 +8,33 @@ namespace Fargo.Domain.Entities
         internal Permission() { }
 
         [SetsRequiredMembers]
-        internal Permission(User user, ActionType actionType, GrantType grantType) 
+        internal Permission(User user, ActionType actionType, GrantType grantType)
         {
             User = user;
             ActionType = actionType;
             GrantType = grantType;
         }
 
-        public Guid UserGuid 
-        { 
+        public Guid UserGuid
+        {
             get;
             private init;
         }
 
-        public required User User 
-        { 
+        public required User User
+        {
             get;
             init
             {
                 UserGuid = value.Guid;
                 field = value;
-            } 
+            }
         }
 
-        public required ActionType ActionType 
-        { 
-            get; 
-            init; 
+        public required ActionType ActionType
+        {
+            get;
+            init;
         }
 
         public GrantType GrantType

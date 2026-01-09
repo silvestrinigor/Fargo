@@ -26,7 +26,7 @@ namespace Fargo.Domain.Entities
 
         public bool IsContainer
         {
-            get; 
+            get;
             init;
         }
     }

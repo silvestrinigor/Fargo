@@ -15,7 +15,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             => context.Items.Remove(item);
 
         public async Task<Item?> GetByGuidAsync(
-            Guid itemGuid, 
+            Guid itemGuid,
             CancellationToken cancellationToken = default
             )
             => await context.Items

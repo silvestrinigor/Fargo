@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Fargo.Domain.Security;
+﻿using Fargo.Domain.Security;
+using Microsoft.AspNetCore.Identity;
 
 namespace Fargo.Infrastructure.Security
 {

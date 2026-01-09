@@ -14,7 +14,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         }
 
         public async Task<User?> GetByGuidAsync(
-            Guid userGuid, 
+            Guid userGuid,
             CancellationToken cancellationToken = default
             )
             => await context.Users

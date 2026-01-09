@@ -5,7 +5,7 @@ namespace Fargo.Domain.Repositories
     public interface IUserRepository
     {
         Task<User?> GetByGuidAsync(
-            Guid userGuid, 
+            Guid userGuid,
             CancellationToken cancellationToken = default
             );
 
