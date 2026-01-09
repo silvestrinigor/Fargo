@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Dtos;
+﻿using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;

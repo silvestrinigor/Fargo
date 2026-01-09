@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Dtos.ArticlesDtos;
+﻿using Fargo.Application.Dtos.ArticleDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;

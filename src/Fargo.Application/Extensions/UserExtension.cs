@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Dtos;
+﻿using Fargo.Application.Dtos.UserDtos;
 using Fargo.Domain.Entities;
 
 namespace Fargo.Application.Extensions

@@ -1,5 +1,7 @@
 ﻿using Fargo.Application.Dtos;
-using Fargo.Application.Dtos.ArticlesDtos;
+using Fargo.Application.Dtos.ArticleDtos;
+using Fargo.Application.Dtos.ItemDtos;
+using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Queries;

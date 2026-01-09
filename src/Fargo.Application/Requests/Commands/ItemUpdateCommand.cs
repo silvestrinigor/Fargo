@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Dtos;
+﻿using Fargo.Application.Dtos.ItemDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
@@ -21,7 +21,7 @@ namespace Fargo.Application.Requests.Commands
             var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Item not found.");
 
-            if (command.Item.ParentItemGuid is not null)
+            if (command.Item.ParentItem.Guid is not null)
             {
                 var targetParentItem = await itemService.GetItemAsync(command.Item.ParentItemGuid.Value, cancellationToken)
                     ?? throw new InvalidOperationException("Target parent item not found.");

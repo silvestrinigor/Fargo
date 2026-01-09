@@ -1,7 +1,6 @@
-﻿
-using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Dtos
+namespace Fargo.Application.Dtos.UserDtos
 {
     public record UserCreateDto(
         Name Name,
