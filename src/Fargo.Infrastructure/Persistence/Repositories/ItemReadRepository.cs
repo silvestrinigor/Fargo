@@ -8,7 +8,13 @@ namespace Fargo.Infrastructure.Persistence.Repositories
     {
         private readonly FargoContext context = context;
 
-        public async Task<IEnumerable<Item>> GetManyAsync(Guid? articleGuid = null, DateTime? atDateTime = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Item>> GetManyAsync(
+            Guid? articleGuid = null, 
+            DateTime? atDateTime = null, 
+            int? skip = null, 
+            int? take = null, 
+            CancellationToken cancellationToken = default
+            )
         {
             var query = atDateTime is not null
                 ? context.Items.TemporalAsOf(atDateTime.Value)
@@ -31,7 +37,11 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<Item?> GetByGuidAsync(Guid itemGuid, DateTime? atDateTime, CancellationToken cancellationToken = default)
+        public async Task<Item?> GetByGuidAsync(
+            Guid itemGuid, 
+            DateTime? atDateTime, 
+            CancellationToken cancellationToken = default
+            )
         {
             var query = atDateTime is not null
                 ? context.Items.TemporalAsOf(atDateTime.Value)

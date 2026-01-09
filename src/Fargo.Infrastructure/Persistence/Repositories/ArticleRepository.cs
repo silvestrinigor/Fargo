@@ -14,12 +14,19 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public void Remove(Article article)
             => context.Articles.Remove(article);
 
-        public async Task<Article?> GetByGuidAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+        public async Task<Article?> GetByGuidAsync(
+            Guid articleGuid, 
+            CancellationToken cancellationToken = default
+            )
             => await context.Articles
                 .Where(x => x.Guid == articleGuid)
-                .SingleOrDefaultAsync(cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken
+                );
 
-        public async Task<bool> HasItensAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
+        public async Task<bool> HasItensAssociated(
+            Guid articleGuid, 
+            CancellationToken cancellationToken = default
+            )
             => await context.Items
                 .Where(x => x.Article.Guid == articleGuid)
                 .AnyAsync(cancellationToken);

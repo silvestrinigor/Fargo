@@ -13,11 +13,14 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             context.Users.Add(user);
         }
 
-        public async Task<User?> GetByGuidAsync(Guid userGuid, CancellationToken cancellationToken = default)
-        => await context.Users
-            .Include(x => x.Permissions)
-            .Where(x => x.Guid == userGuid)
-            .SingleOrDefaultAsync(cancellationToken);
+        public async Task<User?> GetByGuidAsync(
+            Guid userGuid, 
+            CancellationToken cancellationToken = default
+            )
+            => await context.Users
+                .Include(x => x.Permissions)
+                .Where(x => x.Guid == userGuid)
+                .SingleOrDefaultAsync(cancellationToken);
 
         public void Remove(User user)
         {

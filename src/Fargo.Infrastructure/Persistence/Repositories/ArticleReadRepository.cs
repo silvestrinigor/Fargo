@@ -37,7 +37,8 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public async Task<Article?> GetByGuidAsync(
             Guid articleGuid,
             DateTime? atDateTime = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+            )
         {
             var query = atDateTime is not null
                 ? context.Articles.TemporalAsOf(atDateTime.Value)
