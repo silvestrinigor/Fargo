@@ -4,7 +4,7 @@ using Fargo.Application.Persistence;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.UserCommands
 {
     public sealed record UserCreateCommand(
         UserCreateDto User

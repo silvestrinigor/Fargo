@@ -3,7 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemCreateCommand(
         ItemCreateDto Item

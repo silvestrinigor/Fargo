@@ -3,8 +3,12 @@ using Fargo.Application.Dtos.ArticleDtos;
 using Fargo.Application.Dtos.ItemDtos;
 using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
-using Fargo.Application.Requests.Commands;
-using Fargo.Application.Requests.Queries;
+using Fargo.Application.Requests.Commands.ArticleCommands;
+using Fargo.Application.Requests.Commands.ItemCommands;
+using Fargo.Application.Requests.Commands.UserCommands;
+using Fargo.Application.Requests.Queries.ArticleQueries;
+using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.HttpApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,7 +64,7 @@ namespace Fargo.HttpApi.Extensions
                     => await handler.HandleAsync(command, cancellationToken));
 
                 builder.MapPatch(
-                    "/itens/{itemGuid}",
+                    "/items/{itemGuid}",
                     async (Guid itemGuid, [FromBody] ItemUpdateDto dto, [FromServices] ICommandHandlerAsync<ItemUpdateCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemUpdateCommand(itemGuid, dto), cancellationToken));
 
@@ -99,8 +103,8 @@ namespace Fargo.HttpApi.Extensions
 
                 builder.MapPatch(
                     "/users/{userGuid}/permissions",
-                    async (Guid userGuid, [FromBody] UserPermissionDto permission, [FromServices] ICommandHandlerAsync<UserSetPermissionCommand> handler, CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new UserSetPermissionCommand(userGuid, permission), cancellationToken));
+                    async (Guid userGuid, [FromBody] UserPermissionDto permission, [FromServices] ICommandHandlerAsync<UserPermissionUpdateCommand> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new UserPermissionUpdateCommand(userGuid, permission), cancellationToken));
             }
         }
     }

@@ -3,8 +3,12 @@ using Fargo.Application.Dtos.ItemDtos;
 using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Application.Requests.Commands;
-using Fargo.Application.Requests.Queries;
+using Fargo.Application.Requests.Commands.ArticleCommands;
+using Fargo.Application.Requests.Commands.ItemCommands;
+using Fargo.Application.Requests.Commands.UserCommands;
+using Fargo.Application.Requests.Queries.ArticleQueries;
+using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
@@ -29,16 +33,18 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandlerAsync<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>>, ArticleAllQueryHandler>();
+                services.AddScoped<ICommandHandlerAsync<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
 
                 services.AddScoped<ICommandHandlerAsync<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ItemDeleteCommand>, ItemDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
+                services.AddScoped<ICommandHandlerAsync<ItemUpdateCommand>, ItemUpdateCommandHandler>();
 
                 services.AddScoped<ICommandHandlerAsync<UserCreateCommand, Guid>, UserCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<UserDeleteCommand>, UserDeleteCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserSingleQuery, UserDto?>, UserSingleQueryHandler>();
-                services.AddScoped<ICommandHandlerAsync<UserSetPermissionCommand>, UserSetPermissionCommandHandler>();
+                services.AddScoped<ICommandHandlerAsync<UserPermissionUpdateCommand>, UserPermissionUpdateCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<UserPermissionDto>>, UserPermissionAllQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>>, UserAllQueryHandler>();
 

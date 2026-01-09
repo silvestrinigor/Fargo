@@ -4,7 +4,7 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Mediators;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Queries
+namespace Fargo.Application.Requests.Queries.ArticleQueries
 {
     public sealed record ArticleAllQuery(
         DateTime? AtDateTime,

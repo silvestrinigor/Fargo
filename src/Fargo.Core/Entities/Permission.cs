@@ -3,12 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Domain.Entities
 {
-    public class UserPermission
+    public class Permission
     {
-        internal UserPermission() { }
+        internal Permission() { }
 
         [SetsRequiredMembers]
-        internal UserPermission(User user, ActionType actionType, GrantType grantType) 
+        internal Permission(User user, ActionType actionType, GrantType grantType) 
         {
             User = user;
             ActionType = actionType;

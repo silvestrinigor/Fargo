@@ -11,7 +11,8 @@ namespace Fargo.Application.Extensions
                 => new(
                     article.Guid,
                     article.Name,
-                    article.Description
+                    article.Description,
+                    article.IsContainer
                     );
         }
     }

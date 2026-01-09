@@ -11,12 +11,13 @@ namespace Fargo.Domain.Services
             return await articleRepository.GetByGuidAsync(articleGuid, cancellationToken);
         }
 
-        public Article CreateArticle(Name name, Description description)
+        public Article CreateArticle(Name name, Description description, bool isContainer = false)
         {
             var article = new Article
             {
                 Name = name,
-                Description = description
+                Description = description,
+                IsContainer = isContainer
             };
 
             articleRepository.Add(article);

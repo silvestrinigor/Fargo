@@ -3,7 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleUpdateCommand(
         Guid ArticleGuid,

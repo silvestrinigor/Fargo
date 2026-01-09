@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities.ArticleItems;
+﻿using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 

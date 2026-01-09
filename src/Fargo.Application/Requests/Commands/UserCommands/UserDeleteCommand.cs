@@ -2,7 +2,7 @@
 using Fargo.Application.Persistence;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.UserCommands
 {
     public sealed record UserDeleteCommand(
         Guid UserGuid

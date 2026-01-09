@@ -1,7 +1,5 @@
 ﻿using Fargo.Domain.Entities;
-using Fargo.Domain.Entities.ArticleItems;
 using Fargo.Domain.Repositories;
-using System.Threading.Tasks;
 
 namespace Fargo.Domain.Services
 {
@@ -31,7 +29,7 @@ namespace Fargo.Domain.Services
             itemRepository.Remove(item);
         }
 
-        public async Task InsertItemIntoContainer(Item item, Item targetContainer)
+        public async Task InsertItemIntoContainerAsync(Item item, Item targetContainer)
         {
             if (!targetContainer.Article.IsContainer)
                 throw new InvalidOperationException(
@@ -46,6 +44,11 @@ namespace Fargo.Domain.Services
                     "An item cannot be moved inside a container when the container is inside the item.");
 
             item.ParentItem = targetContainer;
+        }
+
+        public static void RemoveFromContainers(Item item)
+        {
+            item.ParentItem = null;
         }
     }
 }

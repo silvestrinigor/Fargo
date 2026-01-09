@@ -1,5 +1,5 @@
 ﻿using Fargo.Application.Dtos.ItemDtos;
-using Fargo.Domain.Entities.ArticleItems;
+using Fargo.Domain.Entities;
 
 namespace Fargo.Application.Extensions
 {

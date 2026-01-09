@@ -7,9 +7,9 @@ using System.Text;
 
 namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    internal class UserPermissionConfiguration : IEntityTypeConfiguration<UserPermission>
+    internal class UserPermissionConfiguration : IEntityTypeConfiguration<Permission>
     {
-        public void Configure(EntityTypeBuilder<UserPermission> builder)
+        public void Configure(EntityTypeBuilder<Permission> builder)
         {
             builder
                 .ToTable(t => t.IsTemporal());

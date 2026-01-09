@@ -3,7 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleCreateCommand(ArticleCreateDto Article) : ICommand<Guid>;
 
@@ -17,7 +17,8 @@ namespace Fargo.Application.Requests.Commands
         {
             var article = articleService.CreateArticle(
                 command.Article.Name,
-                command.Article.Description
+                command.Article.Description,
+                command.Article.IsContainer
                 );
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

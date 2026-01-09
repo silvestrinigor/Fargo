@@ -4,6 +4,7 @@ namespace Fargo.Application.Dtos.ArticleDtos
 {
     public record ArticleCreateDto(
         Name Name,
-        Description Description
+        Description Description,
+        bool IsContainer = false
         );
 }

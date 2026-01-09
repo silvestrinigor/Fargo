@@ -5,6 +5,7 @@ namespace Fargo.Application.Dtos.ArticleDtos
     public record ArticleDto(
         Guid Guid,
         Name Name,
-        Description Description
+        Description Description,
+        bool IsContainer
         );
 }

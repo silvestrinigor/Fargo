@@ -25,9 +25,9 @@ namespace Fargo.Domain.Entities
             set;
         } = Description.Empty;
 
-        public IReadOnlyCollection<UserPermission> Permissions => permissions;
+        public IReadOnlyCollection<Permission> Permissions => permissions;
 
-        private readonly HashSet<UserPermission> permissions = [];
+        private readonly HashSet<Permission> permissions = [];
 
         public void SetPermission(ActionType actionType, GrantType grantType)
         {
@@ -40,7 +40,7 @@ namespace Fargo.Domain.Entities
                 return;
             }
 
-            permissions.Add(new UserPermission(
+            permissions.Add(new Permission(
                 this,
                 actionType,
                 grantType

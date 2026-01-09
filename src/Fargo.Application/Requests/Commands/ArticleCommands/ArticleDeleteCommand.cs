@@ -2,7 +2,7 @@
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleDeleteCommand(Guid ArticleGuid) : ICommand;
 

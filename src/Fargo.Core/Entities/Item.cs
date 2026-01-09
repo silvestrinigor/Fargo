@@ -1,4 +1,4 @@
-﻿namespace Fargo.Domain.Entities.ArticleItems
+﻿namespace Fargo.Domain.Entities
 {
     public class Item
     {

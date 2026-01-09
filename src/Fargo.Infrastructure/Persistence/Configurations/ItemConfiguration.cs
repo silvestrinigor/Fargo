@@ -1,4 +1,4 @@
-﻿using Fargo.Domain.Entities.ArticleItems;
+﻿using Fargo.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -22,12 +22,8 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder
-                .HasOne(x => x.ContainerExtension)
-                .WithOne(x => x.AncestorItem)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder
-                .HasOne(x => x.ParentItem);
+                .HasOne(x => x.ParentItem)
+                .WithMany();
 
             builder
                 .HasIndex(x => x.ArticleGuid);

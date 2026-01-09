@@ -3,20 +3,20 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.UserCommands
 {
-    public sealed record UserSetPermissionCommand(
+    public sealed record UserPermissionUpdateCommand(
         Guid UserGuid,
         UserPermissionDto Permission
         ) : ICommand;
 
-    public sealed class UserSetPermissionCommandHandler(IUserRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<UserSetPermissionCommand>
+    public sealed class UserPermissionUpdateCommandHandler(IUserRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<UserPermissionUpdateCommand>
     {
         private readonly IUserRepository repository = repository;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task HandleAsync(UserSetPermissionCommand command, CancellationToken cancellationToken = default)
+        public async Task HandleAsync(UserPermissionUpdateCommand command, CancellationToken cancellationToken = default)
         {
             var user = await repository.GetByGuidAsync(command.UserGuid, cancellationToken)
                 ?? throw new InvalidOperationException("User not found.");

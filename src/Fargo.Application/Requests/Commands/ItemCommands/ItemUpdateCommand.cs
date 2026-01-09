@@ -3,7 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands
+namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemUpdateCommand(
         Guid ItemGuid,
@@ -21,12 +21,19 @@ namespace Fargo.Application.Requests.Commands
             var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Item not found.");
 
-            if (command.Item.ParentItem.Guid is not null)
+            if (command.Item.ParentItem is not null)
             {
-                var targetParentItem = await itemService.GetItemAsync(command.Item.ParentItemGuid.Value, cancellationToken)
-                    ?? throw new InvalidOperationException("Target parent item not found.");
+                if (command.Item.ParentItem.Guid is null)
+                {
+                    ItemService.RemoveFromContainers(item);
+                }
+                else
+                {
+                    var targetParentItem = await itemService.GetItemAsync(command.Item.ParentItem.Guid.Value, cancellationToken)
+                        ?? throw new InvalidOperationException("Target parent item not found.");
 
-                await itemService.InsertItemIntoContainer(item, targetParentItem);
+                    await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
+                }
             }
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

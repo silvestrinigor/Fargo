@@ -3,7 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Queries
+namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserPermissionAllQuery(
         Guid UserGuid,
