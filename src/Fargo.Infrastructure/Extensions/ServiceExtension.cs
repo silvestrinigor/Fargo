@@ -1,13 +1,16 @@
 ﻿using Fargo.Application.Dtos.ArticleDtos;
 using Fargo.Application.Dtos.ItemDtos;
+using Fargo.Application.Dtos.PartitionDtos;
 using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
+using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
@@ -48,6 +51,10 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<UserPermissionDto>>, UserPermissionAllQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>>, UserAllQueryHandler>();
 
+                services.AddScoped<IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>();
+                services.AddScoped<ICommandHandlerAsync<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
+                services.AddScoped<ICommandHandlerAsync<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
+
                 services.AddScoped<ArticleService>();
 
                 services.AddScoped<ItemService>();
@@ -60,6 +67,9 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IUserReadRepository, UserReadRepository>();
+
+                services.AddScoped<IPartitionReadRepository, PartitionReadRepository>();
+                services.AddScoped<IPartitionRepository, PartitionRepository>();
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 

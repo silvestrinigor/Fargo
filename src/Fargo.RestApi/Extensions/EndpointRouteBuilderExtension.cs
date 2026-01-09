@@ -1,6 +1,7 @@
 ﻿using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.ArticleDtos;
 using Fargo.Application.Dtos.ItemDtos;
+using Fargo.Application.Dtos.PartitionDtos;
 using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Requests.Commands.ArticleCommands;
@@ -8,6 +9,7 @@ using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.HttpApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -105,6 +107,14 @@ namespace Fargo.HttpApi.Extensions
                     "/users/{userGuid}/permissions",
                     async (Guid userGuid, [FromBody] UserPermissionDto permission, [FromServices] ICommandHandlerAsync<UserPermissionUpdateCommand> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new UserPermissionUpdateCommand(userGuid, permission), cancellationToken));
+            }
+
+            public void MapFargoPartition()
+            {
+                builder.MapGet(
+                    "/partition/{partitionGuid}",
+                    async (Guid partitionGuid, [FromQuery] DateTime? atDateTime, [FromServices] IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, atDateTime), cancellationToken));
             }
         }
     }

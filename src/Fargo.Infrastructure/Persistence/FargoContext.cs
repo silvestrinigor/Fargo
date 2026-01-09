@@ -14,6 +14,8 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Partition> Partitions { get; set; }
+
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder
@@ -36,6 +38,8 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new UserConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
+
+            modelBuilder.ApplyConfiguration(new PartitionConfiguration());
         }
     }
 }

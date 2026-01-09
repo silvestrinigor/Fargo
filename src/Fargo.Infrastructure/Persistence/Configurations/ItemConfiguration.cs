@@ -26,6 +26,9 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .WithMany();
 
             builder
+                .HasIndex(x => x.ParentItemGuid);
+
+            builder
                 .HasIndex(x => x.ArticleGuid);
         }
     }
