@@ -26,12 +26,12 @@ namespace Fargo.Domain.Entities
 
         private readonly HashSet<Article> articles = [];
 
-        public bool Add(Article article)
+        public bool AddArticle(Article article)
         {
             return articles.Add(article);
         }
 
-        public bool Remove(Article article)
+        public bool RemoveArticle(Article article)
         {
             return articles.Remove(article);
         }

@@ -8,6 +8,23 @@ namespace Fargo.Infrastructure.Persistence.Repositories
     {
         private readonly FargoContext context = context;
 
+        public async Task<IEnumerable<Partition>> GetManyAsync(DateTime? atDateTime = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        {
+            var query = atDateTime is not null
+                ? context.Partitions.TemporalAsOf(atDateTime.Value)
+                : context.Partitions;
+
+            if (skip != null)
+                query = query.Skip(skip.Value);
+
+            if (take != null)
+                query = query.Take(take.Value);
+
+            return await query
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Partition?> GetByGuidAsync(
             Guid partitionGuid, 
             DateTime? atDateTime = null, 

@@ -6,6 +6,7 @@ using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
+using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
@@ -115,6 +116,16 @@ namespace Fargo.HttpApi.Extensions
                     "/partition/{partitionGuid}",
                     async (Guid partitionGuid, [FromQuery] DateTime? atDateTime, [FromServices] IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?> handler, CancellationToken cancellationToken)
                     => await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, atDateTime), cancellationToken));
+
+                builder.MapGet(
+                    "/partition",
+                    async ([FromQuery] DateTime? atDateTime, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionDto>> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new PartitionManyQuery(atDateTime, new PaginationDto(page, limit)), cancellationToken));
+
+                builder.MapPost(
+                    "/partition",
+                    async ([FromBody] PartitionCreateCommand command, [FromServices] ICommandHandlerAsync<PartitionCreateCommand, Guid> handler, CancellationToken cancellationToken)
+                    => await handler.HandleAsync(command, cancellationToken));
             }
         }
     }
