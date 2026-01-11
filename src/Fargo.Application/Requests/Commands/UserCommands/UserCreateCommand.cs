@@ -21,6 +21,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         public async Task<Guid> HandleAsync(UserCreateCommand command, CancellationToken cancellationToken = default)
         {
             var user = userService.CreateUser(
+                command.User.Id,
                 new(command.User.Name),
                 new(command.User.Description),
                 new(command.User.Password));

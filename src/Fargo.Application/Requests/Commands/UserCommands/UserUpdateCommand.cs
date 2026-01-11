@@ -2,9 +2,7 @@
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -14,9 +12,13 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         ) : ICommand;
 
     public sealed class UserUpdateCommandHandler(
-        IUserRepository repository, IUnitOfWork unitOfWork
+        UserService service,
+        IUserRepository repository, 
+        IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<UserUpdateCommand>
     {
+        private readonly UserService service = service;
+
         private readonly IUserRepository repository = repository;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
@@ -29,6 +31,9 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             user.Name = command.User.Name ?? user.Name;
 
             user.Description = command.User.Description ?? user.Description;
+
+            if (command.User.Password != null)
+                service.SetPassword(user, new(command.User.Password.NewPassword), new(command.User.Password.CurrentPassword));
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

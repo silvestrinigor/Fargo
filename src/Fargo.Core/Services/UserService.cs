@@ -11,10 +11,11 @@ namespace Fargo.Domain.Services
 
         private readonly IPasswordHasher passwordHasher = passwordHasher;
 
-        public User CreateUser(Name name, Description description, Password password)
+        public User CreateUser(int id, Name name, Description description, Password password)
         {
             var user = new User
             {
+                Id = id,
                 Name = name,
                 Description = description,
                 PasswordHash = new(passwordHasher.Hash(password.Value)),
@@ -23,6 +24,16 @@ namespace Fargo.Domain.Services
             repository.Add(user);
 
             return user;
+        }
+
+        public void SetPassword(User user, Password newPassword, Password currentPassword)
+        {
+            var isPasswordCorrect = passwordHasher.Verify(user.PasswordHash.ToString(), currentPassword.ToString());
+
+            if (!isPasswordCorrect)
+                throw new InvalidOperationException("Cannot set new password because the current password is incorrect.");
+
+            user.PasswordHash = new(passwordHasher.Hash(newPassword.ToString()));
         }
     }
 }

@@ -8,11 +8,11 @@ namespace Fargo.Infrastructure.Persistence.Write.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder
-                .ToTable(t => t.IsTemporal());
+            builder.ToTable(t => t.IsTemporal());
 
-            builder
-                .HasKey(x => x.Guid);
+            builder.HasKey(x => x.Guid);
+
+            builder.HasAlternateKey(x => x.Id);
 
             builder
                 .Property(x => x.Name)

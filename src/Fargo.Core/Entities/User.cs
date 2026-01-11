@@ -13,6 +13,12 @@ namespace Fargo.Domain.Entities
             init;
         } = Guid.NewGuid();
 
+        public required int Id
+        {
+            get;
+            init;
+        };
+
         public required Name Name
         {
             get;
@@ -28,7 +34,7 @@ namespace Fargo.Domain.Entities
         internal PasswordHash PasswordHash
         {
             get;
-            init;
+            set;
         }
 
         public IReadOnlyCollection<Permission> Permissions => permissions;
