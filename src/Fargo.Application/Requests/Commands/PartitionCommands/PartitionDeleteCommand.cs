@@ -1,6 +1,6 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Repositories.PartitionRepositories;
 using System;
 using System.Collections.Generic;
 using System.Text;

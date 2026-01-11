@@ -3,6 +3,5 @@
     public record ItemDto(
         Guid Guid,
         Guid ArticleGuid,
-        Guid? ParentItemGuid
-        );
+        Guid? ParentItemGuid);
 }

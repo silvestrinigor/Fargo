@@ -3,7 +3,7 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
 {
-    public class User
+    public class User : IEntityByGuid, IEntityTemporal
     {
         public User() : base() { }
 

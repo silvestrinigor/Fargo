@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Dtos.UserDtos;
 using Fargo.Application.Mediators;
 using Fargo.Domain.Enums;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Repositories.UserRepositories;
 
 namespace Fargo.Application.Requests.Queries.UserQueries
 {

@@ -1,6 +1,6 @@
 ﻿namespace Fargo.Domain.Entities
 {
-    public class Item
+    public class Item : IEntityByGuid, IEntityTemporal
     {
         internal Item() { }
 

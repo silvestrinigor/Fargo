@@ -1,5 +1,5 @@
 ﻿using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Repositories.ItemRepositories;
 
 namespace Fargo.Domain.Services
 {
@@ -39,7 +39,7 @@ namespace Fargo.Domain.Services
                 throw new InvalidOperationException(
                     "An item cannot be moved into itself.");
 
-            if (await itemRepository.IsInsideContainer(item, targetContainer))
+            if (await itemRepository.IsInsideOtherItem(item, targetContainer))
                 throw new InvalidOperationException(
                     "An item cannot be moved inside a container when the container is inside the item.");
 

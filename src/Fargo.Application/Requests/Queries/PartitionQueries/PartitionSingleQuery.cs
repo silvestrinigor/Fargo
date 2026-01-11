@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Dtos.PartitionDtos;
 using Fargo.Application.Extensions;
 using Fargo.Application.Mediators;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Repositories.PartitionRepositories;
 
 namespace Fargo.Application.Requests.Queries.PartitionQueries
 {

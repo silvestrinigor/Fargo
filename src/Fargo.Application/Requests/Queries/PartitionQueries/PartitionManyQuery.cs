@@ -1,15 +1,14 @@
-﻿using Fargo.Application.Dtos;
-using Fargo.Application.Dtos.PartitionDtos;
+﻿using Fargo.Application.Dtos.PartitionDtos;
 using Fargo.Application.Extensions;
 using Fargo.Application.Mediators;
-using Fargo.Domain.Repositories;
-using UnitsNet.Units;
+using Fargo.Domain.Repositories.PartitionRepositories;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Queries.PartitionQueries
 {
     public sealed record PartitionManyQuery(
-        DateTime? AtDateTime,
-        PaginationDto Pagination
+        DateTime? AtDateTime = null,
+        Pagination Pagination = default
         ) : IQuery<IEnumerable<PartitionDto>>;
 
     public sealed class PartitionManyQueryHandler(IPartitionReadRepository repository) : IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionDto>>
@@ -20,8 +19,7 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
         {
             var partitions = await repository.GetManyAsync(
                 query.AtDateTime,
-                query.Pagination.Skip,
-                query.Pagination.Limit,
+                query.Pagination,
                 cancellationToken);
 
             return partitions.Select(x => x.ToDto());

@@ -21,15 +21,15 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
                 ?? throw new InvalidOperationException("Item not found.");
 
-            if (command.Item.ParentItem is not null)
+            if (command.Item.ParentItemGuid.SetValue)
             {
-                if (command.Item.ParentItem.Guid is null)
+                if (command.Item.ParentItemGuid.Value is null)
                 {
                     ItemService.RemoveFromContainers(item);
                 }
                 else
                 {
-                    var targetParentItem = await itemService.GetItemAsync(command.Item.ParentItem.Guid.Value, cancellationToken)
+                    var targetParentItem = await itemService.GetItemAsync(command.Item.ParentItemGuid.Value.Value, cancellationToken)
                         ?? throw new InvalidOperationException("Target parent item not found.");
 
                     await itemService.InsertItemIntoContainerAsync(item, targetParentItem);

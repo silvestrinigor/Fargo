@@ -1,21 +1,29 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
-    public readonly struct Description(string value) : IEquatable<Description>
+    public readonly struct Description : IEquatable<Description>
     {
+        public const string DefaultValue = "";
+
         public const int MaxLength = 500;
 
-        public string Value { get; }
-            = value.Length > MaxLength
-            ? throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.")
-            : value;
+        public string Value => descriptionValue ?? DefaultValue;
+
+        private readonly string descriptionValue;
 
         public Description() : this(string.Empty) { }
+
+        public Description(string value)
+        {
+            descriptionValue = value.Length > MaxLength
+            ? throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.")
+            : value;
+        }
 
         public static Description NewDescription(string value)
             => new(value);
 
         public static Description Empty
-            => new();
+            => new(string.Empty);
 
         public bool Equals(Description other)
             => Value == other.Value;

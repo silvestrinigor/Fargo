@@ -5,7 +5,9 @@ using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
-    public sealed record ArticleCreateCommand(ArticleCreateDto Article) : ICommand<Guid>;
+    public sealed record ArticleCreateCommand(
+        ArticleCreateDto Article
+        ) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(ArticleService articleService, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ArticleCreateCommand, Guid>
     {
@@ -17,9 +19,8 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var article = articleService.CreateArticle(
                 command.Article.Name,
-                command.Article.Description,
-                command.Article.IsContainer
-                );
+                command.Article.Description ?? new(string.Empty),
+                command.Article.IsContainer);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

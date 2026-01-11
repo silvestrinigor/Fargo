@@ -44,6 +44,8 @@ app.MapFargoItem();
 
 app.MapFargoUser();
 
+app.MapFargoPartition();
+
 await app.Services.InitInfrastructureAsync();
 
 app.UseExceptionHandler();

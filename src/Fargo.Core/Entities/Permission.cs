@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Domain.Entities
 {
-    public class Permission
+    public class Permission : IEntityTemporal
     {
         internal Permission() { }
 

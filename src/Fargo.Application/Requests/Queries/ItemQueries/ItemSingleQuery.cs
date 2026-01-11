@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Dtos.ItemDtos;
 using Fargo.Application.Extensions;
 using Fargo.Application.Mediators;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Repositories.ItemRepositories;
 
 namespace Fargo.Application.Requests.Queries.ItemQueries
 {

@@ -1,5 +1,5 @@
 ﻿using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Repositories.ArticleRepositories;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Services
@@ -24,6 +24,9 @@ namespace Fargo.Domain.Services
 
             return article;
         }
+
+        public Article CreateArticle(Name name, bool isContainer = false)
+            => CreateArticle(name, new(string.Empty), isContainer);
 
         public async Task DeleteArticleAsync(Article article, CancellationToken cancellationToken = default)
         {
