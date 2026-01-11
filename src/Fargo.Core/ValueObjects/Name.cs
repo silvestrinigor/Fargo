@@ -11,9 +11,6 @@
             ? throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.")
             : value;
 
-        public static Name NewName(string value)
-            => new(value);
-
         public bool Equals(Name other)
             => Value == other.Value;
 

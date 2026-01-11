@@ -19,9 +19,6 @@
             : value;
         }
 
-        public static Description NewDescription(string value)
-            => new(value);
-
         public static Description Empty
             => new(string.Empty);
 

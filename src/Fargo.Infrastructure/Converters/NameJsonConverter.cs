@@ -13,7 +13,7 @@ namespace Fargo.Infrastructure.Converters
 
             var value = reader.GetString()!;
 
-            return Name.NewName(value);
+            return new Name(value);
         }
 
         public override void Write(Utf8JsonWriter writer, Name value, JsonSerializerOptions options)
