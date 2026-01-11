@@ -14,7 +14,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories.ItemRepositories
         public void Remove(Item item)
             => context.Items.Remove(item);
 
-        public async Task<bool> IsInsideOtherItem(Item item, Item otherItem, CancellationToken cancellationToken = default)
+        public async Task<bool> IsInsideContainer(Item item, Item otherItem, CancellationToken cancellationToken = default)
         {
             if (!otherItem.Article.IsContainer)
                 return false;

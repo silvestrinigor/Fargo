@@ -10,7 +10,10 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         UserPermissionDto Permission
         ) : ICommand;
 
-    public sealed class UserPermissionUpdateCommandHandler(IUserRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<UserPermissionUpdateCommand>
+    public sealed class UserPermissionUpdateCommandHandler(
+        IUserRepository repository, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<UserPermissionUpdateCommand>
     {
         private readonly IUserRepository repository = repository;
 

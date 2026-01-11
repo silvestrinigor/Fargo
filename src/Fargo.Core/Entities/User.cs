@@ -40,16 +40,20 @@ namespace Fargo.Domain.Entities
                 return;
             }
 
-            permissions.Add(new Permission(
-                this,
-                actionType,
-                grantType
-                ));
+            permissions.Add(
+                new Permission
+                {
+                    User = this,
+                    ActionType = actionType,
+                    GrantType = grantType
+                });
         }
 
         public bool HasPermission(ActionType actionType)
         {
-            return permissions.Where(x => x.ActionType == actionType).SingleOrDefault()?.GrantType == GrantType.Granted;
+            var permission = permissions.Where(x => x.ActionType == actionType).SingleOrDefault();
+
+            return permission is not null && permission.GrantType == GrantType.Granted;
         }
     }
 }

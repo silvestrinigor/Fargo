@@ -9,7 +9,10 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         ArticleCreateDto Article
         ) : ICommand<Guid>;
 
-    public sealed class ArticleCreateCommandHandler(ArticleService articleService, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ArticleCreateCommand, Guid>
+    public sealed class ArticleCreateCommandHandler(
+        ArticleService articleService, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<ArticleCreateCommand, Guid>
     {
         private readonly ArticleService articleService = articleService;
 

@@ -4,6 +4,5 @@ namespace Fargo.Application.Dtos.PartitionDtos
 {
     public sealed record PartitionCreateDto(
         Name Name,
-        Description? Description = null
-        );
+        Description? Description = null);
 }

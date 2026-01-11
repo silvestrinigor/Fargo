@@ -28,6 +28,6 @@ namespace Fargo.Domain.Entities
         {
             get;
             init;
-        }
+        } = false;
     }
 }

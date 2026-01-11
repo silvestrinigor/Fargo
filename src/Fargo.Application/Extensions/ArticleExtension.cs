@@ -12,8 +12,7 @@ namespace Fargo.Application.Extensions
                     article.Guid,
                     article.Name,
                     article.Description,
-                    article.IsContainer
-                    );
+                    article.IsContainer);
         }
     }
 }

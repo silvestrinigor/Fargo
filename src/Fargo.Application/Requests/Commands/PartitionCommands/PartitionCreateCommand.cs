@@ -3,8 +3,6 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories.PartitionRepositories;
-using Fargo.Domain.ValueObjects;
-using UnitsNet;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -12,7 +10,10 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
         PartitionCreateDto Partition
         ) : ICommand<Guid>;
 
-    public sealed class PartitionCreateCommandHandler(IPartitionRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<PartitionCreateCommand, Guid>
+    public sealed class PartitionCreateCommandHandler(
+        IPartitionRepository repository, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<PartitionCreateCommand, Guid>
     {
         private readonly IPartitionRepository repository = repository;
 
@@ -23,7 +24,7 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
             var partition = new Partition
             {
                 Name = command.Partition.Name,
-                Description = command.Partition.Description is not null ? command.Partition.Description.Value : default
+                Description = command.Partition.Description ?? new(string.Empty),
             };
 
             repository.Add(partition);

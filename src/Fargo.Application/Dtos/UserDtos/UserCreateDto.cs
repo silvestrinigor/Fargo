@@ -4,6 +4,5 @@ namespace Fargo.Application.Dtos.UserDtos
 {
     public record UserCreateDto(
         Name Name,
-        Description Description
-        );
+        Description? Description = null);
 }

@@ -39,7 +39,7 @@ namespace Fargo.Domain.Services
                 throw new InvalidOperationException(
                     "An item cannot be moved into itself.");
 
-            if (await itemRepository.IsInsideOtherItem(item, targetContainer))
+            if (await itemRepository.IsInsideContainer(item, targetContainer))
                 throw new InvalidOperationException(
                     "An item cannot be moved inside a container when the container is inside the item.");
 

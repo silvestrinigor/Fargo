@@ -22,17 +22,11 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         public async Task HandleAsync(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
         {
             var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken)
-                ?? throw new KeyNotFoundException("Article not found.");
+                ?? throw new InvalidOperationException("Article not found.");
 
-            if (command.Article.Name != null)
-            {
-                article.Name = command.Article.Name.Value;
-            }
+            article.Name = command.Article.Name is not null ? command.Article.Name.Value : article.Name;
 
-            if (command.Article.Description != null)
-            {
-                article.Description = command.Article.Description.Value;
-            }
+            article.Description = command.Article.Description is not null ? command.Article.Description.Value : article.Description;
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

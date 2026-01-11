@@ -8,7 +8,10 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         Guid UserGuid
         ) : ICommand;
 
-    public sealed class UserDeleteCommandHandler(IUserRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<UserDeleteCommand>
+    public sealed class UserDeleteCommandHandler(
+        IUserRepository repository, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<UserDeleteCommand>
     {
         private readonly IUserRepository repository = repository;
 

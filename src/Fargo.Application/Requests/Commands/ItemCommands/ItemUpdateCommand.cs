@@ -10,7 +10,10 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
         ItemUpdateDto Item
         ) : ICommand;
 
-    public sealed class ItemUpdateCommandHandler(ItemService itemService, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ItemUpdateCommand>
+    public sealed class ItemUpdateCommandHandler(
+        ItemService itemService, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<ItemUpdateCommand>
     {
         private readonly ItemService itemService = itemService;
 
@@ -18,23 +21,25 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
         public async Task HandleAsync(ItemUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
-                ?? throw new InvalidOperationException("Item not found.");
-
-            if (command.Item.ParentItemGuid.SetValue)
+            async Task defineItemContainer(Guid? containerGuid)
             {
-                if (command.Item.ParentItemGuid.Value is null)
+                var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
+                    ?? throw new InvalidOperationException("Item not found.");
+
+                if (containerGuid is null)
                 {
                     ItemService.RemoveFromContainers(item);
+                    return;
                 }
-                else
-                {
-                    var targetParentItem = await itemService.GetItemAsync(command.Item.ParentItemGuid.Value.Value, cancellationToken)
-                        ?? throw new InvalidOperationException("Target parent item not found.");
 
-                    await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
-                }
+                var targetParentItem = await itemService.GetItemAsync(containerGuid.Value, cancellationToken)
+                    ?? throw new InvalidOperationException("Target parent item not found.");
+
+                await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
             }
+
+            if (command.Item.ParentItemGuid is not null)
+                await defineItemContainer(command.Item.ParentItemGuid.Value);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

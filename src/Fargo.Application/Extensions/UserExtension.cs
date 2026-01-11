@@ -12,8 +12,7 @@ namespace Fargo.Application.Extensions
                 return new UserDto(
                     user.Guid,
                     user.Name,
-                    user.Description
-                    );
+                    user.Description);
             }
         }
     }

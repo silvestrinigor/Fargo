@@ -25,9 +25,6 @@ namespace Fargo.Domain.Services
             return article;
         }
 
-        public Article CreateArticle(Name name, bool isContainer = false)
-            => CreateArticle(name, new(string.Empty), isContainer);
-
         public async Task DeleteArticleAsync(Article article, CancellationToken cancellationToken = default)
         {
             var hasItens = await articleRepository.HasItensAssociated(article.Guid, cancellationToken);

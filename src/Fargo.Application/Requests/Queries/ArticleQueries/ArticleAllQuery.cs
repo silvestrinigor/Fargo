@@ -7,8 +7,8 @@ using Fargo.Domain.ValueObjects;
 namespace Fargo.Application.Requests.Queries.ArticleQueries
 {
     public sealed record ArticleAllQuery(
-        DateTime? AtDateTime,
-        Pagination Pagination
+        DateTime? AtDateTime = null,
+        Pagination Pagination = default
         ) : IQuery<IEnumerable<ArticleDto>>;
 
     public sealed class ArticleAllQueryHandler(IArticleReadRepository repository) : IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>>

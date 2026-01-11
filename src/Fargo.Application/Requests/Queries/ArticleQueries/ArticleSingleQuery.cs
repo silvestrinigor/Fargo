@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
 {
     public sealed record ArticleSingleQuery(
         Guid ArticleGuid,
-        DateTime? AtDateTime
+        DateTime? AtDateTime = null
         ) : IQuery<ArticleDto>;
 
     public sealed class ArticleSingleQueryHandler(IArticleReadRepository repository) : IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?>

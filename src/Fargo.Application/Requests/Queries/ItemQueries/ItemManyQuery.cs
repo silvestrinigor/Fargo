@@ -7,10 +7,10 @@ using Fargo.Domain.ValueObjects;
 namespace Fargo.Application.Requests.Queries.ItemQueries
 {
     public sealed record ItemManyQuery(
-        Guid? ParentItemGuid,
-        Guid? ArticleGuid,
-        DateTime? AtDateTime,
-        Pagination Pagination
+        Guid? ParentItemGuid = null,
+        Guid? ArticleGuid = null,
+        DateTime? AtDateTime = null,
+        Pagination Pagination = default
         ) : IQuery<IEnumerable<ItemDto>>;
 
     public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>

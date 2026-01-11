@@ -11,8 +11,7 @@ namespace Fargo.Application.Extensions
                 => new(
                     partition.Guid,
                     partition.Name,
-                    partition.Description
-                    );
+                    partition.Description);
         }
     }
 }

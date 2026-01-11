@@ -1,19 +1,10 @@
 ﻿using Fargo.Domain.Enums;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Domain.Entities
 {
     public class Permission : IEntityTemporal
     {
         internal Permission() { }
-
-        [SetsRequiredMembers]
-        internal Permission(User user, ActionType actionType, GrantType grantType)
-        {
-            User = user;
-            ActionType = actionType;
-            GrantType = grantType;
-        }
 
         public Guid UserGuid
         {

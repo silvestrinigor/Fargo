@@ -10,7 +10,10 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         UserCreateDto User
         ) : ICommand<Guid>;
 
-    public sealed class UserCreateCommandHandler(IUserRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<UserCreateCommand, Guid>
+    public sealed class UserCreateCommandHandler(
+        IUserRepository repository, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<UserCreateCommand, Guid>
     {
         private readonly IUserRepository repository = repository;
 
@@ -21,7 +24,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             var user = new User
             {
                 Name = command.User.Name,
-                Description = command.User.Description
+                Description = command.User.Description ?? new(string.Empty)
             };
 
             repository.Add(user);

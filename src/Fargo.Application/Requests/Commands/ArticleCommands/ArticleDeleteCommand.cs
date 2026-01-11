@@ -6,7 +6,10 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleDeleteCommand(Guid ArticleGuid) : ICommand;
 
-    public sealed class ArticleDeleteCommandHandler(ArticleService articleService, IUnitOfWork unitOfWork) : ICommandHandlerAsync<ArticleDeleteCommand>
+    public sealed class ArticleDeleteCommandHandler(
+        ArticleService articleService, 
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<ArticleDeleteCommand>
     {
         private readonly ArticleService articleService = articleService;
 

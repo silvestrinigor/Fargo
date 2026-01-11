@@ -4,6 +4,5 @@ namespace Fargo.Application.Dtos.UserDtos
 {
     public sealed record UserPermissionDto(
         ActionType ActionType,
-        GrantType GrantType
-        );
+        GrantType GrantType);
 }

@@ -6,6 +6,5 @@ namespace Fargo.Application.Dtos.ArticleDtos
         Guid Guid,
         Name Name,
         Description Description,
-        bool IsContainer
-        );
+        bool IsContainer);
 }

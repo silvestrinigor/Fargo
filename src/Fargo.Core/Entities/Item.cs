@@ -45,6 +45,6 @@
                 ParentItemGuid = value?.Guid;
                 field = value;
             }
-        }
+        } = null;
     }
 }

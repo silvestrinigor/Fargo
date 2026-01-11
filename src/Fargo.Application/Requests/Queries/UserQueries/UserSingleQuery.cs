@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserSingleQuery(
         Guid UserGuid,
-        DateTime? AtDateTime
+        DateTime? AtDateTime = null
         ) : IQuery<UserDto?>;
 
     public sealed class UserSingleQueryHandler(IUserReadRepository repository) : IQueryHandlerAsync<UserSingleQuery, UserDto?>

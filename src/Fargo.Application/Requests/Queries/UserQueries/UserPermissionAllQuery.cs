@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserPermissionAllQuery(
         Guid UserGuid,
-        DateTime? AtDateTime
+        DateTime? AtDateTime = null
         ) : IQuery<IEnumerable<UserPermissionDto>>;
 
     public sealed class UserPermissionAllQueryHandler(IUserReadRepository repository) : IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<UserPermissionDto>>

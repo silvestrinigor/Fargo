@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
 {
     public sealed record PartitionSingleQuery(
         Guid PartitionGuid,
-        DateTime? AtDateTime
+        DateTime? AtDateTime = null
         ) : IQuery<PartitionDto?>;
 
     public sealed class PartitionSingleQueryHandler(IPartitionReadRepository repository) : IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?>
