@@ -1,8 +1,7 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -11,23 +10,20 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         ) : ICommand<Guid>;
 
     public sealed class UserCreateCommandHandler(
-        IUserRepository repository, 
+        UserService userService,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<UserCreateCommand, Guid>
     {
-        private readonly IUserRepository repository = repository;
+        private readonly UserService userService = userService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task<Guid> HandleAsync(UserCreateCommand command, CancellationToken cancellationToken = default)
         {
-            var user = new User
-            {
-                Name = command.User.Name,
-                Description = command.User.Description ?? new(string.Empty)
-            };
-
-            repository.Add(user);
+            var user = userService.CreateUser(
+                new(command.User.Name),
+                new(command.User.Description),
+                new(command.User.Password));
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

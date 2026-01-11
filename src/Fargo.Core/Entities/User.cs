@@ -25,6 +25,12 @@ namespace Fargo.Domain.Entities
             set;
         } = Description.Empty;
 
+        internal PasswordHash PasswordHash
+        {
+            get;
+            init;
+        }
+
         public IReadOnlyCollection<Permission> Permissions => permissions;
 
         private readonly HashSet<Permission> permissions = [];
