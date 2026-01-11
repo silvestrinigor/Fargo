@@ -16,7 +16,7 @@ namespace Fargo.Domain.Entities
         public required Name Name
         {
             get;
-            init;
+            set;
         }
 
         public Description Description

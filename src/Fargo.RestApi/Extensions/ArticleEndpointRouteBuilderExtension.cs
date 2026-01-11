@@ -1,8 +1,8 @@
-﻿using Fargo.Application.Dtos.ArticleDtos;
+﻿using Fargo.Application.Commom;
 using Fargo.Application.Mediators;
+using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
-using Fargo.Domain.ValueObjects;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -17,7 +17,7 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid articleGuid,
                         DateTime? atDateTime,
-                        IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?> handler,
+                        IQueryHandlerAsync<ArticleSingleQuery, ArticleReadModel?> handler,
                         CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ArticleSingleQuery(articleGuid, atDateTime), cancellationToken));
 
@@ -27,9 +27,9 @@ namespace Fargo.HttpApi.Extensions
                         DateTime? atDateTime,
                         int? page,
                         int? limit,
-                        IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>> handler,
+                        IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
                         CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleAllQuery(atDateTime, new Pagination(page, limit)), cancellationToken));
+                    => await handler.HandleAsync(new ArticleManyQuery(atDateTime, new Pagination(page, limit)), cancellationToken));
 
                 builder.MapPost(
                     "/articles",
@@ -43,10 +43,10 @@ namespace Fargo.HttpApi.Extensions
                     "/articles/{articleGuid}",
                     async (
                         Guid articleGuid,
-                        ArticleUpdateDto dto,
+                        ArticleUpdateModel model,
                         ICommandHandlerAsync<ArticleUpdateCommand> handler,
                         CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleUpdateCommand(articleGuid, dto), cancellationToken));
+                    => await handler.HandleAsync(new ArticleUpdateCommand(articleGuid, model), cancellationToken));
 
                 builder.MapDelete(
                     "/articles/{articleGuid}",

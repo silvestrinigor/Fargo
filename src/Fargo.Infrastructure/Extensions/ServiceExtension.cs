@@ -1,9 +1,10 @@
-﻿using Fargo.Application.Dtos.ArticleDtos;
-using Fargo.Application.Dtos.ItemDtos;
-using Fargo.Application.Dtos.PartitionDtos;
-using Fargo.Application.Dtos.UserDtos;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.ArticleModels;
+using Fargo.Application.Models.ItemModels;
+using Fargo.Application.Models.PartitionModels;
+using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
+using Fargo.Application.Repositories;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Commands.PartitionCommands;
@@ -12,18 +13,13 @@ using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
 using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
-using Fargo.Domain.Repositories.ArticleRepositories;
-using Fargo.Domain.Repositories.ItemRepositories;
-using Fargo.Domain.Repositories.PartitionRepositories;
-using Fargo.Domain.Repositories.UserRepositories;
+using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
-using Fargo.Infrastructure.Persistence.Repositories.ArticleRepositories;
-using Fargo.Infrastructure.Persistence.Repositories.ItemRepositories;
-using Fargo.Infrastructure.Persistence.Repositories.PartitionRepositories;
-using Fargo.Infrastructure.Persistence.Repositories.UserRepositories;
+using Fargo.Infrastructure.Persistence.Read.Repositories;
+using Fargo.Infrastructure.Persistence.Write;
+using Fargo.Infrastructure.Persistence.Write.Repositories;
 using Fargo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,26 +36,29 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<ICommandHandlerAsync<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
-                services.AddScoped<IQueryHandlerAsync<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<ArticleAllQuery, IEnumerable<ArticleDto>>, ArticleAllQueryHandler>();
                 services.AddScoped<ICommandHandlerAsync<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
+                services.AddScoped<IQueryHandlerAsync<ArticleSingleQuery, ArticleReadModel?>, ArticleSingleQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>>, ArticleManyQueryHandler>();
 
                 services.AddScoped<ICommandHandlerAsync<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<ItemDeleteCommand>, ItemDeleteCommandHandler>();
-                services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>, ItemManyQueryHandler>();
                 services.AddScoped<ICommandHandlerAsync<ItemUpdateCommand>, ItemUpdateCommandHandler>();
+                services.AddScoped<IQueryHandlerAsync<ItemSingleQuery, ItemReadModel?>, ItemSingleQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>>, ItemManyQueryHandler>();
 
                 services.AddScoped<ICommandHandlerAsync<UserCreateCommand, Guid>, UserCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<UserDeleteCommand>, UserDeleteCommandHandler>();
-                services.AddScoped<IQueryHandlerAsync<UserSingleQuery, UserDto?>, UserSingleQueryHandler>();
+                services.AddScoped<ICommandHandlerAsync<UserUpdateCommand>, UserUpdateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<UserPermissionUpdateCommand>, UserPermissionUpdateCommandHandler>();
-                services.AddScoped<IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<UserPermissionDto>>, UserPermissionAllQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<UserAllQuery, IEnumerable<UserDto>>, UserAllQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserSingleQuery, UserReadModel?>, UserSingleQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>>, UserManyQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<PermissionReadModel>>, UserPermissionAllQueryHandler>();
 
-                services.AddScoped<IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>();
                 services.AddScoped<ICommandHandlerAsync<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
+                services.AddScoped<ICommandHandlerAsync<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
+                services.AddScoped<IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?>, PartitionSingleQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>>, PartitionManyQueryHandler>();
 
                 services.AddScoped<ArticleService>();
 
@@ -89,7 +88,7 @@ namespace Fargo.Infrastructure.Extensions
             {
                 using (var scope = services.CreateScope())
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<FargoContext>();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<FargoWriteDbContext>();
                     dbContext.Database.EnsureCreated();
                 }
 

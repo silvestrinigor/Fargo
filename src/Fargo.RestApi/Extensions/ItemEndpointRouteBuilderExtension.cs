@@ -1,8 +1,8 @@
-﻿using Fargo.Application.Dtos.ItemDtos;
+﻿using Fargo.Application.Commom;
 using Fargo.Application.Mediators;
+using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Queries.ItemQueries;
-using Fargo.Domain.ValueObjects;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -17,7 +17,7 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid itemGuid,
                         DateTime? atDateTime,
-                        IQueryHandlerAsync<ItemSingleQuery, ItemDto?> handler,
+                        IQueryHandlerAsync<ItemSingleQuery, ItemReadModel?> handler,
                         CancellationToken cancellationToken)
                     => await handler.HandleAsync(new ItemSingleQuery(itemGuid, atDateTime), cancellationToken));
 
@@ -29,7 +29,7 @@ namespace Fargo.HttpApi.Extensions
                         DateTime? atDateTime,
                         int? page,
                         int? limit,
-                        IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>> handler,
+                        IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>> handler,
                         CancellationToken cancellationToken)
                     => await handler.HandleAsync(
                         new ItemManyQuery(parentItemGuid, articleGuid, atDateTime, new Pagination(page, limit)), cancellationToken));
@@ -46,10 +46,10 @@ namespace Fargo.HttpApi.Extensions
                     "/items/{itemGuid}",
                     async (
                         Guid itemGuid,
-                        ItemUpdateDto dto,
+                        ItemUpdateModel model,
                         ICommandHandlerAsync<ItemUpdateCommand> handler,
                         CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ItemUpdateCommand(itemGuid, dto), cancellationToken));
+                    => await handler.HandleAsync(new ItemUpdateCommand(itemGuid, model), cancellationToken));
 
                 builder.MapDelete(
                     "/items/{itemGuid}",

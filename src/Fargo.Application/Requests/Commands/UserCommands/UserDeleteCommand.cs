@@ -1,6 +1,6 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories.UserRepositories;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {

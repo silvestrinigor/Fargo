@@ -1,24 +1,22 @@
-﻿using Fargo.Application.Dtos.UserDtos;
-using Fargo.Application.Extensions;
-using Fargo.Application.Mediators;
-using Fargo.Domain.Repositories.UserRepositories;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.UserModels;
+using Fargo.Application.Repositories;
 
 namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserSingleQuery(
         Guid UserGuid,
         DateTime? AtDateTime = null
-        ) : IQuery<UserDto?>;
+        ) : IQuery<UserReadModel?>;
 
-    public sealed class UserSingleQueryHandler(IUserReadRepository repository) : IQueryHandlerAsync<UserSingleQuery, UserDto?>
+    public sealed class UserSingleQueryHandler(IUserReadRepository repository) : IQueryHandlerAsync<UserSingleQuery, UserReadModel?>
     {
         private readonly IUserReadRepository repository = repository;
 
-        public async Task<UserDto?> HandleAsync(UserSingleQuery query, CancellationToken cancellationToken = default)
-        {
-            var user = await repository.GetByGuidAsync(query.UserGuid, query.AtDateTime, cancellationToken);
-
-            return user?.ToDto();
-        }
+        public async Task<UserReadModel?> HandleAsync(UserSingleQuery query, CancellationToken cancellationToken = default)
+            => await repository.GetByGuidAsync(
+                query.UserGuid, 
+                query.AtDateTime, 
+                cancellationToken);
     }
 }

@@ -1,7 +1,8 @@
 using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
+using Fargo.Infrastructure.Persistence.Read;
+using Fargo.Infrastructure.Persistence.Write;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,10 +18,15 @@ builder.Services.AddProblemDetails();
 
 var connectionString = builder.Configuration.GetConnectionString("FargoDatabase");
 
-builder.Services.AddDbContext<FargoContext>(opt =>
+builder.Services.AddDbContext<FargoWriteDbContext>(opt =>
     opt.UseSqlServer(
         connectionString,
-        sql => sql.MigrationsAssembly(typeof(FargoContext).Assembly.FullName)
+        sql => sql.MigrationsAssembly(typeof(FargoWriteDbContext).Assembly.FullName)
+    ));
+
+builder.Services.AddDbContext<FargoReadDbContext>(opt =>
+    opt.UseSqlServer(
+        connectionString
     ));
 
 builder.Services.AddInfrastructure();

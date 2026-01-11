@@ -1,13 +1,13 @@
-﻿using Fargo.Application.Dtos.UserDtos;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories.UserRepositories;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
     public sealed record UserPermissionUpdateCommand(
         Guid UserGuid,
-        UserPermissionDto Permission
+        PermissionUpdateModel Permission
         ) : ICommand;
 
     public sealed class UserPermissionUpdateCommandHandler(

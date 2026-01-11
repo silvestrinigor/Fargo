@@ -1,5 +1,5 @@
-﻿using Fargo.Application.Dtos.ItemDtos;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemUpdateCommand(
         Guid ItemGuid,
-        ItemUpdateDto Item
+        ItemUpdateModel Item
         ) : ICommand;
 
     public sealed class ItemUpdateCommandHandler(
@@ -21,7 +21,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
         public async Task HandleAsync(ItemUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            async Task defineItemContainer(Guid? containerGuid)
+            async Task DefineItemContainer(Guid? containerGuid)
             {
                 var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
                     ?? throw new InvalidOperationException("Item not found.");
@@ -39,7 +39,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             }
 
             if (command.Item.ParentItemGuid is not null)
-                await defineItemContainer(command.Item.ParentItemGuid.Value);
+                await DefineItemContainer(command.Item.ParentItemGuid.Value);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

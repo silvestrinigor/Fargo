@@ -1,5 +1,5 @@
-﻿using Fargo.Application.Dtos.ArticleDtos;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
@@ -7,7 +7,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleUpdateCommand(
         Guid ArticleGuid,
-        ArticleUpdateDto Article
+        ArticleUpdateModel Article
         ) : ICommand;
 
     public sealed class ArticleUpdateCommandHandler(

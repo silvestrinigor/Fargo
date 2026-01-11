@@ -1,8 +1,7 @@
-﻿using Fargo.Application.Dtos.ItemDtos;
-using Fargo.Application.Extensions;
+﻿using Fargo.Application.Commom;
 using Fargo.Application.Mediators;
-using Fargo.Domain.Repositories.ItemRepositories;
-using Fargo.Domain.ValueObjects;
+using Fargo.Application.Models.ItemModels;
+using Fargo.Application.Repositories;
 
 namespace Fargo.Application.Requests.Queries.ItemQueries
 {
@@ -11,22 +10,18 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
         Guid? ArticleGuid = null,
         DateTime? AtDateTime = null,
         Pagination Pagination = default
-        ) : IQuery<IEnumerable<ItemDto>>;
+        ) : IQuery<IEnumerable<ItemReadModel>>;
 
-    public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemDto>>
+    public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>>
     {
         private readonly IItemReadRepository repository = repository;
 
-        public async Task<IEnumerable<ItemDto>> HandleAsync(ItemManyQuery query, CancellationToken cancellationToken = default)
-        {
-            var itens = await repository.GetManyAsync(
+        public async Task<IEnumerable<ItemReadModel>> HandleAsync(ItemManyQuery query, CancellationToken cancellationToken = default)
+            => await repository.GetManyAsync(
                 query.ParentItemGuid, 
                 query.ArticleGuid, 
                 query.AtDateTime, 
                 query.Pagination,
                 cancellationToken);
-
-            return itens.Select(x => x.ToDto());
-        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories.PartitionRepositories;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {

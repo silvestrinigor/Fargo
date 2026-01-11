@@ -1,20 +1,22 @@
-﻿using Fargo.Application.Dtos.PartitionDtos;
-using Fargo.Application.Extensions;
-using Fargo.Application.Mediators;
-using Fargo.Domain.Repositories.PartitionRepositories;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.PartitionModels;
+using Fargo.Application.Repositories;
 
 namespace Fargo.Application.Requests.Queries.PartitionQueries
 {
     public sealed record PartitionSingleQuery(
         Guid PartitionGuid,
         DateTime? AtDateTime = null
-        ) : IQuery<PartitionDto?>;
+        ) : IQuery<PartitionReadModel?>;
 
-    public sealed class PartitionSingleQueryHandler(IPartitionReadRepository repository) : IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?>
+    public sealed class PartitionSingleQueryHandler(IPartitionReadRepository repository) : IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?>
     {
         private readonly IPartitionReadRepository repository = repository;
 
-        public async Task<PartitionDto?> HandleAsync(PartitionSingleQuery query, CancellationToken cancellationToken = default)
-            => (await repository.GetByGuidAsync(query.PartitionGuid, query.AtDateTime, cancellationToken))?.ToDto();
+        public async Task<PartitionReadModel?> HandleAsync(PartitionSingleQuery query, CancellationToken cancellationToken = default)
+            => await repository.GetByGuidAsync(
+                query.PartitionGuid, 
+                query.AtDateTime, 
+                cancellationToken);
     }
 }

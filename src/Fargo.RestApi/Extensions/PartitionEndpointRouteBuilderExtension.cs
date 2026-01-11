@@ -1,8 +1,8 @@
-﻿using Fargo.Application.Dtos.PartitionDtos;
+﻿using Fargo.Application.Commom;
 using Fargo.Application.Mediators;
+using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Queries.PartitionQueries;
-using Fargo.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Extensions
@@ -15,18 +15,39 @@ namespace Fargo.HttpApi.Extensions
             {
                 builder.MapGet(
                     "/partition/{partitionGuid}",
-                    async (Guid partitionGuid, [FromQuery] DateTime? atDateTime, [FromServices] IQueryHandlerAsync<PartitionSingleQuery, PartitionDto?> handler, CancellationToken cancellationToken)
+                    async (
+                        Guid partitionGuid, 
+                        DateTime? atDateTime, 
+                        IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?> handler, 
+                        CancellationToken cancellationToken)
                     => await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, atDateTime), cancellationToken));
 
                 builder.MapGet(
                     "/partition",
-                    async ([FromQuery] DateTime? atDateTime, [FromQuery] int? page, [FromQuery] int? limit, [FromServices] IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionDto>> handler, CancellationToken cancellationToken)
+                    async (
+                        DateTime? atDateTime, 
+                        int? page, 
+                        int? limit, 
+                        IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler, 
+                        CancellationToken cancellationToken)
                     => await handler.HandleAsync(new PartitionManyQuery(atDateTime, new Pagination(page, limit)), cancellationToken));
 
                 builder.MapPost(
                     "/partition",
-                    async ([FromBody] PartitionCreateCommand command, [FromServices] ICommandHandlerAsync<PartitionCreateCommand, Guid> handler, CancellationToken cancellationToken)
+                    async (
+                        PartitionCreateCommand command, 
+                        ICommandHandlerAsync<PartitionCreateCommand, Guid> handler, 
+                        CancellationToken cancellationToken)
                     => await handler.HandleAsync(command, cancellationToken));
+
+                builder.MapPatch(
+                    "/partition/{partitionGuid}",
+                    async (
+                        Guid partitionGuid,
+                        PartitionUpdateModel model,
+                        ICommandHandlerAsync<PartitionUpdateCommand> handler,
+                        CancellationToken cancellationToken)
+                    => await handler.HandleAsync(new PartitionUpdateCommand(partitionGuid, model), cancellationToken));
             }
         }
     }

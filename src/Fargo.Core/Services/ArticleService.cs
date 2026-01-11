@@ -1,5 +1,5 @@
 ﻿using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories.ArticleRepositories;
+using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Services
@@ -7,9 +7,7 @@ namespace Fargo.Domain.Services
     public class ArticleService(IArticleRepository articleRepository)
     {
         public async Task<Article?> GetArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
-        {
-            return await articleRepository.GetByGuidAsync(articleGuid, cancellationToken);
-        }
+            => await articleRepository.GetByGuidAsync(articleGuid, cancellationToken);
 
         public Article CreateArticle(Name name, Description description, bool isContainer = false)
         {

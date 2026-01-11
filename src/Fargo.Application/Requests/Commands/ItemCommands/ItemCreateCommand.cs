@@ -1,12 +1,12 @@
-﻿using Fargo.Application.Dtos.ItemDtos;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemCreateCommand(
-        ItemCreateDto Item
+        ItemCreateModel Item
         ) : ICommand<Guid>;
 
     public sealed class ItemCreateCommandHandler(

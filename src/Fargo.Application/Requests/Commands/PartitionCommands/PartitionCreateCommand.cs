@@ -1,13 +1,13 @@
-﻿using Fargo.Application.Dtos.PartitionDtos;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
+using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories.PartitionRepositories;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
     public sealed record PartitionCreateCommand(
-        PartitionCreateDto Partition
+        PartitionCreateModel Partition
         ) : ICommand<Guid>;
 
     public sealed class PartitionCreateCommandHandler(
