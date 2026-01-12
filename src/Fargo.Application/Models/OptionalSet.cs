@@ -1,5 +1,5 @@
 ﻿namespace Fargo.Application.Models
 {
-    public sealed record OptionalSetModel<T>(
+    public sealed record OptionalSet<T>(
         T Value);
 }

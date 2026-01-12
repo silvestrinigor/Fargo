@@ -8,11 +8,11 @@ namespace Fargo.Application.Repositories
     {
         Task<TEntity?> GetByGuidAsync(
             Guid entityGuid,
-            DateTime? atDateTime = null,
+            DateTime? asOfDateTime = null,
             CancellationToken cancellationToken = default);
 
         Task<IEnumerable<TEntity>> GetManyAsync(
-            DateTime? atDateTime = null,
+            DateTime? asOfDateTime = null,
             Pagination pagination = default,
             CancellationToken cancellationToken = default);
     }

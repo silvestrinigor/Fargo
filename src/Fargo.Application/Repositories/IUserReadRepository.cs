@@ -6,7 +6,7 @@ namespace Fargo.Application.Repositories
     {
         Task<IEnumerable<PermissionReadModel>?> GetUserPermissions(
             Guid userGuid,
-            DateTime? atDateTime = null,
+            DateTime? asOfDateTime = null,
             CancellationToken cancellationToken = default);
     }
 }

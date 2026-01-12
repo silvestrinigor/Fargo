@@ -8,7 +8,7 @@ namespace Fargo.Application.Repositories
         Task<IEnumerable<ItemReadModel>> GetManyAsync(
             Guid? parentItemGuid = null,
             Guid? articleGuid = null,
-            DateTime? atDateTime = null,
+            DateTime? asOfDateTime = null,
             Pagination pagination = default,
             CancellationToken cancellationToken = default);
     }
