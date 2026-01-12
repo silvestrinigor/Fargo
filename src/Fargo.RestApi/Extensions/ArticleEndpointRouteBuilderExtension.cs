@@ -4,7 +4,6 @@ using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.HttpApi.Commom;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -65,7 +64,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<ArticleUpdateCommand> handler, 
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new ArticleUpdateCommand(articleGuid, model), cancellationToken);
+                        var command = new ArticleUpdateCommand(articleGuid, model);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -77,7 +78,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<ArticleDeleteCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new ArticleDeleteCommand(articleGuid), cancellationToken);
+                        var command = new ArticleDeleteCommand(articleGuid);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });

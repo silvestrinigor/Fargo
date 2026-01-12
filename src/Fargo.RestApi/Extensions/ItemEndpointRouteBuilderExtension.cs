@@ -66,7 +66,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<ItemUpdateCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new ItemUpdateCommand(itemGuid, model), cancellationToken);
+                        var command = new ItemUpdateCommand(itemGuid, model);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -78,7 +80,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<ItemDeleteCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken);
+                        var command = new ItemDeleteCommand(itemGuid);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });

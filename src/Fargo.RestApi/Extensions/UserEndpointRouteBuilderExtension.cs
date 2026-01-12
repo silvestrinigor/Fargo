@@ -61,7 +61,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<UserDeleteCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new UserDeleteCommand(userGuid), cancellationToken);
+                        var command = new UserDeleteCommand(userGuid);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -74,7 +76,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<UserUpdateCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new UserUpdateCommand(userGuid, model), cancellationToken);
+                        var command = new UserUpdateCommand(userGuid, model);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -87,7 +91,9 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<PermissionReadModel>?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(new UserPermissionAllQuery(userGuid, atDateTime), cancellationToken);
+                        var query = new UserPermissionAllQuery(userGuid, atDateTime);
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -100,7 +106,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<UserPermissionUpdateCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new UserPermissionUpdateCommand(userGuid, model), cancellationToken);
+                        var command = new UserPermissionUpdateCommand(userGuid, model);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });

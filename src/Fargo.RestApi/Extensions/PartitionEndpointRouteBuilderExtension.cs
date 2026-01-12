@@ -54,6 +54,20 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResults.Ok(response);
                     });
 
+                builder.MapDelete(
+                    "/partition/{partitionGuid}",
+                    async (
+                        Guid partitionGuid,
+                        ICommandHandlerAsync<PartitionDeleteCommand> handler,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new PartitionDeleteCommand(partitionGuid);
+
+                        await handler.HandleAsync(command, cancellationToken);
+
+                        return TypedResults.NoContent();
+                    });
+
                 builder.MapPatch(
                     "/partition/{partitionGuid}",
                     async (
@@ -62,7 +76,9 @@ namespace Fargo.HttpApi.Extensions
                         ICommandHandlerAsync<PartitionUpdateCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        await handler.HandleAsync(new PartitionUpdateCommand(partitionGuid, model), cancellationToken);
+                        var command = new PartitionUpdateCommand(partitionGuid, model);
+
+                        await handler.HandleAsync(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
