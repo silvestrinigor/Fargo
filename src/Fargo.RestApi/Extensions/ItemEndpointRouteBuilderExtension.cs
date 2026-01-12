@@ -27,12 +27,13 @@ namespace Fargo.HttpApi.Extensions
                         Guid? parentItemGuid,
                         Guid? articleGuid,
                         DateTime? atDateTime,
-                        int? page,
-                        int? limit,
+                        Page? page,
+                        Limit? limit,
                         IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>> handler,
                         CancellationToken cancellationToken)
                     => await handler.HandleAsync(
-                        new ItemManyQuery(parentItemGuid, articleGuid, atDateTime, new Pagination(page, limit)), cancellationToken));
+                        new ItemManyQuery(parentItemGuid, articleGuid, atDateTime, new Pagination(page ?? default, limit ?? default)), 
+                        cancellationToken));
 
                 builder.MapPost(
                     "/items",

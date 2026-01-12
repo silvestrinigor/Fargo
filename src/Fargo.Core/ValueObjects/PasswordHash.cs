@@ -1,35 +1,30 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
-    public readonly struct PasswordHash(string value) : IEquatable<PasswordHash>
+    public readonly struct PasswordHash : IStringValueObject<PasswordHash>
     {
+        public PasswordHash(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Cannot be empty.", nameof(value));
+
+            if (value.Length > MaxLength)
+                throw new ArgumentOutOfRangeException(nameof(value), $"Cannot exceed {MaxLength} characters.");
+
+            this.value = value;
+        }
+
         public const int MaxLength = 512;
 
-        public string Value { get; }
-            = string.IsNullOrWhiteSpace(value)
-            ? throw new ArgumentException("Cannot be empty.", nameof(value))
-            : value.Length > MaxLength
-            ? throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.")
-            : value;
+        public string Value
+            => value != string.Empty ? value : throw new InvalidOperationException("Password hash value must be set.");
 
-        public static PasswordHash NewPasswordHash(string value)
+        public readonly string value;
+
+        public static PasswordHash FromString(string value)
             => new(value);
 
-        public bool Equals(PasswordHash other)
-            => Value == other.Value;
+        public static implicit operator string(PasswordHash passwordHash) => passwordHash.Value;
 
-        public override bool Equals(object? obj)
-            => obj is PasswordHash other && Equals(other);
-
-        public override int GetHashCode()
-            => Value.GetHashCode();
-
-        public static bool operator ==(PasswordHash left, PasswordHash right)
-            => left.Equals(right);
-
-        public static bool operator !=(PasswordHash left, PasswordHash right)
-            => !left.Equals(right);
-
-        public override string ToString()
-            => Value;
+        public static explicit operator PasswordHash(string value) => new(value);
     }
 }

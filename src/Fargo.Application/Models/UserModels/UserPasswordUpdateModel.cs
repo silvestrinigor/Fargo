@@ -1,6 +1,8 @@
-﻿namespace Fargo.Application.Models.UserModels
+﻿using Fargo.Domain.ValueObjects;
+
+namespace Fargo.Application.Models.UserModels
 {
     public sealed record UserPasswordUpdateModel(
-        string NewPassword,
-        string CurrentPassword);
+        Password NewPassword,
+        Password CurrentPassword);
 }

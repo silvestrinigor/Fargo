@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Read.Repositories
 {
-    public abstract class EntityByGuidTemporalReadRepository<TEntity>(DbSet<TEntity> set) : IEntityByGuidTemporalReadRepository<TEntity>
+    public abstract class EntityByGuidTemporalReadRepository<TEntity>(
+        DbSet<TEntity> set
+        ) : IEntityByGuidTemporalReadRepository<TEntity>
         where TEntity : class, IEntityByGuidReadModel, IEntityTemporalReadModel
     {
         protected readonly DbSet<TEntity> dbSet = set;

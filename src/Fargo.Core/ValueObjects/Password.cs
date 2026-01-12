@@ -1,35 +1,30 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
-    public readonly struct Password(string value) : IEquatable<Password>
+    public readonly struct Password : IStringValueObject<Password>
     {
+        public Password(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Cannot be empty.", nameof(value));
+
+            if (value.Length > MaxLength)
+                throw new ArgumentOutOfRangeException(nameof(value), $"Cannot exceed {MaxLength} characters.");
+
+            this.value = value;
+        }
+
         public const int MaxLength = 512;
 
-        public string Value { get; }
-            = string.IsNullOrWhiteSpace(value)
-            ? throw new ArgumentException("Cannot be empty.", nameof(value))
-            : value.Length > MaxLength
-            ? throw new ArgumentOutOfRangeException(nameof(value), $"Cannot exceed {MaxLength} characters.")
-            : value;
+        public string Value 
+            => value != string.Empty ? value : throw new InvalidOperationException("Password value must be set.");
 
-        public static Password NewPassword(string value)
+        public readonly string value;
+
+        public static Password FromString(string value)
             => new(value);
 
-        public bool Equals(Password other)
-            => Value == other.Value;
+        public static implicit operator string(Password password) => password.Value;
 
-        public override bool Equals(object? obj)
-            => obj is Password other && Equals(other);
-
-        public override int GetHashCode()
-            => Value.GetHashCode();
-
-        public static bool operator ==(Password left, Password right)
-            => left.Equals(right);
-
-        public static bool operator !=(Password left, Password right)
-            => !left.Equals(right);
-
-        public override string ToString()
-            => Value;
+        public static explicit operator Password(string value) => new(value);
     }
 }

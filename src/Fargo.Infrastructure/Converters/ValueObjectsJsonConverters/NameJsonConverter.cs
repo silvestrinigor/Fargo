@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Infrastructure.Converters
+namespace Fargo.Infrastructure.Converters.ValueObjectsJsonConverters
 {
     public class NameJsonConverter : JsonConverter<Name>
     {
@@ -18,7 +18,7 @@ namespace Fargo.Infrastructure.Converters
 
         public override void Write(Utf8JsonWriter writer, Name value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.ToString());
+            writer.WriteStringValue(value.Value);
         }
     }
 }

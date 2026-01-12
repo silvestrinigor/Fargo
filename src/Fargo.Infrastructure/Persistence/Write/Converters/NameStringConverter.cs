@@ -4,5 +4,5 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fargo.Infrastructure.Persistence.Write.Converters
 {
     public class NameStringConverter()
-        : ValueConverter<Name, string>(x => x.ToString(), x => new Name(x));
+        : ValueConverter<Name, string>(x => x.Value, x => new Name(x));
 }

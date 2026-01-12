@@ -1,32 +1,30 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
-    public readonly struct Name(string value) : IEquatable<Name>
+    public readonly struct Name : IStringValueObject<Name>
     {
+        public Name(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Cannot be empty.", nameof(value));
+
+            if (value.Length > MaxLength)
+                throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.");
+
+            this.value = value;
+        }
+
         public const int MaxLength = 100;
 
-        public string Value { get; }
-            = string.IsNullOrWhiteSpace(value)
-            ? throw new ArgumentException("Cannot be empty.", nameof(value))
-            : value.Length > MaxLength
-            ? throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.")
-            : value;
+        public string Value
+            => value != string.Empty ? value : throw new ArgumentException("Cannot be empty.", nameof(Value));
 
-        public bool Equals(Name other)
-            => Value == other.Value;
+        private readonly string value;
 
-        public override bool Equals(object? obj)
-            => obj is Name other && Equals(other);
+        public static Name FromString(string value)
+            => new(value);
 
-        public override int GetHashCode()
-            => Value.GetHashCode();
+        public static implicit operator string(Name name) => name.Value;
 
-        public static bool operator ==(Name left, Name right)
-            => left.Equals(right);
-
-        public static bool operator !=(Name left, Name right)
-            => !left.Equals(right);
-
-        public override string ToString()
-            => Value;
+        public static explicit operator Name(string value) => new(value);
     }
 }

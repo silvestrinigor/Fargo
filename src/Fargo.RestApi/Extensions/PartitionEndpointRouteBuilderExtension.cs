@@ -26,11 +26,13 @@ namespace Fargo.HttpApi.Extensions
                     "/partition",
                     async (
                         DateTime? atDateTime, 
-                        int? page, 
-                        int? limit, 
+                        Page? page, 
+                        Limit? limit, 
                         IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler, 
                         CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new PartitionManyQuery(atDateTime, new Pagination(page, limit)), cancellationToken));
+                    => await handler.HandleAsync(
+                        new PartitionManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default)), 
+                        cancellationToken));
 
                 builder.MapPost(
                     "/partition",

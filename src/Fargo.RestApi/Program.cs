@@ -1,5 +1,6 @@
 using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
+using Fargo.Infrastructure.Converters.ValueObjectsJsonConverters;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence.Read;
 using Fargo.Infrastructure.Persistence.Write;
@@ -35,6 +36,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new NameJsonConverter());
     options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
+    options.SerializerOptions.Converters.Add(new LimitJsonConverter());
+    options.SerializerOptions.Converters.Add(new PageJsonConverter());
 });
 
 var app = builder.Build();

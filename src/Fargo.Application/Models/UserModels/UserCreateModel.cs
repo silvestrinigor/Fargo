@@ -1,8 +1,10 @@
-﻿namespace Fargo.Application.Models.UserModels
+﻿using Fargo.Domain.ValueObjects;
+
+namespace Fargo.Application.Models.UserModels
 {
     public record UserCreateModel(
         int Id,
-        string Name,
-        string Password,
-        string Description = "");
+        Name Name,
+        Password Password,
+        Description Description = default);
 }

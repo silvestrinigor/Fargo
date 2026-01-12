@@ -25,11 +25,13 @@ namespace Fargo.HttpApi.Extensions
                     "/articles",
                     async (
                         DateTime? atDateTime,
-                        int? page,
-                        int? limit,
+                        Page? page,
+                        Limit? limit,
                         IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
                         CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleManyQuery(atDateTime, new Pagination(page, limit)), cancellationToken));
+                    => await handler.HandleAsync(
+                        new ArticleManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default)), 
+                        cancellationToken));
 
                 builder.MapPost(
                     "/articles",
