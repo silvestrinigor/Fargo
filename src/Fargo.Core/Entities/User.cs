@@ -17,7 +17,7 @@ namespace Fargo.Domain.Entities
         {
             get;
             init;
-        };
+        }
 
         public required Name Name
         {

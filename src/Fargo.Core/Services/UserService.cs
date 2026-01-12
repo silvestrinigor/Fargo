@@ -28,12 +28,12 @@ namespace Fargo.Domain.Services
 
         public void SetPassword(User user, Password newPassword, Password currentPassword)
         {
-            var isPasswordCorrect = passwordHasher.Verify(user.PasswordHash.ToString(), currentPassword.ToString());
+            var isPasswordCorrect = passwordHasher.Verify(user.PasswordHash.Value, currentPassword.Value);
 
             if (!isPasswordCorrect)
                 throw new InvalidOperationException("Cannot set new password because the current password is incorrect.");
 
-            user.PasswordHash = new(passwordHasher.Hash(newPassword.ToString()));
+            user.PasswordHash = new(passwordHasher.Hash(newPassword.Value));
         }
     }
 }

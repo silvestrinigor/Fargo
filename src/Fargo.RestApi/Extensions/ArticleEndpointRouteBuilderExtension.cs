@@ -29,7 +29,7 @@ namespace Fargo.HttpApi.Extensions
                     });
 
                 builder.MapGet(
-                    "article/",
+                    "articles/",
                     async (
                         DateTime? asOfDateTime,
                         Page? page,
@@ -45,7 +45,7 @@ namespace Fargo.HttpApi.Extensions
                     });
 
                 builder.MapPost(
-                    "article/",
+                    "articles/",
                     async (
                         ArticleCreateCommand command,
                         ICommandHandlerAsync<ArticleCreateCommand, Guid> handler,
@@ -57,7 +57,7 @@ namespace Fargo.HttpApi.Extensions
                     });
 
                 builder.MapPatch(
-                    "article/{articleGuid}",
+                    "articles/{articleGuid}",
                     async (
                         Guid articleGuid, 
                         ArticleUpdateModel model, 
@@ -72,7 +72,7 @@ namespace Fargo.HttpApi.Extensions
                     });
 
                 builder.MapDelete(
-                    "article/{articleGuid}",
+                    "articles/{articleGuid}",
                     async (
                         Guid articleGuid,
                         ICommandHandlerAsync<ArticleDeleteCommand> handler,

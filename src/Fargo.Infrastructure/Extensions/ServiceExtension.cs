@@ -64,6 +64,8 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<ItemService>();
 
+                services.AddScoped<UserService>();
+
                 services.AddScoped<IArticleRepository, ArticleRepository>();
                 services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
 

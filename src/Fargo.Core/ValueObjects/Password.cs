@@ -18,7 +18,7 @@
         public string Value 
             => value != string.Empty ? value : throw new InvalidOperationException("Password value must be set.");
 
-        public readonly string value;
+        private readonly string value;
 
         public static Password FromString(string value)
             => new(value);
