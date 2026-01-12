@@ -3,6 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.HttpApi.Commom;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -18,8 +19,14 @@ namespace Fargo.HttpApi.Extensions
                         Guid itemGuid,
                         DateTime? atDateTime,
                         IQueryHandlerAsync<ItemSingleQuery, ItemReadModel?> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ItemSingleQuery(itemGuid, atDateTime), cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        var query = new ItemSingleQuery(itemGuid, atDateTime);
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
+
+                        return TypedResultsHelpers.HandleQueryResult(response);
+                    });
 
                 builder.MapGet(
                     "/items",
@@ -30,18 +37,26 @@ namespace Fargo.HttpApi.Extensions
                         Page? page,
                         Limit? limit,
                         IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(
-                        new ItemManyQuery(parentItemGuid, articleGuid, atDateTime, new Pagination(page ?? default, limit ?? default)), 
-                        cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        var query = new ItemManyQuery(parentItemGuid, articleGuid, atDateTime, new Pagination(page ?? default, limit ?? default));
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
+
+                        return TypedResultsHelpers.HandleQueryResult(response);
+                    });
 
                 builder.MapPost(
                     "/items",
                     async (
                         ItemCreateCommand command,
                         ICommandHandlerAsync<ItemCreateCommand, Guid> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(command, cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        var response = await handler.HandleAsync(command, cancellationToken);
+
+                        return TypedResults.Ok(response);
+                    });
 
                 builder.MapPatch(
                     "/items/{itemGuid}",
@@ -49,16 +64,24 @@ namespace Fargo.HttpApi.Extensions
                         Guid itemGuid,
                         ItemUpdateModel model,
                         ICommandHandlerAsync<ItemUpdateCommand> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ItemUpdateCommand(itemGuid, model), cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        await handler.HandleAsync(new ItemUpdateCommand(itemGuid, model), cancellationToken);
+
+                        return TypedResults.NoContent();
+                    });
 
                 builder.MapDelete(
                     "/items/{itemGuid}",
                     async (
                         Guid itemGuid,
                         ICommandHandlerAsync<ItemDeleteCommand> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken);
+
+                        return TypedResults.NoContent();
+                    });
             }
         }
     }

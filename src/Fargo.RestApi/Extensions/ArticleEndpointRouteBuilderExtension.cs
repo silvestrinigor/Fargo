@@ -3,6 +3,8 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
+using Fargo.HttpApi.Commom;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -16,47 +18,69 @@ namespace Fargo.HttpApi.Extensions
                     "/articles/{articleGuid}",
                     async (
                         Guid articleGuid,
-                        DateTime? atDateTime,
+                        DateTime? asOfDateTime,
                         IQueryHandlerAsync<ArticleSingleQuery, ArticleReadModel?> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleSingleQuery(articleGuid, atDateTime), cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        var query = new ArticleSingleQuery(articleGuid, asOfDateTime);
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
+
+                        return TypedResultsHelpers.HandleQueryResult(response);
+                    });
 
                 builder.MapGet(
-                    "/articles",
+                    "article/",
                     async (
-                        DateTime? atDateTime,
+                        DateTime? asOfDateTime,
                         Page? page,
                         Limit? limit,
                         IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(
-                        new ArticleManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default)), 
-                        cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        var query = new ArticleManyQuery(asOfDateTime, new Pagination(page ?? default, limit ?? default));
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
+
+                        return TypedResultsHelpers.HandleQueryResult(response);
+                    });
 
                 builder.MapPost(
-                    "/articles",
+                    "article/",
                     async (
                         ArticleCreateCommand command,
                         ICommandHandlerAsync<ArticleCreateCommand, Guid> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(command, cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        var response = await handler.HandleAsync(command, cancellationToken);
+
+                        return TypedResults.Ok(response);
+                    });
 
                 builder.MapPatch(
-                    "/articles/{articleGuid}",
+                    "article/{articleGuid}",
                     async (
-                        Guid articleGuid,
-                        ArticleUpdateModel model,
-                        ICommandHandlerAsync<ArticleUpdateCommand> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleUpdateCommand(articleGuid, model), cancellationToken));
+                        Guid articleGuid, 
+                        ArticleUpdateModel model, 
+                        ICommandHandlerAsync<ArticleUpdateCommand> handler, 
+                        CancellationToken cancellationToken) =>
+                    {
+                        await handler.HandleAsync(new ArticleUpdateCommand(articleGuid, model), cancellationToken);
+
+                        return TypedResults.NoContent();
+                    });
 
                 builder.MapDelete(
-                    "/articles/{articleGuid}",
+                    "article/{articleGuid}",
                     async (
                         Guid articleGuid,
                         ICommandHandlerAsync<ArticleDeleteCommand> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new ArticleDeleteCommand(articleGuid), cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        await handler.HandleAsync(new ArticleDeleteCommand(articleGuid), cancellationToken);
+
+                        return TypedResults.NoContent();
+                    });
             }
         }
     }

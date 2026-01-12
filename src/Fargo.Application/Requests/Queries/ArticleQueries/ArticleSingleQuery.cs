@@ -6,7 +6,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
 {
     public sealed record ArticleSingleQuery(
         Guid ArticleGuid,
-        DateTime? AtDateTime = null
+        DateTime? AsOfDateTime = null
         ) : IQuery<ArticleReadModel>;
 
     public sealed class ArticleSingleQueryHandler(IArticleReadRepository repository) : IQueryHandlerAsync<ArticleSingleQuery, ArticleReadModel?>
@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
         public async Task<ArticleReadModel?> HandleAsync(ArticleSingleQuery query, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(
                 query.ArticleGuid, 
-                query.AtDateTime, 
+                query.AsOfDateTime, 
                 cancellationToken);
     }
 }

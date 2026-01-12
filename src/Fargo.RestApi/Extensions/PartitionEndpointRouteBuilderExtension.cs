@@ -3,7 +3,7 @@ using Fargo.Application.Mediators;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Queries.PartitionQueries;
-using Microsoft.AspNetCore.Mvc;
+using Fargo.HttpApi.Commom;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -16,31 +16,43 @@ namespace Fargo.HttpApi.Extensions
                 builder.MapGet(
                     "/partition/{partitionGuid}",
                     async (
-                        Guid partitionGuid, 
-                        DateTime? atDateTime, 
-                        IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?> handler, 
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, atDateTime), cancellationToken));
+                        Guid partitionGuid,
+                        DateTime? atDateTime,
+                        IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?> handler,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var response = await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, atDateTime), cancellationToken);
+
+                        return TypedResultsHelpers.HandleQueryResult(response);
+                    });
 
                 builder.MapGet(
                     "/partition",
                     async (
-                        DateTime? atDateTime, 
-                        Page? page, 
-                        Limit? limit, 
-                        IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler, 
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(
-                        new PartitionManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default)), 
-                        cancellationToken));
+                        DateTime? atDateTime,
+                        Page? page,
+                        Limit? limit,
+                        IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var query = new PartitionManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default));
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
+
+                        return TypedResultsHelpers.HandleQueryResult(response);
+                    });
 
                 builder.MapPost(
                     "/partition",
                     async (
-                        PartitionCreateCommand command, 
-                        ICommandHandlerAsync<PartitionCreateCommand, Guid> handler, 
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(command, cancellationToken));
+                        PartitionCreateCommand command,
+                        ICommandHandlerAsync<PartitionCreateCommand, Guid> handler,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var response = await handler.HandleAsync(command, cancellationToken);
+
+                        return TypedResults.Ok(response);
+                    });
 
                 builder.MapPatch(
                     "/partition/{partitionGuid}",
@@ -48,8 +60,12 @@ namespace Fargo.HttpApi.Extensions
                         Guid partitionGuid,
                         PartitionUpdateModel model,
                         ICommandHandlerAsync<PartitionUpdateCommand> handler,
-                        CancellationToken cancellationToken)
-                    => await handler.HandleAsync(new PartitionUpdateCommand(partitionGuid, model), cancellationToken));
+                        CancellationToken cancellationToken) =>
+                    {
+                        await handler.HandleAsync(new PartitionUpdateCommand(partitionGuid, model), cancellationToken);
+
+                        return TypedResults.NoContent();
+                    });
             }
         }
     }
