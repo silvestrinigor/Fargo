@@ -1,6 +1,6 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -8,18 +8,20 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
         Guid PartitionGuid
         ) : ICommand;
 
-    public sealed class PartitionDeleteCommandHandler(IPartitionRepository repository, IUnitOfWork unitOfWork) : ICommandHandlerAsync<PartitionDeleteCommand>
+    public sealed class PartitionDeleteCommandHandler(
+        PartitionService service,
+        IUnitOfWork unitOfWork
+        ) : ICommandHandlerAsync<PartitionDeleteCommand>
     {
-        private readonly IPartitionRepository repository = repository;
+        private readonly PartitionService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task HandleAsync(PartitionDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var partitionToDelete = await repository.GetByGuidAsync(command.PartitionGuid, cancellationToken)
-                ?? throw new InvalidOperationException("Partition not found.");
+            var partitionToDelete = await service.GetPartitionAsync(command.PartitionGuid, cancellationToken);
 
-            repository.Remove(partitionToDelete);
+            service.DeletePartition(partitionToDelete);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

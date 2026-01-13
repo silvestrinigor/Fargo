@@ -23,8 +23,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
         {
             async Task DefineItemContainer(Guid? containerGuid)
             {
-                var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
-                    ?? throw new InvalidOperationException("Item not found.");
+                var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken);
 
                 if (containerGuid is null)
                 {
@@ -32,14 +31,15 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                     return;
                 }
 
-                var targetParentItem = await itemService.GetItemAsync(containerGuid.Value, cancellationToken)
-                    ?? throw new InvalidOperationException("Target parent item not found.");
+                var targetParentItem = await itemService.GetItemAsync(containerGuid.Value, cancellationToken);
 
                 await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
             }
 
             if (command.Item.ParentItemGuid is not null)
+            {
                 await DefineItemContainer(command.Item.ParentItemGuid.Value);
+            }
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

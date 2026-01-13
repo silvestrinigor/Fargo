@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -11,18 +11,17 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         ) : ICommand;
 
     public sealed class UserPermissionUpdateCommandHandler(
-        IUserRepository repository, 
+        UserService service, 
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<UserPermissionUpdateCommand>
     {
-        private readonly IUserRepository repository = repository;
+        private readonly UserService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task HandleAsync(UserPermissionUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            var user = await repository.GetByGuidAsync(command.UserGuid, cancellationToken)
-                ?? throw new InvalidOperationException("User not found.");
+            var user = await service.GetUserAsync(command.UserGuid, cancellationToken);
 
             user.SetPermission(command.Permission.ActionType, command.Permission.GrantType);
 

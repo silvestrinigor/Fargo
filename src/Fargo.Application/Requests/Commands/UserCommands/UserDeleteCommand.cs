@@ -1,6 +1,6 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -9,20 +9,19 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         ) : ICommand;
 
     public sealed class UserDeleteCommandHandler(
-        IUserRepository repository, 
+        UserService service, 
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<UserDeleteCommand>
     {
-        private readonly IUserRepository repository = repository;
+        private readonly UserService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task HandleAsync(UserDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var user = await repository.GetByGuidAsync(command.UserGuid, cancellationToken)
-                ?? throw new InvalidOperationException("User not found.");
+            var user = await service.GetUserAsync(command.UserGuid, cancellationToken);
 
-            repository.Remove(user);
+            service.DeleteUser(user);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

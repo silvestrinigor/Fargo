@@ -1,6 +1,6 @@
 ﻿namespace Fargo.Domain.Entities
 {
-    public interface IEntityByGuid
+    public interface IEntityByGuid : IEntity
     {
         Guid Guid { get; }
     }

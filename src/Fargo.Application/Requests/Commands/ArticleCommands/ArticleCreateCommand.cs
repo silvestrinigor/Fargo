@@ -10,19 +10,19 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         ) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(
-        ArticleService articleService, 
+        ArticleService service,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<ArticleCreateCommand, Guid>
     {
-        private readonly ArticleService articleService = articleService;
+        private readonly ArticleService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task<Guid> HandleAsync(ArticleCreateCommand command, CancellationToken cancellationToken = default)
         {
-            var article = articleService.CreateArticle(
+            var article = service.CreateArticle(
                 command.Article.Name,
-                command.Article.Description ?? new(string.Empty),
+                command.Article.Description ?? default, 
                 command.Article.IsContainer);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

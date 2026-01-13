@@ -7,8 +7,9 @@ namespace Fargo.Domain.Services
     {
         private readonly IItemRepository itemRepository = itemRepository;
 
-        public async Task<Item?> GetItemAsync(Guid itemGuid, CancellationToken cancellationToken = default)
-            => await itemRepository.GetByGuidAsync(itemGuid, cancellationToken);
+        public async Task<Item> GetItemAsync(Guid itemGuid, CancellationToken cancellationToken = default)
+            => await itemRepository.GetByGuidAsync(itemGuid, cancellationToken)
+            ?? throw new InvalidOperationException("Item not found.");
 
         public Item CreateItem(Article article)
         {

@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Mediators;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -11,17 +11,17 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
         ) : ICommand;
 
     public sealed class PartitionUpdateCommandHandler(
-        IPartitionRepository repository, IUnitOfWork unitOfWork
+        PartitionService service, 
+        IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<PartitionUpdateCommand>
     {
-        private readonly IPartitionRepository repository = repository;
+        private readonly PartitionService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
         public async Task HandleAsync(PartitionUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            var partition = await repository.GetByGuidAsync(command.PartitionGuid, cancellationToken)
-                ?? throw new InvalidOperationException("Partition not found.");
+            var partition = await service.GetPartitionAsync(command.PartitionGuid, cancellationToken);
 
             partition.Name = command.Partition.Name ?? partition.Name;
 

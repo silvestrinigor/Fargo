@@ -1,4 +1,4 @@
 ﻿namespace Fargo.Domain.Entities
 {
-    public interface IEntityTemporal;
+    public interface IEntityTemporal : IEntity;
 }

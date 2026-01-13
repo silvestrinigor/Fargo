@@ -2,7 +2,7 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Permission : IEntityTemporal
+    public class Permission : IEntity, IEntityTemporal
     {
         internal Permission() { }
 

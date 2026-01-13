@@ -2,10 +2,8 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Article : IEntityByGuid, IEntityTemporal
+    public class Article : IEntity, IEntityByGuid, IEntityTemporal
     {
-        internal Article() { }
-
         public Guid Guid
         {
             get;

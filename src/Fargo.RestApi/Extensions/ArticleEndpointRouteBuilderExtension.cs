@@ -4,7 +4,6 @@ using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.HttpApi.Commom;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Extensions
 {

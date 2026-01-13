@@ -4,12 +4,15 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Services
 {
-    public class ArticleService(IArticleRepository articleRepository)
+    public class ArticleService(IArticleRepository repository)
     {
-        public async Task<Article?> GetArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
-            => await articleRepository.GetByGuidAsync(articleGuid, cancellationToken);
+        private readonly IArticleRepository repository = repository;
 
-        public Article CreateArticle(Name name, Description description, bool isContainer = false)
+        public async Task<Article> GetArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+            => await repository.GetByGuidAsync(articleGuid, cancellationToken)
+            ?? throw new InvalidOperationException("Article not found");
+
+        public Article CreateArticle(Name name, Description description = default, bool isContainer = false)
         {
             var article = new Article
             {
@@ -18,21 +21,21 @@ namespace Fargo.Domain.Services
                 IsContainer = isContainer
             };
 
-            articleRepository.Add(article);
+            repository.Add(article);
 
             return article;
         }
 
         public async Task DeleteArticleAsync(Article article, CancellationToken cancellationToken = default)
         {
-            var hasItens = await articleRepository.HasItensAssociated(article.Guid, cancellationToken);
+            var hasItens = await repository.HasItensAssociated(article.Guid, cancellationToken);
 
             if (hasItens)
             {
                 throw new InvalidOperationException("Cannot delete article with associated items.");
             }
 
-            articleRepository.Remove(article);
+            repository.Remove(article);
         }
     }
 }

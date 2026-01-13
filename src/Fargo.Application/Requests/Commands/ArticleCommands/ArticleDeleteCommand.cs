@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Exceptions;
-using Fargo.Application.Mediators;
+﻿using Fargo.Application.Mediators;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 
@@ -18,8 +17,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 
         public async Task HandleAsync(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken)
-                ?? throw new ArticleNotFoundException(command.ArticleGuid);
+            var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken);
 
             await articleService.DeleteArticleAsync(article, cancellationToken);
 

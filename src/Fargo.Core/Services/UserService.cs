@@ -11,6 +11,10 @@ namespace Fargo.Domain.Services
 
         private readonly IPasswordHasher passwordHasher = passwordHasher;
 
+        public async Task<User> GetUserAsync(Guid userGuid, CancellationToken cancellationToken = default)
+            => await repository.GetByGuidAsync(userGuid, cancellationToken)
+            ?? throw new InvalidOperationException("User not found.");
+
         public User CreateUser(int id, Name name, Description description, Password password)
         {
             var user = new User
@@ -25,6 +29,9 @@ namespace Fargo.Domain.Services
 
             return user;
         }
+
+        public void DeleteUser(User user)
+            => repository.Remove(user);
 
         public void SetPassword(User user, Password newPassword, Password currentPassword)
         {

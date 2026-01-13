@@ -17,8 +17,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
         public async Task HandleAsync(ItemDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken)
-                ?? throw new InvalidOperationException("Item not found.");
+            var item = await itemService.GetItemAsync(command.ItemGuid, cancellationToken);
 
             itemService.DeleteItem(item);
 
