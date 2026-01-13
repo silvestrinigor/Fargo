@@ -1,6 +1,9 @@
-﻿namespace Fargo.Application.Commom
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+
+namespace Fargo.Application.Commom
 {
-    public readonly record struct Limit
+    public readonly struct Limit : IParsable<Limit>
     {
         public Limit(int value)
         {
@@ -25,5 +28,38 @@
         public static implicit operator int(Limit limit) => limit.Value;
 
         public static explicit operator Limit(int value) => new(value);
+
+        public static Limit Parse(string s, IFormatProvider? provider)
+        {
+            if (TryParse(s, provider, out var result))
+                return result;
+
+            throw new FormatException($"Invalid Limit value: '{s}'.");
+        }
+
+        public static bool TryParse(
+            [NotNullWhen(true)] string? s,
+            IFormatProvider? provider,
+            [MaybeNullWhen(false)] out Limit result)
+        {
+            result = default;
+
+            if (string.IsNullOrWhiteSpace(s))
+                return false;
+
+            if (!int.TryParse(
+                    s,
+                    NumberStyles.Integer,
+                    provider ?? CultureInfo.InvariantCulture,
+                    out var value))
+                return false;
+
+            if (value < MinValue)
+                return false;
+
+            result = new Limit(value);
+            return true;
+        }
+
     }
 }

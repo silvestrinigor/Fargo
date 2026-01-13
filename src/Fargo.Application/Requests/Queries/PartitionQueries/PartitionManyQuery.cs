@@ -6,7 +6,7 @@ using Fargo.Application.Repositories;
 namespace Fargo.Application.Requests.Queries.PartitionQueries
 {
     public sealed record PartitionManyQuery(
-        DateTime? AtDateTime = null,
+        DateTime? TemporalAsOf = null,
         Pagination Pagination = default
         ) : IQuery<IEnumerable<PartitionReadModel>>;
 
@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
 
         public async Task<IEnumerable<PartitionReadModel>> HandleAsync(PartitionManyQuery query, CancellationToken cancellationToken = default)
             => await repository.GetManyAsync(
-                query.AtDateTime,
+                query.TemporalAsOf,
                 query.Pagination,
                 cancellationToken);
     }

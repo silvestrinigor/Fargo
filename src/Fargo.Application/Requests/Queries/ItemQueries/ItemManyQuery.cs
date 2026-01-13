@@ -8,7 +8,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     public sealed record ItemManyQuery(
         Guid? ParentItemGuid = null,
         Guid? ArticleGuid = null,
-        DateTime? AtDateTime = null,
+        DateTime? TemporalAsOf = null,
         Pagination Pagination = default
         ) : IQuery<IEnumerable<ItemReadModel>>;
 
@@ -20,7 +20,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
             => await repository.GetManyAsync(
                 query.ParentItemGuid, 
                 query.ArticleGuid, 
-                query.AtDateTime, 
+                query.TemporalAsOf, 
                 query.Pagination,
                 cancellationToken);
     }

@@ -9,6 +9,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new NameJsonConverter());
+    options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
+    options.SerializerOptions.Converters.Add(new LimitJsonConverter());
+    options.SerializerOptions.Converters.Add(new PageJsonConverter());
+});
+
 builder.Services.AddAuthorization();
 
 builder.AddServiceDefaults();
@@ -31,14 +39,6 @@ builder.Services.AddDbContext<FargoReadDbContext>(opt =>
     ));
 
 builder.Services.AddInfrastructure();
-
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.Converters.Add(new NameJsonConverter());
-    options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
-    options.SerializerOptions.Converters.Add(new LimitJsonConverter());
-    options.SerializerOptions.Converters.Add(new PageJsonConverter());
-});
 
 var app = builder.Build();
 

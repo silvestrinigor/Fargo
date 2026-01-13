@@ -17,11 +17,11 @@ namespace Fargo.HttpApi.Extensions
                     "/items/{itemGuid}",
                     async (
                         Guid itemGuid,
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         IQueryHandlerAsync<ItemSingleQuery, ItemReadModel?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new ItemSingleQuery(itemGuid, atDateTime);
+                        var query = new ItemSingleQuery(itemGuid, temporalAsOf);
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -33,13 +33,13 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid? parentItemGuid,
                         Guid? articleGuid,
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         Page? page,
                         Limit? limit,
                         IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new ItemManyQuery(parentItemGuid, articleGuid, atDateTime, new Pagination(page ?? default, limit ?? default));
+                        var query = new ItemManyQuery(parentItemGuid, articleGuid, temporalAsOf, new Pagination(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

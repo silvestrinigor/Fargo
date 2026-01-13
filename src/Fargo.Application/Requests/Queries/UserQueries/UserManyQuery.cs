@@ -6,7 +6,7 @@ using Fargo.Application.Repositories;
 namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserManyQuery(
-        DateTime? AtDateTime = null,
+        DateTime? TemporalAsOf = null,
         Pagination Pagination = default
         ) : IQuery<IEnumerable<UserReadModel>>;
 
@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 
         public async Task<IEnumerable<UserReadModel>> HandleAsync(UserManyQuery query, CancellationToken cancellationToken = default)
             => await repository.GetManyAsync(
-                query.AtDateTime, 
+                query.TemporalAsOf, 
                 query.Pagination, 
                 cancellationToken);
     }

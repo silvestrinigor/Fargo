@@ -8,9 +8,9 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
     {
         private readonly FargoReadDbContext context = context;
 
-        public async Task<IEnumerable<PermissionReadModel>?> GetUserPermissions(Guid userGuid, DateTime? atDateTime = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<PermissionReadModel>?> GetUserPermissions(Guid userGuid, DateTime? temporalAsOf = null, CancellationToken cancellationToken = default)
             => await GetUserPermissions(
-                atDateTime is not null ? context.Permissions.TemporalAsOf(atDateTime.Value) : context.Permissions.AsQueryable(),
+                temporalAsOf is not null ? context.Permissions.TemporalAsOf(temporalAsOf.Value) : context.Permissions.AsQueryable(),
                 userGuid,
                 cancellationToken);
 

@@ -13,11 +13,11 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
         protected readonly DbSet<TEntity> dbSet = set;
 
         public async Task<IEnumerable<TEntity>> GetManyAsync(
-            DateTime? atDateTime = null,
+            DateTime? temporalAsOf = null,
             Pagination pagination = default,
             CancellationToken cancellationToken = default)
             => await GetManyAsync(
-                atDateTime is not null ? dbSet.TemporalAsOf(atDateTime.Value) : dbSet.AsQueryable(),
+                temporalAsOf is not null ? dbSet.TemporalAsOf(temporalAsOf.Value) : dbSet.AsQueryable(),
                 pagination,
                 cancellationToken);
 
@@ -38,10 +38,10 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
 
         public async Task<TEntity?> GetByGuidAsync(
             Guid entityGuid,
-            DateTime? atDateTime = null,
+            DateTime? temporalAsOf = null,
             CancellationToken cancellationToken = default)
             => await GetByGuidAsync(
-                atDateTime is not null ? dbSet.TemporalAsOf(atDateTime.Value) : dbSet.AsQueryable(),
+                temporalAsOf is not null ? dbSet.TemporalAsOf(temporalAsOf.Value) : dbSet.AsQueryable(),
                 entityGuid,
                 cancellationToken);
 

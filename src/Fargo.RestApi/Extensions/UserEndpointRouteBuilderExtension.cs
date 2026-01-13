@@ -17,11 +17,11 @@ namespace Fargo.HttpApi.Extensions
                     "/users/{userGuid}",
                     async (
                         Guid userGuid,
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         IQueryHandlerAsync<UserSingleQuery, UserReadModel?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(new UserSingleQuery(userGuid, atDateTime), cancellationToken);
+                        var response = await handler.HandleAsync(new UserSingleQuery(userGuid, temporalAsOf), cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -29,13 +29,13 @@ namespace Fargo.HttpApi.Extensions
                 builder.MapGet(
                     "/users",
                     async (
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         Page? page,
                         Limit? limit,
                         IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new UserManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default));
+                        var query = new UserManyQuery(temporalAsOf, new Pagination(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -87,11 +87,11 @@ namespace Fargo.HttpApi.Extensions
                     "/users/{userGuid}/permissions",
                     async (
                         Guid userGuid,
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<PermissionReadModel>?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new UserPermissionAllQuery(userGuid, atDateTime);
+                        var query = new UserPermissionAllQuery(userGuid, temporalAsOf);
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

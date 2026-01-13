@@ -10,11 +10,11 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
         public async Task<IEnumerable<ItemReadModel>> GetManyAsync(
             Guid? parentItemGuid = null,
             Guid? articleGuid = null,
-            DateTime? atDateTime = null,
+            DateTime? TemporalAsOf = null,
             Pagination pagination = default,
             CancellationToken cancellationToken = default)
             => await GetManyAsync(
-                atDateTime is not null ? dbSet.TemporalAsOf(atDateTime.Value) : dbSet.AsQueryable(),
+                TemporalAsOf is not null ? dbSet.TemporalAsOf(TemporalAsOf.Value) : dbSet.AsQueryable(),
                 parentItemGuid,
                 articleGuid,
                 pagination,

@@ -1,6 +1,9 @@
-﻿namespace Fargo.Application.Commom
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+
+namespace Fargo.Application.Commom
 {
-    public readonly struct Page
+    public readonly struct Page : IParsable<Page>
     {
         public Page(int value)
         {
@@ -25,5 +28,37 @@
         public static implicit operator int(Page page) => page.Value;
 
         public static explicit operator Page(int value) => new(value);
+
+        public static Page Parse(string s, IFormatProvider? provider)
+        {
+            if (TryParse(s, provider, out var result))
+                return result;
+
+            throw new FormatException($"Invalid Page value: '{s}'.");
+        }
+
+        public static bool TryParse(
+            [NotNullWhen(true)] string? s,
+            IFormatProvider? provider,
+            [MaybeNullWhen(false)] out Page result)
+        {
+            result = default;
+
+            if (string.IsNullOrWhiteSpace(s))
+                return false;
+
+            if (!int.TryParse(
+                    s,
+                    NumberStyles.Integer,
+                    provider ?? CultureInfo.InvariantCulture,
+                    out var value))
+                return false;
+
+            if (value < MinValue)
+                return false;
+
+            result = new Page(value);
+            return true;
+        }
     }
 }

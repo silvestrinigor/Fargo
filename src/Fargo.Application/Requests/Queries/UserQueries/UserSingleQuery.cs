@@ -6,7 +6,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserSingleQuery(
         Guid UserGuid,
-        DateTime? AtDateTime = null
+        DateTime? TemporalAsOf = null
         ) : IQuery<UserReadModel?>;
 
     public sealed class UserSingleQueryHandler(IUserReadRepository repository) : IQueryHandlerAsync<UserSingleQuery, UserReadModel?>
@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
         public async Task<UserReadModel?> HandleAsync(UserSingleQuery query, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(
                 query.UserGuid, 
-                query.AtDateTime, 
+                query.TemporalAsOf, 
                 cancellationToken);
     }
 }

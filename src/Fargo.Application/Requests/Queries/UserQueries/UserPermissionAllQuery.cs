@@ -6,7 +6,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserPermissionAllQuery(
         Guid UserGuid,
-        DateTime? AtDateTime = null
+        DateTime? TemporalAsOf = null
         ) : IQuery<IEnumerable<PermissionReadModel>>;
 
     public sealed class UserPermissionAllQueryHandler(IUserReadRepository repository) : IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<PermissionReadModel>>
@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
         public async Task<IEnumerable<PermissionReadModel>> HandleAsync(UserPermissionAllQuery query, CancellationToken cancellationToken = default)
             => await repository.GetUserPermissions(
                 query.UserGuid, 
-                query.AtDateTime, 
+                query.TemporalAsOf, 
                 cancellationToken)
                 ?? throw new InvalidOperationException("User not found.");
     }

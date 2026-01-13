@@ -18,7 +18,7 @@ namespace Fargo.Infrastructure.Converters.ValueObjectsJsonConverters
 
         public override void Write(Utf8JsonWriter writer, Description value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value);
+            writer.WriteStringValue(value.Value);
         }
     }
 }

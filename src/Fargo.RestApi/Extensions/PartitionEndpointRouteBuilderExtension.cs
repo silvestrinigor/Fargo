@@ -17,11 +17,11 @@ namespace Fargo.HttpApi.Extensions
                     "/partition/{partitionGuid}",
                     async (
                         Guid partitionGuid,
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, atDateTime), cancellationToken);
+                        var response = await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, temporalAsOf), cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -29,13 +29,13 @@ namespace Fargo.HttpApi.Extensions
                 builder.MapGet(
                     "/partition",
                     async (
-                        DateTime? atDateTime,
+                        DateTime? temporalAsOf,
                         Page? page,
                         Limit? limit,
                         IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new PartitionManyQuery(atDateTime, new Pagination(page ?? default, limit ?? default));
+                        var query = new PartitionManyQuery(temporalAsOf, new Pagination(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 
