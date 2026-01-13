@@ -1,4 +1,5 @@
-﻿using Fargo.Application.Models.UserModels;
+﻿using Fargo.Application.Commom;
+using Fargo.Application.Models.UserModels;
 
 namespace Fargo.Application.Repositories
 {
@@ -7,6 +8,7 @@ namespace Fargo.Application.Repositories
         Task<IEnumerable<PermissionReadModel>?> GetUserPermissions(
             Guid userGuid,
             DateTime? asOfDateTime = null,
+            Pagination pagination = default,
             CancellationToken cancellationToken = default);
     }
 }

@@ -52,7 +52,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandlerAsync<UserPermissionUpdateCommand>, UserPermissionUpdateCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserSingleQuery, UserReadModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>>, UserManyQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<PermissionReadModel>>, UserPermissionAllQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserPermissionManyQuery, IEnumerable<PermissionReadModel>>, UserPermissionAllQueryHandler>();
 
                 services.AddScoped<ICommandHandlerAsync<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();

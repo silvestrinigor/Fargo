@@ -37,7 +37,7 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new PartitionManyQuery(temporalAsOf, new Pagination(page ?? default, limit ?? default));
+                        var query = new PartitionManyQuery(temporalAsOf, new (page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

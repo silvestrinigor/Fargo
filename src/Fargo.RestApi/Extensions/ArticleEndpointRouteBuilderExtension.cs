@@ -32,12 +32,12 @@ namespace Fargo.HttpApi.Extensions
                     "articles/",
                     async (
                         DateTime? temporalAsOf,
-                        Page page,
-                        Limit limit,
+                        Page? page,
+                        Limit? limit,
                         IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new ArticleManyQuery(temporalAsOf, new Pagination(page, limit));
+                        var query = new ArticleManyQuery(temporalAsOf, new (page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

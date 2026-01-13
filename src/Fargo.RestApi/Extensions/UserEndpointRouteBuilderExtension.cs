@@ -37,7 +37,7 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new UserManyQuery(temporalAsOf, new Pagination(page ?? default, limit ?? default));
+                        var query = new UserManyQuery(temporalAsOf, new (page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -90,10 +90,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid userGuid,
                         DateTime? temporalAsOf,
-                        IQueryHandlerAsync<UserPermissionAllQuery, IEnumerable<PermissionReadModel>?> handler,
+                        Limit? limit,
+                        Page? page,
+                        IQueryHandlerAsync<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new UserPermissionAllQuery(userGuid, temporalAsOf);
+                        var query = new UserPermissionManyQuery(userGuid, temporalAsOf, new(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

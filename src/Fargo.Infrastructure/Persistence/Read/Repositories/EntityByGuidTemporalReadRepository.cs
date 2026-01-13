@@ -33,8 +33,8 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
             IQueryable<TEntity> query,
             CancellationToken cancellationToken = default)
             => await query
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
         public async Task<TEntity?> GetByGuidAsync(
             Guid entityGuid,
