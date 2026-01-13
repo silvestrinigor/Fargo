@@ -9,12 +9,14 @@
             if (value.Length > MaxLength)
                 throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.");
 
-            Value = value;
+            this.value = value;
         }
 
         public const int MaxLength = 500;
 
-        public string Value { get; }
+        public string Value => value is not null ? value : string.Empty;
+
+        private readonly string? value;
 
         public static Description Empty
             => new(string.Empty);

@@ -1,3 +1,4 @@
+using Fargo.Application.Commom;
 using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Converters.ValueObjectsJsonConverters;
@@ -6,6 +7,7 @@ using Fargo.Infrastructure.Persistence.Read;
 using Fargo.Infrastructure.Persistence.Write;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,21 @@ builder.Services.AddAuthorization();
 
 builder.AddServiceDefaults();
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Components?.Schemas?["Limit"] = new OpenApiSchema
+        {
+            Type = JsonSchemaType.Integer,
+            Format = "int32",
+            Minimum = Limit.MinValue.ToString(),
+            Maximum = Limit.MaxValue.ToString()
+        };
+
+        return Task.CompletedTask;
+    });
+});
 
 builder.Services.AddProblemDetails();
 

@@ -21,7 +21,9 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(new PartitionSingleQuery(partitionGuid, temporalAsOf), cancellationToken);
+                        var query = new PartitionSingleQuery(partitionGuid, temporalAsOf);
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });

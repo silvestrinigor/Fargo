@@ -4,6 +4,7 @@ using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.HttpApi.Commom;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -32,12 +33,12 @@ namespace Fargo.HttpApi.Extensions
                     "articles/",
                     async (
                         DateTime? temporalAsOf,
-                        Page? page,
-                        Limit? limit,
+                        Page page,
+                        Limit limit,
                         IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new ArticleManyQuery(temporalAsOf, new Pagination(page ?? default, limit ?? default));
+                        var query = new ArticleManyQuery(temporalAsOf, new Pagination(page, limit));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

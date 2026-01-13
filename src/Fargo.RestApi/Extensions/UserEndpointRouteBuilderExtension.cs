@@ -21,7 +21,9 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<UserSingleQuery, UserReadModel?> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(new UserSingleQuery(userGuid, temporalAsOf), cancellationToken);
+                        var query = new UserSingleQuery(userGuid, temporalAsOf);
+
+                        var response = await handler.HandleAsync(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });

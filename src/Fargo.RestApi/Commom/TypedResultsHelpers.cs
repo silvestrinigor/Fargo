@@ -21,7 +21,7 @@ namespace Fargo.HttpApi.Commom
                 return TypedResults.NotFound();
             }
 
-            if (response.Any())
+            if (!response.Any())
             {
                 return TypedResults.NoContent();
             }
