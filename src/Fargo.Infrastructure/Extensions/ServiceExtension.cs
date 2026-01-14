@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Mediators;
-using Fargo.Application.Models.ArticleModels;
+﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Models.UserModels;
@@ -10,6 +9,7 @@ using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Commands.UserCommands;
+using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
 using Fargo.Application.Requests.Queries.PartitionQueries;

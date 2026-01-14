@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Commom
+namespace Fargo.HttpApi.Helpers
 {
     public static class TypedResultsHelpers
     {

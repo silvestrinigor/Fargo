@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Mediators
+﻿namespace Fargo.Application.Requests.Queries
 {
     public interface IQueryHandlerAsync<in TQuery, TResponse>
         where TQuery : IQuery<TResponse>

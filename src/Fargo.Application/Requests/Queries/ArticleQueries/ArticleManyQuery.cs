@@ -1,5 +1,4 @@
 ﻿using Fargo.Application.Commom;
-using Fargo.Application.Mediators;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Repositories;
 

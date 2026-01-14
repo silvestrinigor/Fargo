@@ -1,10 +1,10 @@
 ﻿using Fargo.Application.Commom;
-using Fargo.Application.Mediators;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ArticleCommands;
+using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.ArticleQueries;
-using Fargo.HttpApi.Commom;
+using Fargo.HttpApi.Helpers;
 
 namespace Fargo.HttpApi.Extensions
 {

@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Mediators;
-using Fargo.Application.Models.PartitionModels;
+﻿using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Repositories;
 
 namespace Fargo.Application.Requests.Queries.PartitionQueries
