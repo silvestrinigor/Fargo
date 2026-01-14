@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Mediators;
-using Fargo.Application.Models.ItemModels;
+﻿using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Domain.Services;
 

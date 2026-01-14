@@ -1,6 +1,7 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Mediators;
 using Fargo.Application.Models.PartitionModels;
+using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.HttpApi.Commom;

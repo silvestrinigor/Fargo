@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Mediators
+﻿namespace Fargo.Application.Requests.Commands
 {
     public interface IBaseCommand;
 

@@ -5,6 +5,7 @@ using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Repositories;
+using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Commands.PartitionCommands;

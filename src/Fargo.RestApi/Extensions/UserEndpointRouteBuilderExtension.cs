@@ -1,6 +1,7 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Mediators;
 using Fargo.Application.Models.UserModels;
+using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.HttpApi.Commom;
