@@ -3,6 +3,6 @@
     public record ItemReadModel(
         Guid Guid,
         Guid ArticleGuid,
-        Guid? ParentItemGuid = null
+        Guid? ParentItemGuid
         ) : IEntityByGuidReadModel, IEntityTemporalReadModel;
 }

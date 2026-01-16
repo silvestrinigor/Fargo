@@ -22,7 +22,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             var user = userService.CreateUser(
                 command.User.Id,
                 command.User.Name,
-                command.User.Description,
+                command.User.Description ?? default,
                 command.User.Password);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

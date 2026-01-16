@@ -53,7 +53,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandlerAsync<UserPermissionUpdateCommand>, UserPermissionUpdateCommandHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserSingleQuery, UserReadModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>>, UserManyQueryHandler>();
-                services.AddScoped<IQueryHandlerAsync<UserPermissionManyQuery, IEnumerable<PermissionReadModel>>, UserPermissionAllQueryHandler>();
+                services.AddScoped<IQueryHandlerAsync<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?>, UserPermissionAllQueryHandler>();
 
                 services.AddScoped<ICommandHandlerAsync<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
                 services.AddScoped<ICommandHandlerAsync<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
@@ -66,6 +66,8 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ItemService>();
 
                 services.AddScoped<UserService>();
+
+                services.AddScoped<PartitionService>();
 
                 services.AddScoped<IArticleRepository, ArticleRepository>();
                 services.AddScoped<IArticleReadRepository, ArticleReadRepository>();

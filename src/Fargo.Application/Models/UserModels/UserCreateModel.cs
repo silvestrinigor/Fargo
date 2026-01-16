@@ -6,5 +6,5 @@ namespace Fargo.Application.Models.UserModels
         int Id,
         Name Name,
         Password Password,
-        Description Description);
+        Description? Description = null);
 }
