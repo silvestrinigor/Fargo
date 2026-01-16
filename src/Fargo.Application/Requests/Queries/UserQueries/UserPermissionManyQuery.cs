@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 
         public async Task<IEnumerable<PermissionReadModel>?> HandleAsync(UserPermissionManyQuery query, CancellationToken cancellationToken = default)
             => await repository.GetUserPermissions(
-                query.UserGuid, 
+                query.UserGuid,
                 query.TemporalAsOf,
                 query.Pagination,
                 cancellationToken);

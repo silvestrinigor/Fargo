@@ -10,8 +10,8 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
         private readonly FargoReadDbContext context = context;
 
         public async Task<IEnumerable<PermissionReadModel>?> GetUserPermissions(
-            Guid userGuid, 
-            DateTime? temporalAsOf = null, 
+            Guid userGuid,
+            DateTime? temporalAsOf = null,
             Pagination pagination = default,
             CancellationToken cancellationToken = default)
             => await GetUserPermissions(
@@ -22,7 +22,7 @@ namespace Fargo.Infrastructure.Persistence.Read.Repositories
 
         protected static async Task<IEnumerable<PermissionReadModel>?> GetUserPermissions(
             IQueryable<PermissionReadModel> query,
-            Guid userGuid, 
+            Guid userGuid,
             Pagination pagination = default,
             CancellationToken cancellationToken = default)
             => await query

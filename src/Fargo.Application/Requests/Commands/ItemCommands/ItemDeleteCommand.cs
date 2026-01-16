@@ -6,7 +6,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
     public sealed record ItemDeleteCommand(Guid ItemGuid) : ICommand;
 
     public sealed class ItemDeleteCommandHandler(
-        ItemService itemService, 
+        ItemService itemService,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<ItemDeleteCommand>
     {

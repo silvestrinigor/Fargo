@@ -3,7 +3,7 @@ using Fargo.Application.Models;
 
 namespace Fargo.Application.Repositories
 {
-    public interface IEntityByGuidTemporalReadRepository<TEntity> 
+    public interface IEntityByGuidTemporalReadRepository<TEntity>
         where TEntity : IEntityByGuidReadModel, IEntityTemporalReadModel
     {
         Task<TEntity?> GetByGuidAsync(

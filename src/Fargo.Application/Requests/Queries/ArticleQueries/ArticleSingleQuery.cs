@@ -14,8 +14,8 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
 
         public async Task<ArticleReadModel?> HandleAsync(ArticleSingleQuery query, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(
-                query.ArticleGuid, 
-                query.AsOfDateTime, 
+                query.ArticleGuid,
+                query.AsOfDateTime,
                 cancellationToken);
     }
 }

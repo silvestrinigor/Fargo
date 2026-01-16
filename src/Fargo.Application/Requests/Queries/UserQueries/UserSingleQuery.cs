@@ -14,8 +14,8 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 
         public async Task<UserReadModel?> HandleAsync(UserSingleQuery query, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(
-                query.UserGuid, 
-                query.TemporalAsOf, 
+                query.UserGuid,
+                query.TemporalAsOf,
                 cancellationToken);
     }
 }

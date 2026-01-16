@@ -30,7 +30,7 @@ namespace Fargo.Application.Commom
         public static explicit operator Limit(int value) => new(value);
 
         public static Limit Parse(string s, IFormatProvider? provider)
-        {   
+        {
             if (TryParse(s, provider, out var result))
                 return result;
 

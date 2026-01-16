@@ -10,7 +10,7 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
         ) : ICommand;
 
     public sealed class PartitionUpdateCommandHandler(
-        PartitionService service, 
+        PartitionService service,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<PartitionUpdateCommand>
     {

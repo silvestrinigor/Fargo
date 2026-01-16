@@ -21,7 +21,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var article = service.CreateArticle(
                 command.Article.Name,
-                command.Article.Description ?? default, 
+                command.Article.Description ?? default,
                 command.Article.IsContainer);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -10,7 +10,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         ) : ICommand;
 
     public sealed class UserPermissionUpdateCommandHandler(
-        UserService service, 
+        UserService service,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<UserPermissionUpdateCommand>
     {

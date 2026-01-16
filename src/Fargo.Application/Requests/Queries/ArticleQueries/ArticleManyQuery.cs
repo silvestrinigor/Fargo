@@ -15,8 +15,8 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
 
         public async Task<IEnumerable<ArticleReadModel>> HandleAsync(ArticleManyQuery query, CancellationToken cancellationToken = default)
             => await repository.GetManyAsync(
-                query.AsOfDateTime, 
-                query.Pagination, 
+                query.AsOfDateTime,
+                query.Pagination,
                 cancellationToken);
     }
 }

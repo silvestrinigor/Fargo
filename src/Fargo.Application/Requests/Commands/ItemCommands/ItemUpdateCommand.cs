@@ -10,7 +10,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
         ) : ICommand;
 
     public sealed class ItemUpdateCommandHandler(
-        ItemService itemService, 
+        ItemService itemService,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<ItemUpdateCommand>
     {

@@ -38,7 +38,7 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new UserManyQuery(temporalAsOf, new (page ?? default, limit ?? default));
+                        var query = new UserManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

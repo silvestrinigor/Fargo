@@ -15,8 +15,8 @@ namespace Fargo.Application.Requests.Queries.UserQueries
 
         public async Task<IEnumerable<UserReadModel>> HandleAsync(UserManyQuery query, CancellationToken cancellationToken = default)
             => await repository.GetManyAsync(
-                query.TemporalAsOf, 
-                query.Pagination, 
+                query.TemporalAsOf,
+                query.Pagination,
                 cancellationToken);
     }
 }

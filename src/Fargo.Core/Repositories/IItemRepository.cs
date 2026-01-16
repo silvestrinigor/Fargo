@@ -5,7 +5,7 @@ namespace Fargo.Domain.Repositories
     public interface IItemRepository : IEntityByGuidRepository<Item>
     {
         Task<bool> IsInsideContainer(
-            Item item, 
+            Item item,
             Item container,
             CancellationToken cancellationToken = default);
 

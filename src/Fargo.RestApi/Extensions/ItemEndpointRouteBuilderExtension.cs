@@ -40,7 +40,7 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new ItemManyQuery(parentItemGuid, articleGuid, temporalAsOf, new (page ?? default, limit ?? default));
+                        var query = new ItemManyQuery(parentItemGuid, articleGuid, temporalAsOf, new(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 

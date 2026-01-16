@@ -9,8 +9,8 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
         ) : ICommand<Guid>;
 
     public sealed class ItemCreateCommandHandler(
-        ItemService itemService, 
-        ArticleService articleService, 
+        ItemService itemService,
+        ArticleService articleService,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<ItemCreateCommand, Guid>
     {

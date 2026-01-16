@@ -8,7 +8,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         ) : ICommand;
 
     public sealed class UserDeleteCommandHandler(
-        UserService service, 
+        UserService service,
         IUnitOfWork unitOfWork
         ) : ICommandHandlerAsync<UserDeleteCommand>
     {

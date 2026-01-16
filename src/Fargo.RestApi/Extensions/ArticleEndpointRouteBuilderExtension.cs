@@ -38,7 +38,7 @@ namespace Fargo.HttpApi.Extensions
                         IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var query = new ArticleManyQuery(temporalAsOf, new (page ?? default, limit ?? default));
+                        var query = new ArticleManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
 
                         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -60,9 +60,9 @@ namespace Fargo.HttpApi.Extensions
                 builder.MapPatch(
                     "articles/{articleGuid}",
                     async (
-                        Guid articleGuid, 
-                        ArticleUpdateModel model, 
-                        ICommandHandlerAsync<ArticleUpdateCommand> handler, 
+                        Guid articleGuid,
+                        ArticleUpdateModel model,
+                        ICommandHandlerAsync<ArticleUpdateCommand> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new ArticleUpdateCommand(articleGuid, model);

@@ -15,7 +15,7 @@
 
         public const int MaxLength = 512;
 
-        public string Value 
+        public string Value
             => value != string.Empty ? value : throw new InvalidOperationException("Password value must be set.");
 
         private readonly string value;
