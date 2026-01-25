@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="src/Fargo.Core/Fargo.Domain.csproj" />
-  <Project Path="tests/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
-</Solution>
