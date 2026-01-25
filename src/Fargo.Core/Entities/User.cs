@@ -43,7 +43,7 @@ namespace Fargo.Domain.Entities
 
         public void SetPermission(ActionType actionType, GrantType grantType)
         {
-            var permission = permissions.Where(x => x.ActionType == actionType).SingleOrDefault();
+            var permission = permissions.SingleOrDefault(x => x.ActionType == actionType);
 
             if (permission is not null)
             {
@@ -63,7 +63,7 @@ namespace Fargo.Domain.Entities
 
         public bool HasPermission(ActionType actionType)
         {
-            var permission = permissions.Where(x => x.ActionType == actionType).SingleOrDefault();
+            var permission = permissions.SingleOrDefault(x => x.ActionType == actionType);
 
             return permission is not null && permission.GrantType == GrantType.Granted;
         }
