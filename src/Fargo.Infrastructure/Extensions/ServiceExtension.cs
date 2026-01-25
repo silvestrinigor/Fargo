@@ -17,12 +17,10 @@ using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
-using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence.Read.Repositories;
 using Fargo.Infrastructure.Persistence.Write;
 using Fargo.Infrastructure.Persistence.Write.Repositories;
 using Fargo.Infrastructure.Security;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Infrastructure.Extensions
