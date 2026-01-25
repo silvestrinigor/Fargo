@@ -9,7 +9,8 @@
     {
         Task HandleAsync(
             TCommand command,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default
+            );
     }
 
     /// <summary>
@@ -22,6 +23,7 @@
     {
         Task<TResponse> HandleAsync(
             TCommand command,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default
+            );
     }
 }

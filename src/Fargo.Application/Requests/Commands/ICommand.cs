@@ -9,5 +9,5 @@
     /// Provides an a command interface that returns a response.
     /// </summary>
     /// <typeparam name="TResponse">The type of the response.</typeparam>
-    public interface ICommand<out TResponse> { }
+    public interface ICommand<out TResponse>;
 }
