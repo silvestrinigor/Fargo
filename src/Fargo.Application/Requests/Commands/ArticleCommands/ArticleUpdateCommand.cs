@@ -7,18 +7,18 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
     public sealed record ArticleUpdateCommand(
         Guid ArticleGuid,
         ArticleUpdateModel Article
-        ) : ICommand;
+        ) : ICommand<Task>;
 
     public sealed class ArticleUpdateCommandHandler(
         ArticleService articleService,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<ArticleUpdateCommand>
+        ) : ICommandHandler<ArticleUpdateCommand, Task>
     {
         private readonly ArticleService articleService = articleService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task HandleAsync(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
+        public async Task Handle(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
         {
             var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken);
 
@@ -32,7 +32,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 article.Description = command.Article.Description.Value;
             }
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
         }
     }
 }

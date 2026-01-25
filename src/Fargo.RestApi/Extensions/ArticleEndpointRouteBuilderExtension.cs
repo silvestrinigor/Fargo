@@ -19,12 +19,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid articleGuid,
                         DateTime? temporalAsOf,
-                        IQueryHandlerAsync<ArticleSingleQuery, ArticleReadModel?> handler,
+                        IQueryHandler<ArticleSingleQuery, Task<ArticleReadModel?>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new ArticleSingleQuery(articleGuid, temporalAsOf);
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -35,12 +35,12 @@ namespace Fargo.HttpApi.Extensions
                         DateTime? temporalAsOf,
                         Page? page,
                         Limit? limit,
-                        IQueryHandlerAsync<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
+                        IQueryHandler<ArticleManyQuery, Task<IEnumerable<ArticleReadModel>>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new ArticleManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -49,10 +49,10 @@ namespace Fargo.HttpApi.Extensions
                     "/articles",
                     async (
                         ArticleCreateCommand command,
-                        ICommandHandlerAsync<ArticleCreateCommand, Guid> handler,
+                        ICommandHandler<ArticleCreateCommand, Task<Guid>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(command, cancellationToken);
+                        var response = await handler.Handle(command, cancellationToken);
 
                         return TypedResults.Ok(response);
                     });
@@ -62,12 +62,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid articleGuid,
                         ArticleUpdateModel model,
-                        ICommandHandlerAsync<ArticleUpdateCommand> handler,
+                        ICommandHandler<ArticleUpdateCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new ArticleUpdateCommand(articleGuid, model);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -76,12 +76,12 @@ namespace Fargo.HttpApi.Extensions
                     "/articles/{articleGuid}",
                     async (
                         Guid articleGuid,
-                        ICommandHandlerAsync<ArticleDeleteCommand> handler,
+                        ICommandHandler<ArticleDeleteCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new ArticleDeleteCommand(articleGuid);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });

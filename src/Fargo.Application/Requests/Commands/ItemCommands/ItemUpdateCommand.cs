@@ -7,18 +7,18 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
     public sealed record ItemUpdateCommand(
         Guid ItemGuid,
         ItemUpdateModel Item
-        ) : ICommand;
+        ) : ICommand<Task>;
 
     public sealed class ItemUpdateCommandHandler(
         ItemService itemService,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<ItemUpdateCommand>
+        ) : ICommandHandler<ItemUpdateCommand, Task>
     {
         private readonly ItemService itemService = itemService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task HandleAsync(ItemUpdateCommand command, CancellationToken cancellationToken = default)
+        public async Task Handle(ItemUpdateCommand command, CancellationToken cancellationToken = default)
         {
             async Task DefineItemContainer(Guid? containerGuid)
             {
@@ -40,7 +40,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                 await DefineItemContainer(command.Item.ParentItemGuid.Value);
             }
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
         }
     }
 }

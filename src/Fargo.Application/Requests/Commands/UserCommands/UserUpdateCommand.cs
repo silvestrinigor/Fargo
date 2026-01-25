@@ -7,18 +7,18 @@ namespace Fargo.Application.Requests.Commands.UserCommands
     public sealed record UserUpdateCommand(
         Guid UserGuid,
         UserUpdateModel User
-        ) : ICommand;
+        ) : ICommand<Task>;
 
     public sealed class UserUpdateCommandHandler(
         UserService service,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<UserUpdateCommand>
+        ) : ICommandHandler<UserUpdateCommand, Task>
     {
         private readonly UserService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task HandleAsync(UserUpdateCommand command, CancellationToken cancellationToken = default)
+        public async Task Handle(UserUpdateCommand command, CancellationToken cancellationToken = default)
         {
             var user = await service.GetUserAsync(command.UserGuid, cancellationToken);
 
@@ -31,7 +31,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 service.SetPassword(user, new(command.User.Password.NewPassword), new(command.User.Password.CurrentPassword));
             }
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
         }
     }
 }

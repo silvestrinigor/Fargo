@@ -19,12 +19,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid partitionGuid,
                         DateTime? temporalAsOf,
-                        IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?> handler,
+                        IQueryHandler<PartitionSingleQuery, Task<PartitionReadModel?>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new PartitionSingleQuery(partitionGuid, temporalAsOf);
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -35,12 +35,12 @@ namespace Fargo.HttpApi.Extensions
                         DateTime? temporalAsOf,
                         Page? page,
                         Limit? limit,
-                        IQueryHandlerAsync<PartitionManyQuery, IEnumerable<PartitionReadModel>> handler,
+                        IQueryHandler<PartitionManyQuery, Task<IEnumerable<PartitionReadModel>>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new PartitionManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -49,10 +49,10 @@ namespace Fargo.HttpApi.Extensions
                     "/partition",
                     async (
                         PartitionCreateCommand command,
-                        ICommandHandlerAsync<PartitionCreateCommand, Guid> handler,
+                        ICommandHandler<PartitionCreateCommand, Task<Guid>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(command, cancellationToken);
+                        var response = await handler.Handle(command, cancellationToken);
 
                         return TypedResults.Ok(response);
                     });
@@ -61,12 +61,12 @@ namespace Fargo.HttpApi.Extensions
                     "/partition/{partitionGuid}",
                     async (
                         Guid partitionGuid,
-                        ICommandHandlerAsync<PartitionDeleteCommand> handler,
+                        ICommandHandler<PartitionDeleteCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new PartitionDeleteCommand(partitionGuid);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -76,12 +76,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid partitionGuid,
                         PartitionUpdateModel model,
-                        ICommandHandlerAsync<PartitionUpdateCommand> handler,
+                        ICommandHandler<PartitionUpdateCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new PartitionUpdateCommand(partitionGuid, model);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });

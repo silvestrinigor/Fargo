@@ -9,13 +9,13 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
         Guid? ArticleGuid = null,
         DateTime? TemporalAsOf = null,
         Pagination Pagination = default
-        ) : IQuery<IEnumerable<ItemReadModel>>;
+        ) : IQuery<Task<IEnumerable<ItemReadModel>>>;
 
-    public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemManyQuery, IEnumerable<ItemReadModel>>
+    public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandler<ItemManyQuery, Task<IEnumerable<ItemReadModel>>>
     {
         private readonly IItemReadRepository repository = repository;
 
-        public async Task<IEnumerable<ItemReadModel>> HandleAsync(ItemManyQuery query, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ItemReadModel>> Handle(ItemManyQuery query, CancellationToken cancellationToken = default)
             => await repository.GetManyAsync(
                 query.ParentItemGuid,
                 query.ArticleGuid,

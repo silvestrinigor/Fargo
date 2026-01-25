@@ -19,12 +19,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid userGuid,
                         DateTime? temporalAsOf,
-                        IQueryHandlerAsync<UserSingleQuery, UserReadModel?> handler,
+                        IQueryHandler<UserSingleQuery, Task<UserReadModel?>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new UserSingleQuery(userGuid, temporalAsOf);
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -35,12 +35,12 @@ namespace Fargo.HttpApi.Extensions
                         DateTime? temporalAsOf,
                         Page? page,
                         Limit? limit,
-                        IQueryHandlerAsync<UserManyQuery, IEnumerable<UserReadModel>> handler,
+                        IQueryHandler<UserManyQuery, Task<IEnumerable<UserReadModel>>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new UserManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -49,10 +49,10 @@ namespace Fargo.HttpApi.Extensions
                     "/users",
                     async (
                         UserCreateCommand command,
-                        ICommandHandlerAsync<UserCreateCommand, Guid> handler,
+                        ICommandHandler<UserCreateCommand, Task<Guid>> handler,
                         CancellationToken cancellationToken) =>
                     {
-                        var response = await handler.HandleAsync(command, cancellationToken);
+                        var response = await handler.Handle(command, cancellationToken);
 
                         return TypedResults.Ok(response);
                     });
@@ -61,12 +61,12 @@ namespace Fargo.HttpApi.Extensions
                     "/users/{userGuid}",
                     async (
                         Guid userGuid,
-                        ICommandHandlerAsync<UserDeleteCommand> handler,
+                        ICommandHandler<UserDeleteCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new UserDeleteCommand(userGuid);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -76,12 +76,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid userGuid,
                         UserUpdateModel model,
-                        ICommandHandlerAsync<UserUpdateCommand> handler,
+                        ICommandHandler<UserUpdateCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new UserUpdateCommand(userGuid, model);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });
@@ -93,12 +93,12 @@ namespace Fargo.HttpApi.Extensions
                         DateTime? temporalAsOf,
                         Limit? limit,
                         Page? page,
-                        IQueryHandlerAsync<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?> handler,
+                        IQueryHandler<UserPermissionManyQuery, Task<IEnumerable<PermissionReadModel>?>> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new UserPermissionManyQuery(userGuid, temporalAsOf, new(page ?? default, limit ?? default));
 
-                        var response = await handler.HandleAsync(query, cancellationToken);
+                        var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
                     });
@@ -108,12 +108,12 @@ namespace Fargo.HttpApi.Extensions
                     async (
                         Guid userGuid,
                         PermissionUpdateModel model,
-                        ICommandHandlerAsync<UserPermissionUpdateCommand> handler,
+                        ICommandHandler<UserPermissionUpdateCommand, Task> handler,
                         CancellationToken cancellationToken) =>
                     {
                         var command = new UserPermissionUpdateCommand(userGuid, model);
 
-                        await handler.HandleAsync(command, cancellationToken);
+                        await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
                     });

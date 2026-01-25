@@ -6,13 +6,13 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     public sealed record ItemSingleQuery(
         Guid ItemGuid,
         DateTime? TemporalAsOf = null
-        ) : IQuery<ItemReadModel?>;
+        ) : IQuery<Task<ItemReadModel?>>;
 
-    public sealed class ItemSingleQueryHandler(IItemReadRepository repository) : IQueryHandlerAsync<ItemSingleQuery, ItemReadModel?>
+    public sealed class ItemSingleQueryHandler(IItemReadRepository repository) : IQueryHandler<ItemSingleQuery, Task<ItemReadModel?>>
     {
         private readonly IItemReadRepository repository = repository;
 
-        public async Task<ItemReadModel?> HandleAsync(ItemSingleQuery query, CancellationToken cancellationToken = default)
+        public async Task<ItemReadModel?> Handle(ItemSingleQuery query, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(
                 query.ItemGuid,
                 query.TemporalAsOf,

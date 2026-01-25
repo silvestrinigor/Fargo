@@ -6,25 +6,25 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleCreateCommand(
         ArticleCreateModel Article
-        ) : ICommand<Guid>;
+        ) : ICommand<Task<Guid>>;
 
     public sealed class ArticleCreateCommandHandler(
         ArticleService service,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<ArticleCreateCommand, Guid>
+        ) : ICommandHandler<ArticleCreateCommand, Task<Guid>>
     {
         private readonly ArticleService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task<Guid> HandleAsync(ArticleCreateCommand command, CancellationToken cancellationToken = default)
+        public async Task<Guid> Handle(ArticleCreateCommand command, CancellationToken cancellationToken = default)
         {
             var article = service.CreateArticle(
                 command.Article.Name,
                 command.Article.Description ?? default,
                 command.Article.IsContainer);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
 
             return article.Guid;
         }

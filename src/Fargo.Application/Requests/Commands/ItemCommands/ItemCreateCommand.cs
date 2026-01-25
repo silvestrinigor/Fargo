@@ -6,13 +6,13 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemCreateCommand(
         ItemCreateModel Item
-        ) : ICommand<Guid>;
+        ) : ICommand<Task<Guid>>;
 
     public sealed class ItemCreateCommandHandler(
         ItemService itemService,
         ArticleService articleService,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<ItemCreateCommand, Guid>
+        ) : ICommandHandler<ItemCreateCommand, Task<Guid>>
     {
         private readonly ItemService itemService = itemService;
 
@@ -20,13 +20,13 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
+        public async Task<Guid> Handle(ItemCreateCommand command, CancellationToken cancellationToken = default)
         {
             var article = await articleService.GetArticleAsync(command.Item.ArticleGuid, cancellationToken);
 
             var item = itemService.CreateItem(article);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
 
             return item.Guid;
         }

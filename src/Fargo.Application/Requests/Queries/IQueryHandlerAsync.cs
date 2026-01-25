@@ -5,10 +5,10 @@
     /// </summary>
     /// <typeparam name="TQuery">The type of the query.</typeparam>
     /// <typeparam name="TResponse">The type of the response.</typeparam>
-    public interface IQueryHandlerAsync<in TQuery, TResponse>
+    public interface IQueryHandler<in TQuery, TResponse>
         where TQuery : IQuery<TResponse>
     {
-        Task<TResponse> HandleAsync(
+        TResponse Handle(
             TQuery query,
             CancellationToken cancellationToken = default
             );

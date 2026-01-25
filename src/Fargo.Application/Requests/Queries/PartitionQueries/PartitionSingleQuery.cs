@@ -6,13 +6,13 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
     public sealed record PartitionSingleQuery(
         Guid PartitionGuid,
         DateTime? TemporalAsOf = null
-        ) : IQuery<PartitionReadModel?>;
+        ) : IQuery<Task<PartitionReadModel?>>;
 
-    public sealed class PartitionSingleQueryHandler(IPartitionReadRepository repository) : IQueryHandlerAsync<PartitionSingleQuery, PartitionReadModel?>
+    public sealed class PartitionSingleQueryHandler(IPartitionReadRepository repository) : IQueryHandler<PartitionSingleQuery, Task<PartitionReadModel?>>
     {
         private readonly IPartitionReadRepository repository = repository;
 
-        public async Task<PartitionReadModel?> HandleAsync(PartitionSingleQuery query, CancellationToken cancellationToken = default)
+        public async Task<PartitionReadModel?> Handle(PartitionSingleQuery query, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(
                 query.PartitionGuid,
                 query.TemporalAsOf,

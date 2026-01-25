@@ -6,18 +6,18 @@ namespace Fargo.Application.Requests.Commands.UserCommands
 {
     public sealed record UserCreateCommand(
         UserCreateModel User
-        ) : ICommand<Guid>;
+        ) : ICommand<Task<Guid>>;
 
     public sealed class UserCreateCommandHandler(
         UserService userService,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<UserCreateCommand, Guid>
+        ) : ICommandHandler<UserCreateCommand, Task<Guid>>
     {
         private readonly UserService userService = userService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task<Guid> HandleAsync(UserCreateCommand command, CancellationToken cancellationToken = default)
+        public async Task<Guid> Handle(UserCreateCommand command, CancellationToken cancellationToken = default)
         {
             var user = userService.CreateUser(
                 command.User.Id,
@@ -25,7 +25,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 command.User.Description ?? default,
                 command.User.Password);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
 
             return user.Guid;
         }

@@ -5,24 +5,24 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
     public sealed record PartitionDeleteCommand(
         Guid PartitionGuid
-        ) : ICommand;
+        ) : ICommand<Task>;
 
     public sealed class PartitionDeleteCommandHandler(
         PartitionService service,
         IUnitOfWork unitOfWork
-        ) : ICommandHandlerAsync<PartitionDeleteCommand>
+        ) : ICommandHandler<PartitionDeleteCommand, Task>
     {
         private readonly PartitionService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task HandleAsync(PartitionDeleteCommand command, CancellationToken cancellationToken = default)
+        public async Task Handle(PartitionDeleteCommand command, CancellationToken cancellationToken = default)
         {
             var partitionToDelete = await service.GetPartitionAsync(command.PartitionGuid, cancellationToken);
 
             service.DeletePartition(partitionToDelete);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChanges(cancellationToken);
         }
     }
 }
