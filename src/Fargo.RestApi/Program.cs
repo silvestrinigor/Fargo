@@ -7,7 +7,6 @@ using Fargo.Infrastructure.Persistence.Read;
 using Fargo.Infrastructure.Persistence.Write;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,21 +22,8 @@ builder.Services.AddAuthorization();
 
 builder.AddServiceDefaults();
 
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        document.Components?.Schemas?["Limit"] = new OpenApiSchema
-        {
-            Type = JsonSchemaType.Integer,
-            Format = "int32",
-            Minimum = Limit.MinValue.ToString(),
-            Maximum = Limit.MaxValue.ToString()
-        };
 
-        return Task.CompletedTask;
-    });
-});
+builder.Services.AddOpenApi();
 
 builder.Services.AddProblemDetails();
 
@@ -45,8 +31,7 @@ var connectionString = builder.Configuration.GetConnectionString("FargoDatabase"
 
 builder.Services.AddDbContext<FargoWriteDbContext>(opt =>
     opt.UseSqlServer(
-        connectionString,
-        sql => sql.MigrationsAssembly(typeof(FargoWriteDbContext).Assembly.FullName)
+        connectionString
     ));
 
 builder.Services.AddDbContext<FargoReadDbContext>(opt =>

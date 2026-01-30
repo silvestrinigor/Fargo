@@ -21,6 +21,7 @@ using Fargo.Infrastructure.Persistence.Read.Repositories;
 using Fargo.Infrastructure.Persistence.Write;
 using Fargo.Infrastructure.Persistence.Write.Repositories;
 using Fargo.Infrastructure.Security;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Infrastructure.Extensions
@@ -91,8 +92,8 @@ namespace Fargo.Infrastructure.Extensions
             {
                 using (var scope = services.CreateScope())
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<FargoWriteDbContext>();
-                    dbContext.Database.EnsureCreated();
+                    var db = scope.ServiceProvider.GetRequiredService<FargoWriteDbContext>();
+                    await db.Database.MigrateAsync();
                 }
 
                 return services;
