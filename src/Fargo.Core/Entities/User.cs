@@ -5,8 +5,6 @@ namespace Fargo.Domain.Entities
 {
     public class User : IEntity, IEntityByGuid, IEntityTemporal
     {
-        public User() : base() { }
-
         public Guid Guid
         {
             get;

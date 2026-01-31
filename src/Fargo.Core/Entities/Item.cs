@@ -2,8 +2,6 @@
 {
     public class Item : IEntity, IEntityByGuid, IEntityTemporal
     {
-        internal Item() { }
-
         public Guid Guid
         {
             get;
@@ -38,11 +36,16 @@
             get;
             internal set
             {
-                if (value is not null && !value.Article.IsContainer)
+                if (value?.Article.IsContainer == false)
                     throw new InvalidOperationException(
                         "Cannot set parent item when the value article is not a container.");
 
+                if (value?.Guid == Guid)    
+                    throw new InvalidOperationException(
+                        "An item cannot be moved into itself.");
+
                 ParentItemGuid = value?.Guid;
+
                 field = value;
             }
         } = null;
