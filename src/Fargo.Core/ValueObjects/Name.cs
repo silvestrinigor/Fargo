@@ -26,5 +26,8 @@
         public static implicit operator string(Name name) => name.Value;
 
         public static explicit operator Name(string value) => new(value);
+
+        public static Name NewName(string value)
+            => new (value);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.ValueObjects;
@@ -13,7 +14,7 @@ namespace Fargo.Domain.Services
 
         public async Task<User> GetUserAsync(Guid userGuid, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(userGuid, cancellationToken)
-            ?? throw new InvalidOperationException("User not found.");
+            ?? throw new UserNotFoundException(userGuid);
 
         public User CreateUser(int id, Name name, Description description, Password password)
         {

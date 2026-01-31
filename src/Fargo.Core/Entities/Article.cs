@@ -2,7 +2,8 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Article : IEntity, IEntityByGuid, IEntityTemporal
+    public class Article 
+        : IEntity, IEntityByGuid, IEntityTemporal
     {
         public Guid Guid
         {

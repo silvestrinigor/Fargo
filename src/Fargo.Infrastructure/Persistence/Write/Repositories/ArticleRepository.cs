@@ -14,7 +14,7 @@ namespace Fargo.Infrastructure.Persistence.Write.Repositories
         public void Remove(Article article)
             => context.Articles.Remove(article);
 
-        public async Task<bool> HasItensAssociated(
+        public async Task<bool> HasItemsAssociated(
             Guid articleGuid,
             CancellationToken cancellationToken = default)
             => await context.Items

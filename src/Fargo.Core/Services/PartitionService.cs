@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
@@ -10,7 +11,7 @@ namespace Fargo.Domain.Services
 
         public async Task<Partition> GetPartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
             => await repository.GetByGuidAsync(partitionGuid, cancellationToken)
-            ?? throw new InvalidOperationException("Partition not found.");
+            ?? throw new PartitionNotFoundException(partitionGuid);
 
         public Partition CreatePartition(Name name, Description description = default)
         {

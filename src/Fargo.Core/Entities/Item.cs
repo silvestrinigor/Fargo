@@ -1,4 +1,6 @@
-﻿namespace Fargo.Domain.Entities
+﻿using Fargo.Domain.Exceptions;
+
+namespace Fargo.Domain.Entities
 {
     public class Item : IEntity, IEntityByGuid, IEntityTemporal
     {
@@ -37,12 +39,10 @@
             internal set
             {
                 if (value?.Article.IsContainer == false)
-                    throw new InvalidOperationException(
-                        "Cannot set parent item when the value article is not a container.");
+                    throw new ItemParentNotContainerException(value);
 
                 if (value?.Guid == Guid)    
-                    throw new InvalidOperationException(
-                        "An item cannot be moved into itself.");
+                    throw new ItemParentEqualsItemException(value);
 
                 ParentItemGuid = value?.Guid;
 
