@@ -2,7 +2,8 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Item : IEntity, IEntityByGuid, IEntityTemporal
+    public class Item
+        : IEntity, IEntityByGuid, IEntityTemporal, IEntityPartitioned
     {
         public Guid Guid
         {
@@ -41,7 +42,7 @@ namespace Fargo.Domain.Entities
                 if (value?.Article.IsContainer == false)
                     throw new ItemParentNotContainerException(value);
 
-                if (value?.Guid == Guid)    
+                if (value?.Guid == Guid)
                     throw new ItemParentEqualsItemException(value);
 
                 ParentItemGuid = value?.Guid;
@@ -49,5 +50,9 @@ namespace Fargo.Domain.Entities
                 field = value;
             }
         } = null;
+
+        private readonly HashSet<Partition> partitions = [];
+
+        public IReadOnlyCollection<Partition> Partitions => partitions;
     }
 }

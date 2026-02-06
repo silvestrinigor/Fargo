@@ -9,7 +9,7 @@ namespace Fargo.Domain.Repositories
         void Remove(Article article);
 
         Task<bool> HasItemsAssociated(
-            Guid articleGuid,
-            CancellationToken cancellationToken = default);
+                Guid articleGuid,
+                CancellationToken cancellationToken = default);
     }
 }

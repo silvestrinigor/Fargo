@@ -1,4 +1,6 @@
-﻿using Fargo.Application.Persistence;
+﻿using Fargo.Application.Extensions;
+using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
@@ -7,18 +9,34 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 
     public sealed class ArticleDeleteCommandHandler(
         ArticleService articleService,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
         ) : ICommandHandler<ArticleDeleteCommand, Task>
     {
         private readonly ArticleService articleService = articleService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task Handle(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
-        {
-            var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken);
+        private readonly ICurrentUser currentUser = currentUser;
 
-            await articleService.DeleteArticleAsync(article, cancellationToken);
+        public async Task Handle(
+                ArticleDeleteCommand command,
+                CancellationToken cancellationToken = default
+                )
+        {
+            var actor = currentUser.ToActor();
+
+            var article = await articleService.GetArticleAsync(
+                    actor,
+                    command.ArticleGuid,
+                    cancellationToken
+                    );
+
+            await articleService.DeleteArticleAsync(
+                    actor,
+                    article,
+                    cancellationToken
+                    );
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

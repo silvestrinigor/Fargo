@@ -2,8 +2,8 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Article 
-        : IEntity, IEntityByGuid, IEntityTemporal
+    public class Article
+        : IEntity, IEntityByGuid, IEntityTemporal, IEntityPartitioned
     {
         public Guid Guid
         {
@@ -28,5 +28,9 @@ namespace Fargo.Domain.Entities
             get;
             init;
         } = false;
+
+        private readonly HashSet<Partition> partitions = [];
+
+        public IReadOnlyCollection<Partition> Partitions => partitions;
     }
 }

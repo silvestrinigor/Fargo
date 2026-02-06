@@ -1,6 +1,8 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Services
 {
@@ -9,13 +11,25 @@ namespace Fargo.Domain.Services
         private readonly IItemRepository itemRepository = itemRepository;
 
         public async Task<Item> GetItemAsync(
-                Guid itemGuid, 
-                CancellationToken cancellationToken = default)
-            => await itemRepository.GetByGuidAsync(itemGuid, cancellationToken)
+                Actor actor,
+                Guid itemGuid,
+                CancellationToken cancellationToken = default
+                )
+            => await itemRepository.GetByGuidAsync(
+                    itemGuid,
+                    actor.PartitionGuids,
+                    cancellationToken
+                    )
             ?? throw new ItemNotFoundException(itemGuid);
 
-        public Item CreateItem(Article article)
+        public Item CreateItem(Actor actor, Article article)
         {
+            if (!actor.HasPermission(ActionType.CreateItem))
+                throw new ActorNotAuthorizedException(
+                        actor,
+                        ActionType.CreateItem
+                        );
+
             var item = new Item
             {
                 Article = article
@@ -26,8 +40,13 @@ namespace Fargo.Domain.Services
             return item;
         }
 
-        public void DeleteItem(Item item)
-            => itemRepository.Remove(item);
+        public void DeleteItem(Actor actor, Item item)
+        {
+            if (!actor.HasPermission(ActionType.DeleteItem))
+                throw new ActorNotAuthorizedException(actor, ActionType.DeleteItem);
+
+            itemRepository.Remove(item);
+        } 
 
         public async Task InsertItemIntoContainerAsync(Item item, Item targetContainer)
         {

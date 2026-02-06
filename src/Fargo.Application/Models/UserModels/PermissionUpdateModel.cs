@@ -3,6 +3,7 @@
 namespace Fargo.Application.Models.UserModels
 {
     public sealed record PermissionUpdateModel(
-        ActionType ActionType,
-        GrantType GrantType);
+            ActionType ActionType,
+            GrantType GrantType
+            );
 }

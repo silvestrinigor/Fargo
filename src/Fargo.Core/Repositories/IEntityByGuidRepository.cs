@@ -2,10 +2,13 @@
 
 namespace Fargo.Domain.Repositories
 {
-    public interface IEntityByGuidRepository<TEntity> where TEntity : class, IEntityByGuid
+    public interface IEntityByGuidRepository<TEntity>
+        where TEntity : class, IEntityByGuid, IEntityPartitioned
     {
         Task<TEntity?> GetByGuidAsync(
             Guid entityGuid,
-            CancellationToken cancellationToken = default);
+            IReadOnlyCollection<Guid> partitionGuids,
+            CancellationToken cancellationToken = default
+            );
     }
 }

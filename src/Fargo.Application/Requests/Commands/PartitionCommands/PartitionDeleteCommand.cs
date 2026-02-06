@@ -1,4 +1,6 @@
-﻿using Fargo.Application.Persistence;
+﻿using Fargo.Application.Extensions;
+using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
@@ -9,16 +11,26 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
 
     public sealed class PartitionDeleteCommandHandler(
         PartitionService service,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
         ) : ICommandHandler<PartitionDeleteCommand, Task>
     {
         private readonly PartitionService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task Handle(PartitionDeleteCommand command, CancellationToken cancellationToken = default)
+        private readonly ICurrentUser currentUser = currentUser;
+
+        public async Task Handle(
+                PartitionDeleteCommand command,
+                CancellationToken cancellationToken = default
+                )
         {
-            var partitionToDelete = await service.GetPartitionAsync(command.PartitionGuid, cancellationToken);
+            var partitionToDelete = await service.GetPartitionAsync(
+                    currentUser.ToActor(),
+                    command.PartitionGuid,
+                    cancellationToken
+                    );
 
             service.DeletePartition(partitionToDelete);
 

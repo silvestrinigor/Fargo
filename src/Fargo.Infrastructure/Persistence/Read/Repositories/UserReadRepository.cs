@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Read.Repositories
 {
-    public class UserReadRepository(FargoReadDbContext context) : EntityByGuidTemporalReadRepository<UserReadModel>(context.Users), IUserReadRepository
+    public class UserReadRepository(FargoReadDbContext context) : EntityByGuidTemporalPartitionedReadRepository<UserReadModel>(context.Users), IUserReadRepository
     {
         private readonly FargoReadDbContext context = context;
 

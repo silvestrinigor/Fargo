@@ -1,6 +1,7 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Repositories;
+using Fargo.Application.Security;
 
 namespace Fargo.Application.Requests.Queries.ItemQueries
 {
@@ -11,16 +12,26 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
         Pagination Pagination = default
         ) : IQuery<Task<IEnumerable<ItemReadModel>>>;
 
-    public sealed class ItemManyQueryHandler(IItemReadRepository repository) : IQueryHandler<ItemManyQuery, Task<IEnumerable<ItemReadModel>>>
+    public sealed class ItemManyQueryHandler(
+            IItemReadRepository repository,
+            ICurrentUser currentUser
+            ) : IQueryHandler<ItemManyQuery, Task<IEnumerable<ItemReadModel>>>
     {
         private readonly IItemReadRepository repository = repository;
 
-        public async Task<IEnumerable<ItemReadModel>> Handle(ItemManyQuery query, CancellationToken cancellationToken = default)
+        private readonly ICurrentUser currentUser = currentUser;
+
+        public async Task<IEnumerable<ItemReadModel>> Handle(
+                ItemManyQuery query,
+                CancellationToken cancellationToken = default
+                )
             => await repository.GetManyAsync(
-                query.ParentItemGuid,
-                query.ArticleGuid,
-                query.TemporalAsOf,
-                query.Pagination,
-                cancellationToken);
+                    currentUser.PartitionGuids,
+                    query.ParentItemGuid,
+                    query.ArticleGuid,
+                    query.TemporalAsOf,
+                    query.Pagination,
+                    cancellationToken
+                    );
     }
 }

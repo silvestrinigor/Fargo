@@ -19,7 +19,8 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
         {
             var partition = service.CreatePartition(
                 command.Partition.Name,
-                command.Partition.Description ?? default);
+                command.Partition.Description ?? default
+                );
 
             await unitOfWork.SaveChanges(cancellationToken);
 

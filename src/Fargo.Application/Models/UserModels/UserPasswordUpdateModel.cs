@@ -3,6 +3,7 @@
 namespace Fargo.Application.Models.UserModels
 {
     public sealed record UserPasswordUpdateModel(
-        Password NewPassword,
-        Password CurrentPassword);
+            Password NewPassword,
+            Password CurrentPassword
+            );
 }

@@ -1,5 +1,7 @@
-﻿using Fargo.Application.Models.ItemModels;
+﻿using Fargo.Application.Extensions;
+using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
@@ -11,7 +13,8 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
     public sealed class ItemCreateCommandHandler(
         ItemService itemService,
         ArticleService articleService,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
         ) : ICommandHandler<ItemCreateCommand, Task<Guid>>
     {
         private readonly ItemService itemService = itemService;
@@ -20,11 +23,22 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task<Guid> Handle(ItemCreateCommand command, CancellationToken cancellationToken = default)
-        {
-            var article = await articleService.GetArticleAsync(command.Item.ArticleGuid, cancellationToken);
+        private readonly ICurrentUser currentUser = currentUser;
 
-            var item = itemService.CreateItem(article);
+        public async Task<Guid> Handle(
+                ItemCreateCommand command,
+                CancellationToken cancellationToken = default
+                )
+        {
+            var actor = currentUser.ToActor();
+
+            var article = await articleService.GetArticleAsync(
+                    actor,
+                    command.Item.ArticleGuid,
+                    cancellationToken
+                    );
+
+            var item = itemService.CreateItem(actor, article);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

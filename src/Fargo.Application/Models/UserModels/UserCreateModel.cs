@@ -3,8 +3,9 @@
 namespace Fargo.Application.Models.UserModels
 {
     public record UserCreateModel(
-        int Id,
-        Name Name,
-        Password Password,
-        Description? Description = null);
+            int Id,
+            Name Name,
+            Password Password,
+            Description? Description = null
+            );
 }

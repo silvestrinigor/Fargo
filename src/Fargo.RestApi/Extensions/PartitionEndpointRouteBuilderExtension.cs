@@ -15,76 +15,76 @@ namespace Fargo.HttpApi.Extensions
             public void MapFargoPartition()
             {
                 builder.MapGet(
-                    "/partition/{partitionGuid}",
-                    async (
-                        Guid partitionGuid,
-                        DateTime? temporalAsOf,
-                        IQueryHandler<PartitionSingleQuery, Task<PartitionReadModel?>> handler,
-                        CancellationToken cancellationToken) =>
-                    {
+                        "/partition/{partitionGuid}",
+                        async (
+                            Guid partitionGuid,
+                            DateTime? temporalAsOf,
+                            IQueryHandler<PartitionSingleQuery, Task<PartitionReadModel?>> handler,
+                            CancellationToken cancellationToken) =>
+                        {
                         var query = new PartitionSingleQuery(partitionGuid, temporalAsOf);
 
                         var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
-                    });
+                        });
 
                 builder.MapGet(
-                    "/partition",
-                    async (
-                        DateTime? temporalAsOf,
-                        Page? page,
-                        Limit? limit,
-                        IQueryHandler<PartitionManyQuery, Task<IEnumerable<PartitionReadModel>>> handler,
-                        CancellationToken cancellationToken) =>
-                    {
+                        "/partition",
+                        async (
+                            DateTime? temporalAsOf,
+                            Page? page,
+                            Limit? limit,
+                            IQueryHandler<PartitionManyQuery, Task<IEnumerable<PartitionReadModel>>> handler,
+                            CancellationToken cancellationToken) =>
+                        {
                         var query = new PartitionManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
 
                         var response = await handler.Handle(query, cancellationToken);
 
                         return TypedResultsHelpers.HandleQueryResult(response);
-                    });
+                        });
 
                 builder.MapPost(
-                    "/partition",
-                    async (
-                        PartitionCreateCommand command,
-                        ICommandHandler<PartitionCreateCommand, Task<Guid>> handler,
-                        CancellationToken cancellationToken) =>
-                    {
+                        "/partition",
+                        async (
+                            PartitionCreateCommand command,
+                            ICommandHandler<PartitionCreateCommand, Task<Guid>> handler,
+                            CancellationToken cancellationToken) =>
+                        {
                         var response = await handler.Handle(command, cancellationToken);
 
                         return TypedResults.Ok(response);
-                    });
+                        });
 
                 builder.MapDelete(
-                    "/partition/{partitionGuid}",
-                    async (
-                        Guid partitionGuid,
-                        ICommandHandler<PartitionDeleteCommand, Task> handler,
-                        CancellationToken cancellationToken) =>
-                    {
+                        "/partition/{partitionGuid}",
+                        async (
+                            Guid partitionGuid,
+                            ICommandHandler<PartitionDeleteCommand, Task> handler,
+                            CancellationToken cancellationToken) =>
+                        {
                         var command = new PartitionDeleteCommand(partitionGuid);
 
                         await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
-                    });
+                        });
 
                 builder.MapPatch(
-                    "/partition/{partitionGuid}",
-                    async (
-                        Guid partitionGuid,
-                        PartitionUpdateModel model,
-                        ICommandHandler<PartitionUpdateCommand, Task> handler,
-                        CancellationToken cancellationToken) =>
-                    {
+                        "/partition/{partitionGuid}",
+                        async (
+                            Guid partitionGuid,
+                            PartitionUpdateModel model,
+                            ICommandHandler<PartitionUpdateCommand, Task> handler,
+                            CancellationToken cancellationToken) =>
+                        {
                         var command = new PartitionUpdateCommand(partitionGuid, model);
 
                         await handler.Handle(command, cancellationToken);
 
                         return TypedResults.NoContent();
-                    });
+                        });
             }
         }
     }

@@ -2,6 +2,9 @@
 {
     public interface IEntityByGuidReadModel
     {
-        Guid Guid { get; }
+        Guid Guid
+        {
+            get;
+        }
     }
 }

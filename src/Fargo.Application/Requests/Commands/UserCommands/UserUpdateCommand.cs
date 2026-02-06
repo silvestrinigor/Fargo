@@ -28,7 +28,11 @@ namespace Fargo.Application.Requests.Commands.UserCommands
 
             if (command.User.Password != null)
             {
-                service.SetPassword(user, new(command.User.Password.NewPassword), new(command.User.Password.CurrentPassword));
+                service.SetPassword(
+                        user,
+                        new(command.User.Password.NewPassword),
+                        new(command.User.Password.CurrentPassword)
+                        );
             }
 
             await unitOfWork.SaveChanges(cancellationToken);

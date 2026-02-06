@@ -1,5 +1,7 @@
-﻿using Fargo.Application.Models.ArticleModels;
+﻿using Fargo.Application.Extensions;
+using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
@@ -11,16 +13,26 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 
     public sealed class ArticleUpdateCommandHandler(
         ArticleService articleService,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
         ) : ICommandHandler<ArticleUpdateCommand, Task>
     {
         private readonly ArticleService articleService = articleService;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task Handle(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
+        private readonly ICurrentUser currentUser = currentUser;
+
+        public async Task Handle(
+                ArticleUpdateCommand command,
+                CancellationToken cancellationToken = default
+                )
         {
-            var article = await articleService.GetArticleAsync(command.ArticleGuid, cancellationToken);
+            var article = await articleService.GetArticleAsync(
+                    currentUser.ToActor(),
+                    command.ArticleGuid,
+                    cancellationToken
+                    );
 
             if (command.Article.Name is not null)
             {

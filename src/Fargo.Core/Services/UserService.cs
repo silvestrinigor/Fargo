@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
@@ -6,18 +7,43 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Services
 {
-    public sealed class UserService(IUserRepository repository, IPasswordHasher passwordHasher)
+    public sealed class UserService(
+            IUserRepository repository,
+            IPasswordHasher passwordHasher
+            )
     {
         private readonly IUserRepository repository = repository;
 
         private readonly IPasswordHasher passwordHasher = passwordHasher;
 
-        public async Task<User> GetUserAsync(Guid userGuid, CancellationToken cancellationToken = default)
-            => await repository.GetByGuidAsync(userGuid, cancellationToken)
+        public async Task<User> GetUserAsync(
+                Actor actor,
+                Guid userGuid,
+                CancellationToken cancellationToken = default
+                )
+            => await repository.GetByGuidAsync(
+                    userGuid,
+                    actor.PartitionGuids,
+                    cancellationToken
+                    )
             ?? throw new UserNotFoundException(userGuid);
 
-        public User CreateUser(int id, Name name, Description description, Password password)
+        public User CreateUser(
+                Actor actor,
+                int id,
+                Name name,
+                Description description,
+                Password password
+                )
         {
+            if (!actor.HasPermission(ActionType.CreateUser))
+            {
+                throw new ActorNotAuthorizedException(
+                        actor,
+                        ActionType.CreateUser
+                        );
+            }
+
             var user = new User
             {
                 Id = id,
@@ -31,15 +57,46 @@ namespace Fargo.Domain.Services
             return user;
         }
 
-        public void DeleteUser(User user)
-            => repository.Remove(user);
-
-        public void SetPassword(User user, Password newPassword, Password currentPassword)
+        public void DeleteUser(
+                Actor actor,
+                User user
+                )
         {
-            var isPasswordCorrect = passwordHasher.Verify(user.PasswordHash.Value, currentPassword.Value);
+            if (!actor.HasPermission(ActionType.CreateUser))
+            {
+                throw new ActorNotAuthorizedException(
+                        actor,
+                        ActionType.CreateUser
+                        );
+            }
+
+            repository.Remove(user);
+        }
+
+        public void SetPassword(
+                Actor actor,
+                User user, 
+                Password newPassword, 
+                Password currentPassword
+                )
+        {
+            if (actor.UserGuid != user.Guid)
+            {
+                throw new UserActorSetDiferentUserPasswordException(
+                        actor, 
+                        user
+                        );
+            }
+
+            var isPasswordCorrect = passwordHasher.Verify(
+                    user.PasswordHash.Value, 
+                    currentPassword.Value
+                    );
 
             if (!isPasswordCorrect)
-                throw new InvalidOperationException("Cannot set new password because the current password is incorrect.");
+            {
+                throw new UserInvalidPasswordException(user);
+            }
 
             user.PasswordHash = new(passwordHasher.Hash(newPassword.Value));
         }

@@ -3,14 +3,17 @@ using System.Globalization;
 
 namespace Fargo.Application.Commom
 {
-    public readonly struct Limit : IParsable<Limit>
+    public readonly struct Limit
+        : IParsable<Limit>
     {
         public Limit(int value)
         {
             if (value < MinValue || value > MaxValue)
+            {
                 throw new ArgumentOutOfRangeException(
-                    nameof(value),
-                    $"Must be between {MinValue} and {MaxValue}");
+                        nameof(value),
+                        $"Must be between {MinValue} and {MaxValue}");
+            }
 
             this.value = value;
         }
@@ -21,43 +24,60 @@ namespace Fargo.Application.Commom
 
         public const int DefaultValue = 20;
 
-        public int Value => value == 0 ? DefaultValue : value;
+        public int Value => value == 0
+            ? DefaultValue
+            : value;
 
         private readonly int value;
 
-        public static implicit operator int(Limit limit) => limit.Value;
+        public static implicit operator int(Limit limit)
+            => limit.Value;
 
-        public static explicit operator Limit(int value) => new(value);
+        public static explicit operator Limit(int value)
+            => new(value);
 
         public static Limit Parse(string s, IFormatProvider? provider)
         {
             if (TryParse(s, provider, out var result))
+            {
                 return result;
+            }
 
             throw new FormatException($"Invalid Limit value: '{s}'.");
         }
 
         public static bool TryParse(
-            [NotNullWhen(true)] string? s,
-            IFormatProvider? provider,
-            [MaybeNullWhen(false)] out Limit result)
+                [NotNullWhen(true)] string? s,
+                IFormatProvider? provider,
+                [MaybeNullWhen(false)] out Limit result
+                )
         {
             result = default;
 
             if (string.IsNullOrWhiteSpace(s))
+            {
                 return false;
+            }
 
-            if (!int.TryParse(
+            var parsed = int.TryParse(
                     s,
                     NumberStyles.Integer,
                     provider ?? CultureInfo.InvariantCulture,
-                    out var value))
+                    out var value
+                    );
+
+            if (!parsed)
+            {
                 return false;
+            }
 
             if (value < MinValue)
+            {
                 return false;
+            }
 
             result = new Limit(value);
+
             return true;
         }
     }

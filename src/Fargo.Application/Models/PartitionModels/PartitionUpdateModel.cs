@@ -3,6 +3,7 @@
 namespace Fargo.Application.Models.PartitionModels
 {
     public sealed record PartitionUpdateModel(
-        Name? Name = null,
-        Description? Description = null);
+            Name? Name = null,
+            Description? Description = null
+            );
 }

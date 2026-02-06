@@ -2,7 +2,10 @@
 {
     public readonly record struct Pagination
     {
-        public Pagination(Page page = default, Limit limit = default)
+        public Pagination(
+                Page page = default,
+                Limit limit = default
+                )
         {
             Page = page;
             Limit = limit;

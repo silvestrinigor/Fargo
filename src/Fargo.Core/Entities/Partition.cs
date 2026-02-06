@@ -2,7 +2,8 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Partition : IEntity, IEntityByGuid, IEntityTemporal
+    public class Partition
+        : IEntity, IEntityByGuid, IEntityTemporal, IEntityPartitioned
     {
         public required Name Name
         {
@@ -22,9 +23,9 @@ namespace Fargo.Domain.Entities
             init;
         } = Guid.NewGuid();
 
-        public IReadOnlyCollection<Article> Articles => articles;
-
         private readonly HashSet<Article> articles = [];
+
+        public IReadOnlyCollection<Article> Articles => articles;
 
         public bool AddArticle(Article article)
         {
@@ -35,5 +36,23 @@ namespace Fargo.Domain.Entities
         {
             return articles.Remove(article);
         }
+
+        public readonly HashSet<User> userAccesses = [];
+
+        public IReadOnlyCollection<User> UserAccesses => userAccesses;
+
+        public bool AddUserAccess(User user)
+        {
+            return userAccesses.Add(user);
+        }
+
+        public bool RemoveUserAccess(User user)
+        {
+            return userAccesses.Remove(user);
+        }
+
+        private readonly HashSet<Partition> partitions = [];
+
+        public IReadOnlyCollection<Partition> Partitions => partitions;
     }
 }

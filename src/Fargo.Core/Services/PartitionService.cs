@@ -9,8 +9,16 @@ namespace Fargo.Domain.Services
     {
         private readonly IPartitionRepository repository = repository;
 
-        public async Task<Partition> GetPartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
-            => await repository.GetByGuidAsync(partitionGuid, cancellationToken)
+        public async Task<Partition> GetPartitionAsync(
+                Actor actor,
+                Guid partitionGuid,
+                CancellationToken cancellationToken = default
+                )
+            => await repository.GetByGuidAsync(
+                    partitionGuid,
+                    actor.PartitionGuids,
+                    cancellationToken
+                    )
             ?? throw new PartitionNotFoundException(partitionGuid);
 
         public Partition CreatePartition(Name name, Description description = default)

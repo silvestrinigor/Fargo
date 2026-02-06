@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Write.Repositories
 {
-    public class ArticleRepository(FargoWriteDbContext context) : EntityByGuidRepository<Article>(context.Articles), IArticleRepository
+    public class ArticleRepository(FargoWriteDbContext context) 
+        : EntityByGuidRepository<Article>(context.Articles), IArticleRepository
     {
         private readonly FargoWriteDbContext context = context;
 

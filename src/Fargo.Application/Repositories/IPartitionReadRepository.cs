@@ -2,5 +2,6 @@
 
 namespace Fargo.Application.Repositories
 {
-    public interface IPartitionReadRepository : IEntityByGuidTemporalReadRepository<PartitionReadModel>;
+    public interface IPartitionReadRepository
+        : IEntityByGuidTemporalPartitionedReadRepository<PartitionReadModel>;
 }

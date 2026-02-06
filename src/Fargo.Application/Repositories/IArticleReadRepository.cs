@@ -2,5 +2,6 @@
 
 namespace Fargo.Application.Repositories
 {
-    public interface IArticleReadRepository : IEntityByGuidTemporalReadRepository<ArticleReadModel>;
+    public interface IArticleReadRepository
+        : IEntityByGuidTemporalPartitionedReadRepository<ArticleReadModel>;
 }

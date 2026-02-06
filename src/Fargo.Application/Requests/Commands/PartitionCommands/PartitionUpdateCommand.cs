@@ -1,5 +1,7 @@
-﻿using Fargo.Application.Models.PartitionModels;
+﻿using Fargo.Application.Extensions;
+using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
@@ -11,16 +13,26 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
 
     public sealed class PartitionUpdateCommandHandler(
         PartitionService service,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
         ) : ICommandHandler<PartitionUpdateCommand, Task>
     {
         private readonly PartitionService service = service;
 
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task Handle(PartitionUpdateCommand command, CancellationToken cancellationToken = default)
+        private readonly ICurrentUser currentUser = currentUser;
+
+        public async Task Handle(
+                PartitionUpdateCommand command,
+                CancellationToken cancellationToken = default
+                )
         {
-            var partition = await service.GetPartitionAsync(command.PartitionGuid, cancellationToken);
+            var partition = await service.GetPartitionAsync(
+                    currentUser.ToActor(),
+                    command.PartitionGuid,
+                    cancellationToken
+                    );
 
             partition.Name = command.Partition.Name ?? partition.Name;
 

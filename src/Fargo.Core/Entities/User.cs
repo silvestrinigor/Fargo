@@ -3,7 +3,8 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
 {
-    public class User : IEntity, IEntityByGuid, IEntityTemporal
+    public class User
+        : IEntity, IEntityByGuid, IEntityTemporal, IEntityPartitioned
     {
         public Guid Guid
         {
@@ -65,5 +66,9 @@ namespace Fargo.Domain.Entities
 
             return permission is not null && permission.GrantType == GrantType.Granted;
         }
+
+        private readonly HashSet<Partition> partitions = [];
+
+        public IReadOnlyCollection<Partition> Partitions => partitions;
     }
 }
