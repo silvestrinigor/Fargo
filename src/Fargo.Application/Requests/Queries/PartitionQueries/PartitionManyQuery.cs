@@ -8,17 +8,13 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
     public sealed record PartitionManyQuery(
             DateTime? TemporalAsOf = null,
             Pagination Pagination = default
-            ) : IQuery<Task<IEnumerable<PartitionReadModel>>>;
+            ) : IQuery<IEnumerable<PartitionReadModel>>;
 
     public sealed class PartitionManyQueryHandler(
             IPartitionReadRepository repository,
             ICurrentUser currentUser
-            ) : IQueryHandler<PartitionManyQuery, Task<IEnumerable<PartitionReadModel>>>
+            ) : IQueryHandler<PartitionManyQuery, IEnumerable<PartitionReadModel>>
     {
-        private readonly IPartitionReadRepository repository = repository;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task<IEnumerable<PartitionReadModel>> Handle(
                 PartitionManyQuery query,
                 CancellationToken cancellationToken = default

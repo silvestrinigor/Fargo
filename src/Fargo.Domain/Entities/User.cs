@@ -12,11 +12,11 @@ namespace Fargo.Domain.Entities
             init;
         } = Guid.NewGuid();
 
-        public required int Id
+        public int Id
         {
             get;
             init;
-        }
+        } = 0;
 
         public required Name Name
         {

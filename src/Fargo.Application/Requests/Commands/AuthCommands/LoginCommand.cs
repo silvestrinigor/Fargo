@@ -2,11 +2,11 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
 {
     public sealed record LoginCommand(
 
-            ) : ICommand<Task>;
+            ) : ICommand;
 
     public sealed class LoginCommandHandler(
 
-            ) : ICommandHandler<LoginCommand, Task>
+            ) : ICommandHandler<LoginCommand>
     {
         public async Task Handle(
                 LoginCommand command,

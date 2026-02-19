@@ -1,8 +1,13 @@
 ﻿namespace Fargo.Application.Requests.Queries
 {
-    /// <summary>
-    /// Provides a query interface that returns a response.
-    /// </summary>
-    /// <typeparam name="TResponse">The response type of the query.</typeparam>
     public interface IQuery<out TResponse>;
+
+    public interface IQueryHandler<in TQuery, TResponse>
+        where TQuery : IQuery<TResponse>
+    {
+        Task<TResponse> Handle(
+            TQuery query,
+            CancellationToken cancellationToken = default
+            );
+    }
 }

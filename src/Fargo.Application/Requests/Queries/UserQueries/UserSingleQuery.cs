@@ -1,21 +1,28 @@
 ﻿using Fargo.Application.Models.UserModels;
 using Fargo.Application.Repositories;
+using Fargo.Application.Security;
 
 namespace Fargo.Application.Requests.Queries.UserQueries
 {
     public sealed record UserSingleQuery(
-        Guid UserGuid,
-        DateTime? TemporalAsOf = null
-        ) : IQuery<Task<UserReadModel?>>;
+            Guid UserGuid,
+            DateTime? TemporalAsOf = null
+            ) : IQuery<UserReadModel?>;
 
-    public sealed class UserSingleQueryHandler(IUserReadRepository repository) : IQueryHandler<UserSingleQuery, Task<UserReadModel?>>
+    public sealed class UserSingleQueryHandler(
+            IUserReadRepository repository,
+            ICurrentUser currentUser
+            ) : IQueryHandler<UserSingleQuery, UserReadModel?>
     {
-        private readonly IUserReadRepository repository = repository;
-
-        public async Task<UserReadModel?> Handle(UserSingleQuery query, CancellationToken cancellationToken = default)
+        public async Task<UserReadModel?> Handle(
+                UserSingleQuery query,
+                CancellationToken cancellationToken = default
+                )
             => await repository.GetByGuidAsync(
-                query.UserGuid,
-                query.TemporalAsOf,
-                cancellationToken);
+                    query.UserGuid,
+                    currentUser.PartitionGuids,
+                    query.TemporalAsOf,
+                    cancellationToken
+                    );
     }
 }

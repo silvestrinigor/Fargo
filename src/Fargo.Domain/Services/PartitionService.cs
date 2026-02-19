@@ -7,14 +7,12 @@ namespace Fargo.Domain.Services
 {
     public class PartitionService(IPartitionRepository repository)
     {
-        private readonly IPartitionRepository repository = repository;
-
         public async Task<Partition> GetPartitionAsync(
                 Actor actor,
                 Guid partitionGuid,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetByGuidAsync(
+            => await repository.GetByGuid(
                     partitionGuid,
                     actor.PartitionGuids,
                     cancellationToken

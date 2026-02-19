@@ -1,4 +1,3 @@
-using Fargo.Application.Commom;
 using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Converters.ValueObjectsJsonConverters;

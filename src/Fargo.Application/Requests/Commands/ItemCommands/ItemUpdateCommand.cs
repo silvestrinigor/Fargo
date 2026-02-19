@@ -1,4 +1,5 @@
-﻿using Fargo.Application.Extensions;
+﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -9,27 +10,28 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
     public sealed record ItemUpdateCommand(
         Guid ItemGuid,
         ItemUpdateModel Item
-        ) : ICommand<Task>;
+        ) : ICommand;
 
     public sealed class ItemUpdateCommandHandler(
         ItemService itemService,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<ItemUpdateCommand, Task>
+        ) : ICommandHandler<ItemUpdateCommand>
     {
-        private readonly ItemService itemService = itemService;
-
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task Handle(ItemUpdateCommand command, CancellationToken cancellationToken = default)
         {
             var actor = currentUser.ToActor();
 
             async Task DefineItemContainer(Guid? containerGuid)
             {
-                var item = await itemService.GetItemAsync(actor, command.ItemGuid, cancellationToken);
+                var item = await itemService.GetItem(
+                        actor,
+                        command.ItemGuid,
+                        cancellationToken
+                        )
+                    ?? throw new ItemNotFoundFargoApplicationException(
+                            command.ItemGuid
+                            );
 
                 if (containerGuid is null)
                 {
@@ -37,11 +39,12 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                     return;
                 }
 
-                var targetParentItem = await itemService.GetItemAsync(
+                var targetParentItem = await itemService.GetItem(
                         actor,
                         containerGuid.Value,
                         cancellationToken
-                        );
+                        )
+                    ?? throw new ItemNotFoundFargoApplicationException(containerGuid.Value);
 
                 await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
             }

@@ -8,5 +8,5 @@ namespace Fargo.Application.Models.ArticleModels
             string Description,
             bool IsContainer,
             IReadOnlyCollection<PartitionReadModel> Partitions
-            ) : IEntityByGuidReadModel, IEntityTemporalReadModel;
+            ) : IEntityByGuidReadModel, IEntityTemporalReadModel, IEntityPartitionedReadModel;
 }

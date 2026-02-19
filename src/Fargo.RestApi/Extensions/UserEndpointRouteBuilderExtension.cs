@@ -12,25 +12,14 @@ namespace Fargo.HttpApi.Extensions
     {
         extension(IEndpointRouteBuilder builder)
         {
-            /// <summary>
-            /// Configures routing for user-related endpoints.
-            /// </summary>
             public void MapFargoUser()
             {
-                /// <summary>
-                /// Retrieves a single user by their GUID.
-                /// </summary>
-                /// <param name="userGuid">The unique identifier of the user.</param>
-                /// <param name="temporalAsOf">An optional date and time to fetch the user data as it was at that point in time.</param>
-                /// <param name="handler">The query handler for fetching a single user.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>The result of the query, wrapped in a typed response.</returns>
                 builder.MapGet(
                         "/users/{userGuid}",
                         async (
                             Guid userGuid,
                             DateTime? temporalAsOf,
-                            IQueryHandler<UserSingleQuery, Task<UserReadModel?>> handler,
+                            IQueryHandler<UserSingleQuery, UserReadModel?> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var query = new UserSingleQuery(userGuid, temporalAsOf);
@@ -40,22 +29,13 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResultsHelpers.HandleQueryResult(response);
                         });
 
-                /// <summary>
-                /// Retrieves a list of users.
-                /// </summary>
-                /// <param name="temporalAsOf">An optional date and time to fetch the user data as it was at that point in time.</param>
-                /// <param name="page">The page number for pagination.</param>
-                /// <param name="limit">The maximum number of users to return per page.</param>
-                /// <param name="handler">The query handler for fetching multiple users.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>The result of the query, wrapped in a typed response.</returns>
                 builder.MapGet(
                         "/users",
                         async (
                             DateTime? temporalAsOf,
                             Page? page,
                             Limit? limit,
-                            IQueryHandler<UserManyQuery, Task<IEnumerable<UserReadModel>>> handler,
+                            IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var query = new UserManyQuery(temporalAsOf, new(page ?? default, limit ?? default));
@@ -65,18 +45,11 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResultsHelpers.HandleQueryResult(response);
                         });
 
-                /// <summary>
-                /// Creates a new user.
-                /// </summary>
-                /// <param name="command">The command to create a new user.</param>
-                /// <param name="handler">The command handler for creating a user.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>The unique identifier of the newly created user.</returns>
                 builder.MapPost(
                         "/users",
                         async (
                             UserCreateCommand command,
-                            ICommandHandler<UserCreateCommand, Task<Guid>> handler,
+                            ICommandHandler<UserCreateCommand, Guid> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var response = await handler.Handle(command, cancellationToken);
@@ -84,18 +57,11 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResults.Ok(response);
                         });
 
-                /// <summary>
-                /// Deletes a user by their GUID.
-                /// </summary>
-                /// <param name="userGuid">The unique identifier of the user.</param>
-                /// <param name="handler">The command handler for deleting a user.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>No content if the deletion is successful.</returns>
                 builder.MapDelete(
                         "/users/{userGuid}",
                         async (
                             Guid userGuid,
-                            ICommandHandler<UserDeleteCommand, Task> handler,
+                            ICommandHandler<UserDeleteCommand> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var command = new UserDeleteCommand(userGuid);
@@ -105,20 +71,12 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResults.NoContent();
                         });
 
-                /// <summary>
-                /// Updates a user by their GUID.
-                /// </summary>
-                /// <param name="userGuid">The unique identifier of the user.</param>
-                /// <param name="model">The model containing the updated user data.</param>
-                /// <param name="handler">The command handler for updating a user.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>No content if the update is successful.</returns>
                 builder.MapPatch(
                         "/users/{userGuid}",
                         async (
                             Guid userGuid,
                             UserUpdateModel model,
-                            ICommandHandler<UserUpdateCommand, Task> handler,
+                            ICommandHandler<UserUpdateCommand> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var command = new UserUpdateCommand(userGuid, model);
@@ -128,16 +86,6 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResults.NoContent();
                         });
 
-                /// <summary>
-                /// Retrieves a list of permissions for a user.
-                /// </summary>
-                /// <param name="userGuid">The unique identifier of the user.</param>
-                /// <param name="temporalAsOf">An optional date and time to fetch the permission data as it was at that point in time.</param>
-                /// <param name="limit">The maximum number of permissions to return per page.</param>
-                /// <param name="page">The page number for pagination.</param>
-                /// <param name="handler">The query handler for fetching multiple user permissions.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>The result of the query, wrapped in a typed response.</returns>
                 builder.MapGet(
                         "/users/{userGuid}/permissions",
                         async (
@@ -145,7 +93,7 @@ namespace Fargo.HttpApi.Extensions
                             DateTime? temporalAsOf,
                             Limit? limit,
                             Page? page,
-                            IQueryHandler<UserPermissionManyQuery, Task<IEnumerable<PermissionReadModel>?>> handler,
+                            IQueryHandler<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var query = new UserPermissionManyQuery(
@@ -159,20 +107,12 @@ namespace Fargo.HttpApi.Extensions
                         return TypedResultsHelpers.HandleQueryResult(response);
                         });
 
-                /// <summary>
-                /// Updates permissions for a user.
-                /// </summary>
-                /// <param name="userGuid">The unique identifier of the user.</param>
-                /// <param name="model">The model containing the updated permission data.</param>
-                /// <param name="handler">The command handler for updating user permissions.</param>
-                /// <param name="cancellationToken">A token to cancel the operation.</param>
-                /// <returns>No content if the update is successful.</returns>
                 builder.MapPatch(
                         "/users/{userGuid}/permissions",
                         async (
                             Guid userGuid,
                             PermissionUpdateModel model,
-                            ICommandHandler<UserPermissionUpdateCommand, Task> handler,
+                            ICommandHandler<UserPermissionUpdateCommand> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var command = new UserPermissionUpdateCommand(userGuid, model);

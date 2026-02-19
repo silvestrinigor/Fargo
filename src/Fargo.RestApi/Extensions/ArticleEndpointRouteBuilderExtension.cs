@@ -18,7 +18,7 @@ namespace Fargo.HttpApi.Extensions
                 static async Task<Results<Ok<ArticleReadModel>, NotFound>> GetSingleArticle(
                         Guid articleGuid,
                         DateTime? temporalAsOf,
-                        IQueryHandler<ArticleSingleQuery, Task<ArticleReadModel?>> handler,
+                        IQueryHandler<ArticleSingleQuery, ArticleReadModel?> handler,
                         CancellationToken cancellationToken
                         )
                 {
@@ -42,7 +42,7 @@ namespace Fargo.HttpApi.Extensions
                             DateTime? temporalAsOf,
                             Page? page,
                             Limit? limit,
-                            IQueryHandler<ArticleManyQuery, Task<IEnumerable<ArticleReadModel>>> handler,
+                            IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
                             CancellationToken cancellationToken) =>
                         {
                             var query = new ArticleManyQuery(
@@ -59,7 +59,7 @@ namespace Fargo.HttpApi.Extensions
                         "/articles",
                         async (
                             ArticleCreateCommand command,
-                            ICommandHandler<ArticleCreateCommand, Task<Guid>> handler,
+                            ICommandHandler<ArticleCreateCommand, Guid> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var response = await handler.Handle(command, cancellationToken);
@@ -72,7 +72,7 @@ namespace Fargo.HttpApi.Extensions
                         async (
                             Guid articleGuid,
                             ArticleUpdateModel model,
-                            ICommandHandler<ArticleUpdateCommand, Task> handler,
+                            ICommandHandler<ArticleUpdateCommand> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var command = new ArticleUpdateCommand(articleGuid, model);
@@ -86,7 +86,7 @@ namespace Fargo.HttpApi.Extensions
                         "/articles/{articleGuid}",
                         async (
                             Guid articleGuid,
-                            ICommandHandler<ArticleDeleteCommand, Task> handler,
+                            ICommandHandler<ArticleDeleteCommand> handler,
                             CancellationToken cancellationToken) =>
                         {
                         var command = new ArticleDeleteCommand(articleGuid);

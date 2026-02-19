@@ -7,20 +7,14 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
     public sealed record PartitionDeleteCommand(
         Guid PartitionGuid
-        ) : ICommand<Task>;
+        ) : ICommand;
 
     public sealed class PartitionDeleteCommandHandler(
         PartitionService service,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<PartitionDeleteCommand, Task>
+        ) : ICommandHandler<PartitionDeleteCommand>
     {
-        private readonly PartitionService service = service;
-
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task Handle(
                 PartitionDeleteCommand command,
                 CancellationToken cancellationToken = default

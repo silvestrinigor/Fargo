@@ -11,7 +11,7 @@ namespace Fargo.Infrastructure.Persistence.Write.Repositories
     {
         protected readonly DbSet<TEntity> dbSet = set;
 
-        public async Task<TEntity?> GetByGuidAsync(
+        public async Task<TEntity?> GetByGuid(
                 Guid entityGuid,
                 IReadOnlyCollection<Guid> partitionGuids,
                 CancellationToken cancellationToken = default

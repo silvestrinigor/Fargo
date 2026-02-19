@@ -34,31 +34,31 @@ namespace Fargo.Infrastructure.Extensions
             {
                 services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
 
-                services.AddScoped<ICommandHandler<ArticleCreateCommand, Task<Guid>>, ArticleCreateCommandHandler>();
-                services.AddScoped<ICommandHandler<ArticleDeleteCommand, Task>, ArticleDeleteCommandHandler>();
-                services.AddScoped<ICommandHandler<ArticleUpdateCommand, Task>, ArticleUpdateCommandHandler>();
-                services.AddScoped<IQueryHandler<ArticleSingleQuery, Task<ArticleReadModel?>>, ArticleSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ArticleManyQuery, Task<IEnumerable<ArticleReadModel>>>, ArticleManyQueryHandler>();
+                services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
+                services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
+                services.AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
+                services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleReadModel?>, ArticleSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>>, ArticleManyQueryHandler>();
 
-                services.AddScoped<ICommandHandler<ItemCreateCommand, Task<Guid>>, ItemCreateCommandHandler>();
-                services.AddScoped<ICommandHandler<ItemDeleteCommand, Task>, ItemDeleteCommandHandler>();
-                services.AddScoped<ICommandHandler<ItemUpdateCommand, Task>, ItemUpdateCommandHandler>();
-                services.AddScoped<IQueryHandler<ItemSingleQuery, Task<ItemReadModel?>>, ItemSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ItemManyQuery, Task<IEnumerable<ItemReadModel>>>, ItemManyQueryHandler>();
+                services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
+                services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
+                services.AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>();
+                services.AddScoped<IQueryHandler<ItemSingleQuery, ItemReadModel?>, ItemSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>>, ItemManyQueryHandler>();
 
-                services.AddScoped<ICommandHandler<UserCreateCommand, Task<Guid>>, UserCreateCommandHandler>();
-                services.AddScoped<ICommandHandler<UserDeleteCommand, Task>, UserDeleteCommandHandler>();
-                services.AddScoped<ICommandHandler<UserUpdateCommand, Task>, UserUpdateCommandHandler>();
-                services.AddScoped<ICommandHandler<UserPermissionUpdateCommand, Task>, UserPermissionUpdateCommandHandler>();
-                services.AddScoped<IQueryHandler<UserSingleQuery, Task<UserReadModel?>>, UserSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<UserManyQuery, Task<IEnumerable<UserReadModel>>>, UserManyQueryHandler>();
-                services.AddScoped<IQueryHandler<UserPermissionManyQuery, Task<IEnumerable<PermissionReadModel>?>>, UserPermissionAllQueryHandler>();
+                services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
+                services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
+                services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
+                services.AddScoped<ICommandHandler<UserPermissionUpdateCommand>, UserPermissionUpdateCommandHandler>();
+                services.AddScoped<IQueryHandler<UserSingleQuery, UserReadModel?>, UserSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>>, UserManyQueryHandler>();
+                services.AddScoped<IQueryHandler<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?>, UserPermissionAllQueryHandler>();
 
-                services.AddScoped<ICommandHandler<PartitionCreateCommand, Task<Guid>>, PartitionCreateCommandHandler>();
-                services.AddScoped<ICommandHandler<PartitionDeleteCommand, Task>, PartitionDeleteCommandHandler>();
-                services.AddScoped<ICommandHandler<PartitionUpdateCommand, Task>, PartitionUpdateCommandHandler>();
-                services.AddScoped<IQueryHandler<PartitionSingleQuery, Task<PartitionReadModel?>>, PartitionSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<PartitionManyQuery, Task<IEnumerable<PartitionReadModel>>>, PartitionManyQueryHandler>();
+                services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
+                services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
+                services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
+                services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionReadModel?>, PartitionSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<PartitionManyQuery, IEnumerable<PartitionReadModel>>, PartitionManyQueryHandler>();
 
                 services.AddScoped<ArticleService>();
 

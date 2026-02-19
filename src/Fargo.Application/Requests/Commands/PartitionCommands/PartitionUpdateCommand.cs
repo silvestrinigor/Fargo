@@ -9,20 +9,14 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
     public sealed record PartitionUpdateCommand(
         Guid PartitionGuid,
         PartitionUpdateModel Partition
-        ) : ICommand<Task>;
+        ) : ICommand;
 
     public sealed class PartitionUpdateCommandHandler(
         PartitionService service,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<PartitionUpdateCommand, Task>
+        ) : ICommandHandler<PartitionUpdateCommand>
     {
-        private readonly PartitionService service = service;
-
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task Handle(
                 PartitionUpdateCommand command,
                 CancellationToken cancellationToken = default

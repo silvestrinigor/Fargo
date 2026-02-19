@@ -1,5 +1,7 @@
-﻿using Fargo.Application.Models.UserModels;
+﻿using Fargo.Application.Extensions;
+using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
@@ -7,20 +9,19 @@ namespace Fargo.Application.Requests.Commands.UserCommands
     public sealed record UserUpdateCommand(
         Guid UserGuid,
         UserUpdateModel User
-        ) : ICommand<Task>;
+        ) : ICommand;
 
     public sealed class UserUpdateCommandHandler(
         UserService service,
-        IUnitOfWork unitOfWork
-        ) : ICommandHandler<UserUpdateCommand, Task>
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
+        ) : ICommandHandler<UserUpdateCommand>
     {
-        private readonly UserService service = service;
-
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
-
         public async Task Handle(UserUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            var user = await service.GetUserAsync(command.UserGuid, cancellationToken);
+            var actor = currentUser.ToActor();
+
+            var user = await service.GetUser(actor, command.UserGuid, cancellationToken);
 
             user.Name = command.User.Name ?? user.Name;
 
@@ -29,6 +30,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             if (command.User.Password != null)
             {
                 service.SetPassword(
+                        actor,
                         user,
                         new(command.User.Password.NewPassword),
                         new(command.User.Password.CurrentPassword)

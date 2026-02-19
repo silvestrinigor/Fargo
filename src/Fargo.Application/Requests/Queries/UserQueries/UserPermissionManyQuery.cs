@@ -8,14 +8,12 @@ namespace Fargo.Application.Requests.Queries.UserQueries
             Guid UserGuid,
             DateTime? TemporalAsOf = null,
             Pagination Pagination = default
-            ) : IQuery<Task<IEnumerable<PermissionReadModel>?>>;
+            ) : IQuery<IEnumerable<PermissionReadModel>?>;
 
     public sealed class UserPermissionAllQueryHandler(
             IUserReadRepository repository
-            ) : IQueryHandler<UserPermissionManyQuery, Task<IEnumerable<PermissionReadModel>?>>
+            ) : IQueryHandler<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?>
     {
-        private readonly IUserReadRepository repository = repository;
-
         public async Task<IEnumerable<PermissionReadModel>?> Handle(
                 UserPermissionManyQuery query,
                 CancellationToken cancellationToken = default

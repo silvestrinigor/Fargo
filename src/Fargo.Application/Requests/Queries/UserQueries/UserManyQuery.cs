@@ -8,17 +8,13 @@ namespace Fargo.Application.Requests.Queries.UserQueries
     public sealed record UserManyQuery(
             DateTime? TemporalAsOf = null,
             Pagination Pagination = default
-            ) : IQuery<Task<IEnumerable<UserReadModel>>>;
+            ) : IQuery<IEnumerable<UserReadModel>>;
 
     public sealed class UserManyQueryHandler(
             IUserReadRepository repository,
             ICurrentUser currentUser
-            ) : IQueryHandler<UserManyQuery, Task<IEnumerable<UserReadModel>>>
+            ) : IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>>
     {
-        private readonly IUserReadRepository repository = repository;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task<IEnumerable<UserReadModel>> Handle(
                 UserManyQuery query,
                 CancellationToken cancellationToken = default

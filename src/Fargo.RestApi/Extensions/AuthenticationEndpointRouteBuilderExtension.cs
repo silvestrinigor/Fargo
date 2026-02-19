@@ -13,7 +13,7 @@ namespace Fargo.HttpApi.Extensions
                         "/authentication/login",
                         async (
                             LoginCommand command,
-                            ICommandHandler<LoginCommand, Task> handler,
+                            ICommandHandler<LoginCommand> handler,
                             CancellationToken cancellationToken
                             ) =>
                         {

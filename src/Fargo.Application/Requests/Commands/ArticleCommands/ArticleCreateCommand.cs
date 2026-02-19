@@ -8,27 +8,23 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
     public sealed record ArticleCreateCommand(
             ArticleCreateModel Article
-            ) : ICommand<Task<Guid>>;
+            ) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(
             ArticleService service,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
-            ) : ICommandHandler<ArticleCreateCommand, Task<Guid>>
+            ) : ICommandHandler<ArticleCreateCommand, Guid>
     {
-        private readonly ArticleService service = service;
-
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task<Guid> Handle(
                 ArticleCreateCommand command,
                 CancellationToken cancellationToken = default
                 )
         {
+            var actor = currentUser.ToActor();
+
             var article = service.CreateArticle(
-                    currentUser.ToActor(),
+                    actor,
                     command.Article.Name,
                     command.Article.Description ?? default,
                     command.Article.IsContainer

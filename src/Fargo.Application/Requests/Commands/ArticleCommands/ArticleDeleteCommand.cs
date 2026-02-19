@@ -1,24 +1,21 @@
-﻿using Fargo.Application.Extensions;
+﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
-    public sealed record ArticleDeleteCommand(Guid ArticleGuid) : ICommand<Task>;
+    public sealed record ArticleDeleteCommand(
+            Guid ArticleGuid
+            ) : ICommand;
 
     public sealed class ArticleDeleteCommandHandler(
-        ArticleService articleService,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
-        ) : ICommandHandler<ArticleDeleteCommand, Task>
+            ArticleService articleService,
+            IUnitOfWork unitOfWork,
+            ICurrentUser currentUser
+            ) : ICommandHandler<ArticleDeleteCommand>
     {
-        private readonly ArticleService articleService = articleService;
-
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
-
-        private readonly ICurrentUser currentUser = currentUser;
-
         public async Task Handle(
                 ArticleDeleteCommand command,
                 CancellationToken cancellationToken = default
@@ -26,13 +23,16 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var actor = currentUser.ToActor();
 
-            var article = await articleService.GetArticleAsync(
+            var article = await articleService.GetArticle(
                     actor,
                     command.ArticleGuid,
                     cancellationToken
-                    );
+                    )
+                ?? throw new ArticleNotFoundFargoApplicationException(
+                        command.ArticleGuid
+                        );
 
-            await articleService.DeleteArticleAsync(
+            await articleService.DeleteArticle(
                     actor,
                     article,
                     cancellationToken

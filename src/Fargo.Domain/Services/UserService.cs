@@ -12,16 +12,16 @@ namespace Fargo.Domain.Services
             IPasswordHasher passwordHasher
             )
     {
-        private readonly IUserRepository repository = repository;
+        private const string AdminGuidString = "";
 
-        private readonly IPasswordHasher passwordHasher = passwordHasher;
+        public static readonly Guid AdminGuid = new(AdminGuidString);
 
-        public async Task<User> GetUserAsync(
+        public async Task<User> GetUser(
                 Actor actor,
                 Guid userGuid,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetByGuidAsync(
+            => await repository.GetByGuid(
                     userGuid,
                     actor.PartitionGuids,
                     cancellationToken
@@ -75,21 +75,21 @@ namespace Fargo.Domain.Services
 
         public void SetPassword(
                 Actor actor,
-                User user, 
-                Password newPassword, 
+                User user,
+                Password newPassword,
                 Password currentPassword
                 )
         {
             if (actor.UserGuid != user.Guid)
             {
                 throw new UserActorSetDiferentUserPasswordException(
-                        actor, 
+                        actor,
                         user
                         );
             }
 
             var isPasswordCorrect = passwordHasher.Verify(
-                    user.PasswordHash.Value, 
+                    user.PasswordHash.Value,
                     currentPassword.Value
                     );
 

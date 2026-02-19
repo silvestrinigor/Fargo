@@ -8,19 +8,16 @@ namespace Fargo.Domain.Services
 {
     public class ItemService(IItemRepository itemRepository)
     {
-        private readonly IItemRepository itemRepository = itemRepository;
-
-        public async Task<Item> GetItemAsync(
+        public async Task<Item?> GetItem(
                 Actor actor,
                 Guid itemGuid,
                 CancellationToken cancellationToken = default
                 )
-            => await itemRepository.GetByGuidAsync(
+            => await itemRepository.GetByGuid(
                     itemGuid,
                     actor.PartitionGuids,
                     cancellationToken
-                    )
-            ?? throw new ItemNotFoundException(itemGuid);
+                    );
 
         public Item CreateItem(Actor actor, Article article)
         {
@@ -46,7 +43,7 @@ namespace Fargo.Domain.Services
                 throw new ActorNotAuthorizedException(actor, ActionType.DeleteItem);
 
             itemRepository.Remove(item);
-        } 
+        }
 
         public async Task InsertItemIntoContainerAsync(Item item, Item targetContainer)
         {

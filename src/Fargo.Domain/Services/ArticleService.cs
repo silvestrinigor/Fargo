@@ -8,19 +8,16 @@ namespace Fargo.Domain.Services
 {
     public class ArticleService(IArticleRepository repository)
     {
-        private readonly IArticleRepository repository = repository;
-
-        public async Task<Article> GetArticleAsync(
+        public async Task<Article?> GetArticle(
                 Actor actor,
                 Guid articleGuid,
                 CancellationToken cancellationToken = default
-                ) 
-            => await repository.GetByGuidAsync(
+                )
+            => await repository.GetByGuid(
                     articleGuid,
                     actor.PartitionGuids,
                     cancellationToken
-                    )
-            ?? throw new ArticleNotFoundException(articleGuid);
+                    );
 
         public Article CreateArticle(
                 Actor actor,
@@ -49,9 +46,9 @@ namespace Fargo.Domain.Services
             return article;
         }
 
-        public async Task DeleteArticleAsync(
+        public async Task DeleteArticle(
                 Actor actor,
-                Article article, 
+                Article article,
                 CancellationToken cancellationToken = default
                 )
         {
@@ -59,7 +56,7 @@ namespace Fargo.Domain.Services
             if (!actor.HasPermission(ActionType.DeleteArticle))
             {
                 throw new ActorNotAuthorizedException(
-                        actor, 
+                        actor,
                         ActionType.DeleteArticle
                         );
             }
@@ -72,7 +69,7 @@ namespace Fargo.Domain.Services
             if (hasItens)
             {
                 throw new ArticleDeleteWithItemsAssociatedException(article);
-            } 
+            }
 
             repository.Remove(article);
         }
