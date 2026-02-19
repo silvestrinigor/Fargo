@@ -2,7 +2,7 @@
 
 namespace Fargo.Domain.Repositories
 {
-    public interface IArticleRepository : IEntityByGuidRepository<Article>
+    public interface IArticleRepository
     {
         void Add(Article article);
 
@@ -11,5 +11,11 @@ namespace Fargo.Domain.Repositories
         Task<bool> HasItemsAssociated(
                 Guid articleGuid,
                 CancellationToken cancellationToken = default);
+
+        Task<Article?> GetByGuid(
+                Guid entityGuid,
+                IReadOnlyCollection<Guid> partitionGuids,
+                CancellationToken cancellationToken = default
+                );
     }
 }

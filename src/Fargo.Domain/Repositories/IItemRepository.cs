@@ -2,8 +2,14 @@
 
 namespace Fargo.Domain.Repositories
 {
-    public interface IItemRepository : IEntityByGuidRepository<Item>
+    public interface IItemRepository
     {
+        Task<Item?> GetByGuid(
+                Guid entityGuid,
+                IReadOnlyCollection<Guid> partitionGuids,
+                CancellationToken cancellationToken = default
+                );
+
         Task<bool> IsInsideContainer(
             Item item,
             Item container,

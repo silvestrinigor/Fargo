@@ -2,8 +2,14 @@
 
 namespace Fargo.Domain.Repositories
 {
-    public interface IPartitionRepository : IEntityByGuidRepository<Partition>
+    public interface IPartitionRepository
     {
+        Task<Partition?> GetByGuid(
+                Guid entityGuid,
+                IReadOnlyCollection<Guid> partitionGuids,
+                CancellationToken cancellationToken = default
+                );
+
         void Add(Partition paritition);
 
         void Remove(Partition paritition);

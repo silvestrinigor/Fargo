@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fargo.Core\Fargo.Domain.csproj" />
+    <ProjectReference Include="..\Fargo.Domain\Fargo.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

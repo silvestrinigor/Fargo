@@ -28,6 +28,20 @@ namespace Fargo.Domain.Services
                     )
             ?? throw new UserNotFoundException(userGuid);
 
+        public async Task<User?> GetUserActor(
+                int userId,
+                Password userPassword,
+                CancellationToken cancellationToken = default
+                )
+        {
+
+            var user = await repository.GetById(
+                    userId,
+                    cancellationToken
+                    );
+        }
+
+
         public User CreateUser(
                 Actor actor,
                 int id,

@@ -1,12 +1,15 @@
+using Fargo.Application.Models.AuthModels;
+
 namespace Fargo.Application.Requests.Commands.AuthCommands
 {
     public sealed record LoginCommand(
-
-            ) : ICommand;
+            int Id,
+            string Password
+            ) : ICommand<AuthResultModel>;
 
     public sealed class LoginCommandHandler(
 
-            ) : ICommandHandler<LoginCommand>
+            ) : ICommandHandler<LoginCommand, AuthResultModel>
     {
         public async Task Handle(
                 LoginCommand command,
