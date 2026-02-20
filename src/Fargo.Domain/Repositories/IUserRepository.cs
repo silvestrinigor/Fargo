@@ -6,12 +6,13 @@ namespace Fargo.Domain.Repositories
     {
         Task<User?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid> partitionGuids,
+                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );
 
         Task<User?> GetById(
                 int entityId,
+                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );
 

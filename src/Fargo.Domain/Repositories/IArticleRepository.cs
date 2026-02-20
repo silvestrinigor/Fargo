@@ -4,18 +4,19 @@ namespace Fargo.Domain.Repositories
 {
     public interface IArticleRepository
     {
-        void Add(Article article);
-
-        void Remove(Article article);
+        Task<Article?> GetByGuid(
+                Guid entityGuid,
+                IReadOnlyCollection<Guid>? partitionGuids = default,
+                CancellationToken cancellationToken = default
+                );
 
         Task<bool> HasItemsAssociated(
                 Guid articleGuid,
-                CancellationToken cancellationToken = default);
-
-        Task<Article?> GetByGuid(
-                Guid entityGuid,
-                IReadOnlyCollection<Guid> partitionGuids,
                 CancellationToken cancellationToken = default
                 );
+
+        void Add(Article article);
+
+        void Remove(Article article);
     }
 }

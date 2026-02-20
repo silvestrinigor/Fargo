@@ -6,14 +6,15 @@ namespace Fargo.Domain.Repositories
     {
         Task<Item?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid> partitionGuids,
+                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );
 
         Task<bool> IsInsideContainer(
-            Item item,
-            Item container,
-            CancellationToken cancellationToken = default);
+                Item item,
+                Item container,
+                CancellationToken cancellationToken = default
+                );
 
         void Add(Item item);
 

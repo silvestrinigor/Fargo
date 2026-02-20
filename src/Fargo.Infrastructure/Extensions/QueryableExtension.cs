@@ -5,8 +5,8 @@ namespace Fargo.Infrastructure.Extensions
     public static class QueryableExtension
     {
         public static IQueryable<TEntity> WithPagination<TEntity>(
-                Pagination pagination,
-                IQueryable<TEntity> query
+                this IQueryable<TEntity> query,
+                Pagination pagination
                 ) where TEntity : class
             => query
             .Skip(pagination.Skip)

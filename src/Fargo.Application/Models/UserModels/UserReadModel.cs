@@ -6,6 +6,7 @@ namespace Fargo.Application.Models.UserModels
             Guid Guid,
             string Name,
             string Description,
-            IReadOnlyCollection<PartitionReadModel> Partitions
+            IReadOnlyCollection<PartitionReadModel> Partitions,
+            IReadOnlyCollection<PermissionReadModel> Permissions
             ) : IEntityByGuidReadModel, IEntityTemporalReadModel, IEntityPartitionedReadModel;
 }

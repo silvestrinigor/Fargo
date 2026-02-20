@@ -2,8 +2,7 @@ using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Converters.ValueObjectsJsonConverters;
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence.Read;
-using Fargo.Infrastructure.Persistence.Write;
+using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 

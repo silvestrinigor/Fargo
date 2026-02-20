@@ -19,14 +19,6 @@ namespace Fargo.Domain.Services
                     cancellationToken
                     );
 
-        public async Task<Actor?> GetActor(
-                int UserId,
-                Password UserPassword
-                )
-        {
-
-        }
-
         public Article CreateArticle(
                 Actor actor,
                 Name name,
