@@ -37,7 +37,7 @@ builder.Services.AddDbContext<FargoReadDbContext>(opt =>
         connectionString
     ));
 
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -53,6 +53,8 @@ app.MapFargoItem();
 app.MapFargoUser();
 
 app.MapFargoPartition();
+
+app.MapFargoAuthentication();
 
 await app.Services.InitInfrastructureAsync();
 

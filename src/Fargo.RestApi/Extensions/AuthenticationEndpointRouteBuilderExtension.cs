@@ -1,3 +1,4 @@
+using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.AuthCommands;
 
@@ -13,13 +14,13 @@ namespace Fargo.HttpApi.Extensions
                         "/authentication/login",
                         async (
                             LoginCommand command,
-                            ICommandHandler<LoginCommand> handler,
+                            ICommandHandler<LoginCommand, AuthResultModel> handler,
                             CancellationToken cancellationToken
                             ) =>
                         {
-                        await handler.Handle(command, cancellationToken);
+                        var result = await handler.Handle(command, cancellationToken);
 
-                        return TypedResults.Ok();
+                        return TypedResults.Ok(result);
                         });
             }
         }

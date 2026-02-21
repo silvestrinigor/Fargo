@@ -19,7 +19,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
                 UserManyQuery query,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetManyAsync(
+            => await repository.GetMany(
                     currentUser.PartitionGuids,
                     query.TemporalAsOf,
                     query.Pagination,

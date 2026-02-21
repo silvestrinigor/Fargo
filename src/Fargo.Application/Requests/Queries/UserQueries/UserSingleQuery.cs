@@ -18,7 +18,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
                 UserSingleQuery query,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetByGuidAsync(
+            => await repository.GetByGuid(
                     query.UserGuid,
                     currentUser.PartitionGuids,
                     query.TemporalAsOf,

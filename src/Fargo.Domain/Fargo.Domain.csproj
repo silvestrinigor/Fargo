@@ -1,14 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="UnitsNet" Version="5.75.0" />
-    <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="UnitsNet" Version="5.75.0" />
+        <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.0" />
+    </ItemGroup>
 
 </Project>

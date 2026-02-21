@@ -21,7 +21,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
                 ItemManyQuery query,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetManyAsync(
+            => await repository.GetMany(
                     currentUser.PartitionGuids,
                     query.ParentItemGuid,
                     query.ArticleGuid,

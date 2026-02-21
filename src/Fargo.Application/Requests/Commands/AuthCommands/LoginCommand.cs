@@ -11,7 +11,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
 
             ) : ICommandHandler<LoginCommand, AuthResultModel>
     {
-        public async Task Handle(
+        public async Task<AuthResultModel> Handle(
                 LoginCommand command,
                 CancellationToken cancellationToken = default
                 )
