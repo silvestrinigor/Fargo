@@ -3,10 +3,10 @@ status: "draft"
 date:
 ---
 
-# <!-- short title, representative of the requirement -->
+# New System Admin User Default Name
 
 ## Statement
-The system shall.
+The main admin user id shall awais be `admin`
 
 ## Rationale
 <!-- why this requirement exists -->

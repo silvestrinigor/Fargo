@@ -3,10 +3,10 @@ status: "draft"
 date:
 ---
 
-# User Authentication by Id and Password
+# New System Main Admin User
 
 ## Statement
-The system shall authenticate user by id and password.
+The system shall create the main admin user if no user exists in the system.
 
 ## Rationale
 <!-- why this requirement exists -->

@@ -1,0 +1,21 @@
+---
+status: "draft"
+date:
+---
+
+# New System Main Administrators User Group
+
+## Statement
+The system shall create the main administrators user group if don't exists in the system.
+
+## Rationale
+<!-- why this requirement exists -->
+
+## Acceptance Criteria
+<!-- criteria that constitute success for the requirement -->
+
+## Verification Method
+Test | Analysis | Inspection | Demonstration | Other
+
+## More Information
+<!-- additional context, reference related artifacts -->
