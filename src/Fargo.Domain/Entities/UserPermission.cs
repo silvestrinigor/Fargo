@@ -2,9 +2,12 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Permission : IEntity, IEntityTemporal
+    /// <summary>
+    /// Represents a permission assigned to a user for a specific action type.
+    /// </summary>
+    public class UserPermission
     {
-        internal Permission() { }
+        internal UserPermission() { }
 
         public Guid UserGuid
         {

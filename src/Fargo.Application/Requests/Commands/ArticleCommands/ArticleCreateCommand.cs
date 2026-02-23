@@ -1,7 +1,10 @@
-﻿using Fargo.Application.Extensions;
+﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
@@ -11,9 +14,10 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
             ) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(
-            ArticleService service,
-            IUnitOfWork unitOfWork,
-            ICurrentUser currentUser
+            IArticleRepository articleRepository,
+            IUserRepository userRepository,
+            ICurrentUser currentUser,
+            IUnitOfWork unitOfWork
             ) : ICommandHandler<ArticleCreateCommand, Guid>
     {
         public async Task<Guid> Handle(
@@ -21,14 +25,25 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = currentUser.ToActor();
+            var userActor = await userRepository.GetByGuid(
+                    currentUser.UserGuid,
+                    null,
+                    cancellationToken)
+                ?? throw new UserNotFoundFargoApplicationException(currentUser.UserGuid);
 
-            var article = service.CreateArticle(
-                    actor,
-                    command.Article.Name,
-                    command.Article.Description ?? default,
-                    command.Article.IsContainer
-                    );
+            if(!PermissionService.HasPermission(
+                        userActor, ActionType.CreateArticle))
+                throw new UserNotHavePermissionFargoApplicationException(
+                        userActor.Guid, ActionType.CreateArticle);
+
+            var article = new Article
+            {
+                Name = command.Article.Name,
+                Description = command.Article.Description ?? default,
+                IsContainer = command.Article.IsContainer
+            };
+
+            articleRepository.Add(article);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

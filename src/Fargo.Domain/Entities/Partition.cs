@@ -3,7 +3,6 @@
 namespace Fargo.Domain.Entities
 {
     public class Partition
-        : IEntity, IEntityByGuid, IEntityTemporal, IEntityPartitioned
     {
         public required Name Name
         {

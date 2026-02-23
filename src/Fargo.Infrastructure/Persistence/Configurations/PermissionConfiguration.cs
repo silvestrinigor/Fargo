@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations
 {
-    internal class PermissionConfiguration : IEntityTypeConfiguration<Permission>
+    internal class PermissionConfiguration : IEntityTypeConfiguration<UserPermission>
     {
-        public void Configure(EntityTypeBuilder<Permission> builder)
+        public void Configure(EntityTypeBuilder<UserPermission> builder)
         {
             builder
                 .ToTable(t => t.IsTemporal());

@@ -10,10 +10,16 @@ namespace Fargo.Domain.Entities
             init;
         } = Guid.NewGuid();
 
-        public required Name Name
+        public Name Name
         {
             get;
-            set;
+            private set;
+        }
+
+        public void SetName(Name name, User updatedBy)
+        {
+            Name = name;
+            UpdatedByUser = updatedBy;
         }
 
         public Description Description
@@ -21,6 +27,12 @@ namespace Fargo.Domain.Entities
             get;
             set;
         } = Description.Empty;
+
+        public void SetDescription(Description description, User updatedBy)
+        {
+            Description = description;
+            UpdatedByUser = updatedBy;
+        }
 
         public bool IsContainer
         {
@@ -31,5 +43,21 @@ namespace Fargo.Domain.Entities
         public IReadOnlyCollection<Partition> Partitions => partitions;
 
         private readonly HashSet<Partition> partitions = [];
+
+        public Guid UpdatedByUserGuid
+        {
+            get;
+            private set;
+        }
+
+        public required User UpdatedByUser
+        {
+            get;
+            set
+            {
+                UpdatedByUserGuid = value.Guid;
+                field = value;
+            }
+        }
     }
 }

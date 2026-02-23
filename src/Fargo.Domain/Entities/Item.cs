@@ -3,7 +3,6 @@
 namespace Fargo.Domain.Entities
 {
     public class Item
-        : IEntity, IEntityByGuid, IEntityTemporal, IEntityPartitioned
     {
         public Guid Guid
         {
