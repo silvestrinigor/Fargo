@@ -6,7 +6,7 @@ date:
 # New System Admin User Default Password
 
 ## Statement
-The system shall set the default main admin user password from envirements variables.
+The system shall set the main admin user password from envirements variables main admin user default password information.
 
 ## Rationale
 <!-- why this requirement exists -->

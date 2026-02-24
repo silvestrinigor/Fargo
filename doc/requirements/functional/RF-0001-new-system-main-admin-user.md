@@ -6,7 +6,7 @@ date:
 # New System Main Admin User
 
 ## Statement
-The system shall create the main admin user if no user exists in the system.
+The system shall create the main admin user if don't exists in the system.
 
 ## Rationale
 <!-- why this requirement exists -->
