@@ -1,3 +1,4 @@
+using Fargo.Domain.Enums;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
@@ -7,44 +8,84 @@ namespace Fargo.Domain.Entities;
 /// </summary>
 public class UserGroup
 {
-        internal UserGroup() { }
+    /// <summary>
+    /// Gets the unique identifier (GUID) for the user.
+    /// </summary>
+    public Guid Guid
+    {
+        get;
+        init;
+    } = Guid.NewGuid();
 
-        /// <summary>
-        /// Gets the unique identifier (GUID) for the user group.
-        /// </summary>
-        public Guid Guid
+    /// <summary>
+    /// Gets or sets the unique identifier (NAMEID) of the user.
+    /// </summary>
+    public required Nameid Name
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the description of the user group.
+    /// </summary>
+    public Description Description
+    {
+        get;
+        set;
+    } = Description.Empty;
+
+    public IReadOnlyCollection<UserGroupPermission> Permissions => permissions;
+
+    private readonly List<UserGroupPermission> permissions = [];
+
+    public void AddPermission(ActionType action)
+    {
+        if (permissions.Any(p => p.ActionType == action))
+            return;
+
+        var permissionToAdd = new UserGroupPermission
         {
-            get;
-            init;
-        } = Guid.NewGuid();
+            UserGroup = this,
+            ActionType = action
+        };
 
-        /// <summary>
-        /// Gets or sets the name of the user group.
-        /// </summary>
-        public required Name Name
-        {
-            get;
-            set;
-        }
+        permissions.Add(permissionToAdd);
+    }
 
-        /// <summary>
-        /// Gets or sets the description of the user group.
-        /// </summary>
-        public Description Description
-        {
-            get;
-            set;
-        } = Description.Empty;
+    public void RemovePermission(ActionType action)
+    {
+        var permissionToRemove = permissions.SingleOrDefault(p => p.ActionType == action);
 
-        /// <summary>
-        /// Gets the collection of permissions associated with the user group.
-        /// </summary>
-        public IReadOnlyCollection<UserPermission> Permissions => permissions;
-        private readonly List<UserPermission> permissions = [];
+        if (permissionToRemove is null)
+            return;
 
-        /// <summary>
-        /// Gets the collection of users that are members of this user group.
-        /// </summary>
-        public IReadOnlyCollection<User> Users => users;
-        private readonly List<User> users = [];
+        permissions.Remove(permissionToRemove);
+    }
+
+    public IReadOnlyCollection<User> Users => users;
+
+    private readonly List<User> users = [];
+
+    public void AddUser(User user)
+    {
+        if (users.Contains(user))
+            return;
+
+        users.Add(user);
+    }
+
+    public void RemoveUser(User user)
+    {
+        if (!users.Contains(user))
+            return;
+
+        users.Remove(user);
+    }
+
+    public PartitionCollection Partitions
+    {
+        get;
+        init;
+    } = [];
 }

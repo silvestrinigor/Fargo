@@ -22,7 +22,6 @@ namespace Fargo.Domain.Entities
             init
             {
                 ArticleGuid = value.Guid;
-
                 field = value;
             }
         }
@@ -50,8 +49,10 @@ namespace Fargo.Domain.Entities
             }
         } = null;
 
-        private readonly HashSet<Partition> partitions = [];
-
-        public IReadOnlyCollection<Partition> Partitions => partitions;
+        public PartitionCollection Partitions
+        {
+            get;
+            init;
+        } = [];
     }
 }

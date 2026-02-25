@@ -4,6 +4,12 @@ namespace Fargo.Domain.Entities
 {
     public class Partition
     {
+        public Guid Guid
+        {
+            get;
+            init;
+        } = Guid.NewGuid();
+
         public required Name Name
         {
             get;
@@ -16,42 +22,84 @@ namespace Fargo.Domain.Entities
             set;
         } = Description.Empty;
 
-        public Guid Guid
-        {
-            get;
-            init;
-        } = Guid.NewGuid();
+        public IReadOnlyCollection<User> UsersWithAccess => usersWithAccess;
 
-        private readonly HashSet<Article> articles = [];
+        private readonly List<User> usersWithAccess = [];
+
+        public void AddUserAccess(User user)
+        {
+            if(usersWithAccess.Contains(user))
+                return;
+
+            usersWithAccess.Add(user);
+        }
+
+        public void RemoveUserAccess(User user)
+        {
+            if(!usersWithAccess.Contains(user))
+                return;
+
+            usersWithAccess.Remove(user);
+        }
 
         public IReadOnlyCollection<Article> Articles => articles;
 
-        public bool AddArticle(Article article)
+        private readonly List<Article> articles = [];
+
+        public void AddArticle(Article article)
         {
-            return articles.Add(article);
+            if(articles.Contains(article))
+                return;
+
+            articles.Add(article);
         }
 
-        public bool RemoveArticle(Article article)
+        public void RemoveArticle(Article article)
         {
-            return articles.Remove(article);
+            if(!articles.Contains(article))
+                return;
+
+            articles.Remove(article);
         }
 
-        public readonly HashSet<User> userAccesses = [];
+        public IReadOnlyCollection<Item> Items => items;
 
-        public IReadOnlyCollection<User> UserAccesses => userAccesses;
+        private readonly List<Item> items = [];
 
-        public bool AddUserAccess(User user)
+        public void AddItem(Item item)
         {
-            return userAccesses.Add(user);
+            if(items.Contains(item))
+                return;
+
+            items.Add(item);
         }
 
-        public bool RemoveUserAccess(User user)
+        public void RemoveItem(Item item)
         {
-            return userAccesses.Remove(user);
+            if(!items.Contains(item))
+                return;
+
+            items.Remove(item);
         }
 
-        private readonly HashSet<Partition> partitions = [];
+        public IReadOnlyCollection<User> Users => users;
 
-        public IReadOnlyCollection<Partition> Partitions => partitions;
+        private readonly List<User> users = [];
+
+        public void AddUser(User user)
+        {
+            if(users.Contains(user))
+                return;
+
+            users.Add(user);
+        }
+
+        public void RemoveUser(User user)
+        {
+            if(!users.Contains(user))
+                return;
+
+            users.Remove(user);
+        }
     }
 }

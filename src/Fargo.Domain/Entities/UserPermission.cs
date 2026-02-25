@@ -30,11 +30,5 @@ namespace Fargo.Domain.Entities
             get;
             init;
         }
-
-        public GrantType GrantType
-        {
-            get;
-            internal set;
-        } = GrantType.Denied;
     }
 }
