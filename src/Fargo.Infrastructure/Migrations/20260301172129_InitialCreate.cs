@@ -12,6 +12,38 @@ namespace Fargo.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Nameid = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    Permissions = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
+                        .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
+                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
+                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedByUserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Guid);
+                    table.UniqueConstraint("AK_Users_Nameid", x => x.Nameid);
+                    table.ForeignKey(
+                        name: "FK_Users_Users_UpdatedByUserGuid",
+                        column: x => x.UpdatedByUserGuid,
+                        principalTable: "Users",
+                        principalColumn: "Guid");
+                })
+                .Annotation("SqlServer:IsTemporal", true)
+                .Annotation("SqlServer:TemporalHistoryTableName", "UsersHistory")
+                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+            migrationBuilder.CreateTable(
                 name: "Articles",
                 columns: table => new
                 {
@@ -22,60 +54,21 @@ namespace Fargo.Infrastructure.Migrations
                     PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
                         .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
                     PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
+                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedByUserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Articles", x => x.Guid);
+                    table.ForeignKey(
+                        name: "FK_Articles_Users_UpdatedByUserGuid",
+                        column: x => x.UpdatedByUserGuid,
+                        principalTable: "Users",
+                        principalColumn: "Guid");
                 })
                 .Annotation("SqlServer:IsTemporal", true)
                 .Annotation("SqlServer:TemporalHistoryTableName", "ArticlesHistory")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-            migrationBuilder.CreateTable(
-                name: "Partitions",
-                columns: table => new
-                {
-                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
-                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Partitions", x => x.Guid);
-                })
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "PartitionsHistory")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
-                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Guid);
-                    table.UniqueConstraint("AK_Users_Id", x => x.Id);
-                })
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "UsersHistory")
                 .Annotation("SqlServer:TemporalHistoryTableSchema", null)
                 .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
                 .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
@@ -90,7 +83,9 @@ namespace Fargo.Infrastructure.Migrations
                     PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
                         .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
                     PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
+                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedByUserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -106,6 +101,11 @@ namespace Fargo.Infrastructure.Migrations
                         column: x => x.ParentItemGuid,
                         principalTable: "Items",
                         principalColumn: "Guid");
+                    table.ForeignKey(
+                        name: "FK_Items_Users_UpdatedByUserGuid",
+                        column: x => x.UpdatedByUserGuid,
+                        principalTable: "Users",
+                        principalColumn: "Guid");
                 })
                 .Annotation("SqlServer:IsTemporal", true)
                 .Annotation("SqlServer:TemporalHistoryTableName", "ItemsHistory")
@@ -114,70 +114,62 @@ namespace Fargo.Infrastructure.Migrations
                 .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
 
             migrationBuilder.CreateTable(
-                name: "ArticlePartition",
+                name: "Partitions",
                 columns: table => new
                 {
-                    ArticlesGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PartitionGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ArticleGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ItemGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
                         .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
                     PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
+                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true),
+                    UserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserGuid1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedByUserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ArticlePartition", x => new { x.ArticlesGuid, x.PartitionGuid });
+                    table.PrimaryKey("PK_Partitions", x => x.Guid);
                     table.ForeignKey(
-                        name: "FK_ArticlePartition_Articles_ArticlesGuid",
-                        column: x => x.ArticlesGuid,
+                        name: "FK_Partitions_Articles_ArticleGuid",
+                        column: x => x.ArticleGuid,
                         principalTable: "Articles",
-                        principalColumn: "Guid",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Guid");
                     table.ForeignKey(
-                        name: "FK_ArticlePartition_Partitions_PartitionGuid",
-                        column: x => x.PartitionGuid,
-                        principalTable: "Partitions",
-                        principalColumn: "Guid",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "ArticlePartitionHistory")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-            migrationBuilder.CreateTable(
-                name: "Permission",
-                columns: table => new
-                {
-                    UserGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActionType = table.Column<int>(type: "int", nullable: false),
-                    GrantType = table.Column<byte>(type: "tinyint", nullable: false),
-                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
-                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Permission", x => new { x.UserGuid, x.ActionType });
+                        name: "FK_Partitions_Items_ItemGuid",
+                        column: x => x.ItemGuid,
+                        principalTable: "Items",
+                        principalColumn: "Guid");
                     table.ForeignKey(
-                        name: "FK_Permission_Users_UserGuid",
+                        name: "FK_Partitions_Users_UpdatedByUserGuid",
+                        column: x => x.UpdatedByUserGuid,
+                        principalTable: "Users",
+                        principalColumn: "Guid");
+                    table.ForeignKey(
+                        name: "FK_Partitions_Users_UserGuid",
                         column: x => x.UserGuid,
                         principalTable: "Users",
-                        principalColumn: "Guid",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Guid");
+                    table.ForeignKey(
+                        name: "FK_Partitions_Users_UserGuid1",
+                        column: x => x.UserGuid1,
+                        principalTable: "Users",
+                        principalColumn: "Guid");
                 })
                 .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "PermissionHistory")
+                .Annotation("SqlServer:TemporalHistoryTableName", "PartitionsHistory")
                 .Annotation("SqlServer:TemporalHistoryTableSchema", null)
                 .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
                 .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ArticlePartition_PartitionGuid",
-                table: "ArticlePartition",
-                column: "PartitionGuid");
+                name: "IX_Articles_UpdatedByUserGuid",
+                table: "Articles",
+                column: "UpdatedByUserGuid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Items_ArticleGuid",
@@ -188,15 +180,50 @@ namespace Fargo.Infrastructure.Migrations
                 name: "IX_Items_ParentItemGuid",
                 table: "Items",
                 column: "ParentItemGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_UpdatedByUserGuid",
+                table: "Items",
+                column: "UpdatedByUserGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partitions_ArticleGuid",
+                table: "Partitions",
+                column: "ArticleGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partitions_ItemGuid",
+                table: "Partitions",
+                column: "ItemGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partitions_UpdatedByUserGuid",
+                table: "Partitions",
+                column: "UpdatedByUserGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partitions_UserGuid",
+                table: "Partitions",
+                column: "UserGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partitions_UserGuid1",
+                table: "Partitions",
+                column: "UserGuid1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_UpdatedByUserGuid",
+                table: "Users",
+                column: "UpdatedByUserGuid");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ArticlePartition")
+                name: "Partitions")
                 .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "ArticlePartitionHistory")
+                .Annotation("SqlServer:TemporalHistoryTableName", "PartitionsHistory")
                 .Annotation("SqlServer:TemporalHistoryTableSchema", null)
                 .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
                 .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
@@ -205,22 +232,6 @@ namespace Fargo.Infrastructure.Migrations
                 name: "Items")
                 .Annotation("SqlServer:IsTemporal", true)
                 .Annotation("SqlServer:TemporalHistoryTableName", "ItemsHistory")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-            migrationBuilder.DropTable(
-                name: "Permission")
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "PermissionHistory")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-            migrationBuilder.DropTable(
-                name: "Partitions")
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "PartitionsHistory")
                 .Annotation("SqlServer:TemporalHistoryTableSchema", null)
                 .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
                 .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");

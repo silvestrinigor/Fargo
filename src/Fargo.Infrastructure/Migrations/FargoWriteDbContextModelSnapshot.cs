@@ -22,42 +22,6 @@ namespace Fargo.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ArticlePartition", b =>
-                {
-                    b.Property<Guid>("ArticlesGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
-                    b.HasKey("ArticlesGuid", "PartitionGuid");
-
-                    b.HasIndex("PartitionGuid");
-
-                    b.ToTable("ArticlePartition");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("ArticlePartitionHistory");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
             modelBuilder.Entity("Fargo.Domain.Entities.Article", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -87,7 +51,15 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserGuid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Guid");
+
+                    b.HasIndex("UpdatedByUserGuid");
 
                     b.ToTable("Articles");
 
@@ -125,11 +97,19 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserGuid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Guid");
 
                     b.HasIndex("ArticleGuid");
 
                     b.HasIndex("ParentItemGuid");
+
+                    b.HasIndex("UpdatedByUserGuid");
 
                     b.ToTable("Items");
 
@@ -151,10 +131,16 @@ namespace Fargo.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ArticleGuid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("ItemGuid")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -171,50 +157,35 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserGuid1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Guid");
+
+                    b.HasIndex("ArticleGuid");
+
+                    b.HasIndex("ItemGuid");
+
+                    b.HasIndex("UpdatedByUserGuid");
+
+                    b.HasIndex("UserGuid");
+
+                    b.HasIndex("UserGuid1");
 
                     b.ToTable("Partitions");
 
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
                                 ttb.UseHistoryTable("PartitionsHistory");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
-            modelBuilder.Entity("Fargo.Domain.Entities.Permission", b =>
-                {
-                    b.Property<Guid>("UserGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("ActionType")
-                        .HasColumnType("int");
-
-                    b.Property<byte>("GrantType")
-                        .HasColumnType("tinyint");
-
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
-                    b.HasKey("UserGuid", "ActionType");
-
-                    b.ToTable("Permission");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("PermissionHistory");
                                 ttb
                                     .HasPeriodStart("PeriodStart")
                                     .HasColumnName("PeriodStart");
@@ -235,13 +206,15 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Nameid")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<DateTime>("PeriodEnd")
                         .ValueGeneratedOnAddOrUpdate()
@@ -253,9 +226,21 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
 
+                    b.PrimitiveCollection<string>("Permissions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserGuid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Guid");
 
-                    b.HasAlternateKey("Id");
+                    b.HasAlternateKey("Nameid");
+
+                    b.HasIndex("UpdatedByUserGuid");
 
                     b.ToTable("Users");
 
@@ -271,19 +256,13 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("ArticlePartition", b =>
+            modelBuilder.Entity("Fargo.Domain.Entities.Article", b =>
                 {
-                    b.HasOne("Fargo.Domain.Entities.Article", null)
+                    b.HasOne("Fargo.Domain.Entities.User", "UpdatedBy")
                         .WithMany()
-                        .HasForeignKey("ArticlesGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UpdatedByUserGuid");
 
-                    b.HasOne("Fargo.Domain.Entities.Partition", null)
-                        .WithMany()
-                        .HasForeignKey("PartitionGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Fargo.Domain.Entities.Item", b =>
@@ -298,25 +277,66 @@ namespace Fargo.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ParentItemGuid");
 
+                    b.HasOne("Fargo.Domain.Entities.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserGuid");
+
                     b.Navigation("Article");
 
                     b.Navigation("ParentItem");
+
+                    b.Navigation("UpdatedBy");
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Entities.Permission", b =>
+            modelBuilder.Entity("Fargo.Domain.Entities.Partition", b =>
                 {
-                    b.HasOne("Fargo.Domain.Entities.User", "User")
-                        .WithMany("Permissions")
-                        .HasForeignKey("UserGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Fargo.Domain.Entities.Article", null)
+                        .WithMany("Partitions")
+                        .HasForeignKey("ArticleGuid");
 
-                    b.Navigation("User");
+                    b.HasOne("Fargo.Domain.Entities.Item", null)
+                        .WithMany("Partitions")
+                        .HasForeignKey("ItemGuid");
+
+                    b.HasOne("Fargo.Domain.Entities.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserGuid");
+
+                    b.HasOne("Fargo.Domain.Entities.User", null)
+                        .WithMany("Partitions")
+                        .HasForeignKey("UserGuid");
+
+                    b.HasOne("Fargo.Domain.Entities.User", null)
+                        .WithMany("PartitionsAccesses")
+                        .HasForeignKey("UserGuid1");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Fargo.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Permissions");
+                    b.HasOne("Fargo.Domain.Entities.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserGuid");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Fargo.Domain.Entities.Article", b =>
+                {
+                    b.Navigation("Partitions");
+                });
+
+            modelBuilder.Entity("Fargo.Domain.Entities.Item", b =>
+                {
+                    b.Navigation("Partitions");
+                });
+
+            modelBuilder.Entity("Fargo.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Partitions");
+
+                    b.Navigation("PartitionsAccesses");
                 });
 #pragma warning restore 612, 618
         }

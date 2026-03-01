@@ -30,6 +30,8 @@ namespace Fargo.Infrastructure.Persistence.Configurations
 
             builder
                 .HasIndex(x => x.ArticleGuid);
+
+            builder.HasOne(x => x.UpdatedBy).WithMany().HasForeignKey(x => x.UpdatedByUserGuid);
         }
     }
 }
