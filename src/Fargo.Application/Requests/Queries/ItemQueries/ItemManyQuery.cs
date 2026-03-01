@@ -22,7 +22,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
                 CancellationToken cancellationToken = default
                 )
             => await repository.GetMany(
-                    currentUser.PartitionGuids,
+                    [],
                     query.ParentItemGuid,
                     query.ArticleGuid,
                     query.TemporalAsOf,

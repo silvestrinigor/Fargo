@@ -12,15 +12,11 @@ namespace Fargo.Infrastructure.Persistence.Configurations
 
             builder.HasKey(x => x.Guid);
 
-            builder.HasAlternateKey(x => x.Id);
+            builder.HasAlternateKey(x => x.Nameid);
 
             builder
-                .Property(x => x.Name)
+                .Property(x => x.Nameid)
                 .IsRequired();
-
-            builder
-                .HasMany(x => x.Permissions)
-                .WithOne(x => x.User);
 
             builder
                 .Property(x => x.Description)

@@ -1,12 +1,14 @@
 ﻿using Fargo.Application.Models.PartitionModels;
+using Fargo.Domain.Enums;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Models.UserModels
 {
     public sealed record UserReadModel(
             Guid Guid,
-            string Name,
-            string Description,
+            Nameid Nameid,
+            Description Description,
             IReadOnlyCollection<PartitionReadModel> Partitions,
-            IReadOnlyCollection<PermissionReadModel> Permissions
-            ) : IEntityByGuidReadModel, IEntityTemporalReadModel, IEntityPartitionedReadModel;
+            IReadOnlyCollection<ActionType> Permissions
+            );
 }

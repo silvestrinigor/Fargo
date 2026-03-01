@@ -11,7 +11,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
             ) : IQuery<IEnumerable<ArticleReadModel>>;
 
     public sealed class ArticleManyQueryHandler(
-            IArticleReadRepository repository,
+            IArticleReadRepository articleRepository,
             ICurrentUser currentUser
             )
         : IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>>
@@ -20,11 +20,13 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
                 ArticleManyQuery query,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetMany(
-                    currentUser.PartitionGuids,
+        {
+            return await articleRepository.GetMany(
+                    [],
                     query.AsOfDateTime,
                     query.Pagination,
                     cancellationToken
                     );
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Repositories
 {
@@ -10,8 +11,8 @@ namespace Fargo.Domain.Repositories
                 CancellationToken cancellationToken = default
                 );
 
-        Task<User?> GetById(
-                int entityId,
+        Task<User?> GetByNameid(
+                Nameid nameid,
                 IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );

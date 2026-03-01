@@ -37,8 +37,6 @@ namespace Fargo.Infrastructure.Persistence
 
             modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-            modelBuilder.ApplyConfiguration(new PermissionConfiguration());
-
             modelBuilder.ApplyConfiguration(new PartitionConfiguration());
         }
     }

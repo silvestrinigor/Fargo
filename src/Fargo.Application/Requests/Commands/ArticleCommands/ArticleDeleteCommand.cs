@@ -1,8 +1,8 @@
 ﻿using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services;
+using Fargo.Domain.Services.ArticleServices;
+using Fargo.Domain.Services.UserServices;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
@@ -11,7 +11,9 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
             ) : ICommand;
 
     public sealed class ArticleDeleteCommandHandler(
-            ArticleService articleService,
+            ArticleDeteleService articleDeteleService,
+            ArticleGetService articleGetService,
+            ActorGetService actorGetService,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<ArticleDeleteCommand>
@@ -21,22 +23,18 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = currentUser.ToActor();
+            var actor = await actorGetService.GetActor(
+                    currentUser.UserGuid,
+                    cancellationToken
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var article = await articleService.GetArticle(
+            var article = await articleGetService.GetArticle(
                     actor,
                     command.ArticleGuid,
                     cancellationToken
-                    )
-                ?? throw new ArticleNotFoundFargoApplicationException(
-                        command.ArticleGuid
-                        );
+                    ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
-            await articleService.DeleteArticle(
-                    actor,
-                    article,
-                    cancellationToken
-                    );
+            await articleDeteleService.DeleteArticle(actor, article, cancellationToken);
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

@@ -1,7 +1,7 @@
 namespace Fargo.Application.Models.AuthModels
 {
-    public record AuthResultModel(
+    public record AuthResult(
             string AccessToken,
-            DateTime ExpiresAt
+            DateTimeOffset ExpiresAt
             );
 }

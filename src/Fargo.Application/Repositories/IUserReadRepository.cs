@@ -18,12 +18,5 @@ namespace Fargo.Application.Repositories
                     Pagination pagination = default,
                     CancellationToken cancellationToken = default
                     );
-
-            Task<IReadOnlyCollection<PermissionReadModel>?> GetUserPermissions(
-                    Guid userGuid,
-                    DateTime? asOfDateTime = null,
-                    Pagination pagination = default,
-                    CancellationToken cancellationToken = default
-                    );
         }
 }

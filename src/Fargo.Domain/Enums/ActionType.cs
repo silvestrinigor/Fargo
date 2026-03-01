@@ -7,6 +7,8 @@
         CreateItem,
         DeleteItem,
         CreateUser,
-        DeleteUser
+        DeleteUser,
+        CreatePartition,
+        DeletePartition
     }
 }

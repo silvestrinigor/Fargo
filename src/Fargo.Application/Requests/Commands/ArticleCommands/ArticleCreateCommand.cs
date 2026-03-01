@@ -2,10 +2,8 @@
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
+using Fargo.Domain.Services.ArticleServices;
+using Fargo.Domain.Services.UserServices;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
@@ -14,8 +12,8 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
             ) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(
-            IArticleRepository articleRepository,
-            IUserRepository userRepository,
+            ArticleCreateService articleCreateService,
+            ActorGetService actorGetService,
             ICurrentUser currentUser,
             IUnitOfWork unitOfWork
             ) : ICommandHandler<ArticleCreateCommand, Guid>
@@ -25,25 +23,16 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var userActor = await userRepository.GetByGuid(
+            var actor = await actorGetService.GetActor(
                     currentUser.UserGuid,
-                    null,
-                    cancellationToken)
-                ?? throw new UserNotFoundFargoApplicationException(currentUser.UserGuid);
+                    cancellationToken
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            if(!PermissionService.HasPermission(
-                        userActor, ActionType.CreateArticle))
-                throw new UserNotHavePermissionFargoApplicationException(
-                        userActor.Guid, ActionType.CreateArticle);
-
-            var article = new Article
-            {
-                Name = command.Article.Name,
-                Description = command.Article.Description ?? default,
-                IsContainer = command.Article.IsContainer
-            };
-
-            articleRepository.Add(article);
+            var article = articleCreateService.CreateArticle(
+                    actor,
+                    command.Article.Name,
+                    command.Article.IsContainer
+                    );
 
             await unitOfWork.SaveChanges(cancellationToken);
 

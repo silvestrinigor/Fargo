@@ -1,6 +1,6 @@
 <Solution>
     <Project Path="src/Fargo.AppHost/Fargo.AppHost.csproj" />
-    <Project Path="src/Fargo.RestApi/Fargo.HttpApi.csproj" />
+    <Project Path="src/Fargo.HttpApi/Fargo.HttpApi.csproj" />
     <Project Path="src/Fargo.ServiceDefaults/Fargo.ServiceDefaults.csproj" />
     <Project Path="src/Fargo.Web/Fargo.Web.csproj" />
     <Project Path="src/Fargo.Application/Fargo.Application.csproj" />

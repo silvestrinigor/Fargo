@@ -1,9 +1,11 @@
-﻿namespace Fargo.Application.Models.PartitionModels
+﻿using Fargo.Domain.ValueObjects;
+
+namespace Fargo.Application.Models.PartitionModels
 {
     public sealed record PartitionReadModel(
             Guid Guid,
-            string Name,
-            string Description,
+            Name Name,
+            Description Description,
             IReadOnlyCollection<PartitionReadModel> Partitions
-            ) : IEntityByGuidReadModel, IEntityTemporalReadModel, IEntityPartitionedReadModel;
+            );
 }

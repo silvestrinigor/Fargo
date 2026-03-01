@@ -20,7 +20,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 )
             => await partitions
             .Where(a =>
-                    a.Guid == entityGuid &&
+                    a.Guid == entityGuid
                   )
             .SingleOrDefaultAsync(cancellationToken);
 

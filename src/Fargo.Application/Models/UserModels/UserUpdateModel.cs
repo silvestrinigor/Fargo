@@ -3,7 +3,7 @@
 namespace Fargo.Application.Models.UserModels
 {
     public sealed record UserUpdateModel(
-            Name? Name = null,
+            Nameid? Nameid = null,
             Description? Description = null,
             UserPasswordUpdateModel? Password = null
             );

@@ -1,31 +1,36 @@
-﻿using Fargo.Application.Extensions;
+﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services;
+using Fargo.Domain.Services.UserServices;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
     public sealed record UserDeleteCommand(
-        Guid UserGuid
-        ) : ICommand;
+            Guid UserGuid
+            ) : ICommand;
 
     public sealed class UserDeleteCommandHandler(
-        UserService service,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
-        ) : ICommandHandler<UserDeleteCommand>
+            UserDeleteService userDeleteService,
+            UserGetService userGetService,
+            ActorGetService actorGetService,
+            IUnitOfWork unitOfWork,
+            ICurrentUser currentUser
+            ) : ICommandHandler<UserDeleteCommand>
     {
         public async Task Handle(UserDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var actor = currentUser.ToActor();
+            var actor = await actorGetService.GetActor(
+                    currentUser.UserGuid,
+                    cancellationToken
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var user = await service.GetUser(
+            var user = await userGetService.GetUser(
                     actor,
                     command.UserGuid,
                     cancellationToken
-                    );
+                    ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
-            service.DeleteUser(actor, user);
+            userDeleteService.DeleteUser(actor, user);
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

@@ -15,8 +15,6 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<UserReadModel> Users { get; set; }
 
-        public DbSet<PermissionReadModel> Permissions { get; set; }
-
         public DbSet<PartitionReadModel> Partitions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,8 +24,6 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ItemReadModelConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserReadModelConfiguration());
-
-            modelBuilder.ApplyConfiguration(new PermissionReadModelConfiguration());
 
             modelBuilder.ApplyConfiguration(new PartitionReadModelConfiguration());
         }

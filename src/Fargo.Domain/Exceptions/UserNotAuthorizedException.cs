@@ -1,17 +1,16 @@
 using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Exceptions
 {
-    public class ActorNotAuthorizedException(
-            Actor actor,
+    public class UserNotAuthorizedException(
+            Guid userGuid,
             ActionType action
             ) : FargoException
     {
-        public Actor Actor
+        public Guid UserGuid
         {
             get;
-        } = actor;
+        } = userGuid;
 
         public ActionType ActionType
         {

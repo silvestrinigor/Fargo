@@ -5,6 +5,6 @@ namespace Fargo.Application.Security
 {
     public interface ITokenGenerator
     {
-        AuthResultModel Generate(User user);
+        AuthResult Generate(User user);
     }
 }

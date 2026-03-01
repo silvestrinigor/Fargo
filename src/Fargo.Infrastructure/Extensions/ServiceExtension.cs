@@ -16,7 +16,6 @@ using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
-using Fargo.Domain.Services;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Security;
@@ -26,6 +25,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Fargo.Application.Security;
+using Fargo.Domain.Services.ArticleServices;
+using Fargo.Domain.Services.ItemServices;
+using Fargo.Domain.Services.PartitionServices;
+using Fargo.Domain.Services.UserServices;
 
 namespace Fargo.Infrastructure.Extensions
 {
@@ -52,24 +56,14 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
                 services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
-                services.AddScoped<ICommandHandler<UserPermissionUpdateCommand>, UserPermissionUpdateCommandHandler>();
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserReadModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>>, UserManyQueryHandler>();
-                services.AddScoped<IQueryHandler<UserPermissionManyQuery, IEnumerable<PermissionReadModel>?>, UserPermissionAllQueryHandler>();
 
                 services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
                 services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
                 services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionReadModel?>, PartitionSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<PartitionManyQuery, IEnumerable<PartitionReadModel>>, PartitionManyQueryHandler>();
-
-                services.AddScoped<ArticleService>();
-
-                services.AddScoped<ItemService>();
-
-                services.AddScoped<UserService>();
-
-                services.AddScoped<PartitionService>();
 
                 services.AddScoped<IArticleRepository, ArticleRepository>();
                 services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
@@ -84,6 +78,32 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IPartitionRepository, PartitionRepository>();
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
+
+                services.AddScoped<ArticleCreateService>();
+
+                services.AddScoped<ArticleDeteleService>();
+
+                services.AddScoped<ArticleGetService>();
+
+                services.AddScoped<ItemCreateService>();
+
+                services.AddScoped<ItemDeleteService>();
+
+                services.AddScoped<ItemGetService>();
+
+                services.AddScoped<PartitionCreateService>();
+
+                services.AddScoped<PartitionDeleteService>();
+
+                services.AddScoped<PartitionGetService>();
+
+                services.AddScoped<UserCreateService>();
+
+                services.AddScoped<UserDeleteService>();
+
+                services.AddScoped<UserGetService>();
+
+                services.AddScoped<ActorGetService>();
 
                 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
@@ -103,6 +123,10 @@ namespace Fargo.Infrastructure.Extensions
                             });
 
                 services.AddAuthorization();
+
+                services.AddHttpContextAccessor();
+
+                services.AddScoped<ICurrentUser, CurrentUser>();
 
                 return services;
             }

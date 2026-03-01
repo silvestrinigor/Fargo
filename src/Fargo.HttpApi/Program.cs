@@ -20,7 +20,6 @@ builder.Services.AddAuthorization();
 
 builder.AddServiceDefaults();
 
-
 builder.Services.AddOpenApi();
 
 builder.Services.AddProblemDetails();

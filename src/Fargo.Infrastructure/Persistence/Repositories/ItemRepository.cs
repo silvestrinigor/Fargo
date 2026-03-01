@@ -46,7 +46,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 )
             => await items
             .Where(a =>
-                    a.Guid == entityGuid &&
+                    a.Guid == entityGuid
                   )
             .SingleOrDefaultAsync(cancellationToken);
     }

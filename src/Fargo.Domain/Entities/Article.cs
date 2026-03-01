@@ -2,18 +2,12 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Article
+    public class Article : AuditedEntity
     {
-        public Guid Guid
+        public required Name Name
         {
             get;
-            init;
-        } = Guid.NewGuid();
-
-        public Name Name
-        {
-            get;
-            private set;
+            set;
         }
 
         public Description Description
@@ -28,7 +22,7 @@ namespace Fargo.Domain.Entities
             init;
         } = false;
 
-        public PartitionCollection Partitions
+        public HashSet<Partition> Partitions
         {
             get;
             init;

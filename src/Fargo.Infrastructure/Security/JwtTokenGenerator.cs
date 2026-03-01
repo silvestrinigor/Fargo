@@ -11,7 +11,7 @@ namespace Fargo.Infrastructure.Security;
 
 public class JwtTokenGenerator(IConfiguration configuration) : ITokenGenerator
 {
-    public AuthResultModel Generate(User user)
+    public AuthResult Generate(User user)
     {
         var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
@@ -23,7 +23,7 @@ public class JwtTokenGenerator(IConfiguration configuration) : ITokenGenerator
 
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Nameid),
         };
 
         var expiresAt = DateTime.UtcNow.AddHours(2);
@@ -36,7 +36,7 @@ public class JwtTokenGenerator(IConfiguration configuration) : ITokenGenerator
                 signingCredentials: credentials
                 );
 
-        return new AuthResultModel(
+        return new AuthResult(
                 new JwtSecurityTokenHandler().WriteToken(token),
                 expiresAt
                 );

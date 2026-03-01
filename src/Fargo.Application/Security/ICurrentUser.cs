@@ -11,10 +11,5 @@ namespace Fargo.Application.Security
         {
             get;
         }
-
-        IReadOnlySet<Guid> PartitionGuids
-        {
-            get;
-        }
     }
 }

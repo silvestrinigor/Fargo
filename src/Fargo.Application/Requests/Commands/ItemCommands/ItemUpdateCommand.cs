@@ -1,30 +1,34 @@
 ﻿using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services;
+using Fargo.Domain.Services.ItemServices;
+using Fargo.Domain.Services.UserServices;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemUpdateCommand(
-        Guid ItemGuid,
-        ItemUpdateModel Item
-        ) : ICommand;
+            Guid ItemGuid,
+            ItemUpdateModel Item
+            ) : ICommand;
 
     public sealed class ItemUpdateCommandHandler(
-        ItemService itemService,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
-        ) : ICommandHandler<ItemUpdateCommand>
+            ItemGetService itemGetService,
+            ActorGetService actorGetService,
+            IUnitOfWork unitOfWork,
+            ICurrentUser currentUser
+            ) : ICommandHandler<ItemUpdateCommand>
     {
         public async Task Handle(ItemUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            var actor = currentUser.ToActor();
+            var actor = await actorGetService.GetActor(
+                    currentUser.UserGuid,
+                    cancellationToken
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
             async Task DefineItemContainer(Guid? containerGuid)
             {
-                var item = await itemService.GetItem(
+                var item = await itemGetService.GetItem(
                         actor,
                         command.ItemGuid,
                         cancellationToken
@@ -35,18 +39,18 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
                 if (containerGuid is null)
                 {
-                    ItemService.RemoveFromContainers(item);
+                    //ItemService.RemoveFromContainers(item);
                     return;
                 }
 
-                var targetParentItem = await itemService.GetItem(
+                var targetParentItem = await itemGetService.GetItem(
                         actor,
                         containerGuid.Value,
                         cancellationToken
                         )
                     ?? throw new ItemNotFoundFargoApplicationException(containerGuid.Value);
 
-                await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
+                //await itemService.InsertItemIntoContainerAsync(item, targetParentItem);
             }
 
             if (command.Item.ParentItemGuid is not null)

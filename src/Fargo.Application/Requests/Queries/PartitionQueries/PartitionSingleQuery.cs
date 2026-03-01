@@ -20,7 +20,7 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
                 )
             => await repository.GetByGuid(
                     query.PartitionGuid,
-                    currentUser.PartitionGuids,
+                    [],
                     query.TemporalAsOf,
                     cancellationToken
                     );

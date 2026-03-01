@@ -2,14 +2,8 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Item
+    public class Item : AuditedEntity
     {
-        public Guid Guid
-        {
-            get;
-            init;
-        } = Guid.NewGuid();
-
         public Guid ArticleGuid
         {
             get;
@@ -49,7 +43,7 @@ namespace Fargo.Domain.Entities
             }
         } = null;
 
-        public PartitionCollection Partitions
+        public HashSet<Partition> Partitions
         {
             get;
             init;

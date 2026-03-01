@@ -1,8 +1,10 @@
+using Fargo.Domain.ValueObjects;
+
 namespace Fargo.Application.Models.PartitionModels
 {
     public sealed record PartitionResponseModel(
             Guid Guid,
-            string Name,
-            string Description
+            Name Name,
+            Description Description
             );
 }

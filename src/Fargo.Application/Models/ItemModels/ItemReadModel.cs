@@ -7,5 +7,5 @@ namespace Fargo.Application.Models.ItemModels
             Guid ArticleGuid,
             Guid? ParentItemGuid,
             IReadOnlyCollection<PartitionReadModel> Partitions
-            ) : IEntityByGuidReadModel, IEntityTemporalReadModel, IEntityPartitionedReadModel;
+            );
 }

@@ -1,8 +1,10 @@
-﻿using Fargo.Application.Extensions;
+﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services;
+using Fargo.Domain.Security;
+using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -11,9 +13,11 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             ) : ICommand<Guid>;
 
     public sealed class UserCreateCommandHandler(
-            UserService userService,
+            UserCreateService userCreateService,
+            ActorGetService actorGetService,
             IUnitOfWork unitOfWork,
-            ICurrentUser currentUser
+            ICurrentUser currentUser,
+            IPasswordHasher passwordHasher
             ) : ICommandHandler<UserCreateCommand, Guid>
     {
         public async Task<Guid> Handle(
@@ -21,14 +25,17 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = currentUser.ToActor();
+            var actor = await actorGetService.GetActor(
+                    currentUser.UserGuid,
+                    cancellationToken
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var user = userService.CreateUser(
+            var userPasswordHash = passwordHasher.Hash(command.User.Password.Value);
+
+            var user = userCreateService.CreateUser(
                     actor,
-                    command.User.Id,
-                    command.User.Name,
-                    command.User.Description ?? default,
-                    command.User.Password
+                    command.User.Nameid,
+                    new PasswordHash(userPasswordHash)
                     );
 
             await unitOfWork.SaveChanges(cancellationToken);

@@ -12,10 +12,6 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .ToTable(t => t.IsTemporal());
 
             builder.HasKey(x => x.Guid);
-
-            builder
-                .HasMany(x => x.Articles)
-                .WithMany();
         }
     }
 }

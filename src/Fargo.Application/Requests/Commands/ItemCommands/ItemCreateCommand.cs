@@ -1,31 +1,36 @@
 ﻿using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services;
+using Fargo.Domain.Services.ArticleServices;
+using Fargo.Domain.Services.ItemServices;
+using Fargo.Domain.Services.UserServices;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
     public sealed record ItemCreateCommand(
-        ItemCreateModel Item
-        ) : ICommand<Guid>;
+            ItemCreateModel Item
+            ) : ICommand<Guid>;
 
     public sealed class ItemCreateCommandHandler(
-        ItemService itemService,
-        ArticleService articleService,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
-        ) : ICommandHandler<ItemCreateCommand, Guid>
+            ItemCreateService itemCreateService,
+            ArticleGetService articleGetService,
+            ActorGetService actorGetService,
+            IUnitOfWork unitOfWork,
+            ICurrentUser currentUser
+            ) : ICommandHandler<ItemCreateCommand, Guid>
     {
         public async Task<Guid> Handle(
                 ItemCreateCommand command,
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = currentUser.ToActor();
+            var actor = await actorGetService.GetActor(
+                    currentUser.UserGuid,
+                    cancellationToken
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var article = await articleService.GetArticle(
+            var article = await articleGetService.GetArticle(
                     actor,
                     command.Item.ArticleGuid,
                     cancellationToken
@@ -34,7 +39,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                         command.Item.ArticleGuid
                         );
 
-            var item = itemService.CreateItem(actor, article);
+            var item = itemCreateService.CreateItem(actor, article);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

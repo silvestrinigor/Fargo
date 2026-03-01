@@ -1,5 +1,6 @@
 ﻿using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Repositories
@@ -35,13 +36,17 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 )
             => await users
             .Where(a =>
-                    a.Id == entityId &&
                     a.Partitions.Any(p =>
                         partitionGuids == null ||
                         partitionGuids.Contains(p.Guid)
                         )
                   )
             .SingleOrDefaultAsync(cancellationToken);
+
+        public Task<User?> GetByNameid(Nameid nameid, IReadOnlyCollection<Guid>? partitionGuids = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Remove(User user)
         {

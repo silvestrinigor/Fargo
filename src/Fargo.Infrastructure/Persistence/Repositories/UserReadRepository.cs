@@ -10,21 +10,6 @@ namespace Fargo.Infrastructure.Persistence.Repositories
     {
         private readonly DbSet<UserReadModel> users = context.Users;
 
-        private readonly DbSet<PermissionReadModel> permissions = context.Permissions;
-
-        public async Task<IReadOnlyCollection<PermissionReadModel>?> GetUserPermissions(
-                Guid userGuid,
-                DateTime? temporalAsOf = null,
-                Pagination pagination = default,
-                CancellationToken cancellationToken = default
-                )
-            => await permissions
-            .TemporalAsOfIfDateTimeNotNull(temporalAsOf)
-            .Where(x => x.UserGuid == userGuid)
-            .WithPagination(pagination)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-
         public async Task<UserReadModel?> GetByGuid(
                 Guid entityGuid,
                 IEnumerable<Guid> partitionGuids,
