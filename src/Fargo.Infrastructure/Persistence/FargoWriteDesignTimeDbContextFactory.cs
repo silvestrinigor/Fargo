@@ -11,8 +11,7 @@ namespace Fargo.Infrastructure.Persistence
             var optionsBuilder = new DbContextOptionsBuilder<FargoWriteDbContext>();
 
             var cs = Environment
-                .GetEnvironmentVariable("FARGO_CONNECTION_STRING")
-                ?? "Host=localhost;Database=fargo;Username=postgres;Password=postgres";
+                .GetEnvironmentVariable("FARGO_CONNECTION_STRING");
 
             optionsBuilder.UseSqlServer(cs);
 
