@@ -11,7 +11,7 @@ namespace Fargo.Infrastructure.Persistence
             var optionsBuilder = new DbContextOptionsBuilder<FargoWriteDbContext>();
 
             var cs = Environment
-                .GetEnvironmentVariable("FARGO_CONNECTION_STRING");
+                .GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 
             optionsBuilder.UseSqlServer(cs);
 

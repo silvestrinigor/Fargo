@@ -24,7 +24,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddProblemDetails();
 
-var connectionString = builder.Configuration.GetConnectionString("FargoDatabase");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<FargoWriteDbContext>(opt =>
     opt.UseSqlServer(

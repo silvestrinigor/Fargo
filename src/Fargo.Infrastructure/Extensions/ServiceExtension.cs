@@ -30,6 +30,8 @@ using Fargo.Domain.Services.ArticleServices;
 using Fargo.Domain.Services.ItemServices;
 using Fargo.Domain.Services.PartitionServices;
 using Fargo.Domain.Services.UserServices;
+using Fargo.Application.Requests.Commands.AuthCommands;
+using Fargo.Application.Models.AuthModels;
 
 namespace Fargo.Infrastructure.Extensions
 {
@@ -40,6 +42,10 @@ namespace Fargo.Infrastructure.Extensions
             public IServiceCollection AddInfrastructure(IConfiguration configuration)
             {
                 services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
+
+                services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+
+                services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
 
                 services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();

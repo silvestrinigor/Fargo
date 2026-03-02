@@ -1,0 +1,16 @@
+// generate random password
+gpg --gen-random --armor 1 16
+
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "${DB_CONECTIONSTRING}"
+
+dotnet user-secrets set "Jwt:Key" "dev-only-super-secret-key-change-me-please"
+dotnet user-secrets set "Jwt:Issuer" "Fargo"
+dotnet user-secrets set "Jwt:Audience" "Fargo"
+
+docker compose up --build
+
+dotnet user-secrets list --project src/Fargo.HttpApi/Fargo.HttpApi.csproj
+
+dotnet ef database update \
+           --project src/Fargo.Infrastructure/Fargo.Infrastructure.csproj \
+           --context FargoWriteDbContext --connection "${CONNECTION_STRING}"
