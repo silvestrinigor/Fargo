@@ -33,12 +33,6 @@ namespace Fargo.Domain.Entities
             set;
         }
 
-        public List<UserGroup> UserGroups
-        {
-            get;
-            init;
-        } = [];
-
         public List<ActionType> Permissions
         {
             get;
