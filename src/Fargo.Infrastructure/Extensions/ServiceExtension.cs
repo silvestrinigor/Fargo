@@ -33,6 +33,7 @@ using Fargo.Domain.Services.UserServices;
 using Fargo.Application.Requests.Commands.AuthCommands;
 using Fargo.Application.Models.AuthModels;
 using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Services;
 
 namespace Fargo.Infrastructure.Extensions
 {
@@ -76,6 +77,7 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IArticleRepository, ArticleRepository>();
                 services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
+                services.AddScoped<ArticleService>();
 
                 services.AddScoped<IItemRepository, ItemRepository>();
                 services.AddScoped<IItemReadRepository, ItemReadRepository>();

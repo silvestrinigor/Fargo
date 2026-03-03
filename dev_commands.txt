@@ -1,6 +1,9 @@
 // generate random password
 gpg --gen-random --armor 1 16
 
+// generate random JwtKey
+openssl rand -base64 32
+
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "${DB_CONECTIONSTRING} \
            --project src/Fargo.HttpApi/Fargo.HttpApi.csproj"
 

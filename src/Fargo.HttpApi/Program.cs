@@ -14,6 +14,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
     options.SerializerOptions.Converters.Add(new LimitJsonConverter());
     options.SerializerOptions.Converters.Add(new PageJsonConverter());
+    options.SerializerOptions.Converters.Add(new NameidJsonConverter());
+    options.SerializerOptions.Converters.Add(new PasswordJsonConverter());
 });
 
 builder.Services.AddAuthorization();

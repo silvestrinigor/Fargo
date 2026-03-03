@@ -10,7 +10,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
 {
     public sealed record LoginCommand(
             Nameid Nameid,
-            UserPasswordUpdateModel Password
+            Password Password
             ) : ICommand<AuthResult>;
 
     public sealed class LoginCommandHandler(
@@ -33,7 +33,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
 
             var isValid = passwordHasher.Verify(
                     user.PasswordHash,
-                    command.Password.CurrentPassword
+                    command.Password
                     );
 
             if (!isValid)
