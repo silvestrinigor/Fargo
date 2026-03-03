@@ -20,8 +20,7 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             => await partitions
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
             .Where(a =>
-                    a.Guid == entityGuid &&
-                    a.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
+                    a.Guid == entityGuid)
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -33,7 +32,6 @@ namespace Fargo.Infrastructure.Persistence.Repositories
                 )
             => await partitions
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
-            .Where(a => a.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
             .WithPagination(pagination)
             .AsNoTracking()
             .ToListAsync(cancellationToken);

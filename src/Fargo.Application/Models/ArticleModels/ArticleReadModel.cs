@@ -7,7 +7,6 @@ namespace Fargo.Application.Models.ArticleModels
             Guid Guid,
             Name Name,
             Description Description,
-            bool IsContainer,
-            IReadOnlyCollection<PartitionReadModel> Partitions
+            bool IsContainer
             );
 }

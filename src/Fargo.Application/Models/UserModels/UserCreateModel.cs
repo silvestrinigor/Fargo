@@ -7,8 +7,6 @@ namespace Fargo.Application.Models.UserModels
             Nameid Nameid,
             Password Password,
             Description? Description = null,
-            List<ActionType>? Permissions = null,
-            List<Guid>? Partitions = null,
-            List<Guid>? PartitionAccesses = null
+            List<ActionType>? Permissions = null
             );
 }

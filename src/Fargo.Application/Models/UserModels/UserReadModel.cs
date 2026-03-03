@@ -8,7 +8,6 @@ namespace Fargo.Application.Models.UserModels
             Guid Guid,
             Nameid Nameid,
             Description Description,
-            IReadOnlyCollection<PartitionReadModel> Partitions,
             IReadOnlyCollection<ActionType> Permissions
             );
 }
