@@ -2,8 +2,7 @@
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.ItemServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
@@ -13,24 +12,28 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             ) : ICommand;
 
     public sealed class ItemUpdateCommandHandler(
-            ItemGetService itemGetService,
-            ActorGetService actorGetService,
+            IItemRepository itemRepository,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<ItemUpdateCommand>
     {
         public async Task Handle(ItemUpdateCommand command, CancellationToken cancellationToken = default)
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                    )
+                ?? throw new UnauthorizedAccessFargoApplicationException();
+
+            var actorPartitionGuids = actor.PartitionsAccesses.Select(x => x.Guid).ToList();
 
             async Task DefineItemContainer(Guid? containerGuid)
             {
-                var item = await itemGetService.GetItem(
-                        actor,
+                var item = await itemRepository.GetByGuid(
                         command.ItemGuid,
+                        actorPartitionGuids,
                         cancellationToken
                         )
                     ?? throw new ItemNotFoundFargoApplicationException(
@@ -43,9 +46,9 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                     return;
                 }
 
-                var targetParentItem = await itemGetService.GetItem(
-                        actor,
+                var targetParentItem = await itemRepository.GetByGuid(
                         containerGuid.Value,
+                        actorPartitionGuids,
                         cancellationToken
                         )
                     ?? throw new ItemNotFoundFargoApplicationException(containerGuid.Value);

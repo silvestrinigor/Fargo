@@ -1,5 +1,6 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Models.AuthModels;
+using Fargo.Application.Models.UserModels;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
@@ -9,7 +10,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
 {
     public sealed record LoginCommand(
             Nameid Nameid,
-            Password Password
+            UserPasswordUpdateModel Password
             ) : ICommand<AuthResult>;
 
     public sealed class LoginCommandHandler(
@@ -31,8 +32,8 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                 ?? throw new InvalidCredentialsException();
 
             var isValid = passwordHasher.Verify(
-                    command.Password.Value,
-                    user.PasswordHash.Value ?? string.Empty
+                    user.PasswordHash,
+                    command.Password.CurrentPassword
                     );
 
             if (!isValid)

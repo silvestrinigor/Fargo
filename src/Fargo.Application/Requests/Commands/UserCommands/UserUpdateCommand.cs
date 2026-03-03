@@ -43,7 +43,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
 
             if (command.User.Password != null)
             {
-                var userPasswordHash = passwordHasher.Hash(command.User.Password.NewPassword.Value);
+                var userPasswordHash = passwordHasher.Hash(command.User.Password.NewPassword);
 
                 user.PasswordHash = new PasswordHash(userPasswordHash);
             }

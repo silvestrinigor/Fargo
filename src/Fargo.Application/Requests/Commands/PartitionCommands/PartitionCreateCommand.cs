@@ -2,8 +2,9 @@
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.PartitionServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -11,8 +12,8 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
         : ICommand<Guid>;
 
     public sealed class PartitionCreateCommandHandler(
-            PartitionCreateService partitionCreateService,
-            ActorGetService actorGetService,
+            IPartitionRepository partitionRepository,
+            IUserRepository userRepository,
             ICurrentUser currentUser,
             IUnitOfWork unitOfWork
             ) : ICommandHandler<PartitionCreateCommand, Guid>
@@ -22,15 +23,22 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                    )
+                ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var partition = partitionCreateService.CreatePartition(
-                    actor,
-                    command.Partition.Name
-                    );
+            actor.ValidatePermission(ActionType.CreatePartition);
+
+            var partition = new Partition
+            {
+                Name = command.Partition.Name,
+                UpdatedBy = actor
+            };
+
+            partitionRepository.Add(partition);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

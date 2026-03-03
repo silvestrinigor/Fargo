@@ -32,6 +32,7 @@ using Fargo.Domain.Services.PartitionServices;
 using Fargo.Domain.Services.UserServices;
 using Fargo.Application.Requests.Commands.AuthCommands;
 using Fargo.Application.Models.AuthModels;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Infrastructure.Extensions
 {
@@ -44,6 +45,8 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
 
                 services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+
+                services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
                 services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
 
@@ -140,8 +143,24 @@ namespace Fargo.Infrastructure.Extensions
 
         extension(IServiceProvider services)
         {
-            public async Task<IServiceProvider> InitInfrastructureAsync()
+            public async Task<IServiceProvider> InitInfrastructureAsync(
+                    string? defaultAdminNameid,
+                    string? defaultAdminPassword
+                    )
             {
+                using (var scope = services.CreateScope())
+                {
+                    var initializeSystem = scope.ServiceProvider
+                        .GetRequiredService<ICommandHandler<InitializeSystemCommand>>();
+
+                    var initializeSystemCommand = new InitializeSystemCommand(
+                            defaultAdminNameid != null ? new Nameid(defaultAdminNameid) : null,
+                            defaultAdminPassword != null ? new Password(defaultAdminPassword) : null
+                            );
+
+                    await initializeSystem.Handle(initializeSystemCommand);
+                }
+
                 return services;
             }
         }

@@ -20,5 +20,7 @@ namespace Fargo.Domain.Repositories
         void Add(User user);
 
         void Remove(User user);
+
+        Task<bool> Any(CancellationToken cancellationToken = default);
     }
 }

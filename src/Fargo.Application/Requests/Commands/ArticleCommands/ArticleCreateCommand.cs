@@ -2,8 +2,9 @@
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.ArticleServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
@@ -12,8 +13,8 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
             ) : ICommand<Guid>;
 
     public sealed class ArticleCreateCommandHandler(
-            ArticleCreateService articleCreateService,
-            ActorGetService actorGetService,
+            IArticleRepository articleRepository,
+            IUserRepository userRepository,
             ICurrentUser currentUser,
             IUnitOfWork unitOfWork
             ) : ICommandHandler<ArticleCreateCommand, Guid>
@@ -23,16 +24,22 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var article = articleCreateService.CreateArticle(
-                    actor,
-                    command.Article.Name,
-                    command.Article.IsContainer
-                    );
+            actor.ValidatePermission(ActionType.CreateArticle);
+
+            var article = new Article
+            {
+                Name = command.Article.Name,
+                IsContainer = command.Article.IsContainer,
+                UpdatedBy = actor
+            };
+
+            articleRepository.Add(article);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

@@ -13,6 +13,11 @@ namespace Fargo.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Guid);
 
             builder
+                .HasOne(x => x.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(x => x.UpdatedByUserGuid);
+
+            builder
                 .Property(x => x.Name)
                 .IsRequired();
 
@@ -20,7 +25,9 @@ namespace Fargo.Infrastructure.Persistence.Configurations
                 .Property(x => x.Description)
                 .IsRequired();
 
-            builder.HasOne(x => x.UpdatedBy).WithMany().HasForeignKey(x => x.UpdatedByUserGuid);
+            builder
+                .HasMany(x => x.Partitions)
+                .WithMany();
         }
     }
 }

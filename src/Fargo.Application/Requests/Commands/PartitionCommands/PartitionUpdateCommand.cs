@@ -3,8 +3,7 @@ using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Exceptions;
-using Fargo.Domain.Services.PartitionServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -14,8 +13,8 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
             ) : ICommand;
 
     public sealed class PartitionUpdateCommandHandler(
-            PartitionGetService partitionGetService,
-            ActorGetService actorGetService,
+            IPartitionRepository partitionRepository,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<PartitionUpdateCommand>
@@ -25,16 +24,19 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                    )
+                ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var partition = await partitionGetService.GetPartition(
-                    actor,
+            var partition = await partitionRepository.GetByGuid(
                     currentUser.UserGuid,
+                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
-                    ) ?? throw new PartitionNotFoundException(command.PartitionGuid);
+                    )
+                ?? throw new PartitionNotFoundException(command.PartitionGuid);
 
             partition.Name = command.Partition.Name ?? partition.Name;
 

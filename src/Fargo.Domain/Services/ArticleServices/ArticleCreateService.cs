@@ -1,6 +1,5 @@
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
-using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 

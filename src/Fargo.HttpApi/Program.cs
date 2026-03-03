@@ -38,6 +38,10 @@ builder.Services.AddDbContext<FargoReadDbContext>(opt =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
+var defaultAdminNameid = builder.Configuration["Application:DefaultAdminNameid"];
+
+var defaultAdminPassword = builder.Configuration["Application:DefaultAdminPassword"];
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -55,7 +59,7 @@ app.MapFargoPartition();
 
 app.MapFargoAuthentication();
 
-await app.Services.InitInfrastructureAsync();
+await app.Services.InitInfrastructureAsync(defaultAdminNameid, defaultAdminPassword);
 
 app.UseExceptionHandler();
 

@@ -1,10 +1,14 @@
-﻿using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.Enums;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Models.UserModels
 {
     public record UserCreateModel(
             Nameid Nameid,
             Password Password,
-            Description? Description = null
+            Description? Description = null,
+            List<ActionType>? Permissions = null,
+            List<Guid>? Partitions = null,
+            List<Guid>? PartitionAccesses = null
             );
 }

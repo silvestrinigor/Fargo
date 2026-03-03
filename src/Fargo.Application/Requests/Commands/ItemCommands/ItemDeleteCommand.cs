@@ -1,8 +1,8 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.ItemServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
@@ -11,9 +11,8 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             ) : ICommand;
 
     public sealed class ItemDeleteCommandHandler(
-            ItemDeleteService itemDeleteService,
-            ItemGetService itemGetService,
-            ActorGetService actorGetService,
+            IItemRepository itemRepository,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<ItemDeleteCommand>
@@ -23,19 +22,23 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                    )
+                ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var item = await itemGetService.GetItem(
-                    actor,
+            var item = await itemRepository.GetByGuid(
                     command.ItemGuid,
+                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     )
                 ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);
 
-            itemDeleteService.DeleteItem(actor, item);
+            actor.ValidatePermission(ActionType.DeleteItem);
+
+            itemRepository.Remove(item);
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

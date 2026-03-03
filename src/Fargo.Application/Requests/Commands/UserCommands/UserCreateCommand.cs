@@ -2,9 +2,10 @@
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
-using Fargo.Domain.Services.UserServices;
-using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -13,8 +14,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             ) : ICommand<Guid>;
 
     public sealed class UserCreateCommandHandler(
-            UserCreateService userCreateService,
-            ActorGetService actorGetService,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser,
             IPasswordHasher passwordHasher
@@ -25,18 +25,25 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var userPasswordHash = passwordHasher.Hash(command.User.Password.Value);
+            var userPasswordHash = passwordHasher.Hash(command.User.Password);
 
-            var user = userCreateService.CreateUser(
-                    actor,
-                    command.User.Nameid,
-                    new PasswordHash(userPasswordHash)
-                    );
+            actor.ValidatePermission(ActionType.CreateUser);
+
+            var user = new User
+            {
+                Nameid = command.User.Nameid,
+                PasswordHash = new(userPasswordHash),
+                Permissions = command.User.Permissions ?? [],
+                UpdatedBy = actor
+            };
+
+            userRepository.Add(user);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

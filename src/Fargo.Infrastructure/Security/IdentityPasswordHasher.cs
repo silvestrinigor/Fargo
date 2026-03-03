@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.Security;
+using Fargo.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fargo.Infrastructure.Security
@@ -7,12 +8,14 @@ namespace Fargo.Infrastructure.Security
     {
         private readonly PasswordHasher<object> _hasher = new();
 
-        public string Hash(string password)
+        public PasswordHash Hash(Password password)
         {
-            return _hasher.HashPassword(null!, password);
+            var passwordHashString = _hasher.HashPassword(null!, password);
+
+            return new PasswordHash(passwordHashString);
         }
 
-        public bool Verify(string hashedPassword, string providedPassword)
+        public bool Verify(PasswordHash hashedPassword, Password providedPassword)
         {
             var result = _hasher.VerifyHashedPassword(
                 null!,

@@ -8,11 +8,14 @@ namespace Fargo.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Item> builder)
         {
-            builder
-                .ToTable(t => t.IsTemporal());
+            builder.ToTable(t => t.IsTemporal());
+
+            builder.HasKey(x => x.Guid);
 
             builder
-                .HasKey(x => x.Guid);
+                .HasOne(x => x.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(x => x.UpdatedByUserGuid);
 
             builder
                 .HasOne(x => x.Article)
@@ -23,15 +26,14 @@ namespace Fargo.Infrastructure.Persistence.Configurations
 
             builder
                 .HasOne(x => x.ParentItem)
-                .WithMany();
+                .WithMany()
+                .HasForeignKey(x => x.ParentItemGuid);
 
-            builder
-                .HasIndex(x => x.ParentItemGuid);
+            builder.HasIndex(x => x.ParentItemGuid);
 
-            builder
-                .HasIndex(x => x.ArticleGuid);
+            builder.HasIndex(x => x.ArticleGuid);
 
-            builder.HasOne(x => x.UpdatedBy).WithMany().HasForeignKey(x => x.UpdatedByUserGuid);
+            builder.HasMany(x => x.Partitions).WithMany();
         }
     }
 }

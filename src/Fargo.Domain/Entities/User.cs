@@ -33,19 +33,25 @@ namespace Fargo.Domain.Entities
             set;
         }
 
-        public HashSet<ActionType> Permissions
+        public List<UserGroup> UserGroups
         {
             get;
             init;
         } = [];
 
-        public HashSet<Partition> PartitionsAccesses
+        public List<ActionType> Permissions
         {
             get;
             init;
         } = [];
 
-        public HashSet<Partition> Partitions
+        public List<Partition> PartitionsAccesses
+        {
+            get;
+            init;
+        } = [];
+
+        public List<Partition> Partitions
         {
             get;
             init;

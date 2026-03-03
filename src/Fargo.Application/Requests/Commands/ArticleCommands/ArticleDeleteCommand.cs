@@ -1,8 +1,9 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.ArticleServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
@@ -11,9 +12,9 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
             ) : ICommand;
 
     public sealed class ArticleDeleteCommandHandler(
-            ArticleDeteleService articleDeteleService,
-            ArticleGetService articleGetService,
-            ActorGetService actorGetService,
+            IArticleRepository articleRepository,
+            IUserRepository userRepository,
+            ArticleService articleService,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<ArticleDeleteCommand>
@@ -23,18 +24,23 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var article = await articleGetService.GetArticle(
-                    actor,
+            var article = await articleRepository.GetByGuid(
                     command.ArticleGuid,
+                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
-            await articleDeteleService.DeleteArticle(actor, article, cancellationToken);
+            actor.ValidatePermission(ActionType.DeleteArticle);
+
+            await articleService.ValidateArticleDelete(article, cancellationToken);
+
+            articleRepository.Remove(article);
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

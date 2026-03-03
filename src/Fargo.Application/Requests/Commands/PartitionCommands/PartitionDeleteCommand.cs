@@ -1,9 +1,9 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
-using Fargo.Domain.Services.PartitionServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -12,9 +12,8 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
             ) : ICommand;
 
     public sealed class PartitionDeleteCommandHandler(
-            PartitionDeleteService partitionDeleteService,
-            PartitionGetService partitionGetService,
-            ActorGetService actorGetService,
+            IPartitionRepository partitionRepository,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<PartitionDeleteCommand>
@@ -24,18 +23,23 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                    )
+                ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var partition = await partitionGetService.GetPartition(
-                    actor,
+            var partition = await partitionRepository.GetByGuid(
                     command.PartitionGuid,
+                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
-                    ) ?? throw new PartitionNotFoundException(command.PartitionGuid);
+                    )
+                ?? throw new PartitionNotFoundException(command.PartitionGuid);
 
-            partitionDeleteService.DeletePartition(actor, partition);
+            actor.ValidatePermission(ActionType.DeletePartition);
+
+            partitionRepository.Remove(partition);
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

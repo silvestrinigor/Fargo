@@ -2,9 +2,9 @@
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.ArticleServices;
-using Fargo.Domain.Services.ItemServices;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
@@ -13,9 +13,9 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             ) : ICommand<Guid>;
 
     public sealed class ItemCreateCommandHandler(
-            ItemCreateService itemCreateService,
-            ArticleGetService articleGetService,
-            ActorGetService actorGetService,
+            IItemRepository itemRepository,
+            IArticleRepository articleRepository,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<ItemCreateCommand, Guid>
@@ -25,21 +25,30 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
+                    partitionGuids: null,
                     cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                    )
+                ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var article = await articleGetService.GetArticle(
-                    actor,
+            var article = await articleRepository.GetByGuid(
                     command.Item.ArticleGuid,
+                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     )
                 ?? throw new ArticleNotFoundFargoApplicationException(
-                        command.Item.ArticleGuid
-                        );
+                        command.Item.ArticleGuid);
 
-            var item = itemCreateService.CreateItem(actor, article);
+            actor.ValidatePermission(ActionType.CreateItem);
+
+            var item = new Item
+            {
+                Article = article,
+                UpdatedBy = actor
+            };
+
+            itemRepository.Add(item);
 
             await unitOfWork.SaveChanges(cancellationToken);
 

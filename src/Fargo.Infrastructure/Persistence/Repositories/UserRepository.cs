@@ -9,6 +9,9 @@ namespace Fargo.Infrastructure.Persistence.Repositories
     {
         private readonly DbSet<User> users = context.Users;
 
+        public Task<bool> Any(CancellationToken cancellationToken = default)
+            => context.Users.AnyAsync(cancellationToken);
+
         public void Add(User user)
         {
             context.Users.Add(user);
