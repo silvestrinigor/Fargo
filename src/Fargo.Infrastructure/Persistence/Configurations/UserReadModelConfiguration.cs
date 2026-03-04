@@ -11,6 +11,8 @@ namespace Fargo.Infrastructure.Persistence.Configurations
             builder.ToTable(x => x.IsTemporal());
 
             builder.HasKey(x => x.Guid);
+
+            builder.ComplexProperty(x => x.Permissions, p => p.ToJson());
         }
     }
 }

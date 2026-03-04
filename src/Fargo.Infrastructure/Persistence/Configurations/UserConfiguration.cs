@@ -20,7 +20,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.PasswordHash).IsRequired();
 
-            builder.ComplexProperty(x => x.Permissions, x => x.ToJson());
+            builder.ComplexProperty(x => x.Permissions, p => p.ToJson());
         }
     }
 }
