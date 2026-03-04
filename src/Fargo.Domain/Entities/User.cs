@@ -7,7 +7,7 @@ namespace Fargo.Domain.Entities
     /// <summary>
     /// Represents a user entity in the system.
     /// </summary>
-    public class User : AuditedEntity
+    public class User : Entity
     {
         /// <summary>
         /// Gets or sets the unique identifier (NAMEID) of the user.
@@ -34,18 +34,6 @@ namespace Fargo.Domain.Entities
         }
 
         public List<ActionType> Permissions
-        {
-            get;
-            init;
-        } = [];
-
-        public List<Partition> PartitionsAccesses
-        {
-            get;
-            init;
-        } = [];
-
-        public List<Partition> Partitions
         {
             get;
             init;

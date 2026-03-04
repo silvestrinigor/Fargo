@@ -1,7 +1,7 @@
 ﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.ItemModels;
-using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Models.UserModels;
+using Fargo.Domain.Enums;
 using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Fargo.Infrastructure.Persistence.Converters;
@@ -17,10 +17,12 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<UserReadModel> Users { get; set; }
 
-        public DbSet<PartitionReadModel> Partitions { get; set; }
-
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
+            configurationBuilder
+                .Properties<ActionType>()
+                .HaveConversion<string>();
+
             configurationBuilder
                 .Properties<Name>()
                 .HaveMaxLength(Name.MaxLength)
@@ -49,8 +51,6 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ItemReadModelConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserReadModelConfiguration());
-
-            modelBuilder.ApplyConfiguration(new PartitionReadModelConfiguration());
         }
     }
 }

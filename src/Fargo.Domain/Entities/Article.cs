@@ -2,7 +2,7 @@
 
 namespace Fargo.Domain.Entities
 {
-    public class Article : AuditedEntity
+    public class Article : Entity
     {
         public required Name Name
         {
@@ -15,17 +15,5 @@ namespace Fargo.Domain.Entities
             get;
             set;
         } = Description.Empty;
-
-        public bool IsContainer
-        {
-            get;
-            init;
-        } = false;
-
-        public HashSet<Partition> Partitions
-        {
-            get;
-            init;
-        } = [];
     }
 }

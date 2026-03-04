@@ -7,13 +7,11 @@ namespace Fargo.Application.Repositories
         {
             Task<UserReadModel?> GetByGuid(
                     Guid entityGuid,
-                    IEnumerable<Guid> partitionGuids,
                     DateTime? asOfDateTime = null,
                     CancellationToken cancellationToken = default
                     );
 
             Task<IReadOnlyCollection<UserReadModel>> GetMany(
-                    IEnumerable<Guid> partitionGuids,
                     DateTime? asOfDateTime = null,
                     Pagination pagination = default,
                     CancellationToken cancellationToken = default

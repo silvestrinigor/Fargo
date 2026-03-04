@@ -26,13 +26,11 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
-                    partitionGuids: null,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var article = await articleRepository.GetByGuid(
                     command.ArticleGuid,
-                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 

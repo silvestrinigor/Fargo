@@ -1,6 +1,5 @@
 ﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Repositories;
-using Fargo.Application.Security;
 
 namespace Fargo.Application.Requests.Queries.ArticleQueries
 {
@@ -10,8 +9,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
             ) : IQuery<ArticleReadModel?>;
 
     public sealed class ArticleSingleQueryHandler(
-            IArticleReadRepository repository,
-            ICurrentUser currentUser
+            IArticleReadRepository repository
             ) : IQueryHandler<ArticleSingleQuery, ArticleReadModel?>
     {
         public async Task<ArticleReadModel?> Handle(
@@ -20,7 +18,6 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
                 )
             => await repository.GetByGuid(
                     query.ArticleGuid,
-                    [],
                     query.AsOfDateTime,
                     cancellationToken
                     );

@@ -1,39 +1,31 @@
 ﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.ItemModels;
-using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Repositories;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
-using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
-using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Security;
-using Microsoft.EntityFrameworkCore;
+using Fargo.Application.Security;
+using Fargo.Application.Requests.Commands.AuthCommands;
+using Fargo.Application.Models.AuthModels;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Fargo.Application.Security;
-using Fargo.Domain.Services.ArticleServices;
-using Fargo.Domain.Services.ItemServices;
-using Fargo.Domain.Services.PartitionServices;
-using Fargo.Domain.Services.UserServices;
-using Fargo.Application.Requests.Commands.AuthCommands;
-using Fargo.Application.Models.AuthModels;
-using Fargo.Domain.ValueObjects;
-using Fargo.Domain.Services;
 
 namespace Fargo.Infrastructure.Extensions
 {
@@ -69,12 +61,6 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserReadModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>>, UserManyQueryHandler>();
 
-                services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
-                services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
-                services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
-                services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionReadModel?>, PartitionSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<PartitionManyQuery, IEnumerable<PartitionReadModel>>, PartitionManyQueryHandler>();
-
                 services.AddScoped<IArticleRepository, ArticleRepository>();
                 services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
                 services.AddScoped<ArticleService>();
@@ -85,36 +71,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IUserReadRepository, UserReadRepository>();
 
-                services.AddScoped<IPartitionReadRepository, PartitionReadRepository>();
-                services.AddScoped<IPartitionRepository, PartitionRepository>();
-
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
-
-                services.AddScoped<ArticleCreateService>();
-
-                services.AddScoped<ArticleDeteleService>();
-
-                services.AddScoped<ArticleGetService>();
-
-                services.AddScoped<ItemCreateService>();
-
-                services.AddScoped<ItemDeleteService>();
-
-                services.AddScoped<ItemGetService>();
-
-                services.AddScoped<PartitionCreateService>();
-
-                services.AddScoped<PartitionDeleteService>();
-
-                services.AddScoped<PartitionGetService>();
-
-                services.AddScoped<UserCreateService>();
-
-                services.AddScoped<UserDeleteService>();
-
-                services.AddScoped<UserGetService>();
-
-                services.AddScoped<ActorGetService>();
 
                 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>

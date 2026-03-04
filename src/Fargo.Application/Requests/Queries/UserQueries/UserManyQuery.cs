@@ -1,7 +1,6 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Repositories;
-using Fargo.Application.Security;
 
 namespace Fargo.Application.Requests.Queries.UserQueries
 {
@@ -11,8 +10,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
             ) : IQuery<IEnumerable<UserReadModel>>;
 
     public sealed class UserManyQueryHandler(
-            IUserReadRepository repository,
-            ICurrentUser currentUser
+            IUserReadRepository repository
             ) : IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>>
     {
         public async Task<IEnumerable<UserReadModel>> Handle(
@@ -20,7 +18,6 @@ namespace Fargo.Application.Requests.Queries.UserQueries
                 CancellationToken cancellationToken = default
                 )
             => await repository.GetMany(
-                    [],
                     query.TemporalAsOf,
                     query.Pagination,
                     cancellationToken

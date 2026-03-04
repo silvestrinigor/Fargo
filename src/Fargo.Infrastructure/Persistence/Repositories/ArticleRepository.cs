@@ -27,16 +27,11 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<Article?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 )
             => await articles
             .Where(a =>
-                    a.Guid == entityGuid &&
-                    a.Partitions.Any(p =>
-                        partitionGuids == null ||
-                        partitionGuids.Contains(p.Guid)
-                        )
+                   a.Guid == entityGuid
                   )
             .SingleOrDefaultAsync(cancellationToken);
     }

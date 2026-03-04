@@ -6,7 +6,6 @@ namespace Fargo.Domain.Repositories
     {
         Task<Article?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );
 

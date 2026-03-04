@@ -57,8 +57,6 @@ app.MapFargoItem();
 
 app.MapFargoUser();
 
-app.MapFargoPartition();
-
 app.MapFargoAuthentication();
 
 await app.Services.InitInfrastructureAsync(defaultAdminNameid, defaultAdminPassword);

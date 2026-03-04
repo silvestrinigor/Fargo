@@ -8,11 +8,9 @@ namespace Fargo.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<ArticleReadModel> builder)
         {
-            builder
-                .ToTable(t => t.IsTemporal());
+            builder.ToTable(t => t.IsTemporal());
 
-            builder
-                .HasKey(x => x.Guid);
+            builder.HasKey(x => x.Guid);
         }
     }
 }

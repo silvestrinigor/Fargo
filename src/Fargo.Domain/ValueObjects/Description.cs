@@ -1,18 +1,20 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
-    public readonly struct Description : IStringValueObject<Description>
+    public readonly struct Description
     {
         public Description() : this(string.Empty) { }
 
         public Description(string value)
         {
-            if (value.Length > MaxLength)
-                throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.");
+            if (value.Length > MaxLength || value.Length < MinLength)
+                throw new ArgumentOutOfRangeException(nameof(value), value);
 
             this.value = value;
         }
 
         public const int MaxLength = 500;
+
+        public const int MinLength = 0;
 
         public string Value => value is not null ? value : string.Empty;
 

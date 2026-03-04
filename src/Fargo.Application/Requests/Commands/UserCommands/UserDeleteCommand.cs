@@ -1,7 +1,8 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Services.UserServices;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -10,27 +11,26 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             ) : ICommand;
 
     public sealed class UserDeleteCommandHandler(
-            UserDeleteService userDeleteService,
-            UserGetService userGetService,
-            ActorGetService actorGetService,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
             ) : ICommandHandler<UserDeleteCommand>
     {
         public async Task Handle(UserDeleteCommand command, CancellationToken cancellationToken = default)
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var user = await userGetService.GetUser(
-                    actor,
+            var user = await userRepository.GetByGuid(
                     command.UserGuid,
                     cancellationToken
                     ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
-            userDeleteService.DeleteUser(actor, user);
+            actor.ValidatePermission(ActionType.DeleteUser);
+
+            userRepository.Remove(user);
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

@@ -1,19 +1,21 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
-    public readonly struct Name : IStringValueObject<Name>
+    public readonly struct Name
     {
         public Name(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Cannot be empty.", nameof(value));
 
-            if (value.Length > MaxLength)
-                throw new ArgumentOutOfRangeException(nameof(value), value, $"Cannot exceed {MaxLength} characters.");
+            if (value.Length > MaxLength || value.Length < MinLength)
+                throw new ArgumentOutOfRangeException(nameof(value), value);
 
             this.value = value;
         }
 
         public const int MaxLength = 100;
+
+        public const int MinLength = 3;
 
         public string Value
             => value != string.Empty ? value : throw new ArgumentException("Cannot be empty.", nameof(Value));

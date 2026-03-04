@@ -43,7 +43,6 @@ namespace Fargo.Application.Requests.Commands
             {
                 Nameid = command.DefaultAdminNameid.Value,
                 PasswordHash = passwordHash,
-                UpdatedBy = null,
                 Permissions = [.. Enum.GetValues<ActionType>()]
             };
 

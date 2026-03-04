@@ -19,24 +19,21 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<User?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid>? partitionGuids = null,
                 CancellationToken cancellationToken = default
                 )
             => await users
             .Where(a =>
-                    a.Guid == entityGuid &&
-                    a.Partitions.Any(p =>
-                        partitionGuids == null ||
-                        partitionGuids.Contains(p.Guid)
-                        )
+                    a.Guid == entityGuid
                   )
             .SingleOrDefaultAsync(cancellationToken);
 
-        public async Task<User?> GetByNameid(Nameid nameid, IReadOnlyCollection<Guid>? partitionGuids = null, CancellationToken cancellationToken = default)
+        public async Task<User?> GetByNameid(
+                Nameid nameid,
+                CancellationToken cancellationToken = default
+                )
         {
             return await users.Where(a =>
                     a.Nameid == nameid
-
                     )
                 .SingleOrDefaultAsync(cancellationToken);
         }

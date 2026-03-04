@@ -1,14 +1,35 @@
+using System.Security.Claims;
 using Fargo.Application.Security;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Fargo.Infrastructure.Security
 {
     public sealed class CurrentUser(
             IHttpContextAccessor httpContextAccessor
-            ) : ICurrentUser
+            )
+        : ICurrentUser
     {
-        public Guid UserGuid => throw new NotImplementedException();
+        private readonly IHttpContextAccessor _http = httpContextAccessor;
 
-        public bool IsAuthenticated => throw new NotImplementedException();
+        private ClaimsPrincipal? Principal => _http.HttpContext?.User;
+
+        public bool IsAuthenticated
+            => Principal?.Identity?.IsAuthenticated == true;
+
+        public Guid UserGuid
+        {
+            get
+            {
+                if (!IsAuthenticated)
+                    return Guid.Empty;
+
+                var id =
+                    Principal!.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                    Principal!.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+                return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
+            }
+        }
     }
 }

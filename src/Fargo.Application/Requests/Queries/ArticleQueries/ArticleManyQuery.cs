@@ -1,7 +1,6 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Repositories;
-using Fargo.Application.Security;
 
 namespace Fargo.Application.Requests.Queries.ArticleQueries
 {
@@ -11,8 +10,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
             ) : IQuery<IEnumerable<ArticleReadModel>>;
 
     public sealed class ArticleManyQueryHandler(
-            IArticleReadRepository articleRepository,
-            ICurrentUser currentUser
+            IArticleReadRepository articleRepository
             )
         : IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>>
     {
@@ -22,7 +20,6 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
                 )
         {
             return await articleRepository.GetMany(
-                    [],
                     query.AsOfDateTime,
                     query.Pagination,
                     cancellationToken

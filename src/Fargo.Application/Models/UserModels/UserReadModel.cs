@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Models.PartitionModels;
-using Fargo.Domain.Enums;
+﻿using Fargo.Domain.Enums;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Models.UserModels

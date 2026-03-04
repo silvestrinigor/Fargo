@@ -14,7 +14,6 @@ namespace Fargo.Infrastructure.Persistence.Repositories
 
         public async Task<ArticleReadModel?> GetByGuid(
                 Guid entityGuid,
-                IEnumerable<Guid> partitionGuids,
                 DateTime? asOfDateTime = null,
                 CancellationToken cancellationToken = default
                 )
@@ -26,7 +25,6 @@ namespace Fargo.Infrastructure.Persistence.Repositories
             .SingleOrDefaultAsync(cancellationToken);
 
         public async Task<IReadOnlyCollection<ArticleReadModel>> GetMany(
-                IEnumerable<Guid> partitionGuids,
                 DateTime? asOfDateTime = null,
                 Pagination pagination = default,
                 CancellationToken cancellationToken = default

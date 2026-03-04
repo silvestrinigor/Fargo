@@ -2,8 +2,8 @@
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
-using Fargo.Domain.Services.UserServices;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
@@ -14,8 +14,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             ) : ICommand;
 
     public sealed class UserUpdateCommandHandler(
-            UserGetService userGetService,
-            ActorGetService actorGetService,
+            IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser
@@ -26,13 +25,12 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await actorGetService.GetActor(
+            var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var user = await userGetService.GetUser(
-                    actor,
+            var user = await userRepository.GetByGuid(
                     command.UserGuid,
                     cancellationToken
                     ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);

@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Models.UserModels;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
@@ -26,7 +25,6 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
         {
             var user = await repository.GetByNameid(
                     nameid: command.Nameid,
-                    partitionGuids: null,
                     cancellationToken
                     )
                 ?? throw new InvalidCredentialsException();

@@ -1,7 +1,6 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Repositories;
-using Fargo.Application.Security;
 
 namespace Fargo.Application.Requests.Queries.ItemQueries
 {
@@ -13,8 +12,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
         ) : IQuery<IEnumerable<ItemReadModel>>;
 
     public sealed class ItemManyQueryHandler(
-            IItemReadRepository repository,
-            ICurrentUser currentUser
+            IItemReadRepository repository
             ) : IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>>
     {
         public async Task<IEnumerable<ItemReadModel>> Handle(
@@ -22,7 +20,6 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
                 CancellationToken cancellationToken = default
                 )
             => await repository.GetMany(
-                    [],
                     query.ParentItemGuid,
                     query.ArticleGuid,
                     query.TemporalAsOf,

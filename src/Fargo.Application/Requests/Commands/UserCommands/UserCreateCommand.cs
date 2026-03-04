@@ -27,7 +27,6 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         {
             var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
-                    partitionGuids: null,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
@@ -39,8 +38,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             {
                 Nameid = command.User.Nameid,
                 PasswordHash = new(userPasswordHash),
-                Permissions = command.User.Permissions ?? [],
-                UpdatedBy = actor
+                Permissions = command.User.Permissions ?? []
             };
 
             userRepository.Add(user);

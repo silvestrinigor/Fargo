@@ -14,34 +14,8 @@ namespace Fargo.Infrastructure.Persistence.Repositories
         public void Remove(Item item)
             => context.Items.Remove(item);
 
-        public async Task<bool> IsInsideContainer(
-                Item item,
-                Item otherItem,
-                CancellationToken cancellationToken = default
-                )
-        {
-            if (!otherItem.Article.IsContainer)
-                return false;
-
-            var currentParentGuid = item.ParentItemGuid;
-
-            while (currentParentGuid is not null)
-            {
-                if (currentParentGuid == otherItem.Guid)
-                    return true;
-
-                currentParentGuid = await context.Items
-                    .Where(x => x.Guid == currentParentGuid)
-                    .Select(x => x.ParentItemGuid)
-                    .SingleOrDefaultAsync(cancellationToken);
-            }
-
-            return false;
-        }
-
         public async Task<Item?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 )
             => await items

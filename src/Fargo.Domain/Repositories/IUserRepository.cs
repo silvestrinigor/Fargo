@@ -7,13 +7,11 @@ namespace Fargo.Domain.Repositories
     {
         Task<User?> GetByGuid(
                 Guid entityGuid,
-                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );
 
         Task<User?> GetByNameid(
                 Nameid nameid,
-                IReadOnlyCollection<Guid>? partitionGuids = default,
                 CancellationToken cancellationToken = default
                 );
 

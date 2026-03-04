@@ -13,27 +13,13 @@ namespace Fargo.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Guid);
 
             builder
-                .HasOne(x => x.UpdatedBy)
-                .WithMany()
-                .HasForeignKey(x => x.UpdatedByUserGuid);
-
-            builder
                 .HasOne(x => x.Article)
                 .WithMany()
                 .HasForeignKey(x => x.ArticleGuid)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .HasOne(x => x.ParentItem)
-                .WithMany()
-                .HasForeignKey(x => x.ParentItemGuid);
-
-            builder.HasIndex(x => x.ParentItemGuid);
-
             builder.HasIndex(x => x.ArticleGuid);
-
-            builder.HasMany(x => x.Partitions).WithMany();
         }
     }
 }

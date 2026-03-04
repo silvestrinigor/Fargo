@@ -25,34 +25,22 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
-                    partitionGuids: null,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var article = await articleRepository.GetByGuid(
                     command.ArticleGuid,
-                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
-
-            var updated = false;
 
             if (command.Article.Name is not null)
             {
                 article.Name = command.Article.Name.Value;
-                updated = true;
             }
 
             if (command.Article.Description is not null)
             {
                 article.Description = command.Article.Description.Value;
-                updated = true;
-            }
-
-            if (updated)
-            {
-                article.UpdatedBy = actor;
-                article.UpdatedAt = DateTimeOffset.UtcNow;
             }
 
             await unitOfWork.SaveChanges(cancellationToken);

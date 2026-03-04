@@ -1,8 +1,6 @@
-﻿using Fargo.Domain.Exceptions;
-
-namespace Fargo.Domain.Entities
+﻿namespace Fargo.Domain.Entities
 {
-    public class Item : AuditedEntity
+    public class Item : Entity
     {
         public Guid ArticleGuid
         {
@@ -19,34 +17,5 @@ namespace Fargo.Domain.Entities
                 field = value;
             }
         }
-
-        public Guid? ParentItemGuid
-        {
-            get;
-            private set;
-        }
-
-        public Item? ParentItem
-        {
-            get;
-            internal set
-            {
-                if (value?.Article.IsContainer == false)
-                    throw new ItemParentNotContainerException(value);
-
-                if (value?.Guid == Guid)
-                    throw new ItemParentEqualsItemException(value);
-
-                ParentItemGuid = value?.Guid;
-
-                field = value;
-            }
-        } = null;
-
-        public HashSet<Partition> Partitions
-        {
-            get;
-            init;
-        } = [];
     }
 }

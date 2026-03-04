@@ -1,6 +1,4 @@
-﻿using Fargo.Application.Models.PartitionModels;
-
-namespace Fargo.Application.Models.ItemModels
+﻿namespace Fargo.Application.Models.ItemModels
 {
     public record ItemReadModel(
             Guid Guid,

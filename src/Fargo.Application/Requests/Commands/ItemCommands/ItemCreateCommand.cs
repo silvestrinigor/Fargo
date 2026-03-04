@@ -27,14 +27,12 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
         {
             var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
-                    partitionGuids: null,
                     cancellationToken
                     )
                 ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var article = await articleRepository.GetByGuid(
                     command.Item.ArticleGuid,
-                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     )
                 ?? throw new ArticleNotFoundFargoApplicationException(
@@ -44,8 +42,7 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
 
             var item = new Item
             {
-                Article = article,
-                UpdatedBy = actor
+                Article = article
             };
 
             itemRepository.Add(item);

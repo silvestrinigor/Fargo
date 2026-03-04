@@ -24,14 +24,12 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
         {
             var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
-                    partitionGuids: null,
                     cancellationToken
                     )
                 ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var item = await itemRepository.GetByGuid(
                     command.ItemGuid,
-                    [.. actor.PartitionsAccesses.Select(x => x.Guid)],
                     cancellationToken
                     )
                 ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);
