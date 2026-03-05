@@ -42,9 +42,15 @@ namespace Fargo.Application.Requests.Commands
             var admin = new User
             {
                 Nameid = command.DefaultAdminNameid.Value,
-                PasswordHash = passwordHash,
-                Permissions = [.. Enum.GetValues<ActionType>()]
+                PasswordHash = passwordHash
             };
+
+            var actions = Enum.GetValues<ActionType>().ToList();
+
+            foreach (ActionType a in actions)
+            {
+                admin.AddPermission(a);
+            }
 
             userRepository.Add(admin);
 

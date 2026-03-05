@@ -37,9 +37,13 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             var user = new User
             {
                 Nameid = command.User.Nameid,
-                PasswordHash = new(userPasswordHash),
-                Permissions = command.User.Permissions ?? []
+                PasswordHash = new(userPasswordHash)
             };
+
+            foreach (ActionType a in command.User.Permissions ?? [])
+            {
+                user.AddPermission(a);
+            }
 
             userRepository.Add(user);
 

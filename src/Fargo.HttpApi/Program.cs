@@ -1,24 +1,15 @@
 using Fargo.HttpApi.Extensions;
-using Fargo.Infrastructure.Converters;
-using Fargo.Infrastructure.Converters.ValueObjectsJsonConverters;
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.Converters.Add(new NameJsonConverter());
-    options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
-    options.SerializerOptions.Converters.Add(new LimitJsonConverter());
-    options.SerializerOptions.Converters.Add(new PageJsonConverter());
-    options.SerializerOptions.Converters.Add(new NameidJsonConverter());
-    options.SerializerOptions.Converters.Add(new PasswordJsonConverter());
-});
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddAuthorization();
+var defaultAdminNameid = builder.Configuration.GetApplicationConfiguration("DefaultAdminNameid");
+
+var defaultAdminPassword = builder.Configuration.GetApplicationConfiguration("DefaultAdminPassword");
 
 builder.AddServiceDefaults();
 
@@ -26,23 +17,17 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddProblemDetails();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddDbContext<FargoWriteDbContext>(opt =>
-    opt.UseSqlServer(
-        connectionString
-    ));
+builder.Services.ConfigureFargoHttpJsonOptions();
 
-builder.Services.AddDbContext<FargoReadDbContext>(opt =>
-    opt.UseSqlServer(
-        connectionString
-    ));
+builder.Services.AddFargoScopes();
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddFargoWriteDbContext(connectionString);
 
-var defaultAdminNameid = builder.Configuration["Application:DefaultAdminNameid"];
+builder.Services.AddFargoReadDbContext(connectionString);
 
-var defaultAdminPassword = builder.Configuration["Application:DefaultAdminPassword"];
+builder.Services.AddFargoAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -59,10 +44,10 @@ app.MapFargoUser();
 
 app.MapFargoAuthentication();
 
-await app.Services.InitInfrastructureAsync(defaultAdminNameid, defaultAdminPassword);
-
 app.UseExceptionHandler();
 
 app.MapDefaultEndpoints();
+
+await app.Services.InitializeSystem(defaultAdminNameid, defaultAdminPassword);
 
 app.Run();

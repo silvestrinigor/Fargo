@@ -33,14 +33,44 @@ namespace Fargo.Domain.Entities
             set;
         }
 
-        public List<ActionType> Permissions
+        public IReadOnlyCollection<UserPermission> UserPermissions
         {
-            get;
-            init;
-        } = [];
+            get => userPermissions;
+            init => userPermissions = [.. value];
+        }
+
+        private readonly List<UserPermission> userPermissions = [];
+
+        public void AddPermission(ActionType action)
+        {
+            if (userPermissions.Any(x => x.Action == action))
+            {
+                return;
+            }
+
+            var userPermission = new UserPermission
+            {
+                Action = action,
+                User = this
+            };
+
+            userPermissions.Add(userPermission);
+        }
+
+        public void RemovePermission(ActionType action)
+        {
+            var userPermission = userPermissions.SingleOrDefault(x => x.Action == action);
+
+            if (userPermission == null)
+            {
+                return;
+            }
+
+            userPermissions.Remove(userPermission);
+        }
 
         public bool HasPermission(ActionType action)
-            => Permissions.Any(p => p == action);
+            => UserPermissions.Any(p => p.Action == action);
 
         public void ValidatePermission(ActionType action)
         {

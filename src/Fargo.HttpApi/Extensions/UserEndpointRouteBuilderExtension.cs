@@ -24,10 +24,10 @@ namespace Fargo.HttpApi.Extensions
             group.MapDelete("/{userGuid}", DeleteUser);
         }
 
-        private static async Task<Results<Ok<UserReadModel>, NotFound>> GetSingleUser(
+        private static async Task<Results<Ok<UserResponseModel>, NotFound>> GetSingleUser(
             Guid userGuid,
             DateTime? temporalAsOf,
-            IQueryHandler<UserSingleQuery, UserReadModel?> handler,
+            IQueryHandler<UserSingleQuery, UserResponseModel?> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserSingleQuery(userGuid, temporalAsOf);
@@ -37,11 +37,11 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IEnumerable<UserReadModel>>, NotFound, NoContent>> GetManyUsers(
+        private static async Task<Results<Ok<IEnumerable<UserResponseModel>>, NotFound, NoContent>> GetManyUsers(
             DateTime? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<UserManyQuery, IEnumerable<UserReadModel>> handler,
+            IQueryHandler<UserManyQuery, IEnumerable<UserResponseModel>> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserManyQuery(

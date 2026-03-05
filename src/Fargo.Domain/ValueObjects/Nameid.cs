@@ -30,6 +30,6 @@ namespace Fargo.Domain.ValueObjects
         public static explicit operator Nameid(string value) => new(value);
 
         public static Nameid NewNameid(string value)
-            => new (value);
+            => new(value);
     }
 }

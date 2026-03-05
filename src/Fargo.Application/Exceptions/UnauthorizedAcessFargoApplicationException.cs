@@ -1,7 +1,8 @@
-namespace Fargo.Application.Exceptions;
-
-public class UnauthorizedAccessFargoApplicationException
-    : FargoApplicationException
+namespace Fargo.Application.Exceptions
 {
+    public class UnauthorizedAccessFargoApplicationException
+        : FargoApplicationException
+    {
 
+    }
 }

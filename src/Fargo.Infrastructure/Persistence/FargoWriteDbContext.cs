@@ -1,9 +1,8 @@
 ﻿using Fargo.Domain.Entities;
 using Fargo.Domain.ValueObjects;
-using Fargo.Infrastructure.Persistence.Converters;
-using Fargo.Infrastructure.Persistence.Configurations;
+using Fargo.Infrastructure.Converters;
+using Fargo.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
-using Fargo.Domain.Enums;
 
 namespace Fargo.Infrastructure.Persistence
 {
@@ -15,12 +14,10 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<UserPermission> UserPermission { get; set; }
+
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
-            configurationBuilder
-                .Properties<ActionType>()
-                .HaveConversion<string>();
-
             configurationBuilder
                 .Properties<Name>()
                 .HaveMaxLength(Name.MaxLength)
@@ -49,6 +46,8 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new ItemConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+
+            modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
         }
     }
 }

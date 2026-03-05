@@ -2,9 +2,24 @@
 
 namespace Fargo.Application.Models.ArticleModels
 {
-    public record class ArticleReadModel(
-            Guid Guid,
-            Name Name,
-            Description Description
-            );
+    public class ArticleReadModel
+    {
+        public required Guid Guid
+        {
+            get;
+            init;
+        }
+
+        public required Name Name
+        {
+            get;
+            init;
+        }
+
+        public required Description Description
+        {
+            get;
+            init;
+        }
+    }
 }

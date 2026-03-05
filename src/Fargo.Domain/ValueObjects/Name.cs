@@ -30,6 +30,6 @@
         public static explicit operator Name(string value) => new(value);
 
         public static Name NewName(string value)
-            => new (value);
+            => new(value);
     }
 }
