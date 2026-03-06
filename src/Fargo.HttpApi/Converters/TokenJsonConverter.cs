@@ -13,7 +13,14 @@ namespace Fargo.HttpApi.Converters
 
             var value = reader.GetString()!;
 
-            return new Token(value);
+            try
+            {
+                return new Token(value);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException("Invalid Token format.", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Token value, JsonSerializerOptions options)

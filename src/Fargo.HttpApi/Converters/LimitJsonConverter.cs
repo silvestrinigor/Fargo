@@ -13,7 +13,14 @@ namespace Fargo.HttpApi.Converters
 
             var value = reader.GetInt32()!;
 
-            return new Limit(value);
+            try
+            {
+                return new Limit(value);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException("Invalid Limit format.", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Limit value, JsonSerializerOptions options)

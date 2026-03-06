@@ -13,7 +13,14 @@ namespace Fargo.HttpApi.Converters
 
             var value = reader.GetString()!;
 
-            return new Nameid(value);
+            try
+            {
+                return new Nameid(value);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException("Invalid Nameid format.", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Nameid value, JsonSerializerOptions options)

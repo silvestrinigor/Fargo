@@ -13,7 +13,14 @@ namespace Fargo.HttpApi.Converters
 
             var value = reader.GetInt32()!;
 
-            return new Page(value);
+            try
+            {
+                return new Page(value);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException("Invalid Page format.", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Page value, JsonSerializerOptions options)

@@ -13,7 +13,14 @@ namespace Fargo.HttpApi.Converters
 
             var value = reader.GetString()!;
 
-            return new Password(value);
+            try
+            {
+                return new Password(value);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException("Invalid Password format.", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Password value, JsonSerializerOptions options)

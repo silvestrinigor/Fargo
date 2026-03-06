@@ -13,7 +13,14 @@ namespace Fargo.HttpApi.Converters
 
             var value = reader.GetString()!;
 
-            return new Description(value);
+            try
+            {
+                return new Description(value);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException("Invalid Description format.", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Description value, JsonSerializerOptions options)
