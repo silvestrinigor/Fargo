@@ -11,6 +11,11 @@ namespace Fargo.HttpApi.Middlewares
             {
                 await next(context);
             }
+            catch (BadHttpRequestException)
+            {
+                context.Response.Clear();
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            }
             catch (UnauthorizedAccessFargoApplicationException)
             {
                 context.Response.Clear();
@@ -40,11 +45,6 @@ namespace Fargo.HttpApi.Middlewares
             {
                 context.Response.Clear();
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            }
-            catch (Exception)
-            {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             }
         }
     }

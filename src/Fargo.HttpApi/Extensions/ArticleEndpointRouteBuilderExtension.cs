@@ -17,11 +17,11 @@ namespace Fargo.HttpApi.Extensions
                 .MapGroup("/articles")
                 .RequireAuthorization();
 
-            group.MapGet("/{articleGuid}", GetSingleArticle);
+            group.MapGet("/{articleGuid:guid}", GetSingleArticle);
             group.MapGet("/", GetManyArticle);
             group.MapPost("/", CreateArticle);
-            group.MapPatch("/{articleGuid}", UpdateArticle);
-            group.MapDelete("/{articleGuid}", DeleteArticle);
+            group.MapPatch("/{articleGuid:guid}", UpdateArticle);
+            group.MapDelete("/{articleGuid:guid}", DeleteArticle);
         }
 
         private static async Task<Results<Ok<ArticleReadModel>, NotFound>> GetSingleArticle(

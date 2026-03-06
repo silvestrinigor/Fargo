@@ -14,6 +14,8 @@ var defaultAdminPassword = builder.Configuration.GetApplicationConfiguration("De
 
 builder.AddServiceDefaults();
 
+builder.Services.AddProblemDetails();
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddHttpContextAccessor();
@@ -29,6 +31,8 @@ builder.Services.AddFargoReadDbContext(connectionString);
 builder.Services.AddFargoAuthentication(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
 

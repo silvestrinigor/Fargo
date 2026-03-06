@@ -17,11 +17,11 @@ namespace Fargo.HttpApi.Extensions
                 .MapGroup("/items")
                 .RequireAuthorization();
 
-            group.MapGet("/{itemGuid}", GetSingleItem);
+            group.MapGet("/{itemGuid:guid}", GetSingleItem);
             group.MapGet("/", GetManyItems);
             group.MapPost("/", CreateItem);
-            group.MapPatch("/{itemGuid}", UpdateItem);
-            group.MapDelete("/{itemGuid}", DeleteItem);
+            group.MapPatch("/{itemGuid:guid}", UpdateItem);
+            group.MapDelete("/{itemGuid:guid}", DeleteItem);
         }
 
         private static async Task<Results<Ok<ItemReadModel>, NotFound>> GetSingleItem(

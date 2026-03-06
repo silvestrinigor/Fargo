@@ -17,11 +17,11 @@ namespace Fargo.HttpApi.Extensions
                 .MapGroup("/users")
                 .RequireAuthorization();
 
-            group.MapGet("/{userGuid}", GetSingleUser);
+            group.MapGet("/{userGuid:guid}", GetSingleUser);
             group.MapGet("/", GetManyUsers);
             group.MapPost("/", CreateUser);
-            group.MapPatch("/{userGuid}", UpdateUser);
-            group.MapDelete("/{userGuid}", DeleteUser);
+            group.MapPatch("/{userGuid:guid}", UpdateUser);
+            group.MapDelete("/{userGuid:guid}", DeleteUser);
         }
 
         private static async Task<Results<Ok<UserResponseModel>, NotFound>> GetSingleUser(
