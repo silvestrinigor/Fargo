@@ -101,6 +101,8 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 
+                services.AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>();
+
                 return services;
             }
         }

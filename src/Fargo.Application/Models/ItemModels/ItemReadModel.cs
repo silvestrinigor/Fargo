@@ -2,7 +2,6 @@
 {
     public record ItemReadModel(
             Guid Guid,
-            Guid ArticleGuid,
-            Guid? ParentItemGuid
+            Guid ArticleGuid
             );
 }

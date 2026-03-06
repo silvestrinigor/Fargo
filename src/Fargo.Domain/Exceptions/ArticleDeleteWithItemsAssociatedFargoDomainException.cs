@@ -2,8 +2,8 @@ using Fargo.Domain.Entities;
 
 namespace Fargo.Domain.Exceptions
 {
-    public class ArticleDeleteWithItemsAssociatedException(Article article)
-        : FargoException
+    public class ArticleDeleteWithItemsAssociatedFargoDomainException(Article article)
+        : FargoDomainException
     {
         public Article Article
         {

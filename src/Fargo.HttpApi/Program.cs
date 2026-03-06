@@ -1,4 +1,5 @@
 using Fargo.HttpApi.Extensions;
+using Fargo.HttpApi.Middlewares;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +16,6 @@ builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddProblemDetails();
-
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.ConfigureFargoHttpJsonOptions();
@@ -31,10 +30,16 @@ builder.Services.AddFargoAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<FargoExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapFargoArticle();
 
@@ -43,8 +48,6 @@ app.MapFargoItem();
 app.MapFargoUser();
 
 app.MapFargoAuthentication();
-
-app.UseExceptionHandler();
 
 app.MapDefaultEndpoints();
 

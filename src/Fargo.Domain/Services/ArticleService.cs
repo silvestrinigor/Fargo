@@ -20,7 +20,7 @@ namespace Fargo.Domain.Services
 
             if (hasItens)
             {
-                throw new ArticleDeleteWithItemsAssociatedException(article);
+                throw new ArticleDeleteWithItemsAssociatedFargoDomainException(article);
             }
 
             articleRepository.Remove(article);

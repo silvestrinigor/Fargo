@@ -34,7 +34,6 @@ namespace Fargo.Infrastructure.Repositories
             => await items
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
             .Where(i =>
-                    (parentItemGuid == null || i.ParentItemGuid == parentItemGuid) &&
                     (articleGuid == null || i.ArticleGuid == articleGuid))
             .WithPagination(pagination)
             .AsNoTracking()

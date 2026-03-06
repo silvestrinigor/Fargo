@@ -1,21 +1,21 @@
 namespace Fargo.Domain.Exceptions
 {
-    public class FargoException
+    public class FargoDomainException
         : Exception
     {
-        public FargoException()
+        public FargoDomainException()
             : base()
         {
 
         }
 
-        public FargoException(string? message)
+        public FargoDomainException(string? message)
             : base(message)
         {
 
         }
 
-        public FargoException(string? message, Exception? innerException)
+        public FargoDomainException(string? message, Exception? innerException)
             : base(message, innerException)
         {
 

@@ -76,7 +76,7 @@ namespace Fargo.Domain.Entities
         {
             if (!HasPermission(action))
             {
-                throw new UserNotAuthorizedException(Guid, action);
+                throw new UserNotAuthorizedFargoDomainException(Guid, action);
             }
         }
     }

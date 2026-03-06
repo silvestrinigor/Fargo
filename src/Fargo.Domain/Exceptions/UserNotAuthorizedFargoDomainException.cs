@@ -2,10 +2,10 @@ using Fargo.Domain.Enums;
 
 namespace Fargo.Domain.Exceptions
 {
-    public class UserNotAuthorizedException(
+    public class UserNotAuthorizedFargoDomainException(
             Guid userGuid,
             ActionType action
-            ) : FargoException
+            ) : FargoDomainException
     {
         public Guid UserGuid
         {

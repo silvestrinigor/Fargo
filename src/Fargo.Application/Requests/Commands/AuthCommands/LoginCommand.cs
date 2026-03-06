@@ -33,7 +33,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                     nameid: command.Nameid,
                     cancellationToken
                     )
-                ?? throw new InvalidCredentialsException();
+                ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var isValid = passwordHasher.Verify(
                     user.PasswordHash,
@@ -41,7 +41,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                     );
 
             if (!isValid)
-                throw new InvalidCredentialsException();
+                throw new UnauthorizedAccessFargoApplicationException();
 
             var token = tokenGenerator.Generate(user);
 

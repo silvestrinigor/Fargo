@@ -33,8 +33,6 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
 
             var newTokenHash = tokenHasher.Hash(newRefreshToken);
 
-            refreshTokenRepository.Remove(refreshTokenStored);
-
             var user = await userRepository.GetByGuid(refreshTokenStored.UserGuid, cancellationToken)
                 ?? throw new UnauthorizedAccessFargoApplicationException();
 
@@ -44,6 +42,10 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                 ReplacedByTokenHash = oldRefreshTokenHash,
                 TokenHash = newTokenHash
             };
+
+            refreshTokenRepository.Remove(refreshTokenStored);
+
+            refreshTokenRepository.Add(newRefreshTokenStore);
 
             var newToken = tokenGenerator.Generate(user);
 
