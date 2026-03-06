@@ -54,6 +54,8 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
                 services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
+                services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();
+                services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
 
                 services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
@@ -85,11 +87,15 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IUserReadRepository, UserReadRepository>();
 
+                services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
                 services.AddScoped<ArticleService>();
 
                 services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
 
                 services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+
+                services.AddScoped<ITokenHasher, Sha256TokenHasher>();
 
                 services.AddScoped<ICurrentUser, CurrentUser>();
 

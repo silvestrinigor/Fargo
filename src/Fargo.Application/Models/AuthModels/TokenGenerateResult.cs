@@ -2,9 +2,8 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Models.AuthModels
 {
-    public record AuthResult(
+    public record TokenGenerateResult(
             Token AccessToken,
-            Token RefreshToken,
             DateTimeOffset ExpiresAt
             );
 }

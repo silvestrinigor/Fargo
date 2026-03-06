@@ -16,6 +16,8 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<UserPermission> UserPermission { get; set; }
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder
@@ -37,6 +39,11 @@ namespace Fargo.Infrastructure.Persistence
                 .Properties<PasswordHash>()
                 .HaveMaxLength(PasswordHash.MaxLength)
                 .HaveConversion<PasswordHashStringConverter>();
+
+            configurationBuilder
+                .Properties<TokenHash>()
+                .HaveMaxLength(TokenHash.MaxLength)
+                .HaveConversion<TokenHashStringConverter>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -48,6 +55,8 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new UserConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
+
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
     }
 }

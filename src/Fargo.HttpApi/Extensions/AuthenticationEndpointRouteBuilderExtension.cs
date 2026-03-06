@@ -12,12 +12,35 @@ namespace Fargo.HttpApi.Extensions
             var group = builder.MapGroup("/authentication");
 
             group.MapPost("/login", Login);
+            group.MapPost("/logout", Logout);
+            group.MapPost("/refresh", Refresh);
         }
 
         private static async Task<Ok<AuthResult>> Login(
             LoginCommand command,
             ICommandHandler<LoginCommand, AuthResult> handler,
             CancellationToken cancellationToken)
+        {
+            var result = await handler.Handle(command, cancellationToken);
+
+            return TypedResults.Ok(result);
+        }
+
+        private static async Task<Ok> Logout(
+            LogoutCommand command,
+            ICommandHandler<LogoutCommand> handler,
+            CancellationToken cancellationToken)
+        {
+            await handler.Handle(command, cancellationToken);
+
+            return TypedResults.Ok();
+        }
+
+        private static async Task<Ok<AuthResult>> Refresh(
+                RefreshCommand command,
+                ICommandHandler<RefreshCommand, AuthResult> handler,
+                CancellationToken cancellationToken
+                )
         {
             var result = await handler.Handle(command, cancellationToken);
 

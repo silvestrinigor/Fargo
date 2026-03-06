@@ -1,6 +1,7 @@
 using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
+using Fargo.Domain.ValueObjects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,7 +12,7 @@ namespace Fargo.Infrastructure.Security
 {
     public class JwtTokenGenerator(IConfiguration configuration) : ITokenGenerator
     {
-        public AuthResult Generate(User user)
+        public TokenGenerateResult Generate(User user)
         {
             var key = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
@@ -23,13 +24,10 @@ namespace Fargo.Infrastructure.Security
 
             var claims = new List<Claim>
             {
-                // ✅ standard .NET claim for user id
                 new(ClaimTypes.NameIdentifier, user.Guid.ToString()),
 
-                // ✅ nice to keep a username/nameid too
                 new(ClaimTypes.Name, user.Nameid.ToString() ?? ""),
 
-                // (optional) also keep JWT "sub" as the guid for interoperability
                 new(JwtRegisteredClaimNames.Sub, user.Guid.ToString()),
                 };
 
@@ -43,8 +41,10 @@ namespace Fargo.Infrastructure.Security
                     signingCredentials: credentials
                     );
 
-            return new AuthResult(
-                    new JwtSecurityTokenHandler().WriteToken(token),
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return new TokenGenerateResult(
+                    new Token(tokenString),
                     expiresAt
                     );
         }
