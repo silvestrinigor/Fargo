@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fargo.Application\Fargo.Application.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.Domain\Fargo.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
