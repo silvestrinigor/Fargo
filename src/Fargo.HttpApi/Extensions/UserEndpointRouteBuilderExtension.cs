@@ -9,19 +9,56 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
 {
+    /// <summary>
+    /// Extension responsible for mapping all User endpoints.
+    /// </summary>
     public static class UserEndpointRouteBuilderExtension
     {
+        /// <summary>
+        /// Maps all routes related to users.
+        /// </summary>
+        /// <param name="builder">The endpoint route builder.</param>
         public static void MapFargoUser(this IEndpointRouteBuilder builder)
         {
             var group = builder
                 .MapGroup("/users")
-                .RequireAuthorization();
+                .RequireAuthorization()
+                .WithTags("Users");
 
-            group.MapGet("/{userGuid:guid}", GetSingleUser);
-            group.MapGet("/", GetManyUsers);
-            group.MapPost("/", CreateUser);
-            group.MapPatch("/{userGuid:guid}", UpdateUser);
-            group.MapDelete("/{userGuid:guid}", DeleteUser);
+            group.MapGet("/{userGuid:guid}", GetSingleUser)
+                .WithName("GetUser")
+                .WithSummary("Gets a single user")
+                .WithDescription("Retrieves a single user by its unique identifier. Supports querying historical data using temporal tables.")
+                .Produces<UserResponseModel>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapGet("/", GetManyUsers)
+                .WithName("GetUsers")
+                .WithSummary("Gets multiple users")
+                .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries.")
+                .Produces<IEnumerable<UserResponseModel>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapPost("/", CreateUser)
+                .WithName("CreateUser")
+                .WithSummary("Creates a new user")
+                .WithDescription("Creates a new user and returns the generated identifier.")
+                .Produces<Guid>(StatusCodes.Status200OK);
+
+            group.MapPatch("/{userGuid:guid}", UpdateUser)
+                .WithName("UpdateUser")
+                .WithSummary("Updates an existing user")
+                .WithDescription("Updates a user using partial data.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapDelete("/{userGuid:guid}", DeleteUser)
+                .WithName("DeleteUser")
+                .WithSummary("Deletes a user")
+                .WithDescription("Deletes the specified user from the system.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
         }
 
         private static async Task<Results<Ok<UserResponseModel>, NotFound>> GetSingleUser(

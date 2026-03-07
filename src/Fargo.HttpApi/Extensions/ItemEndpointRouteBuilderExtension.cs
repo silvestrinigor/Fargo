@@ -9,19 +9,58 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
 {
+    /// <summary>
+    /// Extension responsible for mapping all Item endpoints.
+    /// </summary>
     public static class ItemEndpointRouteBuilderExtension
     {
+        /// <summary>
+        /// Maps all routes related to items.
+        /// </summary>
+        /// <param name="builder">The endpoint route builder.</param>
         public static void MapFargoItem(this IEndpointRouteBuilder builder)
         {
             var group = builder
                 .MapGroup("/items")
-                .RequireAuthorization();
+                .RequireAuthorization()
+                .WithTags("Items");
 
-            group.MapGet("/{itemGuid:guid}", GetSingleItem);
-            group.MapGet("/", GetManyItems);
-            group.MapPost("/", CreateItem);
-            group.MapPatch("/{itemGuid:guid}", UpdateItem);
-            group.MapDelete("/{itemGuid:guid}", DeleteItem);
+            group.MapGet("/{itemGuid:guid}", GetSingleItem)
+                .WithName("GetItem")
+                .WithSummary("Gets a single item")
+                .WithDescription("Retrieves a single item by its unique identifier. Supports querying historical data using temporal tables.")
+                .Produces<ItemReadModel>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapGet("/", GetManyItems)
+                .WithName("GetItems")
+                .WithSummary("Gets multiple items")
+                .WithDescription("Retrieves a paginated list of items with optional filters such as parent item or article.")
+                .Produces<IEnumerable<ItemReadModel>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapPost("/", CreateItem)
+                .WithName("CreateItem")
+                .WithSummary("Creates a new item")
+                .WithDescription("Creates a new item and returns the generated identifier.")
+                .Produces<Guid>(StatusCodes.Status200OK);
+
+            group.MapPatch("/{itemGuid:guid}", UpdateItem)
+                .WithName("UpdateItem")
+                .WithSummary("Updates an existing item")
+                .WithDescription("Updates an item using partial data.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapDelete("/{itemGuid:guid}", DeleteItem)
+                .WithName("DeleteItem")
+                .WithSummary("Deletes an item")
+                .WithDescription("Deletes the specified item from the system.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            ;
         }
 
         private static async Task<Results<Ok<ItemReadModel>, NotFound>> GetSingleItem(

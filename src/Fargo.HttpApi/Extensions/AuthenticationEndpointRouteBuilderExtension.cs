@@ -5,15 +5,41 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
 {
+    /// <summary>
+    /// Extension responsible for mapping authentication endpoints.
+    /// </summary>
     public static class AuthenticationEndpointRouteBuilderExtension
     {
+        /// <summary>
+        /// Maps all authentication routes.
+        /// </summary>
+        /// <param name="builder">The endpoint route builder.</param>
         public static void MapFargoAuthentication(this IEndpointRouteBuilder builder)
         {
-            var group = builder.MapGroup("/authentication");
+            var group = builder
+                .MapGroup("/authentication")
+                .WithTags("Authentication");
 
-            group.MapPost("/login", Login);
-            group.MapPost("/logout", Logout);
-            group.MapPost("/refresh", Refresh);
+            group.MapPost("/login", Login)
+                .WithName("Login")
+                .WithSummary("Authenticates a user")
+                .WithDescription("Validates user credentials and returns an access token and refresh token.")
+                .Produces<AuthResult>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status401Unauthorized);
+
+            group.MapPost("/logout", Logout)
+                .WithName("Logout")
+                .WithSummary("Logs out the current user")
+                .WithDescription("Invalidates the current refresh token or session.")
+                .Produces(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status401Unauthorized);
+
+            group.MapPost("/refresh", Refresh)
+                .WithName("RefreshToken")
+                .WithSummary("Refreshes the access token")
+                .WithDescription("Uses a valid refresh token to generate a new access token.")
+                .Produces<AuthResult>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status401Unauthorized);
         }
 
         private static async Task<Ok<AuthResult>> Login(
@@ -37,10 +63,10 @@ namespace Fargo.HttpApi.Extensions
         }
 
         private static async Task<Ok<AuthResult>> Refresh(
-                RefreshCommand command,
-                ICommandHandler<RefreshCommand, AuthResult> handler,
-                CancellationToken cancellationToken
-                )
+            RefreshCommand command,
+            ICommandHandler<RefreshCommand, AuthResult> handler,
+            CancellationToken cancellationToken
+        )
         {
             var result = await handler.Handle(command, cancellationToken);
 

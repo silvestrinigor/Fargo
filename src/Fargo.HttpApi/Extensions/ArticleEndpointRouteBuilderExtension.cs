@@ -9,19 +9,54 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
 {
+    /// <summary>
+    /// Extension responsible for mapping all Article endpoints.
+    /// </summary>
     public static class ArticleEndpointRouteBuilderExtension
     {
+        /// <summary>
+        /// Maps all routes related to articles.
+        /// </summary>
+        /// <param name="builder">The endpoint route builder.</param>
         public static void MapFargoArticle(this IEndpointRouteBuilder builder)
         {
             var group = builder
                 .MapGroup("/articles")
-                .RequireAuthorization();
+                .RequireAuthorization()
+                .WithTags("Articles");
 
-            group.MapGet("/{articleGuid:guid}", GetSingleArticle);
-            group.MapGet("/", GetManyArticle);
-            group.MapPost("/", CreateArticle);
-            group.MapPatch("/{articleGuid:guid}", UpdateArticle);
-            group.MapDelete("/{articleGuid:guid}", DeleteArticle);
+            group.MapGet("/{articleGuid:guid}", GetSingleArticle)
+                .WithName("GetArticle")
+                .WithSummary("Gets a single article")
+                .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
+                .Produces<ArticleReadModel>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapGet("/", GetManyArticle)
+                .WithName("GetArticles")
+                .WithSummary("Gets multiple articles")
+                .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
+                .Produces<IEnumerable<ArticleReadModel>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapPost("/", CreateArticle)
+                .WithName("CreateArticle")
+                .WithSummary("Creates a new article")
+                .WithDescription("Creates a new article and returns the generated identifier.")
+                .Produces<Guid>(StatusCodes.Status200OK);
+
+            group.MapPatch("/{articleGuid:guid}", UpdateArticle)
+                .WithName("UpdateArticle")
+                .WithSummary("Updates an existing article")
+                .WithDescription("Updates an article using partial data.")
+                .Produces(StatusCodes.Status204NoContent);
+
+            group.MapDelete("/{articleGuid:guid}", DeleteArticle)
+                .WithName("DeleteArticle")
+                .WithSummary("Deletes an article")
+                .WithDescription("Deletes the specified article from the system.")
+                .Produces(StatusCodes.Status204NoContent);
         }
 
         private static async Task<Results<Ok<ArticleReadModel>, NotFound>> GetSingleArticle(
