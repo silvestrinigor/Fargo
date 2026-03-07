@@ -50,9 +50,7 @@
         /// Thrown when the value object was not properly initialized.
         /// </exception>
         public string Value
-            => value != string.Empty
-                ? value
-                : throw new InvalidOperationException("Name not initialized.");
+            => value ?? throw new InvalidOperationException("Name not initialized.");
 
         private readonly string value;
 

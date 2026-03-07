@@ -1,0 +1,170 @@
+using Fargo.Domain.ValueObjects;
+
+namespace Fargo.Domain.Tests.ValueObjects;
+
+public sealed class TokenHashTests
+{
+    [Fact]
+    public void Constructor_Should_CreateTokenHash_When_ValueIsValid()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+
+        // Act
+        var tokenHash = new TokenHash(value);
+
+        // Assert
+        Assert.Equal(value, tokenHash.Value);
+    }
+
+    [Fact]
+    public void FromString_Should_CreateTokenHash_When_ValueIsValid()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+
+        // Act
+        var tokenHash = TokenHash.FromString(value);
+
+        // Assert
+        Assert.Equal(value, tokenHash.Value);
+    }
+
+    [Fact]
+    public void ToString_Should_ReturnUnderlyingValue()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+        var tokenHash = new TokenHash(value);
+
+        // Act
+        var result = tokenHash.ToString();
+
+        // Assert
+        Assert.Equal(value, result);
+    }
+
+    [Fact]
+    public void ImplicitOperator_Should_ReturnString()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+        var tokenHash = new TokenHash(value);
+
+        // Act
+        string result = tokenHash;
+
+        // Assert
+        Assert.Equal(value, result);
+    }
+
+    [Fact]
+    public void ExplicitOperator_Should_CreateTokenHash()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+
+        // Act
+        var tokenHash = (TokenHash)value;
+
+        // Assert
+        Assert.Equal(value, tokenHash.Value);
+    }
+
+    [Fact]
+    public void Value_Should_ThrowInvalidOperationException_When_DefaultStructIsUsed()
+    {
+        // Arrange
+        TokenHash tokenHash = default;
+
+        // Act
+        void act() => _ = tokenHash.Value;
+
+        // Assert
+        var exception = Assert.Throws<InvalidOperationException>(act);
+        Assert.Equal("Token hash value must be set.", exception.Message);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Constructor_Should_ThrowArgumentException_When_ValueIsNullOrWhitespace(string? value)
+    {
+        // Act
+        void act() => _ = new TokenHash((string)value!);
+
+        // Assert
+        var exception = Assert.Throws<ArgumentException>(act);
+        Assert.Equal("value", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Should_ThrowArgumentOutOfRangeException_When_ValueIsTooShort()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength - 1);
+
+        // Act
+        void act() => _ = new TokenHash(value);
+
+        // Assert
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(act);
+        Assert.Equal("value", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Should_ThrowArgumentOutOfRangeException_When_ValueIsTooLong()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MaxLength + 1);
+
+        // Act
+        void act() => _ = new TokenHash(value);
+
+        // Assert
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(act);
+        Assert.Equal("value", exception.ParamName);
+    }
+
+    [Theory]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaa\taaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [InlineData(" aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ")]
+    public void Constructor_Should_ThrowArgumentException_When_ValueContainsWhitespace(string value)
+    {
+        // Act
+        void act() => _ = new TokenHash(value);
+
+        // Assert
+        var exception = Assert.Throws<ArgumentException>(act);
+        Assert.Equal("value", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Should_AcceptMinimumLength()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+
+        // Act
+        var tokenHash = new TokenHash(value);
+
+        // Assert
+        Assert.Equal(value, tokenHash.Value);
+    }
+
+    [Fact]
+    public void Constructor_Should_AcceptMaximumLength()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MaxLength);
+
+        // Act
+        var tokenHash = new TokenHash(value);
+
+        // Assert
+        Assert.Equal(value, tokenHash.Value);
+    }
+}
