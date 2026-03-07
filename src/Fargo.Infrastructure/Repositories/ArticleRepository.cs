@@ -31,9 +31,7 @@ namespace Fargo.Infrastructure.Repositories
                 CancellationToken cancellationToken = default
                 )
             => await articles
-            .Where(a =>
-                   a.Guid == entityGuid
-                  )
+            .Where(a => a.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
     }
 }

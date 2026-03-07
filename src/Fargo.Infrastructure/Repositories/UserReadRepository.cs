@@ -20,6 +20,7 @@ namespace Fargo.Infrastructure.Repositories
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
             .Where(a => a.Guid == entityGuid)
             .AsNoTracking()
+            .OrderBy(x => x.Guid)
             .SingleOrDefaultAsync(cancellationToken);
 
         public async Task<IReadOnlyCollection<UserReadModel>> GetMany(
@@ -31,6 +32,7 @@ namespace Fargo.Infrastructure.Repositories
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
             .Include(u => u.UserPermissions)
             .WithPagination(pagination)
+            .OrderBy(x => x.Guid)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }

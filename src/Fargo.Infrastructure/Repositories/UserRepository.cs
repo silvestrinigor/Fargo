@@ -24,9 +24,7 @@ namespace Fargo.Infrastructure.Repositories
                 )
             => await users
             .Include(u => u.UserPermissions)
-            .Where(a =>
-                    a.Guid == entityGuid
-                  )
+            .Where(a => a.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
 
         public async Task<User?> GetByNameid(
@@ -34,9 +32,8 @@ namespace Fargo.Infrastructure.Repositories
                 CancellationToken cancellationToken = default
                 )
         {
-            return await users.Where(a =>
-                    a.Nameid == nameid
-                    )
+            return await users
+                .Where(a => a.Nameid == nameid)
                 .SingleOrDefaultAsync(cancellationToken);
         }
 

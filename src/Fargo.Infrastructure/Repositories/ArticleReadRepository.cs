@@ -20,8 +20,8 @@ namespace Fargo.Infrastructure.Repositories
                         )
                     => await articles
                     .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
-                    .Where(a =>
-                            a.Guid == entityGuid)
+                    .Where(a => a.Guid == entityGuid)
+                    .OrderBy(x => x.Guid)
                     .AsNoTracking()
                     .SingleOrDefaultAsync(cancellationToken);
 
@@ -33,6 +33,7 @@ namespace Fargo.Infrastructure.Repositories
                     => await articles
                     .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
                     .WithPagination(pagination)
+                    .OrderBy(x => x.Guid)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
         }
