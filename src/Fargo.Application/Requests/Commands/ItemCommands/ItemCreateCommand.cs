@@ -8,10 +8,19 @@ using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.ItemCommands
 {
+    /// <summary>
+    /// Command used to create a new <see cref="Item"/>.
+    /// </summary>
+    /// <param name="Item">
+    /// The data required to create the item.
+    /// </param>
     public sealed record ItemCreateCommand(
             ItemCreateModel Item
             ) : ICommand<Guid>;
 
+    /// <summary>
+    /// Handles the execution of <see cref="ItemCreateCommand"/>.
+    /// </summary>
     public sealed class ItemCreateCommandHandler(
             IItemRepository itemRepository,
             IArticleRepository articleRepository,
@@ -20,6 +29,18 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             ICurrentUser currentUser
             ) : ICommandHandler<ItemCreateCommand, Guid>
     {
+        /// <summary>
+        /// Executes the command to create a new item.
+        /// </summary>
+        /// <param name="command">The command containing the item creation data.</param>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <returns>The unique identifier of the created item.</returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current user cannot be resolved.
+        /// </exception>
+        /// <exception cref="ArticleNotFoundFargoApplicationException">
+        /// Thrown when the specified article does not exist.
+        /// </exception>
         public async Task<Guid> Handle(
                 ItemCreateCommand command,
                 CancellationToken cancellationToken = default
@@ -28,15 +49,13 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
             var actor = await userRepository.GetByGuid(
                     currentUser.UserGuid,
                     cancellationToken
-                    )
-                ?? throw new UnauthorizedAccessFargoApplicationException();
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var article = await articleRepository.GetByGuid(
                     command.Item.ArticleGuid,
                     cancellationToken
-                    )
-                ?? throw new ArticleNotFoundFargoApplicationException(
-                        command.Item.ArticleGuid);
+                    ) ?? throw new ArticleNotFoundFargoApplicationException(
+                            command.Item.ArticleGuid);
 
             actor.ValidatePermission(ActionType.CreateItem);
 

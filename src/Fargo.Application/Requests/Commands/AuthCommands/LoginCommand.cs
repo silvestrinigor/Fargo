@@ -9,13 +9,21 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.AuthCommands
 {
+    /// <summary>
+    /// Command used to authenticate a user with a NAMEID and password.
+    /// </summary>
+    /// <param name="Nameid">The unique user identifier used for login.</param>
+    /// <param name="Password">The plaintext password provided for authentication.</param>
     public sealed record LoginCommand(
             Nameid Nameid,
             Password Password
             ) : ICommand<AuthResult>;
 
+    /// <summary>
+    /// Handles the execution of <see cref="LoginCommand"/>.
+    /// </summary>
     public sealed class LoginCommandHandler(
-            IUserRepository repository,
+            IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             ITokenGenerator tokenGenerator,
             IRefreshTokenGenerator refreshTokenGenerator,
@@ -24,16 +32,27 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
             IUnitOfWork unitOfWork
             ) : ICommandHandler<LoginCommand, AuthResult>
     {
+        /// <summary>
+        /// Authenticates a user and generates access and refresh tokens.
+        /// </summary>
+        /// <param name="command">The command containing the login credentials.</param>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <returns>
+        /// An <see cref="AuthResult"/> containing the generated access token,
+        /// refresh token, and access token expiration time.
+        /// </returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the user does not exist or the password is invalid.
+        /// </exception>
         public async Task<AuthResult> Handle(
                 LoginCommand command,
                 CancellationToken cancellationToken = default
                 )
         {
-            var user = await repository.GetByNameid(
-                    nameid: command.Nameid,
+            var user = await userRepository.GetByNameid(
+                    command.Nameid,
                     cancellationToken
-                    )
-                ?? throw new UnauthorizedAccessFargoApplicationException();
+                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
             var isValid = passwordHasher.Verify(
                     user.PasswordHash,
@@ -41,25 +60,31 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                     );
 
             if (!isValid)
-                throw new UnauthorizedAccessFargoApplicationException();
-
-            var token = tokenGenerator.Generate(user);
-
-            var rawRefresh = refreshTokenGenerator.Generate();
-
-            var refreshHash = tokenHasher.Hash(rawRefresh);
-
-            var refreshTokenStored = new RefreshToken
             {
-                TokenHash = refreshHash,
-                UserGuid = user.Guid
+                throw new UnauthorizedAccessFargoApplicationException();
+            }
+
+            var accessTokenResult = tokenGenerator.Generate(user);
+
+            var rawRefreshToken = refreshTokenGenerator.Generate();
+
+            var refreshTokenHash = tokenHasher.Hash(rawRefreshToken);
+
+            var refreshToken = new RefreshToken
+            {
+                UserGuid = user.Guid,
+                TokenHash = refreshTokenHash
             };
 
-            refreshTokenRepository.Add(refreshTokenStored);
+            refreshTokenRepository.Add(refreshToken);
 
             await unitOfWork.SaveChanges(cancellationToken);
 
-            return new AuthResult(token.AccessToken, rawRefresh, token.ExpiresAt);
+            return new AuthResult(
+                    accessTokenResult.AccessToken,
+                    rawRefreshToken,
+                    accessTokenResult.ExpiresAt
+                    );
         }
     }
 }

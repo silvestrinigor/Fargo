@@ -9,10 +9,19 @@ using Fargo.Domain.Security;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
+    /// <summary>
+    /// Command used to create a new <see cref="User"/>.
+    /// </summary>
+    /// <param name="User">
+    /// The data required to create the user.
+    /// </param>
     public sealed record UserCreateCommand(
             UserCreateModel User
             ) : ICommand<Guid>;
 
+    /// <summary>
+    /// Handles the execution of <see cref="UserCreateCommand"/>.
+    /// </summary>
     public sealed class UserCreateCommandHandler(
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
@@ -20,6 +29,15 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             IPasswordHasher passwordHasher
             ) : ICommandHandler<UserCreateCommand, Guid>
     {
+        /// <summary>
+        /// Executes the command to create a new user.
+        /// </summary>
+        /// <param name="command">The command containing the user creation data.</param>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <returns>The unique identifier of the created user.</returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current user cannot be resolved.
+        /// </exception>
         public async Task<Guid> Handle(
                 UserCreateCommand command,
                 CancellationToken cancellationToken = default
@@ -30,19 +48,19 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
-            var userPasswordHash = passwordHasher.Hash(command.User.Password);
-
             actor.ValidatePermission(ActionType.CreateUser);
+
+            var userPasswordHash = passwordHasher.Hash(command.User.Password);
 
             var user = new User
             {
                 Nameid = command.User.Nameid,
-                PasswordHash = new(userPasswordHash)
+                PasswordHash = userPasswordHash
             };
 
-            foreach (ActionType a in command.User.Permissions ?? [])
+            foreach (var action in command.User.Permissions ?? [])
             {
-                user.AddPermission(a);
+                user.AddPermission(action);
             }
 
             userRepository.Add(user);

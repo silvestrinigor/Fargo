@@ -1,33 +1,104 @@
 ﻿namespace Fargo.Domain.ValueObjects
 {
+    /// <summary>
+    /// Represents a hashed password stored in the system.
+    ///
+    /// This value object guarantees that the stored value is a valid
+    /// password hash produced by the hashing infrastructure.
+    /// The plaintext password should never be persisted.
+    /// </summary>
     public readonly struct PasswordHash
     {
+        /// <summary>
+        /// Minimum allowed length for the password hash.
+        /// </summary>
+        public const int MinLength = 50;
+
+        /// <summary>
+        /// Maximum allowed length for the password hash.
+        /// </summary>
+        public const int MaxLength = 512;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordHash"/> value object.
+        /// </summary>
+        /// <param name="value">The hashed password value.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the value is null, empty, or contains invalid characters.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when the value length is outside the allowed range.
+        /// </exception>
         public PasswordHash(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Cannot be empty.", nameof(value));
-
-            if (value.Length > MaxLength || value.Length < MinLength)
-                throw new ArgumentOutOfRangeException(nameof(value), value.Length.ToString());
-
+            Validate(value);
             this.value = value;
         }
 
-        public const int MaxLength = 512;
-
-        public const int MinLength = 50;
-
+        /// <summary>
+        /// Gets the underlying hash string.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the struct is not properly initialized.
+        /// </exception>
         public string Value
-            => value != string.Empty
-            ? value
-            : throw new InvalidOperationException("Password hash value must be set.");
+            => value ?? throw new InvalidOperationException("Password hash value must be set.");
 
         private readonly string value;
 
-        public static PasswordHash FromString(string value) => new(value);
+        /// <summary>
+        /// Creates a <see cref="PasswordHash"/> from the specified string.
+        /// </summary>
+        public static PasswordHash FromString(string value)
+            => new(value);
 
-        public static implicit operator string(PasswordHash passwordHash) => passwordHash.Value;
+        /// <summary>
+        /// Returns the string representation of the password hash.
+        /// </summary>
+        public override string ToString()
+            => Value;
 
-        public static explicit operator PasswordHash(string value) => new(value);
+        /// <summary>
+        /// Implicitly converts a <see cref="PasswordHash"/> to <see cref="string"/>.
+        /// </summary>
+        public static implicit operator string(PasswordHash passwordHash)
+            => passwordHash.Value;
+
+        /// <summary>
+        /// Explicitly converts a <see cref="string"/> to <see cref="PasswordHash"/>.
+        /// </summary>
+        public static explicit operator PasswordHash(string value)
+            => new(value);
+
+        /// <summary>
+        /// Validates the password hash value.
+        /// </summary>
+        private static void Validate(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException(
+                    "Password hash cannot be null or empty.",
+                    nameof(value));
+            }
+
+            if (value.Length < MinLength || value.Length > MaxLength)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(value),
+                    value.Length,
+                    $"Password hash length must be between {MinLength} and {MaxLength} characters.");
+            }
+
+            foreach (var c in value)
+            {
+                if (char.IsWhiteSpace(c))
+                {
+                    throw new ArgumentException(
+                        "Password hash cannot contain whitespace.",
+                        nameof(value));
+                }
+            }
+        }
     }
 }

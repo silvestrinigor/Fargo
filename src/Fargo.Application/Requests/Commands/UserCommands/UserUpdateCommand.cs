@@ -2,17 +2,29 @@
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
-using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
+    /// <summary>
+    /// Command used to update an existing user.
+    /// </summary>
+    /// <param name="UserGuid">
+    /// The unique identifier of the user to update.
+    /// </param>
+    /// <param name="User">
+    /// The data used to update the user.
+    /// </param>
     public sealed record UserUpdateCommand(
             Guid UserGuid,
             UserUpdateModel User
             ) : ICommand;
 
+    /// <summary>
+    /// Handles the execution of <see cref="UserUpdateCommand"/>.
+    /// </summary>
     public sealed class UserUpdateCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
@@ -20,6 +32,18 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             ICurrentUser currentUser
             ) : ICommandHandler<UserUpdateCommand>
     {
+        /// <summary>
+        /// Executes the command to update an existing user.
+        /// </summary>
+        /// <param name="command">The command containing the user identifier and update data.</param>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current user cannot be resolved.
+        /// </exception>
+        /// <exception cref="UserNotFoundFargoApplicationException">
+        /// Thrown when the specified user does not exist.
+        /// </exception>
         public async Task Handle(
                 UserUpdateCommand command,
                 CancellationToken cancellationToken = default
@@ -43,7 +67,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             {
                 var userPasswordHash = passwordHasher.Hash(command.User.Password.NewPassword);
 
-                user.PasswordHash = new PasswordHash(userPasswordHash);
+                user.PasswordHash = userPasswordHash;
             }
 
             await unitOfWork.SaveChanges(cancellationToken);
