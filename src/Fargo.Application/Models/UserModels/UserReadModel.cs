@@ -39,15 +39,6 @@ namespace Fargo.Application.Models.UserModels
         }
 
         /// <summary>
-        /// Gets the hashed password stored for the user.
-        /// </summary>
-        public required PasswordHash PasswordHash
-        {
-            get;
-            init;
-        }
-
-        /// <summary>
         /// Gets the permissions assigned to the user.
         /// </summary>
         public required IReadOnlyCollection<UserPermissionReadModel> UserPermissions

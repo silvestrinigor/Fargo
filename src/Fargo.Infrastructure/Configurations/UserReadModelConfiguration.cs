@@ -18,8 +18,6 @@ namespace Fargo.Infrastructure.Configurations
 
             builder.Property(x => x.Description).IsRequired();
 
-            builder.Property(x => x.PasswordHash).IsRequired();
-
             builder.HasMany(x => x.UserPermissions)
                 .WithOne().HasForeignKey(x => x.UserGuid);
         }
