@@ -58,6 +58,8 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                     cancellationToken
                     ) ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);
 
+            actor.ValidatePermission(ActionType.EditItem);
+
             await unitOfWork.SaveChanges(cancellationToken);
         }
     }

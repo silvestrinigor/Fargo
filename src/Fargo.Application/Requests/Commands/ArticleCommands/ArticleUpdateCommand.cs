@@ -2,6 +2,7 @@
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
@@ -51,6 +52,8 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                     currentUser.UserGuid,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
+
+            actor.ValidatePermission(ActionType.EditArticle);
 
             var article = await articleRepository.GetByGuid(
                     command.ArticleGuid,

@@ -54,6 +54,8 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidatePermission(ActionType.EditUser);
+
             var user = await userRepository.GetByGuid(
                     command.UserGuid,
                     cancellationToken

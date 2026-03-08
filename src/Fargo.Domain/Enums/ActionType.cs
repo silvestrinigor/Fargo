@@ -19,6 +19,11 @@
         DeleteArticle,
 
         /// <summary>
+        /// Allows editing existing articles from the system.
+        /// </summary>
+        EditArticle,
+
+        /// <summary>
         /// Allows creating new items associated with articles.
         /// </summary>
         CreateItem,
@@ -27,6 +32,11 @@
         /// Allows deleting items from the system.
         /// </summary>
         DeleteItem,
+
+        /// <summary>
+        /// Allows editing items from the system.
+        /// </summary>
+        EditItem,
 
         /// <summary>
         /// Allows creating new users.
@@ -39,6 +49,11 @@
         DeleteUser,
 
         /// <summary>
+        /// Allows editing users.
+        /// </summary>
+        EditUser,
+
+        /// <summary>
         /// Allows creating partitions in the system.
         /// </summary>
         CreatePartition,
@@ -46,6 +61,11 @@
         /// <summary>
         /// Allows deleting partitions.
         /// </summary>
-        DeletePartition
+        DeletePartition,
+
+        /// <summary>
+        /// Allows editing partitions.
+        /// </summary>
+        EditPartition,
     }
 }
