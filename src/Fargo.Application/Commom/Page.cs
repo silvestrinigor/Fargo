@@ -26,9 +26,8 @@ namespace Fargo.Application.Commom
             if (value < MinValue || value > MaxValue)
             {
                 throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        $"Must be between {MinValue} and {MaxValue}"
-                        );
+                    nameof(value),
+                    $"Must be between {MinValue} and {MaxValue}.");
             }
 
             this.value = value;
@@ -44,22 +43,18 @@ namespace Fargo.Application.Commom
         /// </summary>
         public const int MaxValue = int.MaxValue;
 
-        /// <summary>
-        /// Default page value used when none is provided.
-        /// </summary>
-        public const int DefaultValue = MinValue;
-
-        /// <summary>
-        /// Gets the effective page value.
-        /// </summary>
-        /// <remarks>
-        /// If the struct is in its default state, the default page value is returned.
-        /// </remarks>
-        public int Value => value == 0
-            ? DefaultValue
-            : value;
-
         private readonly int value;
+
+        /// <summary>
+        /// Gets the page value.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the instance was not properly initialized.
+        /// </exception>
+        public int Value => value == 0
+            ? throw new InvalidOperationException(
+                $"{nameof(Page)} was not initialized. Do not use the default value of this struct.")
+            : value;
 
         /// <summary>
         /// Implicitly converts <see cref="Page"/> to <see cref="int"/>.
@@ -90,10 +85,9 @@ namespace Fargo.Application.Commom
         /// Attempts to parse a string into a <see cref="Page"/>.
         /// </summary>
         public static bool TryParse(
-                [NotNullWhen(true)] string? s,
-                IFormatProvider? provider,
-                [MaybeNullWhen(false)] out Page result
-                )
+            [NotNullWhen(true)] string? s,
+            IFormatProvider? provider,
+            [MaybeNullWhen(false)] out Page result)
         {
             result = default;
 
@@ -103,11 +97,10 @@ namespace Fargo.Application.Commom
             }
 
             var parsed = int.TryParse(
-                    s,
-                    NumberStyles.Integer,
-                    provider ?? CultureInfo.InvariantCulture,
-                    out var value
-                    );
+                s,
+                NumberStyles.Integer,
+                provider ?? CultureInfo.InvariantCulture,
+                out var value);
 
             if (!parsed)
             {
@@ -120,7 +113,6 @@ namespace Fargo.Application.Commom
             }
 
             result = new Page(value);
-
             return true;
         }
     }

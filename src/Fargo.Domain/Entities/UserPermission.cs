@@ -8,7 +8,7 @@ namespace Fargo.Domain.Entities
     /// Each instance defines that a specific <see cref="User"/> is allowed
     /// to perform a particular <see cref="ActionType"/>.
     /// </summary>
-    public class UserPermission
+    public class UserPermission : Entity
     {
         /// <summary>
         /// Gets the unique identifier of the user that owns this permission.

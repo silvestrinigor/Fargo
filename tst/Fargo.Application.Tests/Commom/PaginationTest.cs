@@ -5,17 +5,6 @@ namespace Fargo.Application.Tests.Commom;
 public sealed class PaginationTests
 {
     [Fact]
-    public void Constructor_Should_UseDefaultValues_When_NoArgumentsProvided()
-    {
-        // Act
-        var pagination = new Pagination();
-
-        // Assert
-        Assert.Equal(Page.DefaultValue, pagination.Page.Value);
-        Assert.Equal(Limit.DefaultValue, pagination.Limit.Value);
-    }
-
-    [Fact]
     public void Constructor_Should_SetPageAndLimit_When_Provided()
     {
         // Arrange
@@ -28,6 +17,17 @@ public sealed class PaginationTests
         // Assert
         Assert.Equal(3, pagination.Page.Value);
         Assert.Equal(50, pagination.Limit.Value);
+    }
+
+    [Fact]
+    public void Constructor_Should_AllowDefaultValues_When_NoArgumentsProvided()
+    {
+        // Act
+        var pagination = new Pagination();
+
+        // Assert
+        Assert.Equal(default(Page), pagination.Page);
+        Assert.Equal(default(Limit), pagination.Limit);
     }
 
     [Fact]
@@ -70,44 +70,55 @@ public sealed class PaginationTests
     }
 
     [Fact]
-    public void Skip_Should_WorkWithDefaultLimit()
-    {
-        // Arrange
-        var pagination = new Pagination(new Page(2));
-
-        // Act
-        var result = pagination.Skip;
-
-        // Assert
-        Assert.Equal(Limit.DefaultValue, pagination.Take);
-        Assert.Equal((2 - 1) * Limit.DefaultValue, result);
-    }
-
-    [Fact]
-    public void Take_Should_WorkWithDefaultLimit()
-    {
-        // Arrange
-        var pagination = new Pagination();
-
-        // Act
-        var result = pagination.Take;
-
-        // Assert
-        Assert.Equal(Limit.DefaultValue, result);
-    }
-
-    [Fact]
-    public void Skip_Should_WorkWithDefaultPage()
+    public void Skip_Should_ThrowInvalidOperationException_When_PageIsDefault()
     {
         // Arrange
         var pagination = new Pagination(limit: new Limit(30));
 
         // Act
-        var result = pagination.Skip;
+        void act() => _ = pagination.Skip;
 
         // Assert
-        Assert.Equal(0, result);
-        Assert.Equal(30, pagination.Take);
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
+    [Fact]
+    public void Skip_Should_ThrowInvalidOperationException_When_LimitIsDefault()
+    {
+        // Arrange
+        var pagination = new Pagination(new Page(2));
+
+        // Act
+        void act() => _ = pagination.Skip;
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
+    [Fact]
+    public void Take_Should_ThrowInvalidOperationException_When_LimitIsDefault()
+    {
+        // Arrange
+        var pagination = new Pagination();
+
+        // Act
+        void act() => _ = pagination.Take;
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
+    [Fact]
+    public void Skip_Should_ThrowInvalidOperationException_When_PageAndLimitAreDefault()
+    {
+        // Arrange
+        var pagination = new Pagination();
+
+        // Act
+        void act() => _ = pagination.Skip;
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]

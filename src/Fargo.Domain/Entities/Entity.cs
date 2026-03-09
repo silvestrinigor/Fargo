@@ -16,14 +16,27 @@ namespace Fargo.Domain.Entities
     {
         /// <summary>
         /// Gets the unique identifier of the entity.
-        ///
-        /// The identifier is generated automatically using <see cref="Guid.NewGuid"/>
-        /// when the entity instance is created.
         /// </summary>
+        /// <remarks>
+        /// A new identifier is generated automatically using <see cref="Guid.NewGuid"/>
+        /// when the entity instance is created.
+        ///
+        /// The identifier cannot be <see cref="Guid.Empty"/>. Attempting to initialize
+        /// this property with an empty value results in an <see cref="ArgumentException"/>.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the assigned value is <see cref="Guid.Empty"/>.
+        /// </exception>
         public Guid Guid
         {
             get;
-            init;
+            init
+            {
+                if (value == Guid.Empty)
+                    throw new ArgumentException("Entity Guid cannot be empty.", nameof(value));
+
+                field = value;
+            }
         } = Guid.NewGuid();
 
         /// <summary>

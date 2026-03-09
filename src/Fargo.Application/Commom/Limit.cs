@@ -28,8 +28,8 @@ namespace Fargo.Application.Commom
             if (value < MinValue || value > MaxValue)
             {
                 throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        $"Must be between {MinValue} and {MaxValue}");
+                    nameof(value),
+                    $"Must be between {MinValue} and {MaxValue}.");
             }
 
             this.value = value;
@@ -45,23 +45,18 @@ namespace Fargo.Application.Commom
         /// </summary>
         public const int MaxValue = 1000;
 
-        /// <summary>
-        /// Default limit value used when none is provided.
-        /// </summary>
-        public const int DefaultValue = 20;
-
-        /// <summary>
-        /// Gets the effective limit value.
-        /// </summary>
-        /// <remarks>
-        /// If the underlying value is zero (default struct state),
-        /// the default limit value is returned.
-        /// </remarks>
-        public int Value => value == 0
-            ? DefaultValue
-            : value;
-
         private readonly int value;
+
+        /// <summary>
+        /// Gets the limit value.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the instance was not properly initialized.
+        /// </exception>
+        public int Value => value == 0
+            ? throw new InvalidOperationException(
+                $"{nameof(Limit)} was not initialized. Do not use the default value of this struct.")
+            : value;
 
         /// <summary>
         /// Implicitly converts <see cref="Limit"/> to <see cref="int"/>.
@@ -92,10 +87,9 @@ namespace Fargo.Application.Commom
         /// Attempts to parse a string into a <see cref="Limit"/>.
         /// </summary>
         public static bool TryParse(
-                [NotNullWhen(true)] string? s,
-                IFormatProvider? provider,
-                [MaybeNullWhen(false)] out Limit result
-                )
+            [NotNullWhen(true)] string? s,
+            IFormatProvider? provider,
+            [MaybeNullWhen(false)] out Limit result)
         {
             result = default;
 
@@ -105,11 +99,10 @@ namespace Fargo.Application.Commom
             }
 
             var parsed = int.TryParse(
-                    s,
-                    NumberStyles.Integer,
-                    provider ?? CultureInfo.InvariantCulture,
-                    out var value
-                    );
+                s,
+                NumberStyles.Integer,
+                provider ?? CultureInfo.InvariantCulture,
+                out var value);
 
             if (!parsed)
             {
@@ -122,7 +115,6 @@ namespace Fargo.Application.Commom
             }
 
             result = new Limit(value);
-
             return true;
         }
     }

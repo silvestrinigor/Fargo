@@ -89,7 +89,7 @@ namespace Fargo.HttpApi.Extensions
                 parentItemGuid,
                 articleGuid,
                 temporalAsOf,
-                new(page ?? default, limit ?? default)
+                new Pagination(page ?? Page.DefaultPage(), limit ?? Limit.DefaultLimit())
             );
 
             var response = await handler.Handle(query, cancellationToken);

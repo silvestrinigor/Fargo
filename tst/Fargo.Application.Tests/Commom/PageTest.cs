@@ -57,16 +57,16 @@ public sealed class PageTests
     }
 
     [Fact]
-    public void Value_Should_ReturnDefault_When_DefaultStructIsUsed()
+    public void Value_Should_ThrowInvalidOperationException_When_DefaultStructIsUsed()
     {
         // Arrange
         Page page = default;
 
         // Act
-        var result = page.Value;
+        void act() => _ = page.Value;
 
         // Assert
-        Assert.Equal(Page.DefaultValue, result);
+        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -80,6 +80,19 @@ public sealed class PageTests
 
         // Assert
         Assert.Equal(7, result);
+    }
+
+    [Fact]
+    public void ImplicitOperator_Should_ThrowInvalidOperationException_When_DefaultStructIsUsed()
+    {
+        // Arrange
+        Page page = default;
+
+        // Act
+        void act() => _ = (int)page;
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -115,6 +128,7 @@ public sealed class PageTests
     [InlineData("abc")]
     [InlineData("0")]
     [InlineData("-1")]
+    [InlineData("2147483648")]
     public void Parse_Should_ThrowFormatException_When_ValueIsInvalid(string? value)
     {
         // Act
@@ -153,7 +167,7 @@ public sealed class PageTests
 
         // Assert
         Assert.False(result);
-        Assert.Equal(default, page);
+        Assert.Equal(default(Page), page);
     }
 
     [Fact]

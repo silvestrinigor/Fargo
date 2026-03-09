@@ -9,6 +9,17 @@ public sealed class EntityTests
     private sealed class AnotherEntity : Entity { }
 
     [Fact]
+    public void Guid_Should_ThrowArgumentException_When_InitializedWithEmptyGuid()
+    {
+        // Arrange / Act
+        var action = () => new TestEntity { Guid = Guid.Empty };
+
+        // Assert
+        var exception = Assert.Throws<ArgumentException>(action);
+        Assert.Equal("value", exception.ParamName);
+    }
+
+    [Fact]
     public void Equals_Should_ReturnTrue_When_SameReference()
     {
         // Arrange
@@ -40,20 +51,6 @@ public sealed class EntityTests
         // Arrange
         var entity1 = new TestEntity();
         var entity2 = new AnotherEntity { Guid = entity1.Guid };
-
-        // Act
-        var result = entity1.Equals(entity2);
-
-        // Assert
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void Equals_Should_ReturnFalse_When_GuidIsEmpty()
-    {
-        // Arrange
-        var entity1 = new TestEntity { Guid = Guid.Empty };
-        var entity2 = new TestEntity { Guid = Guid.Empty };
 
         // Act
         var result = entity1.Equals(entity2);

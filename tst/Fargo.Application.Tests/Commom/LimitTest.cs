@@ -44,16 +44,16 @@ public sealed class LimitTests
     }
 
     [Fact]
-    public void Value_Should_ReturnDefault_When_DefaultStructIsUsed()
+    public void Value_Should_ThrowInvalidOperationException_When_DefaultStructIsUsed()
     {
         // Arrange
         Limit limit = default;
 
         // Act
-        var result = limit.Value;
+        void act() => _ = limit.Value;
 
         // Assert
-        Assert.Equal(Limit.DefaultValue, result);
+        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -67,6 +67,19 @@ public sealed class LimitTests
 
         // Assert
         Assert.Equal(42, result);
+    }
+
+    [Fact]
+    public void ImplicitOperator_Should_ThrowInvalidOperationException_When_DefaultStructIsUsed()
+    {
+        // Arrange
+        Limit limit = default;
+
+        // Act
+        void act() => _ = (int)limit;
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -95,14 +108,18 @@ public sealed class LimitTests
         Assert.Equal(25, limit.Value);
     }
 
-    [Fact]
-    public void Parse_Should_ThrowFormatException_When_ValueIsInvalid()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("invalid")]
+    [InlineData("0")]
+    [InlineData("-1")]
+    [InlineData("1001")]
+    public void Parse_Should_ThrowFormatException_When_ValueIsInvalid(string? value)
     {
-        // Arrange
-        var value = "invalid";
-
         // Act
-        void act() => Limit.Parse(value, null);
+        void act() => Limit.Parse(value!, null);
 
         // Assert
         Assert.Throws<FormatException>(act);
