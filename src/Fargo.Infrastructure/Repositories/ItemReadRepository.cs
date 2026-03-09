@@ -14,7 +14,7 @@ namespace Fargo.Infrastructure.Repositories
 
         public async Task<ItemReadModel?> GetByGuid(
                 Guid entityGuid,
-                DateTime? asOfDateTime = null,
+                DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default
                 )
             => await items
@@ -27,7 +27,7 @@ namespace Fargo.Infrastructure.Repositories
         public async Task<IReadOnlyCollection<ItemReadModel>> GetMany(
                 Guid? parentItemGuid = null,
                 Guid? articleGuid = null,
-                DateTime? asOfDateTime = null,
+                DateTimeOffset? asOfDateTime = null,
                 Pagination pagination = default,
                 CancellationToken cancellationToken = default
                 )

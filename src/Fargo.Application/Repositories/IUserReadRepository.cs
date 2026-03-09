@@ -32,7 +32,7 @@ namespace Fargo.Application.Repositories
         /// </returns>
         Task<UserReadModel?> GetByGuid(
                 Guid entityGuid,
-                DateTime? asOfDateTime = null,
+                DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default
                 );
 
@@ -54,7 +54,7 @@ namespace Fargo.Application.Repositories
         /// A read-only collection of <see cref="UserReadModel"/>.
         /// </returns>
         Task<IReadOnlyCollection<UserReadModel>> GetMany(
-                DateTime? asOfDateTime = null,
+                DateTimeOffset? asOfDateTime = null,
                 Pagination pagination = default,
                 CancellationToken cancellationToken = default
                 );

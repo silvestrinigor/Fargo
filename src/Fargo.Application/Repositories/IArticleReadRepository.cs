@@ -32,7 +32,7 @@ namespace Fargo.Application.Repositories
         /// </returns>
         Task<ArticleReadModel?> GetByGuid(
                 Guid entityGuid,
-                DateTime? asOfDateTime = null,
+                DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default
                 );
 

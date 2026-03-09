@@ -62,7 +62,7 @@ namespace Fargo.HttpApi.Extensions
 
         private static async Task<Results<Ok<ArticleReadModel>, NotFound>> GetSingleArticle(
             Guid articleGuid,
-            DateTime? temporalAsOf,
+            DateTimeOffset? temporalAsOf,
             IQueryHandler<ArticleSingleQuery, ArticleReadModel?> handler,
             CancellationToken cancellationToken)
         {
@@ -74,7 +74,7 @@ namespace Fargo.HttpApi.Extensions
         }
 
         private static async Task<Results<Ok<IReadOnlyCollection<ArticleReadModel>>, NotFound, NoContent>> GetManyArticle(
-            DateTime? temporalAsOf,
+            DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
             IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>> handler,

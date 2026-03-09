@@ -65,7 +65,7 @@ namespace Fargo.HttpApi.Extensions
 
         private static async Task<Results<Ok<ItemReadModel>, NotFound>> GetSingleItem(
             Guid itemGuid,
-            DateTime? temporalAsOf,
+            DateTimeOffset? temporalAsOf,
             IQueryHandler<ItemSingleQuery, ItemReadModel?> handler,
             CancellationToken cancellationToken)
         {
@@ -79,7 +79,7 @@ namespace Fargo.HttpApi.Extensions
         private static async Task<Results<Ok<IEnumerable<ItemReadModel>>, NotFound, NoContent>> GetManyItems(
             Guid? parentItemGuid,
             Guid? articleGuid,
-            DateTime? temporalAsOf,
+            DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
             IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>> handler,

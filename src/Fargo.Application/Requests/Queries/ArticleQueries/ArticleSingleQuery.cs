@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     /// </param>
     public sealed record ArticleSingleQuery(
             Guid ArticleGuid,
-            DateTime? AsOfDateTime = null
+            DateTimeOffset? AsOfDateTime = null
             ) : IQuery<ArticleReadModel?>;
 
     /// <summary>

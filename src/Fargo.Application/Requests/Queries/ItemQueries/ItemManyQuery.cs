@@ -24,7 +24,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     public sealed record ItemManyQuery(
         Guid? ParentItemGuid = null,
         Guid? ArticleGuid = null,
-        DateTime? TemporalAsOf = null,
+        DateTimeOffset? TemporalAsOf = null,
         Pagination Pagination = default
         ) : IQuery<IEnumerable<ItemReadModel>>;
 

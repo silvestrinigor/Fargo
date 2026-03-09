@@ -16,7 +16,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     /// </param>
     public sealed record ItemSingleQuery(
         Guid ItemGuid,
-        DateTime? TemporalAsOf = null
+        DateTimeOffset? TemporalAsOf = null
         ) : IQuery<ItemReadModel?>;
 
     /// <summary>

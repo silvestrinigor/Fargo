@@ -15,7 +15,7 @@ namespace Fargo.Infrastructure.Repositories
 
                 public async Task<ArticleReadModel?> GetByGuid(
                         Guid entityGuid,
-                        DateTime? asOfDateTime = null,
+                        DateTimeOffset? asOfDateTime = null,
                         CancellationToken cancellationToken = default
                         )
                     => await articles
