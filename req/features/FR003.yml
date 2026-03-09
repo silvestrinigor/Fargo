@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.2
+links: []
+normative: true
+ref: ''
+reviewed: ZUlSOSFxyfR3zaRcLznJtOQLSCf0Rr9whzQB4jDF4ZM=
+text: |
+  The system shall set the default administrator user NameId using the value provided in the environment configuration.

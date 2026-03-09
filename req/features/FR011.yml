@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: '1.10'
+links: []
+normative: true
+ref: ''
+reviewed: 1Mc3KvxrzOsESMZ7ptwJVU2qXsAYf00n66kaFsvJYkw=
+text: |
+  The system shall authorize access to protected operations based on the authenticated users permissions.

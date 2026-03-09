@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.0
+links: []
+normative: true
+ref: ''
+reviewed: aNXlZnbyYGBBcK8pOvdQ9uHn7-ZsUOdBtCDPkW5X3ps=
+text: |
+  The system shall create a default administrator user during system initialization if no users exist in the system.

@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY Fargo.slnx ./
+COPY src/Fargo.HttpApi/Fargo.HttpApi.csproj src/Fargo.HttpApi/
+COPY src/Fargo.Application/Fargo.Application.csproj src/Fargo.Application/
+COPY src/Fargo.Domain/Fargo.Domain.csproj src/Fargo.Domain/
+COPY src/Fargo.Infrastructure/Fargo.Infrastructure.csproj src/Fargo.Infrastructure/
+COPY src/Fargo.ServiceDefaults/Fargo.ServiceDefaults.csproj src/Fargo.ServiceDefaults/
+
+RUN dotnet restore src/Fargo.HttpApi/Fargo.HttpApi.csproj
+
+COPY . .
+
+WORKDIR /src/src/Fargo.HttpApi
+RUN dotnet publish Fargo.HttpApi.csproj -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "Fargo.HttpApi.dll"]

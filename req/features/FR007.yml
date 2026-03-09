@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.6
+links: []
+normative: true
+ref: ''
+reviewed: 2aRcKv4ZGdyzCruwTX5C2Ua4UeoODeSIdqcxiV_cCzM=
+text: |
+  The system shall invalidate a refresh token after it is used and issue a new refresh token when generating a new access token.

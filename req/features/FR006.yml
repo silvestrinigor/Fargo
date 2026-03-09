@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.5
+links: []
+normative: true
+ref: ''
+reviewed: ku1lQGaQXHptLqZasDe49Ie_gI9pxsj-pxCtJnp5_Ls=
+text: |
+  The system shall allow an authenticated user to obtain a new access token using a valid refresh token.

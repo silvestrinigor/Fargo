@@ -1,0 +1,10 @@
+active: true
+derived: false
+header: ''
+level: 1.3
+links: []
+normative: true
+ref: ''
+reviewed: 5kBmNEawi_wQWyVLyfQvcsCaOCStcPeYHEQz12Pn3LI=
+text: |
+  The system shall allow a registered user to authenticate using valid credentials.
