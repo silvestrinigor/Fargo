@@ -15,6 +15,12 @@ var migrations = builder
     .WithReference(fargodb)
     .WaitFor(fargodb);
 
+builder
+    .AddProject<Projects.Fargo_SeedService>("seeds")
+    .WithReference(fargodb)
+    .WithReference(migrations)
+    .WaitForCompletion(migrations);
+
 var apiService = builder
     .AddProject<Projects.Fargo_HttpApi>("apiservice")
     .WithHttpHealthCheck("/health")

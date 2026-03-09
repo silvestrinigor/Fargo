@@ -24,6 +24,18 @@ builder.Services.ConfigureFargoHttpJsonOptions();
 
 builder.Services.AddFargoScopes();
 
+builder.Services.AddFargoCurrentUser();
+
+builder.Services.AddFargoWriteRepositiresScopes();
+
+builder.Services.AddFargoReadRepositoriesScopes();
+
+builder.Services.AddFargoDomainServiceScopes();
+
+builder.Services.AddFargoPasswordHasher();
+
+builder.Services.AddFargoUnitOfWork();
+
 builder.Services.AddFargoWriteDbContext(connectionString);
 
 builder.Services.AddFargoReadDbContext(connectionString);
@@ -54,7 +66,5 @@ app.MapFargoUser();
 app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();
-
-await app.Services.InitializeSystem(defaultAdminNameid, defaultAdminPassword);
 
 app.Run();

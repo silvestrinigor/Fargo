@@ -49,10 +49,67 @@ namespace Fargo.Infrastructure.Extensions
                 return services;
             }
 
-            public IServiceCollection AddFargoScopes()
+            public IServiceCollection AddFargoCurrentUser()
+            {
+                services.AddScoped<ICurrentUser, CurrentUser>();
+
+                return services;
+            }
+
+            public IServiceCollection AddFargoInitializeSystemScope()
             {
                 services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
+                return services;
+            }
+
+            public IServiceCollection AddFargoReadRepositoriesScopes()
+            {
+                services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
+
+                services.AddScoped<IItemReadRepository, ItemReadRepository>();
+
+                services.AddScoped<IUserReadRepository, UserReadRepository>();
+
+                return services;
+            }
+
+            public IServiceCollection AddFargoWriteRepositiresScopes()
+            {
+                services.AddScoped<IArticleRepository, ArticleRepository>();
+
+                services.AddScoped<IItemRepository, ItemRepository>();
+
+                services.AddScoped<IUserRepository, UserRepository>();
+
+                services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+                return services;
+            }
+
+            public IServiceCollection AddFargoDomainServiceScopes()
+            {
+                services.AddScoped<ArticleService>();
+
+                return services;
+            }
+
+            public IServiceCollection AddFargoPasswordHasher()
+            {
+                services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
+
+                return services;
+            }
+
+            public IServiceCollection AddFargoUnitOfWork()
+            {
+                services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
+
+                return services;
+            }
+
+            public IServiceCollection AddFargoScopes()
+            {
                 services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
                 services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();
                 services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
@@ -78,28 +135,9 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserResponseModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<UserManyQuery, IEnumerable<UserResponseModel>>, UserManyQueryHandler>();
 
-                services.AddScoped<IArticleRepository, ArticleRepository>();
-                services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
-
-                services.AddScoped<IItemRepository, ItemRepository>();
-                services.AddScoped<IItemReadRepository, ItemReadRepository>();
-
-                services.AddScoped<IUserRepository, UserRepository>();
-                services.AddScoped<IUserReadRepository, UserReadRepository>();
-
-                services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
-                services.AddScoped<ArticleService>();
-
-                services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
-
                 services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
 
                 services.AddScoped<ITokenHasher, Sha256TokenHasher>();
-
-                services.AddScoped<ICurrentUser, CurrentUser>();
-
-                services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
 
                 services.AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>();
 

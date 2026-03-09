@@ -4,12 +4,13 @@ using System.Diagnostics;
 
 namespace Fargo.MigrationService;
 
-public class Worker(
+public class MigrationService(
         IServiceProvider serviceProvider,
         IHostApplicationLifetime hostApplicationLifetime
         ) : BackgroundService
 {
     public const string ActivitySourceName = "Migrations";
+
     private static readonly ActivitySource activitySource = new(ActivitySourceName);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
