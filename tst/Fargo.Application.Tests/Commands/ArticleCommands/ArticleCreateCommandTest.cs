@@ -105,7 +105,10 @@ public sealed class ArticleCreateCommandHandlerTests
             unitOfWork);
 
         var command = new ArticleCreateCommand(
-            new ArticleCreateModel(new Name("Notebook"))
+            new ArticleCreateModel(
+                new Name("Notebook"),
+                new Description("A high-quality notebook for writing and drawing"
+                ))
         );
 
         var actor = CreateUserWithPermission(ActionType.CreateArticle);
@@ -133,6 +136,7 @@ public sealed class ArticleCreateCommandHandlerTests
         Assert.NotNull(addedArticle);
         Assert.Equal(command.Article.Name, addedArticle!.Name);
         Assert.Equal(addedArticle.Guid, result);
+        Assert.Equal(command.Article.Description, addedArticle.Description);
     }
 
     [Fact]

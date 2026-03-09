@@ -5,6 +5,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
@@ -51,7 +52,8 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
 
             var article = new Article
             {
-                Name = command.Article.Name
+                Name = command.Article.Name,
+                Description = command.Article.Description ?? Description.Empty
             };
 
             articleRepository.Add(article);
