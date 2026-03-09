@@ -14,7 +14,20 @@ public sealed class NameidTests
         var nameid = new Nameid(value);
 
         // Assert
-        Assert.Equal(value, nameid.Value);
+        Assert.Equal("igor.silvestrin", nameid.Value);
+    }
+
+    [Fact]
+    public void Constructor_Should_NormalizeToLowercase_When_ValueContainsUppercaseLetters()
+    {
+        // Arrange
+        var value = "Igor.Silvestrin";
+
+        // Act
+        var nameid = new Nameid(value);
+
+        // Assert
+        Assert.Equal("igor.silvestrin", nameid.Value);
     }
 
     [Fact]
@@ -27,7 +40,20 @@ public sealed class NameidTests
         var nameid = Nameid.FromString(value);
 
         // Assert
-        Assert.Equal(value, nameid.Value);
+        Assert.Equal("igor_silvestrin", nameid.Value);
+    }
+
+    [Fact]
+    public void FromString_Should_NormalizeToLowercase_When_ValueContainsUppercaseLetters()
+    {
+        // Arrange
+        var value = "Igor_Silvestrin";
+
+        // Act
+        var nameid = Nameid.FromString(value);
+
+        // Assert
+        Assert.Equal("igor_silvestrin", nameid.Value);
     }
 
     [Fact]
@@ -40,28 +66,40 @@ public sealed class NameidTests
         var nameid = Nameid.NewNameid(value);
 
         // Assert
-        Assert.Equal(value, nameid.Value);
+        Assert.Equal("igor-silvestrin", nameid.Value);
     }
 
     [Fact]
-    public void ToString_Should_ReturnValue()
+    public void NewNameid_Should_NormalizeToLowercase_When_ValueContainsUppercaseLetters()
     {
         // Arrange
-        var value = "igor123";
-        var nameid = new Nameid(value);
+        var value = "Igor-Silvestrin";
+
+        // Act
+        var nameid = Nameid.NewNameid(value);
+
+        // Assert
+        Assert.Equal("igor-silvestrin", nameid.Value);
+    }
+
+    [Fact]
+    public void ToString_Should_ReturnNormalizedValue()
+    {
+        // Arrange
+        var nameid = new Nameid("Igor123");
 
         // Act
         var result = nameid.ToString();
 
         // Assert
-        Assert.Equal(value, result);
+        Assert.Equal("igor123", result);
     }
 
     [Fact]
-    public void ImplicitOperator_Should_ReturnStringValue()
+    public void ImplicitOperator_Should_ReturnNormalizedStringValue()
     {
         // Arrange
-        var nameid = new Nameid("igor123");
+        var nameid = new Nameid("Igor123");
 
         // Act
         string value = nameid;
@@ -74,13 +112,13 @@ public sealed class NameidTests
     public void ExplicitOperator_Should_CreateNameid()
     {
         // Arrange
-        var value = "igor123";
+        var value = "Igor123";
 
         // Act
         var nameid = (Nameid)value;
 
         // Assert
-        Assert.Equal(value, nameid.Value);
+        Assert.Equal("igor123", nameid.Value);
     }
 
     [Fact]
@@ -242,20 +280,20 @@ public sealed class NameidTests
     }
 
     [Theory]
-    [InlineData("abc")]
-    [InlineData("igor")]
-    [InlineData("igor123")]
-    [InlineData("igor.silvestrin")]
-    [InlineData("igor_silvestrin")]
-    [InlineData("igor-silvestrin")]
-    [InlineData("i.g-o_r1")]
-    public void Constructor_Should_AcceptValidValues(string value)
+    [InlineData("abc", "abc")]
+    [InlineData("igor", "igor")]
+    [InlineData("Igor123", "igor123")]
+    [InlineData("Igor.Silvestrin", "igor.silvestrin")]
+    [InlineData("Igor_Silvestrin", "igor_silvestrin")]
+    [InlineData("Igor-Silvestrin", "igor-silvestrin")]
+    [InlineData("I.G-o_r1", "i.g-o_r1")]
+    public void Constructor_Should_AcceptValidValues_AndNormalizeToLowercase(string input, string expected)
     {
         // Act
-        var nameid = new Nameid(value);
+        var nameid = new Nameid(input);
 
         // Assert
-        Assert.Equal(value, nameid.Value);
+        Assert.Equal(expected, nameid.Value);
     }
 
     [Fact]
@@ -282,5 +320,90 @@ public sealed class NameidTests
 
         // Assert
         Assert.Equal(value, nameid.Value);
+    }
+
+    [Fact]
+    public void Equals_Should_ReturnTrue_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new Nameid("Admin");
+        var right = new Nameid("admin");
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnTrue_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        object left = new Nameid("Admin");
+        object right = new Nameid("admin");
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void EqualityOperator_Should_ReturnTrue_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new Nameid("Admin");
+        var right = new Nameid("admin");
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void InequalityOperator_Should_ReturnFalse_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new Nameid("Admin");
+        var right = new Nameid("admin");
+
+        // Act
+        var result = left != right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void GetHashCode_Should_ReturnSameValue_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new Nameid("Admin");
+        var right = new Nameid("admin");
+
+        // Act
+        var leftHash = left.GetHashCode();
+        var rightHash = right.GetHashCode();
+
+        // Assert
+        Assert.Equal(leftHash, rightHash);
+    }
+
+    [Fact]
+    public void Equals_Should_ReturnFalse_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new Nameid("admin");
+        var right = new Nameid("manager");
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.False(result);
     }
 }

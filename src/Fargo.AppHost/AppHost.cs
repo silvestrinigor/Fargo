@@ -6,9 +6,7 @@ var sqlserver = builder
     .WithImageTag("2022-latest")
     .WithLifetime(ContainerLifetime.Persistent);
 
-
-
-var fargodb = sqlserver.AddDatabase("Fargo");
+var fargodb = sqlserver.AddDatabase("fargo");
 
 var migrations = builder
     .AddProject<Projects.Fargo_MigrationService>("migrations")

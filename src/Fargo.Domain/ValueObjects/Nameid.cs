@@ -5,8 +5,9 @@ namespace Fargo.Domain.ValueObjects
     ///
     /// A NAMEID is used as a unique textual identifier for a user and must
     /// follow a restricted set of allowed characters and formatting rules.
+    /// Comparisons are case-insensitive.
     /// </summary>
-    public readonly struct Nameid
+    public readonly struct Nameid : IEquatable<Nameid>
     {
         /// <summary>
         /// Maximum allowed length for the identifier.
@@ -17,6 +18,8 @@ namespace Fargo.Domain.ValueObjects
         /// Minimum allowed length for the identifier.
         /// </summary>
         public const int MinLength = 3;
+
+        private readonly string value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Nameid"/> value object.
@@ -31,11 +34,11 @@ namespace Fargo.Domain.ValueObjects
         public Nameid(string value)
         {
             Validate(value);
-            this.value = value;
+            this.value = value.ToLowerInvariant();
         }
 
         /// <summary>
-        /// Gets the underlying string value.
+        /// Gets the underlying normalized string value.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the value object was not properly initialized.
@@ -43,8 +46,6 @@ namespace Fargo.Domain.ValueObjects
         /// </exception>
         public string Value
             => value ?? throw new InvalidOperationException("Nameid not initialized.");
-
-        private readonly string value;
 
         /// <summary>
         /// Creates a new <see cref="Nameid"/> from a string.
@@ -67,6 +68,31 @@ namespace Fargo.Domain.ValueObjects
         /// </summary>
         public override string ToString()
             => Value;
+
+        /// <summary>
+        /// Determines whether this instance and another <see cref="Nameid"/> are equal,
+        /// ignoring character casing.
+        /// </summary>
+        public bool Equals(Nameid other)
+            => string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Determines whether this instance and a specified object are equal.
+        /// </summary>
+        public override bool Equals(object? obj)
+            => obj is Nameid other && Equals(other);
+
+        /// <summary>
+        /// Returns a hash code for this instance, using case-insensitive semantics.
+        /// </summary>
+        public override int GetHashCode()
+            => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+
+        public static bool operator ==(Nameid left, Nameid right)
+            => left.Equals(right);
+
+        public static bool operator !=(Nameid left, Nameid right)
+            => !left.Equals(right);
 
         /// <summary>
         /// Implicitly converts a <see cref="Nameid"/> to <see cref="string"/>.

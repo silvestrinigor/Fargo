@@ -9,9 +9,8 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.ValueObjects;
 using NSubstitute;
-using Xunit;
 
-namespace Fargo.Application.Tests.Requests.Commands.UserCommands
+namespace Fargo.Application.Tests.Commands.UserCommands
 {
     public sealed class UserCreateCommandHandlerTests
     {
@@ -133,7 +132,7 @@ namespace Fargo.Application.Tests.Requests.Commands.UserCommands
                 .SaveChanges(Arg.Any<CancellationToken>());
 
             Assert.NotNull(addedUser);
-            Assert.Equal(nameid, addedUser!.Nameid);
+            Assert.Equal(nameid, addedUser.Nameid);
             Assert.Equal(hashedPassword, addedUser.PasswordHash);
             Assert.Equal(addedUser.Guid, result);
         }
@@ -272,7 +271,7 @@ namespace Fargo.Application.Tests.Requests.Commands.UserCommands
 
             // Assert
             Assert.NotNull(addedUser);
-            Assert.Empty(addedUser!.UserPermissions);
+            Assert.Empty(addedUser.UserPermissions);
         }
     }
 }

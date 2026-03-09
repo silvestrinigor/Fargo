@@ -8,10 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Fargo");
 
-var defaultAdminNameid = builder.Configuration.GetApplicationConfiguration("DefaultAdminNameid");
-
-var defaultAdminPassword = builder.Configuration.GetApplicationConfiguration("DefaultAdminPassword");
-
 builder.AddServiceDefaults();
 
 builder.Services.AddProblemDetails();
