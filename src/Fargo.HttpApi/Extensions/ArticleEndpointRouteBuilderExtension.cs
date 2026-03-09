@@ -1,4 +1,5 @@
 ﻿using Fargo.Application.Commom;
+using Fargo.Application.Models;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ArticleCommands;
@@ -72,11 +73,11 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IEnumerable<ArticleReadModel>>, NotFound, NoContent>> GetManyArticle(
+        private static async Task<Results<Ok<CollectionPaginatedTemporalResponseModel<ArticleReadModel>>, NotFound, NoContent>> GetManyArticle(
             DateTime? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>> handler,
+            IQueryHandler<ArticleManyQuery, CollectionPaginatedTemporalResponseModel<ArticleReadModel>> handler,
             CancellationToken cancellationToken)
         {
             var query = new ArticleManyQuery(

@@ -6,6 +6,9 @@ namespace Fargo.Application.Models.UserModels
     /// <summary>
     /// Represents the user data returned by the application.
     /// </summary>
+    /// <param name="Guid">
+    /// The guid of the user.
+    /// </param>
     /// <param name="Nameid">
     /// The login identifier of the user.
     /// </param>
@@ -16,6 +19,7 @@ namespace Fargo.Application.Models.UserModels
     /// The permissions granted to the user.
     /// </param>
     public sealed record UserResponseModel(
+            Guid Guid,
             Nameid Nameid,
             Description Description,
             IReadOnlyCollection<ActionType> Permissions

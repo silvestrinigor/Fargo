@@ -20,10 +20,11 @@ namespace Fargo.Application.Extensions
             public UserResponseModel ToResponse()
             {
                 return new UserResponseModel(
-                    user.Nameid,
-                    user.Description,
-                    [.. user.UserPermissions.Select(x => x.Action)]
-                );
+                        user.Guid,
+                        user.Nameid,
+                        user.Description,
+                        [.. user.UserPermissions.Select(x => x.Action)]
+                        );
             }
         }
     }

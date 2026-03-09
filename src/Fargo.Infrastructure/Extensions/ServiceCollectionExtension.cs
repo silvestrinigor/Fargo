@@ -1,4 +1,5 @@
-﻿using Fargo.Application.Models.ArticleModels;
+﻿using Fargo.Application.Models;
+using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Models.UserModels;
@@ -14,6 +15,7 @@ using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Application.Security;
+using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
@@ -91,6 +93,8 @@ namespace Fargo.Infrastructure.Extensions
             {
                 services.AddScoped<ArticleService>();
 
+                services.AddScoped<UserService>();
+
                 return services;
             }
 
@@ -127,7 +131,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
 
                 services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleReadModel?>, ArticleSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>>, ArticleManyQueryHandler>();
+                services.AddScoped<IQueryHandler<ArticleManyQuery, CollectionPaginatedTemporalResponseModel<ArticleReadModel>>, ArticleManyQueryHandler>();
 
                 services.AddScoped<IQueryHandler<ItemSingleQuery, ItemReadModel?>, ItemSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>>, ItemManyQueryHandler>();

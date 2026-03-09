@@ -7,6 +7,7 @@ using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 using NSubstitute;
 
@@ -22,6 +23,7 @@ namespace Fargo.Application.Tests.Commands.UserCommands
             var unitOfWork = Substitute.For<IUnitOfWork>();
             var currentUser = Substitute.For<ICurrentUser>();
             var passwordHasher = Substitute.For<IPasswordHasher>();
+            var userService = new UserService(userRepository);
 
             var actorGuid = Guid.NewGuid();
 
@@ -32,24 +34,25 @@ namespace Fargo.Application.Tests.Commands.UserCommands
                 .Returns((User?)null);
 
             var handler = new UserCreateCommandHandler(
-                userRepository,
-                unitOfWork,
-                currentUser,
-                passwordHasher
-            );
+                    userService,
+                    userRepository,
+                    unitOfWork,
+                    currentUser,
+                    passwordHasher
+                    );
 
             var command = new UserCreateCommand(
-                new UserCreateModel(
-                    new Nameid("igor"),
-                    new Password("fasdlfkasj@123456"),
-                    Permissions: []
-                )
-            );
+                    new UserCreateModel(
+                        new Nameid("igor"),
+                        new Password("fasdlfkasj@123456"),
+                        Permissions: []
+                        )
+                    );
 
             // Act + Assert
             await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(
-                () => handler.Handle(command)
-            );
+                    () => handler.Handle(command)
+                    );
 
             await unitOfWork.DidNotReceive()
                 .SaveChanges(Arg.Any<CancellationToken>());
@@ -69,6 +72,7 @@ namespace Fargo.Application.Tests.Commands.UserCommands
             var unitOfWork = Substitute.For<IUnitOfWork>();
             var currentUser = Substitute.For<ICurrentUser>();
             var passwordHasher = Substitute.For<IPasswordHasher>();
+            var userService = new UserService(userRepository);
 
             var actorGuid = Guid.NewGuid();
             var hashedPassword = "hashed-passwordfisdafasdlfjasdlfjweoifjasldkfjaslfjasdlfkjas";
@@ -98,22 +102,23 @@ namespace Fargo.Application.Tests.Commands.UserCommands
                 .Do(callInfo => addedUser = callInfo.Arg<User>());
 
             var handler = new UserCreateCommandHandler(
-                userRepository,
-                unitOfWork,
-                currentUser,
-                passwordHasher
-            );
+                    userService,
+                    userRepository,
+                    unitOfWork,
+                    currentUser,
+                    passwordHasher
+                    );
 
             var nameid = new Nameid("igor");
             var password = new Password("asjfasl#123456");
 
             var command = new UserCreateCommand(
-                new UserCreateModel(
-                    nameid,
-                    password,
-                    Permissions: []
-                )
-            );
+                    new UserCreateModel(
+                        nameid,
+                        password,
+                        Permissions: []
+                        )
+                    );
 
             // Act
             var result = await handler.Handle(command);
@@ -145,6 +150,7 @@ namespace Fargo.Application.Tests.Commands.UserCommands
             var unitOfWork = Substitute.For<IUnitOfWork>();
             var currentUser = Substitute.For<ICurrentUser>();
             var passwordHasher = Substitute.For<IPasswordHasher>();
+            var userService = new UserService(userRepository);
 
             var actorGuid = Guid.NewGuid();
 
@@ -173,11 +179,12 @@ namespace Fargo.Application.Tests.Commands.UserCommands
                 .Do(callInfo => addedUser = callInfo.Arg<User>());
 
             var handler = new UserCreateCommandHandler(
-                userRepository,
-                unitOfWork,
-                currentUser,
-                passwordHasher
-            );
+                    userService,
+                    userRepository,
+                    unitOfWork,
+                    currentUser,
+                    passwordHasher
+                    );
 
             var permissions = new[]
             {
@@ -187,12 +194,12 @@ namespace Fargo.Application.Tests.Commands.UserCommands
             };
 
             var command = new UserCreateCommand(
-                new UserCreateModel(
-                    new Nameid("igor"),
-                    new Password("askfsakldlj@123456"),
-                    Permissions: permissions
-                )
-            );
+                    new UserCreateModel(
+                        new Nameid("igor"),
+                        new Password("askfsakldlj@123456"),
+                        Permissions: permissions
+                        )
+                    );
 
             // Act
             await handler.Handle(command);
@@ -201,19 +208,19 @@ namespace Fargo.Application.Tests.Commands.UserCommands
             Assert.NotNull(addedUser);
 
             Assert.Contains(
-                addedUser!.UserPermissions,
-                x => x.Action == ActionType.CreateArticle
-            );
+                    addedUser!.UserPermissions,
+                    x => x.Action == ActionType.CreateArticle
+                    );
 
             Assert.Contains(
-                addedUser.UserPermissions,
-                x => x.Action == ActionType.CreateArticle
-            );
+                    addedUser.UserPermissions,
+                    x => x.Action == ActionType.CreateArticle
+                    );
 
             Assert.Contains(
-                addedUser.UserPermissions,
-                x => x.Action == ActionType.DeleteItem
-            );
+                    addedUser.UserPermissions,
+                    x => x.Action == ActionType.DeleteItem
+                    );
         }
 
         [Fact]
@@ -224,6 +231,7 @@ namespace Fargo.Application.Tests.Commands.UserCommands
             var unitOfWork = Substitute.For<IUnitOfWork>();
             var currentUser = Substitute.For<ICurrentUser>();
             var passwordHasher = Substitute.For<IPasswordHasher>();
+            var userService = new UserService(userRepository);
 
             var actorGuid = Guid.NewGuid();
 
@@ -252,19 +260,20 @@ namespace Fargo.Application.Tests.Commands.UserCommands
                 .Do(callInfo => addedUser = callInfo.Arg<User>());
 
             var handler = new UserCreateCommandHandler(
-                userRepository,
-                unitOfWork,
-                currentUser,
-                passwordHasher
-            );
+                    userService,
+                    userRepository,
+                    unitOfWork,
+                    currentUser,
+                    passwordHasher
+                    );
 
             var command = new UserCreateCommand(
-                new UserCreateModel(
-                    new Nameid("igor"),
-                    new Password("falfjasl#123456"),
-                    null
-                )
-            );
+                    new UserCreateModel(
+                        new Nameid("igor"),
+                        new Password("falfjasl#123456"),
+                        null
+                        )
+                    );
 
             // Act
             await handler.Handle(command);

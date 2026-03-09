@@ -6,6 +6,7 @@ using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -23,6 +24,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
     /// Handles the execution of <see cref="UserCreateCommand"/>.
     /// </summary>
     public sealed class UserCreateCommandHandler(
+            UserService userService,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser,
@@ -57,6 +59,8 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 Nameid = command.User.Nameid,
                 PasswordHash = userPasswordHash
             };
+
+            await userService.ValidateUserCreate(user, cancellationToken);
 
             foreach (var action in command.User.Permissions ?? [])
             {

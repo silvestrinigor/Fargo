@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Models.ArticleModels;
+using Fargo.Application.Models;
 using Fargo.Application.Repositories;
 
 namespace Fargo.Application.Requests.Queries.ArticleQueries
@@ -18,7 +19,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     public sealed record ArticleManyQuery(
             DateTime? AsOfDateTime = null,
             Pagination Pagination = default
-            ) : IQuery<IEnumerable<ArticleReadModel>>;
+            ) : IQuery<CollectionPaginatedTemporalResponseModel<ArticleReadModel>>;
 
     /// <summary>
     /// Handles the execution of <see cref="ArticleManyQuery"/>.
@@ -26,25 +27,37 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     public sealed class ArticleManyQueryHandler(
             IArticleReadRepository articleRepository
             )
-        : IQueryHandler<ArticleManyQuery, IEnumerable<ArticleReadModel>>
+        : IQueryHandler<ArticleManyQuery, CollectionPaginatedTemporalResponseModel<ArticleReadModel>>
     {
         /// <summary>
         /// Executes the query to retrieve multiple articles.
         /// </summary>
-        /// <param name="query">The query containing the filtering and pagination parameters.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <param name="query">
+        /// The query containing the filtering and pagination parameters.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Token used to cancel the operation.
+        /// </param>
         /// <returns>
-        /// A collection of <see cref="ArticleReadModel"/> representing the retrieved articles.
+        /// A <see cref="CollectionPaginatedTemporalResponseModel{TEntity}"/> containing the retrieved
+        /// <see cref="ArticleReadModel"/> items and the pagination information used
+        /// for the request.
         /// </returns>
-        public async Task<IEnumerable<ArticleReadModel>> Handle(
+        public async Task<CollectionPaginatedTemporalResponseModel<ArticleReadModel>> Handle(
                 ArticleManyQuery query,
                 CancellationToken cancellationToken = default
                 )
         {
-            return await articleRepository.GetMany(
+            var articles = await articleRepository.GetMany(
                     query.AsOfDateTime,
                     query.Pagination,
                     cancellationToken
+                    );
+
+            return new CollectionPaginatedTemporalResponseModel<ArticleReadModel>(
+                    articles,
+                    query.Pagination.Page,
+                    query.Pagination.Limit
                     );
         }
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Fargo.Application.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Helpers
 {
@@ -39,6 +40,36 @@ namespace Fargo.HttpApi.Helpers
             }
 
             if (!response.Any())
+            {
+                return TypedResults.NoContent();
+            }
+
+            return TypedResults.Ok(response);
+        }
+
+        /// <summary>
+        /// Handles a collection query result and returns an appropriate TypedResult based on the response.
+        /// If the response is null, it returns NotFound. If the collection contains no entities, it returns NoContent.
+        /// Otherwise, it returns Ok with the response including pagination information.
+        /// </summary>
+        /// <typeparam name="TResponseItem">The type of items in the collection response.</typeparam>
+        /// <param name="response">The collection query result to handle.</param>
+        /// <returns>A TypedResult containing either Ok, NotFound, or NoContent.</returns>
+        public static Results<Ok<CollectionPaginatedTemporalResponseModel<TResponseItem>>, NotFound, NoContent> HandleQueryResult<TResponseItem>(
+                CollectionPaginatedTemporalResponseModel<TResponseItem>? response
+                )
+        {
+            if (response == null)
+            {
+                return TypedResults.NotFound();
+            }
+
+            if (response.Entities == null)
+            {
+                return TypedResults.NotFound();
+            }
+
+            if (response.Entities.Count == 0)
             {
                 return TypedResults.NoContent();
             }

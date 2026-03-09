@@ -1,9 +1,10 @@
 using Fargo.Application.Exceptions;
 using Fargo.Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Middlewares
 {
-    public class FargoExceptionMiddleware(RequestDelegate next)
+    public sealed class FargoExceptionMiddleware(RequestDelegate next)
     {
         public async Task Invoke(HttpContext context)
         {
@@ -11,41 +12,70 @@ namespace Fargo.HttpApi.Middlewares
             {
                 await next(context);
             }
-            catch (BadHttpRequestException)
+            catch (BadHttpRequestException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await WriteProblemDetailsAsync(context, 400, "Invalid request", ex.Message, "request/invalid");
             }
-            catch (UnauthorizedAccessFargoApplicationException)
+            catch (UnauthorizedAccessFargoApplicationException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await WriteProblemDetailsAsync(context, 401, "Unauthorized", ex.Message, "auth/unauthorized");
             }
-            catch (ArticleNotFoundFargoApplicationException)
+            catch (ArticleNotFoundFargoApplicationException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await WriteProblemDetailsAsync(context, 404, "Article not found", ex.Message, "article/not-found");
             }
-            catch (UserNotFoundFargoApplicationException)
+            catch (UserNotFoundFargoApplicationException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await WriteProblemDetailsAsync(context, 404, "User not found", ex.Message, "user/not-found");
             }
-            catch (ItemNotFoundFargoApplicationException)
+            catch (ItemNotFoundFargoApplicationException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await WriteProblemDetailsAsync(context, 404, "Item not found", ex.Message, "item/not-found");
             }
-            catch (UserNotAuthorizedFargoDomainException)
+            catch (UserNotAuthorizedFargoDomainException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await WriteProblemDetailsAsync(context, 403, "Forbidden", ex.Message, "user/forbidden");
             }
-            catch (ArticleDeleteWithItemsAssociatedFargoDomainException)
+            catch (ArticleDeleteWithItemsAssociatedFargoDomainException ex)
             {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await WriteProblemDetailsAsync(context, 400, "Invalid operation", ex.Message, "article/delete-with-items");
             }
+            catch (UserNameidAlreadyExistsDomainException ex)
+            {
+                await WriteProblemDetailsAsync(context, 409, "Conflict", ex.Message, "user/nameid-already-exists");
+            }
+            catch (Exception)
+            {
+                await WriteProblemDetailsAsync(context, 500, "Internal server error", "An unexpected error occurred.", "server/internal-error");
+            }
+        }
+
+        private static async Task WriteProblemDetailsAsync(
+            HttpContext context,
+            int statusCode,
+            string title,
+            string detail,
+            string type)
+        {
+            if (context.Response.HasStarted)
+            {
+                return;
+            }
+
+            context.Response.Clear();
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/problem+json";
+
+            var problemDetails = new ProblemDetails
+            {
+                Status = statusCode,
+                Title = title,
+                Detail = detail,
+                Type = type,
+                Instance = context.Request.Path
+            };
+
+            await context.Response.WriteAsJsonAsync(problemDetails);
         }
     }
 }
