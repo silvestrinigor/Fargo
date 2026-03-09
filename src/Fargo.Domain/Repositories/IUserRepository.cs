@@ -38,6 +38,24 @@ namespace Fargo.Domain.Repositories
                 );
 
         /// <summary>
+        /// Determines whether a user with the specified <see cref="Nameid"/> already exists.
+        /// </summary>
+        /// <param name="nameid">
+        /// The unique user identifier to check.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if a user with the specified <see cref="Nameid"/> exists;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        Task<bool> ExistsByNameid(
+                Nameid nameid,
+                CancellationToken cancellationToken = default
+                );
+
+        /// <summary>
         /// Adds a new user to the persistence context.
         /// </summary>
         /// <param name="user">The user to add.</param>

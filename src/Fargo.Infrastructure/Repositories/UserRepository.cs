@@ -41,5 +41,10 @@ namespace Fargo.Infrastructure.Repositories
         {
             context.Users.Remove(user);
         }
+
+        public async Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+        {
+            return await context.Users.AnyAsync(x => x.Nameid == nameid, cancellationToken);
+        }
     }
 }
