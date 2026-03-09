@@ -73,11 +73,11 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<CollectionPaginatedTemporalResponseModel<ArticleReadModel>>, NotFound, NoContent>> GetManyArticle(
+        private static async Task<Results<Ok<IReadOnlyCollection<ArticleReadModel>>, NotFound, NoContent>> GetManyArticle(
             DateTime? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<ArticleManyQuery, CollectionPaginatedTemporalResponseModel<ArticleReadModel>> handler,
+            IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>> handler,
             CancellationToken cancellationToken)
         {
             var query = new ArticleManyQuery(

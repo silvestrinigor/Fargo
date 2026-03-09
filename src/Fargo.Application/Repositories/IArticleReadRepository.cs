@@ -54,7 +54,7 @@ namespace Fargo.Application.Repositories
         /// A read-only collection of <see cref="ArticleReadModel"/>.
         /// </returns>
         Task<IReadOnlyCollection<ArticleReadModel>> GetMany(
-                DateTime? asOfDateTime = null,
+                DateTimeOffset? asOfDateTime = null,
                 Pagination pagination = default,
                 CancellationToken cancellationToken = default
                 );

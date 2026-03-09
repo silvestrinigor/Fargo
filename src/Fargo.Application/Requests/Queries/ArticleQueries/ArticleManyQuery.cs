@@ -1,6 +1,5 @@
 ﻿using Fargo.Application.Commom;
 using Fargo.Application.Models.ArticleModels;
-using Fargo.Application.Models;
 using Fargo.Application.Repositories;
 
 namespace Fargo.Application.Requests.Queries.ArticleQueries
@@ -17,9 +16,9 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     /// Pagination parameters used to limit and offset the result set.
     /// </param>
     public sealed record ArticleManyQuery(
-            DateTime? AsOfDateTime = null,
+            DateTimeOffset? AsOfDateTime = null,
             Pagination Pagination = default
-            ) : IQuery<CollectionPaginatedTemporalResponseModel<ArticleReadModel>>;
+            ) : IQuery<IReadOnlyCollection<ArticleReadModel>>;
 
     /// <summary>
     /// Handles the execution of <see cref="ArticleManyQuery"/>.
@@ -27,7 +26,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     public sealed class ArticleManyQueryHandler(
             IArticleReadRepository articleRepository
             )
-        : IQueryHandler<ArticleManyQuery, CollectionPaginatedTemporalResponseModel<ArticleReadModel>>
+        : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>>
     {
         /// <summary>
         /// Executes the query to retrieve multiple articles.
@@ -39,11 +38,10 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
         /// Token used to cancel the operation.
         /// </param>
         /// <returns>
-        /// A <see cref="CollectionPaginatedTemporalResponseModel{TEntity}"/> containing the retrieved
-        /// <see cref="ArticleReadModel"/> items and the pagination information used
-        /// for the request.
+        /// A read-only collection of <see cref="ArticleReadModel"/> representing
+        /// the articles retrieved for the specified temporal reference and pagination parameters.
         /// </returns>
-        public async Task<CollectionPaginatedTemporalResponseModel<ArticleReadModel>> Handle(
+        public async Task<IReadOnlyCollection<ArticleReadModel>> Handle(
                 ArticleManyQuery query,
                 CancellationToken cancellationToken = default
                 )
@@ -54,11 +52,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
                     cancellationToken
                     );
 
-            return new CollectionPaginatedTemporalResponseModel<ArticleReadModel>(
-                    articles,
-                    query.Pagination.Page,
-                    query.Pagination.Limit
-                    );
+            return articles;
         }
     }
 }

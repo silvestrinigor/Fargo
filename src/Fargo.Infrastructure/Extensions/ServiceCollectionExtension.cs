@@ -131,7 +131,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
 
                 services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleReadModel?>, ArticleSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ArticleManyQuery, CollectionPaginatedTemporalResponseModel<ArticleReadModel>>, ArticleManyQueryHandler>();
+                services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>>, ArticleManyQueryHandler>();
 
                 services.AddScoped<IQueryHandler<ItemSingleQuery, ItemReadModel?>, ItemSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>>, ItemManyQueryHandler>();

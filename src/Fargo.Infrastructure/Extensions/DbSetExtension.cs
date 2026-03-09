@@ -6,10 +6,10 @@ namespace Fargo.Infrastructure.Extensions
     {
         public static IQueryable<TEntity> TemporalAsOfIfDateTimeNotNull<TEntity>(
                 this DbSet<TEntity> dbSet,
-                DateTime? dateTime
+                DateTimeOffset? dateTime
                 ) where TEntity : class
             => dateTime is not null
-            ? dbSet.TemporalAsOf(dateTime.Value)
+            ? dbSet.TemporalAsOf(dateTime.Value.UtcDateTime)
             : dbSet.AsQueryable();
     }
 }
