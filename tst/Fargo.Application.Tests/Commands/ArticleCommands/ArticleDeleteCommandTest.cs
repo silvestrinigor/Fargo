@@ -10,7 +10,7 @@ using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 using NSubstitute;
 
-namespace Fargo.Application.Tests.Requests.Commands.ArticleCommands;
+namespace Fargo.Application.Tests.Commands.ArticleCommands;
 
 public sealed class ArticleDeleteCommandHandlerTests
 {
