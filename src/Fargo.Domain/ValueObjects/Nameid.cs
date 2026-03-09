@@ -88,9 +88,27 @@ namespace Fargo.Domain.ValueObjects
         public override int GetHashCode()
             => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
+        /// <summary>
+        /// Determines whether two <see cref="Nameid"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The first <see cref="Nameid"/> to compare.</param>
+        /// <param name="right">The second <see cref="Nameid"/> to compare.</param>
+        /// <returns>
+        /// <see langword="true"/> if both <see cref="Nameid"/> instances are equal;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
         public static bool operator ==(Nameid left, Nameid right)
             => left.Equals(right);
 
+        /// <summary>
+        /// Determines whether two <see cref="Nameid"/> instances are different.
+        /// </summary>
+        /// <param name="left">The first <see cref="Nameid"/> to compare.</param>
+        /// <param name="right">The second <see cref="Nameid"/> to compare.</param>
+        /// <returns>
+        /// <see langword="true"/> if both <see cref="Nameid"/> instances are different;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
         public static bool operator !=(Nameid left, Nameid right)
             => !left.Equals(right);
 
