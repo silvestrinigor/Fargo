@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("Fargo");
 
 var defaultAdminNameid = builder.Configuration.GetApplicationConfiguration("DefaultAdminNameid");
 
