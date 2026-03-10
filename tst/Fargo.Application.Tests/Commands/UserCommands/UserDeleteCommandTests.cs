@@ -61,6 +61,8 @@ public sealed class UserDeleteCommandHandlerTests
     {
         // Arrange
         var actor = CreateUser();
+        actor.AddPermission(ActionType.DeleteUser);
+
         var targetUserGuid = Guid.NewGuid();
         var command = CreateCommand(targetUserGuid);
 
@@ -101,6 +103,37 @@ public sealed class UserDeleteCommandHandlerTests
 
         // Assert
         await Assert.ThrowsAsync<UserNotAuthorizedFargoDomainException>(act);
+
+        userRepository.DidNotReceive()
+            .Remove(Arg.Any<User>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowUserCannotDeleteSelfFargoDomainException_When_ActorTriesToDeleteHimself()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.DeleteUser);
+        var command = CreateCommand(actor.Guid);
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+
+        // importante: retorna outra instância com o mesmo Guid para validar por identidade
+        var sameUserDifferentInstance = CreateUser(actor.Guid);
+
+        userRepository
+            .GetByGuid(actor.Guid, Arg.Any<CancellationToken>())
+            .Returns(actor, sameUserDifferentInstance);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<UserCannotDeleteSelfFargoDomainException>(act);
+        Assert.Equal(actor.Guid, exception.UserGuid);
 
         userRepository.DidNotReceive()
             .Remove(Arg.Any<User>());
@@ -180,11 +213,11 @@ public sealed class UserDeleteCommandHandlerTests
     private static UserDeleteCommand CreateCommand(Guid? userGuid = null)
         => new(userGuid ?? Guid.NewGuid());
 
-    private static User CreateUser()
+    private static User CreateUser(Guid? guid = null)
     {
         return new User
         {
-            Guid = Guid.NewGuid(),
+            Guid = guid ?? Guid.NewGuid(),
             Nameid = new Nameid("user123"),
             PasswordHash = new PasswordHash(new string('a', PasswordHash.MinLength))
         };

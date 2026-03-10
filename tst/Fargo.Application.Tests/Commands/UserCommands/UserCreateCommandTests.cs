@@ -5,6 +5,7 @@ using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
+using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
@@ -48,9 +49,11 @@ public sealed class UserCreateCommandHandlerTests
             .GetByGuid(actorGuid, Arg.Any<CancellationToken>())
             .Returns((User?)null);
 
-        // Act + Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(
-            () => handler.Handle(command));
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
 
         await unitOfWork.DidNotReceive()
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -60,6 +63,63 @@ public sealed class UserCreateCommandHandlerTests
 
         userRepository.DidNotReceive()
             .Add(Arg.Any<User>());
+    }
+
+    [Fact]
+    public async Task Handle_ShouldThrowUserNotAuthorizedFargoDomainException_WhenActorDoesNotHaveCreateUserPermission()
+    {
+        // Arrange
+        var actor = CreateActorWithoutPermissions();
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UserNotAuthorizedFargoDomainException>(act);
+
+        passwordHasher.DidNotReceive()
+            .Hash(Arg.Any<Password>());
+
+        userRepository.DidNotReceive()
+            .Add(Arg.Any<User>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ShouldThrowUserNameidAlreadyExistsDomainException_WhenNameidAlreadyExists()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("existing-user");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var command = CreateCommand(nameid, password);
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+
+        userRepository
+            .ExistsByNameid(nameid, Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UserNameidAlreadyExistsDomainException>(act);
+
+        userRepository.DidNotReceive()
+            .Add(Arg.Any<User>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -76,6 +136,7 @@ public sealed class UserCreateCommandHandlerTests
         ConfigureCurrentUser(actor);
         ConfigureActorLookup(actor);
         ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
         CaptureAddedUser(user => addedUser = user);
 
         // Act
@@ -101,11 +162,37 @@ public sealed class UserCreateCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_ShouldRequirePasswordChange_WhenUserIsCreated()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var command = CreateCommand(nameid, password);
+        User? addedUser = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
+        CaptureAddedUser(user => addedUser = user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedUser);
+        Assert.True(addedUser!.IsPasswordChangeRequired);
+    }
+
+    [Fact]
     public async Task Handle_ShouldAddAllPermissionsFromCommandToCreatedUser()
     {
         // Arrange
         var actor = CreateActorWithCreateUserPermission();
         var passwordHash = CreatePasswordHash('p');
+        var commandNameid = new Nameid("user123");
         var permissions = new[]
         {
             ActionType.CreateArticle,
@@ -114,6 +201,7 @@ public sealed class UserCreateCommandHandlerTests
         };
 
         var command = CreateCommand(
+            nameid: commandNameid,
             permissions: permissions);
 
         User? addedUser = null;
@@ -121,6 +209,7 @@ public sealed class UserCreateCommandHandlerTests
         ConfigureCurrentUser(actor);
         ConfigureActorLookup(actor);
         ConfigureAnyPasswordHash(passwordHash);
+        ConfigureNameidDoesNotExist(commandNameid);
         CaptureAddedUser(user => addedUser = user);
 
         // Act
@@ -144,12 +233,14 @@ public sealed class UserCreateCommandHandlerTests
         // Arrange
         var actor = CreateActorWithCreateUserPermission();
         var passwordHash = CreatePasswordHash('p');
-        var command = CreateCommand(permissions: null);
+        var commandNameid = new Nameid("user123");
+        var command = CreateCommand(nameid: commandNameid, permissions: null);
         User? addedUser = null;
 
         ConfigureCurrentUser(actor);
         ConfigureActorLookup(actor);
         ConfigureAnyPasswordHash(passwordHash);
+        ConfigureNameidDoesNotExist(commandNameid);
         CaptureAddedUser(user => addedUser = user);
 
         // Act
@@ -158,6 +249,45 @@ public sealed class UserCreateCommandHandlerTests
         // Assert
         Assert.NotNull(addedUser);
         Assert.Empty(addedUser!.UserPermissions);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldUseProvidedCancellationToken()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var cancellationToken = new CancellationTokenSource().Token;
+        var command = CreateCommand(nameid, password);
+
+        currentUser.UserGuid.Returns(actor.Guid);
+
+        userRepository
+            .GetByGuid(actor.Guid, cancellationToken)
+            .Returns(actor);
+
+        userRepository
+            .ExistsByNameid(nameid, cancellationToken)
+            .Returns(false);
+
+        passwordHasher
+            .Hash(password)
+            .Returns(passwordHash);
+
+        // Act
+        await handler.Handle(command, cancellationToken);
+
+        // Assert
+        await userRepository.Received(1)
+            .GetByGuid(actor.Guid, cancellationToken);
+
+        await userRepository.Received(1)
+            .ExistsByNameid(nameid, cancellationToken);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(cancellationToken);
     }
 
     private void ConfigureCurrentUser(User actor)
@@ -186,6 +316,13 @@ public sealed class UserCreateCommandHandlerTests
             .Returns(passwordHash);
     }
 
+    private void ConfigureNameidDoesNotExist(Nameid nameid)
+    {
+        userRepository
+            .ExistsByNameid(nameid, Arg.Any<CancellationToken>())
+            .Returns(false);
+    }
+
     private void CaptureAddedUser(Action<User> capture)
     {
         userRepository
@@ -206,7 +343,7 @@ public sealed class UserCreateCommandHandlerTests
                     permissions is not null
                     ? [.. permissions.Select(x => new UserPermissionUpdateModel(x))]
                     : null
-                ));
+            ));
     }
 
     private static User CreateActorWithCreateUserPermission()
@@ -220,6 +357,16 @@ public sealed class UserCreateCommandHandlerTests
 
         actor.AddPermission(ActionType.CreateUser);
         return actor;
+    }
+
+    private static User CreateActorWithoutPermissions()
+    {
+        return new User
+        {
+            Guid = Guid.NewGuid(),
+            Nameid = new Nameid("basic-user"),
+            PasswordHash = CreatePasswordHash('a')
+        };
     }
 
     private static PasswordHash CreatePasswordHash(char value)

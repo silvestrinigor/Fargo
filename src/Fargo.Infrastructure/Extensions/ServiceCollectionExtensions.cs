@@ -181,6 +181,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
                 services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();
                 services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
+                services.AddScoped<ICommandHandler<PasswordChangeCommand>, PasswordChangeCommandHandler>();
 
                 services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();

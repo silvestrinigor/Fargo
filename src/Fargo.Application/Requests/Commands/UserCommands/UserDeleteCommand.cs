@@ -3,6 +3,7 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -53,6 +54,8 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
             actor.ValidatePermission(ActionType.DeleteUser);
+
+            UserService.ValidateUserDelete(user, actor);
 
             userRepository.Remove(user);
 

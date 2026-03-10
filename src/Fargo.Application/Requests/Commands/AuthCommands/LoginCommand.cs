@@ -44,6 +44,9 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
         /// <exception cref="UnauthorizedAccessFargoApplicationException">
         /// Thrown when the user does not exist or the password is invalid.
         /// </exception>
+        /// <exception cref="PasswordChangeRequiredFargoApplicationException">
+        /// Thrown when the user must change their password before continuing.
+        /// </exception>
         public async Task<AuthResult> Handle(
                 LoginCommand command,
                 CancellationToken cancellationToken = default
@@ -62,6 +65,11 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
             if (!isValid)
             {
                 throw new UnauthorizedAccessFargoApplicationException();
+            }
+
+            if (user.IsPasswordChangeRequired)
+            {
+                throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
             }
 
             var accessTokenResult = tokenGenerator.Generate(user);

@@ -3,28 +3,30 @@
 namespace Fargo.Application.Models.UserModels
 {
     /// <summary>
-    /// Represents the data used to update an existing user.
+    /// Represents the data used to update an existing user by an administrative operation.
     /// </summary>
     /// <remarks>
     /// All properties are optional. Only the provided values will be updated.
     /// </remarks>
     /// <param name="Nameid">
-    /// The new login identifier of the user. If null, the nameid will not be changed.
+    /// The new login identifier of the user. If <c>null</c>, the nameid will not be changed.
     /// </param>
     /// <param name="Description">
-    /// The new description of the user. If null, the description will not be changed.
+    /// The new description of the user. If <c>null</c>, the description will not be changed.
     /// </param>
     /// <param name="Password">
-    /// The password update information containing the current password and the new password.
-    /// If null, the password will not be changed.
+    /// The new password to assign to the user.
+    /// This field is intended for administrative password changes only.
+    /// If <c>null</c>, the password will not be changed.
     /// </param>
     /// <param name="Permissions">
-    /// Optional list of permissions granted to the user.
+    /// The set of permissions to assign to the user.
+    /// If <c>null</c>, the user's permissions will not be changed.
     /// </param>
     public sealed record UserUpdateModel(
             Nameid? Nameid = null,
             Description? Description = null,
-            UserPasswordUpdateModel? Password = null,
+            Password? Password = null,
             IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null
             );
 }

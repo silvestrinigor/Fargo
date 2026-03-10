@@ -5,6 +5,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -44,9 +45,6 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         /// <exception cref="UserNotFoundFargoApplicationException">
         /// Thrown when the specified user does not exist.
         /// </exception>
-        /// <exception cref="InvalidPasswordFargoApplicationException">
-        /// Thrown when the provided current password is incorrect.
-        /// </exception>
         public async Task Handle(
                 UserUpdateCommand command,
                 CancellationToken cancellationToken = default
@@ -69,23 +67,16 @@ namespace Fargo.Application.Requests.Commands.UserCommands
 
             if (command.User.Password is not null)
             {
-                var passwordUpdate = command.User.Password;
+                actor.ValidatePermission(ActionType.ChangeOtherUserPassword);
 
-                var isValid = passwordHasher.Verify(
-                        user.PasswordHash,
-                        passwordUpdate.CurrentPassword
-                        );
-
-                if (!isValid)
-                {
-                    throw new InvalidPasswordFargoApplicationException();
-                }
-
-                user.PasswordHash = passwordHasher.Hash(passwordUpdate.NewPassword);
+                user.PasswordHash = passwordHasher.Hash(command.User.Password.Value);
+                user.MarkPasswordChangeAsRequired();
             }
 
             if (command.User.Permissions is not null)
             {
+                UserService.ValidateUserPermissionChange(user, actor);
+
                 var requestedActions = command.User.Permissions
                     .Select(x => x.Action)
                     .Distinct()

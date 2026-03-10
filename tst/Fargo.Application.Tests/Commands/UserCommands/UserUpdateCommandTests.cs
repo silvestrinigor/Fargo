@@ -58,7 +58,7 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorDoesNotHavePermission()
+    public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorDoesNotHaveEditUserPermission()
     {
         // Arrange
         var actor = CreateUser();
@@ -157,32 +157,26 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ThrowInvalidPasswordFargoApplicationException_When_CurrentPasswordIsInvalid()
+    public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorTriesToChangeOtherUserPasswordWithoutPermission()
     {
         // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
-        var passwordUpdate = new UserPasswordUpdateModel(
-            new Password("Wrong@123"),
-            new Password("NewSecure@123"));
+        var newPassword = new Password("NewSecure@123");
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(Password: passwordUpdate));
+            new UserUpdateModel(Password: newPassword));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        passwordHasher
-            .Verify(targetUser.PasswordHash, passwordUpdate.CurrentPassword)
-            .Returns(false);
-
         // Act
         Task act() => handler.Handle(command);
 
         // Assert
-        await Assert.ThrowsAsync<InvalidPasswordFargoApplicationException>(act);
+        await Assert.ThrowsAsync<UserNotAuthorizedFargoDomainException>(act);
 
         passwordHasher.DidNotReceive()
             .Hash(Arg.Any<Password>());
@@ -192,32 +186,27 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_UpdatePassword_When_CurrentPasswordIsValid()
+    public async Task Handle_Should_UpdatePassword_When_ActorHasChangeOtherUserPasswordPermission()
     {
         // Arrange
-        var actor = CreateUserWithPermission(ActionType.EditUser);
-        var targetUser = CreateUser();
-        var originalPasswordHash = targetUser.PasswordHash;
+        var actor = CreateUserWithPermissions(
+            ActionType.EditUser,
+            ActionType.ChangeOtherUserPassword);
 
-        var passwordUpdate = new UserPasswordUpdateModel(
-            new Password("Current@123"),
-            new Password("NewSecure@123"));
+        var targetUser = CreateUser();
+        var newPassword = new Password("NewSecure@123");
         var newPasswordHash = CreatePasswordHash('n');
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(Password: passwordUpdate));
+            new UserUpdateModel(Password: newPassword));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
         passwordHasher
-            .Verify(originalPasswordHash, passwordUpdate.CurrentPassword)
-            .Returns(true);
-
-        passwordHasher
-            .Hash(passwordUpdate.NewPassword)
+            .Hash(newPassword)
             .Returns(newPasswordHash);
 
         // Act
@@ -225,10 +214,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         // Assert
         passwordHasher.Received(1)
-            .Verify(originalPasswordHash, passwordUpdate.CurrentPassword);
-
-        passwordHasher.Received(1)
-            .Hash(passwordUpdate.NewPassword);
+            .Hash(newPassword);
 
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
 
@@ -385,14 +371,15 @@ public sealed class UserUpdateCommandHandlerTests
     public async Task Handle_Should_UpdateNameidDescriptionAndPassword_When_AllAreProvided()
     {
         // Arrange
-        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var actor = CreateUserWithPermissions(
+            ActionType.EditUser,
+            ActionType.ChangeOtherUserPassword);
+
         var targetUser = CreateUser();
 
         var newNameid = new Nameid("updated-user");
         var newDescription = new Description("Updated user description.");
-        var passwordUpdate = new UserPasswordUpdateModel(
-            new Password("Current@123"),
-            new Password("NewSecure@123"));
+        var newPassword = new Password("NewSecure@123");
         var newPasswordHash = CreatePasswordHash('z');
 
         var command = CreateCommand(
@@ -400,18 +387,14 @@ public sealed class UserUpdateCommandHandlerTests
             new UserUpdateModel(
                 Nameid: newNameid,
                 Description: newDescription,
-                Password: passwordUpdate));
+                Password: newPassword));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
         passwordHasher
-            .Verify(targetUser.PasswordHash, passwordUpdate.CurrentPassword)
-            .Returns(true);
-
-        passwordHasher
-            .Hash(passwordUpdate.NewPassword)
+            .Hash(newPassword)
             .Returns(newPasswordHash);
 
         // Act
@@ -421,6 +404,9 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(newNameid, targetUser.Nameid);
         Assert.Equal(newDescription, targetUser.Description);
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
+
+        passwordHasher.Received(1)
+            .Hash(newPassword);
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -456,6 +442,9 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(
             originalActions,
             targetUser.UserPermissions.Select(x => x.Action).ToHashSet());
+
+        passwordHasher.DidNotReceive()
+            .Hash(Arg.Any<Password>());
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -494,6 +483,144 @@ public sealed class UserUpdateCommandHandlerTests
             .SaveChanges(cancellationToken);
     }
 
+    [Fact]
+    public async Task Handle_Should_ThrowUserCannotChangeOwnPermissionsFargoDomainException_When_ActorTriesToChangeOwnPermissions()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+
+        var command = CreateCommand(
+            actor.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.CreateUser),
+                    new UserPermissionUpdateModel(ActionType.DeleteUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception =
+            await Assert.ThrowsAsync<UserCannotChangeOwnPermissionsFargoDomainException>(act);
+
+        Assert.Equal(actor.Guid, exception.UserGuid);
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotAddPermissions_When_ActorTriesToChangeOwnPermissions()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var originalActions = actor.UserPermissions
+            .Select(x => x.Action)
+            .ToHashSet();
+
+        var command = CreateCommand(
+            actor.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.CreateUser),
+                    new UserPermissionUpdateModel(ActionType.DeleteUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UserCannotChangeOwnPermissionsFargoDomainException>(act);
+
+        Assert.Equal(
+            originalActions,
+            actor.UserPermissions.Select(x => x.Action).ToHashSet());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotRemovePermissions_When_ActorTriesToChangeOwnPermissions()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        actor.AddPermission(ActionType.CreateUser);
+        actor.AddPermission(ActionType.DeleteUser);
+
+        var originalActions = actor.UserPermissions
+            .Select(x => x.Action)
+            .ToHashSet();
+
+        var command = CreateCommand(
+            actor.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.EditUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UserCannotChangeOwnPermissionsFargoDomainException>(act);
+
+        Assert.Equal(
+            originalActions,
+            actor.UserPermissions.Select(x => x.Action).ToHashSet());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_RequirePasswordChange_When_AdminChangesUserPassword()
+    {
+        // Arrange
+        var actor = CreateUserWithPermissions(
+                ActionType.EditUser,
+                ActionType.ChangeOtherUserPassword);
+
+        var targetUser = CreateUser();
+        var newPassword = new Password("NewSecure@123");
+        var newPasswordHash = CreatePasswordHash('n');
+
+        var command = CreateCommand(
+                targetUser.Guid,
+                new UserUpdateModel(Password: newPassword));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        passwordHasher
+            .Hash(newPassword)
+            .Returns(newPasswordHash);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(newPasswordHash, targetUser.PasswordHash);
+        Assert.True(targetUser.IsPasswordChangeRequired);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User actor)
     {
         currentUser.UserGuid.Returns(actor.Guid);
@@ -507,29 +634,39 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     private static UserUpdateCommand CreateCommand(
-        Guid? userGuid = null,
-        UserUpdateModel? model = null)
+            Guid? userGuid = null,
+            UserUpdateModel? model = null)
         => new(
-            userGuid ?? Guid.NewGuid(),
-            model ?? new UserUpdateModel());
+                userGuid ?? Guid.NewGuid(),
+                model ?? new UserUpdateModel());
 
     private static User CreateUser()
     {
-        var user = new User
+        return new User
         {
             Guid = Guid.NewGuid(),
             Nameid = new Nameid("user123"),
             Description = new Description("Original description."),
             PasswordHash = CreatePasswordHash('a')
         };
-
-        return user;
     }
 
     private static User CreateUserWithPermission(ActionType action)
     {
         var user = CreateUser();
         user.AddPermission(action);
+        return user;
+    }
+
+    private static User CreateUserWithPermissions(params ActionType[] actions)
+    {
+        var user = CreateUser();
+
+        foreach (var action in actions)
+        {
+            user.AddPermission(action);
+        }
+
         return user;
     }
 

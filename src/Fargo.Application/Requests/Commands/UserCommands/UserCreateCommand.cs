@@ -62,6 +62,8 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 PasswordHash = userPasswordHash
             };
 
+            user.MarkPasswordChangeAsRequired();
+
             await userService.ValidateUserCreate(user, cancellationToken);
 
             foreach (var permission in command.User.Permissions ?? [])

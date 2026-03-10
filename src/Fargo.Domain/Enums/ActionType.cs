@@ -54,6 +54,17 @@
         EditUser,
 
         /// <summary>
+        /// Allows changing the password of another user without requiring
+        /// the current password of that user.
+        ///
+        /// This permission is typically intended for administrative users
+        /// who need to reset another user's password. It does not apply to
+        /// a user changing their own password, which should require the
+        /// current password.
+        /// </summary>
+        ChangeOtherUserPassword,
+
+        /// <summary>
         /// Allows creating partitions in the system.
         /// </summary>
         CreatePartition,

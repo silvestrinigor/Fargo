@@ -45,7 +45,63 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Gets the collection of permissions assigned to the user.
+        /// The default number of days a user can keep the same password
+        /// before a password change is required.
+        /// </summary>
+        public const int DefaultPasswordChangeDays = 90;
+
+        /// <summary>
+        /// Gets or sets the date and time when the user must change their password.
+        ///
+        /// By default, this value is initialized based on
+        /// <see cref="DefaultPasswordChangeDays"/> from the current UTC time.
+        /// </summary>
+        public DateTimeOffset RequirePasswordChangeAt
+        {
+            get;
+            set;
+        } = DateTimeOffset.UtcNow + TimeSpan.FromDays(DefaultPasswordChangeDays);
+
+        /// <summary>
+        /// Sets the password expiration requirement to a future date based on the specified number of days.
+        /// </summary>
+        /// <param name="days">
+        /// The number of days from the current UTC time after which the user must change their password.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="days"/> is less than zero.
+        /// </exception>
+        public void RequirePasswordChangeInDays(int days)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(days);
+
+            RequirePasswordChangeAt = DateTimeOffset.UtcNow.AddDays(days);
+        }
+
+        /// <summary>
+        /// Marks the user's password as requiring an immediate change.
+        /// </summary>
+        /// <remarks>
+        /// After calling this method, <see cref="IsPasswordChangeRequired"/> will return <c>true</c>
+        /// until the password is updated and a new expiration date is set.
+        /// </remarks>
+        public void MarkPasswordChangeAsRequired()
+        {
+            RequirePasswordChangeAt = DateTimeOffset.UtcNow;
+        }
+
+        /// <summary>
+        /// Determines whether the user is currently required to change their password.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the current UTC time is greater than or equal to
+        /// <see cref="RequirePasswordChangeAt"/>; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsPasswordChangeRequired
+            => DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
+
+        /// <summary>
+        /// Gets the read-only collection of permissions assigned to the user.
         ///
         /// Each permission represents an allowed <see cref="ActionType"/>
         /// that the user can perform.

@@ -1,6 +1,8 @@
 using Fargo.Application.Models.AuthModels;
+using Fargo.Application.Models.UserModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.AuthCommands;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions
@@ -40,6 +42,15 @@ namespace Fargo.HttpApi.Extensions
                 .WithDescription("Uses a valid refresh token to generate a new access token.")
                 .Produces<AuthResult>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status401Unauthorized);
+
+            group.MapPut("/password", ChangePassword)
+                .RequireAuthorization()
+                .WithName("ChangePassword")
+                .WithSummary("Changes the password of the authenticated user")
+                .WithDescription("Validates the current password and updates it with the new password.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status400BadRequest)
+                .Produces(StatusCodes.Status401Unauthorized);
         }
 
         private static async Task<Ok<AuthResult>> Login(
@@ -65,12 +76,21 @@ namespace Fargo.HttpApi.Extensions
         private static async Task<Ok<AuthResult>> Refresh(
             RefreshCommand command,
             ICommandHandler<RefreshCommand, AuthResult> handler,
-            CancellationToken cancellationToken
-        )
+            CancellationToken cancellationToken)
         {
             var result = await handler.Handle(command, cancellationToken);
 
             return TypedResults.Ok(result);
+        }
+
+        private static async Task<NoContent> ChangePassword(
+            PasswordChangeCommand command,
+            ICommandHandler<PasswordChangeCommand> handler,
+            CancellationToken cancellationToken)
+        {
+            await handler.Handle(command, cancellationToken);
+
+            return TypedResults.NoContent();
         }
     }
 }

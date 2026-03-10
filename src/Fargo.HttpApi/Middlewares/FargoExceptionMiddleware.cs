@@ -30,6 +30,10 @@ namespace Fargo.HttpApi.Middlewares
                 new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
             },
             {
+                typeof(PasswordChangeRequiredFargoApplicationException),
+                new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
+            },
+            {
                 typeof(ArticleNotFoundFargoApplicationException),
                 new ProblemDetailsDefinition(404, "Article not found", "article/not-found")
             },
@@ -52,6 +56,14 @@ namespace Fargo.HttpApi.Middlewares
             {
                 typeof(UserNameidAlreadyExistsDomainException),
                 new ProblemDetailsDefinition(409, "Conflict", "user/nameid-already-exists")
+            },
+            {
+                typeof(UserCannotDeleteSelfFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-delete-self")
+            },
+            {
+                typeof(UserCannotChangeOwnPermissionsFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-change-own-permissions")
             }
         };
 

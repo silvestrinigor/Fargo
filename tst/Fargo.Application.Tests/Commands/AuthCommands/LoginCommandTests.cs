@@ -100,6 +100,43 @@ public sealed class LoginCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_Should_ThrowPasswordChangeRequiredFargoApplicationException_When_PasswordChangeIsRequired()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var user = CreateUser();
+        user.MarkPasswordChangeAsRequired();
+
+        ConfigureUserFound(command, user);
+
+        passwordHasher
+            .Verify(user.PasswordHash, command.Password)
+            .Returns(true);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<PasswordChangeRequiredFargoApplicationException>(act);
+        Assert.Equal(user.Guid, exception.UserGuid);
+
+        tokenGenerator.DidNotReceive()
+            .Generate(Arg.Any<User>());
+
+        refreshTokenGenerator.DidNotReceive()
+            .Generate();
+
+        tokenHasher.DidNotReceive()
+            .Hash(Arg.Any<Token>());
+
+        refreshTokenRepository.DidNotReceive()
+            .Add(Arg.Any<RefreshToken>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_Should_ReturnAuthResult_When_CredentialsAreValid()
     {
         // Arrange
