@@ -157,6 +157,64 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_Should_UpdateDefaultPasswordExpirationTimeSpan_When_ValueIsProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+        var newDefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(15);
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            new UserUpdateModel(
+                DefaultPasswordExpirationTimeSpan: newDefaultPasswordExpirationTimeSpan));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(
+            newDefaultPasswordExpirationTimeSpan,
+            targetUser.DefaultPasswordExpirationTimeSpan);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotUpdateDefaultPasswordExpirationTimeSpan_When_ValueIsNotProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+        var originalDefaultPasswordExpirationTimeSpan =
+            targetUser.DefaultPasswordExpirationTimeSpan;
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            new UserUpdateModel());
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(
+            originalDefaultPasswordExpirationTimeSpan,
+            targetUser.DefaultPasswordExpirationTimeSpan);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorTriesToChangeOtherUserPasswordWithoutPermission()
     {
         // Arrange
@@ -368,7 +426,7 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_UpdateNameidDescriptionAndPassword_When_AllAreProvided()
+    public async Task Handle_Should_UpdateNameidDescriptionPasswordAndDefaultPasswordExpirationTimeSpan_When_AllAreProvided()
     {
         // Arrange
         var actor = CreateUserWithPermissions(
@@ -381,13 +439,15 @@ public sealed class UserUpdateCommandHandlerTests
         var newDescription = new Description("Updated user description.");
         var newPassword = new Password("NewSecure@123");
         var newPasswordHash = CreatePasswordHash('z');
+        var newDefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(45);
 
         var command = CreateCommand(
             targetUser.Guid,
             new UserUpdateModel(
                 Nameid: newNameid,
                 Description: newDescription,
-                Password: newPassword));
+                Password: newPassword,
+                DefaultPasswordExpirationTimeSpan: newDefaultPasswordExpirationTimeSpan));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -404,6 +464,9 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(newNameid, targetUser.Nameid);
         Assert.Equal(newDescription, targetUser.Description);
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
+        Assert.Equal(
+            newDefaultPasswordExpirationTimeSpan,
+            targetUser.DefaultPasswordExpirationTimeSpan);
 
         passwordHasher.Received(1)
             .Hash(newPassword);
@@ -422,6 +485,8 @@ public sealed class UserUpdateCommandHandlerTests
         var originalNameid = targetUser.Nameid;
         var originalDescription = targetUser.Description;
         var originalPasswordHash = targetUser.PasswordHash;
+        var originalDefaultPasswordExpirationTimeSpan =
+            targetUser.DefaultPasswordExpirationTimeSpan;
         var originalActions = targetUser.UserPermissions
             .Select(x => x.Action)
             .ToHashSet();
@@ -439,6 +504,9 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(originalNameid, targetUser.Nameid);
         Assert.Equal(originalDescription, targetUser.Description);
         Assert.Equal(originalPasswordHash, targetUser.PasswordHash);
+        Assert.Equal(
+            originalDefaultPasswordExpirationTimeSpan,
+            targetUser.DefaultPasswordExpirationTimeSpan);
         Assert.Equal(
             originalActions,
             targetUser.UserPermissions.Select(x => x.Action).ToHashSet());

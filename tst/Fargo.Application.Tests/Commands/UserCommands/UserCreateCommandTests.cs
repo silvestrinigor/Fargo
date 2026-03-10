@@ -252,6 +252,66 @@ public sealed class UserCreateCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_ShouldSetDefaultPasswordExpirationTimeSpan_WhenValueIsProvided()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var defaultPasswordExpirationTimeSpan = TimeSpan.FromDays(15);
+        var command = CreateCommand(
+            nameid: nameid,
+            password: password,
+            defaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan);
+
+        User? addedUser = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
+        CaptureAddedUser(user => addedUser = user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedUser);
+        Assert.Equal(
+            defaultPasswordExpirationTimeSpan,
+            addedUser!.DefaultPasswordExpirationTimeSpan);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldKeepDomainDefaultPasswordExpirationTimeSpan_WhenValueIsNotProvided()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var command = CreateCommand(nameid: nameid, password: password);
+
+        User? addedUser = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
+        CaptureAddedUser(user => addedUser = user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedUser);
+        Assert.Equal(
+            TimeSpan.FromDays(User.DefaultPasswordChangeDays),
+            addedUser!.DefaultPasswordExpirationTimeSpan);
+    }
+
+    [Fact]
     public async Task Handle_ShouldUseProvidedCancellationToken()
     {
         // Arrange
@@ -333,7 +393,8 @@ public sealed class UserCreateCommandHandlerTests
     private static UserCreateCommand CreateCommand(
         Nameid? nameid = null,
         Password? password = null,
-        IReadOnlyCollection<ActionType>? permissions = null)
+        IReadOnlyCollection<ActionType>? permissions = null,
+        TimeSpan? defaultPasswordExpirationTimeSpan = null)
     {
         return new UserCreateCommand(
             new UserCreateModel(
@@ -342,7 +403,8 @@ public sealed class UserCreateCommandHandlerTests
                 Permissions:
                     permissions is not null
                     ? [.. permissions.Select(x => new UserPermissionUpdateModel(x))]
-                    : null
+                    : null,
+                DefaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan
             ));
     }
 

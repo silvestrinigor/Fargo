@@ -65,6 +65,12 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             user.Nameid = command.User.Nameid ?? user.Nameid;
             user.Description = command.User.Description ?? user.Description;
 
+            if (command.User.DefaultPasswordExpirationTimeSpan is not null)
+            {
+                user.DefaultPasswordExpirationTimeSpan =
+                    command.User.DefaultPasswordExpirationTimeSpan.Value;
+            }
+
             if (command.User.Password is not null)
             {
                 actor.ValidatePermission(ActionType.ChangeOtherUserPassword);

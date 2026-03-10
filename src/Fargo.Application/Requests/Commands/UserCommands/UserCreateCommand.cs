@@ -59,7 +59,10 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             {
                 Nameid = command.User.Nameid,
                 Description = command.User.Description ?? Description.Empty,
-                PasswordHash = userPasswordHash
+                PasswordHash = userPasswordHash,
+                DefaultPasswordExpirationTimeSpan =
+                    command.User.DefaultPasswordExpirationTimeSpan
+                    ?? TimeSpan.FromDays(User.DefaultPasswordChangeDays)
             };
 
             user.MarkPasswordChangeAsRequired();

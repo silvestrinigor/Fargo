@@ -2,7 +2,6 @@ using Fargo.Application.Exceptions;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 
@@ -70,7 +69,7 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
             }
 
             user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
-            user.RequirePasswordChangeInDays(User.DefaultPasswordChangeDays);
+            user.ResetPasswordExpiration();
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

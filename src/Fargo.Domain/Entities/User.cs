@@ -51,6 +51,28 @@ namespace Fargo.Domain.Entities
         public const int DefaultPasswordChangeDays = 90;
 
         /// <summary>
+        /// Gets or sets the default password expiration period for the user.
+        ///
+        /// This value is persisted and represents the amount of time added to the
+        /// current UTC time when the user successfully changes their own password.
+        ///
+        /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
+        /// immediately after being changed.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when the assigned value is less than <see cref="TimeSpan.Zero"/>.
+        /// </exception>
+        public TimeSpan DefaultPasswordExpirationTimeSpan
+        {
+            get;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, TimeSpan.Zero);
+                field = value;
+            }
+        } = TimeSpan.FromDays(DefaultPasswordChangeDays);
+
+        /// <summary>
         /// Gets or sets the date and time when the user must change their password.
         ///
         /// By default, this value is initialized based on
@@ -61,6 +83,23 @@ namespace Fargo.Domain.Entities
             get;
             set;
         } = DateTimeOffset.UtcNow + TimeSpan.FromDays(DefaultPasswordChangeDays);
+
+        /// <summary>
+        /// Resets the password expiration date based on the user's
+        /// <see cref="DefaultPasswordExpirationTimeSpan"/>.
+        ///
+        /// The new expiration date is calculated by adding the configured
+        /// default expiration interval to the current UTC time.
+        ///
+        /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
+        /// immediately.
+        /// </summary>
+        /// <remarks>
+        /// This method is typically used after the user successfully changes
+        /// their own password.
+        /// </remarks>
+        public void ResetPasswordExpiration()
+            => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationTimeSpan;
 
         /// <summary>
         /// Sets the password expiration requirement to a future date based on the specified number of days.

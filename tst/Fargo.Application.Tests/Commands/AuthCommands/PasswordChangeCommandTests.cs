@@ -23,10 +23,10 @@ public sealed class PasswordChangeCommandHandlerTests
     public PasswordChangeCommandHandlerTests()
     {
         handler = new PasswordChangeCommandHandler(
-            userRepository,
-            passwordHasher,
-            unitOfWork,
-            currentUser);
+                userRepository,
+                passwordHasher,
+                unitOfWork,
+                currentUser);
     }
 
     [Fact]
@@ -64,9 +64,9 @@ public sealed class PasswordChangeCommandHandlerTests
         // Arrange
         var user = CreateUser();
         var command = new PasswordChangeCommand(
-            new UserPasswordUpdateModel(
-                NewPassword: new Password("NewSecure@123"),
-                CurrentPassword: null));
+                new UserPasswordUpdateModel(
+                    NewPassword: new Password("NewSecure@123"),
+                    CurrentPassword: null));
 
         ConfigureCurrentUser(user);
         ConfigureUserLookup(user);
@@ -158,10 +158,11 @@ public sealed class PasswordChangeCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ClearPasswordChangeRequirement_When_PasswordIsChangedSuccessfully()
+    public async Task Handle_Should_ClearPasswordChangeRequirement_When_PasswordIsChangedSuccessfully_And_ExpirationIsPositive()
     {
         // Arrange
         var user = CreateUser();
+        user.DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(30);
         user.MarkPasswordChangeAsRequired();
 
         var currentPassword = new Password("Current@123");
@@ -227,6 +228,85 @@ public sealed class PasswordChangeCommandHandlerTests
             .SaveChanges(cancellationToken);
     }
 
+    [Fact]
+    public async Task Handle_Should_ResetPasswordExpiration_BasedOnUserDefaultPasswordExpirationTimeSpan()
+    {
+        // Arrange
+        var user = CreateUser();
+        user.DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(15);
+
+        var currentPassword = new Password("Current@123");
+        var newPassword = new Password("NewSecure@123");
+        var newPasswordHash = CreatePasswordHash('r');
+        var command = CreateCommand(currentPassword, newPassword);
+
+        ConfigureCurrentUser(user);
+        ConfigureUserLookup(user);
+
+        passwordHasher
+            .Verify(user.PasswordHash, currentPassword)
+            .Returns(true);
+
+        passwordHasher
+            .Hash(newPassword)
+            .Returns(newPasswordHash);
+
+        var before = DateTimeOffset.UtcNow;
+
+        // Act
+        await handler.Handle(command);
+
+        var after = DateTimeOffset.UtcNow;
+
+        // Assert
+        Assert.Equal(newPasswordHash, user.PasswordHash);
+        Assert.True(user.RequirePasswordChangeAt >= before.AddDays(15));
+        Assert.True(user.RequirePasswordChangeAt <= after.AddDays(15));
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ExpireImmediately_When_DefaultPasswordExpirationTimeSpanIsZero()
+    {
+        // Arrange
+        var user = CreateUser();
+        user.DefaultPasswordExpirationTimeSpan = TimeSpan.Zero;
+
+        var currentPassword = new Password("Current@123");
+        var newPassword = new Password("NewSecure@123");
+        var newPasswordHash = CreatePasswordHash('q');
+        var command = CreateCommand(currentPassword, newPassword);
+
+        ConfigureCurrentUser(user);
+        ConfigureUserLookup(user);
+
+        passwordHasher
+            .Verify(user.PasswordHash, currentPassword)
+            .Returns(true);
+
+        passwordHasher
+            .Hash(newPassword)
+            .Returns(newPasswordHash);
+
+        var before = DateTimeOffset.UtcNow;
+
+        // Act
+        await handler.Handle(command);
+
+        var after = DateTimeOffset.UtcNow;
+
+        // Assert
+        Assert.Equal(newPasswordHash, user.PasswordHash);
+        Assert.True(user.RequirePasswordChangeAt >= before);
+        Assert.True(user.RequirePasswordChangeAt <= after);
+        Assert.True(user.IsPasswordChangeRequired);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User user)
     {
         currentUser.UserGuid.Returns(user.Guid);
@@ -240,13 +320,13 @@ public sealed class PasswordChangeCommandHandlerTests
     }
 
     private static PasswordChangeCommand CreateCommand(
-        Password? currentPassword = null,
-        Password? newPassword = null)
+            Password? currentPassword = null,
+            Password? newPassword = null)
     {
         return new PasswordChangeCommand(
-            new UserPasswordUpdateModel(
-                NewPassword: newPassword ?? new Password("NewSecure@123"),
-                CurrentPassword: currentPassword ?? new Password("Current@123")));
+                new UserPasswordUpdateModel(
+                    NewPassword: newPassword ?? new Password("NewSecure@123"),
+                    CurrentPassword: currentPassword ?? new Password("Current@123")));
     }
 
     private static User CreateUser()
