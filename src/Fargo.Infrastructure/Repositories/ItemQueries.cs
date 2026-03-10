@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories
 {
-    public sealed class ItemReadRepository(FargoReadDbContext context)
-        : IItemReadRepository
+    public sealed class ItemQueries(FargoReadDbContext context)
+        : IItemQueries
     {
         private readonly DbSet<ItemReadModel> items = context.Items;
 
@@ -18,7 +18,7 @@ namespace Fargo.Infrastructure.Repositories
                 CancellationToken cancellationToken = default
                 )
             => await items
-            .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
+            .TemporalAsOfIfProvided(asOfDateTime)
             .Where(a =>a.Guid == entityGuid)
             .OrderBy(x => x.Guid)
             .AsNoTracking()
@@ -31,7 +31,7 @@ namespace Fargo.Infrastructure.Repositories
                 CancellationToken cancellationToken = default
                 )
             => await items
-            .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
+            .TemporalAsOfIfProvided(asOfDateTime)
             .Where(i => articleGuid == null || i.ArticleGuid == articleGuid)
             .OrderBy(x => x.Guid)
             .WithPagination(pagination)

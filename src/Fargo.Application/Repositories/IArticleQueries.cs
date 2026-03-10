@@ -11,7 +11,7 @@ namespace Fargo.Application.Repositories
     /// and is responsible only for retrieving article data.
     /// It must not modify the state of the system.
     /// </remarks>
-    public interface IArticleReadRepository
+    public interface IArticleQueries
     {
         /// <summary>
         /// Retrieves a single article by its unique identifier.

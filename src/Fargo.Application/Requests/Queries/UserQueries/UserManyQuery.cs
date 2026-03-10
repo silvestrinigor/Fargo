@@ -26,7 +26,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
     /// Handles the execution of <see cref="UserManyQuery"/>.
     /// </summary>
     public sealed class UserManyQueryHandler(
-            IUserReadRepository userRepository
+            IUserQueries userRepository
             ) : IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>>
     {
         /// <summary>

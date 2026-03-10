@@ -30,7 +30,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     /// Handles the execution of <see cref="ItemManyQuery"/>.
     /// </summary>
     public sealed class ItemManyQueryHandler(
-            IItemReadRepository itemRepository
+            IItemQueries itemRepository
             ) : IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemReadModel>>
     {
         /// <summary>

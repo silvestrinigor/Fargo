@@ -23,7 +23,7 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     /// Handles the execution of <see cref="ItemSingleQuery"/>.
     /// </summary>
     public sealed class ItemSingleQueryHandler(
-            IItemReadRepository itemRepository
+            IItemQueries itemRepository
             ) : IQueryHandler<ItemSingleQuery, ItemReadModel?>
     {
         /// <summary>

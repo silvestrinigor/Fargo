@@ -14,26 +14,32 @@ namespace Fargo.Application.Tests.Commands.ArticleCommands;
 
 public sealed class ArticleCreateCommandHandlerTests
 {
+    private static readonly Name articleName = new("Notebook");
+    private static readonly Description articleDescription =
+        new("A high-quality notebook for writing and drawing");
+
+    private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
+    private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
+    private readonly ICurrentUser currentUser = Substitute.For<ICurrentUser>();
+    private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
+
+    private readonly ArticleCreateCommandHandler handler;
+
+    public ArticleCreateCommandHandlerTests()
+    {
+        handler = new ArticleCreateCommandHandler(
+                articleRepository,
+                userRepository,
+                currentUser,
+                unitOfWork);
+    }
+
     [Fact]
     public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_ActorIsNotFound()
     {
         // Arrange
-        var articleRepository = Substitute.For<IArticleRepository>();
-        var userRepository = Substitute.For<IUserRepository>();
-        var currentUser = Substitute.For<ICurrentUser>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new ArticleCreateCommandHandler(
-            articleRepository,
-            userRepository,
-            currentUser,
-            unitOfWork);
-
-        var command = new ArticleCreateCommand(
-            new ArticleCreateModel(new Name("Notebook"))
-        );
-
         var userGuid = Guid.NewGuid();
+        var command = CreateCommand();
 
         currentUser.UserGuid.Returns(userGuid);
 
@@ -55,29 +61,11 @@ public sealed class ArticleCreateCommandHandlerTests
     public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorDoesNotHavePermission()
     {
         // Arrange
-        var articleRepository = Substitute.For<IArticleRepository>();
-        var userRepository = Substitute.For<IUserRepository>();
-        var currentUser = Substitute.For<ICurrentUser>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new ArticleCreateCommandHandler(
-            articleRepository,
-            userRepository,
-            currentUser,
-            unitOfWork);
-
-        var command = new ArticleCreateCommand(
-            new ArticleCreateModel(new Name("Notebook"))
-        );
-
         var actor = CreateUser();
-        var userGuid = actor.Guid;
+        var command = CreateCommand();
 
-        currentUser.UserGuid.Returns(userGuid);
-
-        userRepository
-            .GetByGuid(userGuid, Arg.Any<CancellationToken>())
-            .Returns(actor);
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
 
         // Act
         Task act() => handler.Handle(command);
@@ -93,38 +81,13 @@ public sealed class ArticleCreateCommandHandlerTests
     public async Task Handle_Should_AddArticleAndSaveChanges_When_ActorHasPermission()
     {
         // Arrange
-        var articleRepository = Substitute.For<IArticleRepository>();
-        var userRepository = Substitute.For<IUserRepository>();
-        var currentUser = Substitute.For<ICurrentUser>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new ArticleCreateCommandHandler(
-            articleRepository,
-            userRepository,
-            currentUser,
-            unitOfWork);
-
-        var command = new ArticleCreateCommand(
-            new ArticleCreateModel(
-                new Name("Notebook"),
-                new Description("A high-quality notebook for writing and drawing"
-                ))
-        );
-
         var actor = CreateUserWithPermission(ActionType.CreateArticle);
-        var userGuid = actor.Guid;
-
-        currentUser.UserGuid.Returns(userGuid);
-
-        userRepository
-            .GetByGuid(userGuid, Arg.Any<CancellationToken>())
-            .Returns(actor);
-
+        var command = CreateCommand(articleDescription);
         Article? addedArticle = null;
 
-        articleRepository
-            .When(x => x.Add(Arg.Any<Article>()))
-            .Do(callInfo => addedArticle = callInfo.Arg<Article>());
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        CaptureAddedArticle(article => addedArticle = article);
 
         // Act
         var result = await handler.Handle(command);
@@ -135,66 +98,34 @@ public sealed class ArticleCreateCommandHandlerTests
 
         Assert.NotNull(addedArticle);
         Assert.Equal(command.Article.Name, addedArticle!.Name);
-        Assert.Equal(addedArticle.Guid, result);
         Assert.Equal(command.Article.Description, addedArticle.Description);
+        Assert.Equal(addedArticle.Guid, result);
     }
 
     [Fact]
     public async Task Handle_Should_UseCurrentUserGuidToLoadActor()
     {
         // Arrange
-        var articleRepository = Substitute.For<IArticleRepository>();
-        var userRepository = Substitute.For<IUserRepository>();
-        var currentUser = Substitute.For<ICurrentUser>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new ArticleCreateCommandHandler(
-            articleRepository,
-            userRepository,
-            currentUser,
-            unitOfWork);
-
-        var command = new ArticleCreateCommand(
-            new ArticleCreateModel(new Name("Notebook"))
-        );
-
         var actor = CreateUserWithPermission(ActionType.CreateArticle);
-        var userGuid = actor.Guid;
+        var command = CreateCommand();
 
-        currentUser.UserGuid.Returns(userGuid);
-
-        userRepository
-            .GetByGuid(userGuid, Arg.Any<CancellationToken>())
-            .Returns(actor);
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
 
         // Act
         await handler.Handle(command);
 
         // Assert
         await userRepository.Received(1)
-            .GetByGuid(userGuid, Arg.Any<CancellationToken>());
+            .GetByGuid(actor.Guid, Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Handle_Should_UseProvidedCancellationToken()
     {
         // Arrange
-        var articleRepository = Substitute.For<IArticleRepository>();
-        var userRepository = Substitute.For<IUserRepository>();
-        var currentUser = Substitute.For<ICurrentUser>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new ArticleCreateCommandHandler(
-            articleRepository,
-            userRepository,
-            currentUser,
-            unitOfWork);
-
-        var command = new ArticleCreateCommand(
-            new ArticleCreateModel(new Name("Notebook"))
-        );
-
         var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        var command = CreateCommand();
         var cancellationToken = new CancellationTokenSource().Token;
 
         currentUser.UserGuid.Returns(actor.Guid);
@@ -212,6 +143,31 @@ public sealed class ArticleCreateCommandHandlerTests
 
         await unitOfWork.Received(1)
             .SaveChanges(cancellationToken);
+    }
+
+    private void ConfigureCurrentUser(User actor)
+    {
+        currentUser.UserGuid.Returns(actor.Guid);
+    }
+
+    private void ConfigureActorLookup(User actor)
+    {
+        userRepository
+            .GetByGuid(actor.Guid, Arg.Any<CancellationToken>())
+            .Returns(actor);
+    }
+
+    private void CaptureAddedArticle(Action<Article> capture)
+    {
+        articleRepository
+            .When(x => x.Add(Arg.Any<Article>()))
+            .Do(callInfo => capture(callInfo.Arg<Article>()));
+    }
+
+    private static ArticleCreateCommand CreateCommand(Description? description = null)
+    {
+        return new ArticleCreateCommand(
+                new ArticleCreateModel(articleName, description));
     }
 
     private static User CreateUser()

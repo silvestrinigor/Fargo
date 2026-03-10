@@ -11,7 +11,7 @@ namespace Fargo.Application.Repositories
     /// and is responsible only for retrieving user data.
     /// It must not modify the state of the system.
     /// </remarks>
-    public interface IUserReadRepository
+    public interface IUserQueries
     {
         /// <summary>
         /// Retrieves a single user by its unique identifier.

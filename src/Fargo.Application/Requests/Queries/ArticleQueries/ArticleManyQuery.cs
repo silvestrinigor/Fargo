@@ -25,7 +25,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     /// Handles the execution of <see cref="ArticleManyQuery"/>.
     /// </summary>
     public sealed class ArticleManyQueryHandler(
-            IArticleReadRepository articleRepository
+            IArticleQueries articleRepository
             )
         : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>>
     {

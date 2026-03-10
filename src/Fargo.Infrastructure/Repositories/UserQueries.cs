@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories
 {
-    public class UserReadRepository(FargoReadDbContext context) : IUserReadRepository
+    public class UserQueries(FargoReadDbContext context) : IUserQueries
     {
         private readonly DbSet<UserReadModel> users = context.Users;
 
@@ -17,7 +17,7 @@ namespace Fargo.Infrastructure.Repositories
                 CancellationToken cancellationToken = default
                 )
             => await users
-            .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
+            .TemporalAsOfIfProvided(asOfDateTime)
             .Where(a => a.Guid == entityGuid)
             .AsNoTracking()
             .OrderBy(x => x.Guid)
@@ -29,7 +29,7 @@ namespace Fargo.Infrastructure.Repositories
                 CancellationToken cancellationToken = default
                 )
             => await users
-            .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
+            .TemporalAsOfIfProvided(asOfDateTime)
             .Include(u => u.UserPermissions)
             .OrderBy(x => x.Guid)
             .WithPagination(pagination)

@@ -23,7 +23,7 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     /// Handles the execution of <see cref="ArticleSingleQuery"/>.
     /// </summary>
     public sealed class ArticleSingleQueryHandler(
-            IArticleReadRepository repository
+            IArticleQueries repository
             ) : IQueryHandler<ArticleSingleQuery, ArticleReadModel?>
     {
         /// <summary>

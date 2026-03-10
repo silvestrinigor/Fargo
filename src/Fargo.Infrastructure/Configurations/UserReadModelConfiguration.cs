@@ -14,10 +14,6 @@ namespace Fargo.Infrastructure.Configurations
 
             builder.HasAlternateKey(x => x.Nameid);
 
-            builder.Property(x => x.Nameid).IsRequired();
-
-            builder.Property(x => x.Description).IsRequired();
-
             builder.HasMany(x => x.UserPermissions)
                 .WithOne().HasForeignKey(x => x.UserGuid);
         }

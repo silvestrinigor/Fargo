@@ -65,11 +65,11 @@ namespace Fargo.Infrastructure.Extensions
 
             public IServiceCollection AddFargoReadRepositoriesScopes()
             {
-                services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
+                services.AddScoped<IArticleQueries, ArticleQueries>();
 
-                services.AddScoped<IItemReadRepository, ItemReadRepository>();
+                services.AddScoped<IItemQueries, ItemQueries>();
 
-                services.AddScoped<IUserReadRepository, UserReadRepository>();
+                services.AddScoped<IUserQueries, UserQueries>();
 
                 return services;
             }

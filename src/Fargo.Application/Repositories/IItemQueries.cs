@@ -11,7 +11,7 @@ namespace Fargo.Application.Repositories
     /// and is responsible only for retrieving item data.
     /// It must not modify the state of the system.
     /// </remarks>
-    public interface IItemReadRepository
+    public interface IItemQueries
     {
         /// <summary>
         /// Retrieves a single item by its unique identifier.
