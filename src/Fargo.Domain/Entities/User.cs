@@ -23,6 +23,38 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
+        /// Gets or sets the user's first name.
+        ///
+        /// This value is optional and, when provided, must satisfy the
+        /// validation rules defined by <see cref="ValueObjects.FirstName"/>.
+        /// </summary>
+        /// <remarks>
+        /// A <see langword="null"/> value indicates that the first name
+        /// has not been specified.
+        /// </remarks>
+        public FirstName? FirstName
+        {
+            get;
+            set;
+        } = null;
+
+        /// <summary>
+        /// Gets or sets the user's last name.
+        ///
+        /// This value is optional and, when provided, must satisfy the
+        /// validation rules defined by <see cref="ValueObjects.LastName"/>.
+        /// </summary>
+        /// <remarks>
+        /// A <see langword="null"/> value indicates that the last name
+        /// has not been specified.
+        /// </remarks>
+        public LastName? LastName
+        {
+            get;
+            set;
+        } = null;
+
+        /// <summary>
         /// Gets or sets the textual description associated with the user.
         /// If not specified, the description defaults to <see cref="Description.Empty"/>.
         /// </summary>
@@ -62,7 +94,7 @@ namespace Fargo.Domain.Entities
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the assigned value is less than <see cref="TimeSpan.Zero"/>.
         /// </exception>
-        public TimeSpan DefaultPasswordExpirationTimeSpan
+        public TimeSpan DefaultPasswordExpirationPeriod
         {
             get;
             set
@@ -86,7 +118,7 @@ namespace Fargo.Domain.Entities
 
         /// <summary>
         /// Resets the password expiration date based on the user's
-        /// <see cref="DefaultPasswordExpirationTimeSpan"/>.
+        /// <see cref="DefaultPasswordExpirationPeriod"/>.
         ///
         /// The new expiration date is calculated by adding the configured
         /// default expiration interval to the current UTC time.
@@ -99,7 +131,7 @@ namespace Fargo.Domain.Entities
         /// their own password.
         /// </remarks>
         public void ResetPasswordExpiration()
-            => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationTimeSpan;
+            => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationPeriod;
 
         /// <summary>
         /// Sets the password expiration requirement to a future date based on the specified number of days.

@@ -63,11 +63,13 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
             user.Nameid = command.User.Nameid ?? user.Nameid;
+            user.FirstName = command.User.FirstName ?? user.FirstName;
+            user.LastName = command.User.LastName ?? user.LastName;
             user.Description = command.User.Description ?? user.Description;
 
             if (command.User.DefaultPasswordExpirationTimeSpan is not null)
             {
-                user.DefaultPasswordExpirationTimeSpan =
+                user.DefaultPasswordExpirationPeriod =
                     command.User.DefaultPasswordExpirationTimeSpan.Value;
             }
 

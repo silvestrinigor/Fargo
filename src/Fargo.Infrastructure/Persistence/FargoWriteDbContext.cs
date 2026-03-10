@@ -44,6 +44,16 @@ namespace Fargo.Infrastructure.Persistence
                 .Properties<TokenHash>()
                 .HaveMaxLength(TokenHash.MaxLength)
                 .HaveConversion<TokenHashStringConverter>();
+
+            configurationBuilder
+                .Properties<FirstName>()
+                .HaveMaxLength(FirstName.MaxLength)
+                .HaveConversion<FirstNameStringConverter>();
+
+            configurationBuilder
+                .Properties<LastName>()
+                .HaveMaxLength(LastName.MaxLength)
+                .HaveConversion<LastNameStringConverter>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

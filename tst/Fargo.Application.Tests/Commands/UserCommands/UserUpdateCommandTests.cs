@@ -114,7 +114,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(Nameid: newNameid));
+            CreateUpdateModel(nameid: newNameid));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -140,7 +140,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(Description: newDescription));
+            CreateUpdateModel(description: newDescription));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -166,8 +166,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(
-                DefaultPasswordExpirationTimeSpan: newDefaultPasswordExpirationTimeSpan));
+            CreateUpdateModel(
+                defaultPasswordExpirationTimeSpan: newDefaultPasswordExpirationTimeSpan));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -196,7 +196,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel());
+            CreateUpdateModel());
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -224,7 +224,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(Password: newPassword));
+            CreateUpdateModel(password: newPassword));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -257,7 +257,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(Password: newPassword));
+            CreateUpdateModel(password: newPassword));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -289,8 +289,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.CreateUser),
                     new UserPermissionUpdateModel(ActionType.EditUser)
@@ -327,8 +327,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.EditUser)
                 ]));
@@ -364,8 +364,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.CreateUser),
                     new UserPermissionUpdateModel(ActionType.EditUser)
@@ -400,8 +400,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.EditUser),
                     new UserPermissionUpdateModel(ActionType.EditUser),
@@ -426,7 +426,7 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_UpdateNameidDescriptionPasswordAndDefaultPasswordExpirationTimeSpan_When_AllAreProvided()
+    public async Task Handle_Should_UpdateNameidFirstNameLastNameDescriptionPasswordAndDefaultPasswordExpirationTimeSpan_When_AllAreProvided()
     {
         // Arrange
         var actor = CreateUserWithPermissions(
@@ -436,6 +436,8 @@ public sealed class UserUpdateCommandHandlerTests
         var targetUser = CreateUser();
 
         var newNameid = new Nameid("updated-user");
+        var newFirstName = new FirstName("Igor");
+        var newLastName = new LastName("Silvestrin");
         var newDescription = new Description("Updated user description.");
         var newPassword = new Password("NewSecure@123");
         var newPasswordHash = CreatePasswordHash('z');
@@ -443,11 +445,13 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             targetUser.Guid,
-            new UserUpdateModel(
-                Nameid: newNameid,
-                Description: newDescription,
-                Password: newPassword,
-                DefaultPasswordExpirationTimeSpan: newDefaultPasswordExpirationTimeSpan));
+            CreateUpdateModel(
+                nameid: newNameid,
+                firstName: newFirstName,
+                lastName: newLastName,
+                description: newDescription,
+                password: newPassword,
+                defaultPasswordExpirationTimeSpan: newDefaultPasswordExpirationTimeSpan));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -462,6 +466,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         // Assert
         Assert.Equal(newNameid, targetUser.Nameid);
+        Assert.Equal(newFirstName, targetUser.FirstName);
+        Assert.Equal(newLastName, targetUser.LastName);
         Assert.Equal(newDescription, targetUser.Description);
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
         Assert.Equal(
@@ -483,6 +489,8 @@ public sealed class UserUpdateCommandHandlerTests
         var targetUser = CreateUser();
 
         var originalNameid = targetUser.Nameid;
+        var originalFirstName = targetUser.FirstName;
+        var originalLastName = targetUser.LastName;
         var originalDescription = targetUser.Description;
         var originalPasswordHash = targetUser.PasswordHash;
         var originalDefaultPasswordExpirationTimeSpan =
@@ -491,7 +499,7 @@ public sealed class UserUpdateCommandHandlerTests
             .Select(x => x.Action)
             .ToHashSet();
 
-        var command = CreateCommand(targetUser.Guid, new UserUpdateModel());
+        var command = CreateCommand(targetUser.Guid, CreateUpdateModel());
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -502,6 +510,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         // Assert
         Assert.Equal(originalNameid, targetUser.Nameid);
+        Assert.Equal(originalFirstName, targetUser.FirstName);
+        Assert.Equal(originalLastName, targetUser.LastName);
         Assert.Equal(originalDescription, targetUser.Description);
         Assert.Equal(originalPasswordHash, targetUser.PasswordHash);
         Assert.Equal(
@@ -559,8 +569,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             actor.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.CreateUser),
                     new UserPermissionUpdateModel(ActionType.DeleteUser)
@@ -593,8 +603,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             actor.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.CreateUser),
                     new UserPermissionUpdateModel(ActionType.DeleteUser)
@@ -631,8 +641,8 @@ public sealed class UserUpdateCommandHandlerTests
 
         var command = CreateCommand(
             actor.Guid,
-            new UserUpdateModel(
-                Permissions:
+            CreateUpdateModel(
+                permissions:
                 [
                     new UserPermissionUpdateModel(ActionType.EditUser)
                 ]));
@@ -659,16 +669,16 @@ public sealed class UserUpdateCommandHandlerTests
     {
         // Arrange
         var actor = CreateUserWithPermissions(
-                ActionType.EditUser,
-                ActionType.ChangeOtherUserPassword);
+            ActionType.EditUser,
+            ActionType.ChangeOtherUserPassword);
 
         var targetUser = CreateUser();
         var newPassword = new Password("NewSecure@123");
         var newPasswordHash = CreatePasswordHash('n');
 
         var command = CreateCommand(
-                targetUser.Guid,
-                new UserUpdateModel(Password: newPassword));
+            targetUser.Guid,
+            CreateUpdateModel(password: newPassword));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -689,6 +699,121 @@ public sealed class UserUpdateCommandHandlerTests
             .SaveChanges(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_Should_UpdateFirstName_When_FirstNameIsProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+        var newFirstName = new FirstName("Igor");
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            CreateUpdateModel(firstName: newFirstName));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(newFirstName, targetUser.FirstName);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_UpdateLastName_When_LastNameIsProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+        var newLastName = new LastName("Silvestrin");
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            CreateUpdateModel(lastName: newLastName));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(newLastName, targetUser.LastName);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_UpdateFirstNameAndLastName_When_BothAreProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+
+        var newFirstName = new FirstName("Igor");
+        var newLastName = new LastName("Silvestrin");
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            CreateUpdateModel(
+                firstName: newFirstName,
+                lastName: newLastName));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(newFirstName, targetUser.FirstName);
+        Assert.Equal(newLastName, targetUser.LastName);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotChangeFirstNameAndLastName_When_TheyAreNotProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+
+        targetUser.FirstName = new FirstName("Original");
+        targetUser.LastName = new LastName("User");
+
+        var originalFirstName = targetUser.FirstName;
+        var originalLastName = targetUser.LastName;
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            CreateUpdateModel(description: new Description("Updated description.")));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.Equal(originalFirstName, targetUser.FirstName);
+        Assert.Equal(originalLastName, targetUser.LastName);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User actor)
     {
         currentUser.UserGuid.Returns(actor.Guid);
@@ -702,11 +827,30 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     private static UserUpdateCommand CreateCommand(
-            Guid? userGuid = null,
-            UserUpdateModel? model = null)
+        Guid? userGuid = null,
+        UserUpdateModel? model = null)
         => new(
-                userGuid ?? Guid.NewGuid(),
-                model ?? new UserUpdateModel());
+            userGuid ?? Guid.NewGuid(),
+            model ?? CreateUpdateModel());
+
+    private static UserUpdateModel CreateUpdateModel(
+        Nameid? nameid = null,
+        FirstName? firstName = null,
+        LastName? lastName = null,
+        Description? description = null,
+        Password? password = null,
+        IReadOnlyCollection<UserPermissionUpdateModel>? permissions = null,
+        TimeSpan? defaultPasswordExpirationTimeSpan = null)
+    {
+        return new UserUpdateModel(
+            Nameid: nameid,
+            FirstName: firstName,
+            LastName: lastName,
+            Description: description,
+            Password: password,
+            Permissions: permissions,
+            DefaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan);
+    }
 
     private static User CreateUser()
     {
@@ -714,8 +858,11 @@ public sealed class UserUpdateCommandHandlerTests
         {
             Guid = Guid.NewGuid(),
             Nameid = new Nameid("user123"),
+            FirstName = new FirstName("Default"),
+            LastName = new LastName("User"),
             Description = new Description("Original description."),
-            PasswordHash = CreatePasswordHash('a')
+            PasswordHash = CreatePasswordHash('a'),
+            DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(User.DefaultPasswordChangeDays)
         };
     }
 

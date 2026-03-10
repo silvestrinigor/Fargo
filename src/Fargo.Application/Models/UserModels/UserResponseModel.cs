@@ -6,10 +6,20 @@ namespace Fargo.Application.Models.UserModels
     /// Represents the user data returned by the application.
     /// </summary>
     /// <param name="Guid">
-    /// The guid of the user.
+    /// The unique identifier of the user.
     /// </param>
     /// <param name="Nameid">
     /// The login identifier of the user.
+    /// </param>
+    /// <param name="FirstName">
+    /// The first name of the user, if available.
+    /// </param>
+    /// <param name="LastName">
+    /// The last name of the user, if available.
+    /// </param>
+    /// <param name="DefaultPasswordExpirationPeriod">
+    /// The default password expiration period configured for the user.
+    /// This value represents the duration applied when the user changes their own password.
     /// </param>
     /// <param name="Description">
     /// The description associated with the user.
@@ -20,6 +30,9 @@ namespace Fargo.Application.Models.UserModels
     public sealed record UserResponseModel(
             Guid Guid,
             Nameid Nameid,
+            FirstName? FirstName,
+            LastName? LastName,
+            TimeSpan DefaultPasswordExpirationPeriod,
             Description Description,
             IReadOnlyCollection<UserPermissionResponseModel> Permissions
             );

@@ -16,6 +16,12 @@ namespace Fargo.Infrastructure.Configurations
 
             builder.HasMany(x => x.UserPermissions)
                 .WithOne().HasForeignKey(x => x.UserGuid);
+
+            builder.Property(x => x.DefaultPasswordExpirationPeriod)
+                .HasConversion(
+                        x => x.Ticks,
+                        x => TimeSpan.FromTicks(x)
+                        );
         }
     }
 }

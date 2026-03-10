@@ -7,29 +7,39 @@ namespace Fargo.Application.Models.UserModels
     /// </summary>
     /// <param name="Nameid">
     /// The unique login identifier of the user.
-    /// This value must follow the validation rules defined in <see cref="Nameid"/>.
+    /// This value must satisfy the validation rules defined in <see cref="Nameid"/>.
     /// </param>
     /// <param name="Password">
     /// The plaintext password that will be hashed before being stored.
-    /// The hashing process is handled by the application's password hashing service.
+    /// </param>
+    /// <param name="FirstName">
+    /// Optional first name of the user.
+    /// When provided, the value must satisfy the validation rules defined in
+    /// <see cref="FirstName"/>.
+    /// </param>
+    /// <param name="LastName">
+    /// Optional last name of the user.
+    /// When provided, the value must satisfy the validation rules defined in
+    /// <see cref="LastName"/>.
     /// </param>
     /// <param name="Description">
-    /// Optional description of the user.
-    /// If not provided, the user will receive the default value defined by the domain.
+    /// Optional textual description associated with the user.
+    /// If not provided, the default value defined by the domain will be used.
     /// </param>
     /// <param name="Permissions">
     /// Optional list of permissions granted to the user.
-    /// Each permission defines an action that the user is allowed to perform in the system.
+    /// Each permission defines an action the user is allowed to perform.
     /// If not provided, the user will be created without additional permissions.
     /// </param>
     /// <param name="DefaultPasswordExpirationTimeSpan">
-    /// Optional default password expiration period for the user.
+    /// Optional password expiration interval configured for the user.
     ///
-    /// This value defines how long a password remains valid after the user successfully
-    /// changes it. The expiration time is calculated by adding this value to the
-    /// current UTC time at the moment of the password change.
+    /// When the user successfully changes their password, this value is added
+    /// to the current UTC time to determine when the next password change
+    /// will be required.
     ///
-    /// If <c>null</c>, the system default expiration policy will be applied.
+    /// If <see langword="null"/>, the system default expiration period defined
+    /// by the domain will be used.
     ///
     /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
     /// immediately after it is changed.
@@ -37,6 +47,8 @@ namespace Fargo.Application.Models.UserModels
     public record UserCreateModel(
             Nameid Nameid,
             Password Password,
+            FirstName? FirstName = null,
+            LastName? LastName = null,
             Description? Description = null,
             IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null,
             TimeSpan? DefaultPasswordExpirationTimeSpan = null

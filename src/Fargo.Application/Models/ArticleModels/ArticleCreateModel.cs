@@ -7,9 +7,12 @@ namespace Fargo.Application.Models.ArticleModels
     /// </summary>
     /// <param name="Name">
     /// The name of the article.
+    /// This value must satisfy the validation rules defined in <see cref="Name"/>.
     /// </param>
     /// <param name="Description">
-    /// Optional description of the article.
+    /// Optional description associated with the article.
+    /// When provided, the value must satisfy the validation rules defined in
+    /// <see cref="Description"/>.
     /// </param>
     public record ArticleCreateModel(
             Name Name,

@@ -29,11 +29,11 @@ public sealed class UserCreateCommandHandlerTests
         userService = new UserService(userRepository);
 
         handler = new UserCreateCommandHandler(
-            userService,
-            userRepository,
-            unitOfWork,
-            currentUser,
-            passwordHasher);
+                userService,
+                userRepository,
+                unitOfWork,
+                currentUser,
+                passwordHasher);
     }
 
     [Fact]
@@ -201,8 +201,8 @@ public sealed class UserCreateCommandHandlerTests
         };
 
         var command = CreateCommand(
-            nameid: commandNameid,
-            permissions: permissions);
+                nameid: commandNameid,
+                permissions: permissions);
 
         User? addedUser = null;
 
@@ -219,12 +219,12 @@ public sealed class UserCreateCommandHandlerTests
         Assert.NotNull(addedUser);
 
         Assert.Contains(
-            addedUser!.UserPermissions,
-            x => x.Action == ActionType.CreateArticle);
+                addedUser!.UserPermissions,
+                x => x.Action == ActionType.CreateArticle);
 
         Assert.Contains(
-            addedUser.UserPermissions,
-            x => x.Action == ActionType.DeleteItem);
+                addedUser.UserPermissions,
+                x => x.Action == ActionType.DeleteItem);
     }
 
     [Fact]
@@ -261,9 +261,9 @@ public sealed class UserCreateCommandHandlerTests
         var passwordHash = CreatePasswordHash('h');
         var defaultPasswordExpirationTimeSpan = TimeSpan.FromDays(15);
         var command = CreateCommand(
-            nameid: nameid,
-            password: password,
-            defaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan);
+                nameid: nameid,
+                password: password,
+                defaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan);
 
         User? addedUser = null;
 
@@ -279,8 +279,8 @@ public sealed class UserCreateCommandHandlerTests
         // Assert
         Assert.NotNull(addedUser);
         Assert.Equal(
-            defaultPasswordExpirationTimeSpan,
-            addedUser!.DefaultPasswordExpirationTimeSpan);
+                defaultPasswordExpirationTimeSpan,
+                addedUser!.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
@@ -307,8 +307,8 @@ public sealed class UserCreateCommandHandlerTests
         // Assert
         Assert.NotNull(addedUser);
         Assert.Equal(
-            TimeSpan.FromDays(User.DefaultPasswordChangeDays),
-            addedUser!.DefaultPasswordExpirationTimeSpan);
+                TimeSpan.FromDays(User.DefaultPasswordChangeDays),
+                addedUser!.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
@@ -348,6 +348,102 @@ public sealed class UserCreateCommandHandlerTests
 
         await unitOfWork.Received(1)
             .SaveChanges(cancellationToken);
+    }
+
+    [Fact]
+    public async Task Handle_Should_SetFirstName_When_Provided()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var firstName = new FirstName("Igor");
+
+        var command = CreateCommand(
+                nameid: nameid,
+                password: password,
+                firstName: firstName);
+
+        User? addedUser = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
+        CaptureAddedUser(user => addedUser = user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedUser);
+        Assert.Equal(firstName, addedUser!.FirstName);
+    }
+
+    [Fact]
+    public async Task Handle_Should_SetLastName_When_Provided()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var lastName = new LastName("Silvestrin");
+
+        var command = CreateCommand(
+                nameid: nameid,
+                password: password,
+                lastName: lastName);
+
+        User? addedUser = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
+        CaptureAddedUser(user => addedUser = user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedUser);
+        Assert.Equal(lastName, addedUser!.LastName);
+    }
+
+    [Fact]
+    public async Task Handle_Should_SetFirstNameAndLastName_When_BothAreProvided()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        var nameid = new Nameid("user123");
+        var password = new Password("Secure@123456");
+        var passwordHash = CreatePasswordHash('h');
+        var firstName = new FirstName("Igor");
+        var lastName = new LastName("Silvestrin");
+
+        var command = CreateCommand(
+                nameid: nameid,
+                password: password,
+                firstName: firstName,
+                lastName: lastName);
+
+        User? addedUser = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        ConfigurePasswordHash(password, passwordHash);
+        ConfigureNameidDoesNotExist(nameid);
+        CaptureAddedUser(user => addedUser = user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedUser);
+        Assert.Equal(firstName, addedUser!.FirstName);
+        Assert.Equal(lastName, addedUser.LastName);
     }
 
     private void ConfigureCurrentUser(User actor)
@@ -391,21 +487,25 @@ public sealed class UserCreateCommandHandlerTests
     }
 
     private static UserCreateCommand CreateCommand(
-        Nameid? nameid = null,
-        Password? password = null,
-        IReadOnlyCollection<ActionType>? permissions = null,
-        TimeSpan? defaultPasswordExpirationTimeSpan = null)
+            Nameid? nameid = null,
+            Password? password = null,
+            IReadOnlyCollection<ActionType>? permissions = null,
+            TimeSpan? defaultPasswordExpirationTimeSpan = null,
+            FirstName? firstName = null,
+            LastName? lastName = null)
     {
         return new UserCreateCommand(
-            new UserCreateModel(
-                nameid ?? new Nameid("user123"),
-                password ?? new Password("Secure@123456"),
-                Permissions:
+                new UserCreateModel(
+                    nameid ?? new Nameid("user123"),
+                    password ?? new Password("Secure@123456"),
+                    FirstName: firstName,
+                    LastName: lastName,
+                    Permissions:
                     permissions is not null
                     ? [.. permissions.Select(x => new UserPermissionUpdateModel(x))]
                     : null,
-                DefaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan
-            ));
+                    DefaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan
+                    ));
     }
 
     private static User CreateActorWithCreateUserPermission()

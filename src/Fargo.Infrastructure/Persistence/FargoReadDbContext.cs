@@ -39,6 +39,16 @@ namespace Fargo.Infrastructure.Persistence
                 .Properties<PasswordHash>()
                 .HaveMaxLength(PasswordHash.MaxLength)
                 .HaveConversion<PasswordHashStringConverter>();
+
+            configurationBuilder
+                .Properties<FirstName>()
+                .HaveMaxLength(FirstName.MaxLength)
+                .HaveConversion<FirstNameStringConverter>();
+
+            configurationBuilder
+                .Properties<LastName>()
+                .HaveMaxLength(LastName.MaxLength)
+                .HaveConversion<LastNameStringConverter>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

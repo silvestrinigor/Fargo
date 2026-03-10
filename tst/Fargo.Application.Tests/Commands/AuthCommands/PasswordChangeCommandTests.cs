@@ -162,7 +162,7 @@ public sealed class PasswordChangeCommandHandlerTests
     {
         // Arrange
         var user = CreateUser();
-        user.DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(30);
+        user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(30);
         user.MarkPasswordChangeAsRequired();
 
         var currentPassword = new Password("Current@123");
@@ -233,7 +233,7 @@ public sealed class PasswordChangeCommandHandlerTests
     {
         // Arrange
         var user = CreateUser();
-        user.DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(15);
+        user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(15);
 
         var currentPassword = new Password("Current@123");
         var newPassword = new Password("NewSecure@123");
@@ -272,7 +272,7 @@ public sealed class PasswordChangeCommandHandlerTests
     {
         // Arrange
         var user = CreateUser();
-        user.DefaultPasswordExpirationTimeSpan = TimeSpan.Zero;
+        user.DefaultPasswordExpirationPeriod = TimeSpan.Zero;
 
         var currentPassword = new Password("Current@123");
         var newPassword = new Password("NewSecure@123");

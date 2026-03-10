@@ -58,12 +58,17 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             var user = new User
             {
                 Nameid = command.User.Nameid,
+                FirstName = command.User.FirstName,
+                LastName = command.User.LastName,
                 Description = command.User.Description ?? Description.Empty,
-                PasswordHash = userPasswordHash,
-                DefaultPasswordExpirationTimeSpan =
-                    command.User.DefaultPasswordExpirationTimeSpan
-                    ?? TimeSpan.FromDays(User.DefaultPasswordChangeDays)
+                PasswordHash = userPasswordHash
             };
+
+            if (command.User.DefaultPasswordExpirationTimeSpan is not null)
+            {
+                user.DefaultPasswordExpirationPeriod =
+                    command.User.DefaultPasswordExpirationTimeSpan.Value;
+            }
 
             user.MarkPasswordChangeAsRequired();
 

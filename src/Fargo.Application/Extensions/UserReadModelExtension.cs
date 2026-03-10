@@ -22,6 +22,9 @@ namespace Fargo.Application.Extensions
                 return new UserResponseModel(
                         user.Guid,
                         user.Nameid,
+                        user.FirstName,
+                        user.LastName,
+                        user.DefaultPasswordExpirationPeriod,
                         user.Description,
                         [.. user.UserPermissions.Select(x =>
                             new UserPermissionResponseModel(

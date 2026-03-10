@@ -4,6 +4,7 @@ using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoWriteDbContext))]
-    partial class FargoWriteDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310190256_UserFirstLastNamePasswordExpiration")]
+    partial class UserFirstLastNamePasswordExpiration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,8 +162,8 @@ namespace Fargo.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("DefaultPasswordExpirationPeriod")
-                        .HasColumnType("bigint");
+                    b.Property<TimeSpan>("DefaultPasswordExpirationTimeSpan")
+                        .HasColumnType("time");
 
                     b.Property<string>("Description")
                         .IsRequired()

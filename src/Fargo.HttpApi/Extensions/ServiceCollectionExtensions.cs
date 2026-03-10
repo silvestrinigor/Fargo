@@ -37,6 +37,8 @@ namespace Fargo.HttpApi.Extensions
                     options.SerializerOptions.Converters.Add(new NameidJsonConverter());
                     options.SerializerOptions.Converters.Add(new PasswordJsonConverter());
                     options.SerializerOptions.Converters.Add(new TokenJsonConverter());
+                    options.SerializerOptions.Converters.Add(new FirstNameJsonConverter());
+                    options.SerializerOptions.Converters.Add(new LastNameJsonConverter());
                 });
 
                 return services;
