@@ -1,5 +1,4 @@
-﻿using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects;
+﻿using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Models.UserModels
 {
@@ -22,6 +21,6 @@ namespace Fargo.Application.Models.UserModels
             Nameid Nameid,
             Password Password,
             Description? Description = null,
-            IReadOnlyCollection<ActionType>? Permissions = null
+            IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null
             );
 }

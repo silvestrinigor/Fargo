@@ -23,7 +23,12 @@ namespace Fargo.Application.Extensions
                         user.Guid,
                         user.Nameid,
                         user.Description,
-                        [.. user.UserPermissions.Select(x => x.Action)]
+                        [.. user.UserPermissions.Select(x =>
+                            new UserPermissionResponseModel(
+                                x.Guid,
+                                x.Action
+                                )
+                            )]
                         );
             }
         }

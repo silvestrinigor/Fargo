@@ -202,7 +202,11 @@ public sealed class UserCreateCommandHandlerTests
             new UserCreateModel(
                 nameid ?? new Nameid("user123"),
                 password ?? new Password("Secure@123456"),
-                Permissions: permissions));
+                Permissions:
+                    permissions is not null
+                    ? [.. permissions.Select(x => new UserPermissionUpdateModel(x))]
+                    : null
+                ));
     }
 
     private static User CreateActorWithCreateUserPermission()

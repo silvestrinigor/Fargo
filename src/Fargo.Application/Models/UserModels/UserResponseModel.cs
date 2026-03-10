@@ -1,4 +1,3 @@
-using Fargo.Domain.Enums;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Models.UserModels
@@ -22,6 +21,6 @@ namespace Fargo.Application.Models.UserModels
             Guid Guid,
             Nameid Nameid,
             Description Description,
-            IReadOnlyCollection<ActionType> Permissions
+            IReadOnlyCollection<UserPermissionResponseModel> Permissions
             );
 }

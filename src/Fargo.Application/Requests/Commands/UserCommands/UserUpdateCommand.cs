@@ -65,7 +65,6 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
             user.Nameid = command.User.Nameid ?? user.Nameid;
-
             user.Description = command.User.Description ?? user.Description;
 
             if (command.User.Password is not null)
@@ -82,9 +81,32 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     throw new InvalidPasswordFargoApplicationException();
                 }
 
-                var userPasswordHash = passwordHasher.Hash(passwordUpdate.NewPassword);
+                user.PasswordHash = passwordHasher.Hash(passwordUpdate.NewPassword);
+            }
 
-                user.PasswordHash = userPasswordHash;
+            if (command.User.Permissions is not null)
+            {
+                var requestedActions = command.User.Permissions
+                    .Select(x => x.Action)
+                    .Distinct()
+                    .ToHashSet();
+
+                var currentActions = user.UserPermissions
+                    .Select(x => x.Action)
+                    .ToHashSet();
+
+                var permissionsToAdd = requestedActions.Except(currentActions);
+                var permissionsToRemove = currentActions.Except(requestedActions);
+
+                foreach (var action in permissionsToAdd)
+                {
+                    user.AddPermission(action);
+                }
+
+                foreach (var action in permissionsToRemove)
+                {
+                    user.RemovePermission(action);
+                }
             }
 
             await unitOfWork.SaveChanges(cancellationToken);

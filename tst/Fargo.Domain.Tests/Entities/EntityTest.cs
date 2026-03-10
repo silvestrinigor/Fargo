@@ -12,10 +12,10 @@ public sealed class EntityTests
     public void Guid_Should_ThrowArgumentException_When_InitializedWithEmptyGuid()
     {
         // Arrange / Act
-        var action = () => new TestEntity { Guid = Guid.Empty };
+        static TestEntity action() => _ = new TestEntity { Guid = Guid.Empty };
 
         // Assert
-        var exception = Assert.Throws<ArgumentException>(action);
+        var exception = Assert.Throws<ArgumentException>((Func<TestEntity>)action);
         Assert.Equal("value", exception.ParamName);
     }
 

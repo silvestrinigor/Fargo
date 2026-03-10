@@ -8,9 +8,11 @@ namespace Fargo.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<UserPermissionReadModel> builder)
         {
-            builder.ToTable(x => x.IsTemporal());
+            builder.ToTable(t => t.IsTemporal());
 
-            builder.HasKey(x => new { x.UserGuid, x.Action });
+            builder.HasKey(x => x.Guid);
+
+            builder.HasAlternateKey(x => new { x.UserGuid, x.Action });
         }
     }
 }

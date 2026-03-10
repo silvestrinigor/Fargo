@@ -18,9 +18,13 @@ namespace Fargo.Application.Models.UserModels
     /// The password update information containing the current password and the new password.
     /// If null, the password will not be changed.
     /// </param>
+    /// <param name="Permissions">
+    /// Optional list of permissions granted to the user.
+    /// </param>
     public sealed record UserUpdateModel(
             Nameid? Nameid = null,
             Description? Description = null,
-            UserPasswordUpdateModel? Password = null
+            UserPasswordUpdateModel? Password = null,
+            IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null
             );
 }

@@ -200,13 +200,13 @@ public sealed class UserUpdateCommandHandlerTests
         var originalPasswordHash = targetUser.PasswordHash;
 
         var passwordUpdate = new UserPasswordUpdateModel(
-                new Password("Current@123"),
-                new Password("NewSecure@123"));
+            new Password("Current@123"),
+            new Password("NewSecure@123"));
         var newPasswordHash = CreatePasswordHash('n');
 
         var command = CreateCommand(
-                targetUser.Guid,
-                new UserUpdateModel(Password: passwordUpdate));
+            targetUser.Guid,
+            new UserUpdateModel(Password: passwordUpdate));
 
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
@@ -231,6 +231,151 @@ public sealed class UserUpdateCommandHandlerTests
             .Hash(passwordUpdate.NewPassword);
 
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_AddPermissions_When_TheyDoNotExist()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.CreateUser),
+                    new UserPermissionUpdateModel(ActionType.EditUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        var actions = targetUser.UserPermissions
+            .Select(x => x.Action)
+            .ToHashSet();
+
+        Assert.Contains(ActionType.CreateUser, actions);
+        Assert.Contains(ActionType.EditUser, actions);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_RemovePermissions_ThatAreNotRequested()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+        targetUser.AddPermission(ActionType.CreateUser);
+        targetUser.AddPermission(ActionType.EditUser);
+        targetUser.AddPermission(ActionType.DeleteUser);
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.EditUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        var actions = targetUser.UserPermissions
+            .Select(x => x.Action)
+            .ToHashSet();
+
+        Assert.Contains(ActionType.EditUser, actions);
+        Assert.DoesNotContain(ActionType.CreateUser, actions);
+        Assert.DoesNotContain(ActionType.DeleteUser, actions);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_SynchronizePermissions_When_AddingAndRemovingAreRequired()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+        targetUser.AddPermission(ActionType.CreateUser);
+        targetUser.AddPermission(ActionType.DeleteUser);
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.CreateUser),
+                    new UserPermissionUpdateModel(ActionType.EditUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        var actions = targetUser.UserPermissions
+            .Select(x => x.Action)
+            .ToHashSet();
+
+        Assert.Contains(ActionType.CreateUser, actions);
+        Assert.Contains(ActionType.EditUser, actions);
+        Assert.DoesNotContain(ActionType.DeleteUser, actions);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_IgnoreDuplicatePermissions_When_PermissionsContainDuplicates()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var targetUser = CreateUser();
+
+        var command = CreateCommand(
+            targetUser.Guid,
+            new UserUpdateModel(
+                Permissions:
+                [
+                    new UserPermissionUpdateModel(ActionType.EditUser),
+                    new UserPermissionUpdateModel(ActionType.EditUser),
+                    new UserPermissionUpdateModel(ActionType.EditUser)
+                ]));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(targetUser);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        var editUserCount = targetUser.UserPermissions
+            .Count(x => x.Action == ActionType.EditUser);
+
+        Assert.Equal(1, editUserCount);
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -291,6 +436,9 @@ public sealed class UserUpdateCommandHandlerTests
         var originalNameid = targetUser.Nameid;
         var originalDescription = targetUser.Description;
         var originalPasswordHash = targetUser.PasswordHash;
+        var originalActions = targetUser.UserPermissions
+            .Select(x => x.Action)
+            .ToHashSet();
 
         var command = CreateCommand(targetUser.Guid, new UserUpdateModel());
 
@@ -305,6 +453,9 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(originalNameid, targetUser.Nameid);
         Assert.Equal(originalDescription, targetUser.Description);
         Assert.Equal(originalPasswordHash, targetUser.PasswordHash);
+        Assert.Equal(
+            originalActions,
+            targetUser.UserPermissions.Select(x => x.Action).ToHashSet());
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -364,13 +515,15 @@ public sealed class UserUpdateCommandHandlerTests
 
     private static User CreateUser()
     {
-        return new User
+        var user = new User
         {
             Guid = Guid.NewGuid(),
             Nameid = new Nameid("user123"),
             Description = new Description("Original description."),
             PasswordHash = CreatePasswordHash('a')
         };
+
+        return user;
     }
 
     private static User CreateUserWithPermission(ActionType action)

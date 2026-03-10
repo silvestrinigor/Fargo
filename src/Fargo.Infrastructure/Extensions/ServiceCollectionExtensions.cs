@@ -21,97 +21,163 @@ using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Fargo.Infrastructure.Extensions
 {
+    /// <summary>
+    /// Provides extension methods for registering Fargo infrastructure services.
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
         extension(IServiceCollection services)
         {
-            public IServiceCollection AddFargoWriteDbContext(string? connectionString)
+            /// <summary>
+            /// Registers all Fargo infrastructure services required by the main application.
+            /// </summary>
+            /// <param name="services">
+            /// The service collection used to register dependencies.
+            /// </param>
+            /// <param name="configuration">
+            /// The application configuration used to bind options and connection strings.
+            /// </param>
+            /// <returns>
+            /// The same <see cref="IServiceCollection"/> instance so that additional
+            /// registrations can be chained.
+            /// </returns>
+            /// <remarks>
+            /// This method registers:
+            /// <list type="bullet">
+            /// <item><description>JWT configuration options</description></item>
+            /// <item><description>Database connection string options</description></item>
+            /// <item><description>Write and read database contexts</description></item>
+            /// <item><description>Repositories and query services</description></item>
+            /// <item><description>Command and query handlers</description></item>
+            /// <item><description>Domain services</description></item>
+            /// <item><description>Security services</description></item>
+            /// <item><description>Unit of work</description></item>
+            /// <item><description>Current user abstraction</description></item>
+            /// </list>
+            /// </remarks>
+            public IServiceCollection AddFargoInfrastructure(IConfiguration configuration)
             {
-                services.AddDbContext<FargoWriteDbContext>(opt =>
-                    opt.UseSqlServer(
-                        connectionString
-                        ));
+                AddFargoJwt(services, configuration);
+                AddFargoConnectionStrings(services, configuration);
+                AddDbContexts(services);
+                AddRepositories(services);
+                AddReadRepositories(services);
+                AddHandlers(services);
+                AddDomainServices(services);
+                AddSecurity(services);
+                AddPersistence(services);
 
-                return services;
-            }
-
-            public IServiceCollection AddFargoReadDbContext(string? connectionString)
-            {
-                services.AddDbContext<FargoReadDbContext>(opt =>
-                    opt.UseSqlServer(
-                        connectionString
-                        ));
-
-                return services;
-            }
-
-            public IServiceCollection AddFargoCurrentUser()
-            {
                 services.AddScoped<ICurrentUser, CurrentUser>();
 
                 return services;
             }
 
-            public IServiceCollection AddFargoInitializeSystemScope()
+            /// <summary>
+            /// Registers only the infrastructure services required to execute database migrations.
+            /// </summary>
+            /// <param name="services">
+            /// The service collection used to register dependencies.
+            /// </param>
+            /// <param name="configuration">
+            /// The application configuration used to bind connection string options.
+            /// </param>
+            /// <returns>
+            /// The same <see cref="IServiceCollection"/> instance so that additional
+            /// registrations can be chained.
+            /// </returns>
+            public IServiceCollection AddFargoMigrationInfrastructure(IConfiguration configuration)
             {
+                AddFargoConnectionStrings(services, configuration);
+                AddDbContexts(services);
+
+                return services;
+            }
+
+            /// <summary>
+            /// Registers only the infrastructure services required to initialize or seed the system.
+            /// </summary>
+            /// <param name="services">
+            /// The service collection used to register dependencies.
+            /// </param>
+            /// <param name="configuration">
+            /// The application configuration used to bind connection string options.
+            /// </param>
+            /// <returns>
+            /// The same <see cref="IServiceCollection"/> instance so that additional
+            /// registrations can be chained.
+            /// </returns>
+            public IServiceCollection AddFargoSeedInfrastructure(IConfiguration configuration)
+            {
+                AddFargoConnectionStrings(services, configuration);
+                AddDbContexts(services);
+                AddRepositories(services);
+                AddSecurity(services);
+                AddPersistence(services);
+
                 services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
                 return services;
             }
 
-            public IServiceCollection AddFargoReadRepositoriesScopes()
+            private IServiceCollection AddFargoJwt(
+                    IConfiguration configuration
+                    )
             {
-                services.AddScoped<IArticleQueries, ArticleQueries>();
-
-                services.AddScoped<IItemQueries, ItemQueries>();
-
-                services.AddScoped<IUserQueries, UserQueries>();
+                services
+                    .AddOptions<JwtOptions>()
+                    .Bind(configuration.GetSection(JwtOptions.SectionName))
+                    .ValidateDataAnnotations()
+                    .Validate(
+                            o => o.Key.Length >= 32,
+                            "Jwt:Key must be at least 32 characters long.")
+                    .ValidateOnStart();
 
                 return services;
             }
 
-            public IServiceCollection AddFargoWriteRepositoriesScopes()
+            private IServiceCollection AddFargoConnectionStrings(
+                    IConfiguration configuration)
+            {
+                services
+                    .AddOptions<ConnectionStringOptions>()
+                    .Bind(configuration.GetSection(ConnectionStringOptions.SectionName))
+                    .Validate(o => !string.IsNullOrWhiteSpace(o.Fargo),
+                            "ConnectionStrings:Fargo must be provided.")
+                    .ValidateOnStart();
+
+                return services;
+            }
+
+            private void AddDbContexts()
+            {
+                services.AddDbContext<FargoWriteDbContext>((sp, opt) => ConfigureSqlServer(sp, opt));
+                services.AddDbContext<FargoReadDbContext>((sp, opt) => ConfigureSqlServer(sp, opt));
+            }
+
+            private void AddRepositories()
             {
                 services.AddScoped<IArticleRepository, ArticleRepository>();
-
                 services.AddScoped<IItemRepository, ItemRepository>();
-
                 services.AddScoped<IUserRepository, UserRepository>();
-
                 services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
-                return services;
             }
 
-            public IServiceCollection AddFargoDomainServiceScopes()
+            private void AddReadRepositories()
             {
-                services.AddScoped<ArticleService>();
-
-                services.AddScoped<UserService>();
-
-                return services;
+                services.AddScoped<IArticleQueries, ArticleQueries>();
+                services.AddScoped<IItemQueries, ItemQueries>();
+                services.AddScoped<IUserQueries, UserQueries>();
             }
-
-            public IServiceCollection AddFargoPasswordHasher()
+            private void AddHandlers()
             {
-                services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
+                services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
-                return services;
-            }
-
-            public IServiceCollection AddFargoUnitOfWork()
-            {
-                services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
-
-                return services;
-            }
-
-            public IServiceCollection AddFargoScopes()
-            {
                 services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
                 services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();
                 services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
@@ -136,14 +202,34 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserResponseModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>>, UserManyQueryHandler>();
+            }
 
+            private void AddDomainServices()
+            {
+                services.AddScoped<ArticleService>();
+                services.AddScoped<UserService>();
+            }
+
+            private void AddSecurity()
+            {
+                services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
                 services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
-
                 services.AddScoped<ITokenHasher, Sha256TokenHasher>();
-
                 services.AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>();
+            }
 
-                return services;
+            private void AddPersistence()
+            {
+                services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
+            }
+
+            private static void ConfigureSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)
+            {
+                var options = sp
+                    .GetRequiredService<IOptions<ConnectionStringOptions>>()
+                    .Value;
+
+                opt.UseSqlServer(options.Fargo);
             }
         }
     }

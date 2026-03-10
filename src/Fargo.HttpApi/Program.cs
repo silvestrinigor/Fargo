@@ -2,11 +2,8 @@ using Fargo.HttpApi.Extensions;
 using Fargo.HttpApi.Middlewares;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var connectionString = builder.Configuration.GetConnectionString("Fargo");
 
 builder.AddServiceDefaults();
 
@@ -16,27 +13,11 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.ConfigureFargoHttpJsonOptions();
 
-builder.Services.AddFargoJwt(builder.Configuration);
-
-builder.Services.AddFargoScopes();
-
-builder.Services.AddFargoCurrentUser();
-
-builder.Services.AddFargoWriteRepositoriesScopes();
-
-builder.Services.AddFargoReadRepositoriesScopes();
-
-builder.Services.AddFargoDomainServiceScopes();
-
-builder.Services.AddFargoPasswordHasher();
-
-builder.Services.AddFargoUnitOfWork();
-
-builder.Services.AddFargoWriteDbContext(connectionString);
-
-builder.Services.AddFargoReadDbContext(connectionString);
+builder.Services.AddFargoInfrastructure(builder.Configuration);
 
 builder.Services.AddFargoAuthentication(builder.Configuration);
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

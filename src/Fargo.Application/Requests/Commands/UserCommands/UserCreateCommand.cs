@@ -64,9 +64,9 @@ namespace Fargo.Application.Requests.Commands.UserCommands
 
             await userService.ValidateUserCreate(user, cancellationToken);
 
-            foreach (var action in command.User.Permissions ?? [])
+            foreach (var permission in command.User.Permissions ?? [])
             {
-                user.AddPermission(action);
+                user.AddPermission(permission.Action);
             }
 
             userRepository.Add(user);
