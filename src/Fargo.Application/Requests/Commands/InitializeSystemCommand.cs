@@ -1,9 +1,11 @@
 using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.ValueObjects;
+using Microsoft.Extensions.Options;
 
 namespace Fargo.Application.Requests.Commands
 {
@@ -13,17 +15,7 @@ namespace Fargo.Application.Requests.Commands
     /// This command ensures that the system has at least one user.
     /// If no users exist, a default administrator account is created.
     /// </summary>
-    /// <param name="DefaultAdminNameid">
-    /// The NAMEID of the default administrator user.
-    /// </param>
-    /// <param name="DefaultAdminPassword">
-    /// The password of the default administrator user.
-    /// </param>
-    public sealed record InitializeSystemCommand(
-            Nameid? DefaultAdminNameid = null,
-            Password? DefaultAdminPassword = null
-            )
-        : ICommand;
+    public sealed record InitializeSystemCommand() : ICommand;
 
     /// <summary>
     /// Handles the execution of <see cref="InitializeSystemCommand"/>.
@@ -31,7 +23,8 @@ namespace Fargo.Application.Requests.Commands
     public sealed class InitializeSystemCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
-            IUnitOfWork unitOfWork
+            IUnitOfWork unitOfWork,
+            IOptions<DefaultAdminOptions> defaultAdminOptions
             )
         : ICommandHandler<InitializeSystemCommand>
     {
@@ -39,7 +32,7 @@ namespace Fargo.Application.Requests.Commands
         /// Initializes the system by creating the default administrator user
         /// when no users exist in the system.
         /// </summary>
-        /// <param name="command">The command containing default admin credentials.</param>
+        /// <param name="command">The command requesting system initialization.</param>
         /// <param name="cancellationToken">Token used to cancel the operation.</param>
         public async Task Handle(
                 InitializeSystemCommand command,
@@ -53,23 +46,16 @@ namespace Fargo.Application.Requests.Commands
                 return;
             }
 
-            if (command.DefaultAdminNameid == null)
-            {
-                throw new InvalidOperationException(
-                        "Cannot create default admin user when default admin nameid is not provided.");
-            }
+            var options = defaultAdminOptions.Value;
 
-            if (command.DefaultAdminPassword == null)
-            {
-                throw new InvalidOperationException(
-                        "Cannot create default admin user when default admin password is not provided.");
-            }
+            var adminNameid = new Nameid(options.Nameid);
+            var adminPassword = new Password(options.Password);
 
-            var passwordHash = passwordHasher.Hash(command.DefaultAdminPassword.Value);
+            var passwordHash = passwordHasher.Hash(adminPassword);
 
             var admin = new User
             {
-                Nameid = command.DefaultAdminNameid.Value,
+                Nameid = adminNameid,
                 PasswordHash = passwordHash
             };
 

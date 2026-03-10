@@ -32,8 +32,8 @@ namespace Fargo.Infrastructure.Repositories
                         )
                     => await articles
                     .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
-                    .WithPagination(pagination)
                     .OrderBy(x => x.Guid)
+                    .WithPagination(pagination)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
         }

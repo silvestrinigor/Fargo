@@ -1,10 +1,12 @@
 using Fargo.Application.Persistence;
 using Fargo.Application.Requests.Commands;
+using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.ValueObjects;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Commands;
@@ -18,15 +20,19 @@ public sealed class InitializeSystemCommandHandlerTests
         var userRepository = Substitute.For<IUserRepository>();
         var passwordHasher = Substitute.For<IPasswordHasher>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
+        var defaultAdminOptions = Options.Create(new DefaultAdminOptions
+        {
+            Nameid = "admin",
+            Password = "Secure@123"
+        });
 
         var handler = new InitializeSystemCommandHandler(
             userRepository,
             passwordHasher,
-            unitOfWork);
+            unitOfWork,
+            defaultAdminOptions);
 
-        var command = new InitializeSystemCommand(
-            new Nameid("admin"),
-            new Password("Secure@123"));
+        var command = new InitializeSystemCommand();
 
         userRepository
             .Any(Arg.Any<CancellationToken>())
@@ -47,105 +53,29 @@ public sealed class InitializeSystemCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ThrowInvalidOperationException_When_DefaultAdminNameidIsNotProvided()
-    {
-        // Arrange
-        var userRepository = Substitute.For<IUserRepository>();
-        var passwordHasher = Substitute.For<IPasswordHasher>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new InitializeSystemCommandHandler(
-            userRepository,
-            passwordHasher,
-            unitOfWork);
-
-        var command = new InitializeSystemCommand(
-            null,
-            new Password("Secure@123"));
-
-        userRepository
-            .Any(Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        // Act
-        Task act() => handler.Handle(command);
-
-        // Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(act);
-        Assert.Equal(
-            "Cannot create default admin user when default admin nameid is not provided.",
-            exception.Message);
-
-        passwordHasher.DidNotReceive()
-            .Hash(Arg.Any<Password>());
-
-        userRepository.DidNotReceive()
-            .Add(Arg.Any<User>());
-
-        await unitOfWork.DidNotReceive()
-            .SaveChanges(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_ThrowInvalidOperationException_When_DefaultAdminPasswordIsNotProvided()
-    {
-        // Arrange
-        var userRepository = Substitute.For<IUserRepository>();
-        var passwordHasher = Substitute.For<IPasswordHasher>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-
-        var handler = new InitializeSystemCommandHandler(
-            userRepository,
-            passwordHasher,
-            unitOfWork);
-
-        var command = new InitializeSystemCommand(
-            new Nameid("admin"),
-            null);
-
-        userRepository
-            .Any(Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        // Act
-        Task act() => handler.Handle(command);
-
-        // Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(act);
-        Assert.Equal(
-            "Cannot create default admin user when default admin password is not provided.",
-            exception.Message);
-
-        passwordHasher.DidNotReceive()
-            .Hash(Arg.Any<Password>());
-
-        userRepository.DidNotReceive()
-            .Add(Arg.Any<User>());
-
-        await unitOfWork.DidNotReceive()
-            .SaveChanges(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task Handle_Should_CreateDefaultAdmin_When_NoUsersExist()
     {
         // Arrange
         var userRepository = Substitute.For<IUserRepository>();
         var passwordHasher = Substitute.For<IPasswordHasher>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
+        var defaultAdminOptions = Options.Create(new DefaultAdminOptions
+        {
+            Nameid = "admin",
+            Password = "Secure@123"
+        });
 
         var handler = new InitializeSystemCommandHandler(
             userRepository,
             passwordHasher,
-            unitOfWork);
+            unitOfWork,
+            defaultAdminOptions);
 
-        var defaultAdminNameid = new Nameid("admin");
-        var defaultAdminPassword = new Password("Secure@123");
+        var expectedNameid = new Nameid("admin");
+        var expectedPassword = new Password("Secure@123");
         var passwordHash = new PasswordHash(new string('p', PasswordHash.MinLength));
 
-        var command = new InitializeSystemCommand(
-            defaultAdminNameid,
-            defaultAdminPassword);
+        var command = new InitializeSystemCommand();
 
         User? addedUser = null;
 
@@ -154,7 +84,7 @@ public sealed class InitializeSystemCommandHandlerTests
             .Returns(false);
 
         passwordHasher
-            .Hash(defaultAdminPassword)
+            .Hash(expectedPassword)
             .Returns(passwordHash);
 
         userRepository
@@ -166,7 +96,7 @@ public sealed class InitializeSystemCommandHandlerTests
 
         // Assert
         passwordHasher.Received(1)
-            .Hash(defaultAdminPassword);
+            .Hash(expectedPassword);
 
         userRepository.Received(1)
             .Add(Arg.Any<User>());
@@ -175,7 +105,7 @@ public sealed class InitializeSystemCommandHandlerTests
             .SaveChanges(Arg.Any<CancellationToken>());
 
         Assert.NotNull(addedUser);
-        Assert.Equal(defaultAdminNameid, addedUser!.Nameid);
+        Assert.Equal(expectedNameid, addedUser!.Nameid);
         Assert.Equal(passwordHash, addedUser.PasswordHash);
     }
 
@@ -186,19 +116,22 @@ public sealed class InitializeSystemCommandHandlerTests
         var userRepository = Substitute.For<IUserRepository>();
         var passwordHasher = Substitute.For<IPasswordHasher>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
+        var defaultAdminOptions = Options.Create(new DefaultAdminOptions
+        {
+            Nameid = "admin",
+            Password = "Secure@123"
+        });
 
         var handler = new InitializeSystemCommandHandler(
             userRepository,
             passwordHasher,
-            unitOfWork);
+            unitOfWork,
+            defaultAdminOptions);
 
-        var defaultAdminNameid = new Nameid("admin");
-        var defaultAdminPassword = new Password("Secure@123");
+        var expectedPassword = new Password("Secure@123");
         var passwordHash = new PasswordHash(new string('p', PasswordHash.MinLength));
 
-        var command = new InitializeSystemCommand(
-            defaultAdminNameid,
-            defaultAdminPassword);
+        var command = new InitializeSystemCommand();
 
         User? addedUser = null;
 
@@ -207,7 +140,7 @@ public sealed class InitializeSystemCommandHandlerTests
             .Returns(false);
 
         passwordHasher
-            .Hash(defaultAdminPassword)
+            .Hash(expectedPassword)
             .Returns(passwordHash);
 
         userRepository
@@ -237,27 +170,30 @@ public sealed class InitializeSystemCommandHandlerTests
         var userRepository = Substitute.For<IUserRepository>();
         var passwordHasher = Substitute.For<IPasswordHasher>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
+        var defaultAdminOptions = Options.Create(new DefaultAdminOptions
+        {
+            Nameid = "admin",
+            Password = "Secure@123"
+        });
 
         var handler = new InitializeSystemCommandHandler(
             userRepository,
             passwordHasher,
-            unitOfWork);
+            unitOfWork,
+            defaultAdminOptions);
 
-        var defaultAdminNameid = new Nameid("admin");
-        var defaultAdminPassword = new Password("Secure@123");
+        var expectedPassword = new Password("Secure@123");
         var passwordHash = new PasswordHash(new string('p', PasswordHash.MinLength));
         var cancellationToken = new CancellationTokenSource().Token;
 
-        var command = new InitializeSystemCommand(
-            defaultAdminNameid,
-            defaultAdminPassword);
+        var command = new InitializeSystemCommand();
 
         userRepository
             .Any(cancellationToken)
             .Returns(false);
 
         passwordHasher
-            .Hash(defaultAdminPassword)
+            .Hash(expectedPassword)
             .Returns(passwordHash);
 
         // Act

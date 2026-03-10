@@ -42,10 +42,6 @@ namespace Fargo.Application.Repositories
         /// <param name="pagination">
         /// Pagination parameters used to limit and offset the result set.
         /// </param>
-        /// <param name="parentItemGuid">
-        /// Optional identifier used to filter items by parent item,
-        /// enabling hierarchical item queries.
-        /// </param>
         /// <param name="articleGuid">
         /// Optional identifier used to filter items associated with a specific article.
         /// </param>
@@ -62,7 +58,6 @@ namespace Fargo.Application.Repositories
         /// </returns>
         Task<IReadOnlyCollection<ItemReadModel>> GetMany(
                 Pagination pagination,
-                Guid? parentItemGuid = null,
                 Guid? articleGuid = null,
                 DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default

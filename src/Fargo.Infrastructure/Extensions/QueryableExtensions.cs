@@ -2,7 +2,7 @@ using Fargo.Application.Commom;
 
 namespace Fargo.Infrastructure.Extensions
 {
-    public static class QueryableExtension
+    public static class QueryableExtensions
     {
         public static IQueryable<TEntity> WithPagination<TEntity>(
                 this IQueryable<TEntity> query,
@@ -10,6 +10,6 @@ namespace Fargo.Infrastructure.Extensions
                 ) where TEntity : class
             => query
             .Skip(pagination.Skip)
-            .Take(pagination.Limit);
+            .Take(pagination.Take);
     }
 }

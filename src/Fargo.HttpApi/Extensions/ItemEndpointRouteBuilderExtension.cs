@@ -36,7 +36,7 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetItems")
                 .WithSummary("Gets multiple items")
                 .WithDescription("Retrieves a paginated list of items with optional filters such as parent item or article.")
-                .Produces<IEnumerable<ItemReadModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<ItemReadModel>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
 
@@ -76,17 +76,16 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IEnumerable<ItemReadModel>>, NotFound, NoContent>> GetManyItems(
+        private static async Task<Results<Ok<IReadOnlyCollection<ItemReadModel>>, NotFound, NoContent>> GetManyItems(
             Guid? parentItemGuid,
             Guid? articleGuid,
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>> handler,
+            IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemReadModel>> handler,
             CancellationToken cancellationToken)
         {
             var query = new ItemManyQuery(
-                parentItemGuid,
                 articleGuid,
                 temporalAsOf,
                 PaginationHelpers.CreatePagination(page, limit)

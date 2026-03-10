@@ -1,6 +1,4 @@
 using Fargo.Application.Requests.Commands;
-using Fargo.Domain.ValueObjects;
-using Fargo.SeedService.Extensions;
 using System.Diagnostics;
 
 namespace Fargo.SeedService;
@@ -9,24 +7,22 @@ namespace Fargo.SeedService;
 /// Background service responsible for executing the system seed process during application startup.
 /// </summary>
 /// <remarks>
-/// This service creates a scoped dependency container, reads the default administrator
-/// configuration values from <see cref="IConfiguration"/>, resolves the
+/// This service creates a scoped dependency container, resolves the
 /// <see cref="ICommandHandler{TCommand}"/> for <see cref="InitializeSystemCommand"/>,
 /// and executes it to initialize the system state.
 /// <para>
-/// If the default administrator configuration values are available, they are converted
-/// into <see cref="Nameid"/> and <see cref="Password"/> value objects and passed to the
-/// initialization command.
+/// The default administrator configuration is no longer read directly by this service.
+/// That configuration is provided through application options and consumed by the
+/// <see cref="InitializeSystemCommandHandler"/>.
 /// </para>
 /// <para>
 /// After the seed process finishes, the application is stopped through
 /// <see cref="IHostApplicationLifetime.StopApplication"/>.
 /// </para>
 /// </remarks>
-public class SeedService(
+public sealed class SeedService(
         IServiceProvider serviceProvider,
-        IHostApplicationLifetime hostApplicationLifetime,
-        IConfiguration configuration
+        IHostApplicationLifetime hostApplicationLifetime
         ) : BackgroundService
 {
     /// <summary>
@@ -50,14 +46,8 @@ public class SeedService(
     /// </returns>
     /// <remarks>
     /// This method starts a tracing activity, creates a service scope,
-    /// reads the default administrator credentials from configuration,
-    /// creates an <see cref="InitializeSystemCommand"/>, resolves its handler,
+    /// resolves the handler for <see cref="InitializeSystemCommand"/>,
     /// and executes the command.
-    /// <para>
-    /// The configuration values are optional. When present, they are converted into
-    /// <see cref="Nameid"/> and <see cref="Password"/> instances before being passed
-    /// to the command.
-    /// </para>
     /// <para>
     /// If an exception occurs during execution, it is attached to the current activity
     /// and then rethrown.
@@ -76,14 +66,7 @@ public class SeedService(
         {
             using var scope = serviceProvider.CreateScope();
 
-            var newUserName = configuration.GetApplicationConfiguration("DefaultAdminNameid");
-
-            var newUserPass = configuration.GetApplicationConfiguration("DefaultAdminPassword");
-
-            var command = new InitializeSystemCommand(
-                    newUserName is not null ? new Nameid(newUserName) : null,
-                    newUserPass is not null ? new Password(newUserPass) : null
-                    );
+            var command = new InitializeSystemCommand();
 
             var handler = scope.ServiceProvider
                 .GetRequiredService<ICommandHandler<InitializeSystemCommand>>();

@@ -1,5 +1,4 @@
-﻿using Fargo.Application.Models;
-using Fargo.Application.Models.ArticleModels;
+﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Models.UserModels;
@@ -15,7 +14,6 @@ using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Application.Security;
-using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
@@ -27,7 +25,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Infrastructure.Extensions
 {
-    public static class ServiceCollectionExtension
+    public static class ServiceCollectionExtensions
     {
         extension(IServiceCollection services)
         {
@@ -76,7 +74,7 @@ namespace Fargo.Infrastructure.Extensions
                 return services;
             }
 
-            public IServiceCollection AddFargoWriteRepositiresScopes()
+            public IServiceCollection AddFargoWriteRepositoriesScopes()
             {
                 services.AddScoped<IArticleRepository, ArticleRepository>();
 

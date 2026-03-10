@@ -7,6 +7,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.UserCommands
 {
@@ -57,6 +58,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             var user = new User
             {
                 Nameid = command.User.Nameid,
+                Description = command.User.Description ?? Description.Empty,
                 PasswordHash = userPasswordHash
             };
 

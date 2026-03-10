@@ -7,10 +7,6 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     /// <summary>
     /// Query used to retrieve multiple items.
     /// </summary>
-    /// <param name="ParentItemGuid">
-    /// Optional identifier of the parent item used to filter hierarchical item relationships.
-    /// When provided, only items that belong to the specified parent item are returned.
-    /// </param>
     /// <param name="ArticleGuid">
     /// Optional identifier of the associated article used to filter items.
     /// When provided, only items associated with the specified article are returned.
@@ -25,7 +21,6 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
     /// If not provided, a default pagination configuration is used.
     /// </param>
     public sealed record ItemManyQuery(
-        Guid? ParentItemGuid = null,
         Guid? ArticleGuid = null,
         DateTimeOffset? TemporalAsOf = null,
         Pagination? Pagination = null
@@ -63,7 +58,6 @@ namespace Fargo.Application.Requests.Queries.ItemQueries
         {
             var items = await itemRepository.GetMany(
                     query.Pagination ?? Pagination.First20Pages,
-                    query.ParentItemGuid,
                     query.ArticleGuid,
                     query.TemporalAsOf,
                     cancellationToken

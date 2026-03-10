@@ -26,7 +26,6 @@ namespace Fargo.Infrastructure.Repositories
 
         public async Task<IReadOnlyCollection<ItemReadModel>> GetMany(
                 Pagination pagination,
-                Guid? parentItemGuid = null,
                 Guid? articleGuid = null,
                 DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default
@@ -34,8 +33,8 @@ namespace Fargo.Infrastructure.Repositories
             => await items
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
             .Where(i => articleGuid == null || i.ArticleGuid == articleGuid)
-            .WithPagination(pagination)
             .OrderBy(x => x.Guid)
+            .WithPagination(pagination)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }

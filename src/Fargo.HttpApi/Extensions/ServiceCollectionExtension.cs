@@ -1,5 +1,6 @@
 using Fargo.Application.Commom;
 using Fargo.HttpApi.Converters;
+using Fargo.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -14,6 +15,54 @@ namespace Fargo.HttpApi.Extensions
     {
         extension(IServiceCollection services)
         {
+            /// <summary>
+            /// Registers and validates the JWT configuration used by the application.
+            /// </summary>
+            /// <param name="configuration">
+            /// The application configuration instance used to bind JWT settings.
+            /// </param>
+            /// <returns>
+            /// The same <see cref="IServiceCollection"/> instance to allow method chaining.
+            /// </returns>
+            /// <remarks>
+            /// This method binds the <see cref="JwtOptions"/> configuration from the
+            /// <c>Jwt</c> section of the application configuration (for example
+            /// <c>appsettings.json</c>, environment variables, or other configuration providers).
+            ///
+            /// The configuration is validated during application startup to ensure
+            /// that required settings are present and correctly configured.
+            /// In particular:
+            /// <list type="bullet">
+            /// <item>
+            /// The configuration is validated using data annotations defined on
+            /// <see cref="JwtOptions"/>.
+            /// </item>
+            /// <item>
+            /// The JWT signing key must contain at least 32 characters to ensure
+            /// sufficient security for symmetric signing algorithms.
+            /// </item>
+            /// </list>
+            ///
+            /// The call to <see cref="OptionsBuilderExtensions.ValidateOnStart{TOptions}(Microsoft.Extensions.Options.OptionsBuilder{TOptions})"/>
+            /// ensures that the application fails fast if the JWT configuration is invalid,
+            /// preventing runtime errors during token generation or authentication.
+            /// </remarks>
+            public IServiceCollection AddFargoJwt(
+                    IConfiguration configuration
+                    )
+            {
+                services
+                    .AddOptions<JwtOptions>()
+                    .Bind(configuration.GetSection(JwtOptions.SectionName))
+                    .ValidateDataAnnotations()
+                    .Validate(
+                            o => o.Key.Length >= 32,
+                            "Jwt:Key must be at least 32 characters long.")
+                    .ValidateOnStart();
+
+                return services;
+            }
+
             /// <summary>
             /// Configures the JSON serialization options used by the HTTP API.
             ///
@@ -98,7 +147,7 @@ namespace Fargo.HttpApi.Extensions
                         {
                             schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;
                             schema.Minimum = Page.MinValue.ToString();
-                            schema.Default = JsonNode.Parse(PageExtension.DefaultPageValue.ToString());
+                            schema.Default = JsonNode.Parse(Page.FirstPage.ToString()!);
                         }
 
                         if (context.ParameterDescription?.Type == typeof(Limit?))
@@ -106,7 +155,7 @@ namespace Fargo.HttpApi.Extensions
                             schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;
                             schema.Minimum = Limit.MinValue.ToString();
                             schema.Maximum = Limit.MaxValue.ToString();
-                            schema.Default = JsonNode.Parse(LimitExtension.DefaultLimitValue.ToString());
+                            schema.Default = JsonNode.Parse(Limit.MaxLimit.ToString()!);
                         }
 
                         return Task.CompletedTask;

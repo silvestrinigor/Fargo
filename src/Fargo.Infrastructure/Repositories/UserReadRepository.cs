@@ -31,8 +31,8 @@ namespace Fargo.Infrastructure.Repositories
             => await users
             .TemporalAsOfIfDateTimeNotNull(asOfDateTime)
             .Include(u => u.UserPermissions)
-            .WithPagination(pagination)
             .OrderBy(x => x.Guid)
+            .WithPagination(pagination)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }

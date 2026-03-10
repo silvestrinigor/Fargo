@@ -2,12 +2,15 @@ using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Extensions;
 using Fargo.SeedService;
 using Fargo.ServiceDefaults;
+using Fargo.SeedService.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddFargoWriteRepositiresScopes();
+builder.Services.AddFargoDefaultAdmin(builder.Configuration);
+
+builder.Services.AddFargoWriteRepositoriesScopes();
 
 builder.Services.AddFargoInitializeSystemScope();
 

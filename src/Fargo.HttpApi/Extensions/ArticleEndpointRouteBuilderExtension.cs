@@ -37,7 +37,7 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetArticles")
                 .WithSummary("Gets multiple articles")
                 .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
-                .Produces<IEnumerable<ArticleReadModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<ArticleReadModel>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
 

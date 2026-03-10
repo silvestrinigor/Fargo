@@ -36,7 +36,7 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetUsers")
                 .WithSummary("Gets multiple users")
                 .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries.")
-                .Produces<IEnumerable<UserResponseModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<UserResponseModel>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
 
@@ -74,11 +74,11 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IEnumerable<UserResponseModel>>, NotFound, NoContent>> GetManyUsers(
+        private static async Task<Results<Ok<IReadOnlyCollection<UserResponseModel>>, NotFound, NoContent>> GetManyUsers(
             DateTime? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<UserManyQuery, IEnumerable<UserResponseModel>> handler,
+            IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserManyQuery(

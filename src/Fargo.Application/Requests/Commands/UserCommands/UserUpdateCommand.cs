@@ -44,6 +44,9 @@ namespace Fargo.Application.Requests.Commands.UserCommands
         /// <exception cref="UserNotFoundFargoApplicationException">
         /// Thrown when the specified user does not exist.
         /// </exception>
+        /// <exception cref="InvalidPasswordFargoApplicationException">
+        /// Thrown when the provided current password is incorrect.
+        /// </exception>
         public async Task Handle(
                 UserUpdateCommand command,
                 CancellationToken cancellationToken = default
@@ -65,9 +68,21 @@ namespace Fargo.Application.Requests.Commands.UserCommands
 
             user.Description = command.User.Description ?? user.Description;
 
-            if (command.User.Password != null)
+            if (command.User.Password is not null)
             {
-                var userPasswordHash = passwordHasher.Hash(command.User.Password.NewPassword);
+                var passwordUpdate = command.User.Password;
+
+                var isValid = passwordHasher.Verify(
+                        user.PasswordHash,
+                        passwordUpdate.CurrentPassword
+                        );
+
+                if (!isValid)
+                {
+                    throw new InvalidPasswordFargoApplicationException();
+                }
+
+                var userPasswordHash = passwordHasher.Hash(passwordUpdate.NewPassword);
 
                 user.PasswordHash = userPasswordHash;
             }
