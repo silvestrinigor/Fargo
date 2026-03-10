@@ -167,4 +167,184 @@ public sealed class TokenHashTests
         // Assert
         Assert.Equal(value, tokenHash.Value);
     }
+
+    [Fact]
+    public void Equals_Should_ReturnTrue_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Equals_Should_ReturnFalse_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('b', TokenHash.MinLength));
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnTrue_When_ObjectIsTokenHashWithSameValue()
+    {
+        // Arrange
+        var tokenHash = new TokenHash(new string('a', TokenHash.MinLength));
+        object other = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = tokenHash.Equals(other);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnFalse_When_ObjectIsNull()
+    {
+        // Arrange
+        var tokenHash = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = tokenHash.Equals(null);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnFalse_When_ObjectIsDifferentType()
+    {
+        // Arrange
+        var tokenHash = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = tokenHash.Equals(new string('a', TokenHash.MinLength));
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void OperatorEqual_Should_ReturnTrue_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperatorEqual_Should_ReturnFalse_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('b', TokenHash.MinLength));
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void OperatorNotEqual_Should_ReturnTrue_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('b', TokenHash.MinLength));
+
+        // Act
+        var result = left != right;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperatorNotEqual_Should_ReturnFalse_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = left != right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void GetHashCode_Should_ReturnSameHash_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var leftHash = left.GetHashCode();
+        var rightHash = right.GetHashCode();
+
+        // Assert
+        Assert.Equal(leftHash, rightHash);
+    }
+
+    [Fact]
+    public void Equals_Should_NotThrow_When_BothAreDefault()
+    {
+        // Arrange
+        TokenHash left = default;
+        TokenHash right = default;
+
+        // Act
+        var exception = Record.Exception(() => left.Equals(right));
+
+        // Assert
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void OperatorEqual_Should_NotThrow_When_BothAreDefault()
+    {
+        // Arrange
+        TokenHash left = default;
+        TokenHash right = default;
+
+        // Act
+        var exception = Record.Exception(() => _ = left == right);
+
+        // Assert
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void GetHashCode_Should_NotThrow_When_DefaultStructIsUsed()
+    {
+        // Arrange
+        TokenHash tokenHash = default;
+
+        // Act
+        var exception = Record.Exception(() => _ = tokenHash.GetHashCode());
+
+        // Assert
+        Assert.Null(exception);
+    }
 }

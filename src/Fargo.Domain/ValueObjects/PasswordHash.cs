@@ -7,7 +7,7 @@
     /// password hash produced by the hashing infrastructure.
     /// The plaintext password should never be persisted.
     /// </summary>
-    public readonly struct PasswordHash
+    public readonly struct PasswordHash : IEquatable<PasswordHash>
     {
         /// <summary>
         /// Minimum allowed length for the password hash.
@@ -18,6 +18,8 @@
         /// Maximum allowed length for the password hash.
         /// </summary>
         public const int MaxLength = 512;
+
+        private readonly string value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordHash"/> value object.
@@ -44,13 +46,41 @@
         public string Value
             => value ?? throw new InvalidOperationException("Password hash value must be set.");
 
-        private readonly string value;
-
         /// <summary>
         /// Creates a <see cref="PasswordHash"/> from the specified string.
         /// </summary>
         public static PasswordHash FromString(string value)
             => new(value);
+
+        /// <summary>
+        /// Determines whether the current password hash is equal to another password hash.
+        /// </summary>
+        public bool Equals(PasswordHash other)
+            => string.Equals(value, other.value, StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether the current password hash is equal to the specified object.
+        /// </summary>
+        public override bool Equals(object? obj)
+            => obj is PasswordHash other && Equals(other);
+
+        /// <summary>
+        /// Returns a hash code for the current password hash.
+        /// </summary>
+        public override int GetHashCode()
+            => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether two <see cref="PasswordHash"/> instances are equal.
+        /// </summary>
+        public static bool operator ==(PasswordHash left, PasswordHash right)
+            => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="PasswordHash"/> instances are different.
+        /// </summary>
+        public static bool operator !=(PasswordHash left, PasswordHash right)
+            => !left.Equals(right);
 
         /// <summary>
         /// Returns the string representation of the password hash.

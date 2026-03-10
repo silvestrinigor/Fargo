@@ -1,7 +1,9 @@
+using Fargo.Application.Commom;
 using Fargo.HttpApi.Converters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace Fargo.HttpApi.Extensions
 {
@@ -74,6 +76,38 @@ namespace Fargo.HttpApi.Extensions
                     });
 
                 services.AddAuthorization();
+
+                return services;
+            }
+
+            /// <summary>
+            /// Adds OpenAPI configuration including schema transformations
+            /// for custom pagination value objects such as <see cref="Page"/> and <see cref="Limit"/>.
+            /// </summary>
+            public IServiceCollection AddFargoOpenApi()
+            {
+                services.AddOpenApi(options =>
+                {
+                    options.AddSchemaTransformer((schema, context, _) =>
+                    {
+                        if (context.ParameterDescription?.Type == typeof(Page?))
+                        {
+                            schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;
+                            schema.Minimum = Page.MinValue.ToString();
+                            schema.Default = JsonNode.Parse(PageExtension.DefaultPageValue.ToString());
+                        }
+
+                        if (context.ParameterDescription?.Type == typeof(Limit?))
+                        {
+                            schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;
+                            schema.Minimum = Limit.MinValue.ToString();
+                            schema.Maximum = Limit.MaxValue.ToString();
+                            schema.Default = JsonNode.Parse(LimitExtension.DefaultLimitValue.ToString());
+                        }
+
+                        return Task.CompletedTask;
+                    });
+                });
 
                 return services;
             }

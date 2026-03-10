@@ -7,7 +7,7 @@ namespace Fargo.Domain.ValueObjects
     /// purposes (for example, access tokens or refresh tokens).
     /// This value object ensures the token is not null, empty, or malformed.
     /// </summary>
-    public readonly struct Token
+    public readonly struct Token : IEquatable<Token>
     {
         /// <summary>
         /// Minimum allowed length for the token.
@@ -18,6 +18,8 @@ namespace Fargo.Domain.ValueObjects
         /// Maximum allowed length for the token.
         /// </summary>
         public const int MaxLength = 512;
+
+        private readonly string value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Token"/> value object.
@@ -45,13 +47,41 @@ namespace Fargo.Domain.ValueObjects
         public string Value
             => value ?? throw new InvalidOperationException("Token value must be set.");
 
-        private readonly string value;
-
         /// <summary>
         /// Creates a <see cref="Token"/> from the specified string.
         /// </summary>
         public static Token FromString(string value)
             => new(value);
+
+        /// <summary>
+        /// Determines whether the current token is equal to another token.
+        /// </summary>
+        public bool Equals(Token other)
+            => string.Equals(value, other.value, StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether the current token is equal to the specified object.
+        /// </summary>
+        public override bool Equals(object? obj)
+            => obj is Token other && Equals(other);
+
+        /// <summary>
+        /// Returns a hash code for the current token.
+        /// </summary>
+        public override int GetHashCode()
+            => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether two <see cref="Token"/> instances are equal.
+        /// </summary>
+        public static bool operator ==(Token left, Token right)
+            => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="Token"/> instances are different.
+        /// </summary>
+        public static bool operator !=(Token left, Token right)
+            => !left.Equals(right);
 
         /// <summary>
         /// Returns the token string.

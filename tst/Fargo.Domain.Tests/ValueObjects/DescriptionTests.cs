@@ -152,4 +152,157 @@ public sealed class DescriptionTests
         // Assert
         Assert.Equal(string.Empty, description.Value);
     }
+
+    [Fact]
+    public void Equals_Should_ReturnTrue_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new Description("Same value");
+        var right = new Description("Same value");
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Equals_Should_ReturnFalse_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new Description("First");
+        var right = new Description("Second");
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnTrue_When_ObjectIsDescriptionWithSameValue()
+    {
+        // Arrange
+        object other = new Description("Same value");
+        var description = new Description("Same value");
+
+        // Act
+        var result = description.Equals(other);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnFalse_When_ObjectIsNull()
+    {
+        // Arrange
+        var description = new Description("Value");
+
+        // Act
+        var result = description.Equals(null);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnFalse_When_ObjectIsDifferentType()
+    {
+        // Arrange
+        var description = new Description("Value");
+
+        // Act
+        var result = description.Equals("Value");
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void OperatorEqual_Should_ReturnTrue_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new Description("Same value");
+        var right = new Description("Same value");
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperatorEqual_Should_ReturnFalse_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new Description("First");
+        var right = new Description("Second");
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void OperatorNotEqual_Should_ReturnTrue_When_ValuesAreDifferent()
+    {
+        // Arrange
+        var left = new Description("First");
+        var right = new Description("Second");
+
+        // Act
+        var result = left != right;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperatorNotEqual_Should_ReturnFalse_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new Description("Same value");
+        var right = new Description("Same value");
+
+        // Act
+        var result = left != right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void GetHashCode_Should_ReturnSameHash_When_ValuesAreEqual()
+    {
+        // Arrange
+        var left = new Description("Same value");
+        var right = new Description("Same value");
+
+        // Act
+        var leftHash = left.GetHashCode();
+        var rightHash = right.GetHashCode();
+
+        // Assert
+        Assert.Equal(leftHash, rightHash);
+    }
+
+    [Fact]
+    public void DefaultStruct_Should_BeEqualTo_EmptyDescription()
+    {
+        // Arrange
+        Description left = default;
+        var right = Description.Empty;
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.True(result);
+    }
 }

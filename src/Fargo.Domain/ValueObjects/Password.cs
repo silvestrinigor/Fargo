@@ -6,7 +6,7 @@
     /// This value object enforces minimum security rules for passwords
     /// before they are hashed and stored in the system.
     /// </summary>
-    public readonly struct Password
+    public readonly struct Password : IEquatable<Password>
     {
         /// <summary>
         /// Maximum allowed length for the password.
@@ -18,16 +18,12 @@
         /// </summary>
         public const int MinLength = 9;
 
+        private readonly string value;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Password"/> value object.
         /// </summary>
         /// <param name="value">The plaintext password.</param>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the password is null, empty, or contains invalid characters.
-        /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the password length is outside the allowed range.
-        /// </exception>
         public Password(string value)
         {
             Validate(value);
@@ -44,15 +40,50 @@
         public string Value
             => value ?? throw new InvalidOperationException("Password value must be set.");
 
-        private readonly string value;
-
         /// <summary>
         /// Creates a new <see cref="Password"/> from a string.
         /// </summary>
-        /// <param name="value">The plaintext password.</param>
-        /// <returns>A validated <see cref="Password"/> instance.</returns>
         public static Password FromString(string value)
             => new(value);
+
+        /// <summary>
+        /// Determines whether the current password is equal to another password.
+        /// </summary>
+        public bool Equals(Password other)
+            => string.Equals(value, other.value, StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether the current password is equal to the specified object.
+        /// </summary>
+        public override bool Equals(object? obj)
+            => obj is Password other && Equals(other);
+
+        /// <summary>
+        /// Returns a hash code for the current password.
+        /// </summary>
+        public override int GetHashCode()
+            => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether two <see cref="Password"/> instances are equal.
+        /// </summary>
+        public static bool operator ==(Password left, Password right)
+            => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="Password"/> instances are different.
+        /// </summary>
+        public static bool operator !=(Password left, Password right)
+            => !left.Equals(right);
+
+        /// <summary>
+        /// Returns the string representation of the password.
+        /// </summary>
+        /// <remarks>
+        /// Use carefully, as this exposes the plaintext password.
+        /// </remarks>
+        public override string ToString()
+            => Value;
 
         /// <summary>
         /// Implicitly converts a <see cref="Password"/> to <see cref="string"/>.
@@ -69,7 +100,6 @@
         /// <summary>
         /// Validates the password value.
         /// </summary>
-        /// <param name="value">The password to validate.</param>
         private static void Validate(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

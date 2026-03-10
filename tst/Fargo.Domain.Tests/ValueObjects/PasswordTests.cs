@@ -31,6 +31,20 @@ namespace Fargo.Domain.Tests.ValueObjects
         }
 
         [Fact]
+        public void ToString_Should_ReturnUnderlyingValue()
+        {
+            // Arrange
+            var value = "Secure@123";
+            var password = new Password(value);
+
+            // Act
+            var result = password.ToString();
+
+            // Assert
+            Assert.Equal(value, result);
+        }
+
+        [Fact]
         public void ImplicitOperator_Should_ReturnStringValue()
         {
             // Arrange
@@ -41,6 +55,19 @@ namespace Fargo.Domain.Tests.ValueObjects
 
             // Assert
             Assert.Equal("Secure@123", value);
+        }
+
+        [Fact]
+        public void ExplicitOperator_Should_CreatePassword_When_ValueIsValid()
+        {
+            // Arrange
+            var value = "Secure@123";
+
+            // Act
+            var password = (Password)value;
+
+            // Assert
+            Assert.Equal(value, password.Value);
         }
 
         [Fact]
@@ -148,6 +175,145 @@ namespace Fargo.Domain.Tests.ValueObjects
 
             // Assert
             Assert.Throws<ArgumentException>(act);
+        }
+
+        [Fact]
+        public void Equals_Should_ReturnTrue_When_ValuesAreEqual()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@123");
+
+            // Act
+            var result = left.Equals(right);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void Equals_Should_ReturnFalse_When_ValuesAreDifferent()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@456");
+
+            // Act
+            var result = left.Equals(right);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void EqualsObject_Should_ReturnTrue_When_ObjectIsPasswordWithSameValue()
+        {
+            // Arrange
+            var password = new Password("Secure@123");
+            object other = new Password("Secure@123");
+
+            // Act
+            var result = password.Equals(other);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void EqualsObject_Should_ReturnFalse_When_ObjectIsNull()
+        {
+            // Arrange
+            var password = new Password("Secure@123");
+
+            // Act
+            var result = password.Equals(null);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void EqualsObject_Should_ReturnFalse_When_ObjectIsDifferentType()
+        {
+            // Arrange
+            var password = new Password("Secure@123");
+
+            // Act
+            var result = password.Equals("Secure@123");
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void OperatorEqual_Should_ReturnTrue_When_ValuesAreEqual()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@123");
+
+            // Act
+            var result = left == right;
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void OperatorEqual_Should_ReturnFalse_When_ValuesAreDifferent()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@456");
+
+            // Act
+            var result = left == right;
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void OperatorNotEqual_Should_ReturnTrue_When_ValuesAreDifferent()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@456");
+
+            // Act
+            var result = left != right;
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void OperatorNotEqual_Should_ReturnFalse_When_ValuesAreEqual()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@123");
+
+            // Act
+            var result = left != right;
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void GetHashCode_Should_ReturnSameHash_When_ValuesAreEqual()
+        {
+            // Arrange
+            var left = new Password("Secure@123");
+            var right = new Password("Secure@123");
+
+            // Act
+            var leftHash = left.GetHashCode();
+            var rightHash = right.GetHashCode();
+
+            // Assert
+            Assert.Equal(leftHash, rightHash);
         }
     }
 }

@@ -1,8 +1,10 @@
+using Fargo.Application.Commom;
 using Fargo.HttpApi.Extensions;
 using Fargo.HttpApi.Middlewares;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Nodes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,7 @@ builder.AddServiceDefaults();
 
 builder.Services.AddProblemDetails();
 
-builder.Services.AddOpenApi();
+builder.Services.AddFargoOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 

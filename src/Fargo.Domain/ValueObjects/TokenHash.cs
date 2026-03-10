@@ -7,7 +7,7 @@ namespace Fargo.Domain.ValueObjects
     /// of a security token. The original token should never be
     /// persisted, only its hash.
     /// </summary>
-    public readonly struct TokenHash
+    public readonly struct TokenHash : IEquatable<TokenHash>
     {
         /// <summary>
         /// Minimum allowed length for the token hash.
@@ -18,6 +18,8 @@ namespace Fargo.Domain.ValueObjects
         /// Maximum allowed length for the token hash.
         /// </summary>
         public const int MaxLength = 512;
+
+        private readonly string value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenHash"/> value object.
@@ -45,13 +47,41 @@ namespace Fargo.Domain.ValueObjects
         public string Value
             => value ?? throw new InvalidOperationException("Token hash value must be set.");
 
-        private readonly string value;
-
         /// <summary>
         /// Creates a <see cref="TokenHash"/> from the specified string.
         /// </summary>
         public static TokenHash FromString(string value)
             => new(value);
+
+        /// <summary>
+        /// Determines whether the current token hash is equal to another token hash.
+        /// </summary>
+        public bool Equals(TokenHash other)
+            => string.Equals(value, other.value, StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether the current token hash is equal to the specified object.
+        /// </summary>
+        public override bool Equals(object? obj)
+            => obj is TokenHash other && Equals(other);
+
+        /// <summary>
+        /// Returns a hash code for the current token hash.
+        /// </summary>
+        public override int GetHashCode()
+            => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+        /// <summary>
+        /// Determines whether two <see cref="TokenHash"/> instances are equal.
+        /// </summary>
+        public static bool operator ==(TokenHash left, TokenHash right)
+            => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="TokenHash"/> instances are different.
+        /// </summary>
+        public static bool operator !=(TokenHash left, TokenHash right)
+            => !left.Equals(right);
 
         /// <summary>
         /// Returns the string representation of the token hash.
