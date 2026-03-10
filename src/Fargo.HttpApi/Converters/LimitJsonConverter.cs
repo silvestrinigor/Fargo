@@ -1,17 +1,17 @@
-﻿using Fargo.Application.Commom;
+﻿using Fargo.Application.Common;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Fargo.HttpApi.Converters
 {
-    public class LimitJsonConverter : JsonConverter<Limit>
+    public sealed class LimitJsonConverter : JsonConverter<Limit>
     {
         public override Limit Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.Number)
-                throw new JsonException("Must be a integer.");
+                throw new JsonException("Must be an integer.");
 
-            var value = reader.GetInt32()!;
+            var value = reader.GetInt32();
 
             try
             {

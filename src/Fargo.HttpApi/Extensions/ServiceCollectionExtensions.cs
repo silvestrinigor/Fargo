@@ -1,4 +1,4 @@
-using Fargo.Application.Commom;
+using Fargo.Application.Common;
 using Fargo.HttpApi.Converters;
 using Fargo.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +11,7 @@ namespace Fargo.HttpApi.Extensions
     /// <summary>
     /// Provides extension methods for configuring HTTP API services.
     /// </summary>
-    public static class ServiceExtension
+    public static class ServiceCollectionExtension
     {
         extension(IServiceCollection services)
         {
@@ -106,23 +106,27 @@ namespace Fargo.HttpApi.Extensions
             /// </returns>
             public IServiceCollection AddFargoAuthentication(IConfiguration configuration)
             {
+                var jwt = configuration
+                    .GetSection(JwtOptions.SectionName)
+                    .Get<JwtOptions>()
+                    ?? throw new InvalidOperationException("Jwt configuration is missing.");
+
                 services
                     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
+                            {
+                            options.TokenValidationParameters = new TokenValidationParameters
+                            {
                             ValidateIssuer = true,
                             ValidateAudience = true,
                             ValidateLifetime = true,
                             ValidateIssuerSigningKey = true,
-                            ValidIssuer = configuration.GetJwtConfiguration("Issuer"),
-                            ValidAudience = configuration.GetJwtConfiguration("Audience"),
+                            ValidIssuer = jwt.Issuer,
+                            ValidAudience = jwt.Audience,
                             IssuerSigningKey = new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(configuration.GetJwtConfiguration("Key")!)
-                            )
-                        };
-                    });
+                                    Encoding.UTF8.GetBytes(jwt.Key))
+                            };
+                            });
 
                 services.AddAuthorization();
 
@@ -147,7 +151,7 @@ namespace Fargo.HttpApi.Extensions
                         {
                             schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;
                             schema.Minimum = Page.MinValue.ToString();
-                            schema.Default = JsonNode.Parse(Page.FirstPage.ToString()!);
+                            schema.Default = JsonValue.Create(Page.FirstPage.Value);
                         }
 
                         if (context.ParameterDescription?.Type == typeof(Limit?))
@@ -155,7 +159,7 @@ namespace Fargo.HttpApi.Extensions
                             schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;
                             schema.Minimum = Limit.MinValue.ToString();
                             schema.Maximum = Limit.MaxValue.ToString();
-                            schema.Default = JsonNode.Parse(Limit.MaxLimit.ToString()!);
+                            schema.Default = JsonValue.Create(Limit.MaxLimit.Value);
                         }
 
                         return Task.CompletedTask;

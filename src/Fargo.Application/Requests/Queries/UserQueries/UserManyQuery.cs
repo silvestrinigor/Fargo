@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Commom;
+﻿using Fargo.Application.Common;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Repositories;

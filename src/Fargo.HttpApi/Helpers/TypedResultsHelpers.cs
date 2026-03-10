@@ -8,12 +8,18 @@ namespace Fargo.HttpApi.Helpers
     public static class TypedResultsHelpers
     {
         /// <summary>
-        /// Handles a query result and returns an appropriate TypedResult based on the response.
-        /// If the response is null, it returns NotFound. Otherwise, it returns Ok with the response.
+        /// Handles a single query result and returns an appropriate typed result.
         /// </summary>
-        /// <typeparam name="TResponse">The type of the response.</typeparam>
-        /// <param name="response">The query result to handle.</param>
-        /// <returns>A TypedResult containing either Ok or NotFound.</returns>
+        /// <typeparam name="TResponse">
+        /// The type of the response.
+        /// </typeparam>
+        /// <param name="response">
+        /// The query result to handle.
+        /// </param>
+        /// <returns>
+        /// <see cref="TypedResults.Ok{TValue}(TValue)"/> when the response exists;
+        /// otherwise <see cref="TypedResults.NotFound()"/>.
+        /// </returns>
         public static Results<Ok<TResponse>, NotFound> HandleQueryResult<TResponse>(TResponse? response)
         {
             if (response == null)
@@ -25,49 +31,59 @@ namespace Fargo.HttpApi.Helpers
         }
 
         /// <summary>
-        /// Handles a query result and returns an appropriate TypedResult based on the response.
-        /// If the response is null, it returns NotFound. If the response is empty, it returns NoContent. Otherwise, it returns Ok with the response.
+        /// Handles a nullable read-only collection query result and returns an appropriate typed result.
         /// </summary>
-        /// <typeparam name="TResponseItem">The type of items in the response.</typeparam>
-        /// <param name="response">The query result to handle.</param>
-        /// <returns>A TypedResult containing either Ok, NotFound, or NoContent.</returns>
-        public static Results<Ok<IEnumerable<TResponseItem>>, NotFound, NoContent> HandleQueryResult<TResponseItem>(IEnumerable<TResponseItem>? response)
-        {
-            if (response == null)
+        /// <typeparam name="TResponseItem">
+        /// The type of items in the response collection.
+        /// </typeparam>
+        /// <param name="response">
+        /// The query result to handle.
+        /// </param>
+        /// <returns>
+        /// <see cref="TypedResults.NotFound()"/> when the response is <see langword="null"/>;
+        /// <see cref="TypedResults.NoContent()"/> when the collection is empty;
+        /// otherwise <see cref="TypedResults.Ok{TValue}(TValue)"/>.
+        /// </returns>
+        public static Results<Ok<IReadOnlyCollection<TResponseItem>>, NotFound, NoContent>
+            HandleNullableCollectionQueryResult<TResponseItem>(
+                    IReadOnlyCollection<TResponseItem>? response)
             {
-                return TypedResults.NotFound();
-            }
+                if (response == null)
+                {
+                    return TypedResults.NotFound();
+                }
 
-            if (!response.Any())
-            {
-                return TypedResults.NoContent();
-            }
+                if (response.Count == 0)
+                {
+                    return TypedResults.NoContent();
+                }
 
-            return TypedResults.Ok(response);
-        }
+                return TypedResults.Ok(response);
+            }
 
         /// <summary>
-        /// Handles a query result and returns an appropriate TypedResult based on the response.
-        /// If the response is null, it returns NotFound. If the response is empty, it returns NoContent. Otherwise, it returns Ok with the response.
+        /// Handles a non-null read-only collection query result and returns an appropriate typed result.
         /// </summary>
-        /// <typeparam name="TResponseItem">The type of items in the read-only collection response.</typeparam>
-        /// <param name="response">The query result to handle.</param>
-        /// <returns>A TypedResult containing either Ok, NotFound, or NoContent.</returns>
-        public static Results<Ok<IReadOnlyCollection<TResponseItem>>, NotFound, NoContent> HandleQueryResult<TResponseItem>(
-                IReadOnlyCollection<TResponseItem>? response
-                )
-        {
-            if (response == null)
+        /// <typeparam name="TResponseItem">
+        /// The type of items in the response collection.
+        /// </typeparam>
+        /// <param name="response">
+        /// The non-null query result to handle.
+        /// </param>
+        /// <returns>
+        /// <see cref="TypedResults.NoContent()"/> when the collection is empty;
+        /// otherwise <see cref="TypedResults.Ok{TValue}(TValue)"/>.
+        /// </returns>
+        public static Results<Ok<IReadOnlyCollection<TResponseItem>>, NoContent>
+            HandleCollectionQueryResult<TResponseItem>(
+                    IReadOnlyCollection<TResponseItem> response)
             {
-                return TypedResults.NotFound();
-            }
+                if (response.Count == 0)
+                {
+                    return TypedResults.NoContent();
+                }
 
-            if (response.Count == 0)
-            {
-                return TypedResults.NoContent();
+                return TypedResults.Ok(response);
             }
-
-            return TypedResults.Ok(response);
-        }
     }
 }

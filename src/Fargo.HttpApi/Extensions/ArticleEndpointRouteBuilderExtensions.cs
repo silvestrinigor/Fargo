@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Commom;
+﻿using Fargo.Application.Common;
 using Fargo.Application.Models;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands;
@@ -38,8 +38,7 @@ namespace Fargo.HttpApi.Extensions
                 .WithSummary("Gets multiple articles")
                 .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
                 .Produces<IReadOnlyCollection<ArticleReadModel>>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces(StatusCodes.Status204NoContent);
 
             group.MapPost("/", CreateArticle)
                 .WithName("CreateArticle")
@@ -73,7 +72,7 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<ArticleReadModel>>, NotFound, NoContent>> GetManyArticle(
+        private static async Task<Results<Ok<IReadOnlyCollection<ArticleReadModel>>, NoContent>> GetManyArticle(
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
@@ -87,7 +86,7 @@ namespace Fargo.HttpApi.Extensions
 
             var response = await handler.Handle(query, cancellationToken);
 
-            return TypedResultsHelpers.HandleQueryResult(response);
+            return TypedResultsHelpers.HandleCollectionQueryResult(response);
         }
 
         private static async Task<Ok<Guid>> CreateArticle(

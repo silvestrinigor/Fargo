@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Fargo.HttpApi.Converters
 {
-    public class PasswordJsonConverter : JsonConverter<Password>
+    public sealed class PasswordJsonConverter : JsonConverter<Password>
     {
         public override Password Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

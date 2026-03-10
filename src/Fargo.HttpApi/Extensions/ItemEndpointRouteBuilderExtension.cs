@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Commom;
+﻿using Fargo.Application.Common;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ItemCommands;
@@ -37,8 +37,7 @@ namespace Fargo.HttpApi.Extensions
                 .WithSummary("Gets multiple items")
                 .WithDescription("Retrieves a paginated list of items with optional filters such as parent item or article.")
                 .Produces<IReadOnlyCollection<ItemReadModel>>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces(StatusCodes.Status204NoContent);
 
             group.MapPost("/", CreateItem)
                 .WithName("CreateItem")
@@ -76,8 +75,7 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<ItemReadModel>>, NotFound, NoContent>> GetManyItems(
-            Guid? parentItemGuid,
+        private static async Task<Results<Ok<IReadOnlyCollection<ItemReadModel>>, NoContent>> GetManyItems(
             Guid? articleGuid,
             DateTimeOffset? temporalAsOf,
             Page? page,
@@ -93,7 +91,7 @@ namespace Fargo.HttpApi.Extensions
 
             var response = await handler.Handle(query, cancellationToken);
 
-            return TypedResultsHelpers.HandleQueryResult(response);
+            return TypedResultsHelpers.HandleCollectionQueryResult(response);
         }
 
         private static async Task<Ok<Guid>> CreateItem(

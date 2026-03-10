@@ -10,8 +10,6 @@ var connectionString = builder.Configuration.GetConnectionString("Fargo");
 
 builder.AddServiceDefaults();
 
-builder.Services.AddProblemDetails();
-
 builder.Services.AddFargoOpenApi();
 
 builder.Services.AddHttpContextAccessor();
@@ -41,8 +39,6 @@ builder.Services.AddFargoReadDbContext(connectionString);
 builder.Services.AddFargoAuthentication(builder.Configuration);
 
 var app = builder.Build();
-
-app.UseExceptionHandler();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
 

@@ -5,7 +5,7 @@ namespace Fargo.SeedService.Extensions
     /// <summary>
     /// Provides extension methods for configuring the worker.
     /// </summary>
-    public static class ServiceCollectionExtension
+    public static class ServiceCollectionExtensions
     {
         extension(IServiceCollection services)
         {

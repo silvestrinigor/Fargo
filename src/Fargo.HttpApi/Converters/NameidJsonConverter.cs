@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Fargo.HttpApi.Converters
 {
-    public class NameidJsonConverter : JsonConverter<Nameid>
+    public sealed class NameidJsonConverter : JsonConverter<Nameid>
     {
         public override Nameid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

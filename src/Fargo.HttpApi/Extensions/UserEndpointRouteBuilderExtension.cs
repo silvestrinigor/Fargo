@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Commom;
+﻿using Fargo.Application.Common;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.UserCommands;
@@ -37,8 +37,7 @@ namespace Fargo.HttpApi.Extensions
                 .WithSummary("Gets multiple users")
                 .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries.")
                 .Produces<IReadOnlyCollection<UserResponseModel>>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces(StatusCodes.Status204NoContent);
 
             group.MapPost("/", CreateUser)
                 .WithName("CreateUser")
@@ -63,7 +62,7 @@ namespace Fargo.HttpApi.Extensions
 
         private static async Task<Results<Ok<UserResponseModel>, NotFound>> GetSingleUser(
             Guid userGuid,
-            DateTime? temporalAsOf,
+            DateTimeOffset? temporalAsOf,
             IQueryHandler<UserSingleQuery, UserResponseModel?> handler,
             CancellationToken cancellationToken)
         {
@@ -74,8 +73,8 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<UserResponseModel>>, NotFound, NoContent>> GetManyUsers(
-            DateTime? temporalAsOf,
+        private static async Task<Results<Ok<IReadOnlyCollection<UserResponseModel>>, NoContent>> GetManyUsers(
+            DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
             IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>> handler,
@@ -88,7 +87,7 @@ namespace Fargo.HttpApi.Extensions
 
             var response = await handler.Handle(query, cancellationToken);
 
-            return TypedResultsHelpers.HandleQueryResult(response);
+            return TypedResultsHelpers.HandleCollectionQueryResult(response);
         }
 
         private static async Task<Ok<Guid>> CreateUser(

@@ -16,7 +16,7 @@ namespace Fargo.MigrationService;
 /// <see cref="IHostApplicationLifetime.StopApplication"/>.
 /// </para>
 /// </remarks>
-public class MigrationService(
+public sealed class MigrationService(
         IServiceProvider serviceProvider,
         IHostApplicationLifetime hostApplicationLifetime
         ) : BackgroundService

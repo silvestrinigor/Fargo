@@ -1,35 +1,41 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Fargo.Application.Commom
+namespace Fargo.Application.Common
 {
     /// <summary>
-    /// Represents the page index used in paginated queries.
+    /// Represents the maximum number of items returned in a paginated query.
     /// </summary>
     /// <remarks>
-    /// This value object ensures that page numbers remain within
-    /// a valid range and supports automatic parsing from strings
-    /// using <see cref="IParsable{TSelf}"/>.
+    /// This value object ensures that pagination limits stay within
+    /// a safe and controlled range.
+    ///
+    /// It implements <see cref="IParsable{TSelf}"/> so it can be automatically
+    /// parsed from query parameters in ASP.NET.
     /// </remarks>
-    public readonly struct Page
-        : IParsable<Page>
+    public readonly struct Limit
+        : IParsable<Limit>
     {
         /// <summary>
-        /// Gets the first valid page (<c>1</c>).
+        /// Gets the maximum valid limit.
         /// </summary>
         /// <remarks>
-        /// Provides a safe starting page for pagination operations.
+        /// This property represents the largest number of items
+        /// that can be requested in a paginated query.
+        ///
+        /// It is equivalent to creating a new instance with
+        /// <see cref="MaxValue"/>.
         /// </remarks>
-        public static Page FirstPage => new(1);
+        public static Limit MaxLimit => new(MaxValue);
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Page"/>.
+        /// Initializes a new instance of <see cref="Limit"/>.
         /// </summary>
-        /// <param name="value">The page number.</param>
+        /// <param name="value">The limit value.</param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the page value is outside the allowed range.
+        /// Thrown when the value is outside the allowed range.
         /// </exception>
-        public Page(int value)
+        public Limit(int value)
         {
             if (value < MinValue || value > MaxValue)
             {
@@ -42,60 +48,60 @@ namespace Fargo.Application.Commom
         }
 
         /// <summary>
-        /// Minimum allowed page value.
+        /// Minimum allowed limit value.
         /// </summary>
         public const int MinValue = 1;
 
         /// <summary>
-        /// Maximum allowed page value.
+        /// Maximum allowed limit value.
         /// </summary>
-        public const int MaxValue = int.MaxValue;
+        public const int MaxValue = 1000;
 
         private readonly int value;
 
         /// <summary>
-        /// Gets the page value.
+        /// Gets the limit value.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the instance was not properly initialized.
         /// </exception>
         public int Value => value == 0
             ? throw new InvalidOperationException(
-                $"{nameof(Page)} was not initialized. Do not use the default value of this struct.")
+                $"{nameof(Limit)} was not initialized. Do not use the default value of this struct.")
             : value;
 
         /// <summary>
-        /// Implicitly converts <see cref="Page"/> to <see cref="int"/>.
+        /// Implicitly converts <see cref="Limit"/> to <see cref="int"/>.
         /// </summary>
-        public static implicit operator int(Page page)
-            => page.Value;
+        public static implicit operator int(Limit limit)
+            => limit.Value;
 
         /// <summary>
-        /// Explicitly converts an <see cref="int"/> to <see cref="Page"/>.
+        /// Explicitly converts an <see cref="int"/> to <see cref="Limit"/>.
         /// </summary>
-        public static explicit operator Page(int value)
+        public static explicit operator Limit(int value)
             => new(value);
 
         /// <summary>
-        /// Parses a string into a <see cref="Page"/>.
+        /// Parses a string into a <see cref="Limit"/>.
         /// </summary>
-        public static Page Parse(string s, IFormatProvider? provider)
+        public static Limit Parse(string s, IFormatProvider? provider)
         {
             if (TryParse(s, provider, out var result))
             {
                 return result;
             }
 
-            throw new FormatException($"Invalid Page value: '{s}'.");
+            throw new FormatException($"Invalid Limit value: '{s}'.");
         }
 
         /// <summary>
-        /// Attempts to parse a string into a <see cref="Page"/>.
+        /// Attempts to parse a string into a <see cref="Limit"/>.
         /// </summary>
         public static bool TryParse(
             [NotNullWhen(true)] string? s,
             IFormatProvider? provider,
-            [MaybeNullWhen(false)] out Page result)
+            [MaybeNullWhen(false)] out Limit result)
         {
             result = default;
 
@@ -120,7 +126,7 @@ namespace Fargo.Application.Commom
                 return false;
             }
 
-            result = new Page(value);
+            result = new Limit(value);
             return true;
         }
     }

@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Commom;
+﻿using Fargo.Application.Common;
 using Fargo.Application.Models.ArticleModels;
 
 namespace Fargo.Application.Repositories

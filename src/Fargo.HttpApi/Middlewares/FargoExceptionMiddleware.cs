@@ -26,6 +26,10 @@ namespace Fargo.HttpApi.Middlewares
                 new ProblemDetailsDefinition(401, "Unauthorized", "auth/unauthorized")
             },
             {
+                typeof(InvalidPasswordFargoApplicationException),
+                new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
+            },
+            {
                 typeof(ArticleNotFoundFargoApplicationException),
                 new ProblemDetailsDefinition(404, "Article not found", "article/not-found")
             },
