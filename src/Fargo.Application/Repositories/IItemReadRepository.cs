@@ -39,6 +39,9 @@ namespace Fargo.Application.Repositories
         /// <summary>
         /// Retrieves multiple items using filtering and pagination.
         /// </summary>
+        /// <param name="pagination">
+        /// Pagination parameters used to limit and offset the result set.
+        /// </param>
         /// <param name="parentItemGuid">
         /// Optional identifier used to filter items by parent item,
         /// enabling hierarchical item queries.
@@ -51,9 +54,6 @@ namespace Fargo.Application.Repositories
         /// When provided, the result represents the state of the items
         /// as they existed at the specified date and time.
         /// </param>
-        /// <param name="pagination">
-        /// Pagination parameters used to limit and offset the result set.
-        /// </param>
         /// <param name="cancellationToken">
         /// Token used to cancel the operation.
         /// </param>
@@ -61,10 +61,10 @@ namespace Fargo.Application.Repositories
         /// A read-only collection of <see cref="ItemReadModel"/>.
         /// </returns>
         Task<IReadOnlyCollection<ItemReadModel>> GetMany(
+                Pagination pagination,
                 Guid? parentItemGuid = null,
                 Guid? articleGuid = null,
                 DateTimeOffset? asOfDateTime = null,
-                Pagination pagination = default,
                 CancellationToken cancellationToken = default
             );
     }

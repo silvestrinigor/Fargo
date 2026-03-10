@@ -5,6 +5,16 @@ namespace Fargo.Application.Tests.Commom;
 public sealed class PageTests
 {
     [Fact]
+    public void FirstPage_Should_ReturnPageWithValueOne()
+    {
+        // Act
+        var page = Page.FirstPage;
+
+        // Assert
+        Assert.Equal(1, page.Value);
+    }
+
+    [Fact]
     public void Constructor_Should_CreatePage_When_ValueIsValid()
     {
         // Arrange

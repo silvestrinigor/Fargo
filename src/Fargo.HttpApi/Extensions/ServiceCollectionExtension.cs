@@ -84,6 +84,10 @@ namespace Fargo.HttpApi.Extensions
             /// Adds OpenAPI configuration including schema transformations
             /// for custom pagination value objects such as <see cref="Page"/> and <see cref="Limit"/>.
             /// </summary>
+            /// <returns>
+            /// The same <see cref="IServiceCollection"/> instance so that additional
+            /// calls can be chained.
+            /// </returns>
             public IServiceCollection AddFargoOpenApi()
             {
                 services.AddOpenApi(options =>

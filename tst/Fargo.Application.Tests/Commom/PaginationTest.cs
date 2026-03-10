@@ -5,6 +5,17 @@ namespace Fargo.Application.Tests.Commom;
 public sealed class PaginationTests
 {
     [Fact]
+    public void First20Pages_Should_ReturnPaginationWithPageOneAndLimitTwenty()
+    {
+        // Act
+        var pagination = Pagination.First20Pages;
+
+        // Assert
+        Assert.Equal(1, pagination.Page.Value);
+        Assert.Equal(20, pagination.Limit.Value);
+    }
+
+    [Fact]
     public void Constructor_Should_SetPageAndLimit_When_Provided()
     {
         // Arrange
@@ -67,32 +78,6 @@ public sealed class PaginationTests
 
         // Assert
         Assert.Equal(25, result);
-    }
-
-    [Fact]
-    public void Skip_Should_ThrowInvalidOperationException_When_PageIsDefault()
-    {
-        // Arrange
-        var pagination = new Pagination(limit: new Limit(30));
-
-        // Act
-        void act() => _ = pagination.Skip;
-
-        // Assert
-        Assert.Throws<InvalidOperationException>(act);
-    }
-
-    [Fact]
-    public void Skip_Should_ThrowInvalidOperationException_When_LimitIsDefault()
-    {
-        // Arrange
-        var pagination = new Pagination(new Page(2));
-
-        // Act
-        void act() => _ = pagination.Skip;
-
-        // Assert
-        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]

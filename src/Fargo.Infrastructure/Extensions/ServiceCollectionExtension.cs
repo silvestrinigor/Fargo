@@ -134,10 +134,10 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>>, ArticleManyQueryHandler>();
 
                 services.AddScoped<IQueryHandler<ItemSingleQuery, ItemReadModel?>, ItemSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ItemManyQuery, IEnumerable<ItemReadModel>>, ItemManyQueryHandler>();
+                services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemReadModel>>, ItemManyQueryHandler>();
 
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserResponseModel?>, UserSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<UserManyQuery, IEnumerable<UserResponseModel>>, UserManyQueryHandler>();
+                services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>>, UserManyQueryHandler>();
 
                 services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
 

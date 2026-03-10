@@ -25,10 +25,10 @@ namespace Fargo.Infrastructure.Repositories
             .SingleOrDefaultAsync(cancellationToken);
 
         public async Task<IReadOnlyCollection<ItemReadModel>> GetMany(
+                Pagination pagination,
                 Guid? parentItemGuid = null,
                 Guid? articleGuid = null,
                 DateTimeOffset? asOfDateTime = null,
-                Pagination pagination = default,
                 CancellationToken cancellationToken = default
                 )
             => await items

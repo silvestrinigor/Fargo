@@ -15,6 +15,14 @@ namespace Fargo.Application.Commom
         : IParsable<Page>
     {
         /// <summary>
+        /// Gets the first valid page (<c>1</c>).
+        /// </summary>
+        /// <remarks>
+        /// Provides a safe starting page for pagination operations.
+        /// </remarks>
+        public static Page FirstPage => new(1);
+
+        /// <summary>
         /// Initializes a new instance of <see cref="Page"/>.
         /// </summary>
         /// <param name="value">The page number.</param>

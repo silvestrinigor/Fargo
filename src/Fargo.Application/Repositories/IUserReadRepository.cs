@@ -39,13 +39,13 @@ namespace Fargo.Application.Repositories
         /// <summary>
         /// Retrieves multiple users using pagination.
         /// </summary>
+        /// <param name="pagination">
+        /// Pagination parameters used to limit and offset the result set.
+        /// </param>
         /// <param name="asOfDateTime">
         /// Optional point in time used to retrieve historical data.
         /// When provided, the result represents the state of the users
         /// as they existed at the specified date and time.
-        /// </param>
-        /// <param name="pagination">
-        /// Pagination parameters used to limit and offset the result set.
         /// </param>
         /// <param name="cancellationToken">
         /// Token used to cancel the operation.
@@ -54,8 +54,8 @@ namespace Fargo.Application.Repositories
         /// A read-only collection of <see cref="UserReadModel"/>.
         /// </returns>
         Task<IReadOnlyCollection<UserReadModel>> GetMany(
+                Pagination pagination,
                 DateTimeOffset? asOfDateTime = null,
-                Pagination pagination = default,
                 CancellationToken cancellationToken = default
                 );
     }

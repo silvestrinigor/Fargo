@@ -17,6 +17,18 @@ namespace Fargo.Application.Commom
         : IParsable<Limit>
     {
         /// <summary>
+        /// Gets the maximum valid limit.
+        /// </summary>
+        /// <remarks>
+        /// This property represents the largest number of items
+        /// that can be requested in a paginated query.
+        ///
+        /// It is equivalent to creating a new instance with
+        /// <see cref="MaxValue"/>.
+        /// </remarks>
+        public static Limit MaxLimit => new(MaxValue);
+
+        /// <summary>
         /// Initializes a new instance of <see cref="Limit"/>.
         /// </summary>
         /// <param name="value">The limit value.</param>

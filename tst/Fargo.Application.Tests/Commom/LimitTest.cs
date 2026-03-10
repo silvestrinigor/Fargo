@@ -5,6 +5,16 @@ namespace Fargo.Application.Tests.Commom;
 public sealed class LimitTests
 {
     [Fact]
+    public void MaxLimit_Should_ReturnLimitWithMaxValue()
+    {
+        // Act
+        var limit = Limit.MaxLimit;
+
+        // Assert
+        Assert.Equal(Limit.MaxValue, limit.Value);
+    }
+
+    [Fact]
     public void Constructor_Should_CreateLimit_When_ValueIsValid()
     {
         // Arrange

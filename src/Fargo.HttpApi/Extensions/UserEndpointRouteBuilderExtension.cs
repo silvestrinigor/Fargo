@@ -83,7 +83,7 @@ namespace Fargo.HttpApi.Extensions
         {
             var query = new UserManyQuery(
                 temporalAsOf,
-                new Pagination(page ?? Page.DefaultPage(), limit ?? Limit.DefaultLimit())
+                PaginationHelpers.CreatePagination(page, limit)
             );
 
             var response = await handler.Handle(query, cancellationToken);

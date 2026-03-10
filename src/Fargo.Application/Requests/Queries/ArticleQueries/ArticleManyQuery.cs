@@ -13,11 +13,12 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
     /// as they existed at the specified date and time.
     /// </param>
     /// <param name="Pagination">
-    /// Pagination parameters used to limit and offset the result set.
+    /// Optional pagination parameters used to limit and offset the result set.
+    /// If not provided, a default pagination configuration is used.
     /// </param>
     public sealed record ArticleManyQuery(
             DateTimeOffset? AsOfDateTime = null,
-            Pagination Pagination = default
+            Pagination? Pagination = null
             ) : IQuery<IReadOnlyCollection<ArticleReadModel>>;
 
     /// <summary>
@@ -32,23 +33,27 @@ namespace Fargo.Application.Requests.Queries.ArticleQueries
         /// Executes the query to retrieve multiple articles.
         /// </summary>
         /// <param name="query">
-        /// The query containing the filtering and pagination parameters.
+        /// The query containing the temporal filter and optional pagination parameters.
         /// </param>
         /// <param name="cancellationToken">
         /// Token used to cancel the operation.
         /// </param>
         /// <returns>
         /// A read-only collection of <see cref="ArticleReadModel"/> representing
-        /// the articles retrieved for the specified temporal reference and pagination parameters.
+        /// the articles that match the specified temporal reference and pagination.
         /// </returns>
+        /// <remarks>
+        /// If pagination is not provided, the query uses
+        /// <see cref="Pagination.First20Pages"/> as the default.
+        /// </remarks>
         public async Task<IReadOnlyCollection<ArticleReadModel>> Handle(
                 ArticleManyQuery query,
                 CancellationToken cancellationToken = default
                 )
         {
             var articles = await articleRepository.GetMany(
+                    query.Pagination ?? Pagination.First20Pages,
                     query.AsOfDateTime,
-                    query.Pagination,
                     cancellationToken
                     );
 

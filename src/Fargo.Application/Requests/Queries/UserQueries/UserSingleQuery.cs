@@ -17,7 +17,7 @@ namespace Fargo.Application.Requests.Queries.UserQueries
     /// </param>
     public sealed record UserSingleQuery(
             Guid UserGuid,
-            DateTime? TemporalAsOf = null
+            DateTimeOffset? TemporalAsOf = null
             ) : IQuery<UserResponseModel?>;
 
     /// <summary>
