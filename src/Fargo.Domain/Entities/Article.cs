@@ -9,7 +9,7 @@ namespace Fargo.Domain.Entities
     /// such as its name and description. It does not represent a physical unit,
     /// but rather the metadata describing a type of item.
     /// </summary>
-    public class Article : Entity
+    public class Article : AuditedEntity
     {
         /// <summary>
         /// Gets or sets the name of the article.

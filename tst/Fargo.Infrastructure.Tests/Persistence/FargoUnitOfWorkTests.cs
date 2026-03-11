@@ -35,10 +35,9 @@ public sealed class FargoUnitOfWorkTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        var currentUser = Substitute.For<ICurrentUser>();
-        var currentUserGuid = Guid.NewGuid();
-
-        currentUser.UserGuid.Returns(currentUserGuid);
+        var creationUser = Substitute.For<ICurrentUser>();
+        var creationUserGuid = Guid.NewGuid();
+        creationUser.UserGuid.Returns(creationUserGuid);
 
         await using var context = new TestFargoWriteDbContext(options);
 
@@ -49,22 +48,30 @@ public sealed class FargoUnitOfWorkTests
         };
 
         context.AuditedEntities.Add(entity);
-        await context.SaveChangesAsync();
+
+        var creationUnitOfWork = new FargoUnitOfWork(context, creationUser);
+        await creationUnitOfWork.SaveChanges();
+
+        var editUser = Substitute.For<ICurrentUser>();
+        var editUserGuid = Guid.NewGuid();
+        editUser.UserGuid.Returns(editUserGuid);
 
         entity.Name = "After";
 
-        var unitOfWork = new FargoUnitOfWork(context, currentUser);
+        var unitOfWork = new FargoUnitOfWork(context, editUser);
 
         // Act
         await unitOfWork.SaveChanges();
 
         // Assert
+        Assert.NotEqual(default, entity.CreatedAt);
+        Assert.Equal(creationUserGuid, entity.CreatedByGuid);
         Assert.NotNull(entity.EditedAt);
-        Assert.Equal(currentUserGuid, entity.EditedByGuid);
+        Assert.Equal(editUserGuid, entity.EditedByGuid);
     }
 
     [Fact]
-    public async Task SaveChanges_Should_ReturnAffectedEntriesCount()
+    public async Task SaveChanges_Should_SetCreationAudit_When_AuditedEntityIsAdded()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<FargoWriteDbContext>()
@@ -72,7 +79,8 @@ public sealed class FargoUnitOfWorkTests
             .Options;
 
         var currentUser = Substitute.For<ICurrentUser>();
-        currentUser.UserGuid.Returns(Guid.NewGuid());
+        var currentUserGuid = Guid.NewGuid();
+        currentUser.UserGuid.Returns(currentUserGuid);
 
         await using var context = new TestFargoWriteDbContext(options);
 
@@ -91,5 +99,9 @@ public sealed class FargoUnitOfWorkTests
 
         // Assert
         Assert.True(result > 0);
+        Assert.NotEqual(default, entity.CreatedAt);
+        Assert.Equal(currentUserGuid, entity.CreatedByGuid);
+        Assert.Null(entity.EditedAt);
+        Assert.Null(entity.EditedByGuid);
     }
 }

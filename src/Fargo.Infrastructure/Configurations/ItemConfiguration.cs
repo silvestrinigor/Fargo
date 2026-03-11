@@ -20,6 +20,19 @@ namespace Fargo.Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(x => x.ArticleGuid);
+
+            builder
+                .Property(x => x.CreatedAt)
+                .IsRequired();
+
+            builder
+                .Property(x => x.CreatedByGuid);
+
+            builder
+                .Property(x => x.EditedAt);
+
+            builder
+                .Property(x => x.EditedByGuid);
         }
     }
 }

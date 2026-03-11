@@ -19,6 +19,19 @@ namespace Fargo.Infrastructure.Configurations
             builder
                 .Property(x => x.Description)
                 .IsRequired();
+
+            builder
+                .Property(x => x.CreatedAt)
+                .IsRequired();
+
+            builder
+                .Property(x => x.CreatedByGuid);
+
+            builder
+                .Property(x => x.EditedAt);
+
+            builder
+                .Property(x => x.EditedByGuid);
         }
     }
 }

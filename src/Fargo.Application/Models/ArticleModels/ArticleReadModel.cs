@@ -9,7 +9,7 @@ namespace Fargo.Application.Models.ArticleModels
     /// This model is part of the query side (CQRS) and is used to transfer
     /// article data from the persistence layer to the application or API.
     /// </remarks>
-    public class ArticleReadModel
+    public class ArticleReadModel : AuditedEntityReadModel
     {
         /// <summary>
         /// Gets the unique identifier of the article.

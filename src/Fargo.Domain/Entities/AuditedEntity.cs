@@ -33,14 +33,13 @@ namespace Fargo.Domain.Entities
         /// Gets the date and time when the entity was created.
         /// </summary>
         /// <remarks>
-        /// The value is initialized with <see cref="DateTimeOffset.UtcNow"/>
-        /// when the entity instance is created.
+        /// This value is assigned when the entity is marked as created.
         /// </remarks>
         public DateTimeOffset CreatedAt
         {
             get;
-            init;
-        } = DateTimeOffset.UtcNow;
+            private set;
+        }
 
         /// <summary>
         /// Gets the unique identifier of the user that created the entity.
@@ -53,7 +52,7 @@ namespace Fargo.Domain.Entities
         public Guid? CreatedByGuid
         {
             get;
-            init;
+            private set;
         }
 
         /// <summary>
@@ -80,6 +79,23 @@ namespace Fargo.Domain.Entities
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Marks the entity as created by the specified user.
+        /// </summary>
+        /// <param name="userGuid">
+        /// The unique identifier of the user responsible for creating the entity.
+        /// </param>
+        /// <remarks>
+        /// This method initializes the creation audit metadata of the entity
+        /// by assigning the current UTC time to <see cref="CreatedAt"/> and
+        /// storing the provided user identifier in <see cref="CreatedByGuid"/>.
+        /// </remarks>
+        public void MarkAsCreated(Guid? userGuid)
+        {
+            CreatedAt = DateTimeOffset.UtcNow;
+            CreatedByGuid = userGuid;
         }
 
         /// <summary>

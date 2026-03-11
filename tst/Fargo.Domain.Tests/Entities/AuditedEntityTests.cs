@@ -7,34 +7,23 @@ public sealed class AuditedEntityTests
     private sealed class TestAuditedEntity : AuditedEntity { }
 
     [Fact]
-    public void CreatedAt_Should_BeInitializedWithUtcNow()
+    public void CreatedAt_Should_BeDefault_ByDefault()
     {
-        // Arrange
-        var before = DateTimeOffset.UtcNow;
-
-        // Act
+        // Arrange / Act
         var entity = new TestAuditedEntity();
 
-        var after = DateTimeOffset.UtcNow;
-
         // Assert
-        Assert.InRange(entity.CreatedAt, before, after);
+        Assert.Equal(default, entity.CreatedAt);
     }
 
     [Fact]
-    public void CreatedByGuid_Should_AssignValue_WhenInitialized()
+    public void CreatedByGuid_Should_BeNull_ByDefault()
     {
-        // Arrange
-        var createdByGuid = Guid.NewGuid();
-
-        // Act
-        var entity = new TestAuditedEntity
-        {
-            CreatedByGuid = createdByGuid
-        };
+        // Arrange / Act
+        var entity = new TestAuditedEntity();
 
         // Assert
-        Assert.Equal(createdByGuid, entity.CreatedByGuid);
+        Assert.Null(entity.CreatedByGuid);
     }
 
     [Fact]
@@ -58,24 +47,47 @@ public sealed class AuditedEntityTests
     }
 
     [Fact]
-    public void Should_AssignInitialAuditingProperties_WhenInitialized()
+    public void MarkAsCreated_Should_SetCreatedAt()
     {
         // Arrange
-        var createdAt = DateTimeOffset.UtcNow.AddMinutes(-10);
-        var createdByGuid = Guid.NewGuid();
+        var entity = new TestAuditedEntity();
+        var before = DateTimeOffset.UtcNow;
 
         // Act
-        var entity = new TestAuditedEntity
-        {
-            CreatedAt = createdAt,
-            CreatedByGuid = createdByGuid
-        };
+        entity.MarkAsCreated(Guid.NewGuid());
+
+        var after = DateTimeOffset.UtcNow;
 
         // Assert
-        Assert.Equal(createdAt, entity.CreatedAt);
-        Assert.Equal(createdByGuid, entity.CreatedByGuid);
-        Assert.Null(entity.EditedAt);
-        Assert.Null(entity.EditedByGuid);
+        Assert.InRange(entity.CreatedAt, before, after);
+    }
+
+    [Fact]
+    public void MarkAsCreated_Should_SetCreatedByGuid()
+    {
+        // Arrange
+        var entity = new TestAuditedEntity();
+        var userGuid = Guid.NewGuid();
+
+        // Act
+        entity.MarkAsCreated(userGuid);
+
+        // Assert
+        Assert.Equal(userGuid, entity.CreatedByGuid);
+    }
+
+    [Fact]
+    public void MarkAsCreated_Should_AllowNullCreatedByGuid()
+    {
+        // Arrange
+        var entity = new TestAuditedEntity();
+
+        // Act
+        entity.MarkAsCreated(null);
+
+        // Assert
+        Assert.Null(entity.CreatedByGuid);
+        Assert.NotEqual(default, entity.CreatedAt);
     }
 
     [Fact]
@@ -143,5 +155,19 @@ public sealed class AuditedEntityTests
         Assert.Equal(secondUser, entity.EditedByGuid);
         Assert.NotNull(entity.EditedAt);
         Assert.True(entity.EditedAt >= firstEditedAt);
+    }
+
+    [Fact]
+    public void MarkAsCreated_Should_NotSetEditedInformation()
+    {
+        // Arrange
+        var entity = new TestAuditedEntity();
+
+        // Act
+        entity.MarkAsCreated(Guid.NewGuid());
+
+        // Assert
+        Assert.Null(entity.EditedAt);
+        Assert.Null(entity.EditedByGuid);
     }
 }

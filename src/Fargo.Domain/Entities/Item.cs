@@ -8,7 +8,7 @@
     /// descriptive information of a product, an <see cref="Item"/> represents
     /// a concrete unit of that article.
     /// </summary>
-    public class Item : Entity
+    public class Item : AuditedEntity
     {
         /// <summary>
         /// Gets the unique identifier of the associated <see cref="Article"/>.

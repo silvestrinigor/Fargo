@@ -47,6 +47,19 @@ namespace Fargo.Domain.Entities
         Guid? EditedByGuid { get; }
 
         /// <summary>
+        /// Marks the entity as created by the specified user.
+        /// </summary>
+        /// <param name="userGuid">
+        /// The unique identifier of the user responsible for creating the entity.
+        /// </param>
+        /// <remarks>
+        /// This method initializes the creation audit metadata of the entity
+        /// by assigning the creation timestamp and the identifier of the user
+        /// responsible for the creation.
+        /// </remarks>
+        void MarkAsCreated(Guid? userGuid);
+
+        /// <summary>
         /// Marks the entity as edited by the specified user.
         /// </summary>
         /// <param name="userGuid">

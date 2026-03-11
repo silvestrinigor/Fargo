@@ -11,7 +11,7 @@ namespace Fargo.Infrastructure.Extensions
     internal static class ChangeTrackerExtensions
     {
         /// <summary>
-        /// Applies modification auditing to tracked entities.
+        /// Applies auditing metadata to tracked entities.
         /// </summary>
         /// <param name="changeTracker">
         /// The EF Core change tracker.
@@ -20,17 +20,23 @@ namespace Fargo.Infrastructure.Extensions
         /// The unique identifier of the user performing the operation.
         /// </param>
         /// <remarks>
-        /// This method applies auditing in two scenarios:
+        /// This method applies auditing in three scenarios:
         /// <list type="bullet">
         /// <item>
         /// <description>
         /// When a tracked entity implementing <see cref="IAuditedEntity"/> is in the
-        /// <see cref="EntityState.Modified"/> state, its own audit metadata is updated.
+        /// <see cref="EntityState.Added"/> state, its creation audit metadata is initialized.
         /// </description>
         /// </item>
         /// <item>
         /// <description>
-        /// When a tracked entity implementing <see cref="IAuditPropagator"/> is in the
+        /// When a tracked entity implementing <see cref="IAuditedEntity"/> is in the
+        /// <see cref="EntityState.Modified"/> state, its modification audit metadata is updated.
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <description>
+        /// When a tracked entity implementing <see cref="IAuditedAggregateMember"/> is in the
         /// <see cref="EntityState.Added"/>, <see cref="EntityState.Modified"/>,
         /// or <see cref="EntityState.Deleted"/> state, the audit metadata of its
         /// parent audited entity is updated.
@@ -42,7 +48,11 @@ namespace Fargo.Infrastructure.Extensions
         {
             foreach (var entry in changeTracker.Entries<IAuditedEntity>())
             {
-                if (entry.State == EntityState.Modified)
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.MarkAsCreated(currentUserGuid);
+                }
+                else if (entry.State == EntityState.Modified)
                 {
                     entry.Entity.MarkAsEdited(currentUserGuid);
                 }

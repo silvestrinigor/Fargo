@@ -11,7 +11,7 @@ public sealed class ChangeTrackerExtensionsTests
         public string Name { get; set; } = string.Empty;
     }
 
-    private sealed class TestAuditPropagatorEntity : Entity, IAuditedAggregateMember
+    private sealed class TestAuditedAggregateMember : Entity, IAuditedAggregateMember
     {
         public string Name { get; set; } = string.Empty;
 
@@ -30,18 +30,18 @@ public sealed class ChangeTrackerExtensionsTests
     {
         public DbSet<TestAuditedEntity> AuditedEntities => Set<TestAuditedEntity>();
 
-        public DbSet<TestAuditPropagatorEntity> AuditPropagatorEntities => Set<TestAuditPropagatorEntity>();
+        public DbSet<TestAuditedAggregateMember> AuditedAggregateMembers => Set<TestAuditedAggregateMember>();
 
         public DbSet<TestNonAuditedEntity> NonAuditedEntities => Set<TestNonAuditedEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TestAuditedEntity>().HasKey(x => x.Guid);
-            modelBuilder.Entity<TestAuditPropagatorEntity>().HasKey(x => x.Guid);
+            modelBuilder.Entity<TestAuditedAggregateMember>().HasKey(x => x.Guid);
             modelBuilder.Entity<TestNonAuditedEntity>().HasKey(x => x.Guid);
 
             modelBuilder
-                .Entity<TestAuditPropagatorEntity>()
+                .Entity<TestAuditedAggregateMember>()
                 .HasOne(x => x.Parent);
 
             base.OnModelCreating(modelBuilder);
@@ -49,13 +49,45 @@ public sealed class ChangeTrackerExtensionsTests
     }
 
     [Fact]
-    public async Task ApplyAuditing_Should_SetEditedAtAndEditedByGuid_When_AuditedEntityIsModified()
+    public void ApplyAuditing_Should_SetCreatedAtAndCreatedByGuid_When_AuditedEntityIsAdded()
     {
+        // Arrange
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
         var currentUserGuid = Guid.NewGuid();
+
+        using var context = new TestDbContext(options);
+
+        var entity = new TestAuditedEntity
+        {
+            Guid = Guid.NewGuid(),
+            Name = "Created"
+        };
+
+        context.Add(entity);
+
+        // Act
+        context.ChangeTracker.ApplyAuditing(currentUserGuid);
+
+        // Assert
+        Assert.NotEqual(default, entity.CreatedAt);
+        Assert.Equal(currentUserGuid, entity.CreatedByGuid);
+        Assert.Null(entity.EditedAt);
+        Assert.Null(entity.EditedByGuid);
+    }
+
+    [Fact]
+    public async Task ApplyAuditing_Should_SetEditedAtAndEditedByGuid_When_AuditedEntityIsModified()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        var creationUserGuid = Guid.NewGuid();
+        var editionUserGuid = Guid.NewGuid();
 
         await using var context = new TestDbContext(options);
 
@@ -66,23 +98,29 @@ public sealed class ChangeTrackerExtensionsTests
         };
 
         context.Add(entity);
+        context.ChangeTracker.ApplyAuditing(creationUserGuid);
         await context.SaveChangesAsync();
 
         entity.Name = "After";
 
-        context.ChangeTracker.ApplyAuditing(currentUserGuid);
+        // Act
+        context.ChangeTracker.ApplyAuditing(editionUserGuid);
 
+        // Assert
         Assert.NotNull(entity.EditedAt);
-        Assert.Equal(currentUserGuid, entity.EditedByGuid);
+        Assert.Equal(editionUserGuid, entity.EditedByGuid);
+        Assert.Equal(creationUserGuid, entity.CreatedByGuid);
     }
 
     [Fact]
     public async Task ApplyAuditing_Should_NotSetEditedFields_When_AuditedEntityIsUnchanged()
     {
+        // Arrange
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
+        var creationUserGuid = Guid.NewGuid();
         var currentUserGuid = Guid.NewGuid();
 
         await using var context = new TestDbContext(options);
@@ -94,17 +132,22 @@ public sealed class ChangeTrackerExtensionsTests
         };
 
         context.Add(entity);
+        context.ChangeTracker.ApplyAuditing(creationUserGuid);
         await context.SaveChangesAsync();
 
+        // Act
         context.ChangeTracker.ApplyAuditing(currentUserGuid);
 
+        // Assert
         Assert.Null(entity.EditedAt);
         Assert.Null(entity.EditedByGuid);
+        Assert.Equal(creationUserGuid, entity.CreatedByGuid);
     }
 
     [Fact]
     public async Task ApplyAuditing_Should_NotThrow_When_TrackedEntityIsNotAudited()
     {
+        // Arrange
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
@@ -124,19 +167,23 @@ public sealed class ChangeTrackerExtensionsTests
 
         entity.Name = "After";
 
+        // Act
         var exception = Record.Exception(() =>
             context.ChangeTracker.ApplyAuditing(currentUserGuid));
 
+        // Assert
         Assert.Null(exception);
     }
 
     [Fact]
     public async Task ApplyAuditing_Should_UpdateOnlyModifiedAuditedEntities()
     {
+        // Arrange
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
+        var creationUserGuid = Guid.NewGuid();
         var currentUserGuid = Guid.NewGuid();
 
         await using var context = new TestDbContext(options);
@@ -154,12 +201,15 @@ public sealed class ChangeTrackerExtensionsTests
         };
 
         context.AddRange(modified, unchanged);
+        context.ChangeTracker.ApplyAuditing(creationUserGuid);
         await context.SaveChangesAsync();
 
         modified.Name = "Modified After";
 
+        // Act
         context.ChangeTracker.ApplyAuditing(currentUserGuid);
 
+        // Assert
         Assert.NotNull(modified.EditedAt);
         Assert.Equal(currentUserGuid, modified.EditedByGuid);
 
@@ -168,12 +218,14 @@ public sealed class ChangeTrackerExtensionsTests
     }
 
     [Fact]
-    public async Task ApplyAuditing_Should_UpdateParentAudit_When_AuditPropagatorIsModified()
+    public async Task ApplyAuditing_Should_UpdateParentAudit_When_AuditedAggregateMemberIsModified()
     {
+        // Arrange
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
+        var creationUserGuid = Guid.NewGuid();
         var currentUserGuid = Guid.NewGuid();
 
         await using var context = new TestDbContext(options);
@@ -184,7 +236,7 @@ public sealed class ChangeTrackerExtensionsTests
             Name = "Parent"
         };
 
-        var child = new TestAuditPropagatorEntity
+        var child = new TestAuditedAggregateMember
         {
             Guid = Guid.NewGuid(),
             Name = "Child",
@@ -192,23 +244,28 @@ public sealed class ChangeTrackerExtensionsTests
         };
 
         context.AddRange(parent, child);
+        context.ChangeTracker.ApplyAuditing(creationUserGuid);
         await context.SaveChangesAsync();
 
         child.Name = "Changed";
 
+        // Act
         context.ChangeTracker.ApplyAuditing(currentUserGuid);
 
+        // Assert
         Assert.NotNull(parent.EditedAt);
         Assert.Equal(currentUserGuid, parent.EditedByGuid);
     }
 
     [Fact]
-    public async Task ApplyAuditing_Should_UpdateParentAudit_When_AuditPropagatorIsAdded()
+    public async Task ApplyAuditing_Should_UpdateParentAudit_When_AuditedAggregateMemberIsAdded()
     {
+        // Arrange
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
+        var creationUserGuid = Guid.NewGuid();
         var currentUserGuid = Guid.NewGuid();
 
         await using var context = new TestDbContext(options);
@@ -220,9 +277,10 @@ public sealed class ChangeTrackerExtensionsTests
         };
 
         context.Add(parent);
+        context.ChangeTracker.ApplyAuditing(creationUserGuid);
         await context.SaveChangesAsync();
 
-        var child = new TestAuditPropagatorEntity
+        var child = new TestAuditedAggregateMember
         {
             Guid = Guid.NewGuid(),
             Name = "Child",
@@ -231,8 +289,10 @@ public sealed class ChangeTrackerExtensionsTests
 
         context.Add(child);
 
+        // Act
         context.ChangeTracker.ApplyAuditing(currentUserGuid);
 
+        // Assert
         Assert.NotNull(parent.EditedAt);
         Assert.Equal(currentUserGuid, parent.EditedByGuid);
     }
