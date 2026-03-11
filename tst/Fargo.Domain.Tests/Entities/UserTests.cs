@@ -25,8 +25,8 @@ public sealed class UserTests
 
         // Assert
         Assert.Equal(
-                TimeSpan.FromDays(User.DefaultPasswordChangeDays),
-                user.DefaultPasswordExpirationPeriod);
+            TimeSpan.FromDays(User.DefaultPasswordChangeDays),
+            user.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
@@ -122,6 +122,22 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void ResetPasswordExpiration_Should_OverwritePreviousExpirationDate()
+    {
+        // Arrange
+        var user = CreateUser(
+            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddDays(-10));
+
+        user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(20);
+
+        // Act
+        user.ResetPasswordExpiration();
+
+        // Assert
+        Assert.True(user.RequirePasswordChangeAt > DateTimeOffset.UtcNow);
+    }
+
+    [Fact]
     public void RequirePasswordChangeInDays_Should_SetFutureExpirationDate_When_DaysIsValid()
     {
         // Arrange
@@ -136,6 +152,23 @@ public sealed class UserTests
         // Assert
         Assert.True(user.RequirePasswordChangeAt >= before.AddDays(10));
         Assert.True(user.RequirePasswordChangeAt <= after.AddDays(10));
+    }
+
+    [Fact]
+    public void RequirePasswordChangeInDays_Should_SetExpirationToNow_When_DaysIsZero()
+    {
+        // Arrange
+        var user = CreateUser();
+        var before = DateTimeOffset.UtcNow;
+
+        // Act
+        user.RequirePasswordChangeInDays(0);
+
+        var after = DateTimeOffset.UtcNow;
+
+        // Assert
+        Assert.True(user.RequirePasswordChangeAt >= before);
+        Assert.True(user.RequirePasswordChangeAt <= after);
     }
 
     [Fact]
@@ -173,7 +206,7 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateUser(
-                requirePasswordChangeAt: DateTimeOffset.UtcNow);
+            requirePasswordChangeAt: DateTimeOffset.UtcNow);
 
         // Assert
         Assert.True(user.IsPasswordChangeRequired);
@@ -184,7 +217,7 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateUser(
-                requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(-1));
+            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(-1));
 
         // Assert
         Assert.True(user.IsPasswordChangeRequired);
@@ -195,7 +228,7 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateUser(
-                requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(1));
+            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(1));
 
         // Assert
         Assert.False(user.IsPasswordChangeRequired);
@@ -274,7 +307,7 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void HasPermission_Should_ReturnTrue_When_UserHasPermission()
+    public void HasPermission_Should_ReturnTrue_When_UserHasDirectPermission()
     {
         // Arrange
         var user = CreateUser();
@@ -282,6 +315,59 @@ public sealed class UserTests
 
         // Act
         var result = user.HasPermission(ActionType.EditUser);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void HasPermission_Should_ReturnTrue_When_ActiveGroupHasPermission()
+    {
+        // Arrange
+        var group = CreateUserGroup();
+        group.AddPermission(ActionType.EditUser);
+
+        var user = CreateUser();
+        user.AddGroup(group);
+
+        // Act
+        var result = user.HasPermission(ActionType.EditUser);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void HasPermission_Should_ReturnFalse_When_OnlyInactiveGroupHasPermission()
+    {
+        // Arrange
+        var group = CreateUserGroup(isActive: false);
+        group.AddPermission(ActionType.EditUser);
+
+        var user = CreateUser();
+        user.AddGroup(group);
+
+        // Act
+        var result = user.HasPermission(ActionType.EditUser);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void HasPermission_Should_ReturnTrue_When_UserHasNoDirectPermission_But_AnotherActiveGroupHasIt()
+    {
+        // Arrange
+        var groupWithoutPermission = CreateUserGroup();
+        var groupWithPermission = CreateUserGroup();
+        groupWithPermission.AddPermission(ActionType.DeleteUser);
+
+        var user = CreateUser();
+        user.AddGroup(groupWithoutPermission);
+        user.AddGroup(groupWithPermission);
+
+        // Act
+        var result = user.HasPermission(ActionType.DeleteUser);
 
         // Assert
         Assert.True(result);
@@ -301,6 +387,20 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void HasPermission_Should_ReturnFalse_AfterPermissionIsRemoved()
+    {
+        // Arrange
+        var user = CreateUser();
+        user.AddPermission(ActionType.EditUser);
+
+        // Act
+        user.RemovePermission(ActionType.EditUser);
+
+        // Assert
+        Assert.False(user.HasPermission(ActionType.EditUser));
+    }
+
+    [Fact]
     public void ValidatePermission_Should_NotThrow_When_UserHasPermission()
     {
         // Arrange
@@ -309,6 +409,24 @@ public sealed class UserTests
 
         // Act
         user.ValidatePermission(ActionType.DeleteUser);
+
+        // Assert
+    }
+
+    [Fact]
+    public void ValidatePermission_Should_NotThrow_When_ActiveGroupGrantsPermission()
+    {
+        // Arrange
+        var group = CreateUserGroup();
+        group.AddPermission(ActionType.DeleteUser);
+
+        var user = CreateUser();
+        user.AddGroup(group);
+
+        // Act
+        user.ValidatePermission(ActionType.DeleteUser);
+
+        // Assert
     }
 
     [Fact]
@@ -323,6 +441,21 @@ public sealed class UserTests
         // Assert
         var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
         Assert.Equal(user.Guid, exception.UserGuid);
+    }
+
+    [Fact]
+    public void ValidatePermission_Should_ThrowUserNotAuthorizedFargoDomainException_WithExpectedData()
+    {
+        // Arrange
+        var user = CreateUser();
+
+        // Act
+        void act() => user.ValidatePermission(ActionType.DeleteUser);
+
+        // Assert
+        var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
+        Assert.Equal(user.Guid, exception.UserGuid);
+        Assert.Equal(ActionType.DeleteUser, exception.ActionType);
     }
 
     [Fact]
@@ -342,20 +475,40 @@ public sealed class UserTests
         };
 
         var user = CreateUser(
-                guid: anotherUser.Guid,
-                userPermissions: sourcePermissions);
+            guid: anotherUser.Guid,
+            userPermissions: sourcePermissions);
 
         // Act
         sourcePermissions.Add(new UserPermission
-                {
-                User = owner,
-                Action = ActionType.DeleteUser
-                });
+        {
+            User = owner,
+            Action = ActionType.DeleteUser
+        });
 
         // Assert
         Assert.Single(user.UserPermissions);
         Assert.Contains(user.UserPermissions, x => x.Action == ActionType.CreateUser);
         Assert.DoesNotContain(user.UserPermissions, x => x.Action == ActionType.DeleteUser);
+    }
+
+    [Fact]
+    public void UserGroups_Should_CopyInputCollection_When_Initialized()
+    {
+        // Arrange
+        var sourceGroups = new List<UserGroup>
+        {
+            CreateUserGroup(nameid: "admins")
+        };
+
+        var user = CreateUser(userGroups: sourceGroups);
+
+        // Act
+        sourceGroups.Add(CreateUserGroup(nameid: "managers"));
+
+        // Assert
+        Assert.Single(user.UserGroups);
+        Assert.Contains(user.UserGroups, x => x.Nameid == new Nameid("admins"));
+        Assert.DoesNotContain(user.UserGroups, x => x.Nameid == new Nameid("managers"));
     }
 
     [Fact]
@@ -379,75 +532,41 @@ public sealed class UserTests
     [Fact]
     public void FirstName_Should_DefaultToNull_When_NotSpecified()
     {
+        // Arrange
         var user = CreateUser();
 
+        // Assert
         Assert.Null(user.FirstName);
     }
 
     [Fact]
     public void LastName_Should_DefaultToNull_When_NotSpecified()
     {
+        // Arrange
         var user = CreateUser();
 
+        // Assert
         Assert.Null(user.LastName);
     }
 
     [Fact]
     public void UserPermissions_Should_DefaultToEmpty_When_NotSpecified()
     {
+        // Arrange
         var user = CreateUser();
 
+        // Assert
         Assert.Empty(user.UserPermissions);
     }
 
     [Fact]
-    public void ValidatePermission_Should_ThrowUserNotAuthorizedFargoDomainException_WithExpectedData()
+    public void UserGroups_Should_DefaultToEmpty_When_NotSpecified()
     {
+        // Arrange
         var user = CreateUser();
 
-        void act() => user.ValidatePermission(ActionType.DeleteUser);
-
-        var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
-        Assert.Equal(user.Guid, exception.UserGuid);
-        Assert.Equal(ActionType.DeleteUser, exception.ActionType);
-    }
-
-    [Fact]
-    public void ResetPasswordExpiration_Should_OverwritePreviousExpirationDate()
-    {
-        var user = CreateUser(
-                requirePasswordChangeAt: DateTimeOffset.UtcNow.AddDays(-10));
-
-        user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(20);
-
-        user.ResetPasswordExpiration();
-
-        Assert.True(user.RequirePasswordChangeAt > DateTimeOffset.UtcNow);
-    }
-
-    [Fact]
-    public void RequirePasswordChangeInDays_Should_SetExpirationToNow_When_DaysIsZero()
-    {
-        var user = CreateUser();
-        var before = DateTimeOffset.UtcNow;
-
-        user.RequirePasswordChangeInDays(0);
-
-        var after = DateTimeOffset.UtcNow;
-
-        Assert.True(user.RequirePasswordChangeAt >= before);
-        Assert.True(user.RequirePasswordChangeAt <= after);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnFalse_AfterPermissionIsRemoved()
-    {
-        var user = CreateUser();
-        user.AddPermission(ActionType.EditUser);
-
-        user.RemovePermission(ActionType.EditUser);
-
-        Assert.False(user.HasPermission(ActionType.EditUser));
+        // Assert
+        Assert.Empty(user.UserGroups);
     }
 
     [Fact]
@@ -481,6 +600,32 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void Activate_Should_SetIsActive_ToTrue()
+    {
+        // Arrange
+        var user = CreateUser(isActive: false);
+
+        // Act
+        user.Activate();
+
+        // Assert
+        Assert.True(user.IsActive);
+    }
+
+    [Fact]
+    public void Deactivate_Should_SetIsActive_ToFalse()
+    {
+        // Arrange
+        var user = CreateUser(isActive: true);
+
+        // Act
+        user.Deactivate();
+
+        // Assert
+        Assert.False(user.IsActive);
+    }
+
+    [Fact]
     public void ValidateIsActive_Should_NotThrow_When_UserIsActive()
     {
         // Arrange
@@ -506,13 +651,111 @@ public sealed class UserTests
         Assert.Equal(user.Guid, exception.UserGuid);
     }
 
+    [Fact]
+    public void AddGroup_Should_AddGroup_When_ItDoesNotExist()
+    {
+        // Arrange
+        var user = CreateUser();
+        var group = CreateUserGroup();
+
+        // Act
+        user.AddGroup(group);
+
+        // Assert
+        Assert.Single(user.UserGroups);
+        Assert.Contains(user.UserGroups, x => x.Guid == group.Guid);
+    }
+
+    [Fact]
+    public void AddGroup_Should_NotAddDuplicateGroup_When_GroupAlreadyExists()
+    {
+        // Arrange
+        var user = CreateUser();
+        var group = CreateUserGroup();
+
+        user.AddGroup(group);
+
+        // Act
+        user.AddGroup(group);
+
+        // Assert
+        Assert.Single(user.UserGroups);
+    }
+
+    [Fact]
+    public void AddGroup_Should_NotAddDuplicateGroup_When_GroupWithSameGuidAlreadyExists()
+    {
+        // Arrange
+        var groupGuid = Guid.NewGuid();
+
+        var first = CreateUserGroup(guid: groupGuid, nameid: "admins");
+        var second = CreateUserGroup(guid: groupGuid, nameid: "managers");
+
+        var user = CreateUser();
+        user.AddGroup(first);
+
+        // Act
+        user.AddGroup(second);
+
+        // Assert
+        Assert.Single(user.UserGroups);
+        Assert.Contains(user.UserGroups, x => x.Guid == groupGuid);
+    }
+
+    [Fact]
+    public void AddGroup_Should_ThrowArgumentNullException_When_GroupIsNull()
+    {
+        // Arrange
+        var user = CreateUser();
+
+        // Act
+        void act() => user.AddGroup(null!);
+
+        // Assert
+        Assert.Throws<ArgumentNullException>(act);
+    }
+
+    [Fact]
+    public void RemoveGroup_Should_RemoveGroup_When_ItExists()
+    {
+        // Arrange
+        var user = CreateUser();
+        var group = CreateUserGroup();
+
+        user.AddGroup(group);
+
+        // Act
+        user.RemoveGroup(group.Guid);
+
+        // Assert
+        Assert.Empty(user.UserGroups);
+    }
+
+    [Fact]
+    public void RemoveGroup_Should_DoNothing_When_GroupDoesNotExist()
+    {
+        // Arrange
+        var user = CreateUser();
+        var group = CreateUserGroup();
+
+        user.AddGroup(group);
+
+        // Act
+        user.RemoveGroup(Guid.NewGuid());
+
+        // Assert
+        Assert.Single(user.UserGroups);
+        Assert.Contains(user.UserGroups, x => x.Guid == group.Guid);
+    }
+
     private static User CreateUser(
-            Guid? guid = null,
-            Description? description = null,
-            TimeSpan? defaultPasswordExpirationPeriod = null,
-            DateTimeOffset? requirePasswordChangeAt = null,
-            IReadOnlyCollection<UserPermission>? userPermissions = null,
-            bool isActive = true)
+        Guid? guid = null,
+        Description? description = null,
+        TimeSpan? defaultPasswordExpirationPeriod = null,
+        DateTimeOffset? requirePasswordChangeAt = null,
+        IReadOnlyCollection<UserPermission>? userPermissions = null,
+        IReadOnlyCollection<UserGroup>? userGroups = null,
+        bool isActive = true)
     {
         return new User
         {
@@ -525,6 +768,20 @@ public sealed class UserTests
             RequirePasswordChangeAt =
                 requirePasswordChangeAt ?? DateTimeOffset.UtcNow.AddDays(User.DefaultPasswordChangeDays),
             UserPermissions = userPermissions ?? [],
+            UserGroups = userGroups ?? [],
+            IsActive = isActive
+        };
+    }
+
+    private static UserGroup CreateUserGroup(
+        Guid? guid = null,
+        string nameid = "admins",
+        bool isActive = true)
+    {
+        return new UserGroup
+        {
+            Guid = guid ?? Guid.NewGuid(),
+            Nameid = new Nameid(nameid),
             IsActive = isActive
         };
     }

@@ -47,11 +47,13 @@ namespace Fargo.Domain.Entities
         /// Gets the unique identifier of the actor that created the entity.
         /// </summary>
         /// <remarks>
-        /// This value may be <see langword="null"/> when the actor context is not available.
-        /// When the entity is created by an internal system process, this value should
-        /// typically be set to <see cref="SystemActor.Guid"/>.
+        /// When the current user cannot be resolved, this value is set to
+        /// <see cref="Guid.Empty"/>.
+        ///
+        /// When the entity is created by an internal system process, this value
+        /// should typically be set to <see cref="SystemActor.Guid"/>.
         /// </remarks>
-        public Guid? CreatedByGuid
+        public Guid CreatedByGuid
         {
             get;
             private set;
@@ -76,6 +78,7 @@ namespace Fargo.Domain.Entities
         /// <remarks>
         /// This value is <see langword="null"/> when the entity has not been modified
         /// since its creation.
+        ///
         /// When the modification is performed by an internal system process, this value
         /// should typically be set to <see cref="SystemActor.Guid"/>.
         /// </remarks>
@@ -90,13 +93,16 @@ namespace Fargo.Domain.Entities
         /// </summary>
         /// <param name="userGuid">
         /// The unique identifier of the user responsible for creating the entity.
+        /// When the actor cannot be resolved, <see cref="Guid.Empty"/> should be used.
+        /// When the creation is performed by an internal system process,
+        /// <see cref="SystemActor.Guid"/> should typically be used.
         /// </param>
         /// <remarks>
         /// This method initializes the creation audit metadata of the entity
         /// by assigning the current UTC time to <see cref="CreatedAt"/> and
         /// storing the provided user identifier in <see cref="CreatedByGuid"/>.
         /// </remarks>
-        public void MarkAsCreated(Guid? userGuid)
+        public void MarkAsCreated(Guid userGuid)
         {
             CreatedAt = DateTimeOffset.UtcNow;
             CreatedByGuid = userGuid;

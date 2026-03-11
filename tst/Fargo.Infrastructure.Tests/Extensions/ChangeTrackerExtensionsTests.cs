@@ -296,4 +296,18 @@ public sealed class ChangeTrackerExtensionsTests
         Assert.NotNull(parent.EditedAt);
         Assert.Equal(currentUserGuid, parent.EditedByGuid);
     }
+
+    [Fact]
+    public void ApplyAuditing_Should_KeepCreatedByGuidAsGuidEmpty_ByDefault_When_NotApplied()
+    {
+        // Arrange
+        var entity = new TestAuditedEntity
+        {
+            Guid = Guid.NewGuid(),
+            Name = "Entity"
+        };
+
+        // Assert
+        Assert.Equal(Guid.Empty, entity.CreatedByGuid);
+    }
 }

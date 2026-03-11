@@ -7,8 +7,8 @@ namespace Fargo.Domain.Entities
     /// <summary>
     /// Represents a user entity in the system.
     ///
-    /// A user contains authentication credentials and a collection
-    /// of permissions that define which actions they are allowed to perform.
+    /// A user contains authentication credentials, direct permissions,
+    /// and group memberships that may also grant permissions.
     /// </summary>
     public class User : AuditedEntity
     {
@@ -222,10 +222,10 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Gets the read-only collection of permissions assigned to the user.
+        /// Gets the read-only collection of permissions assigned directly to the user.
         ///
         /// Each permission represents an allowed <see cref="ActionType"/>
-        /// that the user can perform.
+        /// that the user can perform without considering group memberships.
         /// </summary>
         public IReadOnlyCollection<UserPermission> UserPermissions
         {
@@ -234,9 +234,26 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Internal mutable collection used to store user permissions.
+        /// Internal mutable collection used to store direct user permissions.
         /// </summary>
         private readonly List<UserPermission> userPermissions = [];
+
+        /// <summary>
+        /// Gets the read-only collection of groups to which the user belongs.
+        /// </summary>
+        /// <remarks>
+        /// Group memberships may grant additional permissions to the user.
+        /// </remarks>
+        public IReadOnlyCollection<UserGroup> UserGroups
+        {
+            get => userGroups;
+            init => userGroups = [.. value];
+        }
+
+        /// <summary>
+        /// Internal mutable collection used to store user group memberships.
+        /// </summary>
+        private readonly List<UserGroup> userGroups = [];
 
         /// <summary>
         /// Adds a permission to the user if it does not already exist.
@@ -275,14 +292,52 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Determines whether the user has the specified permission.
+        /// Adds the specified group to the user if it is not already associated.
+        /// </summary>
+        /// <param name="userGroup">The group to associate with the user.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="userGroup"/> is <see langword="null"/>.
+        /// </exception>
+        public void AddGroup(UserGroup userGroup)
+        {
+            ArgumentNullException.ThrowIfNull(userGroup);
+
+            if (userGroups.Any(x => x.Guid == userGroup.Guid))
+            {
+                return;
+            }
+
+            userGroups.Add(userGroup);
+        }
+
+        /// <summary>
+        /// Removes the specified group from the user if it exists.
+        /// </summary>
+        /// <param name="userGroupGuid">The unique identifier of the group to remove.</param>
+        public void RemoveGroup(Guid userGroupGuid)
+        {
+            var userGroup = userGroups.SingleOrDefault(x => x.Guid == userGroupGuid);
+
+            if (userGroup == null)
+            {
+                return;
+            }
+
+            userGroups.Remove(userGroup);
+        }
+
+        /// <summary>
+        /// Determines whether the user has the specified permission,
+        /// either directly or through at least one active group membership.
         /// </summary>
         /// <param name="action">The action type to check.</param>
         /// <returns>
-        /// <c>true</c> if the user has the permission; otherwise <c>false</c>.
+        /// <c>true</c> if the user has the permission directly or through
+        /// at least one active group; otherwise <c>false</c>.
         /// </returns>
         public bool HasPermission(ActionType action)
-            => UserPermissions.Any(p => p.Action == action);
+            => userPermissions.Any(p => p.Action == action)
+            || userGroups.Any(g => g.IsActive && g.HasPermission(action));
 
         /// <summary>
         /// Validates whether the user has the specified permission.

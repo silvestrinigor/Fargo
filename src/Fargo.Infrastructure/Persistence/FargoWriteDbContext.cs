@@ -66,6 +66,10 @@ namespace Fargo.Infrastructure.Persistence
 
             modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
 
+            modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
+
+            modelBuilder.ApplyConfiguration(new UserGroupPermissionConfiguration());
+
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
     }

@@ -23,15 +23,14 @@ namespace Fargo.Domain.Entities
         /// Gets the unique identifier of the actor that created the entity.
         /// </summary>
         /// <remarks>
-        /// This value may be <see langword="null"/> when the actor context
-        /// is not available.
+        /// When the actor cannot be resolved, implementations should use
+        /// <see cref="Guid.Empty"/>.
         ///
         /// When the entity is created by an internal system process,
         /// implementations should typically use
-        /// <see cref="Security.SystemActor.Guid"/> rather than
-        /// <see langword="null"/>.
+        /// <see cref="Security.SystemActor.Guid"/>.
         /// </remarks>
-        Guid? CreatedByGuid { get; }
+        Guid CreatedByGuid { get; }
 
         /// <summary>
         /// Gets the date and time when the entity was last modified.
@@ -60,16 +59,11 @@ namespace Fargo.Domain.Entities
         /// </summary>
         /// <param name="userGuid">
         /// The unique identifier of the actor responsible for creating the entity.
+        /// When the actor cannot be resolved, <see cref="Guid.Empty"/> should be used.
+        /// When the creation is performed by an internal system process,
+        /// <see cref="Security.SystemActor.Guid"/> should typically be used.
         /// </param>
-        /// <remarks>
-        /// This method initializes the creation audit metadata of the entity
-        /// by assigning the creation timestamp and the identifier of the actor
-        /// responsible for the creation.
-        ///
-        /// When the creation is performed by the system, the caller should pass
-        /// <see cref="Security.SystemActor.Guid"/>.
-        /// </remarks>
-        void MarkAsCreated(Guid? userGuid);
+        void MarkAsCreated(Guid userGuid);
 
         /// <summary>
         /// Marks the entity as edited by the specified actor.

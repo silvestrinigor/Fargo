@@ -17,13 +17,13 @@ public sealed class AuditedEntityTests
     }
 
     [Fact]
-    public void CreatedByGuid_Should_BeNull_ByDefault()
+    public void CreatedByGuid_Should_BeEmpty_ByDefault()
     {
         // Arrange / Act
         var entity = new TestAuditedEntity();
 
         // Assert
-        Assert.Null(entity.CreatedByGuid);
+        Assert.Equal(Guid.Empty, entity.CreatedByGuid);
     }
 
     [Fact]
@@ -51,10 +51,11 @@ public sealed class AuditedEntityTests
     {
         // Arrange
         var entity = new TestAuditedEntity();
+        var userGuid = Guid.NewGuid();
         var before = DateTimeOffset.UtcNow;
 
         // Act
-        entity.MarkAsCreated(Guid.NewGuid());
+        entity.MarkAsCreated(userGuid);
 
         var after = DateTimeOffset.UtcNow;
 
@@ -77,16 +78,16 @@ public sealed class AuditedEntityTests
     }
 
     [Fact]
-    public void MarkAsCreated_Should_AllowNullCreatedByGuid()
+    public void MarkAsCreated_Should_AllowGuidEmpty()
     {
         // Arrange
         var entity = new TestAuditedEntity();
 
         // Act
-        entity.MarkAsCreated(null);
+        entity.MarkAsCreated(Guid.Empty);
 
         // Assert
-        Assert.Null(entity.CreatedByGuid);
+        Assert.Equal(Guid.Empty, entity.CreatedByGuid);
         Assert.NotEqual(default, entity.CreatedAt);
     }
 

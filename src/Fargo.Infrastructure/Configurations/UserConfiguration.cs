@@ -64,7 +64,7 @@ namespace Fargo.Infrastructure.Configurations
                 .IsRequired();
 
             builder.Property(x => x.CreatedByGuid)
-                .IsRequired(false);
+                .IsRequired();
 
             builder.Property(x => x.EditedAt)
                 .IsRequired(false);
@@ -79,6 +79,9 @@ namespace Fargo.Infrastructure.Configurations
 
             builder.Navigation(x => x.UserPermissions)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasMany(x => x.UserGroups)
+                .WithMany();
         }
     }
 }

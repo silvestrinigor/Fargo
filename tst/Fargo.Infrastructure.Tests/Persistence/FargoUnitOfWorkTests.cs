@@ -104,4 +104,35 @@ public sealed class FargoUnitOfWorkTests
         Assert.Null(entity.EditedAt);
         Assert.Null(entity.EditedByGuid);
     }
+
+    [Fact]
+    public async Task SaveChanges_Should_UseGuidEmpty_When_CurrentUserGuidIsEmpty()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<FargoWriteDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        var currentUser = Substitute.For<ICurrentUser>();
+        currentUser.UserGuid.Returns(Guid.Empty);
+
+        await using var context = new TestFargoWriteDbContext(options);
+
+        var entity = new TestAuditedEntity
+        {
+            Guid = Guid.NewGuid(),
+            Name = "Value"
+        };
+
+        context.AuditedEntities.Add(entity);
+
+        var unitOfWork = new FargoUnitOfWork(context, currentUser);
+
+        // Act
+        await unitOfWork.SaveChanges();
+
+        // Assert
+        Assert.Equal(Guid.Empty, entity.CreatedByGuid);
+        Assert.NotEqual(default, entity.CreatedAt);
+    }
 }
