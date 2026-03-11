@@ -10,7 +10,7 @@ namespace Fargo.Domain.Entities
     /// A user contains authentication credentials and a collection
     /// of permissions that define which actions they are allowed to perform.
     /// </summary>
-    public class User : Entity
+    public class User : AuditedEntity
     {
         /// <summary>
         /// Gets or sets the unique NAMEID (username) of the user.
@@ -170,6 +170,56 @@ namespace Fargo.Domain.Entities
         /// </returns>
         public bool IsPasswordChangeRequired
             => DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
+
+        /// <summary>
+        /// Gets a value indicating whether the user is active.
+        ///
+        /// An active user is allowed to authenticate and interact with the system,
+        /// subject to any additional authorization or security rules.
+        ///
+        /// An inactive user is considered disabled and may be prevented from
+        /// signing in or performing operations, depending on application policies.
+        /// </summary>
+        /// <remarks>
+        /// This property represents the user's current activation status.
+        /// Use <see cref="Activate"/> and <see cref="Deactivate"/> to change the state
+        /// in a controlled way.
+        /// </remarks>
+        public bool IsActive
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
+        /// Marks the user as active.
+        /// </summary>
+        public void Activate()
+        {
+            IsActive = true;
+        }
+
+        /// <summary>
+        /// Marks the user as inactive.
+        /// </summary>
+        public void Deactivate()
+        {
+            IsActive = false;
+        }
+
+        /// <summary>
+        /// Validates whether the user is active.
+        /// </summary>
+        /// <exception cref="UserInactiveFargoDomainException">
+        /// Thrown when the user is inactive.
+        /// </exception>
+        public void ValidateIsActive()
+        {
+            if (!IsActive)
+            {
+                throw new UserInactiveFargoDomainException(Guid);
+            }
+        }
 
         /// <summary>
         /// Gets the read-only collection of permissions assigned to the user.

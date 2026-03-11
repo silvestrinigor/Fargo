@@ -64,6 +64,10 @@ namespace Fargo.HttpApi.Middlewares
             {
                 typeof(UserCannotChangeOwnPermissionsFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-change-own-permissions")
+            },
+            {
+                typeof(UserInactiveFargoDomainException),
+                new ProblemDetailsDefinition(403, "User inactive", "user/inactive")
             }
         };
 

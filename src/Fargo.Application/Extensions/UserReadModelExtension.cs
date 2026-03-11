@@ -26,6 +26,7 @@ namespace Fargo.Application.Extensions
                         user.LastName,
                         user.DefaultPasswordExpirationPeriod,
                         user.Description,
+                        user.IsActive,
                         [.. user.UserPermissions.Select(x =>
                             new UserPermissionResponseModel(
                                 x.Guid,

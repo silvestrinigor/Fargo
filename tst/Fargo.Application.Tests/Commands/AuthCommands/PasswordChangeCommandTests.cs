@@ -307,6 +307,60 @@ public sealed class PasswordChangeCommandHandlerTests
             .SaveChanges(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_CurrentUserIsInactive()
+    {
+        // Arrange
+        var user = CreateUser(isActive: false);
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(user);
+        ConfigureUserLookup(user);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
+
+        passwordHasher.DidNotReceive()
+            .Verify(Arg.Any<PasswordHash>(), Arg.Any<Password>());
+
+        passwordHasher.DidNotReceive()
+            .Hash(Arg.Any<Password>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_CurrentUserIsInactive_BeforeValidatingPassword()
+    {
+        // Arrange
+        var user = CreateUser(isActive: false);
+        var currentPassword = new Password("Current@123");
+        var newPassword = new Password("NewSecure@123");
+        var command = CreateCommand(currentPassword, newPassword);
+
+        ConfigureCurrentUser(user);
+        ConfigureUserLookup(user);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
+
+        passwordHasher.DidNotReceive()
+            .Verify(user.PasswordHash, currentPassword);
+
+        passwordHasher.DidNotReceive()
+            .Hash(newPassword);
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User user)
     {
         currentUser.UserGuid.Returns(user.Guid);
@@ -329,13 +383,14 @@ public sealed class PasswordChangeCommandHandlerTests
                     CurrentPassword: currentPassword ?? new Password("Current@123")));
     }
 
-    private static User CreateUser()
+    private static User CreateUser(bool isActive = true)
     {
         return new User
         {
             Guid = Guid.NewGuid(),
             Nameid = new Nameid("user123"),
-            PasswordHash = CreatePasswordHash('a')
+            PasswordHash = CreatePasswordHash('a'),
+            IsActive = isActive
         };
     }
 

@@ -30,6 +30,17 @@ namespace Fargo.Application.Models.UserModels
     /// This field is intended for administrative password changes only.
     /// If <see langword="null"/>, the password remains unchanged.
     /// </param>
+    /// <param name="IsActive">
+    /// Indicates whether the user account should be active.
+    ///
+    /// When set to <see langword="true"/>, the user is allowed to authenticate
+    /// and perform authorized operations.
+    ///
+    /// When set to <see langword="false"/>, the user account becomes inactive
+    /// and cannot authenticate or execute any protected actions.
+    ///
+    /// If <see langword="null"/>, the current activation state is preserved.
+    /// </param>
     /// <param name="Permissions">
     /// The complete set of permissions to assign to the user.
     ///
@@ -38,7 +49,7 @@ namespace Fargo.Application.Models.UserModels
     ///
     /// If <see langword="null"/>, the existing permissions are preserved.
     /// </param>
-    /// <param name="DefaultPasswordExpirationTimeSpan">
+    /// <param name="DefaultPasswordExpirationPeriod">
     /// The new default password expiration interval for the user.
     ///
     /// This value defines how long a password remains valid after the user
@@ -55,7 +66,8 @@ namespace Fargo.Application.Models.UserModels
             LastName? LastName = null,
             Description? Description = null,
             Password? Password = null,
+            bool? IsActive = null,
             IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null,
-            TimeSpan? DefaultPasswordExpirationTimeSpan = null
+            TimeSpan? DefaultPasswordExpirationPeriod = null
             );
 }

@@ -51,13 +51,14 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
+            actor.ValidatePermission(ActionType.CreateItem);
+
             var article = await articleRepository.GetByGuid(
                     command.Item.ArticleGuid,
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(
                             command.Item.ArticleGuid);
-
-            actor.ValidatePermission(ActionType.CreateItem);
 
             var item = new Item
             {

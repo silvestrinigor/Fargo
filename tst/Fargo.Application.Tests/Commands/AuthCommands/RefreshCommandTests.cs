@@ -291,6 +291,51 @@ public sealed class RefreshCommandHandlerTests
             .SaveChanges(cancellationToken);
     }
 
+    [Fact]
+    public async Task Handle_Should_RemoveOldRefreshToken_SaveChanges_AndThrowUnauthorizedAccessFargoApplicationException_When_UserIsInactive()
+    {
+        // Arrange
+        var rawOldRefreshToken = CreateToken('a');
+        var oldRefreshTokenHash = CreateTokenHash('b');
+        var user = CreateUser(isActive: false);
+        var storedOldRefreshToken = CreateStoredRefreshToken(
+                user.Guid,
+                oldRefreshTokenHash,
+                DateTimeOffset.UtcNow.AddMinutes(1));
+        var command = CreateCommand(rawOldRefreshToken);
+
+        ConfigureOldRefreshTokenHash(rawOldRefreshToken, oldRefreshTokenHash);
+
+        refreshTokenRepository
+            .GetByTokenHash(oldRefreshTokenHash, Arg.Any<CancellationToken>())
+            .Returns(storedOldRefreshToken);
+
+        userRepository
+            .GetByGuid(user.Guid, Arg.Any<CancellationToken>())
+            .Returns(user);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
+
+        refreshTokenRepository.Received(1)
+            .Remove(storedOldRefreshToken);
+
+        refreshTokenRepository.DidNotReceive()
+            .Add(Arg.Any<RefreshToken>());
+
+        refreshTokenGenerator.DidNotReceive()
+            .Generate();
+
+        tokenGenerator.DidNotReceive()
+            .Generate(Arg.Any<User>());
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureOldRefreshTokenHash(Token rawOldRefreshToken, TokenHash oldRefreshTokenHash)
     {
         tokenHasher
@@ -299,13 +344,13 @@ public sealed class RefreshCommandHandlerTests
     }
 
     private void ConfigureSuccessfulRefresh(
-        RefreshCommand command,
-        User user,
-        RefreshToken storedOldRefreshToken,
-        Token rawNewRefreshToken,
-        TokenHash newRefreshTokenHash,
-        Token accessToken,
-        DateTimeOffset expiresAt)
+            RefreshCommand command,
+            User user,
+            RefreshToken storedOldRefreshToken,
+            Token rawNewRefreshToken,
+            TokenHash newRefreshTokenHash,
+            Token accessToken,
+            DateTimeOffset expiresAt)
     {
         ConfigureOldRefreshTokenHash(command.RefreshToken, storedOldRefreshToken.TokenHash);
 
@@ -333,20 +378,21 @@ public sealed class RefreshCommandHandlerTests
     private static RefreshCommand CreateCommand(Token rawOldRefreshToken)
         => new(rawOldRefreshToken);
 
-    private static User CreateUser()
+    private static User CreateUser(bool isActive = true)
     {
         return new User
         {
             Guid = Guid.NewGuid(),
             Nameid = new Nameid("user123"),
-            PasswordHash = new PasswordHash(new string('p', PasswordHash.MinLength))
+            PasswordHash = new PasswordHash(new string('p', PasswordHash.MinLength)),
+            IsActive = isActive
         };
     }
 
     private static RefreshToken CreateStoredRefreshToken(
-        Guid userGuid,
-        TokenHash tokenHash,
-        DateTimeOffset expiresAt)
+            Guid userGuid,
+            TokenHash tokenHash,
+            DateTimeOffset expiresAt)
     {
         return new RefreshToken
         {

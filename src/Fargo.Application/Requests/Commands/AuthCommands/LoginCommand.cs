@@ -12,8 +12,12 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
     /// <summary>
     /// Command used to authenticate a user with a NAMEID and password.
     /// </summary>
-    /// <param name="Nameid">The unique user identifier used for login.</param>
-    /// <param name="Password">The plaintext password provided for authentication.</param>
+    /// <param name="Nameid">
+    /// The unique user identifier used for login.
+    /// </param>
+    /// <param name="Password">
+    /// The plaintext password provided for authentication.
+    /// </param>
     public sealed record LoginCommand(
             Nameid Nameid,
             Password Password
@@ -22,6 +26,10 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
     /// <summary>
     /// Handles the execution of <see cref="LoginCommand"/>.
     /// </summary>
+    /// <remarks>
+    /// This handler validates the provided credentials, checks whether the
+    /// user is allowed to sign in, and issues new access and refresh tokens.
+    /// </remarks>
     public sealed class LoginCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
@@ -35,14 +43,19 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
         /// <summary>
         /// Authenticates a user and generates access and refresh tokens.
         /// </summary>
-        /// <param name="command">The command containing the login credentials.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <param name="command">
+        /// The command containing the login credentials.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Token used to cancel the operation.
+        /// </param>
         /// <returns>
         /// An <see cref="AuthResult"/> containing the generated access token,
         /// refresh token, and access token expiration time.
         /// </returns>
         /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the user does not exist or the password is invalid.
+        /// Thrown when the user does not exist, the password is invalid,
+        /// or the user is inactive.
         /// </exception>
         /// <exception cref="PasswordChangeRequiredFargoApplicationException">
         /// Thrown when the user must change their password before continuing.
@@ -56,6 +69,11 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                     command.Nameid,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
+
+            if (!user.IsActive)
+            {
+                throw new UnauthorizedAccessFargoApplicationException();
+            }
 
             var isValid = passwordHasher.Verify(
                     user.PasswordHash,

@@ -24,6 +24,12 @@ namespace Fargo.Application.Models.UserModels
     /// <param name="Description">
     /// The description associated with the user.
     /// </param>
+    /// <param name="IsActive">
+    /// Indicates whether the user account is currently active.
+    ///
+    /// An inactive user cannot authenticate or perform any authorized
+    /// operations within the system.
+    /// </param>
     /// <param name="Permissions">
     /// The permissions granted to the user.
     /// </param>
@@ -34,6 +40,7 @@ namespace Fargo.Application.Models.UserModels
             LastName? LastName,
             TimeSpan DefaultPasswordExpirationPeriod,
             Description Description,
+            bool IsActive,
             IReadOnlyCollection<UserPermissionResponseModel> Permissions
             );
 }

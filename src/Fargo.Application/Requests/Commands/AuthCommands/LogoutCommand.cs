@@ -18,6 +18,10 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
     /// <summary>
     /// Handles the execution of <see cref="LogoutCommand"/>.
     /// </summary>
+    /// <remarks>
+    /// This handler invalidates the provided refresh token if it exists.
+    /// If the token is not found, the operation completes silently.
+    /// </remarks>
     public sealed class LogoutCommandHandler(
             IRefreshTokenRepository refreshTokenRepository,
             ITokenHasher tokenHasher,
@@ -27,8 +31,19 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
         /// <summary>
         /// Invalidates the provided refresh token.
         /// </summary>
-        /// <param name="command">The command containing the refresh token.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <param name="command">
+        /// The command containing the refresh token.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Token used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous logout operation.
+        /// </returns>
+        /// <remarks>
+        /// If the refresh token does not exist in storage, the method returns
+        /// without throwing an exception.
+        /// </remarks>
         public async Task Handle(
                 LogoutCommand command,
                 CancellationToken cancellationToken = default

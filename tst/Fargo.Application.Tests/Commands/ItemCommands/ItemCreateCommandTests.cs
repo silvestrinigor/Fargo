@@ -67,6 +67,7 @@ public sealed class ItemCreateCommandHandlerTests
     {
         // Arrange
         var actor = CreateUser();
+        actor.AddPermission(ActionType.CreateItem);
         var articleGuid = Guid.NewGuid();
         var command = CreateCommand(articleGuid);
 
@@ -176,6 +177,36 @@ public sealed class ItemCreateCommandHandlerTests
 
         await unitOfWork.Received(1)
             .SaveChanges(cancellationToken);
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowUserInactiveFargoDomainException_When_ActorIsInactive()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateItem);
+        actor.IsActive = false;
+
+        var article = CreateArticle();
+        var command = CreateCommand(article.Guid);
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
+        Assert.Equal(actor.Guid, exception.UserGuid);
+
+        await articleRepository.DidNotReceive()
+            .GetByGuid(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+
+        itemRepository.DidNotReceive()
+            .Add(Arg.Any<Item>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
     }
 
     private void ConfigureCurrentUser(User actor)

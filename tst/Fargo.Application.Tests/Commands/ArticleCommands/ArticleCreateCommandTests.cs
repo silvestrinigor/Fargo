@@ -145,6 +145,29 @@ public sealed class ArticleCreateCommandHandlerTests
             .SaveChanges(cancellationToken);
     }
 
+    [Fact]
+    public async Task Handle_Should_ThrowUserInactiveFargoDomainException_When_ActorIsInactive()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        actor.IsActive = false;
+
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
+        Assert.Equal(actor.Guid, exception.UserGuid);
+
+        articleRepository.DidNotReceive().Add(Arg.Any<Article>());
+        await unitOfWork.DidNotReceive().SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User actor)
     {
         currentUser.UserGuid.Returns(actor.Guid);

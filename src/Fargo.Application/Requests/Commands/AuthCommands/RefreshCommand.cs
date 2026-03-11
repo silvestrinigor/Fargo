@@ -22,6 +22,11 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
     /// <summary>
     /// Handles the execution of <see cref="RefreshCommand"/>.
     /// </summary>
+    /// <remarks>
+    /// This handler validates the provided refresh token, resolves the
+    /// associated user, rotates the refresh token, and generates a new
+    /// access token.
+    /// </remarks>
     public sealed class RefreshCommandHandler(
             IUserRepository userRepository,
             ITokenGenerator tokenGenerator,
@@ -34,14 +39,19 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
         /// <summary>
         /// Validates the provided refresh token, rotates it, and generates a new access token.
         /// </summary>
-        /// <param name="command">The command containing the refresh token.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <param name="command">
+        /// The command containing the refresh token.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Token used to cancel the operation.
+        /// </param>
         /// <returns>
         /// An <see cref="AuthResult"/> containing the new access token,
         /// new refresh token, and access token expiration time.
         /// </returns>
         /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the refresh token is invalid, expired, or the user cannot be resolved.
+        /// Thrown when the refresh token is invalid, expired, the user cannot
+        /// be resolved, or the user is inactive.
         /// </exception>
         public async Task<AuthResult> Handle(
                 RefreshCommand command,
@@ -64,6 +74,13 @@ namespace Fargo.Application.Requests.Commands.AuthCommands
                     storedOldRefreshToken.UserGuid,
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
+
+            if (!user.IsActive)
+            {
+                refreshTokenRepository.Remove(storedOldRefreshToken);
+                await unitOfWork.SaveChanges(cancellationToken);
+                throw new UnauthorizedAccessFargoApplicationException();
+            }
 
             var rawNewRefreshToken = refreshTokenGenerator.Generate();
 

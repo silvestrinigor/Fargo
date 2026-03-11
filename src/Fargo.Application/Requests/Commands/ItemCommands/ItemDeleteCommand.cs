@@ -49,13 +49,14 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                     )
                 ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
+            actor.ValidatePermission(ActionType.DeleteItem);
+
             var item = await itemRepository.GetByGuid(
                     command.ItemGuid,
                     cancellationToken
                     )
                 ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);
-
-            actor.ValidatePermission(ActionType.DeleteItem);
 
             itemRepository.Remove(item);
 

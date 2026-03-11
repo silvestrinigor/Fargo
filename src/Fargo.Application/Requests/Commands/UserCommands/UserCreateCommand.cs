@@ -51,6 +51,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
             actor.ValidatePermission(ActionType.CreateUser);
 
             var userPasswordHash = passwordHasher.Hash(command.User.Password);

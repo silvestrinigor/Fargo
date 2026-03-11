@@ -90,6 +90,15 @@ namespace Fargo.Application.Models.UserModels
         }
 
         /// <summary>
+        /// Gets a value indicating whether the user is active.
+        /// </summary>
+        public required bool IsActive
+        {
+            get;
+            init;
+        }
+
+        /// <summary>
         /// Gets the permissions assigned to the user.
         /// </summary>
         /// <remarks>

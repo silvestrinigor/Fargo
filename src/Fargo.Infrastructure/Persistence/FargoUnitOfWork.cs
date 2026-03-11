@@ -1,4 +1,7 @@
 ﻿using Fargo.Application.Persistence;
+using Fargo.Application.Security;
+using Fargo.Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence
 {
@@ -15,13 +18,24 @@ namespace Fargo.Infrastructure.Persistence
     /// The unit of work ensures that multiple repository operations are committed
     /// as a single atomic database transaction handled internally by Entity Framework Core.
     /// </para>
+    /// <para>
+    /// Before persisting changes, this unit of work applies auditing metadata
+    /// to modified auditable entities tracked by the context.
+    /// </para>
     /// </remarks>
-    public sealed class FargoUnitOfWork(FargoWriteDbContext fargoContext) : IUnitOfWork
+    public sealed class FargoUnitOfWork(
+        FargoWriteDbContext fargoContext,
+        ICurrentUser currentUser) : IUnitOfWork
     {
         /// <summary>
         /// The write database context used to persist changes.
         /// </summary>
         private readonly FargoWriteDbContext fargoContext = fargoContext;
+
+        /// <summary>
+        /// Provides information about the current authenticated user.
+        /// </summary>
+        private readonly ICurrentUser currentUser = currentUser;
 
         /// <summary>
         /// Persists all pending changes tracked by the <see cref="FargoWriteDbContext"/>.
@@ -33,10 +47,15 @@ namespace Fargo.Infrastructure.Persistence
         /// The number of state entries written to the database.
         /// </returns>
         /// <remarks>
-        /// This method delegates the persistence operation to
+        /// This method applies auditing metadata to modified entities before
+        /// delegating the persistence operation to
         /// <see cref="DbContext.SaveChangesAsync(CancellationToken)"/>.
         /// </remarks>
         public async Task<int> SaveChanges(CancellationToken cancellationToken = default)
-            => await fargoContext.SaveChangesAsync(cancellationToken);
+        {
+            fargoContext.ChangeTracker.ApplyAuditing(currentUser.UserGuid);
+
+            return await fargoContext.SaveChangesAsync(cancellationToken);
+        }
     }
 }

@@ -63,6 +63,7 @@ public sealed class ItemDeleteCommandHandlerTests
     {
         // Arrange
         var actor = CreateUser();
+        actor.AddPermission(ActionType.DeleteItem);
         var itemGuid = Guid.NewGuid();
         var command = CreateCommand(itemGuid);
 
@@ -165,6 +166,35 @@ public sealed class ItemDeleteCommandHandlerTests
 
         await unitOfWork.Received(1)
             .SaveChanges(cancellationToken);
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowUserInactiveFargoDomainException_When_ActorIsInactive()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.DeleteItem);
+        actor.IsActive = false;
+
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
+        Assert.Equal(actor.Guid, exception.UserGuid);
+
+        await itemRepository.DidNotReceive()
+            .GetByGuid(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+
+        itemRepository.DidNotReceive()
+            .Remove(Arg.Any<Item>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
     }
 
     private void ConfigureCurrentUser(User actor)

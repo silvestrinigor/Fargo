@@ -198,6 +198,26 @@ public sealed class UserDeleteCommandHandlerTests
             .SaveChanges(cancellationToken);
     }
 
+    [Fact]
+    public async Task Handle_Should_ThrowUserInactiveFargoDomainException_When_ActorIsInactive()
+    {
+        var actor = CreateUserWithPermission(ActionType.DeleteUser);
+        actor.IsActive = false;
+
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+
+        Task act() => handler.Handle(command);
+
+        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
+        Assert.Equal(actor.Guid, exception.UserGuid);
+
+        userRepository.DidNotReceive().Remove(Arg.Any<User>());
+        await unitOfWork.DidNotReceive().SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User actor)
     {
         currentUser.UserGuid.Returns(actor.Guid);

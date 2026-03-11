@@ -446,6 +446,35 @@ public sealed class UserCreateCommandHandlerTests
         Assert.Equal(lastName, addedUser.LastName);
     }
 
+    [Fact]
+    public async Task Handle_ShouldThrowUserInactiveFargoDomainException_WhenActorIsInactive()
+    {
+        // Arrange
+        var actor = CreateActorWithCreateUserPermission();
+        actor.IsActive = false;
+
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
+        Assert.Equal(actor.Guid, exception.UserGuid);
+
+        passwordHasher.DidNotReceive()
+            .Hash(Arg.Any<Password>());
+
+        userRepository.DidNotReceive()
+            .Add(Arg.Any<User>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User actor)
     {
         currentUser.UserGuid.Returns(actor.Guid);

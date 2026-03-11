@@ -55,6 +55,7 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
             actor.ValidatePermission(ActionType.EditUser);
 
             var user = await userRepository.GetByGuid(
@@ -67,10 +68,10 @@ namespace Fargo.Application.Requests.Commands.UserCommands
             user.LastName = command.User.LastName ?? user.LastName;
             user.Description = command.User.Description ?? user.Description;
 
-            if (command.User.DefaultPasswordExpirationTimeSpan is not null)
+            if (command.User.DefaultPasswordExpirationPeriod is not null)
             {
                 user.DefaultPasswordExpirationPeriod =
-                    command.User.DefaultPasswordExpirationTimeSpan.Value;
+                    command.User.DefaultPasswordExpirationPeriod.Value;
             }
 
             if (command.User.Password is not null)
@@ -106,6 +107,11 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 {
                     user.RemovePermission(action);
                 }
+            }
+
+            if (command.User.IsActive is not null)
+            {
+                user.IsActive = command.User.IsActive.Value;
             }
 
             await unitOfWork.SaveChanges(cancellationToken);

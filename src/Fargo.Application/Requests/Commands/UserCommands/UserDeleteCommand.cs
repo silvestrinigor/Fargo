@@ -48,12 +48,13 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
+            actor.ValidatePermission(ActionType.DeleteUser);
+
             var user = await userRepository.GetByGuid(
                     command.UserGuid,
                     cancellationToken
                     ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
-
-            actor.ValidatePermission(ActionType.DeleteUser);
 
             UserService.ValidateUserDelete(user, actor);
 

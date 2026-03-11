@@ -25,8 +25,8 @@ public sealed class UserTests
 
         // Assert
         Assert.Equal(
-            TimeSpan.FromDays(User.DefaultPasswordChangeDays),
-            user.DefaultPasswordExpirationPeriod);
+                TimeSpan.FromDays(User.DefaultPasswordChangeDays),
+                user.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateUser(
-            requirePasswordChangeAt: DateTimeOffset.UtcNow);
+                requirePasswordChangeAt: DateTimeOffset.UtcNow);
 
         // Assert
         Assert.True(user.IsPasswordChangeRequired);
@@ -184,7 +184,7 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateUser(
-            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(-1));
+                requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(-1));
 
         // Assert
         Assert.True(user.IsPasswordChangeRequired);
@@ -195,7 +195,7 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateUser(
-            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(1));
+                requirePasswordChangeAt: DateTimeOffset.UtcNow.AddMinutes(1));
 
         // Assert
         Assert.False(user.IsPasswordChangeRequired);
@@ -342,15 +342,15 @@ public sealed class UserTests
         };
 
         var user = CreateUser(
-            guid: anotherUser.Guid,
-            userPermissions: sourcePermissions);
+                guid: anotherUser.Guid,
+                userPermissions: sourcePermissions);
 
         // Act
         sourcePermissions.Add(new UserPermission
-        {
-            User = owner,
-            Action = ActionType.DeleteUser
-        });
+                {
+                User = owner,
+                Action = ActionType.DeleteUser
+                });
 
         // Assert
         Assert.Single(user.UserPermissions);
@@ -416,7 +416,7 @@ public sealed class UserTests
     public void ResetPasswordExpiration_Should_OverwritePreviousExpirationDate()
     {
         var user = CreateUser(
-            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddDays(-10));
+                requirePasswordChangeAt: DateTimeOffset.UtcNow.AddDays(-10));
 
         user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(20);
 
@@ -450,12 +450,69 @@ public sealed class UserTests
         Assert.False(user.HasPermission(ActionType.EditUser));
     }
 
+    [Fact]
+    public void IsActive_Should_DefaultToTrue_When_NotSpecified()
+    {
+        // Arrange
+        var user = CreateUser();
+
+        // Assert
+        Assert.True(user.IsActive);
+    }
+
+    [Fact]
+    public void IsActive_Should_SetFalse_When_SpecifiedAsFalse()
+    {
+        // Arrange
+        var user = CreateUser(isActive: false);
+
+        // Assert
+        Assert.False(user.IsActive);
+    }
+
+    [Fact]
+    public void IsActive_Should_SetTrue_When_SpecifiedAsTrue()
+    {
+        // Arrange
+        var user = CreateUser(isActive: true);
+
+        // Assert
+        Assert.True(user.IsActive);
+    }
+
+    [Fact]
+    public void ValidateIsActive_Should_NotThrow_When_UserIsActive()
+    {
+        // Arrange
+        var user = CreateUser(isActive: true);
+
+        // Act
+        user.ValidateIsActive();
+
+        // Assert
+    }
+
+    [Fact]
+    public void ValidateIsActive_Should_ThrowUserInactiveFargoDomainException_When_UserIsInactive()
+    {
+        // Arrange
+        var user = CreateUser(isActive: false);
+
+        // Act
+        void act() => user.ValidateIsActive();
+
+        // Assert
+        var exception = Assert.Throws<UserInactiveFargoDomainException>(act);
+        Assert.Equal(user.Guid, exception.UserGuid);
+    }
+
     private static User CreateUser(
-        Guid? guid = null,
-        Description? description = null,
-        TimeSpan? defaultPasswordExpirationPeriod = null,
-        DateTimeOffset? requirePasswordChangeAt = null,
-        IReadOnlyCollection<UserPermission>? userPermissions = null)
+            Guid? guid = null,
+            Description? description = null,
+            TimeSpan? defaultPasswordExpirationPeriod = null,
+            DateTimeOffset? requirePasswordChangeAt = null,
+            IReadOnlyCollection<UserPermission>? userPermissions = null,
+            bool isActive = true)
     {
         return new User
         {
@@ -467,7 +524,8 @@ public sealed class UserTests
                 defaultPasswordExpirationPeriod ?? TimeSpan.FromDays(User.DefaultPasswordChangeDays),
             RequirePasswordChangeAt =
                 requirePasswordChangeAt ?? DateTimeOffset.UtcNow.AddDays(User.DefaultPasswordChangeDays),
-            UserPermissions = userPermissions ?? []
+            UserPermissions = userPermissions ?? [],
+            IsActive = isActive
         };
     }
 }

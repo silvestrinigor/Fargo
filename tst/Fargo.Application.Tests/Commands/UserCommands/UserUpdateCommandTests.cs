@@ -742,6 +742,84 @@ public sealed class UserUpdateCommandHandlerTests
             .SaveChanges(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_Should_SetIsActiveToFalse_When_ValueIsProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var user = CreateUser();
+        user.Deactivate();
+
+        var command = CreateCommand(
+                userGuid: user.Guid,
+                model: new UserUpdateModel(IsActive: false));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.False(user.IsActive);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_SetIsActiveToTrue_When_ValueIsProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var user = CreateUser();
+        user.Deactivate();
+
+        var command = CreateCommand(
+                userGuid: user.Guid,
+                model: new UserUpdateModel(IsActive: true));
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.True(user.IsActive);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_KeepIsActiveUnchanged_When_ValueIsNotProvided()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.EditUser);
+        var user = CreateUser();
+        user.Deactivate();
+
+        var command = CreateCommand(
+                userGuid: user.Guid,
+                model: new UserUpdateModel());
+
+        ConfigureCurrentUser(actor);
+        ConfigureUserLookup(actor);
+        ConfigureUserLookup(user);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.False(user.IsActive);
+
+        await unitOfWork.Received(1)
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
     private void ConfigureCurrentUser(User actor)
     {
         currentUser.UserGuid.Returns(actor.Guid);
@@ -755,29 +833,29 @@ public sealed class UserUpdateCommandHandlerTests
     }
 
     private static UserUpdateCommand CreateCommand(
-        Guid? userGuid = null,
-        UserUpdateModel? model = null)
+            Guid? userGuid = null,
+            UserUpdateModel? model = null)
         => new(
-            userGuid ?? Guid.NewGuid(),
-            model ?? CreateUpdateModel());
+                userGuid ?? Guid.NewGuid(),
+                model ?? CreateUpdateModel());
 
     private static UserUpdateModel CreateUpdateModel(
-        Nameid? nameid = null,
-        FirstName? firstName = null,
-        LastName? lastName = null,
-        Description? description = null,
-        Password? password = null,
-        IReadOnlyCollection<UserPermissionUpdateModel>? permissions = null,
-        TimeSpan? defaultPasswordExpirationTimeSpan = null)
+            Nameid? nameid = null,
+            FirstName? firstName = null,
+            LastName? lastName = null,
+            Description? description = null,
+            Password? password = null,
+            IReadOnlyCollection<UserPermissionUpdateModel>? permissions = null,
+            TimeSpan? defaultPasswordExpirationTimeSpan = null)
     {
         return new UserUpdateModel(
-            Nameid: nameid,
-            FirstName: firstName,
-            LastName: lastName,
-            Description: description,
-            Password: password,
-            Permissions: permissions,
-            DefaultPasswordExpirationTimeSpan: defaultPasswordExpirationTimeSpan);
+                Nameid: nameid,
+                FirstName: firstName,
+                LastName: lastName,
+                Description: description,
+                Password: password,
+                Permissions: permissions,
+                DefaultPasswordExpirationPeriod: defaultPasswordExpirationTimeSpan);
     }
 
     private static User CreateUser()

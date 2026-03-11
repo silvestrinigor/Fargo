@@ -29,13 +29,13 @@ public sealed class LoginCommandHandlerTests
     public LoginCommandHandlerTests()
     {
         handler = new LoginCommandHandler(
-            userRepository,
-            passwordHasher,
-            tokenGenerator,
-            refreshTokenGenerator,
-            tokenHasher,
-            refreshTokenRepository,
-            unitOfWork);
+                userRepository,
+                passwordHasher,
+                tokenGenerator,
+                refreshTokenGenerator,
+                tokenHasher,
+                refreshTokenRepository,
+                unitOfWork);
     }
 
     [Fact]
@@ -235,6 +235,62 @@ public sealed class LoginCommandHandlerTests
             .SaveChanges(cancellationToken);
     }
 
+    [Fact]
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_UserIsInactive()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var user = CreateUser(isActive: false);
+
+        ConfigureUserFound(command, user);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
+
+        passwordHasher.DidNotReceive()
+            .Verify(Arg.Any<PasswordHash>(), Arg.Any<Password>());
+
+        tokenGenerator.DidNotReceive()
+            .Generate(Arg.Any<User>());
+
+        refreshTokenGenerator.DidNotReceive()
+            .Generate();
+
+        tokenHasher.DidNotReceive()
+            .Hash(Arg.Any<Token>());
+
+        refreshTokenRepository.DidNotReceive()
+            .Add(Arg.Any<RefreshToken>());
+
+        await unitOfWork.DidNotReceive()
+            .SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_UserIsInactive_EvenIfPasswordWouldBeValid()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var user = CreateUser(isActive: false);
+
+        ConfigureUserFound(command, user);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
+
+        passwordHasher.DidNotReceive()
+            .Verify(user.PasswordHash, command.Password);
+
+        tokenGenerator.DidNotReceive()
+            .Generate(Arg.Any<User>());
+    }
+
     private void ConfigureUserFound(LoginCommand command, User user)
     {
         userRepository
@@ -243,12 +299,12 @@ public sealed class LoginCommandHandlerTests
     }
 
     private void ConfigureValidLogin(
-        LoginCommand command,
-        User user,
-        Token accessToken,
-        Token refreshToken,
-        TokenHash refreshTokenHash,
-        DateTimeOffset expiresAt)
+            LoginCommand command,
+            User user,
+            Token accessToken,
+            Token refreshToken,
+            TokenHash refreshTokenHash,
+            DateTimeOffset expiresAt)
     {
         ConfigureUserFound(command, user);
 
@@ -272,13 +328,14 @@ public sealed class LoginCommandHandlerTests
     private static LoginCommand CreateCommand()
         => new(validNameid, validPassword);
 
-    private static User CreateUser()
+    private static User CreateUser(bool isActive = true)
     {
         return new User
         {
             Guid = Guid.NewGuid(),
             Nameid = validNameid,
-            PasswordHash = new PasswordHash(new string('p', PasswordHash.MinLength))
+            PasswordHash = new PasswordHash(new string('p', PasswordHash.MinLength)),
+            IsActive = isActive
         };
     }
 

@@ -48,6 +48,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
             actor.ValidatePermission(ActionType.CreateArticle);
 
             var article = new Article

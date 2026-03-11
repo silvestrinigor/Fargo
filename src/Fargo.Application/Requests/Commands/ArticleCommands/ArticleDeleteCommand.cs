@@ -50,12 +50,13 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                     cancellationToken
                     ) ?? throw new UnauthorizedAccessFargoApplicationException();
 
+            actor.ValidateIsActive();
+            actor.ValidatePermission(ActionType.DeleteArticle);
+
             var article = await articleRepository.GetByGuid(
                     command.ArticleGuid,
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
-
-            actor.ValidatePermission(ActionType.DeleteArticle);
 
             await articleService.ValidateArticleDelete(article, cancellationToken);
 
