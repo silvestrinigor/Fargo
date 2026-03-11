@@ -4,22 +4,22 @@
     /// Represents the set of actions that can be authorized in the system.
     ///
     /// Each value defines a specific permission that can be granted
-    /// to a user through <see cref="Entities.UserPermission"/>.
+    /// to a user through <see cref="Fargo.Domain.Entities.UserPermission"/>.
     /// </summary>
     public enum ActionType
     {
         /// <summary>
-        /// Allows creating new articles in the system.
+        /// Allows creating new articles.
         /// </summary>
         CreateArticle,
 
         /// <summary>
-        /// Allows deleting existing articles from the system.
+        /// Allows deleting existing articles.
         /// </summary>
         DeleteArticle,
 
         /// <summary>
-        /// Allows editing existing articles from the system.
+        /// Allows editing existing articles.
         /// </summary>
         EditArticle,
 
@@ -29,12 +29,12 @@
         CreateItem,
 
         /// <summary>
-        /// Allows deleting items from the system.
+        /// Allows deleting existing items.
         /// </summary>
         DeleteItem,
 
         /// <summary>
-        /// Allows editing items from the system.
+        /// Allows editing existing items.
         /// </summary>
         EditItem,
 
@@ -44,12 +44,12 @@
         CreateUser,
 
         /// <summary>
-        /// Allows deleting users.
+        /// Allows deleting existing users.
         /// </summary>
         DeleteUser,
 
         /// <summary>
-        /// Allows editing users.
+        /// Allows editing existing users.
         /// </summary>
         EditUser,
 
@@ -65,17 +65,32 @@
         ChangeOtherUserPassword,
 
         /// <summary>
-        /// Allows creating partitions in the system.
+        /// Allows creating new user groups.
+        /// </summary>
+        CreateUserGroup,
+
+        /// <summary>
+        /// Allows deleting existing user groups.
+        /// </summary>
+        DeleteUserGroup,
+
+        /// <summary>
+        /// Allows editing existing user groups.
+        /// </summary>
+        EditUserGroup,
+
+        /// <summary>
+        /// Allows creating partitions.
         /// </summary>
         CreatePartition,
 
         /// <summary>
-        /// Allows deleting partitions.
+        /// Allows deleting existing partitions.
         /// </summary>
         DeletePartition,
 
         /// <summary>
-        /// Allows editing partitions.
+        /// Allows editing existing partitions.
         /// </summary>
         EditPartition,
     }
