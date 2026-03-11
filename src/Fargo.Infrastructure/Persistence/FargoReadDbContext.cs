@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.ItemModels;
+using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Models.UserModels;
 using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Configurations;
@@ -17,6 +18,10 @@ namespace Fargo.Infrastructure.Persistence
         public DbSet<UserReadModel> Users { get; set; }
 
         public DbSet<UserPermissionReadModel> UserPermission { get; set; }
+
+        public DbSet<UserGroupReadModel> UserGroups { get; set; }
+
+        public DbSet<UserGroupPermissionReadModel> UserGroupPermissions { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -60,6 +65,10 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new UserReadModelConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserPermissionReadModelConfiguration());
+
+            modelBuilder.ApplyConfiguration(new UserGroupReadModelConfiguration());
+
+            modelBuilder.ApplyConfiguration(new UserGroupPermissionReadModelConfiguration());
         }
     }
 }

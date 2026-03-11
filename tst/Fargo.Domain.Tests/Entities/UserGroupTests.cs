@@ -81,6 +81,7 @@ public sealed class UserGroupTests
 
         // Assert
         Assert.NotNull(exception);
+        Assert.Equal(exception.UserGroupGuid, userGroup.Guid);
     }
 
     [Fact]
