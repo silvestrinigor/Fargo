@@ -18,7 +18,7 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void DefaultPasswordExpirationTimeSpan_Should_DefaultToNinetyDays()
+    public void DefaultPasswordExpirationPeriod_Should_DefaultToNinetyDays()
     {
         // Arrange
         var user = CreateUser();
@@ -26,44 +26,44 @@ public sealed class UserTests
         // Assert
         Assert.Equal(
             TimeSpan.FromDays(User.DefaultPasswordChangeDays),
-            user.DefaultPasswordExpirationTimeSpan);
+            user.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
-    public void DefaultPasswordExpirationTimeSpan_Should_SetValue_When_ValueIsPositive()
+    public void DefaultPasswordExpirationPeriod_Should_SetValue_When_ValueIsPositive()
     {
         // Arrange
         var user = CreateUser();
         var value = TimeSpan.FromDays(30);
 
         // Act
-        user.DefaultPasswordExpirationTimeSpan = value;
+        user.DefaultPasswordExpirationPeriod = value;
 
         // Assert
-        Assert.Equal(value, user.DefaultPasswordExpirationTimeSpan);
+        Assert.Equal(value, user.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
-    public void DefaultPasswordExpirationTimeSpan_Should_SetValue_When_ValueIsZero()
+    public void DefaultPasswordExpirationPeriod_Should_SetValue_When_ValueIsZero()
     {
         // Arrange
         var user = CreateUser();
 
         // Act
-        user.DefaultPasswordExpirationTimeSpan = TimeSpan.Zero;
+        user.DefaultPasswordExpirationPeriod = TimeSpan.Zero;
 
         // Assert
-        Assert.Equal(TimeSpan.Zero, user.DefaultPasswordExpirationTimeSpan);
+        Assert.Equal(TimeSpan.Zero, user.DefaultPasswordExpirationPeriod);
     }
 
     [Fact]
-    public void DefaultPasswordExpirationTimeSpan_Should_ThrowArgumentOutOfRangeException_When_ValueIsNegative()
+    public void DefaultPasswordExpirationPeriod_Should_ThrowArgumentOutOfRangeException_When_ValueIsNegative()
     {
         // Arrange
         var user = CreateUser();
 
         // Act
-        void act() => user.DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(-1);
+        void act() => user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(-1);
 
         // Assert
         Assert.Throws<ArgumentOutOfRangeException>(act);
@@ -83,12 +83,12 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void ResetPasswordExpiration_Should_SetExpirationBasedOnDefaultPasswordExpirationTimeSpan()
+    public void ResetPasswordExpiration_Should_SetExpirationBasedOnDefaultPasswordExpirationPeriod()
     {
         // Arrange
         var user = CreateUser();
         var expiration = TimeSpan.FromDays(15);
-        user.DefaultPasswordExpirationTimeSpan = expiration;
+        user.DefaultPasswordExpirationPeriod = expiration;
 
         var before = DateTimeOffset.UtcNow;
 
@@ -103,11 +103,11 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void ResetPasswordExpiration_Should_SetExpirationToNow_When_DefaultPasswordExpirationTimeSpanIsZero()
+    public void ResetPasswordExpiration_Should_SetExpirationToNow_When_DefaultPasswordExpirationPeriodIsZero()
     {
         // Arrange
         var user = CreateUser();
-        user.DefaultPasswordExpirationTimeSpan = TimeSpan.Zero;
+        user.DefaultPasswordExpirationPeriod = TimeSpan.Zero;
 
         var before = DateTimeOffset.UtcNow;
 
@@ -376,10 +376,84 @@ public sealed class UserTests
         Assert.Equal(user, permission.User);
     }
 
+    [Fact]
+    public void FirstName_Should_DefaultToNull_When_NotSpecified()
+    {
+        var user = CreateUser();
+
+        Assert.Null(user.FirstName);
+    }
+
+    [Fact]
+    public void LastName_Should_DefaultToNull_When_NotSpecified()
+    {
+        var user = CreateUser();
+
+        Assert.Null(user.LastName);
+    }
+
+    [Fact]
+    public void UserPermissions_Should_DefaultToEmpty_When_NotSpecified()
+    {
+        var user = CreateUser();
+
+        Assert.Empty(user.UserPermissions);
+    }
+
+    [Fact]
+    public void ValidatePermission_Should_ThrowUserNotAuthorizedFargoDomainException_WithExpectedData()
+    {
+        var user = CreateUser();
+
+        void act() => user.ValidatePermission(ActionType.DeleteUser);
+
+        var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
+        Assert.Equal(user.Guid, exception.UserGuid);
+        Assert.Equal(ActionType.DeleteUser, exception.ActionType);
+    }
+
+    [Fact]
+    public void ResetPasswordExpiration_Should_OverwritePreviousExpirationDate()
+    {
+        var user = CreateUser(
+            requirePasswordChangeAt: DateTimeOffset.UtcNow.AddDays(-10));
+
+        user.DefaultPasswordExpirationPeriod = TimeSpan.FromDays(20);
+
+        user.ResetPasswordExpiration();
+
+        Assert.True(user.RequirePasswordChangeAt > DateTimeOffset.UtcNow);
+    }
+
+    [Fact]
+    public void RequirePasswordChangeInDays_Should_SetExpirationToNow_When_DaysIsZero()
+    {
+        var user = CreateUser();
+        var before = DateTimeOffset.UtcNow;
+
+        user.RequirePasswordChangeInDays(0);
+
+        var after = DateTimeOffset.UtcNow;
+
+        Assert.True(user.RequirePasswordChangeAt >= before);
+        Assert.True(user.RequirePasswordChangeAt <= after);
+    }
+
+    [Fact]
+    public void HasPermission_Should_ReturnFalse_AfterPermissionIsRemoved()
+    {
+        var user = CreateUser();
+        user.AddPermission(ActionType.EditUser);
+
+        user.RemovePermission(ActionType.EditUser);
+
+        Assert.False(user.HasPermission(ActionType.EditUser));
+    }
+
     private static User CreateUser(
         Guid? guid = null,
         Description? description = null,
-        TimeSpan? defaultPasswordExpirationTimeSpan = null,
+        TimeSpan? defaultPasswordExpirationPeriod = null,
         DateTimeOffset? requirePasswordChangeAt = null,
         IReadOnlyCollection<UserPermission>? userPermissions = null)
     {
@@ -389,8 +463,8 @@ public sealed class UserTests
             Nameid = new Nameid("user123"),
             Description = description ?? Description.Empty,
             PasswordHash = new PasswordHash(new string('a', PasswordHash.MinLength)),
-            DefaultPasswordExpirationTimeSpan =
-                defaultPasswordExpirationTimeSpan ?? TimeSpan.FromDays(User.DefaultPasswordChangeDays),
+            DefaultPasswordExpirationPeriod =
+                defaultPasswordExpirationPeriod ?? TimeSpan.FromDays(User.DefaultPasswordChangeDays),
             RequirePasswordChangeAt =
                 requirePasswordChangeAt ?? DateTimeOffset.UtcNow.AddDays(User.DefaultPasswordChangeDays),
             UserPermissions = userPermissions ?? []

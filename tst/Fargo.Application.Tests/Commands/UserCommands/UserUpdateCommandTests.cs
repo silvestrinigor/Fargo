@@ -34,7 +34,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_ActorIsNotFound()
     {
-        // Arrange
         var actorGuid = Guid.NewGuid();
         var command = CreateCommand();
 
@@ -44,10 +43,8 @@ public sealed class UserUpdateCommandHandlerTests
             .GetByGuid(actorGuid, Arg.Any<CancellationToken>())
             .Returns((User?)null);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
 
         await userRepository.DidNotReceive()
@@ -60,7 +57,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorDoesNotHaveEditUserPermission()
     {
-        // Arrange
         var actor = CreateUser();
         var targetUser = CreateUser();
         var command = CreateCommand(targetUser.Guid);
@@ -69,10 +65,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         await Assert.ThrowsAsync<UserNotAuthorizedFargoDomainException>(act);
 
         await unitOfWork.DidNotReceive()
@@ -82,7 +76,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ThrowUserNotFoundFargoApplicationException_When_TargetUserIsNotFound()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUserGuid = Guid.NewGuid();
         var command = CreateCommand(targetUserGuid);
@@ -94,10 +87,8 @@ public sealed class UserUpdateCommandHandlerTests
             .GetByGuid(targetUserGuid, Arg.Any<CancellationToken>())
             .Returns((User?)null);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         await Assert.ThrowsAsync<UserNotFoundFargoApplicationException>(act);
 
         await unitOfWork.DidNotReceive()
@@ -107,7 +98,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateNameid_When_NameidIsProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var newNameid = new Nameid("updated-user");
@@ -120,10 +110,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newNameid, targetUser.Nameid);
 
         await unitOfWork.Received(1)
@@ -133,7 +121,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateDescription_When_DescriptionIsProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var newDescription = new Description("Updated user description.");
@@ -146,10 +133,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newDescription, targetUser.Description);
 
         await unitOfWork.Received(1)
@@ -159,7 +144,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateDefaultPasswordExpirationTimeSpan_When_ValueIsProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var newDefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(15);
@@ -173,13 +157,11 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(
             newDefaultPasswordExpirationTimeSpan,
-            targetUser.DefaultPasswordExpirationTimeSpan);
+            targetUser.DefaultPasswordExpirationPeriod);
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -188,11 +170,10 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_NotUpdateDefaultPasswordExpirationTimeSpan_When_ValueIsNotProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var originalDefaultPasswordExpirationTimeSpan =
-            targetUser.DefaultPasswordExpirationTimeSpan;
+            targetUser.DefaultPasswordExpirationPeriod;
 
         var command = CreateCommand(
             targetUser.Guid,
@@ -202,13 +183,11 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(
             originalDefaultPasswordExpirationTimeSpan,
-            targetUser.DefaultPasswordExpirationTimeSpan);
+            targetUser.DefaultPasswordExpirationPeriod);
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -217,7 +196,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ThrowUserNotAuthorizedFargoDomainException_When_ActorTriesToChangeOtherUserPasswordWithoutPermission()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var newPassword = new Password("NewSecure@123");
@@ -230,10 +208,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         await Assert.ThrowsAsync<UserNotAuthorizedFargoDomainException>(act);
 
         passwordHasher.DidNotReceive()
@@ -246,7 +222,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdatePassword_When_ActorHasChangeOtherUserPasswordPermission()
     {
-        // Arrange
         var actor = CreateUserWithPermissions(
             ActionType.EditUser,
             ActionType.ChangeOtherUserPassword);
@@ -267,10 +242,8 @@ public sealed class UserUpdateCommandHandlerTests
             .Hash(newPassword)
             .Returns(newPasswordHash);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         passwordHasher.Received(1)
             .Hash(newPassword);
 
@@ -283,7 +256,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_AddPermissions_When_TheyDoNotExist()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
 
@@ -300,10 +272,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         var actions = targetUser.UserPermissions
             .Select(x => x.Action)
             .ToHashSet();
@@ -318,7 +288,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_RemovePermissions_ThatAreNotRequested()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         targetUser.AddPermission(ActionType.CreateUser);
@@ -337,10 +306,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         var actions = targetUser.UserPermissions
             .Select(x => x.Action)
             .ToHashSet();
@@ -356,7 +323,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_SynchronizePermissions_When_AddingAndRemovingAreRequired()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         targetUser.AddPermission(ActionType.CreateUser);
@@ -375,10 +341,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         var actions = targetUser.UserPermissions
             .Select(x => x.Action)
             .ToHashSet();
@@ -394,7 +358,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_IgnoreDuplicatePermissions_When_PermissionsContainDuplicates()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
 
@@ -412,10 +375,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         var editUserCount = targetUser.UserPermissions
             .Count(x => x.Action == ActionType.EditUser);
 
@@ -428,7 +389,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateNameidFirstNameLastNameDescriptionPasswordAndDefaultPasswordExpirationTimeSpan_When_AllAreProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermissions(
             ActionType.EditUser,
             ActionType.ChangeOtherUserPassword);
@@ -461,10 +421,8 @@ public sealed class UserUpdateCommandHandlerTests
             .Hash(newPassword)
             .Returns(newPasswordHash);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newNameid, targetUser.Nameid);
         Assert.Equal(newFirstName, targetUser.FirstName);
         Assert.Equal(newLastName, targetUser.LastName);
@@ -472,7 +430,7 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
         Assert.Equal(
             newDefaultPasswordExpirationTimeSpan,
-            targetUser.DefaultPasswordExpirationTimeSpan);
+            targetUser.DefaultPasswordExpirationPeriod);
 
         passwordHasher.Received(1)
             .Hash(newPassword);
@@ -484,7 +442,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_NotChangeUser_When_UpdateModelHasNoValues()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
 
@@ -494,7 +451,7 @@ public sealed class UserUpdateCommandHandlerTests
         var originalDescription = targetUser.Description;
         var originalPasswordHash = targetUser.PasswordHash;
         var originalDefaultPasswordExpirationTimeSpan =
-            targetUser.DefaultPasswordExpirationTimeSpan;
+            targetUser.DefaultPasswordExpirationPeriod;
         var originalActions = targetUser.UserPermissions
             .Select(x => x.Action)
             .ToHashSet();
@@ -505,10 +462,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(originalNameid, targetUser.Nameid);
         Assert.Equal(originalFirstName, targetUser.FirstName);
         Assert.Equal(originalLastName, targetUser.LastName);
@@ -516,7 +471,7 @@ public sealed class UserUpdateCommandHandlerTests
         Assert.Equal(originalPasswordHash, targetUser.PasswordHash);
         Assert.Equal(
             originalDefaultPasswordExpirationTimeSpan,
-            targetUser.DefaultPasswordExpirationTimeSpan);
+            targetUser.DefaultPasswordExpirationPeriod);
         Assert.Equal(
             originalActions,
             targetUser.UserPermissions.Select(x => x.Action).ToHashSet());
@@ -531,7 +486,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UseProvidedCancellationToken()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var cancellationToken = new CancellationTokenSource().Token;
@@ -547,10 +501,8 @@ public sealed class UserUpdateCommandHandlerTests
             .GetByGuid(targetUser.Guid, cancellationToken)
             .Returns(targetUser);
 
-        // Act
         await handler.Handle(command, cancellationToken);
 
-        // Assert
         await userRepository.Received(1)
             .GetByGuid(actor.Guid, cancellationToken);
 
@@ -564,7 +516,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ThrowUserCannotChangeOwnPermissionsFargoDomainException_When_ActorTriesToChangeOwnPermissions()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
 
         var command = CreateCommand(
@@ -579,10 +530,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         var exception =
             await Assert.ThrowsAsync<UserCannotChangeOwnPermissionsFargoDomainException>(act);
 
@@ -595,7 +544,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_NotAddPermissions_When_ActorTriesToChangeOwnPermissions()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var originalActions = actor.UserPermissions
             .Select(x => x.Action)
@@ -613,10 +561,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         await Assert.ThrowsAsync<UserCannotChangeOwnPermissionsFargoDomainException>(act);
 
         Assert.Equal(
@@ -630,7 +576,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_NotRemovePermissions_When_ActorTriesToChangeOwnPermissions()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         actor.AddPermission(ActionType.CreateUser);
         actor.AddPermission(ActionType.DeleteUser);
@@ -650,10 +595,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureCurrentUser(actor);
         ConfigureUserLookup(actor);
 
-        // Act
         Task act() => handler.Handle(command);
 
-        // Assert
         await Assert.ThrowsAsync<UserCannotChangeOwnPermissionsFargoDomainException>(act);
 
         Assert.Equal(
@@ -667,7 +610,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_RequirePasswordChange_When_AdminChangesUserPassword()
     {
-        // Arrange
         var actor = CreateUserWithPermissions(
             ActionType.EditUser,
             ActionType.ChangeOtherUserPassword);
@@ -688,10 +630,8 @@ public sealed class UserUpdateCommandHandlerTests
             .Hash(newPassword)
             .Returns(newPasswordHash);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newPasswordHash, targetUser.PasswordHash);
         Assert.True(targetUser.IsPasswordChangeRequired);
 
@@ -702,7 +642,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateFirstName_When_FirstNameIsProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var newFirstName = new FirstName("Igor");
@@ -715,10 +654,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newFirstName, targetUser.FirstName);
 
         await unitOfWork.Received(1)
@@ -728,7 +665,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateLastName_When_LastNameIsProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
         var newLastName = new LastName("Silvestrin");
@@ -741,10 +677,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newLastName, targetUser.LastName);
 
         await unitOfWork.Received(1)
@@ -754,7 +688,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_UpdateFirstNameAndLastName_When_BothAreProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
 
@@ -771,10 +704,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(newFirstName, targetUser.FirstName);
         Assert.Equal(newLastName, targetUser.LastName);
 
@@ -785,7 +716,6 @@ public sealed class UserUpdateCommandHandlerTests
     [Fact]
     public async Task Handle_Should_NotChangeFirstNameAndLastName_When_TheyAreNotProvided()
     {
-        // Arrange
         var actor = CreateUserWithPermission(ActionType.EditUser);
         var targetUser = CreateUser();
 
@@ -803,10 +733,8 @@ public sealed class UserUpdateCommandHandlerTests
         ConfigureUserLookup(actor);
         ConfigureUserLookup(targetUser);
 
-        // Act
         await handler.Handle(command);
 
-        // Assert
         Assert.Equal(originalFirstName, targetUser.FirstName);
         Assert.Equal(originalLastName, targetUser.LastName);
 
@@ -862,7 +790,7 @@ public sealed class UserUpdateCommandHandlerTests
             LastName = new LastName("User"),
             Description = new Description("Original description."),
             PasswordHash = CreatePasswordHash('a'),
-            DefaultPasswordExpirationTimeSpan = TimeSpan.FromDays(User.DefaultPasswordChangeDays)
+            DefaultPasswordExpirationPeriod = TimeSpan.FromDays(User.DefaultPasswordChangeDays)
         };
     }
 
