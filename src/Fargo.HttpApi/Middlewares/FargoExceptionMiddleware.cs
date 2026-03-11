@@ -1,5 +1,3 @@
-using Fargo.Application.Exceptions;
-using Fargo.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Middlewares
@@ -15,62 +13,6 @@ namespace Fargo.HttpApi.Middlewares
     /// </remarks>
     public sealed class FargoExceptionMiddleware(RequestDelegate next)
     {
-        private static readonly Dictionary<Type, ProblemDetailsDefinition> exceptionMap = new()
-        {
-            {
-                typeof(BadHttpRequestException),
-                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
-            },
-            {
-                typeof(UnauthorizedAccessFargoApplicationException),
-                new ProblemDetailsDefinition(401, "Unauthorized", "auth/unauthorized")
-            },
-            {
-                typeof(InvalidPasswordFargoApplicationException),
-                new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
-            },
-            {
-                typeof(PasswordChangeRequiredFargoApplicationException),
-                new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
-            },
-            {
-                typeof(ArticleNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "Article not found", "article/not-found")
-            },
-            {
-                typeof(UserNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "User not found", "user/not-found")
-            },
-            {
-                typeof(ItemNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "Item not found", "item/not-found")
-            },
-            {
-                typeof(UserNotAuthorizedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
-            },
-            {
-                typeof(ArticleDeleteWithItemsAssociatedFargoDomainException),
-                new ProblemDetailsDefinition(400, "Invalid operation", "article/delete-with-items")
-            },
-            {
-                typeof(UserNameidAlreadyExistsDomainException),
-                new ProblemDetailsDefinition(409, "Conflict", "user/nameid-already-exists")
-            },
-            {
-                typeof(UserCannotDeleteSelfFargoDomainException),
-                new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-delete-self")
-            },
-            {
-                typeof(UserCannotChangeOwnPermissionsFargoDomainException),
-                new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-change-own-permissions")
-            },
-            {
-                typeof(UserInactiveFargoDomainException),
-                new ProblemDetailsDefinition(403, "User inactive", "user/inactive")
-            }
-        };
-
         /// <summary>
         /// Processes the current HTTP request and handles exceptions thrown by downstream middleware.
         /// </summary>
@@ -81,9 +23,9 @@ namespace Fargo.HttpApi.Middlewares
             {
                 await next(context);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await HandleExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, exception);
             }
         }
 
@@ -96,7 +38,7 @@ namespace Fargo.HttpApi.Middlewares
             HttpContext context,
             Exception exception)
         {
-            if (exceptionMap.TryGetValue(exception.GetType(), out var definition))
+            if (FargoProblemDetailsRegistry.TryGetDefinition(exception.GetType(), out var definition))
             {
                 await WriteProblemDetailsAsync(
                     context,
@@ -151,16 +93,5 @@ namespace Fargo.HttpApi.Middlewares
 
             await context.Response.WriteAsJsonAsync(problemDetails);
         }
-
-        /// <summary>
-        /// Represents the metadata used to build a <see cref="ProblemDetails"/> response.
-        /// </summary>
-        /// <param name="StatusCode">The HTTP status code.</param>
-        /// <param name="Title">The problem title.</param>
-        /// <param name="Type">The machine-readable problem type.</param>
-        private sealed record ProblemDetailsDefinition(
-            int StatusCode,
-            string Title,
-            string Type);
     }
 }

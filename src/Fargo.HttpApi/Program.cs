@@ -38,6 +38,8 @@ app.MapFargoItem();
 
 app.MapFargoUser();
 
+app.MapFargoUserGroup();
+
 app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();
