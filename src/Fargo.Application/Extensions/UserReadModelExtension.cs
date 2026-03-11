@@ -14,26 +14,28 @@ namespace Fargo.Application.Extensions
             /// into a <see cref="UserResponseModel"/>.
             /// </summary>
             /// <returns>
-            /// A <see cref="UserResponseModel"/> containing the user information
-            /// and the list of granted permissions.
+            /// A <see cref="UserResponseModel"/> containing the user information,
+            /// auditing metadata, and the list of granted permissions.
             /// </returns>
             public UserResponseModel ToResponse()
             {
                 return new UserResponseModel(
-                        user.Guid,
-                        user.Nameid,
-                        user.FirstName,
-                        user.LastName,
-                        user.DefaultPasswordExpirationPeriod,
-                        user.Description,
-                        user.IsActive,
-                        [.. user.UserPermissions.Select(x =>
-                            new UserPermissionResponseModel(
-                                x.Guid,
-                                x.Action
-                                )
-                            )]
-                        );
+                    user.Guid,
+                    user.Nameid,
+                    user.FirstName,
+                    user.LastName,
+                    user.DefaultPasswordExpirationPeriod,
+                    user.Description,
+                    user.IsActive,
+                    user.CreatedAt,
+                    user.CreatedByGuid,
+                    user.EditedAt,
+                    user.EditedByGuid,
+                    [.. user.UserPermissions.Select(x =>
+                        new UserPermissionResponseModel(
+                            x.Guid,
+                            x.Action))]
+                );
             }
         }
     }

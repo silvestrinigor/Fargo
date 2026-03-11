@@ -10,7 +10,7 @@ namespace Fargo.Application.Models.UserModels
     /// to transfer user data from the persistence layer to the application layer
     /// without exposing domain entities directly.
     /// </remarks>
-    public class UserReadModel
+    public class UserReadModel : AuditedEntityReadModel
     {
         /// <summary>
         /// Gets the unique identifier of the user.
