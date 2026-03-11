@@ -47,19 +47,19 @@ namespace Fargo.HttpApi.Helpers
         public static Results<Ok<IReadOnlyCollection<TResponseItem>>, NotFound, NoContent>
             HandleNullableCollectionQueryResult<TResponseItem>(
                     IReadOnlyCollection<TResponseItem>? response)
+        {
+            if (response == null)
             {
-                if (response == null)
-                {
-                    return TypedResults.NotFound();
-                }
-
-                if (response.Count == 0)
-                {
-                    return TypedResults.NoContent();
-                }
-
-                return TypedResults.Ok(response);
+                return TypedResults.NotFound();
             }
+
+            if (response.Count == 0)
+            {
+                return TypedResults.NoContent();
+            }
+
+            return TypedResults.Ok(response);
+        }
 
         /// <summary>
         /// Handles a non-null read-only collection query result and returns an appropriate typed result.
@@ -77,13 +77,13 @@ namespace Fargo.HttpApi.Helpers
         public static Results<Ok<IReadOnlyCollection<TResponseItem>>, NoContent>
             HandleCollectionQueryResult<TResponseItem>(
                     IReadOnlyCollection<TResponseItem> response)
+        {
+            if (response.Count == 0)
             {
-                if (response.Count == 0)
-                {
-                    return TypedResults.NoContent();
-                }
-
-                return TypedResults.Ok(response);
+                return TypedResults.NoContent();
             }
+
+            return TypedResults.Ok(response);
+        }
     }
 }

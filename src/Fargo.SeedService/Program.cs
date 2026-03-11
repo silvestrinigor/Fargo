@@ -1,7 +1,7 @@
 using Fargo.Infrastructure.Extensions;
 using Fargo.SeedService;
-using Fargo.ServiceDefaults;
 using Fargo.SeedService.Extensions;
+using Fargo.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 

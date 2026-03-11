@@ -1,7 +1,7 @@
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Fargo.Domain.Tests.Entities;
 

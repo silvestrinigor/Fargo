@@ -19,7 +19,7 @@ namespace Fargo.Infrastructure.Repositories
                 )
             => await items
             .TemporalAsOfIfProvided(asOfDateTime)
-            .Where(a =>a.Guid == entityGuid)
+            .Where(a => a.Guid == entityGuid)
             .OrderBy(x => x.Guid)
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);

@@ -1,7 +1,7 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Security;
 using Fargo.Application.Persistence;
+using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;

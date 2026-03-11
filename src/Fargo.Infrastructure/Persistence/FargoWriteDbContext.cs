@@ -1,7 +1,7 @@
 ﻿using Fargo.Domain.Entities;
 using Fargo.Domain.ValueObjects;
-using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Configurations;
+using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence
