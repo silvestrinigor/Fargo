@@ -1,3 +1,5 @@
+using Fargo.Domain.Security;
+
 namespace Fargo.Domain.Entities
 {
     /// <summary>
@@ -42,12 +44,12 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Gets the unique identifier of the user that created the entity.
+        /// Gets the unique identifier of the actor that created the entity.
         /// </summary>
         /// <remarks>
-        /// This value may be <see langword="null"/> when the entity was created
-        /// by a system process or when the user context is not available.
-        /// When provided, it identifies the user responsible for the creation.
+        /// This value may be <see langword="null"/> when the actor context is not available.
+        /// When the entity is created by an internal system process, this value should
+        /// typically be set to <see cref="SystemActor.Guid"/>.
         /// </remarks>
         public Guid? CreatedByGuid
         {
@@ -69,11 +71,13 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Gets the unique identifier of the user that last modified the entity.
+        /// Gets the unique identifier of the actor that last modified the entity.
         /// </summary>
         /// <remarks>
-        /// This value is <see langword="null"/> when the entity has not been
-        /// modified since its creation.
+        /// This value is <see langword="null"/> when the entity has not been modified
+        /// since its creation.
+        /// When the modification is performed by an internal system process, this value
+        /// should typically be set to <see cref="SystemActor.Guid"/>.
         /// </remarks>
         public Guid? EditedByGuid
         {
