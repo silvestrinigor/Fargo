@@ -32,14 +32,12 @@ namespace Fargo.HttpApi.Extensions
                 .Produces<UserGroupResponseModel>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);
 
-            /*
             group.MapGet("/", GetManyUserGroups)
                 .WithName("GetUserGroups")
                 .WithSummary("Gets multiple user groups")
                 .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries.")
                 .Produces<IReadOnlyCollection<UserGroupResponseModel>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
-            */
 
             group.MapPost("/", CreateUserGroup)
                 .WithName("CreateUserGroup")
@@ -79,7 +77,7 @@ namespace Fargo.HttpApi.Extensions
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
-            //IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupResponseModel>> handler,
+            IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupResponseModel>> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserGroupManyQuery(
@@ -87,9 +85,9 @@ namespace Fargo.HttpApi.Extensions
                 PaginationHelpers.CreatePagination(page, limit)
             );
 
-            //var response = await handler.Handle(query, cancellationToken);
-            throw new NotImplementedException();
-            //return TypedResultsHelpers.HandleCollectionQueryResult(response);
+            var response = await handler.Handle(query, cancellationToken);
+
+            return TypedResultsHelpers.HandleCollectionQueryResult(response);
         }
 
         private static async Task<Ok<Guid>> CreateUserGroup(
