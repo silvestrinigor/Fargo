@@ -16,6 +16,10 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<UserPermission> UserPermission { get; set; }
 
+        public DbSet<UserGroup> UserGroups { get; set; }
+
+        public DbSet<UserGroupPermission> UserGroupPermissions { get; set; }
+
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
