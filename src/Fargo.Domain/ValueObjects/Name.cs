@@ -78,7 +78,7 @@
         /// <see langword="true"/> if both names have the same value; otherwise, <see langword="false"/>.
         /// </returns>
         public bool Equals(Name other)
-            => string.Equals(Value, other.Value, StringComparison.Ordinal);
+            => string.Equals(value, other.value, StringComparison.Ordinal);
 
         /// <summary>
         /// Determines whether the current name is equal to the specified object.
@@ -96,7 +96,7 @@
         /// </summary>
         /// <returns>A hash code based on the underlying value.</returns>
         public override int GetHashCode()
-            => Value.GetHashCode(StringComparison.Ordinal);
+            => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
 
         /// <summary>
         /// Determines whether two <see cref="Name"/> instances are equal.

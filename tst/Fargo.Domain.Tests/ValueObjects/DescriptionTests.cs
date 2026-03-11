@@ -18,16 +18,6 @@ public sealed class DescriptionTests
     }
 
     [Fact]
-    public void DefaultConstructor_Should_CreateEmptyDescription()
-    {
-        // Act
-        var description = new Description();
-
-        // Assert
-        Assert.Equal(string.Empty, description.Value);
-    }
-
-    [Fact]
     public void EmptyProperty_Should_ReturnEmptyDescription()
     {
         // Act
@@ -91,16 +81,42 @@ public sealed class DescriptionTests
     }
 
     [Fact]
-    public void DefaultStruct_Should_ReturnEmptyString()
+    public void DefaultStruct_Value_Should_ThrowInvalidOperationException()
     {
         // Arrange
         Description description = default;
 
         // Act
-        var result = description.Value;
+        void act() => _ = description.Value;
 
         // Assert
-        Assert.Equal(string.Empty, result);
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
+    [Fact]
+    public void DefaultStruct_ToString_Should_ThrowInvalidOperationException()
+    {
+        // Arrange
+        Description description = default;
+
+        // Act
+        void act() => _ = description.ToString();
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
+    [Fact]
+    public void DefaultStruct_ImplicitOperator_Should_ThrowInvalidOperationException()
+    {
+        // Arrange
+        Description description = default;
+
+        // Act
+        void act() => _ = (string)description;
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -144,7 +160,7 @@ public sealed class DescriptionTests
     public void Constructor_Should_AcceptEmptyString()
     {
         // Arrange
-        var value = "";
+        var value = string.Empty;
 
         // Act
         var description = new Description(value);
@@ -293,11 +309,25 @@ public sealed class DescriptionTests
     }
 
     [Fact]
-    public void DefaultStruct_Should_BeEqualTo_EmptyDescription()
+    public void DefaultStruct_Should_NotBeEqualTo_EmptyDescription()
     {
         // Arrange
         Description left = default;
         var right = Description.Empty;
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void DefaultStruct_Should_BeEqualTo_DefaultStruct()
+    {
+        // Arrange
+        Description left = default;
+        Description right = default;
 
         // Act
         var result = left == right;

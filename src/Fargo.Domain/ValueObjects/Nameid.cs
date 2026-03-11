@@ -74,7 +74,7 @@ namespace Fargo.Domain.ValueObjects
         /// ignoring character casing.
         /// </summary>
         public bool Equals(Nameid other)
-            => string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
+            => string.Equals(value, other.value, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Determines whether this instance and a specified object are equal.
@@ -86,7 +86,7 @@ namespace Fargo.Domain.ValueObjects
         /// Returns a hash code for this instance, using case-insensitive semantics.
         /// </summary>
         public override int GetHashCode()
-            => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+            => value is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(value);
 
         /// <summary>
         /// Determines whether two <see cref="Nameid"/> instances are equal.

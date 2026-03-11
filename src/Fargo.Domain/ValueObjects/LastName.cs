@@ -83,7 +83,7 @@ namespace Fargo.Domain.ValueObjects
         /// Determines whether the current last name is equal to another last name.
         /// </summary>
         public bool Equals(LastName other)
-            => string.Equals(Value, other.Value, StringComparison.Ordinal);
+            => string.Equals(value, other.value, StringComparison.Ordinal);
 
         /// <summary>
         /// Determines whether the current last name is equal to the specified object.
@@ -95,7 +95,7 @@ namespace Fargo.Domain.ValueObjects
         /// Returns a hash code for the current last name.
         /// </summary>
         public override int GetHashCode()
-            => Value.GetHashCode(StringComparison.Ordinal);
+            => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
 
         /// <summary>
         /// Determines whether two <see cref="LastName"/> instances are equal.
