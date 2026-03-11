@@ -122,6 +122,8 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
+                services.AddScoped<ICurrentUser, SystemCurrentUser>();
+
                 return services;
             }
 
