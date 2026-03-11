@@ -1,6 +1,7 @@
 ﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Models.ItemModels;
+using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Repositories;
@@ -9,9 +10,11 @@ using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.AuthCommands;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Commands.UserCommands;
+using Fargo.Application.Requests.Commands.UserGroupCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Application.Requests.Queries.UserGroupQueries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
@@ -167,6 +170,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IArticleRepository, ArticleRepository>();
                 services.AddScoped<IItemRepository, ItemRepository>();
                 services.AddScoped<IUserRepository, UserRepository>();
+                services.AddScoped<IUserGroupRepository, UserGroupRepository>();
                 services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             }
 
@@ -175,6 +179,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IArticleQueries, ArticleQueries>();
                 services.AddScoped<IItemQueries, ItemQueries>();
                 services.AddScoped<IUserQueries, UserQueries>();
+                services.AddScoped<IUserGroupQueries, UserGroupQueries>();
             }
             private void AddHandlers()
             {
@@ -197,6 +202,10 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
                 services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
 
+                services.AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>();
+                services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
+                services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
+
                 services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleReadModel?>, ArticleSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>>, ArticleManyQueryHandler>();
 
@@ -205,12 +214,15 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserResponseModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>>, UserManyQueryHandler>();
+
+                services.AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupResponseModel?>, UserGroupSingleQueryHandler>();
             }
 
             private void AddDomainServices()
             {
                 services.AddScoped<ArticleService>();
                 services.AddScoped<UserService>();
+                services.AddScoped<UserGroupService>();
             }
 
             private void AddSecurity()
