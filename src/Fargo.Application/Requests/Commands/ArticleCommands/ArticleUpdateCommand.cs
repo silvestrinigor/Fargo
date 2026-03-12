@@ -28,7 +28,6 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
     /// </summary>
     public sealed class ArticleUpdateCommandHandler(
             ArticleService articleService,
-            IArticleRepository articleRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ICurrentUser currentUser

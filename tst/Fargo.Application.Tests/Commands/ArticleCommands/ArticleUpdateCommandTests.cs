@@ -33,7 +33,6 @@ public sealed class ArticleUpdateCommandHandlerTests
 
         handler = new ArticleUpdateCommandHandler(
                 articleService,
-                articleRepository,
                 userRepository,
                 unitOfWork,
                 currentUser);

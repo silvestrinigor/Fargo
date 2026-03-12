@@ -22,6 +22,7 @@ namespace Fargo.Infrastructure.Configurations
                         x => x.Ticks,
                         x => TimeSpan.FromTicks(x)
                         );
+            builder.HasMany(x => x.UserGroups).WithMany();
         }
     }
 }
