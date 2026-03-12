@@ -1,4 +1,5 @@
 ﻿using Fargo.Domain.ValueObjects;
+using Fargo.Application.Models.UserGroupModels;
 
 namespace Fargo.Application.Models.UserModels
 {
@@ -99,7 +100,7 @@ namespace Fargo.Application.Models.UserModels
         }
 
         /// <summary>
-        /// Gets the permissions assigned to the user.
+        /// Gets the permissions assigned directly to the user.
         /// </summary>
         /// <remarks>
         /// Each permission defines an action that the user is allowed to perform.
@@ -111,5 +112,19 @@ namespace Fargo.Application.Models.UserModels
         }
 
         private readonly List<UserPermissionReadModel> userPermissions = [];
+
+        /// <summary>
+        /// Gets the groups associated with the user.
+        /// </summary>
+        /// <remarks>
+        /// Each group may grant additional permissions to the user.
+        /// </remarks>
+        public required IReadOnlyCollection<UserGroupReadModel> UserGroups
+        {
+            get => userGroups;
+            init => userGroups = [.. value];
+        }
+
+        private readonly List<UserGroupReadModel> userGroups = [];
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Fargo.Application.Common;
+using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.UserCommands;
@@ -39,6 +40,14 @@ namespace Fargo.HttpApi.Extensions
                 .Produces<IReadOnlyCollection<UserResponseModel>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
 
+            group.MapGet("/{userGuid:guid}/groups", GetUserGroups)
+                .WithName("GetUserGroups")
+                .WithSummary("Gets the groups of a user")
+                .WithDescription("Retrieves all user groups associated with the specified user. Supports querying historical data using temporal tables.")
+                .Produces<IReadOnlyCollection<UserGroupResponseModel>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
             group.MapPost("/", CreateUser)
                 .WithName("CreateUser")
                 .WithSummary("Creates a new user")
@@ -56,6 +65,20 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("DeleteUser")
                 .WithSummary("Deletes a user")
                 .WithDescription("Deletes the specified user from the system.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapPost("/{userGuid:guid}/groups/{userGroupGuid:guid}", AddUserGroup)
+                .WithName("AddUserGroupToUser")
+                .WithSummary("Adds a user group to a user")
+                .WithDescription("Associates an existing user group with the specified user.")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapDelete("/{userGuid:guid}/groups/{userGroupGuid:guid}", RemoveUserGroup)
+                .WithName("RemoveUserGroupFromUser")
+                .WithSummary("Removes a user group from a user")
+                .WithDescription("Removes the association between an existing user group and the specified user.")
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
         }
@@ -84,6 +107,19 @@ namespace Fargo.HttpApi.Extensions
                 temporalAsOf,
                 PaginationHelpers.CreatePagination(page, limit)
             );
+
+            var response = await handler.Handle(query, cancellationToken);
+
+            return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        }
+
+        private static async Task<Results<Ok<IReadOnlyCollection<UserGroupResponseModel>>, NoContent>> GetUserGroups(
+            Guid userGuid,
+            DateTimeOffset? temporalAsOf,
+            IQueryHandler<UserUserGroupsManyQuery, IReadOnlyCollection<UserGroupResponseModel>> handler,
+            CancellationToken cancellationToken)
+        {
+            var query = new UserUserGroupsManyQuery(userGuid, temporalAsOf);
 
             var response = await handler.Handle(query, cancellationToken);
 
@@ -119,6 +155,32 @@ namespace Fargo.HttpApi.Extensions
             CancellationToken cancellationToken)
         {
             var command = new UserDeleteCommand(userGuid);
+
+            await handler.Handle(command, cancellationToken);
+
+            return TypedResults.NoContent();
+        }
+
+        private static async Task<NoContent> AddUserGroup(
+            Guid userGuid,
+            Guid userGroupGuid,
+            ICommandHandler<UserAddUserGroupCommand> handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new UserAddUserGroupCommand(userGuid, userGroupGuid);
+
+            await handler.Handle(command, cancellationToken);
+
+            return TypedResults.NoContent();
+        }
+
+        private static async Task<NoContent> RemoveUserGroup(
+            Guid userGuid,
+            Guid userGroupGuid,
+            ICommandHandler<UserRemoveUserGroupCommand> handler,
+            CancellationToken cancellationToken)
+        {
+            var command = new UserRemoveUserGroupCommand(userGuid, userGroupGuid);
 
             await handler.Handle(command, cancellationToken);
 

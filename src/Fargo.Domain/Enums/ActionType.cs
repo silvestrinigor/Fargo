@@ -80,6 +80,18 @@
         EditUserGroup,
 
         /// <summary>
+        /// Allows modifying the membership of a user group,
+        /// including adding or removing users from the group.
+        ///
+        /// This permission controls operations that change which
+        /// users belong to a given <see cref="Entities.UserGroup"/>.
+        /// It does not grant permission to create, delete, or edit the group
+        /// itself, which are controlled by <see cref="CreateUserGroup"/>,
+        /// <see cref="DeleteUserGroup"/>, and <see cref="EditUserGroup"/>.
+        /// </summary>
+        ChangeUserGroupMembers,
+
+        /// <summary>
         /// Allows creating partitions.
         /// </summary>
         CreatePartition,
