@@ -14,8 +14,18 @@ namespace Fargo.Application.Models.ArticleModels
     /// When provided, the value must satisfy the validation rules defined in
     /// <see cref="Description"/>.
     /// </param>
+    /// <param name="FirstPartition">
+    /// Optional identifier of the first partition to associate with the article
+    /// during creation.
+    /// </param>
+    /// <remarks>
+    /// Articles are partitioned entities and may belong to multiple partitions.
+    /// When <paramref name="FirstPartition"/> is provided, the created article
+    /// is initially associated with that partition.
+    /// </remarks>
     public record ArticleCreateModel(
             Name Name,
-            Description? Description = null
+            Description? Description = null,
+            Guid? FirstPartition = null
             );
 }

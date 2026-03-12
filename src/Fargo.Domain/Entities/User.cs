@@ -10,7 +10,7 @@ namespace Fargo.Domain.Entities
     /// A user contains authentication credentials, direct permissions,
     /// and group memberships that may also grant permissions.
     /// </summary>
-    public class User : AuditedEntity
+    public class User : AuditedEntity, IPartitioned
     {
         /// <summary>
         /// Gets or sets the unique NAMEID (username) of the user.
@@ -256,6 +256,26 @@ namespace Fargo.Domain.Entities
         private readonly List<UserGroup> userGroups = [];
 
         /// <summary>
+        /// Gets the read-only collection of partitions the user has access to.
+        /// </summary>
+        /// <remarks>
+        /// Partitions define logical boundaries in the system.
+        /// A user can only access entities that belong to at least one partition
+        /// to which the user has been granted access.
+        /// </remarks>
+        public IReadOnlyCollection<PartitionAccess> PartitionsAccesses
+        {
+            get => partitionAccesses;
+            init => partitionAccesses = [.. value];
+        }
+
+        /// <summary>
+        /// Internal mutable collection used to store the partitions
+        /// the user has access to.
+        /// </summary>
+        private readonly List<PartitionAccess> partitionAccesses = [];
+
+        /// <summary>
         /// Adds a permission to the user if it does not already exist.
         /// </summary>
         /// <param name="action">The action type to allow.</param>
@@ -352,6 +372,151 @@ namespace Fargo.Domain.Entities
             {
                 throw new UserNotAuthorizedFargoDomainException(Guid, action);
             }
+        }
+
+        /// <summary>
+        /// Grants access to the specified partition for the user.
+        /// </summary>
+        /// <param name="partition">The partition to grant access to.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+        /// </exception>
+        public void AddPartitionAccess(Partition partition)
+        {
+            ArgumentNullException.ThrowIfNull(partition);
+
+            if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
+            {
+                return;
+            }
+
+            var partitionAccess = new PartitionAccess
+            {
+                User = this,
+                Partition = partition
+            };
+
+            partitionAccesses.Add(partitionAccess);
+        }
+
+        /// <summary>
+        /// Removes access to the specified partition from the user.
+        /// </summary>
+        /// <param name="partitionGuid">The partition identifier.</param>
+        public void RemovePartitionAccess(Guid partitionGuid)
+        {
+            var userPartition =
+                partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
+
+            if (userPartition == null)
+            {
+                return;
+            }
+
+            partitionAccesses.Remove(userPartition);
+        }
+
+        /// <summary>
+        /// Gets the read-only collection of partitions to which the user belongs.
+        /// </summary>
+        /// <remarks>
+        /// These partitions define the data scope of the user itself.
+        /// Other users may only access this user if they have access to at least
+        /// one of these partitions.
+        /// </remarks>
+        public IReadOnlyCollection<Partition> Partitions
+        {
+            get => partitions;
+            init => partitions = [.. value];
+        }
+
+        /// <summary>
+        /// Internal mutable collection used to store the partitions
+        /// to which the user belongs.
+        /// </summary>
+        private readonly List<Partition> partitions = [];
+
+        /// <summary>
+        /// Adds the specified partition to the user if it is not already associated.
+        /// </summary>
+        /// <param name="partition">The partition to associate with the user.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+        /// </exception>
+        public void AddPartition(Partition partition)
+        {
+            ArgumentNullException.ThrowIfNull(partition);
+
+            if (partitions.Any(x => x.Guid == partition.Guid))
+            {
+                return;
+            }
+
+            partitions.Add(partition);
+        }
+
+        /// <summary>
+        /// Removes the specified partition from the user if it exists.
+        /// </summary>
+        /// <param name="partitionGuid">The unique identifier of the partition to remove.</param>
+        public void RemovePartition(Guid partitionGuid)
+        {
+            var partition = partitions.SingleOrDefault(x => x.Guid == partitionGuid);
+
+            if (partition == null)
+            {
+                return;
+            }
+
+            partitions.Remove(partition);
+        }
+
+        /// <summary>
+        /// Determines whether the user has access to the specified partition.
+        /// </summary>
+        /// <param name="partition">The partition identifier.</param>
+        /// <returns>
+        /// <c>true</c> if the user has access to the partition; otherwise <c>false</c>.
+        /// </returns>
+        public bool HasPartitionAccess(Partition partition)
+            => partitionAccesses.Any(x => x == partition);
+
+        /// <summary>
+        /// Determines whether the user has access to the specified partitioned entity.
+        /// </summary>
+        /// <param name="partitioned">
+        /// The partitioned entity to evaluate.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the entity belongs to at least one partition the user has access to,
+        /// or if the entity is not associated with any partition; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="partitioned"/> is <see langword="null"/>.
+        /// </exception>
+        /// <remarks>
+        /// Access is granted when:
+        /// <list type="bullet">
+        /// <item>
+        /// The entity has no partitions associated with it, making it accessible to all users.
+        /// </item>
+        /// <item>
+        /// There is at least one intersection between the partitions associated with the
+        /// entity and the partitions the user has access to.
+        /// </item>
+        /// </list>
+        /// </remarks>
+        public bool HasAccess(IPartitioned partitioned)
+        {
+            ArgumentNullException.ThrowIfNull(partitioned);
+
+            if (!partitioned.Partitions.Any())
+            {
+                return true;
+            }
+
+            return partitioned.Partitions.Any(partition =>
+                    partitionAccesses.Any(access => access.PartitionGuid == partition.Guid));
         }
     }
 }

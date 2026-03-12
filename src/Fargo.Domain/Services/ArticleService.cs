@@ -7,6 +7,10 @@ namespace Fargo.Domain.Services
     /// <summary>
     /// Provides domain-level operations related to <see cref="Article"/>.
     /// </summary>
+    /// <remarks>
+    /// This service encapsulates domain rules involving articles,
+    /// including deletion constraints and partition-based access checks.
+    /// </remarks>
     public class ArticleService(
             IArticleRepository articleRepository
             )
@@ -33,6 +37,45 @@ namespace Fargo.Domain.Services
             {
                 throw new ArticleDeleteWithItemsAssociatedFargoDomainException(article.Guid);
             }
+        }
+
+        /// <summary>
+        /// Gets an article by its identifier if the specified actor
+        /// has access to it.
+        /// </summary>
+        /// <param name="articleGuid">
+        /// The unique identifier of the article to retrieve.
+        /// </param>
+        /// <param name="actor">
+        /// The user performing the operation. The actor must have access
+        /// to at least one partition associated with the requested article.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        /// The matching <see cref="Article"/> when it exists and the actor
+        /// has access to it; otherwise, <see langword="null"/>.
+        /// </returns>
+        /// <remarks>
+        /// This method enforces partition-based visibility rules.
+        /// An article is only returned when the requesting user has access
+        /// to at least one partition associated with it.
+        /// </remarks>
+        public async Task<Article?> GetArticle(
+                Guid articleGuid,
+                User actor,
+                CancellationToken cancellationToken = default
+                )
+        {
+            var article = await articleRepository.GetByGuid(articleGuid, cancellationToken);
+
+            if (article != null && !actor.HasAccess(article))
+            {
+                return null;
+            }
+
+            return article;
         }
     }
 }

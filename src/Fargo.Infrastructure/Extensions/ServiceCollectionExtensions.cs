@@ -172,6 +172,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IUserGroupRepository, UserGroupRepository>();
                 services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+                services.AddScoped<IPartitionRepository, PartitionRepository>();
             }
 
             private void AddReadRepositories()
@@ -223,6 +224,7 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ArticleService>();
                 services.AddScoped<UserService>();
                 services.AddScoped<UserGroupService>();
+                services.AddScoped<PartitionService>();
             }
 
             private void AddSecurity()

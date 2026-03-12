@@ -1,10 +1,12 @@
 ﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
@@ -23,6 +25,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
     /// Handles the execution of <see cref="ArticleCreateCommand"/>.
     /// </summary>
     public sealed class ArticleCreateCommandHandler(
+            PartitionService partitionService,
             IArticleRepository articleRepository,
             IUserRepository userRepository,
             ICurrentUser currentUser,
@@ -43,12 +46,8 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
             actor.ValidatePermission(ActionType.CreateArticle);
 
             var article = new Article
@@ -56,6 +55,17 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 Name = command.Article.Name,
                 Description = command.Article.Description ?? Description.Empty
             };
+
+            if (command.Article.FirstPartition != null)
+            {
+                var articlePartition = await partitionService.GetPartition(
+                        command.Article.FirstPartition.Value,
+                        actor,
+                        cancellationToken
+                        ) ?? throw new PartitionNotFoundFargoApplicationException(command.Article.FirstPartition.Value);
+
+                article.AddPartition(articlePartition);
+            }
 
             articleRepository.Add(article);
 

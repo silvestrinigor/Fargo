@@ -7,6 +7,7 @@ using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 using NSubstitute;
 
@@ -15,15 +16,23 @@ namespace Fargo.Application.Tests.Commands.ArticleCommands;
 public sealed class ArticleUpdateCommandHandlerTests
 {
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
+
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
+
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
+
     private readonly ICurrentUser currentUser = Substitute.For<ICurrentUser>();
+
+    private readonly ArticleService articleService;
 
     private readonly ArticleUpdateCommandHandler handler;
 
     public ArticleUpdateCommandHandlerTests()
     {
+        articleService = new(articleRepository);
+
         handler = new ArticleUpdateCommandHandler(
+                articleService,
                 articleRepository,
                 userRepository,
                 unitOfWork,
@@ -249,7 +258,7 @@ public sealed class ArticleUpdateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ThrowUserInactiveFargoDomainException_When_ActorIsInactive()
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_ActorIsInactive()
     {
         // Arrange
         var actor = CreateUserWithPermission(ActionType.EditArticle);
@@ -264,8 +273,7 @@ public sealed class ArticleUpdateCommandHandlerTests
         Task act() => handler.Handle(command);
 
         // Assert
-        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
-        Assert.Equal(actor.Guid, exception.UserGuid);
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
 
         await articleRepository.DidNotReceive()
             .GetByGuid(Arg.Any<Guid>(), Arg.Any<CancellationToken>());

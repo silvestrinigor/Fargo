@@ -1,9 +1,11 @@
 ﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
@@ -25,6 +27,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
     /// Handles the execution of <see cref="ArticleUpdateCommand"/>.
     /// </summary>
     public sealed class ArticleUpdateCommandHandler(
+            ArticleService articleService,
             IArticleRepository articleRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
@@ -48,16 +51,13 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
             actor.ValidatePermission(ActionType.EditArticle);
 
-            var article = await articleRepository.GetByGuid(
+            var article = await articleService.GetArticle(
                     command.ArticleGuid,
+                    actor,
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 

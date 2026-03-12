@@ -22,6 +22,10 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+        public DbSet<Partition> Partitions { get; set; }
+
+        public DbSet<PartitionAccess> PartitionAccesses { get; set; }
+
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder
@@ -75,6 +79,10 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new UserGroupPermissionConfiguration());
 
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+
+            modelBuilder.ApplyConfiguration(new PartitionConfiguration());
+
+            modelBuilder.ApplyConfiguration(new PartitionAccessConfiguration());
         }
     }
 }

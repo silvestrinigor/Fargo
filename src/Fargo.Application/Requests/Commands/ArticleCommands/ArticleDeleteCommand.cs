@@ -1,4 +1,5 @@
 ﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -45,16 +46,13 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
             actor.ValidatePermission(ActionType.DeleteArticle);
 
-            var article = await articleRepository.GetByGuid(
+            var article = await articleService.GetArticle(
                     command.ArticleGuid,
+                    actor,
                     cancellationToken
                     ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 

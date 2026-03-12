@@ -11,11 +11,19 @@ namespace Fargo.Domain.Entities
     /// of permissions that define which actions members of the group
     /// are allowed to perform.
     /// </summary>
-    public class UserGroup : AuditedEntity
+    /// <remarks>
+    /// A user group is partitioned data and may belong to multiple
+    /// <see cref="Partition"/> instances.
+    ///
+    /// A user may access the group only if they have access to at least
+    /// one of the partitions associated with it, subject to additional
+    /// authorization rules.
+    /// </remarks>
+    public class UserGroup : AuditedEntity, IPartitioned
     {
         /// <summary>
         /// Gets or sets the unique NAMEID of the user group.
-        /// /// This value uniquely identifies the group in the system.
+        /// This value uniquely identifies the group in the system.
         /// </summary>
         public required Nameid Nameid
         {
@@ -101,6 +109,26 @@ namespace Fargo.Domain.Entities
         private readonly List<UserGroupPermission> userGroupPermissions = [];
 
         /// <summary>
+        /// Gets the read-only collection of partitions to which the user group belongs.
+        /// </summary>
+        /// <remarks>
+        /// These partitions define the access scope of the user group.
+        /// A user may access the group only if they have access to at least
+        /// one of these partitions.
+        /// </remarks>
+        public IReadOnlyCollection<Partition> Partitions
+        {
+            get => partitions;
+            init => partitions = [.. value];
+        }
+
+        /// <summary>
+        /// Internal mutable collection used to store the partitions
+        /// associated with the user group.
+        /// </summary>
+        private readonly List<Partition> partitions = [];
+
+        /// <summary>
         /// Adds a permission to the user group if it does not already exist.
         /// </summary>
         /// <param name="action">The action type to allow.</param>
@@ -134,6 +162,41 @@ namespace Fargo.Domain.Entities
             }
 
             userGroupPermissions.Remove(userGroupPermission);
+        }
+
+        /// <summary>
+        /// Adds the specified partition to the user group if it is not already associated.
+        /// </summary>
+        /// <param name="partition">The partition to associate with the user group.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+        /// </exception>
+        public void AddPartition(Partition partition)
+        {
+            ArgumentNullException.ThrowIfNull(partition);
+
+            if (partitions.Any(x => x.Guid == partition.Guid))
+            {
+                return;
+            }
+
+            partitions.Add(partition);
+        }
+
+        /// <summary>
+        /// Removes the specified partition from the user group if it exists.
+        /// </summary>
+        /// <param name="partitionGuid">The unique identifier of the partition to remove.</param>
+        public void RemovePartition(Guid partitionGuid)
+        {
+            var partition = partitions.SingleOrDefault(x => x.Guid == partitionGuid);
+
+            if (partition == null)
+            {
+                return;
+            }
+
+            partitions.Remove(partition);
         }
 
         /// <summary>

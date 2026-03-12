@@ -213,7 +213,7 @@ public sealed class ArticleDeleteCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ThrowUserInactiveFargoDomainException_When_ActorIsInactive()
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_ActorIsInactive()
     {
         // Arrange
         var actor = CreateUserWithPermission(ActionType.DeleteArticle);
@@ -228,8 +228,7 @@ public sealed class ArticleDeleteCommandHandlerTests
         Task act() => handler.Handle(command);
 
         // Assert
-        var exception = await Assert.ThrowsAsync<UserInactiveFargoDomainException>(act);
-        Assert.Equal(actor.Guid, exception.UserGuid);
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
 
         await articleRepository.DidNotReceive()
             .GetByGuid(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
