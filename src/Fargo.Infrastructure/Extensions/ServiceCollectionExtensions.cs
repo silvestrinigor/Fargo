@@ -202,6 +202,8 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
                 services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
+                services.AddScoped<ICommandHandler<UserAddUserGroupCommand>, UserAddUserGroupCommandHandler>();
+                services.AddScoped<ICommandHandler<UserRemoveUserGroupCommand>, UserRemoveUserGroupCommandHandler>();
 
                 services.AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>();
                 services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
@@ -215,8 +217,10 @@ namespace Fargo.Infrastructure.Extensions
 
                 services.AddScoped<IQueryHandler<UserSingleQuery, UserResponseModel?>, UserSingleQueryHandler>();
                 services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>>, UserManyQueryHandler>();
+                services.AddScoped<IQueryHandler<UserUserGroupsManyQuery, IReadOnlyCollection<UserGroupResponseModel>>, UserUserGroupsManyQueryHandler>();
 
                 services.AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupResponseModel?>, UserGroupSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupResponseModel>>, UserGroupManyQueryHandler>();
             }
 
             private void AddDomainServices()

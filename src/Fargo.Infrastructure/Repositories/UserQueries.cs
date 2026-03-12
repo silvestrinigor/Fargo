@@ -18,6 +18,7 @@ namespace Fargo.Infrastructure.Repositories
                 )
             => await users
             .TemporalAsOfIfProvided(asOfDateTime)
+            .Include(u => u.UserPermissions)
             .Where(a => a.Guid == entityGuid)
             .AsNoTracking()
             .OrderBy(x => x.Guid)

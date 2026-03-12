@@ -40,8 +40,8 @@ namespace Fargo.HttpApi.Extensions
                 .Produces<IReadOnlyCollection<UserResponseModel>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
 
-            group.MapGet("/{userGuid:guid}/groups", GetUserGroups)
-                .WithName("GetUserGroups")
+            group.MapGet("/{userGuid:guid}/user-groups", GetUserUserGroups)
+                .WithName("GetUserUserGroups")
                 .WithSummary("Gets the groups of a user")
                 .WithDescription("Retrieves all user groups associated with the specified user. Supports querying historical data using temporal tables.")
                 .Produces<IReadOnlyCollection<UserGroupResponseModel>>(StatusCodes.Status200OK)
@@ -68,14 +68,14 @@ namespace Fargo.HttpApi.Extensions
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPost("/{userGuid:guid}/groups/{userGroupGuid:guid}", AddUserGroup)
+            group.MapPost("/{userGuid:guid}/user-groups/{userGroupGuid:guid}", AddUserGroup)
                 .WithName("AddUserGroupToUser")
                 .WithSummary("Adds a user group to a user")
                 .WithDescription("Associates an existing user group with the specified user.")
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
 
-            group.MapDelete("/{userGuid:guid}/groups/{userGroupGuid:guid}", RemoveUserGroup)
+            group.MapDelete("/{userGuid:guid}/user-groups/{userGroupGuid:guid}", RemoveUserGroup)
                 .WithName("RemoveUserGroupFromUser")
                 .WithSummary("Removes a user group from a user")
                 .WithDescription("Removes the association between an existing user group and the specified user.")
@@ -113,7 +113,7 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleCollectionQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<UserGroupResponseModel>>, NoContent>> GetUserGroups(
+        private static async Task<Results<Ok<IReadOnlyCollection<UserGroupResponseModel>>, NoContent>> GetUserUserGroups(
             Guid userGuid,
             DateTimeOffset? temporalAsOf,
             IQueryHandler<UserUserGroupsManyQuery, IReadOnlyCollection<UserGroupResponseModel>> handler,
