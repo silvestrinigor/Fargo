@@ -479,7 +479,7 @@ namespace Fargo.Domain.Entities
         /// <c>true</c> if the user has access to the partition; otherwise <c>false</c>.
         /// </returns>
         public bool HasPartitionAccess(Partition partition)
-            => partitionAccesses.Any(x => x == partition);
+            => partitionAccesses.Any(x => x.Partition == partition);
 
         /// <summary>
         /// Determines whether the user has access to the specified partitioned entity.
