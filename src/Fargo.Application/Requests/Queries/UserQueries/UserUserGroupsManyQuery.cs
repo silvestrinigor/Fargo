@@ -1,6 +1,6 @@
 using Fargo.Application.Common;
-using Fargo.Application.Extensions;
 using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Repositories;
 

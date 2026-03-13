@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Fargo.Infrastructure.Converters;
+using System.Text.Json;
 
 namespace Fargo.Infrastructure.Client.Serialization;
 
