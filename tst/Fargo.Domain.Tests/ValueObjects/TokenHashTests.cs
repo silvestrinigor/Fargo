@@ -14,7 +14,7 @@ public sealed class TokenHashTests
         var tokenHash = new TokenHash(value);
 
         // Assert
-        Assert.Equal(value, tokenHash.Value);
+        Assert.Equal(value.ToUpperInvariant(), tokenHash.Value);
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public sealed class TokenHashTests
         var tokenHash = TokenHash.FromString(value);
 
         // Assert
-        Assert.Equal(value, tokenHash.Value);
+        Assert.Equal(value.ToUpperInvariant(), tokenHash.Value);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class TokenHashTests
         var result = tokenHash.ToString();
 
         // Assert
-        Assert.Equal(value, result);
+        Assert.Equal(value.ToUpperInvariant(), result);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class TokenHashTests
         string result = tokenHash;
 
         // Assert
-        Assert.Equal(value, result);
+        Assert.Equal(value.ToUpperInvariant(), result);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class TokenHashTests
         var tokenHash = (TokenHash)value;
 
         // Assert
-        Assert.Equal(value, tokenHash.Value);
+        Assert.Equal(value.ToUpperInvariant(), tokenHash.Value);
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public sealed class TokenHashTests
         var tokenHash = new TokenHash(value);
 
         // Assert
-        Assert.Equal(value, tokenHash.Value);
+        Assert.Equal(value.ToUpperInvariant(), tokenHash.Value);
     }
 
     [Fact]
@@ -165,7 +165,20 @@ public sealed class TokenHashTests
         var tokenHash = new TokenHash(value);
 
         // Assert
-        Assert.Equal(value, tokenHash.Value);
+        Assert.Equal(value.ToUpperInvariant(), tokenHash.Value);
+    }
+
+    [Fact]
+    public void Constructor_Should_NormalizeValueToUpperCase()
+    {
+        // Arrange
+        var value = new string('a', TokenHash.MinLength);
+
+        // Act
+        var tokenHash = new TokenHash(value);
+
+        // Assert
+        Assert.Equal(new string('A', TokenHash.MinLength), tokenHash.Value);
     }
 
     [Fact]
@@ -174,6 +187,20 @@ public sealed class TokenHashTests
         // Arrange
         var left = new TokenHash(new string('a', TokenHash.MinLength));
         var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = left.Equals(right);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Equals_Should_ReturnTrue_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('A', TokenHash.MinLength));
 
         // Act
         var result = left.Equals(right);
@@ -202,6 +229,20 @@ public sealed class TokenHashTests
         // Arrange
         var tokenHash = new TokenHash(new string('a', TokenHash.MinLength));
         object other = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = tokenHash.Equals(other);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void EqualsObject_Should_ReturnTrue_When_ObjectDiffersOnlyByCase()
+    {
+        // Arrange
+        var tokenHash = new TokenHash(new string('a', TokenHash.MinLength));
+        object other = new TokenHash(new string('A', TokenHash.MinLength));
 
         // Act
         var result = tokenHash.Equals(other);
@@ -242,6 +283,20 @@ public sealed class TokenHashTests
         // Arrange
         var left = new TokenHash(new string('a', TokenHash.MinLength));
         var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var result = left == right;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void OperatorEqual_Should_ReturnTrue_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('A', TokenHash.MinLength));
 
         // Act
         var result = left == right;
@@ -293,11 +348,40 @@ public sealed class TokenHashTests
     }
 
     [Fact]
+    public void OperatorNotEqual_Should_ReturnFalse_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('A', TokenHash.MinLength));
+
+        // Act
+        var result = left != right;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
     public void GetHashCode_Should_ReturnSameHash_When_ValuesAreEqual()
     {
         // Arrange
         var left = new TokenHash(new string('a', TokenHash.MinLength));
         var right = new TokenHash(new string('a', TokenHash.MinLength));
+
+        // Act
+        var leftHash = left.GetHashCode();
+        var rightHash = right.GetHashCode();
+
+        // Assert
+        Assert.Equal(leftHash, rightHash);
+    }
+
+    [Fact]
+    public void GetHashCode_Should_ReturnSameHash_When_ValuesDifferOnlyByCase()
+    {
+        // Arrange
+        var left = new TokenHash(new string('a', TokenHash.MinLength));
+        var right = new TokenHash(new string('A', TokenHash.MinLength));
 
         // Act
         var leftHash = left.GetHashCode();

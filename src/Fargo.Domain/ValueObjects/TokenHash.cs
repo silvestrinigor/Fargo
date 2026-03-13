@@ -2,11 +2,16 @@ namespace Fargo.Domain.ValueObjects
 {
     /// <summary>
     /// Represents a hashed token stored by the system.
-    ///
-    /// This value object ensures the stored value is a valid hash
-    /// of a security token. The original token should never be
-    /// persisted, only its hash.
     /// </summary>
+    /// <remarks>
+    /// This value object ensures that only a valid token hash is stored.
+    /// The original token must never be persisted — only its hash.
+    ///
+    /// The hash value is normalized to uppercase when stored, ensuring a
+    /// canonical representation and enabling efficient ordinal comparisons.
+    ///
+    /// Validation ignores case differences and rejects whitespace.
+    /// </remarks>
     public readonly struct TokenHash : IEquatable<TokenHash>
     {
         /// <summary>
@@ -26,7 +31,7 @@ namespace Fargo.Domain.ValueObjects
         /// </summary>
         /// <param name="value">The hashed token value.</param>
         /// <exception cref="ArgumentException">
-        /// Thrown when the value is null, empty, or contains invalid characters.
+        /// Thrown when the value is null, empty, or contains whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the hash length is outside the allowed range.
@@ -34,7 +39,9 @@ namespace Fargo.Domain.ValueObjects
         public TokenHash(string value)
         {
             Validate(value);
-            this.value = value;
+
+            // Normalize to canonical uppercase representation
+            this.value = value.ToUpperInvariant();
         }
 
         /// <summary>
@@ -50,12 +57,16 @@ namespace Fargo.Domain.ValueObjects
         /// <summary>
         /// Creates a <see cref="TokenHash"/> from the specified string.
         /// </summary>
+        /// <param name="value">The hashed token value.</param>
+        /// <returns>A new <see cref="TokenHash"/> instance.</returns>
         public static TokenHash FromString(string value)
             => new(value);
 
         /// <summary>
         /// Determines whether the current token hash is equal to another token hash.
         /// </summary>
+        /// <param name="other">The other token hash to compare.</param>
+        /// <returns><see langword="true"/> if both hashes are equal; otherwise <see langword="false"/>.</returns>
         public bool Equals(TokenHash other)
             => string.Equals(value, other.value, StringComparison.Ordinal);
 
@@ -104,6 +115,7 @@ namespace Fargo.Domain.ValueObjects
         /// <summary>
         /// Validates the token hash value.
         /// </summary>
+        /// <param name="value">The hash value to validate.</param>
         private static void Validate(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

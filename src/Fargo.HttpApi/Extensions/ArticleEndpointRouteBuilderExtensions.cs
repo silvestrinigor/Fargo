@@ -1,5 +1,4 @@
 ﻿using Fargo.Application.Common;
-using Fargo.Application.Models;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ArticleCommands;
