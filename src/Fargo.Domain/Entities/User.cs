@@ -346,19 +346,20 @@ namespace Fargo.Domain.Entities
             userGroups.Remove(userGroup);
         }
 
-        /// <summary>
-        /// Determines whether the user has the specified permission,
-        /// either directly or through at least one active group membership.
-        /// </summary>
-        /// <param name="action">The action type to check.</param>
-        /// <returns>
-        /// <c>true</c> if the user has the permission directly or through
-        /// at least one active group; otherwise <c>false</c>.
-        /// </returns>
-        public bool HasPermission(ActionType action)
-            => userPermissions.Any(p => p.Action == action)
-            || userGroups.Any(g => g.IsActive && g.HasPermission(action));
-
+/// <summary>
+/// Determines whether the user has the specified permission,
+/// either directly or through at least one active and accessible group membership.
+/// </summary>
+/// <param name="action">The action type to check.</param>
+/// <returns>
+/// <c>true</c> if the user has the permission directly or through
+/// at least one active group that the user can access by partition;
+/// otherwise <c>false</c>.
+/// </returns>
+public bool HasPermission(ActionType action)
+    => userPermissions.Any(p => p.Action == action)
+    || userGroups.Any(g => g.GrantsPermissionTo(this, action));
+    
         /// <summary>
         /// Validates whether the user has the specified permission.
         /// </summary>
@@ -471,15 +472,22 @@ namespace Fargo.Domain.Entities
             partitions.Remove(partition);
         }
 
-        /// <summary>
-        /// Determines whether the user has access to the specified partition.
-        /// </summary>
-        /// <param name="partition">The partition identifier.</param>
-        /// <returns>
-        /// <c>true</c> if the user has access to the partition; otherwise <c>false</c>.
-        /// </returns>
-        public bool HasPartitionAccess(Partition partition)
-            => partitionAccesses.Any(x => x.Partition == partition);
+/// <summary>
+/// Determines whether the user has access to the specified partition.
+/// </summary>
+/// <param name="partition">The partition to evaluate.</param>
+/// <returns>
+/// <c>true</c> if the user has explicit access to the partition; otherwise <c>false</c>.
+/// </returns>
+/// <exception cref="ArgumentNullException">
+/// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+/// </exception>
+public bool HasPartitionAccess(Partition partition)
+{
+    ArgumentNullException.ThrowIfNull(partition);
+
+    return partitionAccesses.Any(x => x.PartitionGuid == partition.Guid);
+}
 
         /// <summary>
         /// Determines whether the user has access to the specified partitioned entity.

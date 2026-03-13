@@ -21,23 +21,23 @@ public sealed class ArticleCreateCommandHandlerTests
 
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
+    private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
     private readonly ICurrentUser currentUser = Substitute.For<ICurrentUser>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
 
-    private readonly PartitionService partitionService = new(
-            Substitute.For<IPartitionRepository>()
-            );
-
+    private readonly PartitionService partitionService;
     private readonly ArticleCreateCommandHandler handler;
 
     public ArticleCreateCommandHandlerTests()
     {
+        partitionService = new PartitionService(partitionRepository);
+
         handler = new ArticleCreateCommandHandler(
-                partitionService,
-                articleRepository,
-                userRepository,
-                currentUser,
-                unitOfWork);
+            partitionService,
+            articleRepository,
+            userRepository,
+            currentUser,
+            unitOfWork);
     }
 
     [Fact]
@@ -52,6 +52,28 @@ public sealed class ArticleCreateCommandHandlerTests
         userRepository
             .GetByGuid(userGuid, Arg.Any<CancellationToken>())
             .Returns((User?)null);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
+
+        articleRepository.DidNotReceive().Add(Arg.Any<Article>());
+        await unitOfWork.DidNotReceive().SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_ActorIsInactive()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        actor.IsActive = false;
+
+        var command = CreateCommand();
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
 
         // Act
         Task act() => handler.Handle(command);
@@ -109,6 +131,107 @@ public sealed class ArticleCreateCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_Should_UseDescriptionEmpty_When_DescriptionIsNull()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        var command = CreateCommand(description: null);
+        Article? addedArticle = null;
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        CaptureAddedArticle(article => addedArticle = article);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedArticle);
+        Assert.Equal(Description.Empty, addedArticle!.Description);
+    }
+
+    [Fact]
+    public async Task Handle_Should_AddFirstPartition_When_FirstPartitionExistsAndActorHasAccess()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        var partition = CreatePartition();
+        var command = CreateCommand(firstPartition: partition.Guid);
+        Article? addedArticle = null;
+
+        actor.AddPartitionAccess(
+            partition
+            );
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+        CaptureAddedArticle(article => addedArticle = article);
+
+        partitionRepository
+            .GetByGuid(partition.Guid, Arg.Any<CancellationToken>())
+            .Returns(partition);
+
+        // Act
+        await handler.Handle(command);
+
+        // Assert
+        Assert.NotNull(addedArticle);
+        Assert.Contains(
+            addedArticle!.Partitions,
+            x => x.Guid == partition.Guid);
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowPartitionNotFoundFargoApplicationException_When_FirstPartitionDoesNotExist()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        var partitionGuid = Guid.NewGuid();
+        var command = CreateCommand(firstPartition: partitionGuid);
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        partitionRepository
+            .GetByGuid(partitionGuid, Arg.Any<CancellationToken>())
+            .Returns((Partition?)null);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<PartitionNotFoundFargoApplicationException>(act);
+
+        articleRepository.DidNotReceive().Add(Arg.Any<Article>());
+        await unitOfWork.DidNotReceive().SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowPartitionNotFoundFargoApplicationException_When_ActorDoesNotHaveAccessToFirstPartition()
+    {
+        // Arrange
+        var actor = CreateUserWithPermission(ActionType.CreateArticle);
+        var partition = CreatePartition();
+        var command = CreateCommand(firstPartition: partition.Guid);
+
+        ConfigureCurrentUser(actor);
+        ConfigureActorLookup(actor);
+
+        partitionRepository
+            .GetByGuid(partition.Guid, Arg.Any<CancellationToken>())
+            .Returns(partition);
+
+        // Act
+        Task act() => handler.Handle(command);
+
+        // Assert
+        await Assert.ThrowsAsync<PartitionNotFoundFargoApplicationException>(act);
+
+        articleRepository.DidNotReceive().Add(Arg.Any<Article>());
+        await unitOfWork.DidNotReceive().SaveChanges(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_Should_UseCurrentUserGuidToLoadActor()
     {
         // Arrange
@@ -152,25 +275,32 @@ public sealed class ArticleCreateCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ThrowUnauthorizedAccessFargoApplicationException_When_ActorIsInactive()
+    public async Task Handle_Should_UseProvidedCancellationToken_ForPartitionLookup()
     {
         // Arrange
         var actor = CreateUserWithPermission(ActionType.CreateArticle);
-        actor.IsActive = false;
+        var partition = CreatePartition();
+        var command = CreateCommand(firstPartition: partition.Guid);
+        var cancellationToken = new CancellationTokenSource().Token;
 
-        var command = CreateCommand();
+        actor.AddPartitionAccess(partition);
 
-        ConfigureCurrentUser(actor);
-        ConfigureActorLookup(actor);
+        currentUser.UserGuid.Returns(actor.Guid);
+
+        userRepository
+            .GetByGuid(actor.Guid, cancellationToken)
+            .Returns(actor);
+
+        partitionRepository
+            .GetByGuid(partition.Guid, cancellationToken)
+            .Returns(partition);
 
         // Act
-        Task act() => handler.Handle(command);
+        await handler.Handle(command, cancellationToken);
 
         // Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessFargoApplicationException>(act);
-
-        articleRepository.DidNotReceive().Add(Arg.Any<Article>());
-        await unitOfWork.DidNotReceive().SaveChanges(Arg.Any<CancellationToken>());
+        await partitionRepository.Received(1)
+            .GetByGuid(partition.Guid, cancellationToken);
     }
 
     private void ConfigureCurrentUser(User actor)
@@ -192,10 +322,12 @@ public sealed class ArticleCreateCommandHandlerTests
             .Do(callInfo => capture(callInfo.Arg<Article>()));
     }
 
-    private static ArticleCreateCommand CreateCommand(Description? description = null)
+    private static ArticleCreateCommand CreateCommand(
+        Description? description = null,
+        Guid? firstPartition = null)
     {
         return new ArticleCreateCommand(
-                new ArticleCreateModel(articleName, description));
+            new ArticleCreateModel(articleName, description, firstPartition));
     }
 
     private static User CreateUser()
@@ -213,5 +345,18 @@ public sealed class ArticleCreateCommandHandlerTests
         var user = CreateUser();
         user.AddPermission(action);
         return user;
+    }
+
+    private static Partition CreatePartition()
+    {
+        return new Partition
+        {
+            Guid = Guid.NewGuid(),
+            Name = new Name(new string('a', Name.MinLength)),
+            Description = new Description(new string('a', Description.MinLength)),
+            IsActive = true,
+            IsGlobal = false,
+            IsEditable = true
+        };
     }
 }
