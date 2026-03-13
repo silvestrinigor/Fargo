@@ -5,6 +5,8 @@
 @using Fargo.Application.Requests.Commands.AuthCommands
 @using Fargo.HttpApi.Client.Contracts
 @using Fargo.HttpApi.Client.Interfaces
+@using Fargo.Web.Security
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthenticationClient AuthenticationClient
 @inject NavigationManager Navigation
 
@@ -122,12 +124,16 @@
         }
     }
 
-    private static Task PersistSessionAsync(AuthResult result, bool rememberMe)
+    private async Task PersistSessionAsync(AuthResult result, bool rememberMe)
     {
-        // Ponto de integração do Fargo:
-        // aqui você conecta cookie, local storage, AuthenticationStateProvider
-        // ou qualquer outro mecanismo que seu Web usar para manter a sessão.
-        return Task.CompletedTask;
+        var session = new AuthenticatedSession
+        {
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken,
+            ExpiresAt = result.ExpiresAt
+        };
+
+        await AuthStateProvider.SignInAsync(session, rememberMe);
     }
 
     private sealed class LoginInputModel
