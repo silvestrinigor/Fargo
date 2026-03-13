@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.HttpApi.Converters;
+using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

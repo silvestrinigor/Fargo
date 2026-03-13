@@ -1,3 +1,5 @@
+using Fargo.Infrastructure.Client;
+using Fargo.Infrastructure.Client.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -11,6 +13,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddFluentUIComponents();
+
+builder.Services.AddFargoHttpApiClient();
 
 var app = builder.Build();
 

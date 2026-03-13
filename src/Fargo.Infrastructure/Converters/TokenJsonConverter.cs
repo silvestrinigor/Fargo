@@ -2,7 +2,7 @@ using Fargo.Domain.ValueObjects;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.HttpApi.Converters
+namespace Fargo.Infrastructure.Converters
 {
     public sealed class TokenJsonConverter : JsonConverter<Token>
     {

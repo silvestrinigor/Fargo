@@ -1,0 +1,143 @@
+@page "/login"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Fargo.Application.Models.AuthModels
+@using Fargo.Application.Requests.Commands.AuthCommands
+@using Fargo.HttpApi.Client.Contracts
+@using Fargo.HttpApi.Client.Interfaces
+@inject IAuthenticationClient AuthenticationClient
+@inject NavigationManager Navigation
+
+<PageTitle>Login | Fargo</PageTitle>
+
+<div class="login-page">
+    <div class="login-shell">
+        <section class="login-hero">
+            <div class="hero-badge">F</div>
+
+            <h1>Fargo</h1>
+            <p class="hero-text">
+                Entre com sua conta para acessar artigos, itens, usuários e grupos.
+            </p>
+
+            <div class="hero-points">
+                <div class="hero-point">
+                    <strong>Segurança</strong>
+                    <span>Autenticação centralizada pela API do Fargo.</span>
+                </div>
+
+                <div class="hero-point">
+                    <strong>Produtividade</strong>
+                    <span>Um ponto único para administrar o sistema.</span>
+                </div>
+            </div>
+        </section>
+
+        <FluentCard Class="login-card" MinimalStyle="true">
+            <EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
+                <DataAnnotationsValidator />
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+                    <div>
+                        <h2 class="login-title">Entrar</h2>
+                        <p class="login-subtitle">Use seu NameId e sua senha.</p>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                    {
+                        <FluentMessageBar Intent="MessageIntent.Error" Title="Falha no login" AllowDismiss="false">
+                            @_errorMessage
+                        </FluentMessageBar>
+                    }
+
+                    <div class="field-group">
+                        <FluentTextField Label="Usuário" Name="nameid" Placeholder="seu.nameid" Required="true"
+                                         Immediate="true" @bind-Value="_model.Nameid" />
+
+                        <ValidationMessage For="@(() => _model.Nameid)" />
+                    </div>
+
+                    <div class="field-group">
+                        <FluentTextField Label="Senha" Name="password" Placeholder="Digite sua senha" Required="true"
+                                         TextFieldType="TextFieldType.Password" @bind-Value="_model.Password" />
+
+                        <ValidationMessage For="@(() => _model.Password)" />
+                    </div>
+
+                    <FluentCheckbox @bind-Value="_model.RememberMe">
+                        Manter sessão iniciada
+                    </FluentCheckbox>
+
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Loading="@_isSubmitting"
+                                  Disabled="@_isSubmitting" Class="login-button">
+                        Entrar
+                    </FluentButton>
+
+                    <FluentAnchor Href="/" Appearance="Appearance.Hypertext">
+                        Voltar para a página inicial
+                    </FluentAnchor>
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+    </div>
+</div>
+
+@code {
+    private readonly LoginInputModel _model = new();
+    private bool _isSubmitting;
+    private string? _errorMessage;
+
+    private async Task HandleLoginAsync()
+    {
+        if (_isSubmitting)
+            return;
+
+        _isSubmitting = true;
+        _errorMessage = null;
+
+        try
+        {
+            // Ajuste esta linha se o seu LoginCommand tiver outra assinatura.
+            var command = new LoginCommand(new(_model.Nameid!), new(_model.Password!));
+
+            var result = await AuthenticationClient.LoginAsync(command);
+
+            await PersistSessionAsync(result, _model.RememberMe);
+
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            _errorMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? "Usuário ou senha inválidos."
+                : ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Ocorreu um erro inesperado ao tentar entrar.";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private static Task PersistSessionAsync(AuthResult result, bool rememberMe)
+    {
+        // Ponto de integração do Fargo:
+        // aqui você conecta cookie, local storage, AuthenticationStateProvider
+        // ou qualquer outro mecanismo que seu Web usar para manter a sessão.
+        return Task.CompletedTask;
+    }
+
+    private sealed class LoginInputModel
+    {
+        [Required(ErrorMessage = "Informe o usuário.")]
+        public string? Nameid { get; set; }
+
+        [Required(ErrorMessage = "Informe a senha.")]
+        public string? Password { get; set; }
+
+        public bool RememberMe { get; set; } = true;
+    }
+}
