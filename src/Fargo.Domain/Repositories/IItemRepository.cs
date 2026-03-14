@@ -1,4 +1,6 @@
 ﻿using Fargo.Domain.Entities;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Domain.Repositories
 {
@@ -19,6 +21,19 @@ namespace Fargo.Domain.Repositories
         /// </returns>
         Task<Item?> GetByGuid(
                 Guid entityGuid,
+                CancellationToken cancellationToken = default
+                );
+
+        Task<ItemInformation?> GetInfoByGuid(
+                Guid entityGuid,
+                DateTimeOffset? asOfDateTime = null,
+                CancellationToken cancellationToken = default
+                );
+
+        Task<IReadOnlyCollection<ItemInformation>> GetManyInfo(
+                Pagination pagination,
+                Guid? articleGuid = null,
+                DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default
                 );
 

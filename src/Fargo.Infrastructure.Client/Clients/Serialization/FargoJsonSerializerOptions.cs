@@ -1,7 +1,7 @@
 using Fargo.Infrastructure.Converters;
 using System.Text.Json;
 
-namespace Fargo.Infrastructure.Client.Serialization;
+namespace Fargo.Infrastructure.Client.Clients.Serialization;
 
 public static class FargoJsonSerializerOptions
 {

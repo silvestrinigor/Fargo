@@ -1,9 +1,10 @@
-using Fargo.Application.Common;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.UserGroupCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.UserGroupQueries;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -29,14 +30,14 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetUserGroup")
                 .WithSummary("Gets a single user group")
                 .WithDescription("Retrieves a single user group by its unique identifier. Supports querying historical data using temporal tables.")
-                .Produces<UserGroupResponseModel>(StatusCodes.Status200OK)
+                .Produces<UserGroupInformation>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", GetManyUserGroups)
                 .WithName("GetUserGroups")
                 .WithSummary("Gets multiple user groups")
                 .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries.")
-                .Produces<IReadOnlyCollection<UserGroupResponseModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<UserGroupInformation>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
 
             group.MapPost("/", CreateUserGroup)
@@ -60,10 +61,10 @@ namespace Fargo.HttpApi.Extensions
                 .Produces(StatusCodes.Status404NotFound);
         }
 
-        private static async Task<Results<Ok<UserGroupResponseModel>, NotFound>> GetSingleUserGroup(
+        private static async Task<Results<Ok<UserGroupInformation>, NotFound>> GetSingleUserGroup(
             Guid userGroupGuid,
             DateTimeOffset? temporalAsOf,
-            IQueryHandler<UserGroupSingleQuery, UserGroupResponseModel?> handler,
+            IQueryHandler<UserGroupSingleQuery, UserGroupInformation?> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserGroupSingleQuery(userGroupGuid, temporalAsOf);
@@ -73,14 +74,16 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<UserGroupResponseModel>>, NoContent>> GetManyUserGroups(
+        private static async Task<Results<Ok<IReadOnlyCollection<UserGroupInformation>>, NoContent>> GetManyUserGroups(
+            Guid? userGuid,
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupResponseModel>> handler,
+            IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupInformation>> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserGroupManyQuery(
+                userGuid,
                 temporalAsOf,
                 PaginationHelpers.CreatePagination(page, limit)
             );

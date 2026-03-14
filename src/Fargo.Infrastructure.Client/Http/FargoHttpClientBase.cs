@@ -1,4 +1,4 @@
-using Fargo.Infrastructure.Client.Serialization;
+using Fargo.Infrastructure.Client.Clients.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Http.Json;

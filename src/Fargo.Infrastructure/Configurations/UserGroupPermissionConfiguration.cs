@@ -4,21 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations
 {
-    /// <summary>
-    /// Configures the persistence mapping for the <see cref="UserGroupPermission"/> entity.
-    /// </summary>
-    /// <remarks>
-    /// This configuration defines keys, property mappings, and relationship
-    /// settings for permissions assigned to a <see cref="UserGroup"/>.
-    /// </remarks>
     public sealed class UserGroupPermissionConfiguration : IEntityTypeConfiguration<UserGroupPermission>
     {
-        /// <summary>
-        /// Configures the database mapping for the <see cref="UserGroupPermission"/> entity.
-        /// </summary>
-        /// <param name="builder">
-        /// The builder used to configure the <see cref="UserGroupPermission"/> entity type.
-        /// </param>
         public void Configure(EntityTypeBuilder<UserGroupPermission> builder)
         {
             builder.ToTable("UserGroupPermissions", tableBuilder => tableBuilder.IsTemporal());

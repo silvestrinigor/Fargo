@@ -102,6 +102,14 @@ namespace Fargo.Domain.Entities
 
         private readonly List<Partition> partitions = [];
 
+        public IReadOnlyCollection<User> Users
+        {
+            get => users;
+            init => users = [.. value];
+        }
+
+        private readonly List<User> users = [];
+
         /// <summary>
         /// Adds a permission to the user group if it does not already exist.
         /// </summary>

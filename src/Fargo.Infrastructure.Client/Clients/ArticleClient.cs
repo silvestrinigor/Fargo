@@ -1,6 +1,7 @@
-using Fargo.Application.Common;
 using Fargo.Application.Models.ArticleModels;
-using Fargo.HttpApi.Client.Interfaces;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
+using Fargo.HttpApi.Client.Contracts;
 using Fargo.Infrastructure.Client.Http;
 
 namespace Fargo.Infrastructure.Client.Clients;
@@ -8,23 +9,23 @@ namespace Fargo.Infrastructure.Client.Clients;
 public sealed class ArticleClient(HttpClient http)
     : FargoHttpClientBase(http), IArticleClient
 {
-    public Task<ArticleReadModel?> GetSingleAsync(
+    public Task<ArticleInformation?> GetSingleAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken ct = default)
     {
         var uri = $"/articles/{articleGuid}?temporalAsOf={temporalAsOf}";
-        return GetAsync<ArticleReadModel>(uri, ct);
+        return GetAsync<ArticleInformation>(uri, ct);
     }
 
-    public Task<IReadOnlyCollection<ArticleReadModel>> GetManyAsync(
+    public Task<IReadOnlyCollection<ArticleInformation>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         Page? page = null,
         Limit? limit = null,
         CancellationToken ct = default)
     {
         var uri = $"/articles?temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
-        return GetCollectionAsync<ArticleReadModel>(uri, ct);
+        return GetCollectionAsync<ArticleInformation>(uri, ct);
     }
 
     public Task<Guid> CreateAsync(ArticleCreateModel model, CancellationToken ct = default)

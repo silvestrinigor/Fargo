@@ -1,9 +1,10 @@
-using Fargo.Application.Common;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.PartitionQueries;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -29,14 +30,14 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetPartition")
                 .WithSummary("Gets a single partition")
                 .WithDescription("Retrieves a single partition by its unique identifier. Optionally allows querying historical data using temporal tables.")
-                .Produces<PartitionReadModel>(StatusCodes.Status200OK)
+                .Produces<PartitionInformation>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", GetManyPartition)
                 .WithName("GetPartitions")
                 .WithSummary("Gets multiple partitions")
                 .WithDescription("Retrieves a paginated list of partitions. Supports optional temporal queries.")
-                .Produces<IReadOnlyCollection<PartitionReadModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
 
             group.MapPost("/", CreatePartition)
@@ -58,10 +59,10 @@ namespace Fargo.HttpApi.Extensions
                 .Produces(StatusCodes.Status204NoContent);
         }
 
-        private static async Task<Results<Ok<PartitionReadModel>, NotFound>> GetSinglePartition(
+        private static async Task<Results<Ok<PartitionInformation>, NotFound>> GetSinglePartition(
             Guid partitionGuid,
             DateTimeOffset? temporalAsOf,
-            IQueryHandler<PartitionSingleQuery, PartitionReadModel?> handler,
+            IQueryHandler<PartitionSingleQuery, PartitionInformation?> handler,
             CancellationToken cancellationToken)
         {
             var query = new PartitionSingleQuery(partitionGuid, temporalAsOf);
@@ -71,11 +72,11 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<PartitionReadModel>>, NoContent>> GetManyPartition(
+        private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NoContent>> GetManyPartition(
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionReadModel>> handler,
+            IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>> handler,
             CancellationToken cancellationToken)
         {
             var query = new PartitionManyQuery(

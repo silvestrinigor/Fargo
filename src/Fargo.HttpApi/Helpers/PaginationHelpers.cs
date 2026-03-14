@@ -1,4 +1,4 @@
-using Fargo.Application.Common;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.HttpApi.Helpers
 {

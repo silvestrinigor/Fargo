@@ -3,7 +3,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Fargo.Application.Models.UserModels
 @using Fargo.HttpApi.Client.Contracts
-@using Fargo.HttpApi.Client.Interfaces
+@using Fargo.Domain.ValueObjects.Entities;
 @inject IUserClient UserClient
 
 <PageTitle>Users | Fargo</PageTitle>
@@ -184,8 +184,8 @@
 }
 
 @code {
-    private readonly List<UserResponseModel> _users = [];
-    private readonly List<UserResponseModel> _filteredUsers = [];
+    private readonly List<UserInformation> _users = [];
+    private readonly List<UserInformation> _filteredUsers = [];
 
     private bool _isLoading;
     private bool _isSaving;
@@ -197,7 +197,7 @@
     private string? _searchTerm;
 
     private Guid? _editingUserGuid;
-    private UserResponseModel? _userPendingDelete;
+    private UserInformation? _userPendingDelete;
 
     private UserEditorModel _editorModel = new();
 
@@ -240,7 +240,7 @@
     {
         _filteredUsers.Clear();
 
-        IEnumerable<UserResponseModel> query = _users;
+        IEnumerable<UserInformation> query = _users;
 
         if (!string.IsNullOrWhiteSpace(_searchTerm))
         {
@@ -266,7 +266,7 @@
         _isEditorOpen = true;
     }
 
-    private void OpenEditDialog(UserResponseModel user)
+    private void OpenEditDialog(UserInformation user)
     {
         _isEditing = true;
         _editingUserGuid = user.Guid;
@@ -343,7 +343,7 @@
         }
     }
 
-    private void OpenDeleteDialog(UserResponseModel user)
+    private void OpenDeleteDialog(UserInformation user)
     {
         _userPendingDelete = user;
     }

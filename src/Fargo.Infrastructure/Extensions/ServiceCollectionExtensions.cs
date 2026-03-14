@@ -1,11 +1,5 @@
-﻿using Fargo.Application.Models.ArticleModels;
-using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Models.ItemModels;
-using Fargo.Application.Models.PartitionModels;
-using Fargo.Application.Models.UserGroupModels;
-using Fargo.Application.Models.UserModels;
+﻿using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Persistence;
-using Fargo.Application.Repositories;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Commands.AuthCommands;
@@ -23,6 +17,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects.Entities;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
@@ -33,47 +28,16 @@ using Microsoft.Extensions.Options;
 
 namespace Fargo.Infrastructure.Extensions
 {
-    /// <summary>
-    /// Provides extension methods for registering Fargo infrastructure services.
-    /// </summary>
     public static class ServiceCollectionExtensions
     {
         extension(IServiceCollection services)
         {
-            /// <summary>
-            /// Registers all Fargo infrastructure services required by the main application.
-            /// </summary>
-            /// <param name="services">
-            /// The service collection used to register dependencies.
-            /// </param>
-            /// <param name="configuration">
-            /// The application configuration used to bind options and connection strings.
-            /// </param>
-            /// <returns>
-            /// The same <see cref="IServiceCollection"/> instance so that additional
-            /// registrations can be chained.
-            /// </returns>
-            /// <remarks>
-            /// This method registers:
-            /// <list type="bullet">
-            /// <item><description>JWT configuration options</description></item>
-            /// <item><description>Database connection string options</description></item>
-            /// <item><description>Write and read database contexts</description></item>
-            /// <item><description>Repositories and query services</description></item>
-            /// <item><description>Command and query handlers</description></item>
-            /// <item><description>Domain services</description></item>
-            /// <item><description>Security services</description></item>
-            /// <item><description>Unit of work</description></item>
-            /// <item><description>Current user abstraction</description></item>
-            /// </list>
-            /// </remarks>
             public IServiceCollection AddFargoInfrastructure(IConfiguration configuration)
             {
                 AddFargoJwt(services, configuration);
                 AddFargoConnectionStrings(services, configuration);
                 AddDbContexts(services);
                 AddRepositories(services);
-                AddReadRepositories(services);
                 AddHandlers(services);
                 AddDomainServices(services);
                 AddSecurity(services);
@@ -84,19 +48,6 @@ namespace Fargo.Infrastructure.Extensions
                 return services;
             }
 
-            /// <summary>
-            /// Registers only the infrastructure services required to execute database migrations.
-            /// </summary>
-            /// <param name="services">
-            /// The service collection used to register dependencies.
-            /// </param>
-            /// <param name="configuration">
-            /// The application configuration used to bind connection string options.
-            /// </param>
-            /// <returns>
-            /// The same <see cref="IServiceCollection"/> instance so that additional
-            /// registrations can be chained.
-            /// </returns>
             public IServiceCollection AddFargoMigrationInfrastructure(IConfiguration configuration)
             {
                 AddFargoConnectionStrings(services, configuration);
@@ -105,19 +56,6 @@ namespace Fargo.Infrastructure.Extensions
                 return services;
             }
 
-            /// <summary>
-            /// Registers only the infrastructure services required to initialize or seed the system.
-            /// </summary>
-            /// <param name="services">
-            /// The service collection used to register dependencies.
-            /// </param>
-            /// <param name="configuration">
-            /// The application configuration used to bind connection string options.
-            /// </param>
-            /// <returns>
-            /// The same <see cref="IServiceCollection"/> instance so that additional
-            /// registrations can be chained.
-            /// </returns>
             public IServiceCollection AddFargoSeedInfrastructure(IConfiguration configuration)
             {
                 AddFargoConnectionStrings(services, configuration);
@@ -164,8 +102,7 @@ namespace Fargo.Infrastructure.Extensions
 
             private void AddDbContexts()
             {
-                services.AddDbContext<FargoWriteDbContext>((sp, opt) => ConfigureSqlServer(sp, opt));
-                services.AddDbContext<FargoReadDbContext>((sp, opt) => ConfigureSqlServer(sp, opt));
+                services.AddDbContext<FargoDbContext>((sp, opt) => ConfigureSqlServer(sp, opt));
             }
 
             private void AddRepositories()
@@ -178,14 +115,6 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<IPartitionRepository, PartitionRepository>();
             }
 
-            private void AddReadRepositories()
-            {
-                services.AddScoped<IArticleQueries, ArticleQueries>();
-                services.AddScoped<IItemQueries, ItemQueries>();
-                services.AddScoped<IUserQueries, UserQueries>();
-                services.AddScoped<IUserGroupQueries, UserGroupQueries>();
-                services.AddScoped<IPartitionQueries, PartitionQueries>();
-            }
             private void AddHandlers()
             {
                 services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
@@ -217,21 +146,20 @@ namespace Fargo.Infrastructure.Extensions
                 services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
                 services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
 
-                services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleReadModel?>, ArticleSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleReadModel>>, ArticleManyQueryHandler>();
+                services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleInformation?>, ArticleSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>, ArticleManyQueryHandler>();
 
-                services.AddScoped<IQueryHandler<ItemSingleQuery, ItemReadModel?>, ItemSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemReadModel>>, ItemManyQueryHandler>();
+                services.AddScoped<IQueryHandler<ItemSingleQuery, ItemInformation?>, ItemSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>, ItemManyQueryHandler>();
 
-                services.AddScoped<IQueryHandler<UserSingleQuery, UserResponseModel?>, UserSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>>, UserManyQueryHandler>();
-                services.AddScoped<IQueryHandler<UserUserGroupsManyQuery, IReadOnlyCollection<UserGroupResponseModel>>, UserUserGroupsManyQueryHandler>();
+                services.AddScoped<IQueryHandler<UserSingleQuery, UserInformation?>, UserSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserInformation>>, UserManyQueryHandler>();
 
-                services.AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupResponseModel?>, UserGroupSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupResponseModel>>, UserGroupManyQueryHandler>();
+                services.AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupInformation?>, UserGroupSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupInformation>>, UserGroupManyQueryHandler>();
 
-                services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionReadModel?>, PartitionSingleQueryHandler>();
-                services.AddScoped<IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionReadModel>>, PartitionManyQueryHandler>();
+                services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionInformation?>, PartitionSingleQueryHandler>();
+                services.AddScoped<IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>>, PartitionManyQueryHandler>();
             }
 
             private void AddDomainServices()

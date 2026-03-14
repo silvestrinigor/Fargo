@@ -1,5 +1,4 @@
 using Fargo.HttpApi.Client.Contracts;
-using Fargo.HttpApi.Client.Interfaces;
 using Fargo.Infrastructure.Client.Clients;
 using Microsoft.Extensions.DependencyInjection;
 

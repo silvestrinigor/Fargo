@@ -1,6 +1,7 @@
-using Fargo.Application.Common;
 using Fargo.Application.Models.ItemModels;
-using Fargo.HttpApi.Client.Interfaces;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
+using Fargo.HttpApi.Client.Contracts;
 using Fargo.Infrastructure.Client.Http;
 
 namespace Fargo.Infrastructure.Client.Clients;
@@ -8,13 +9,13 @@ namespace Fargo.Infrastructure.Client.Clients;
 public sealed class ItemClient(HttpClient http)
     : FargoHttpClientBase(http), IItemClient
 {
-    public Task<ItemReadModel?> GetSingleAsync(
+    public Task<ItemInformation?> GetSingleAsync(
         Guid itemGuid,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken ct = default)
-        => GetAsync<ItemReadModel>($"/items/{itemGuid}?temporalAsOf={temporalAsOf}", ct);
+        => GetAsync<ItemInformation>($"/items/{itemGuid}?temporalAsOf={temporalAsOf}", ct);
 
-    public Task<IReadOnlyCollection<ItemReadModel>> GetManyAsync(
+    public Task<IReadOnlyCollection<ItemInformation>> GetManyAsync(
         Guid? articleGuid = null,
         DateTimeOffset? temporalAsOf = null,
         Page? page = null,
@@ -24,7 +25,7 @@ public sealed class ItemClient(HttpClient http)
         var uri =
             $"/items?articleGuid={articleGuid}&temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
 
-        return GetCollectionAsync<ItemReadModel>(uri, ct);
+        return GetCollectionAsync<ItemInformation>(uri, ct);
     }
 
     public Task<Guid> CreateAsync(ItemCreateModel model, CancellationToken ct = default)

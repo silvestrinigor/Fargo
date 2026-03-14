@@ -1,5 +1,6 @@
 using Fargo.Domain.Entities;
 using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Domain.Repositories
 {
@@ -52,6 +53,19 @@ namespace Fargo.Domain.Repositories
         /// </returns>
         Task<bool> ExistsByNameid(
                 Nameid nameid,
+                CancellationToken cancellationToken = default
+                );
+
+        Task<UserGroupInformation?> GetInfoByGuid(
+                Guid entityGuid,
+                DateTimeOffset? asOfDateTime = null,
+                CancellationToken cancellationToken = default
+                );
+
+        Task<IReadOnlyCollection<UserGroupInformation>> GetManyInfo(
+                Pagination pagination,
+                Guid? userGuid = null,
+                DateTimeOffset? asOfDateTime = null,
                 CancellationToken cancellationToken = default
                 );
 

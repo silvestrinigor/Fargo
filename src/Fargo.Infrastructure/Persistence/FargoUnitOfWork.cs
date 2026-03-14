@@ -7,12 +7,12 @@ namespace Fargo.Infrastructure.Persistence
 {
     /// <summary>
     /// Implementation of <see cref="IUnitOfWork"/> that coordinates persistence
-    /// operations using the <see cref="FargoWriteDbContext"/>.
+    /// operations using the <see cref="FargoDbContext"/>.
     /// </summary>
     /// <remarks>
     /// This class acts as a boundary for committing changes to the database.
     /// All write operations performed through repositories that share the same
-    /// <see cref="FargoWriteDbContext"/> instance are persisted when
+    /// <see cref="FargoDbContext"/> instance are persisted when
     /// <see cref="SaveChanges(CancellationToken)"/> is executed.
     /// <para>
     /// The unit of work ensures that multiple repository operations are committed
@@ -24,13 +24,13 @@ namespace Fargo.Infrastructure.Persistence
     /// </para>
     /// </remarks>
     public sealed class FargoUnitOfWork(
-        FargoWriteDbContext fargoContext,
+        FargoDbContext fargoContext,
         ICurrentUser currentUser) : IUnitOfWork
     {
         /// <summary>
         /// The write database context used to persist changes.
         /// </summary>
-        private readonly FargoWriteDbContext fargoContext = fargoContext;
+        private readonly FargoDbContext fargoContext = fargoContext;
 
         /// <summary>
         /// Provides information about the current authenticated user.
@@ -38,7 +38,7 @@ namespace Fargo.Infrastructure.Persistence
         private readonly ICurrentUser currentUser = currentUser;
 
         /// <summary>
-        /// Persists all pending changes tracked by the <see cref="FargoWriteDbContext"/>.
+        /// Persists all pending changes tracked by the <see cref="FargoDbContext"/>.
         /// </summary>
         /// <param name="cancellationToken">
         /// A token used to cancel the save operation.

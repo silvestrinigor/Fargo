@@ -1,8 +1,6 @@
 using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Models.UserModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.AuthCommands;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Extensions

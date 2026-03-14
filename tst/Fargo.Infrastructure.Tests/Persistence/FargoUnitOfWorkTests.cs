@@ -14,8 +14,8 @@ public sealed class FargoUnitOfWorkTests
     }
 
     private sealed class TestFargoWriteDbContext(
-        DbContextOptions<FargoWriteDbContext> options)
-        : FargoWriteDbContext(options)
+        DbContextOptions<FargoDbContext> options)
+        : FargoDbContext(options)
     {
         public DbSet<TestAuditedEntity> AuditedEntities => Set<TestAuditedEntity>();
 
@@ -31,7 +31,7 @@ public sealed class FargoUnitOfWorkTests
     public async Task SaveChanges_Should_ApplyAuditing_When_AuditedEntityIsModified()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<FargoWriteDbContext>()
+        var options = new DbContextOptionsBuilder<FargoDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
@@ -74,7 +74,7 @@ public sealed class FargoUnitOfWorkTests
     public async Task SaveChanges_Should_SetCreationAudit_When_AuditedEntityIsAdded()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<FargoWriteDbContext>()
+        var options = new DbContextOptionsBuilder<FargoDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
@@ -109,7 +109,7 @@ public sealed class FargoUnitOfWorkTests
     public async Task SaveChanges_Should_UseGuidEmpty_When_CurrentUserGuidIsEmpty()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<FargoWriteDbContext>()
+        var options = new DbContextOptionsBuilder<FargoDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 

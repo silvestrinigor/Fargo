@@ -1,7 +1,7 @@
-using Fargo.Application.Common;
-using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Models.UserModels;
-using Fargo.HttpApi.Client.Interfaces;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
+using Fargo.HttpApi.Client.Contracts;
 using Fargo.Infrastructure.Client.Http;
 
 namespace Fargo.Infrastructure.Client.Clients;
@@ -9,13 +9,13 @@ namespace Fargo.Infrastructure.Client.Clients;
 public sealed class UserClient(HttpClient http)
     : FargoHttpClientBase(http), IUserClient
 {
-    public Task<UserResponseModel?> GetSingleAsync(
+    public Task<UserInformation?> GetSingleAsync(
         Guid userGuid,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken ct = default)
-        => GetAsync<UserResponseModel>($"/users/{userGuid}?temporalAsOf={temporalAsOf}", ct);
+        => GetAsync<UserInformation>($"/users/{userGuid}?temporalAsOf={temporalAsOf}", ct);
 
-    public Task<IReadOnlyCollection<UserResponseModel>> GetManyAsync(
+    public Task<IReadOnlyCollection<UserInformation>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         Page? page = null,
         Limit? limit = null,
@@ -23,17 +23,7 @@ public sealed class UserClient(HttpClient http)
     {
         var uri = $"/users?temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
 
-        return GetCollectionAsync<UserResponseModel>(uri, ct);
-    }
-
-    public Task<IReadOnlyCollection<UserGroupResponseModel>> GetUserGroupsAsync(
-        Guid userGuid,
-        DateTimeOffset? temporalAsOf = null,
-        CancellationToken ct = default)
-    {
-        var uri = $"/users/{userGuid}/user-groups?temporalAsOf={temporalAsOf}";
-
-        return GetCollectionAsync<UserGroupResponseModel>(uri, ct);
+        return GetCollectionAsync<UserInformation>(uri, ct);
     }
 
     public Task<Guid> CreateAsync(UserCreateModel model, CancellationToken ct = default)

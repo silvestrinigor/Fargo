@@ -10,7 +10,7 @@ namespace Fargo.MigrationService;
 /// </summary>
 /// <remarks>
 /// This service creates a scoped service provider, resolves the
-/// <see cref="FargoWriteDbContext"/>, and executes the migration process.
+/// <see cref="FargoDbContext"/>, and executes the migration process.
 /// <para>
 /// After the migration finishes, the application is stopped through
 /// <see cref="IHostApplicationLifetime.StopApplication"/>.
@@ -64,7 +64,7 @@ public sealed class MigrationService(
         {
             using var scope = serviceProvider.CreateScope();
 
-            var dbContext = scope.ServiceProvider.GetRequiredService<FargoWriteDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<FargoDbContext>();
 
             await RunMigrationAsync(dbContext, stoppingToken);
         }
@@ -94,7 +94,7 @@ public sealed class MigrationService(
     /// so transient failures can be retried according to the configured provider behavior.
     /// </remarks>
     private static async Task RunMigrationAsync(
-            FargoWriteDbContext dbContext,
+            FargoDbContext dbContext,
             CancellationToken cancellationToken
             )
     {

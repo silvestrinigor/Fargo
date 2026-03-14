@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fargo.Infrastructure.Migrations
 {
-    [DbContext(typeof(FargoWriteDbContext))]
+    [DbContext(typeof(FargoDbContext))]
     partial class FargoWriteDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -520,7 +520,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid>("UserGroupsGuid")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UserGuid")
+                    b.Property<Guid>("UsersGuid")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("PeriodEnd")
@@ -533,9 +533,9 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
 
-                    b.HasKey("UserGroupsGuid", "UserGuid");
+                    b.HasKey("UserGroupsGuid", "UsersGuid");
 
-                    b.HasIndex("UserGuid");
+                    b.HasIndex("UsersGuid");
 
                     b.ToTable("UserUserGroup");
 
@@ -648,7 +648,7 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.HasOne("Fargo.Domain.Entities.User", null)
                         .WithMany()
-                        .HasForeignKey("UserGuid")
+                        .HasForeignKey("UsersGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

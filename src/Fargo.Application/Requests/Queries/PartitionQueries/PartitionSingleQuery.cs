@@ -1,48 +1,27 @@
-using Fargo.Application.Models.PartitionModels;
-using Fargo.Application.Repositories;
+using Fargo.Domain.Repositories;
+using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Application.Requests.Queries.PartitionQueries
 {
-    /// <summary>
-    /// Query used to retrieve a single partition by its unique identifier.
-    /// </summary>
-    /// <param name="PartitionGuid">
-    /// The unique identifier of the partition.
-    /// </param>
-    /// <param name="AsOfDateTime">
-    /// Optional point in time used to retrieve historical data.
-    /// When provided, the query returns the state of the partition
-    /// as it existed at the specified date and time.
-    /// </param>
     public sealed record PartitionSingleQuery(
             Guid PartitionGuid,
             DateTimeOffset? AsOfDateTime = null
-            ) : IQuery<PartitionReadModel?>;
+            ) : IQuery<PartitionInformation?>;
 
-    /// <summary>
-    /// Handles the execution of <see cref="PartitionSingleQuery"/>.
-    /// </summary>
     public sealed class PartitionSingleQueryHandler(
-            IPartitionQueries repository
-            ) : IQueryHandler<PartitionSingleQuery, PartitionReadModel?>
+            IPartitionRepository partitionRepository
+            ) : IQueryHandler<PartitionSingleQuery, PartitionInformation?>
     {
-        /// <summary>
-        /// Executes the query to retrieve a single partition.
-        /// </summary>
-        /// <param name="query">The query containing the partition identifier.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
-        /// <returns>
-        /// The <see cref="PartitionReadModel"/> if the partition exists;
-        /// otherwise <c>null</c>.
-        /// </returns>
-        public async Task<PartitionReadModel?> Handle(
+        public async Task<PartitionInformation?> Handle(
                 PartitionSingleQuery query,
                 CancellationToken cancellationToken = default
                 )
-            => await repository.GetByGuid(
+        {
+            return await partitionRepository.GetInfoByGuid(
                     query.PartitionGuid,
                     query.AsOfDateTime,
                     cancellationToken
                     );
+        }
     }
 }

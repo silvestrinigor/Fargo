@@ -1,48 +1,31 @@
-using Fargo.Application.Common;
 using Fargo.Application.Models.ArticleModels;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 
-namespace Fargo.HttpApi.Client.Interfaces
+namespace Fargo.HttpApi.Client.Contracts
 {
-    /// <summary>
-    /// Defines the contract for article-related HTTP API operations.
-    /// </summary>
     public interface IArticleClient
     {
-        /// <summary>
-        /// Gets a single article by its identifier.
-        /// </summary>
-        Task<ArticleReadModel?> GetSingleAsync(
+        Task<ArticleInformation?> GetSingleAsync(
             Guid articleGuid,
             DateTimeOffset? temporalAsOf = null,
             CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Gets multiple articles with optional pagination and temporal query.
-        /// </summary>
-        Task<IReadOnlyCollection<ArticleReadModel>> GetManyAsync(
+        Task<IReadOnlyCollection<ArticleInformation>> GetManyAsync(
             DateTimeOffset? temporalAsOf = null,
             Page? page = null,
             Limit? limit = null,
             CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Creates a new article and returns its identifier.
-        /// </summary>
         Task<Guid> CreateAsync(
             ArticleCreateModel model,
             CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Updates an existing article.
-        /// </summary>
         Task UpdateAsync(
             Guid articleGuid,
             ArticleUpdateModel model,
             CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Deletes an article.
-        /// </summary>
         Task DeleteAsync(
             Guid articleGuid,
             CancellationToken cancellationToken = default);

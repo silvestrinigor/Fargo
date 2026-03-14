@@ -1,59 +1,94 @@
+using Fargo.Application.Mappings;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
+using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories
 {
-    /// <summary>
-    /// Provides persistence operations for <see cref="UserGroup"/> entities.
-    /// </summary>
-    public sealed class UserGroupRepository(FargoWriteDbContext context) : IUserGroupRepository
+    public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepository
     {
         private readonly DbSet<UserGroup> userGroups = context.UserGroups;
 
-        /// <inheritdoc/>
         public Task<bool> Any(CancellationToken cancellationToken = default)
-            => context.UserGroups.AnyAsync(cancellationToken);
+        {
+            return context.UserGroups.AnyAsync(cancellationToken);
+        }
 
-        /// <inheritdoc/>
         public void Add(UserGroup userGroup)
         {
             context.UserGroups.Add(userGroup);
         }
 
-        /// <inheritdoc/>
         public async Task<UserGroup?> GetByGuid(
-                Guid entityGuid,
-                CancellationToken cancellationToken = default
-                )
-            => await userGroups
-                .Include(g => g.UserGroupPermissions)
-                .Where(g => g.Guid == entityGuid)
+            Guid entityGuid,
+            CancellationToken cancellationToken = default)
+        {
+            return await userGroups
+                .Include(userGroup => userGroup.UserGroupPermissions)
+                .Where(userGroup => userGroup.Guid == entityGuid)
                 .SingleOrDefaultAsync(cancellationToken);
+        }
 
-        /// <inheritdoc/>
         public async Task<UserGroup?> GetByNameid(
-                Nameid nameid,
-                CancellationToken cancellationToken = default
-                )
-            => await userGroups
-                .Where(g => g.Nameid == nameid)
+            Nameid nameid,
+            CancellationToken cancellationToken = default)
+        {
+            return await userGroups
+                .Where(userGroup => userGroup.Nameid == nameid)
                 .SingleOrDefaultAsync(cancellationToken);
+        }
 
-        /// <inheritdoc/>
         public async Task<bool> ExistsByNameid(
-                Nameid nameid,
-                CancellationToken cancellationToken = default
-                )
-            => await context.UserGroups
-                .AnyAsync(x => x.Nameid == nameid, cancellationToken);
+            Nameid nameid,
+            CancellationToken cancellationToken = default)
+        {
+            return await context.UserGroups
+                .AnyAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);
+        }
 
-        /// <inheritdoc/>
         public void Remove(UserGroup userGroup)
         {
             context.UserGroups.Remove(userGroup);
+        }
+
+        public async Task<UserGroupInformation?> GetInfoByGuid(
+            Guid entityGuid,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await userGroups
+                .TemporalAsOfIfProvided(asOfDateTime)
+                .AsNoTracking()
+                .Where(userGroup => userGroup.Guid == entityGuid)
+                .Select(UserGroupMappings.InformationProjection)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyCollection<UserGroupInformation>> GetManyInfo(
+            Pagination pagination,
+            Guid? userGuid = null,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default)
+        {
+            IQueryable<UserGroup> query = userGroups
+                .TemporalAsOfIfProvided(asOfDateTime)
+                .AsNoTracking();
+
+            if (userGuid.HasValue)
+            {
+                query = query.Where(userGroup =>
+                    userGroup.Users.Any(g => g.Guid == userGuid));
+            }
+
+            return await query
+                .OrderBy(userGroup => userGroup.Guid)
+                .WithPagination(pagination)
+                .Select(UserGroupMappings.InformationProjection)
+                .ToListAsync(cancellationToken);
         }
     }
 }

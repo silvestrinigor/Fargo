@@ -359,7 +359,7 @@ namespace Fargo.Domain.Entities
 public bool HasPermission(ActionType action)
     => userPermissions.Any(p => p.Action == action)
     || userGroups.Any(g => g.GrantsPermissionTo(this, action));
-    
+
         /// <summary>
         /// Validates whether the user has the specified permission.
         /// </summary>

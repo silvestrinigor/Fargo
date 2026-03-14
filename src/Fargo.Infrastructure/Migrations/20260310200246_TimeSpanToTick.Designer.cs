@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fargo.Infrastructure.Migrations
 {
-    [DbContext(typeof(FargoWriteDbContext))]
+    [DbContext(typeof(FargoDbContext))]
     [Migration("20260310200246_TimeSpanToTick")]
     partial class TimeSpanToTick
     {

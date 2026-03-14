@@ -4,24 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations
 {
-    /// <summary>
-    /// Configures the persistence mapping for the <see cref="UserGroup"/> entity.
-    /// </summary>
-    /// <remarks>
-    /// This configuration defines keys, property mappings, relationships,
-    /// and auditing metadata for <see cref="UserGroup"/>.
-    ///
-    /// Since <see cref="UserGroup"/> inherits from <see cref="AuditedEntity"/>,
-    /// the inherited auditing properties are also configured here.
-    /// </remarks>
     public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
     {
-        /// <summary>
-        /// Configures the database mapping for the <see cref="UserGroup"/> entity.
-        /// </summary>
-        /// <param name="builder">
-        /// The builder used to configure the <see cref="UserGroup"/> entity type.
-        /// </param>
         public void Configure(EntityTypeBuilder<UserGroup> builder)
         {
             builder.ToTable("UserGroups", tableBuilder => tableBuilder.IsTemporal());

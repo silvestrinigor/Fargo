@@ -1,10 +1,10 @@
-﻿using Fargo.Application.Common;
-using Fargo.Application.Models.UserGroupModels;
-using Fargo.Application.Models.UserModels;
+﻿using Fargo.Application.Models.UserModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.UserQueries;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -30,23 +30,15 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetUser")
                 .WithSummary("Gets a single user")
                 .WithDescription("Retrieves a single user by its unique identifier. Supports querying historical data using temporal tables.")
-                .Produces<UserResponseModel>(StatusCodes.Status200OK)
+                .Produces<UserInformation>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", GetManyUsers)
                 .WithName("GetUsers")
                 .WithSummary("Gets multiple users")
                 .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries.")
-                .Produces<IReadOnlyCollection<UserResponseModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<UserInformation>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
-
-            group.MapGet("/{userGuid:guid}/user-groups", GetUserUserGroups)
-                .WithName("GetUserUserGroups")
-                .WithSummary("Gets the groups of a user")
-                .WithDescription("Retrieves all user groups associated with the specified user. Supports querying historical data using temporal tables.")
-                .Produces<IReadOnlyCollection<UserGroupResponseModel>>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
 
             group.MapPost("/", CreateUser)
                 .WithName("CreateUser")
@@ -83,10 +75,10 @@ namespace Fargo.HttpApi.Extensions
                 .Produces(StatusCodes.Status404NotFound);
         }
 
-        private static async Task<Results<Ok<UserResponseModel>, NotFound>> GetSingleUser(
+        private static async Task<Results<Ok<UserInformation>, NotFound>> GetSingleUser(
             Guid userGuid,
             DateTimeOffset? temporalAsOf,
-            IQueryHandler<UserSingleQuery, UserResponseModel?> handler,
+            IQueryHandler<UserSingleQuery, UserInformation?> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserSingleQuery(userGuid, temporalAsOf);
@@ -96,30 +88,17 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<UserResponseModel>>, NoContent>> GetManyUsers(
+        private static async Task<Results<Ok<IReadOnlyCollection<UserInformation>>, NoContent>> GetManyUsers(
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<UserManyQuery, IReadOnlyCollection<UserResponseModel>> handler,
+            IQueryHandler<UserManyQuery, IReadOnlyCollection<UserInformation>> handler,
             CancellationToken cancellationToken)
         {
             var query = new UserManyQuery(
                 temporalAsOf,
                 PaginationHelpers.CreatePagination(page, limit)
             );
-
-            var response = await handler.Handle(query, cancellationToken);
-
-            return TypedResultsHelpers.HandleCollectionQueryResult(response);
-        }
-
-        private static async Task<Results<Ok<IReadOnlyCollection<UserGroupResponseModel>>, NoContent>> GetUserUserGroups(
-            Guid userGuid,
-            DateTimeOffset? temporalAsOf,
-            IQueryHandler<UserUserGroupsManyQuery, IReadOnlyCollection<UserGroupResponseModel>> handler,
-            CancellationToken cancellationToken)
-        {
-            var query = new UserUserGroupsManyQuery(userGuid, temporalAsOf);
 
             var response = await handler.Handle(query, cancellationToken);
 

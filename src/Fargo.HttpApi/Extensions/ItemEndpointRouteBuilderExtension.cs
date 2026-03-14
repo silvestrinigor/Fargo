@@ -1,9 +1,10 @@
-﻿using Fargo.Application.Common;
-using Fargo.Application.Models.ItemModels;
+﻿using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Requests.Commands;
 using Fargo.Application.Requests.Commands.ItemCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.ItemQueries;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -29,14 +30,14 @@ namespace Fargo.HttpApi.Extensions
                 .WithName("GetItem")
                 .WithSummary("Gets a single item")
                 .WithDescription("Retrieves a single item by its unique identifier. Supports querying historical data using temporal tables.")
-                .Produces<ItemReadModel>(StatusCodes.Status200OK)
+                .Produces<ItemInformation>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", GetManyItems)
                 .WithName("GetItems")
                 .WithSummary("Gets multiple items")
                 .WithDescription("Retrieves a paginated list of items with optional filters such as parent item or article.")
-                .Produces<IReadOnlyCollection<ItemReadModel>>(StatusCodes.Status200OK)
+                .Produces<IReadOnlyCollection<ItemInformation>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status204NoContent);
 
             group.MapPost("/", CreateItem)
@@ -62,10 +63,10 @@ namespace Fargo.HttpApi.Extensions
             ;
         }
 
-        private static async Task<Results<Ok<ItemReadModel>, NotFound>> GetSingleItem(
+        private static async Task<Results<Ok<ItemInformation>, NotFound>> GetSingleItem(
             Guid itemGuid,
             DateTimeOffset? temporalAsOf,
-            IQueryHandler<ItemSingleQuery, ItemReadModel?> handler,
+            IQueryHandler<ItemSingleQuery, ItemInformation?> handler,
             CancellationToken cancellationToken)
         {
             var query = new ItemSingleQuery(itemGuid, temporalAsOf);
@@ -75,12 +76,12 @@ namespace Fargo.HttpApi.Extensions
             return TypedResultsHelpers.HandleQueryResult(response);
         }
 
-        private static async Task<Results<Ok<IReadOnlyCollection<ItemReadModel>>, NoContent>> GetManyItems(
+        private static async Task<Results<Ok<IReadOnlyCollection<ItemInformation>>, NoContent>> GetManyItems(
             Guid? articleGuid,
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
-            IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemReadModel>> handler,
+            IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>> handler,
             CancellationToken cancellationToken)
         {
             var query = new ItemManyQuery(

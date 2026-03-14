@@ -1,27 +1,62 @@
+using Fargo.Application.Mappings;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.ValueObjects;
+using Fargo.Domain.ValueObjects.Entities;
+using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories
 {
-    public class PartitionRepository(FargoWriteDbContext context)
-        : IPartitionRepository
+    public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepository
     {
         private readonly DbSet<Partition> partitions = context.Partitions;
 
         public void Add(Partition partition)
-            => partitions.Add(partition);
+        {
+            partitions.Add(partition);
+        }
 
         public void Remove(Partition partition)
-            => partitions.Remove(partition);
+        {
+            partitions.Remove(partition);
+        }
 
         public async Task<Partition?> GetByGuid(
-                Guid entityGuid,
-                CancellationToken cancellationToken = default
-                )
-            => await partitions
-            .Where(x => x.Guid == entityGuid)
-            .SingleOrDefaultAsync(cancellationToken);
+            Guid entityGuid,
+            CancellationToken cancellationToken = default)
+        {
+            return await partitions
+                .Where(partition => partition.Guid == entityGuid)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<PartitionInformation?> GetInfoByGuid(
+            Guid entityGuid,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await partitions
+                .TemporalAsOfIfProvided(asOfDateTime)
+                .AsNoTracking()
+                .Where(partition => partition.Guid == entityGuid)
+                .Select(PartitionMappings.InformationProjection)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyCollection<PartitionInformation>> GetManyInfo(
+            Pagination pagination,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await partitions
+                .TemporalAsOfIfProvided(asOfDateTime)
+                .AsNoTracking()
+                .OrderBy(partition => partition.Guid)
+                .WithPagination(pagination)
+                .Select(PartitionMappings.InformationProjection)
+                .ToListAsync(cancellationToken);
+        }
     }
 }
