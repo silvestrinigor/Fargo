@@ -13,6 +13,15 @@ namespace Fargo.Application.Models
     public abstract class AuditedEntityReadModel
     {
         /// <summary>
+        /// Gets the unique identifier of the entity.
+        /// </summary>
+        public required Guid Guid
+        {
+            get;
+            init;
+        }
+
+        /// <summary>
         /// Gets the date and time when the entity was created.
         /// </summary>
         public required DateTimeOffset CreatedAt

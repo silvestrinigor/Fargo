@@ -40,6 +40,8 @@ app.MapFargoUser();
 
 app.MapFargoUserGroup();
 
+app.MapFargoPartition();
+
 app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();

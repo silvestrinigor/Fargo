@@ -12,15 +12,6 @@ namespace Fargo.Application.Models.ArticleModels
     public class ArticleReadModel : AuditedEntityReadModel
     {
         /// <summary>
-        /// Gets the unique identifier of the article.
-        /// </summary>
-        public required Guid Guid
-        {
-            get;
-            init;
-        }
-
-        /// <summary>
         /// Gets the name of the article.
         /// </summary>
         public required Name Name

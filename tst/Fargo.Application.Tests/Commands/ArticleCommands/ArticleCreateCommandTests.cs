@@ -354,9 +354,7 @@ public sealed class ArticleCreateCommandHandlerTests
             Guid = Guid.NewGuid(),
             Name = new Name(new string('a', Name.MinLength)),
             Description = new Description(new string('a', Description.MinLength)),
-            IsActive = true,
-            IsGlobal = false,
-            IsEditable = true
+            IsActive = true
         };
     }
 }

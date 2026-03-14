@@ -49,14 +49,6 @@ namespace Fargo.Infrastructure.Configurations
                 .Property(x => x.IsActive)
                 .IsRequired();
 
-            builder
-                .Property(x => x.IsGlobal)
-                .IsRequired();
-
-            builder
-                .Property(x => x.IsEditable)
-                .IsRequired();
-
             // Configure optional parent partition reference
             builder
                 .Property(x => x.ParentPartitionGuid);

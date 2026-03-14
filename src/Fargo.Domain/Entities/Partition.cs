@@ -89,35 +89,6 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this partition is the unique
-        /// global partition of the system.
-        /// </summary>
-        /// <remarks>
-        /// The global partition is the top-level partition in the hierarchy and
-        /// has implicit access to all entities contained in its descendant partitions.
-        /// This partition is intended for highly privileged users only.
-        /// </remarks>
-        public bool IsGlobal
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this partition can be managed.
-        /// </summary>
-        /// <remarks>
-        /// The global partition should typically not be editable by regular users.
-        /// This property can be used to protect partitions from normal management
-        /// operations when required by business rules.
-        /// </remarks>
-        public bool IsEditable
-        {
-            get;
-            set;
-        } = true;
-
-        /// <summary>
         /// Marks the partition as active.
         /// </summary>
         public void Activate()

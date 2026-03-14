@@ -1,17 +1,19 @@
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects;
 using NSubstitute;
 
 namespace Fargo.Domain.Tests.Services;
 
 public sealed class PartitionServiceTests
 {
-    private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
+    private readonly IPartitionRepository partitionRepository;
     private readonly PartitionService service;
 
     public PartitionServiceTests()
     {
+        partitionRepository = Substitute.For<IPartitionRepository>();
         service = new PartitionService(partitionRepository);
     }
 
@@ -95,8 +97,8 @@ public sealed class PartitionServiceTests
         return new User
         {
             Guid = Guid.NewGuid(),
-            Nameid = new Fargo.Domain.ValueObjects.Nameid("testuser"),
-            PasswordHash = new Fargo.Domain.ValueObjects.PasswordHash(new string('A', Fargo.Domain.ValueObjects.PasswordHash.MinLength)),
+            Nameid = new Nameid("testuser"),
+            PasswordHash = new PasswordHash(new string('A', PasswordHash.MinLength)),
             PartitionsAccesses = []
         };
     }
@@ -105,11 +107,10 @@ public sealed class PartitionServiceTests
     {
         return new Partition
         {
-            Name = new Fargo.Domain.ValueObjects.Name(new string('A', Fargo.Domain.ValueObjects.Name.MinLength)),
-            Description = new Fargo.Domain.ValueObjects.Description(new string('A', Fargo.Domain.ValueObjects.Description.MinLength)),
-            IsActive = true,
-            IsEditable = true,
-            IsGlobal = false
+            Guid = Guid.NewGuid(),
+            Name = new Name(new string('A', Name.MinLength)),
+            Description = new Description(new string('A', Description.MinLength)),
+            IsActive = true
         };
     }
 }

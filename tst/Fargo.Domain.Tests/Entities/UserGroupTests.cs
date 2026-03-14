@@ -564,9 +564,7 @@ public sealed class UserGroupTests
             Guid = guid ?? Guid.NewGuid(),
             Name = new Name(name),
             Description = new Description("Partition description"),
-            IsActive = true,
-            IsEditable = true,
-            IsGlobal = false
+            IsActive = true
         };
     }
 }

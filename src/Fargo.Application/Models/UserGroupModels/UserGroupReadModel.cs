@@ -13,15 +13,6 @@ namespace Fargo.Application.Models.UserGroupModels
     public class UserGroupReadModel : AuditedEntityReadModel
     {
         /// <summary>
-        /// Gets the unique identifier of the user group.
-        /// </summary>
-        public required Guid Guid
-        {
-            get;
-            init;
-        }
-
-        /// <summary>
         /// Gets the login identifier (NAMEID) of the user group.
         /// </summary>
         public required Nameid Nameid

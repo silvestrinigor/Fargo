@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.ItemModels;
+using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Models.UserModels;
 using Fargo.Domain.ValueObjects;
@@ -54,6 +55,8 @@ namespace Fargo.Infrastructure.Persistence
         /// Gets the set of user group permission read models.
         /// </summary>
         public DbSet<UserGroupPermissionReadModel> UserGroupPermissions { get; set; }
+
+        public DbSet<PartitionReadModel> Partitions { get; set; }
 
         /// <summary>
         /// Configures global conventions for value object mappings.
@@ -120,6 +123,8 @@ namespace Fargo.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new UserGroupReadModelConfiguration());
 
             modelBuilder.ApplyConfiguration(new UserGroupPermissionReadModelConfiguration());
+
+            modelBuilder.ApplyConfiguration(new PartitionReadModelConfiguration());
         }
     }
 }

@@ -1,0 +1,607 @@
+Sim — com esses novos requisitos, a decisão principal muda:
+
+não vale modelar o Fargo web como uma única árvore fixa.
+O certo é tratar a interface como um explorer genérico com múltiplas visões, porque o mesmo recurso vai participar de relações diferentes ao mesmo tempo. Isso combina melhor com a direção da solução atual em .NET, já organizada em módulos dentro de src e tst.
+O ponto mais importante
+
+Um Item pode participar de várias estruturas ao mesmo tempo:
+
+    estrutura organizacional: partição
+
+    estrutura de catálogo: artigo → itens
+
+    estrutura física/logística: container → conteúdo
+
+    estrutura histórica: posição e mudanças ao longo do tempo
+
+Então o erro seria tentar escolher “a árvore oficial”.
+Na prática, você vai precisar de várias árvores/visões sobre o mesmo conjunto de entidades.
+Proposta de arquitetura da interface
+
+Eu faria a web em cima de um conceito central:
+
+Explorer + modos de visualização
+
+Cada modo troca a lógica da árvore, mas reaproveita o mesmo shell visual:
+
+    painel esquerdo: árvore
+
+    painel central: lista/conteúdo do nó
+
+    painel direito: detalhe contextual
+
+    barra superior: filtros, busca, modo da árvore, overlays
+
+Modos de árvore
+1. Visão por partição
+
+Essa é a visão mais administrativa e de segurança.
+
+Exemplo:
+
+    Partição
+
+        subpartições
+
+        grupos
+
+        usuários
+
+        artigos
+
+        itens
+
+        containers
+
+Essa visão responde:
+
+    quem está dentro de qual escopo
+
+    o que está protegido por qual partição
+
+    como a herança está afetando acesso e organização
+
+2. Visão por catálogo
+
+Essa é a visão funcional de estoque/cadastro.
+
+Exemplo:
+
+    Artigo
+
+        itens
+
+            histórico resumido
+
+            container atual
+
+            validade
+
+            peso
+
+Essa visão responde:
+
+    quantos itens existem de um artigo
+
+    onde cada item está
+
+    qual o estado atual
+
+    qual o histórico individual
+
+3. Visão por contenção
+
+Essa tende a virar uma das mais importantes.
+
+Exemplo:
+
+    Local / container raiz
+
+        container
+
+            subcontainer
+
+                item
+
+                item
+
+            item
+
+Aqui você consegue representar:
+
+    caixa dentro de prateleira
+
+    item dentro de caixa
+
+    caixa dentro de pallet
+
+    pallet dentro de área
+
+    e depois, se quiser, até veículo, doca, sala, setor
+
+Essa é a árvore de movimentação física.
+4. Visão por histórico
+
+Essa não precisa ser exatamente uma árvore o tempo todo.
+Para item, faz mais sentido uma mistura de:
+
+    timeline
+
+    tabela de eventos
+
+    replay de posição
+
+    comparação “antes/depois”
+
+A árvore aqui pode servir só como filtro de contexto, e o foco fica no histórico.
+Partition como overlay global
+
+A sua ideia de poder ligar e desligar a visualização por partição em qualquer árvore é muito boa.
+Eu faria isso como um overlay, não como estrutura obrigatória.
+
+Ou seja:
+
+    na visão por artigo, você continua vendo Artigo -> Itens
+
+    mas, com overlay ligado, cada nó mostra:
+
+        partição direta
+
+        partição herdada
+
+        nível de herança
+
+        conflito ou diferença de escopo
+
+Como exibir isso bem
+
+Sem poluir demais a UI:
+
+    badge da partição no nó
+
+    ícone para indicar herança
+
+    borda/realce para partição efetiva
+
+    filtro “mostrar só partição X”
+
+    toggle:
+
+        sem partição
+
+        partição resumida
+
+        partição detalhada
+
+Isso é importante porque
+
+a partição não é só uma pasta visual.
+Ela cruza segurança, organização e navegação.
+
+Então ela deve ser:
+
+    visível em qualquer árvore
+
+    opcional visualmente
+
+    consistente sem mudar o modelo principal da árvore
+
+O modelo conceitual que eu seguiria
+
+Eu separaria os relacionamentos em 4 eixos.
+1. Identidade
+
+O que a coisa é:
+
+    usuário
+
+    grupo
+
+    artigo
+
+    item
+
+    container
+
+    partição
+
+2. Contenção
+
+Onde ela está:
+
+    item dentro de container
+
+    container dentro de outro container
+
+    container dentro de área/local
+
+3. Classificação
+
+A qual “família” pertence:
+
+    item pertence a artigo
+
+    usuário pertence a grupo
+
+    recurso pertence a categoria futura, se existir
+
+4. Escopo
+
+Em que partição está:
+
+    partição direta
+
+    partição herdada
+
+    partição efetiva
+
+Essa separação evita muita confusão.
+Sobre container: minha recomendação
+
+Como você ainda não decidiu se “caixa” será container ou se container será outro conceito, eu não prenderia isso agora a um tipo concreto de item.
+
+Eu faria Container como capacidade, não como objeto puramente visual.
+
+Na prática, existem duas abordagens.
+Opção A: container é um tipo de item
+
+Exemplo:
+
+    Item do tipo caixa
+
+    esse item pode conter outros itens
+
+Vantagem:
+
+    simples mentalmente
+
+    caixa continua sendo item
+
+Desvantagem:
+
+    mistura identidade de produto com função logística
+
+    pode ficar ruim quando surgir pallet, gaveta, sala, veículo, prateleira
+
+Opção B: container é uma entidade/capacidade de armazenagem
+
+Exemplo:
+
+    um item pode ocupar um container
+
+    alguns recursos podem ser containers
+
+    um container pode conter itens e outros containers
+
+Essa é a que eu recomendo.
+
+Porque ela deixa o sistema preparado para:
+
+    caixa
+
+    pallet
+
+    prateleira
+
+    armário
+
+    sala
+
+    setor
+
+    veículo
+
+    qualquer unidade logística futura
+
+Ou seja:
+“caixa” pode ser um item que possui capacidade de container, mas o sistema não fica preso a isso.
+Histórico temporal do item
+
+Aqui tem um detalhe muito importante:
+
+tabela temporal é excelente para reconstruir estado,
+mas não substitui totalmente uma trilha de movimentação semântica.
+O que a temporal table resolve bem
+
+Ela responde:
+
+    como o item estava em uma data
+
+    quando um campo mudou
+
+    qual era a partição naquela data
+
+    qual era o peso registrado
+
+    qual era o container atual naquele instante, se isso estiver na própria entidade
+
+O que ela não resolve tão bem sozinha
+
+Ela não é a melhor fonte para perguntas como:
+
+    quem moveu o item
+
+    de onde para onde ele foi movido
+
+    qual foi o motivo da movimentação
+
+    se foi transferência, conferência, ajuste, entrada, saída, perda, avaria
+
+    qual foi a sequência operacional de eventos
+
+Para isso, eu recomendo fortemente ter também uma estrutura de evento de movimentação.
+Então eu teria duas camadas de histórico
+1. Snapshot temporal
+
+Para reconstrução do estado.
+
+Exemplo:
+
+    item às 10:00
+
+    item às 14:00
+
+    item às 17:00
+
+2. Evento de movimentação
+
+Para trilha operacional.
+
+Exemplo:
+
+    entrada no estoque
+
+    colocado no container X
+
+    movido para container Y
+
+    separado para expedição
+
+    devolvido
+
+    reclassificado
+
+    ajustado peso
+
+    alterada validade
+
+    alterada partição
+
+Isso deixa a interface muito melhor.
+Como ficaria a tela de um item
+
+No detalhe do item eu colocaria abas, não um formulário gigante:
+Resumo
+
+    identificação
+
+    artigo
+
+    status
+
+    partição efetiva
+
+    container atual
+
+    peso atual
+
+    validade
+
+    última movimentação
+
+Posição
+
+    árvore de contenção atual
+
+    caminho completo
+
+    localização física/logística
+
+    partição visível no caminho
+
+Histórico
+
+    timeline
+
+    snapshots temporais
+
+    diff entre versões
+
+Movimentações
+
+    origem
+
+    destino
+
+    data/hora
+
+    responsável
+
+    motivo
+
+    observações
+
+Medidas e controle
+
+    peso
+
+    volume
+
+    unidade
+
+    lote
+
+    validade
+
+    restrições
+
+Auditoria
+
+    criado por
+
+    alterado por
+
+    mudanças críticas
+
+    trilha de segurança
+
+Como a árvore de estoque deve nascer
+
+Ela já precisa nascer preparada para:
+
+    item dentro de container
+
+    container dentro de container
+
+    filtros por status
+
+    filtros por validade
+
+    filtros por peso
+
+    filtros por partição
+
+    busca por código/identificador
+
+    destaque de divergência de partição
+
+Exemplo de visualização
+
+Área A > Estante 2 > Caixa 15 > Item 000123
+
+E com overlay ligado:
+Área A [P1] > Estante 2 [P1 herdada] > Caixa 15 [P2] > Item 000123 [P2]
+
+Isso mostra imediatamente conflito ou mudança de escopo.
+Regra importante para não quebrar o futuro
+
+Eu evitaria acoplar a UI a páginas do tipo:
+
+    página de item
+
+    página de artigo
+
+    página de grupo
+
+    página de partição
+
+Essas páginas vão existir, mas o núcleo deveria ser um conjunto de componentes genéricos:
+
+    ExplorerShell
+
+    TreePane
+
+    NodeRenderer
+
+    DetailPane
+
+    OverlayManager
+
+    TimelinePanel
+
+    MovementPanel
+
+    PartitionBadge
+
+    BreadcrumbPath
+
+    InspectorTabs
+
+Assim, quando “container” entrar, você não recria a aplicação.
+Você só adiciona:
+
+    novo tipo de nó
+
+    novo modo de árvore
+
+    novos painéis de detalhe
+
+Minha recomendação objetiva
+
+Eu consolidaria o plano assim:
+Fase 1
+
+Criar o Explorer genérico com suporte a:
+
+    múltiplos tipos de nó
+
+    múltiplos modos de árvore
+
+    painel de detalhe
+
+    busca global
+
+    overlays
+
+Fase 2
+
+Implementar três árvores principais:
+
+    partição
+
+    artigo → itens
+
+    container → conteúdo
+
+Fase 3
+
+Adicionar overlay de partição em todas as árvores:
+
+    on/off
+
+    direto/herdado
+
+    filtros por partição
+
+Fase 4
+
+Adicionar histórico de item com duas fontes:
+
+    snapshot temporal
+
+    trilha de movimentação
+
+Fase 5
+
+Expandir o domínio de estoque:
+
+    peso
+
+    validade
+
+    lote
+
+    movimentação
+
+    restrições
+
+    auditoria
+
+A decisão técnica mais valiosa aqui
+
+Se eu tivesse que resumir em uma frase:
+
+o Fargo web deve ser pensado como um explorador de relações, não como um conjunto de CRUDs.
+
+Porque agora o problema não é só cadastrar entidade.
+É conseguir responder bem a perguntas como:
+
+    onde está esse item agora?
+
+    por onde ele passou?
+
+    em qual partição ele está?
+
+    esse container pode conter esse item?
+
+    o artigo é um, mas os itens estão distribuídos onde?
+
+    quem moveu?
+
+    quando mudou?
+
+    qual era o estado em uma data passada?
+
+Esse é o tipo de modelagem que vai deixar a web crescer sem precisar ser refeita.
+
+No próximo passo eu posso transformar isso em uma arquitetura concreta de componentes, DTOs e endpoints para a parte web e API.
