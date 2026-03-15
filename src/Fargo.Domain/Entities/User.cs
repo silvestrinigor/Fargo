@@ -1,5 +1,6 @@
-﻿using Fargo.Domain.Enums;
-using Fargo.Domain.Exceptions;
+﻿using Fargo.Domain.Collections;
+using Fargo.Domain.Enums;
+using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
@@ -10,7 +11,7 @@ namespace Fargo.Domain.Entities
     /// A user contains authentication credentials, direct permissions,
     /// and group memberships that may also grant permissions.
     /// </summary>
-    public class User : AuditedEntity, IPartitioned
+    public class User : AuditedEntity, IPartitioned, IPartitionUser, IUserWithPermissions
     {
         /// <summary>
         /// Gets or sets the unique NAMEID (username) of the user.
@@ -117,6 +118,16 @@ namespace Fargo.Domain.Entities
         } = DateTimeOffset.UtcNow + TimeSpan.FromDays(DefaultPasswordChangeDays);
 
         /// <summary>
+        /// Determines whether the user is currently required to change their password.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the current UTC time is greater than or equal to
+        /// <see cref="RequirePasswordChangeAt"/>; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsPasswordChangeRequired
+            => DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
+
+        /// <summary>
         /// Resets the password expiration date based on the user's
         /// <see cref="DefaultPasswordExpirationPeriod"/>.
         ///
@@ -162,16 +173,6 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Determines whether the user is currently required to change their password.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if the current UTC time is greater than or equal to
-        /// <see cref="RequirePasswordChangeAt"/>; otherwise, <c>false</c>.
-        /// </returns>
-        public bool IsPasswordChangeRequired
-            => DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
-
-        /// <summary>
         /// Gets a value indicating whether the user is active.
         ///
         /// An active user is allowed to authenticate and interact with the system,
@@ -208,72 +209,20 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Validates whether the user is active.
-        /// </summary>
-        /// <exception cref="UserInactiveFargoDomainException">
-        /// Thrown when the user is inactive.
-        /// </exception>
-        public void ValidateIsActive()
-        {
-            if (!IsActive)
-            {
-                throw new UserInactiveFargoDomainException(Guid);
-            }
-        }
-
-        /// <summary>
         /// Gets the read-only collection of permissions assigned directly to the user.
         ///
         /// Each permission represents an allowed <see cref="ActionType"/>
         /// that the user can perform without considering group memberships.
         /// </summary>
-        public IReadOnlyCollection<UserPermission> UserPermissions
+        public IReadOnlyCollection<UserPermission> Permissions
         {
             get => userPermissions;
             init => userPermissions = [.. value];
         }
 
-        /// <summary>
-        /// Internal mutable collection used to store direct user permissions.
-        /// </summary>
+        IReadOnlyCollection<IPermission> IUserWithPermissions.Permissions => Permissions;
+
         private readonly List<UserPermission> userPermissions = [];
-
-        /// <summary>
-        /// Gets the read-only collection of groups to which the user belongs.
-        /// </summary>
-        /// <remarks>
-        /// Group memberships may grant additional permissions to the user.
-        /// </remarks>
-        public IReadOnlyCollection<UserGroup> UserGroups
-        {
-            get => userGroups;
-            init => userGroups = [.. value];
-        }
-
-        /// <summary>
-        /// Internal mutable collection used to store user group memberships.
-        /// </summary>
-        private readonly List<UserGroup> userGroups = [];
-
-        /// <summary>
-        /// Gets the read-only collection of partitions the user has access to.
-        /// </summary>
-        /// <remarks>
-        /// Partitions define logical boundaries in the system.
-        /// A user can only access entities that belong to at least one partition
-        /// to which the user has been granted access.
-        /// </remarks>
-        public IReadOnlyCollection<PartitionAccess> PartitionsAccesses
-        {
-            get => partitionAccesses;
-            init => partitionAccesses = [.. value];
-        }
-
-        /// <summary>
-        /// Internal mutable collection used to store the partitions
-        /// the user has access to.
-        /// </summary>
-        private readonly List<PartitionAccess> partitionAccesses = [];
 
         /// <summary>
         /// Adds a permission to the user if it does not already exist.
@@ -311,69 +260,29 @@ namespace Fargo.Domain.Entities
             userPermissions.Remove(userPermission);
         }
 
-        /// <summary>
-        /// Adds the specified group to the user if it is not already associated.
-        /// </summary>
-        /// <param name="userGroup">The group to associate with the user.</param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="userGroup"/> is <see langword="null"/>.
-        /// </exception>
-        public void AddGroup(UserGroup userGroup)
+        public UserGroupCollection UserGroups
         {
-            ArgumentNullException.ThrowIfNull(userGroup);
-
-            if (userGroups.Any(x => x.Guid == userGroup.Guid))
-            {
-                return;
-            }
-
-            userGroups.Add(userGroup);
+            get;
+            init;
         }
 
         /// <summary>
-        /// Removes the specified group from the user if it exists.
+        /// Gets the read-only collection of partitions the user has access to.
         /// </summary>
-        /// <param name="userGroupGuid">The unique identifier of the group to remove.</param>
-        public void RemoveGroup(Guid userGroupGuid)
+        /// <remarks>
+        /// Partitions define logical boundaries in the system.
+        /// A user can only access entities that belong to at least one partition
+        /// to which the user has been granted access.
+        /// </remarks>
+        public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses
         {
-            var userGroup = userGroups.SingleOrDefault(x => x.Guid == userGroupGuid);
-
-            if (userGroup == null)
-            {
-                return;
-            }
-
-            userGroups.Remove(userGroup);
+            get => partitionAccesses;
+            init => partitionAccesses = [.. value];
         }
 
-/// <summary>
-/// Determines whether the user has the specified permission,
-/// either directly or through at least one active and accessible group membership.
-/// </summary>
-/// <param name="action">The action type to check.</param>
-/// <returns>
-/// <c>true</c> if the user has the permission directly or through
-/// at least one active group that the user can access by partition;
-/// otherwise <c>false</c>.
-/// </returns>
-public bool HasPermission(ActionType action)
-    => userPermissions.Any(p => p.Action == action)
-    || userGroups.Any(g => g.GrantsPermissionTo(this, action));
+        IReadOnlyCollection<IPartitionAccess> IPartitionUser.PartitionAccesses => PartitionAccesses;
 
-        /// <summary>
-        /// Validates whether the user has the specified permission.
-        /// </summary>
-        /// <param name="action">The action that must be authorized.</param>
-        /// <exception cref="UserNotAuthorizedFargoDomainException">
-        /// Thrown when the user does not have the required permission.
-        /// </exception>
-        public void ValidatePermission(ActionType action)
-        {
-            if (!HasPermission(action))
-            {
-                throw new UserNotAuthorizedFargoDomainException(Guid, action);
-            }
-        }
+        private readonly List<UserPartitionAccess> partitionAccesses = [];
 
         /// <summary>
         /// Grants access to the specified partition for the user.
@@ -391,7 +300,7 @@ public bool HasPermission(ActionType action)
                 return;
             }
 
-            var partitionAccess = new PartitionAccess
+            var partitionAccess = new UserPartitionAccess
             {
                 User = this,
                 Partition = partition
@@ -417,114 +326,12 @@ public bool HasPermission(ActionType action)
             partitionAccesses.Remove(userPartition);
         }
 
-        /// <summary>
-        /// Gets the read-only collection of partitions to which the user belongs.
-        /// </summary>
-        /// <remarks>
-        /// These partitions define the data scope of the user itself.
-        /// Other users may only access this user if they have access to at least
-        /// one of these partitions.
-        /// </remarks>
-        public IReadOnlyCollection<Partition> Partitions
+        public PartitionCollection Partitions
         {
-            get => partitions;
-            init => partitions = [.. value];
-        }
+            get;
+            init;
+        } = [];
 
-        /// <summary>
-        /// Internal mutable collection used to store the partitions
-        /// to which the user belongs.
-        /// </summary>
-        private readonly List<Partition> partitions = [];
-
-        /// <summary>
-        /// Adds the specified partition to the user if it is not already associated.
-        /// </summary>
-        /// <param name="partition">The partition to associate with the user.</param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-        /// </exception>
-        public void AddPartition(Partition partition)
-        {
-            ArgumentNullException.ThrowIfNull(partition);
-
-            if (partitions.Any(x => x.Guid == partition.Guid))
-            {
-                return;
-            }
-
-            partitions.Add(partition);
-        }
-
-        /// <summary>
-        /// Removes the specified partition from the user if it exists.
-        /// </summary>
-        /// <param name="partitionGuid">The unique identifier of the partition to remove.</param>
-        public void RemovePartition(Guid partitionGuid)
-        {
-            var partition = partitions.SingleOrDefault(x => x.Guid == partitionGuid);
-
-            if (partition == null)
-            {
-                return;
-            }
-
-            partitions.Remove(partition);
-        }
-
-/// <summary>
-/// Determines whether the user has access to the specified partition.
-/// </summary>
-/// <param name="partition">The partition to evaluate.</param>
-/// <returns>
-/// <c>true</c> if the user has explicit access to the partition; otherwise <c>false</c>.
-/// </returns>
-/// <exception cref="ArgumentNullException">
-/// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-/// </exception>
-public bool HasPartitionAccess(Partition partition)
-{
-    ArgumentNullException.ThrowIfNull(partition);
-
-    return partitionAccesses.Any(x => x.PartitionGuid == partition.Guid);
-}
-
-        /// <summary>
-        /// Determines whether the user has access to the specified partitioned entity.
-        /// </summary>
-        /// <param name="partitioned">
-        /// The partitioned entity to evaluate.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the entity belongs to at least one partition the user has access to,
-        /// or if the entity is not associated with any partition; otherwise, <c>false</c>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="partitioned"/> is <see langword="null"/>.
-        /// </exception>
-        /// <remarks>
-        /// Access is granted when:
-        /// <list type="bullet">
-        /// <item>
-        /// The entity has no partitions associated with it, making it accessible to all users.
-        /// </item>
-        /// <item>
-        /// There is at least one intersection between the partitions associated with the
-        /// entity and the partitions the user has access to.
-        /// </item>
-        /// </list>
-        /// </remarks>
-        public bool HasAccess(IPartitioned partitioned)
-        {
-            ArgumentNullException.ThrowIfNull(partitioned);
-
-            if (!partitioned.Partitions.Any())
-            {
-                return true;
-            }
-
-            return partitioned.Partitions.Any(partition =>
-                    partitionAccesses.Any(access => access.PartitionGuid == partition.Guid));
-        }
+        IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
     }
 }

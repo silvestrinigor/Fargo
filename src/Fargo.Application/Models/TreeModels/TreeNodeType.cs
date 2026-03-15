@@ -1,4 +1,4 @@
-namespace Fargo.Application.Enums;
+namespace Fargo.Application.Models.TreeModels;
 
 public enum TreeNodeType
 {

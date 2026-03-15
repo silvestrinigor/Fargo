@@ -6,10 +6,12 @@ namespace Fargo.Domain.Repositories
 {
     /// <summary>
     /// Defines the repository contract for managing <see cref="Article"/> entities.
-    ///
-    /// This repository provides access to article persistence operations and
-    /// domain-related queries involving articles.
     /// </summary>
+    /// <remarks>
+    /// This repository provides persistence access and domain queries related to
+    /// <see cref="Article"/> aggregates. It exposes both aggregate retrieval methods
+    /// and lightweight projection queries used for read operations.
+    /// </remarks>
     public interface IArticleRepository
     {
         /// <summary>
@@ -21,21 +23,51 @@ namespace Fargo.Domain.Repositories
         /// The matching <see cref="Article"/> if found; otherwise, <see langword="null"/>.
         /// </returns>
         Task<Article?> GetByGuid(
-                Guid entityGuid,
-                CancellationToken cancellationToken = default
-                );
+            Guid entityGuid,
+            CancellationToken cancellationToken = default
+        );
 
+        /// <summary>
+        /// Gets lightweight information about an article by its unique identifier.
+        /// </summary>
+        /// <param name="entityGuid">The unique identifier of the article.</param>
+        /// <param name="asOfDateTime">
+        /// Optional point in time used to retrieve historical data.
+        /// When provided, the returned information represents the state of the article
+        /// as it existed at the specified date and time.
+        /// </param>
+        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// An <see cref="ArticleInformation"/> projection if the article exists;
+        /// otherwise, <see langword="null"/>.
+        /// </returns>
         Task<ArticleInformation?> GetInfoByGuid(
-                Guid entityGuid,
-                DateTimeOffset? asOfDateTime = null,
-                CancellationToken cancellationToken = default
-                );
+            Guid entityGuid,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default
+        );
 
+        /// <summary>
+        /// Gets a paginated collection of article information projections.
+        /// </summary>
+        /// <param name="pagination">
+        /// The pagination configuration used to control the number of returned results
+        /// and the starting position of the query.
+        /// </param>
+        /// <param name="asOfDateTime">
+        /// Optional point in time used to retrieve historical data.
+        /// When provided, the returned results represent the state of the articles
+        /// as they existed at the specified date and time.
+        /// </param>
+        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A read-only collection of <see cref="ArticleInformation"/> objects.
+        /// </returns>
         Task<IReadOnlyCollection<ArticleInformation>> GetManyInfo(
-                Pagination pagination,
-                DateTimeOffset? asOfDateTime = null,
-                CancellationToken cancellationToken = default
-                );
+            Pagination pagination,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Determines whether the specified article has any associated items.
@@ -46,9 +78,9 @@ namespace Fargo.Domain.Repositories
         /// <see langword="true"/> if the article has associated items; otherwise, <see langword="false"/>.
         /// </returns>
         Task<bool> HasItemsAssociated(
-                Guid articleGuid,
-                CancellationToken cancellationToken = default
-                );
+            Guid articleGuid,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Adds a new article to the persistence context.

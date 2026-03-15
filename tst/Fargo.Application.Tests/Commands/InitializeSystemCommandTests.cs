@@ -109,11 +109,11 @@ public sealed class InitializeSystemCommandHandlerTests
 
         var actions = Enum.GetValues<ActionType>();
 
-        Assert.Equal(actions.Length, addedUser!.UserPermissions.Count);
+        Assert.Equal(actions.Length, addedUser!.Permissions.Count);
 
         foreach (var action in actions)
         {
-            Assert.Contains(addedUser.UserPermissions, x => x.Action == action);
+            Assert.Contains(addedUser.Permissions, x => x.Action == action);
         }
     }
 

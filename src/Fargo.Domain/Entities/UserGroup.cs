@@ -1,30 +1,32 @@
+using Fargo.Domain.Collections;
 using Fargo.Domain.Enums;
-using Fargo.Domain.Exceptions;
+using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
 {
     /// <summary>
     /// Represents a user group in the system.
-    ///
-    /// A user group contains descriptive information and a collection
-    /// of permissions that define which actions members of the group
-    /// are allowed to perform.
     /// </summary>
     /// <remarks>
+    /// A user group contains descriptive information and a collection of permissions
+    /// that define which actions members of the group are allowed to perform.
+    ///
     /// A user group is partitioned data and may belong to multiple
     /// <see cref="Partition"/> instances.
     ///
-    /// A user may access the group only if they have access to at least
-    /// one of the partitions associated with it, subject to additional
-    /// authorization rules.
+    /// A user may access the group only if they have access to at least one of the
+    /// partitions associated with it, subject to additional authorization rules.
     /// </remarks>
-    public class UserGroup : AuditedEntity, IPartitioned
+    public class UserGroup : AuditedEntity, IPartitioned, IPartitionUser, IUserWithPermissions
     {
         /// <summary>
         /// Gets or sets the unique NAMEID of the user group.
-        /// This value uniquely identifies the group in the system.
         /// </summary>
+        /// <remarks>
+        /// This value uniquely identifies the group in the system and must satisfy
+        /// the validation rules defined by <see cref="Nameid"/>.
+        /// </remarks>
         public required Nameid Nameid
         {
             get;
@@ -33,8 +35,11 @@ namespace Fargo.Domain.Entities
 
         /// <summary>
         /// Gets or sets the textual description associated with the user group.
-        /// If not specified, the description defaults to <see cref="Description.Empty"/>.
         /// </summary>
+        /// <remarks>
+        /// This field provides additional contextual information about the purpose
+        /// of the group. If not specified, it defaults to <see cref="Description.Empty"/>.
+        /// </remarks>
         public Description Description
         {
             get;
@@ -42,8 +47,12 @@ namespace Fargo.Domain.Entities
         } = Description.Empty;
 
         /// <summary>
-        /// Gets a value indicating whether the user group is active.
+        /// Gets or sets a value indicating whether the user group is active.
         /// </summary>
+        /// <remarks>
+        /// Inactive groups should not be considered available for permission grants
+        /// or operational use, depending on application rules.
+        /// </remarks>
         public bool IsActive
         {
             get;
@@ -67,52 +76,27 @@ namespace Fargo.Domain.Entities
         }
 
         /// <summary>
-        /// Validates whether the user group is active.
-        /// </summary>
-        /// <exception cref="UserGroupInactiveFargoDomainException">
-        /// Thrown when the user group is inactive.
-        /// </exception>
-        public void ValidateIsActive()
-        {
-            if (!IsActive)
-            {
-                throw new UserGroupInactiveFargoDomainException(Guid);
-            }
-        }
-
-        /// <summary>
         /// Gets the read-only collection of permissions assigned to the user group.
         /// </summary>
-        public IReadOnlyCollection<UserGroupPermission> UserGroupPermissions
+        /// <remarks>
+        /// This collection represents the permissions granted by the group.
+        /// It is part of the group authorization model and is used to determine
+        /// which actions members of the group are allowed to perform.
+        /// </remarks>
+        public IReadOnlyCollection<UserGroupPermission> Permissions
         {
             get => userGroupPermissions;
             init => userGroupPermissions = [.. value];
         }
 
+        IReadOnlyCollection<IPermission> IUserWithPermissions.Permissions => Permissions;
+
         private readonly List<UserGroupPermission> userGroupPermissions = [];
-
-        /// <summary>
-        /// Gets the read-only collection of partitions to which the user group belongs.
-        /// </summary>
-        public IReadOnlyCollection<Partition> Partitions
-        {
-            get => partitions;
-            init => partitions = [.. value];
-        }
-
-        private readonly List<Partition> partitions = [];
-
-        public IReadOnlyCollection<User> Users
-        {
-            get => users;
-            init => users = [.. value];
-        }
-
-        private readonly List<User> users = [];
 
         /// <summary>
         /// Adds a permission to the user group if it does not already exist.
         /// </summary>
+        /// <param name="action">The action to grant to the user group.</param>
         public void AddPermission(ActionType action)
         {
             if (userGroupPermissions.Any(x => x.Action == action))
@@ -132,6 +116,7 @@ namespace Fargo.Domain.Entities
         /// <summary>
         /// Removes a permission from the user group if it exists.
         /// </summary>
+        /// <param name="action">The action to remove from the user group.</param>
         public void RemovePermission(ActionType action)
         {
             var userGroupPermission = userGroupPermissions.SingleOrDefault(x => x.Action == action);
@@ -144,84 +129,70 @@ namespace Fargo.Domain.Entities
             userGroupPermissions.Remove(userGroupPermission);
         }
 
+        public PartitionCollection Partitions
+        {
+            get;
+            init;
+        }
+
+        IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+
         /// <summary>
-        /// Adds the specified partition to the user group if it is not already associated.
+        /// Gets the read-only collection of users associated with the user group.
         /// </summary>
-        public void AddPartition(Partition partition)
+        /// <remarks>
+        /// This collection represents users that belong to the group.
+        /// It is primarily used for relationship navigation and persistence mapping.
+        /// Domain operations related to membership should be controlled through
+        /// explicit behaviors rather than by directly mutating this collection.
+        /// </remarks>
+        public IReadOnlyCollection<User> Users
+        {
+            get => users;
+            init => users = [.. value];
+        }
+
+        private readonly List<User> users = [];
+
+        public IReadOnlyCollection<UserGroupPartitionAccess> PartitionsAccesses
+        {
+            get => partitionAccesses;
+            init => partitionAccesses = [.. value];
+        }
+
+        public IReadOnlyCollection<IPartitionAccess> PartitionAccesses => PartitionAccesses;
+
+        private List<UserGroupPartitionAccess> partitionAccesses = [];
+
+        public void AddPartitionAccess(Partition partition)
         {
             ArgumentNullException.ThrowIfNull(partition);
 
-            if (partitions.Any(x => x.Guid == partition.Guid))
+            if (partitionAccesses.Any(x => x == partition))
             {
                 return;
             }
 
-            partitions.Add(partition);
+            var partitionAccess = new UserGroupPartitionAccess
+            {
+                UserGroup = this,
+                Partition = partition
+            };
+
+            partitionAccesses.Add(partitionAccess);
         }
 
-        /// <summary>
-        /// Removes the specified partition from the user group if it exists.
-        /// </summary>
-        public void RemovePartition(Guid partitionGuid)
+        public void RemovePartitionAccess(Guid partitionGuid)
         {
-            var partition = partitions.SingleOrDefault(x => x.Guid == partitionGuid);
+            var userGroupPartition =
+                partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
 
-            if (partition == null)
+            if (userGroupPartition == null)
             {
                 return;
             }
 
-            partitions.Remove(partition);
-        }
-
-        /// <summary>
-        /// Determines whether the user group has the specified permission.
-        /// </summary>
-        public bool HasPermission(ActionType action)
-            => userGroupPermissions.Any(p => p.Action == action);
-
-        /// <summary>
-        /// Determines whether the specified user can access this user group.
-        /// </summary>
-        /// <param name="user">The user to evaluate.</param>
-        /// <returns>
-        /// <see langword="true"/> if the group has no partitions or the user has
-        /// access to at least one of the group's partitions; otherwise, <see langword="false"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="user"/> is <see langword="null"/>.
-        /// </exception>
-        public bool CanBeAccessedBy(User user)
-        {
-            ArgumentNullException.ThrowIfNull(user);
-
-            if (!Partitions.Any())
-            {
-                return true;
-            }
-
-            return Partitions.Any(user.HasPartitionAccess);
-        }
-
-        /// <summary>
-        /// Determines whether the specified user can use this group to perform the given action.
-        /// </summary>
-        /// <param name="user">The user to evaluate.</param>
-        /// <param name="action">The action to check.</param>
-        /// <returns>
-        /// <see langword="true"/> if the group is active, has the specified permission,
-        /// and the user can access the group by partition; otherwise, <see langword="false"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="user"/> is <see langword="null"/>.
-        /// </exception>
-        public bool GrantsPermissionTo(User user, ActionType action)
-        {
-            ArgumentNullException.ThrowIfNull(user);
-
-            return IsActive
-                && HasPermission(action)
-                && CanBeAccessedBy(user);
+            partitionAccesses.Remove(userGroupPartition);
         }
     }
 }

@@ -1,4 +1,6 @@
 using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -49,14 +51,9 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    )
-                ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
-            actor.ValidatePermission(ActionType.ChangeUserGroupMembers);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.ChangeUserGroupMembers);
 
             var user = await userRepository.GetByGuid(
                     command.UserGuid,
@@ -64,7 +61,12 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                     )
                 ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
-            user.RemoveGroup(command.UserGroupGuid);
+            var userGroupToRemove = user.UserGroups.FirstOrDefault(g => g.Guid == command.UserGroupGuid);
+
+            if (userGroupToRemove != null)
+            {
+                user.UserGroups.Remove(userGroupToRemove);
+            }
 
             await unitOfWork.SaveChanges(cancellationToken);
         }

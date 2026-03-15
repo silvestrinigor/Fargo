@@ -12,39 +12,27 @@ namespace Fargo.Infrastructure.Configurations
 
             builder.HasKey(x => x.Guid);
 
-            builder
-                .Property(x => x.Name)
-                .IsRequired();
+            builder.Property(x => x.Name).IsRequired();
 
-            builder
-                .Property(x => x.Description)
-                .IsRequired();
+            builder.Property(x => x.Description).IsRequired();
 
-            builder
-                .Property(x => x.IsActive)
-                .IsRequired();
+            builder.Property(x => x.IsActive).IsRequired();
 
-            builder
-                .Property(x => x.ParentPartitionGuid);
+            builder.Property(x => x.ParentPartitionGuid);
 
             builder
                 .HasOne(x => x.ParentPartition)
-                .WithMany()
+                .WithMany(p => p.PartitionMembers)
                 .HasForeignKey(x => x.ParentPartitionGuid)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .Property(x => x.CreatedAt)
-                .IsRequired();
+            builder.Property(x => x.CreatedAt).IsRequired();
 
-            builder
-                .Property(x => x.CreatedByGuid);
+            builder.Property(x => x.CreatedByGuid);
 
-            builder
-                .Property(x => x.EditedAt);
+            builder.Property(x => x.EditedAt);
 
-            builder
-                .Property(x => x.EditedByGuid);
+            builder.Property(x => x.EditedByGuid);
         }
     }
 }

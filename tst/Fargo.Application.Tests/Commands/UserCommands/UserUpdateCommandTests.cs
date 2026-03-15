@@ -274,7 +274,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         await handler.Handle(command);
 
-        var actions = targetUser.UserPermissions
+        var actions = targetUser.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -308,7 +308,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         await handler.Handle(command);
 
-        var actions = targetUser.UserPermissions
+        var actions = targetUser.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -343,7 +343,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         await handler.Handle(command);
 
-        var actions = targetUser.UserPermissions
+        var actions = targetUser.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -377,7 +377,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         await handler.Handle(command);
 
-        var editUserCount = targetUser.UserPermissions
+        var editUserCount = targetUser.Permissions
             .Count(x => x.Action == ActionType.EditUser);
 
         Assert.Equal(1, editUserCount);
@@ -452,7 +452,7 @@ public sealed class UserUpdateCommandHandlerTests
         var originalPasswordHash = targetUser.PasswordHash;
         var originalDefaultPasswordExpirationTimeSpan =
             targetUser.DefaultPasswordExpirationPeriod;
-        var originalActions = targetUser.UserPermissions
+        var originalActions = targetUser.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -474,7 +474,7 @@ public sealed class UserUpdateCommandHandlerTests
             targetUser.DefaultPasswordExpirationPeriod);
         Assert.Equal(
             originalActions,
-            targetUser.UserPermissions.Select(x => x.Action).ToHashSet());
+            targetUser.Permissions.Select(x => x.Action).ToHashSet());
 
         passwordHasher.DidNotReceive()
             .Hash(Arg.Any<Password>());
@@ -545,7 +545,7 @@ public sealed class UserUpdateCommandHandlerTests
     public async Task Handle_Should_NotAddPermissions_When_ActorTriesToChangeOwnPermissions()
     {
         var actor = CreateUserWithPermission(ActionType.EditUser);
-        var originalActions = actor.UserPermissions
+        var originalActions = actor.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -567,7 +567,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         Assert.Equal(
             originalActions,
-            actor.UserPermissions.Select(x => x.Action).ToHashSet());
+            actor.Permissions.Select(x => x.Action).ToHashSet());
 
         await unitOfWork.DidNotReceive()
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -580,7 +580,7 @@ public sealed class UserUpdateCommandHandlerTests
         actor.AddPermission(ActionType.CreateUser);
         actor.AddPermission(ActionType.DeleteUser);
 
-        var originalActions = actor.UserPermissions
+        var originalActions = actor.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -601,7 +601,7 @@ public sealed class UserUpdateCommandHandlerTests
 
         Assert.Equal(
             originalActions,
-            actor.UserPermissions.Select(x => x.Action).ToHashSet());
+            actor.Permissions.Select(x => x.Action).ToHashSet());
 
         await unitOfWork.DidNotReceive()
             .SaveChanges(Arg.Any<CancellationToken>());

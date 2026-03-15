@@ -6,10 +6,12 @@ namespace Fargo.Domain.Repositories
 {
     /// <summary>
     /// Defines the repository contract for managing <see cref="User"/> entities.
-    ///
-    /// This repository provides persistence operations and domain queries
-    /// related to users.
     /// </summary>
+    /// <remarks>
+    /// This repository provides persistence access and domain queries related to
+    /// <see cref="User"/> aggregates. It exposes both aggregate retrieval methods
+    /// and lightweight projection queries used for read operations.
+    /// </remarks>
     public interface IUserRepository
     {
         /// <summary>
@@ -21,9 +23,9 @@ namespace Fargo.Domain.Repositories
         /// The matching <see cref="User"/> if found; otherwise, <see langword="null"/>.
         /// </returns>
         Task<User?> GetByGuid(
-                Guid entityGuid,
-                CancellationToken cancellationToken = default
-                );
+            Guid entityGuid,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Gets a user by their unique <see cref="Nameid"/>.
@@ -34,44 +36,79 @@ namespace Fargo.Domain.Repositories
         /// The matching <see cref="User"/> if found; otherwise, <see langword="null"/>.
         /// </returns>
         Task<User?> GetByNameid(
-                Nameid nameid,
-                CancellationToken cancellationToken = default
-                );
+            Nameid nameid,
+            CancellationToken cancellationToken = default
+        );
 
-        public Task<bool> ExistsByGuid(
+        /// <summary>
+        /// Determines whether a user with the specified identifier exists.
+        /// </summary>
+        /// <param name="guid">The unique identifier of the user.</param>
+        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// <see langword="true"/> if a user with the specified identifier exists;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        Task<bool> ExistsByGuid(
             Guid guid,
             CancellationToken cancellationToken = default
-            );
+        );
 
         /// <summary>
         /// Determines whether a user with the specified <see cref="Nameid"/> already exists.
         /// </summary>
-        /// <param name="nameid">
-        /// The unique user identifier to check.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A token used to cancel the asynchronous operation.
-        /// </param>
+        /// <param name="nameid">The unique user identifier to check.</param>
+        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
         /// <returns>
         /// <see langword="true"/> if a user with the specified <see cref="Nameid"/> exists;
         /// otherwise, <see langword="false"/>.
         /// </returns>
         Task<bool> ExistsByNameid(
-                Nameid nameid,
-                CancellationToken cancellationToken = default
-                );
+            Nameid nameid,
+            CancellationToken cancellationToken = default
+        );
 
+        /// <summary>
+        /// Gets lightweight information about a user by its unique identifier.
+        /// </summary>
+        /// <param name="entityGuid">The unique identifier of the user.</param>
+        /// <param name="asOfDateTime">
+        /// Optional point in time used to retrieve historical data.
+        /// When provided, the returned information represents the state of the user
+        /// as it existed at the specified date and time.
+        /// </param>
+        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A <see cref="UserInformation"/> projection if the user exists;
+        /// otherwise, <see langword="null"/>.
+        /// </returns>
         Task<UserInformation?> GetInfoByGuid(
-                Guid entityGuid,
-                DateTimeOffset? asOfDateTime = null,
-                CancellationToken cancellationToken = default
-                );
+            Guid entityGuid,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default
+        );
 
+        /// <summary>
+        /// Gets a paginated collection of user information projections.
+        /// </summary>
+        /// <param name="pagination">
+        /// The pagination configuration used to control the number of returned results
+        /// and the starting position of the query.
+        /// </param>
+        /// <param name="asOfDateTime">
+        /// Optional point in time used to retrieve historical data.
+        /// When provided, the returned results represent the state of the users
+        /// as they existed at the specified date and time.
+        /// </param>
+        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A read-only collection of <see cref="UserInformation"/> objects.
+        /// </returns>
         Task<IReadOnlyCollection<UserInformation>> GetManyInfo(
-                Pagination pagination,
-                DateTimeOffset? asOfDateTime = null,
-                CancellationToken cancellationToken = default
-                );
+            Pagination pagination,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         /// Adds a new user to the persistence context.

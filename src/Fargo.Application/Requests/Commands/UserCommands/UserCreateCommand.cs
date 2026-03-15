@@ -1,4 +1,6 @@
 ﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -46,13 +48,9 @@ namespace Fargo.Application.Requests.Commands.UserCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
-            actor.ValidatePermission(ActionType.CreateUser);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.CreateUser);
 
             var userPasswordHash = passwordHasher.Hash(command.User.Password);
 

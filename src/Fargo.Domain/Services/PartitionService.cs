@@ -1,4 +1,5 @@
 using Fargo.Domain.Entities;
+using Fargo.Domain.Logics;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Domain.Services
@@ -43,12 +44,40 @@ namespace Fargo.Domain.Services
         {
             var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
 
-            if (partition != null && !actor.HasPartitionAccess(partition))
+            if (partition != null && !partition.HasAccess(actor))
             {
                 return null;
             }
 
             return partition;
+        }
+
+        public static bool HasAccess(Partition partition, User user)
+        {
+            var userHasAccess = partition.HasAccess(user);
+
+            if (userHasAccess)
+            {
+                return true;
+            }
+
+            var userGroupHasAccess = user.UserGroups.Any(partition.HasAccess);
+
+            return userGroupHasAccess;
+        }
+
+        public static bool HasAccess(IPartitioned partitioned, User user)
+        {
+            var userHasAccess = partitioned.HasAccess(user);
+
+            if (userHasAccess)
+            {
+                return true;
+            }
+
+            var userGroupHasAccess = user.UserGroups.Any(partitioned.HasAccess);
+
+            return userGroupHasAccess;
         }
     }
 }

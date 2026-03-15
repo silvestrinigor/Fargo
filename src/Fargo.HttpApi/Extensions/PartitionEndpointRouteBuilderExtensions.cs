@@ -73,6 +73,7 @@ namespace Fargo.HttpApi.Extensions
         }
 
         private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NoContent>> GetManyPartition(
+            Guid? parentPartitionGuid,
             DateTimeOffset? temporalAsOf,
             Page? page,
             Limit? limit,
@@ -80,6 +81,7 @@ namespace Fargo.HttpApi.Extensions
             CancellationToken cancellationToken)
         {
             var query = new PartitionManyQuery(
+                parentPartitionGuid,
                 temporalAsOf,
                 PaginationHelpers.CreatePagination(page, limit)
             );

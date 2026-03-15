@@ -16,8 +16,8 @@ namespace Fargo.Application.Mappings
                 u.DefaultPasswordExpirationPeriod,
                 u.RequirePasswordChangeAt,
                 u.IsActive,
-                u.UserPermissions.Select(p => new Permission(p.Guid, p.Action)).ToList(),
-                u.PartitionsAccesses.Select(p => p.Guid).ToList()
+                u.Permissions.Select(p => new Permission(p.Guid, p.Action)).ToList(),
+                u.PartitionAccesses.Select(p => p.Guid).ToList()
             );
 
         public static UserInformation ToInformation(this User u) =>
@@ -30,8 +30,8 @@ namespace Fargo.Application.Mappings
                 u.DefaultPasswordExpirationPeriod,
                 u.RequirePasswordChangeAt,
                 u.IsActive,
-                [.. u.UserPermissions.Select(p => new Permission(p.Guid, p.Action))],
-                [.. u.PartitionsAccesses.Select(p => p.Guid)]
+                [.. u.Permissions.Select(p => new Permission(p.Guid, p.Action))],
+                [.. u.PartitionAccesses.Select(p => p.Guid)]
             );
     }
 }

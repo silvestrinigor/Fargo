@@ -1,21 +1,23 @@
+using Fargo.Domain.Logics;
+
 namespace Fargo.Domain.Entities
 {
     /// <summary>
     /// Represents the access relationship between a <see cref="User"/> and a <see cref="Partition"/>.
     /// </summary>
     /// <remarks>
-    /// A <see cref="PartitionAccess"/> defines whether a user is allowed to access a specific
+    /// A <see cref="UserPartitionAccess"/> defines whether a user is allowed to access a specific
     /// partition and optionally whether the user can modify entities within that partition.
     ///
     /// Partitions are used to logically isolate data in the system. Users can only access
     /// entities that belong to partitions for which they have an associated
-    /// <see cref="PartitionAccess"/>.
+    /// <see cref="UserPartitionAccess"/>.
     ///
     /// This entity is a member of the <see cref="User"/> aggregate and implements
     /// <see cref="IAuditedAggregateMember"/>, meaning that any modification to this
     /// entity should update the audit metadata of the parent <see cref="User"/>.
     /// </remarks>
-    public class PartitionAccess : Entity, IAuditedAggregateMember
+    public class UserPartitionAccess : Entity, IAuditedAggregateMember, IPartitionAccess
     {
         /// <summary>
         /// Gets the unique identifier of the user associated with this access entry.
@@ -69,12 +71,14 @@ namespace Fargo.Domain.Entities
             }
         }
 
+        IPartition IPartitionAccess.Partition => Partition;
+
         /// <summary>
         /// Gets the parent audited entity whose audit metadata must be updated
         /// when this entity changes.
         /// </summary>
         /// <remarks>
-        /// Since <see cref="PartitionAccess"/> belongs to the <see cref="User"/> aggregate,
+        /// Since <see cref="UserPartitionAccess"/> belongs to the <see cref="User"/> aggregate,
         /// the parent audited entity is the associated user.
         /// </remarks>
         public IAuditedEntity ParentAuditedEntity => User;

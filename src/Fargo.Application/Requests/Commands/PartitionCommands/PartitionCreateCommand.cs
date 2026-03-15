@@ -7,6 +7,7 @@ using Fargo.Domain.Exceptions;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
+using Fargo.Application.Helpers;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -75,7 +76,7 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
 
             var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidatePermission(ActionType.CreatePartition);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.CreatePartition);
 
             var partition = new Partition
             {

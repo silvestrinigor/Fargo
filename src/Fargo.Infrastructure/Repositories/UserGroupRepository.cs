@@ -28,7 +28,7 @@ namespace Fargo.Infrastructure.Repositories
             CancellationToken cancellationToken = default)
         {
             return await userGroups
-                .Include(userGroup => userGroup.UserGroupPermissions)
+                .Include(userGroup => userGroup.Permissions)
                 .Where(userGroup => userGroup.Guid == entityGuid)
                 .SingleOrDefaultAsync(cancellationToken);
         }

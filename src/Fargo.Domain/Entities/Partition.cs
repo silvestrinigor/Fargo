@@ -1,3 +1,4 @@
+using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities
@@ -20,7 +21,7 @@ namespace Fargo.Domain.Entities
     /// The global partition has access to all entities contained in its descendant
     /// partitions. Access to this partition is restricted to highly privileged users.
     /// </remarks>
-    public class Partition : AuditedEntity
+    public class Partition : AuditedEntity, IPartition
     {
         /// <summary>
         /// Gets or sets the name of the partition.
@@ -87,6 +88,88 @@ namespace Fargo.Domain.Entities
             get;
             private set;
         }
+
+        /// <summary>
+        /// Gets the child partitions that belong to the current partition.
+        /// </summary>
+        /// <remarks>
+        /// This collection represents the hierarchical relationship between partitions.
+        /// Each member partition has the current partition as its parent.
+        ///
+        /// The collection is primarily used for navigation and persistence mapping.
+        /// Domain logic should not rely on directly mutating this collection.
+        /// </remarks>
+        public IReadOnlyCollection<Partition> PartitionMembers
+        {
+            get => partitionMembers;
+            init => partitionMembers = [.. value];
+        }
+
+        private readonly List<Partition> partitionMembers = [];
+
+        /// <summary>
+        /// Gets the articles associated with the current partition.
+        /// </summary>
+        /// <remarks>
+        /// This collection represents the articles that belong to the partition.
+        /// It is mainly used for persistence navigation and relationship mapping.
+        /// Domain operations should interact with articles through their own
+        /// aggregates and repositories.
+        /// </remarks>
+        public IReadOnlyCollection<Article> ArticleMembers
+        {
+            get => articleMembers;
+            init => articleMembers = [.. value];
+        }
+
+        private readonly List<Article> articleMembers = [];
+
+        /// <summary>
+        /// Gets the items associated with the current partition.
+        /// </summary>
+        /// <remarks>
+        /// This collection represents the items that belong to the partition.
+        /// It is primarily intended for persistence navigation and relationship mapping.
+        /// </remarks>
+        public IReadOnlyCollection<Item> ItemMembers
+        {
+            get => itemMembers;
+            init => itemMembers = [.. value];
+        }
+
+        private readonly List<Item> itemMembers = [];
+
+        /// <summary>
+        /// Gets the users associated with the current partition.
+        /// </summary>
+        /// <remarks>
+        /// This collection represents users that have membership or association
+        /// with the partition. It is mainly used for persistence navigation.
+        /// Authorization logic should rely on domain services or repositories
+        /// rather than manipulating this collection directly.
+        /// </remarks>
+        public IReadOnlyCollection<User> UserMembers
+        {
+            get => userMembers;
+            init => userMembers = [.. value];
+        }
+
+        private readonly List<User> userMembers = [];
+
+        /// <summary>
+        /// Gets the user groups associated with the current partition.
+        /// </summary>
+        /// <remarks>
+        /// This collection represents user groups linked to the partition.
+        /// It is primarily used for persistence navigation and relationship mapping.
+        /// </remarks>
+        public IReadOnlyCollection<UserGroup> UserGroupMembers
+        {
+            get => userGroupMembers;
+            init => userGroupMembers = [.. value];
+        }
+
+        private readonly List<UserGroup> userGroupMembers = [];
 
         /// <summary>
         /// Marks the partition as active.

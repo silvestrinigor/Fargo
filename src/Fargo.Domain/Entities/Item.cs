@@ -1,4 +1,7 @@
-﻿namespace Fargo.Domain.Entities
+﻿using Fargo.Domain.Collections;
+using Fargo.Domain.Logics;
+
+namespace Fargo.Domain.Entities
 {
     /// <summary>
     /// Represents an item in the system.
@@ -48,59 +51,12 @@
             }
         }
 
-        /// <summary>
-        /// Gets the read-only collection of partitions to which the item belongs.
-        /// </summary>
-        /// <remarks>
-        /// These partitions define the access scope of the item itself.
-        /// A user may access the item only if they have access to at least one
-        /// of these partitions.
-        /// </remarks>
-        public IReadOnlyCollection<Partition> Partitions
+        public PartitionCollection Partitions
         {
-            get => partitions;
-            init => partitions = [.. value];
-        }
+            get;
+            init;
+        } = [];
 
-        /// <summary>
-        /// Internal mutable collection used to store the partitions
-        /// associated with the item.
-        /// </summary>
-        private readonly List<Partition> partitions = [];
-
-        /// <summary>
-        /// Adds the specified partition to the item if it is not already associated.
-        /// </summary>
-        /// <param name="partition">The partition to associate with the item.</param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-        /// </exception>
-        public void AddPartition(Partition partition)
-        {
-            ArgumentNullException.ThrowIfNull(partition);
-
-            if (partitions.Any(x => x.Guid == partition.Guid))
-            {
-                return;
-            }
-
-            partitions.Add(partition);
-        }
-
-        /// <summary>
-        /// Removes the specified partition from the item if it exists.
-        /// </summary>
-        /// <param name="partitionGuid">The unique identifier of the partition to remove.</param>
-        public void RemovePartition(Guid partitionGuid)
-        {
-            var partition = partitions.SingleOrDefault(x => x.Guid == partitionGuid);
-
-            if (partition == null)
-            {
-                return;
-            }
-
-            partitions.Remove(partition);
-        }
+        IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
     }
 }

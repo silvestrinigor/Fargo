@@ -70,7 +70,7 @@ namespace Fargo.Domain.Services
         {
             var article = await articleRepository.GetByGuid(articleGuid, cancellationToken);
 
-            if (article != null && !actor.HasAccess(article))
+            if (article != null && !PartitionService.HasAccess(article, actor))
             {
                 return null;
             }

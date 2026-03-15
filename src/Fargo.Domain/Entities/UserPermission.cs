@@ -1,4 +1,5 @@
 using Fargo.Domain.Enums;
+using Fargo.Domain.Logics;
 
 namespace Fargo.Domain.Entities
 {
@@ -16,7 +17,7 @@ namespace Fargo.Domain.Entities
     /// that any changes to this permission will propagate auditing updates
     /// to the parent <see cref="User"/> entity.
     /// </remarks>
-    public class UserPermission : Entity, IAuditedAggregateMember
+    public class UserPermission : Entity, IAuditedAggregateMember, IPermission
     {
         /// <summary>
         /// Gets the unique identifier of the user that owns this permission.

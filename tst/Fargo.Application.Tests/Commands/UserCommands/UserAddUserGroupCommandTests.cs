@@ -218,7 +218,7 @@ public sealed class UserAddUserGroupCommandHandlerTests
         var userGroup = CreateUserGroup(userGroupGuid);
 
         var user = CreateUser(targetUserGuid);
-        user.AddGroup(userGroup);
+        user.UserGroups.Add(userGroup);
 
         var command = new UserAddUserGroupCommand(targetUserGuid, userGroupGuid);
 

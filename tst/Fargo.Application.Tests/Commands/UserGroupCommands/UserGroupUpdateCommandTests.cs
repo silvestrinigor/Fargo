@@ -232,7 +232,7 @@ public sealed class UserGroupUpdateCommandHandlerTests
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var actions = userGroup.UserGroupPermissions
+        var actions = userGroup.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -272,7 +272,7 @@ public sealed class UserGroupUpdateCommandHandlerTests
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.Empty(userGroup.UserGroupPermissions);
+        Assert.Empty(userGroup.Permissions);
 
         await unitOfWork.Received(1)
             .SaveChanges(Arg.Any<CancellationToken>());
@@ -288,7 +288,7 @@ public sealed class UserGroupUpdateCommandHandlerTests
         userGroup.AddPermission(ActionType.CreateUser);
         userGroup.AddPermission(ActionType.DeleteUser);
 
-        var originalActions = userGroup.UserGroupPermissions
+        var originalActions = userGroup.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 
@@ -310,7 +310,7 @@ public sealed class UserGroupUpdateCommandHandlerTests
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var resultingActions = userGroup.UserGroupPermissions
+        var resultingActions = userGroup.Permissions
             .Select(x => x.Action)
             .ToHashSet();
 

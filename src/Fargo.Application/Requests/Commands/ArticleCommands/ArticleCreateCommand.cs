@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -48,7 +49,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidatePermission(ActionType.CreateArticle);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.CreateArticle);
 
             var article = new Article
             {
@@ -64,7 +65,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
                         cancellationToken
                         ) ?? throw new PartitionNotFoundFargoApplicationException(command.Article.FirstPartition.Value);
 
-                article.AddPartition(articlePartition);
+                article.Partitions.Add(articlePartition);
             }
 
             articleRepository.Add(article);

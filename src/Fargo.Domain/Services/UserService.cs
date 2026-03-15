@@ -1,5 +1,7 @@
 using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
+using Fargo.Domain.Logics;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Domain.Services
@@ -83,6 +85,20 @@ namespace Fargo.Domain.Services
             {
                 throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
             }
+        }
+
+        public static bool HasPermission(User user, ActionType action)
+        {
+            var userHasPermission = user.HasPermission(action);
+
+            if (userHasPermission)
+            {
+                return true;
+            }
+
+            var userGroupHasPermission = user.UserGroups.Any(g => g.HasPermission(action));
+
+            return userGroupHasPermission;
         }
     }
 }

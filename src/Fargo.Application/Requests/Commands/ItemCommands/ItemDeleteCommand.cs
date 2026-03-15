@@ -1,4 +1,6 @@
 ﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -43,14 +45,9 @@ namespace Fargo.Application.Requests.Commands.ItemCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    )
-                ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
-            actor.ValidatePermission(ActionType.DeleteItem);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteItem);
 
             var item = await itemRepository.GetByGuid(
                     command.ItemGuid,

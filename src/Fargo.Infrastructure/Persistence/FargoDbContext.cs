@@ -24,7 +24,7 @@ namespace Fargo.Infrastructure.Persistence
 
         public DbSet<Partition> Partitions { get; set; }
 
-        public DbSet<PartitionAccess> PartitionAccesses { get; set; }
+        public DbSet<UserPartitionAccess> PartitionAccesses { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

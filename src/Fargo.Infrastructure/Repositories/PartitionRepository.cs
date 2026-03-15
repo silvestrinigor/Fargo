@@ -47,12 +47,14 @@ namespace Fargo.Infrastructure.Repositories
 
         public async Task<IReadOnlyCollection<PartitionInformation>> GetManyInfo(
             Pagination pagination,
+            Guid? parentPartitionGuid,
             DateTimeOffset? asOfDateTime = null,
             CancellationToken cancellationToken = default)
         {
             return await partitions
                 .TemporalAsOfIfProvided(asOfDateTime)
                 .AsNoTracking()
+                .Where(p => parentPartitionGuid == null || p.ParentPartitionGuid == parentPartitionGuid)
                 .OrderBy(partition => partition.Guid)
                 .WithPagination(pagination)
                 .Select(PartitionMappings.InformationProjection)

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Fargo.Application.Models.TreeModels;
 using Fargo.Domain.Entities;
 using Fargo.Domain.ValueObjects.Entities;
 

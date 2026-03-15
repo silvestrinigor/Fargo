@@ -160,14 +160,14 @@ public sealed class UserGroupCreateCommandHandlerTests
         Assert.Equal(command.UserGroup.Nameid, addedUserGroup.Nameid);
         Assert.Equal(command.UserGroup.Description, addedUserGroup.Description);
         Assert.True(addedUserGroup.IsActive);
-        Assert.Equal(2, addedUserGroup.UserGroupPermissions.Count);
+        Assert.Equal(2, addedUserGroup.Permissions.Count);
 
         Assert.Contains(
-            addedUserGroup.UserGroupPermissions,
+            addedUserGroup.Permissions,
             x => x.Action == ActionType.CreateUser);
 
         Assert.Contains(
-            addedUserGroup.UserGroupPermissions,
+            addedUserGroup.Permissions,
             x => x.Action == ActionType.EditUser);
     }
 
@@ -215,7 +215,7 @@ public sealed class UserGroupCreateCommandHandlerTests
         Assert.Equal(command.UserGroup.Nameid, addedUserGroup.Nameid);
         Assert.Equal(Description.Empty, addedUserGroup.Description);
         Assert.True(addedUserGroup.IsActive);
-        Assert.Empty(addedUserGroup.UserGroupPermissions);
+        Assert.Empty(addedUserGroup.Permissions);
     }
 
     [Fact]
@@ -258,7 +258,7 @@ public sealed class UserGroupCreateCommandHandlerTests
 
         Assert.NotNull(addedUserGroup);
         Assert.Equal(result, addedUserGroup!.Guid);
-        Assert.Empty(addedUserGroup.UserGroupPermissions);
+        Assert.Empty(addedUserGroup.Permissions);
     }
 
     [Fact]
@@ -299,9 +299,9 @@ public sealed class UserGroupCreateCommandHandlerTests
 
         // Assert
         Assert.NotNull(addedUserGroup);
-        Assert.Single(addedUserGroup!.UserGroupPermissions);
+        Assert.Single(addedUserGroup!.Permissions);
         Assert.Contains(
-            addedUserGroup.UserGroupPermissions,
+            addedUserGroup.Permissions,
             x => x.Action == ActionType.CreateUser);
     }
 

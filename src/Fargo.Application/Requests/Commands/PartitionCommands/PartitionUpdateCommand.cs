@@ -8,6 +8,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 using Fargo.Application.Models.PartitionModels;
+using Fargo.Application.Helpers;
 
 namespace Fargo.Application.Requests.Commands.PartitionCommands
 {
@@ -67,7 +68,7 @@ namespace Fargo.Application.Requests.Commands.PartitionCommands
 
             var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidatePermission(ActionType.EditPartition);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.EditPartition);
 
             var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
                 ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);

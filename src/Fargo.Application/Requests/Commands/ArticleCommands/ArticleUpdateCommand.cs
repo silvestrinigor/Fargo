@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -52,7 +53,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidatePermission(ActionType.EditArticle);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.EditArticle);
 
             var article = await articleService.GetArticle(
                     command.ArticleGuid,

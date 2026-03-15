@@ -142,7 +142,7 @@ public sealed class UserRemoveUserGroupCommandHandlerTests
         var userGroup = CreateUserGroup(userGroupGuid);
 
         var user = CreateUser(targetUserGuid);
-        user.AddGroup(userGroup);
+        user.UserGroups.Add(userGroup);
 
         var command = new UserRemoveUserGroupCommand(targetUserGuid, userGroupGuid);
 

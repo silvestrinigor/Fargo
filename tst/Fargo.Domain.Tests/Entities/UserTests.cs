@@ -32,7 +32,7 @@ public sealed class UserTests
     public void UserPermissions_Should_DefaultToEmpty_When_NotSpecified()
     {
         var user = CreateUser();
-        Assert.Empty(user.UserPermissions);
+        Assert.Empty(user.Permissions);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public sealed class UserTests
     public void PartitionsAccesses_Should_DefaultToEmpty_When_NotSpecified()
     {
         var user = CreateUser();
-        Assert.Empty(user.PartitionsAccesses);
+        Assert.Empty(user.PartitionAccesses);
     }
 
     [Fact]
@@ -91,24 +91,6 @@ public sealed class UserTests
         var user = CreateUser(isActive: true);
         user.Deactivate();
         Assert.False(user.IsActive);
-    }
-
-    [Fact]
-    public void ValidateIsActive_Should_NotThrow_When_UserIsActive()
-    {
-        var user = CreateUser(isActive: true);
-        user.ValidateIsActive();
-    }
-
-    [Fact]
-    public void ValidateIsActive_Should_ThrowUserInactiveFargoDomainException_When_UserIsInactive()
-    {
-        var user = CreateUser(isActive: false);
-
-        void act() => user.ValidateIsActive();
-
-        var exception = Assert.Throws<UserInactiveFargoDomainException>(act);
-        Assert.Equal(user.Guid, exception.UserGuid);
     }
 
     [Fact]
@@ -295,7 +277,7 @@ public sealed class UserTests
 
         user.AddPermission(ActionType.CreateUser);
 
-        Assert.Contains(user.UserPermissions, x => x.Action == ActionType.CreateUser);
+        Assert.Contains(user.Permissions, x => x.Action == ActionType.CreateUser);
     }
 
     [Fact]
@@ -306,7 +288,7 @@ public sealed class UserTests
 
         user.AddPermission(ActionType.CreateUser);
 
-        Assert.Equal(1, user.UserPermissions.Count(x => x.Action == ActionType.CreateUser));
+        Assert.Equal(1, user.Permissions.Count(x => x.Action == ActionType.CreateUser));
     }
 
     [Fact]
@@ -316,7 +298,7 @@ public sealed class UserTests
 
         user.AddPermission(ActionType.DeleteUser);
 
-        var permission = Assert.Single(user.UserPermissions);
+        var permission = Assert.Single(user.Permissions);
         Assert.Equal(ActionType.DeleteUser, permission.Action);
         Assert.Equal(user, permission.User);
         Assert.Equal(user.Guid, permission.UserGuid);
@@ -330,7 +312,7 @@ public sealed class UserTests
 
         user.RemovePermission(ActionType.EditUser);
 
-        Assert.DoesNotContain(user.UserPermissions, x => x.Action == ActionType.EditUser);
+        Assert.DoesNotContain(user.Permissions, x => x.Action == ActionType.EditUser);
     }
 
     [Fact]
@@ -341,197 +323,8 @@ public sealed class UserTests
 
         user.RemovePermission(ActionType.DeleteUser);
 
-        Assert.Single(user.UserPermissions);
-        Assert.Contains(user.UserPermissions, x => x.Action == ActionType.CreateUser);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnTrue_When_UserHasDirectPermission()
-    {
-        var user = CreateUser();
-        user.AddPermission(ActionType.EditUser);
-
-        var result = user.HasPermission(ActionType.EditUser);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnTrue_When_ActiveGroupHasPermission_And_GroupHasNoPartitions()
-    {
-        var group = CreateUserGroup();
-        group.AddPermission(ActionType.EditUser);
-
-        var user = CreateUser();
-        user.AddGroup(group);
-
-        var result = user.HasPermission(ActionType.EditUser);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnTrue_When_ActiveGroupHasPermission_And_UserHasAccessToGroupPartition()
-    {
-        var partition = CreatePartition();
-
-        var group = CreateUserGroup();
-        group.AddPermission(ActionType.EditUser);
-        group.AddPartition(partition);
-
-        var user = CreateUser();
-        user.AddPartitionAccess(partition);
-        user.AddGroup(group);
-
-        var result = user.HasPermission(ActionType.EditUser);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnFalse_When_ActiveGroupHasPermission_But_UserDoesNotHaveAccessToGroupPartition()
-    {
-        var groupPartition = CreatePartition();
-
-        var group = CreateUserGroup();
-        group.AddPermission(ActionType.EditUser);
-        group.AddPartition(groupPartition);
-
-        var user = CreateUser();
-        user.AddGroup(group);
-
-        var result = user.HasPermission(ActionType.EditUser);
-
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnFalse_When_OnlyInactiveGroupHasPermission()
-    {
-        var group = CreateUserGroup(isActive: false);
-        group.AddPermission(ActionType.EditUser);
-
-        var user = CreateUser();
-        user.AddGroup(group);
-
-        var result = user.HasPermission(ActionType.EditUser);
-
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnTrue_When_UserHasNoDirectPermission_But_AnotherActiveAccessibleGroupHasIt()
-    {
-        var inaccessiblePartition = CreatePartition(name: "Inaccessible");
-        var accessiblePartition = CreatePartition(name: "Accessible");
-
-        var groupWithoutPermission = CreateUserGroup();
-
-        var inaccessibleGroupWithPermission = CreateUserGroup(nameid: "managers");
-        inaccessibleGroupWithPermission.AddPermission(ActionType.DeleteUser);
-        inaccessibleGroupWithPermission.AddPartition(inaccessiblePartition);
-
-        var accessibleGroupWithPermission = CreateUserGroup(nameid: "supervisors");
-        accessibleGroupWithPermission.AddPermission(ActionType.DeleteUser);
-        accessibleGroupWithPermission.AddPartition(accessiblePartition);
-
-        var user = CreateUser();
-        user.AddPartitionAccess(accessiblePartition);
-        user.AddGroup(groupWithoutPermission);
-        user.AddGroup(inaccessibleGroupWithPermission);
-        user.AddGroup(accessibleGroupWithPermission);
-
-        var result = user.HasPermission(ActionType.DeleteUser);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnFalse_When_UserDoesNotHavePermission()
-    {
-        var user = CreateUser();
-
-        var result = user.HasPermission(ActionType.EditUser);
-
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void HasPermission_Should_ReturnFalse_AfterPermissionIsRemoved()
-    {
-        var user = CreateUser();
-        user.AddPermission(ActionType.EditUser);
-
-        user.RemovePermission(ActionType.EditUser);
-
-        Assert.False(user.HasPermission(ActionType.EditUser));
-    }
-
-    [Fact]
-    public void ValidatePermission_Should_NotThrow_When_UserHasPermission()
-    {
-        var user = CreateUser();
-        user.AddPermission(ActionType.DeleteUser);
-
-        user.ValidatePermission(ActionType.DeleteUser);
-    }
-
-    [Fact]
-    public void ValidatePermission_Should_NotThrow_When_ActiveAccessibleGroupGrantsPermission()
-    {
-        var partition = CreatePartition();
-
-        var group = CreateUserGroup();
-        group.AddPermission(ActionType.DeleteUser);
-        group.AddPartition(partition);
-
-        var user = CreateUser();
-        user.AddPartitionAccess(partition);
-        user.AddGroup(group);
-
-        user.ValidatePermission(ActionType.DeleteUser);
-    }
-
-    [Fact]
-    public void ValidatePermission_Should_ThrowUserNotAuthorizedFargoDomainException_When_GroupHasPermission_But_UserCannotAccessGroupPartitions()
-    {
-        var partition = CreatePartition();
-
-        var group = CreateUserGroup();
-        group.AddPermission(ActionType.DeleteUser);
-        group.AddPartition(partition);
-
-        var user = CreateUser();
-        user.AddGroup(group);
-
-        void act() => user.ValidatePermission(ActionType.DeleteUser);
-
-        var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
-        Assert.Equal(user.Guid, exception.UserGuid);
-        Assert.Equal(ActionType.DeleteUser, exception.ActionType);
-    }
-
-    [Fact]
-    public void ValidatePermission_Should_ThrowUserNotAuthorizedFargoDomainException_When_UserDoesNotHavePermission()
-    {
-        var user = CreateUser();
-
-        void act() => user.ValidatePermission(ActionType.DeleteUser);
-
-        var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
-        Assert.Equal(user.Guid, exception.UserGuid);
-    }
-
-    [Fact]
-    public void ValidatePermission_Should_ThrowUserNotAuthorizedFargoDomainException_WithExpectedData()
-    {
-        var user = CreateUser();
-
-        void act() => user.ValidatePermission(ActionType.DeleteUser);
-
-        var exception = Assert.Throws<UserNotAuthorizedFargoDomainException>(act);
-        Assert.Equal(user.Guid, exception.UserGuid);
-        Assert.Equal(ActionType.DeleteUser, exception.ActionType);
+        Assert.Single(user.Permissions);
+        Assert.Contains(user.Permissions, x => x.Action == ActionType.CreateUser);
     }
 
     [Fact]
@@ -540,7 +333,7 @@ public sealed class UserTests
         var user = CreateUser();
         var group = CreateUserGroup();
 
-        user.AddGroup(group);
+        user.UserGroups.Add(group);
 
         Assert.Single(user.UserGroups);
         Assert.Contains(user.UserGroups, x => x.Guid == group.Guid);
@@ -552,8 +345,8 @@ public sealed class UserTests
         var user = CreateUser();
         var group = CreateUserGroup();
 
-        user.AddGroup(group);
-        user.AddGroup(group);
+        user.UserGroups.Add(group);
+        user.UserGroups.Add(group);
 
         Assert.Single(user.UserGroups);
     }
@@ -567,8 +360,8 @@ public sealed class UserTests
         var second = CreateUserGroup(guid: groupGuid, nameid: "managers");
 
         var user = CreateUser();
-        user.AddGroup(first);
-        user.AddGroup(second);
+        user.UserGroups.Add(first);
+        user.UserGroups.Add(second);
 
         Assert.Single(user.UserGroups);
         Assert.Contains(user.UserGroups, x => x.Guid == groupGuid);
@@ -579,7 +372,7 @@ public sealed class UserTests
     {
         var user = CreateUser();
 
-        void act() => user.AddGroup(null!);
+        void act() => user.UserGroups.Add(null!);
 
         Assert.Throws<ArgumentNullException>(act);
     }
@@ -590,8 +383,8 @@ public sealed class UserTests
         var user = CreateUser();
         var group = CreateUserGroup();
 
-        user.AddGroup(group);
-        user.RemoveGroup(group.Guid);
+        user.UserGroups.Add(group);
+        user.UserGroups.Add(group);
 
         Assert.Empty(user.UserGroups);
     }
@@ -602,11 +395,10 @@ public sealed class UserTests
         var user = CreateUser();
         var group = CreateUserGroup();
 
-        user.AddGroup(group);
-        user.RemoveGroup(Guid.NewGuid());
+        user.UserGroups.Add(group);
+        user.UserGroups.Remove(group);
 
-        Assert.Single(user.UserGroups);
-        Assert.Contains(user.UserGroups, x => x.Guid == group.Guid);
+        Assert.Empty(user.UserGroups);
     }
 
     [Fact]
@@ -617,7 +409,7 @@ public sealed class UserTests
 
         user.AddPartitionAccess(partition);
 
-        var access = Assert.Single(user.PartitionsAccesses);
+        var access = Assert.Single(user.PartitionAccesses);
         Assert.Equal(user, access.User);
         Assert.Equal(user.Guid, access.UserGuid);
         Assert.Equal(partition, access.Partition);
@@ -633,7 +425,7 @@ public sealed class UserTests
         user.AddPartitionAccess(partition);
         user.AddPartitionAccess(partition);
 
-        Assert.Single(user.PartitionsAccesses);
+        Assert.Single(user.PartitionAccesses);
     }
 
     [Fact]
@@ -655,7 +447,7 @@ public sealed class UserTests
         user.AddPartitionAccess(partition);
         user.RemovePartitionAccess(partition.Guid);
 
-        Assert.Empty(user.PartitionsAccesses);
+        Assert.Empty(user.PartitionAccesses);
     }
 
     [Fact]
@@ -667,57 +459,7 @@ public sealed class UserTests
         user.AddPartitionAccess(partition);
         user.RemovePartitionAccess(Guid.NewGuid());
 
-        Assert.Single(user.PartitionsAccesses);
-    }
-
-    [Fact]
-    public void HasPartitionAccess_Should_ReturnTrue_When_UserHasAccessToPartition()
-    {
-        var user = CreateUser();
-        var partition = CreatePartition();
-
-        user.AddPartitionAccess(partition);
-
-        var result = user.HasPartitionAccess(partition);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasPartitionAccess_Should_ReturnTrue_When_UserHasAccessToDifferentInstanceWithSameGuid()
-    {
-        var partitionGuid = Guid.NewGuid();
-
-        var grantedPartition = CreatePartition(guid: partitionGuid, name: "Granted");
-        var queriedPartition = CreatePartition(guid: partitionGuid, name: "Queried");
-
-        var user = CreateUser();
-        user.AddPartitionAccess(grantedPartition);
-
-        var result = user.HasPartitionAccess(queriedPartition);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasPartitionAccess_Should_ReturnFalse_When_UserDoesNotHaveAccessToPartition()
-    {
-        var user = CreateUser();
-        var partition = CreatePartition();
-
-        var result = user.HasPartitionAccess(partition);
-
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void HasPartitionAccess_Should_ThrowArgumentNullException_When_PartitionIsNull()
-    {
-        var user = CreateUser();
-
-        void act() => user.HasPartitionAccess(null!);
-
-        Assert.Throws<ArgumentNullException>(act);
+        Assert.Single(user.PartitionAccesses);
     }
 
     [Fact]
@@ -726,7 +468,7 @@ public sealed class UserTests
         var user = CreateUser();
         var partition = CreatePartition();
 
-        user.AddPartition(partition);
+        user.Partitions.Add(partition);
 
         Assert.Single(user.Partitions);
         Assert.Contains(user.Partitions, x => x.Guid == partition.Guid);
@@ -738,8 +480,8 @@ public sealed class UserTests
         var user = CreateUser();
         var partition = CreatePartition();
 
-        user.AddPartition(partition);
-        user.AddPartition(partition);
+        user.Partitions.Add(partition);
+        user.Partitions.Add(partition);
 
         Assert.Single(user.Partitions);
     }
@@ -749,84 +491,7 @@ public sealed class UserTests
     {
         var user = CreateUser();
 
-        void act() => user.AddPartition(null!);
-
-        Assert.Throws<ArgumentNullException>(act);
-    }
-
-    [Fact]
-    public void RemovePartition_Should_RemovePartition_When_ItExists()
-    {
-        var user = CreateUser();
-        var partition = CreatePartition();
-
-        user.AddPartition(partition);
-        user.RemovePartition(partition.Guid);
-
-        Assert.Empty(user.Partitions);
-    }
-
-    [Fact]
-    public void RemovePartition_Should_DoNothing_When_ItDoesNotExist()
-    {
-        var user = CreateUser();
-        var partition = CreatePartition();
-
-        user.AddPartition(partition);
-        user.RemovePartition(Guid.NewGuid());
-
-        Assert.Single(user.Partitions);
-    }
-
-    [Fact]
-    public void HasAccess_Should_ReturnTrue_When_EntityHasNoPartitions()
-    {
-        var user = CreateUser();
-        var entity = CreatePartitionedEntity();
-
-        var result = user.HasAccess(entity);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasAccess_Should_ReturnTrue_When_EntitySharesAtLeastOneAccessiblePartition()
-    {
-        var user = CreateUser();
-        var accessiblePartition = CreatePartition();
-        var otherPartition = CreatePartition();
-
-        user.AddPartitionAccess(accessiblePartition);
-
-        var entity = CreatePartitionedEntity([accessiblePartition, otherPartition]);
-
-        var result = user.HasAccess(entity);
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void HasAccess_Should_ReturnFalse_When_EntityDoesNotShareAnyAccessiblePartition()
-    {
-        var user = CreateUser();
-        var userPartition = CreatePartition();
-        var entityPartition = CreatePartition();
-
-        user.AddPartitionAccess(userPartition);
-
-        var entity = CreatePartitionedEntity([entityPartition]);
-
-        var result = user.HasAccess(entity);
-
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void HasAccess_Should_ThrowArgumentNullException_When_PartitionedIsNull()
-    {
-        var user = CreateUser();
-
-        void act() => user.HasAccess(null!);
+        void act() => user.Partitions.Add(null!);
 
         Assert.Throws<ArgumentNullException>(act);
     }

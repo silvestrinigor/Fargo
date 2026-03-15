@@ -219,11 +219,11 @@ public sealed class UserCreateCommandHandlerTests
         Assert.NotNull(addedUser);
 
         Assert.Contains(
-                addedUser!.UserPermissions,
+                addedUser!.Permissions,
                 x => x.Action == ActionType.CreateArticle);
 
         Assert.Contains(
-                addedUser.UserPermissions,
+                addedUser.Permissions,
                 x => x.Action == ActionType.DeleteItem);
     }
 
@@ -248,7 +248,7 @@ public sealed class UserCreateCommandHandlerTests
 
         // Assert
         Assert.NotNull(addedUser);
-        Assert.Empty(addedUser!.UserPermissions);
+        Assert.Empty(addedUser!.Permissions);
     }
 
     [Fact]

@@ -28,7 +28,7 @@ namespace Fargo.Infrastructure.Configurations
                 .IsRequired();
 
             builder.HasOne(x => x.UserGroup)
-                .WithMany(x => x.UserGroupPermissions)
+                .WithMany(x => x.Permissions)
                 .HasForeignKey(x => x.UserGroupGuid)
                 .OnDelete(DeleteBehavior.Cascade);
         }

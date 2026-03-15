@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations
 {
-    public class PartitionAccessConfiguration : IEntityTypeConfiguration<PartitionAccess>
+    public class PartitionAccessConfiguration : IEntityTypeConfiguration<UserPartitionAccess>
     {
-        public void Configure(EntityTypeBuilder<PartitionAccess> builder)
+        public void Configure(EntityTypeBuilder<UserPartitionAccess> builder)
         {
             builder.ToTable(t => t.IsTemporal());
 
@@ -22,7 +22,7 @@ namespace Fargo.Infrastructure.Configurations
 
             builder
                 .HasOne(x => x.User)
-                .WithMany(x => x.PartitionsAccesses)
+                .WithMany(x => x.PartitionAccesses)
                 .HasForeignKey(x => x.UserGuid)
                 .OnDelete(DeleteBehavior.Cascade);
 

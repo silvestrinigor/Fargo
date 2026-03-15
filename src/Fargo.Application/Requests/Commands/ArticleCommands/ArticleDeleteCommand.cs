@@ -1,5 +1,6 @@
 ﻿using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -48,7 +49,7 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands
         {
             var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidatePermission(ActionType.DeleteArticle);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteArticle);
 
             var article = await articleService.GetArticle(
                     command.ArticleGuid,

@@ -1,4 +1,6 @@
 using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -54,13 +56,9 @@ namespace Fargo.Application.Requests.Commands.UserGroupCommands
                 CancellationToken cancellationToken = default
                 )
         {
-            var actor = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
+            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            actor.ValidateIsActive();
-            actor.ValidatePermission(ActionType.EditUserGroup);
+            UserPermissionHelper.ValidatePermission(actor, ActionType.EditUserGroup);
 
             var userGroup = await userGroupRepository.GetByGuid(
                     command.UserGroupGuid,
@@ -77,7 +75,7 @@ namespace Fargo.Application.Requests.Commands.UserGroupCommands
                     .Distinct()
                     .ToHashSet();
 
-                var currentActions = userGroup.UserGroupPermissions
+                var currentActions = userGroup.Permissions
                     .Select(x => x.Action)
                     .ToHashSet();
 

@@ -5,6 +5,7 @@ using Fargo.Domain.ValueObjects.Entities;
 namespace Fargo.Application.Requests.Queries.PartitionQueries
 {
     public sealed record PartitionManyQuery(
+            Guid? ParentPartitionGuid = null,
             DateTimeOffset? AsOfDateTime = null,
             Pagination? Pagination = null
             ) : IQuery<IReadOnlyCollection<PartitionInformation>>;
@@ -21,6 +22,7 @@ namespace Fargo.Application.Requests.Queries.PartitionQueries
         {
             var partitions = await partitionRepository.GetManyInfo(
                     query.Pagination ?? Pagination.First20Pages,
+                    query.ParentPartitionGuid,
                     query.AsOfDateTime,
                     cancellationToken
                     );

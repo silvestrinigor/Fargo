@@ -12,7 +12,7 @@ namespace Fargo.Application.Mappings
                 u.Nameid,
                 u.Description,
                 u.IsActive,
-                u.UserGroupPermissions.Select(p => new Permission(p.Guid, p.Action)).ToList()
+                u.Permissions.Select(p => new Permission(p.Guid, p.Action)).ToList()
             );
 
         public static UserGroupInformation ToInformation(this UserGroup u) =>
@@ -21,7 +21,7 @@ namespace Fargo.Application.Mappings
                 u.Nameid,
                 u.Description,
                 u.IsActive,
-                [.. u.UserGroupPermissions.Select(p => new Permission(p.Guid, p.Action))]
+                [.. u.Permissions.Select(p => new Permission(p.Guid, p.Action))]
             );
     }
 }
