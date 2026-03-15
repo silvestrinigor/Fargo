@@ -17,7 +17,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
-using Fargo.Domain.ValueObjects.Entities;
+using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Fargo.Domain.Entities;
-using Fargo.Domain.ValueObjects.Entities;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Mappings
 {

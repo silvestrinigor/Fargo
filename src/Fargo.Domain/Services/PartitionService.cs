@@ -44,7 +44,7 @@ namespace Fargo.Domain.Services
         {
             var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
 
-            if (partition != null && !partition.HasAccess(actor))
+            if (partition != null && !HasAccess(partition, actor))
             {
                 return null;
             }

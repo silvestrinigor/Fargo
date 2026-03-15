@@ -2,7 +2,6 @@
 using Fargo.Domain.Mappings;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
-using Fargo.Domain.ValueObjects.Entities;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

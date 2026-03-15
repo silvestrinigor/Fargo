@@ -1,42 +1,40 @@
 using Fargo.Domain.Entities;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Domain.Services
 {
-    /// <summary>
-    /// Provides domain-level operations related to <see cref="Article"/>.
-    /// </summary>
-    /// <remarks>
-    /// This service encapsulates domain rules involving articles,
-    /// including deletion constraints and partition-based access checks.
-    /// </remarks>
     public class ArticleService(
             IArticleRepository articleRepository
             )
     {
-        /// <summary>
-        /// Validates whether an article can be deleted.
-        /// </summary>
-        /// <param name="article">The article to validate.</param>
-        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-        /// <exception cref="ArticleDeleteWithItemsAssociatedFargoDomainException">
-        /// Thrown when the article has associated items.
-        /// </exception>
-        public async Task ValidateArticleDelete(
+        public async Task DeleteArticle(
                 Article article,
-                CancellationToken cancellationToken = default
-                )
+                User actor,
+                CancellationToken cancellationToken = default)
         {
+            if (UserService.HasPermission(actor, ActionType.DeleteArticle))
+            {
+                throw new UserNotAuthorizedFargoDomainException(actor.Guid, ActionType.DeleteArticle);
+            }
+
+            if (!actor.IsActive)
+            {
+                throw new UserInactiveFargoDomainException(actor.Guid);
+            }
+
             var hasItems = await articleRepository.HasItemsAssociated(
-                    article.Guid,
-                    cancellationToken
-                    );
+                article.Guid,
+                cancellationToken
+            );
 
             if (hasItems)
             {
                 throw new ArticleDeleteWithItemsAssociatedFargoDomainException(article.Guid);
             }
+
+            articleRepository.Remove(article);
         }
 
         /// <summary>

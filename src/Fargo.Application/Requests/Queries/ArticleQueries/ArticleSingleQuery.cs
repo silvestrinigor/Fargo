@@ -1,5 +1,5 @@
 ﻿using Fargo.Domain.Repositories;
-using Fargo.Domain.ValueObjects.Entities;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Requests.Queries.ArticleQueries
 {

@@ -4,7 +4,6 @@ using Fargo.Application.Requests.Commands.UserCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.UserQueries;
 using Fargo.Domain.ValueObjects;
-using Fargo.Domain.ValueObjects.Entities;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 

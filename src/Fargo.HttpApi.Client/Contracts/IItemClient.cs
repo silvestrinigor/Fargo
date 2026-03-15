@@ -1,6 +1,5 @@
 using Fargo.Application.Models.ItemModels;
 using Fargo.Domain.ValueObjects;
-using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.HttpApi.Client.Contracts
 {

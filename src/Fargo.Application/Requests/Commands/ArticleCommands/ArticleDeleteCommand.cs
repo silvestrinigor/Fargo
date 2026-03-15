@@ -9,59 +9,55 @@ using Fargo.Domain.Services;
 
 namespace Fargo.Application.Requests.Commands.ArticleCommands
 {
-    /// <summary>
-    /// Command used to delete an existing article.
-    /// </summary>
-    /// <param name="ArticleGuid">
-    /// The unique identifier of the article to delete.
-    /// </param>
-    public sealed record ArticleDeleteCommand(
-            Guid ArticleGuid
-            ) : ICommand;
-
-    /// <summary>
-    /// Handles the execution of <see cref="ArticleDeleteCommand"/>.
-    /// </summary>
-    public sealed class ArticleDeleteCommandHandler(
-            IArticleRepository articleRepository,
-            IUserRepository userRepository,
-            ArticleService articleService,
-            IUnitOfWork unitOfWork,
-            ICurrentUser currentUser
-            ) : ICommandHandler<ArticleDeleteCommand>
-    {
         /// <summary>
-        /// Executes the command to delete an existing article.
+        /// Command used to delete an existing article.
         /// </summary>
-        /// <param name="command">The command containing the article identifier.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the current user cannot be resolved.
-        /// </exception>
-        /// <exception cref="ArticleNotFoundFargoApplicationException">
-        /// Thrown when the specified article does not exist.
-        /// </exception>
-        public async Task Handle(
-                ArticleDeleteCommand command,
-                CancellationToken cancellationToken = default
-                )
+        /// <param name="ArticleGuid">
+        /// The unique identifier of the article to delete.
+        /// </param>
+        public sealed record ArticleDeleteCommand(
+                Guid ArticleGuid
+                ) : ICommand;
+
+        /// <summary>
+        /// Handles the execution of <see cref="ArticleDeleteCommand"/>.
+        /// </summary>
+        public sealed class ArticleDeleteCommandHandler(
+                IArticleRepository articleRepository,
+                IUserRepository userRepository,
+                ArticleService articleService,
+                IUnitOfWork unitOfWork,
+                ICurrentUser currentUser
+                ) : ICommandHandler<ArticleDeleteCommand>
         {
-            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+                /// <summary>
+                /// Executes the command to delete an existing article.
+                /// </summary>
+                /// <param name="command">The command containing the article identifier.</param>
+                /// <param name="cancellationToken">Token used to cancel the operation.</param>
+                /// <returns>A task that represents the asynchronous operation.</returns>
+                /// <exception cref="UnauthorizedAccessFargoApplicationException">
+                /// Thrown when the current user cannot be resolved.
+                /// </exception>
+                /// <exception cref="ArticleNotFoundFargoApplicationException">
+                /// Thrown when the specified article does not exist.
+                /// </exception>
+                public async Task Handle(
+                        ArticleDeleteCommand command,
+                        CancellationToken cancellationToken = default
+                        )
+                {
+                        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteArticle);
+                        var article = await articleService.GetArticle(
+                                command.ArticleGuid,
+                                actor,
+                                cancellationToken
+                                ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
-            var article = await articleService.GetArticle(
-                    command.ArticleGuid,
-                    actor,
-                    cancellationToken
-                    ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+                        await articleService.DeleteArticle(article, actor, cancellationToken);
 
-            await articleService.ValidateArticleDelete(article, cancellationToken);
-
-            articleRepository.Remove(article);
-
-            await unitOfWork.SaveChanges(cancellationToken);
+                        await unitOfWork.SaveChanges(cancellationToken);
+                }
         }
-    }
 }

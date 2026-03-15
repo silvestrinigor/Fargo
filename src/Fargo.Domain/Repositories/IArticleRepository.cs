@@ -1,6 +1,5 @@
 ﻿using Fargo.Domain.Entities;
 using Fargo.Domain.ValueObjects;
-using Fargo.Domain.ValueObjects.Entities;
 
 namespace Fargo.Domain.Repositories
 {
