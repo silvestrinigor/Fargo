@@ -6,7 +6,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands.UserCommands;
+namespace Fargo.Application.Commands.UserCommands;
 
 /// <summary>
 /// Command used to remove an existing user group membership from a user.
@@ -51,9 +51,9 @@ public sealed class UserRemoveUserGroupCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.ChangeUserGroupMembers);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.ChangeUserGroupMembers);
 
         var user = await userRepository.GetByGuid(
                 command.UserGuid,

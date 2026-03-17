@@ -1,6 +1,6 @@
+using Fargo.Application.Commands;
+using Fargo.Application.Commands.PartitionCommands;
 using Fargo.Application.Models.PartitionModels;
-using Fargo.Application.Requests.Commands;
-using Fargo.Application.Requests.Commands.PartitionCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.PartitionQueries;
 using Fargo.Domain.ValueObjects;

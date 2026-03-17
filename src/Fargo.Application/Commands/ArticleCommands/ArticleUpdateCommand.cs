@@ -8,7 +8,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.ArticleCommands;
+namespace Fargo.Application.Commands.ArticleCommands;
 
 /// <summary>
 /// Command used to update an existing article.
@@ -51,15 +51,15 @@ public sealed class ArticleUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.EditArticle);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditArticle);
 
         var article = await articleService.GetArticle(
-                command.ArticleGuid,
-                actor,
-                cancellationToken
-                ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+            command.ArticleGuid,
+            actor,
+            cancellationToken
+        ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
         if (command.Article.Name is not null)
         {

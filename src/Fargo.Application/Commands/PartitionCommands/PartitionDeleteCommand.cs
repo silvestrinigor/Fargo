@@ -8,7 +8,7 @@ using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.PartitionCommands;
+namespace Fargo.Application.Commands.PartitionCommands;
 
 /// <summary>
 /// Command used to delete an existing partition.
@@ -65,9 +65,9 @@ public sealed class PartitionDeleteCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.DeletePartition);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeletePartition);
 
         var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
             ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);

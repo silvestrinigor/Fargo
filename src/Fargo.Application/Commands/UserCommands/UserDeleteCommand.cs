@@ -7,7 +7,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.UserCommands;
+namespace Fargo.Application.Commands.UserCommands;
 
 /// <summary>
 /// Command used to delete an existing user.
@@ -45,9 +45,9 @@ public sealed class UserDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteUser);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteUser);
 
         var user = await userRepository.GetByGuid(
                 command.UserGuid,

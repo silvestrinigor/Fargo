@@ -7,7 +7,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.UserGroupCommands;
+namespace Fargo.Application.Commands.UserGroupCommands;
 
 /// <summary>
 /// Command used to delete an existing user group.
@@ -52,9 +52,9 @@ public sealed class UserGroupDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteUserGroup);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteUserGroup);
 
         var userGroup = await userGroupRepository.GetByGuid(
                 command.UserGroupGuid,

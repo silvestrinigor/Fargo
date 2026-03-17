@@ -1,7 +1,7 @@
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Queries.UserGroupQueries;
+namespace Fargo.Application.Queries.UserGroupQueries;
 
 public sealed record UserGroupManyQuery(
         Guid? UserGuid = null,

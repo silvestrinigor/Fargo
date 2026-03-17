@@ -1,6 +1,6 @@
+using Fargo.Application.Commands;
+using Fargo.Application.Commands.ArticleCommands;
 using Fargo.Application.Models.ArticleModels;
-using Fargo.Application.Requests.Commands;
-using Fargo.Application.Requests.Commands.ArticleCommands;
 using Fargo.Application.Requests.Queries;
 using Fargo.Application.Requests.Queries.ArticleQueries;
 using Fargo.Domain.ValueObjects;

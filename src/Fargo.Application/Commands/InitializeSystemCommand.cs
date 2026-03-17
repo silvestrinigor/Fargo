@@ -7,7 +7,7 @@ using Fargo.Domain.Security;
 using Fargo.Domain.ValueObjects;
 using Microsoft.Extensions.Options;
 
-namespace Fargo.Application.Requests.Commands;
+namespace Fargo.Application.Commands;
 
 /// <summary>
 /// Command used to initialize the system when it is first started.

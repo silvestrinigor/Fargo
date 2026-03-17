@@ -6,7 +6,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands.ItemCommands;
+namespace Fargo.Application.Commands.ItemCommands;
 
 /// <summary>
 /// Command used to delete an existing item.
@@ -45,9 +45,9 @@ public sealed class ItemDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteItem);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteItem);
 
         var item = await itemRepository.GetByGuid(
                 command.ItemGuid,

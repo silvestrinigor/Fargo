@@ -5,7 +5,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 
-namespace Fargo.Application.Requests.Commands.AuthCommands;
+namespace Fargo.Application.Commands.AuthCommands;
 
 /// <summary>
 /// Command used by an authenticated user to change their own password.

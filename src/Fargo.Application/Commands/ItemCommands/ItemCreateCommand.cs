@@ -8,7 +8,7 @@ using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands.ItemCommands;
+namespace Fargo.Application.Commands.ItemCommands;
 
 /// <summary>
 /// Command used to create a new <see cref="Item"/>.
@@ -48,9 +48,9 @@ public sealed class ItemCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.CreateItem);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateItem);
 
         var article = await articleRepository.GetByGuid(
                 command.Item.ArticleGuid,

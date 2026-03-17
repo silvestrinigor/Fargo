@@ -10,7 +10,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Commands.UserGroupCommands;
+namespace Fargo.Application.Commands.UserGroupCommands;
 
 /// <summary>
 /// Command used to create a new <see cref="UserGroup"/>.
@@ -47,9 +47,9 @@ public sealed class UserGroupCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.CreateUserGroup);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateUserGroup);
 
         var userGroup = new UserGroup
         {

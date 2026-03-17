@@ -10,7 +10,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Commands.ArticleCommands;
+namespace Fargo.Application.Commands.ArticleCommands;
 
 /// <summary>
 /// Command used to create a new <see cref="Article"/>.
@@ -19,19 +19,19 @@ namespace Fargo.Application.Requests.Commands.ArticleCommands;
 /// The data required to create the article.
 /// </param>
 public sealed record ArticleCreateCommand(
-        ArticleCreateModel Article
-        ) : ICommand<Guid>;
+    ArticleCreateModel Article
+    ) : ICommand<Guid>;
 
 /// <summary>
 /// Handles the execution of <see cref="ArticleCreateCommand"/>.
 /// </summary>
 public sealed class ArticleCreateCommandHandler(
-        PartitionService partitionService,
-        IArticleRepository articleRepository,
-        IUserRepository userRepository,
-        ICurrentUser currentUser,
-        IUnitOfWork unitOfWork
-        ) : ICommandHandler<ArticleCreateCommand, Guid>
+    PartitionService partitionService,
+    IArticleRepository articleRepository,
+    IUserRepository userRepository,
+    ICurrentUser currentUser,
+    IUnitOfWork unitOfWork
+    ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     /// <summary>
     /// Executes the command to create a new article.
@@ -39,17 +39,14 @@ public sealed class ArticleCreateCommandHandler(
     /// <param name="command">The command containing article creation data.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The unique identifier of the created article.</returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current user cannot be resolved.
-    /// </exception>
     public async Task<Guid> Handle(
-            ArticleCreateCommand command,
-            CancellationToken cancellationToken = default
-            )
+        ArticleCreateCommand command,
+        CancellationToken cancellationToken = default
+        )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.CreateArticle);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateArticle);
 
         var article = new Article
         {
@@ -60,10 +57,10 @@ public sealed class ArticleCreateCommandHandler(
         if (command.Article.FirstPartition != null)
         {
             var articlePartition = await partitionService.GetPartition(
-                    command.Article.FirstPartition.Value,
-                    actor,
-                    cancellationToken
-                    ) ?? throw new PartitionNotFoundFargoApplicationException(command.Article.FirstPartition.Value);
+                command.Article.FirstPartition.Value,
+                actor,
+                cancellationToken
+            ) ?? throw new PartitionNotFoundFargoApplicationException(command.Article.FirstPartition.Value);
 
             article.Partitions.Add(articlePartition);
         }

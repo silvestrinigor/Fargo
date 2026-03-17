@@ -1,7 +1,7 @@
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Queries.PartitionQueries;
+namespace Fargo.Application.Queries.PartitionQueries;
 
 public sealed record PartitionSingleQuery(
         Guid PartitionGuid,

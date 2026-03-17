@@ -10,7 +10,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Commands.PartitionCommands;
+namespace Fargo.Application.Commands.PartitionCommands;
 
 /// <summary>
 /// Command used to update an existing partition.
@@ -66,9 +66,9 @@ public sealed class PartitionUpdateCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.EditPartition);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditPartition);
 
         var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
             ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);

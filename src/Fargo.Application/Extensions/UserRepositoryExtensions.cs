@@ -21,7 +21,7 @@ public static class UserRepositoryExtensions
     /// <exception cref="UnauthorizedAccessFargoApplicationException">
     /// Thrown when the current user cannot be found or when the user is inactive.
     /// </exception>
-    public static async Task<User> GetActiveActor(
+    public static async Task<User> GetActiveCurrentUser(
         this IUserRepository repository,
         ICurrentUser currentUser,
         CancellationToken cancellationToken = default)

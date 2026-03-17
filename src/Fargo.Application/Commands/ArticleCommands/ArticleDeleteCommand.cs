@@ -5,7 +5,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.ArticleCommands;
+namespace Fargo.Application.Commands.ArticleCommands;
 
 /// <summary>
 /// Command used to delete an existing article.
@@ -21,7 +21,6 @@ public sealed record ArticleDeleteCommand(
 /// Handles the execution of <see cref="ArticleDeleteCommand"/>.
 /// </summary>
 public sealed class ArticleDeleteCommandHandler(
-        IArticleRepository articleRepository,
         IUserRepository userRepository,
         ArticleService articleService,
         IUnitOfWork unitOfWork,
@@ -34,9 +33,6 @@ public sealed class ArticleDeleteCommandHandler(
     /// <param name="command">The command containing the article identifier.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current user cannot be resolved.
-    /// </exception>
     /// <exception cref="ArticleNotFoundFargoApplicationException">
     /// Thrown when the specified article does not exist.
     /// </exception>
@@ -45,13 +41,13 @@ public sealed class ArticleDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
         var article = await articleService.GetArticle(
-                command.ArticleGuid,
-                actor,
-                cancellationToken
-                ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+            command.ArticleGuid,
+            actor,
+            cancellationToken
+        ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
         await articleService.DeleteArticle(article, actor, cancellationToken);
 

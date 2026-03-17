@@ -9,7 +9,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.UserCommands;
+namespace Fargo.Application.Commands.UserCommands;
 
 /// <summary>
 /// Command used to update an existing user.
@@ -52,9 +52,9 @@ public sealed class UserUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.EditUser);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditUser);
 
         var user = await userRepository.GetByGuid(
                 command.UserGuid,
@@ -74,7 +74,7 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.Password is not null)
         {
-            UserPermissionHelper.ValidatePermission(actor, ActionType.ChangeOtherUserPassword);
+            UserPermissionHelper.ValidateHasPermission(actor, ActionType.ChangeOtherUserPassword);
 
             user.PasswordHash = passwordHasher.Hash(command.User.Password.Value);
             user.MarkPasswordChangeAsRequired();

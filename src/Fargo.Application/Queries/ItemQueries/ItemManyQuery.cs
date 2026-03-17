@@ -1,7 +1,7 @@
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Queries.ItemQueries;
+namespace Fargo.Application.Queries.ItemQueries;
 
 public sealed record ItemManyQuery(
     Guid? ArticleGuid = null,

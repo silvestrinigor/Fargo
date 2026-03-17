@@ -11,7 +11,7 @@ using Fargo.Domain.Security;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Commands.UserCommands;
+namespace Fargo.Application.Commands.UserCommands;
 
 /// <summary>
 /// Command used to create a new <see cref="User"/>.
@@ -48,9 +48,9 @@ public sealed class UserCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.CreateUser);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateUser);
 
         var userPasswordHash = passwordHasher.Hash(command.User.Password);
 

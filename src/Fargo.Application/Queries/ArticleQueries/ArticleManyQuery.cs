@@ -1,7 +1,7 @@
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Queries.ArticleQueries;
+namespace Fargo.Application.Queries.ArticleQueries;
 
 public sealed record ArticleManyQuery(
         DateTimeOffset? AsOfDateTime = null,

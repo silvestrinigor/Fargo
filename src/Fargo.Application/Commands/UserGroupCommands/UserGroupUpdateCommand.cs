@@ -7,7 +7,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Requests.Commands.UserGroupCommands;
+namespace Fargo.Application.Commands.UserGroupCommands;
 
 /// <summary>
 /// Command used to update an existing user group.
@@ -56,9 +56,9 @@ public sealed class UserGroupUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.EditUserGroup);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditUserGroup);
 
         var userGroup = await userGroupRepository.GetByGuid(
                 command.UserGroupGuid,

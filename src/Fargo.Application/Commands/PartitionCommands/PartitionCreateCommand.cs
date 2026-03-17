@@ -9,7 +9,7 @@ using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Commands.PartitionCommands;
+namespace Fargo.Application.Commands.PartitionCommands;
 
 /// <summary>
 /// Command used to create a new <see cref="Partition"/>.
@@ -74,9 +74,9 @@ public sealed class PartitionCreateCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
-        UserPermissionHelper.ValidatePermission(actor, ActionType.CreatePartition);
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreatePartition);
 
         var partition = new Partition
         {

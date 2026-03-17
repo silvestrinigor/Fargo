@@ -1,4 +1,4 @@
-namespace Fargo.Application.Requests.Queries.TreeQueries;
+namespace Fargo.Application.Queries.TreeQueries;
 
 public sealed record PartitionTreeQuery(
 

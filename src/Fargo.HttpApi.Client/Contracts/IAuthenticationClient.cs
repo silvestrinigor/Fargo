@@ -1,5 +1,5 @@
+using Fargo.Application.Commands.AuthCommands;
 using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Requests.Commands.AuthCommands;
 
 namespace Fargo.HttpApi.Client.Contracts;
 

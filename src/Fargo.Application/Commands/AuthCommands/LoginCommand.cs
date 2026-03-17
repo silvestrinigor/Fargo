@@ -7,7 +7,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Commands.AuthCommands;
+namespace Fargo.Application.Commands.AuthCommands;
 
 /// <summary>
 /// Command used to authenticate a user with a NAMEID and password.
