@@ -1,66 +1,73 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Fargo.Application.Models.TreeModels
+namespace Fargo.Application.Models.TreeModels;
+
+public readonly struct Nodeid : IParsable<Nodeid>
 {
-    public readonly struct Nodeid : IParsable<Nodeid>
+    public string Value { get; }
+
+    public TreeNodeType TreeNodeType { get; }
+
+    public Guid EntityGuid { get; }
+
+    public Nodeid(TreeNodeType treeNodeType, Guid entityGuid)
     {
-        public string Value { get; }
+        TreeNodeType = treeNodeType;
+        EntityGuid = entityGuid;
+        Value = $"{treeNodeType.ToString().ToLowerInvariant()}:{entityGuid}";
+    }
 
-        public TreeNodeType TreeNodeType { get; }
+    public static implicit operator string(Nodeid nodeid)
+        => nodeid.Value;
 
-        public Guid EntityGuid { get; }
+    public static explicit operator Nodeid(string value)
+        => Parse(value, CultureInfo.InvariantCulture);
 
-        public Nodeid(TreeNodeType treeNodeType, Guid entityGuid)
+    public override string ToString()
+        => Value;
+
+    public static Nodeid Parse(string s, IFormatProvider? provider)
+    {
+        if (!TryParse(s, provider, out var result))
         {
-            TreeNodeType = treeNodeType;
-            EntityGuid = entityGuid;
-            Value = $"{treeNodeType.ToString().ToLowerInvariant()}:{entityGuid}";
+            throw new FormatException($"Invalid Nodeid format: '{s}'.");
         }
 
-        public static implicit operator string(Nodeid nodeid)
-            => nodeid.Value;
+        return result;
+    }
 
-        public static explicit operator Nodeid(string value)
-            => Parse(value, CultureInfo.InvariantCulture);
+    public static bool TryParse(
+        [NotNullWhen(true)] string? s,
+        IFormatProvider? provider,
+        [MaybeNullWhen(false)] out Nodeid result)
+    {
+        result = default;
 
-        public override string ToString()
-            => Value;
-
-        public static Nodeid Parse(string s, IFormatProvider? provider)
+        if (string.IsNullOrWhiteSpace(s))
         {
-            if (!TryParse(s, provider, out var result))
-            {
-                throw new FormatException($"Invalid Nodeid format: '{s}'.");
-            }
-
-            return result;
+            return false;
         }
 
-        public static bool TryParse(
-            [NotNullWhen(true)] string? s,
-            IFormatProvider? provider,
-            [MaybeNullWhen(false)] out Nodeid result)
+        var parts = s.Split(':', 2);
+
+        if (parts.Length != 2)
         {
-            result = default;
-
-            if (string.IsNullOrWhiteSpace(s))
-                return false;
-
-            var parts = s.Split(':', 2);
-
-            if (parts.Length != 2)
-                return false;
-
-            if (!Enum.TryParse<TreeNodeType>(parts[0], true, out var type))
-                return false;
-
-            if (!Guid.TryParse(parts[1], out var guid))
-                return false;
-
-            result = new Nodeid(type, guid);
-
-            return true;
+            return false;
         }
+
+        if (!Enum.TryParse<TreeNodeType>(parts[0], true, out var type))
+        {
+            return false;
+        }
+
+        if (!Guid.TryParse(parts[1], out var guid))
+        {
+            return false;
+        }
+
+        result = new Nodeid(type, guid);
+
+        return true;
     }
 }

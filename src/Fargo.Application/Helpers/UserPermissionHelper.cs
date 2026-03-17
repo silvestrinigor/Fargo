@@ -9,7 +9,7 @@ public static class UserPermissionHelper
 {
     public static void ValidatePermission(User user, ActionType action)
     {
-        if (!UserService.HasPermission(user,action))
+        if (!UserService.HasPermission(user, action))
         {
             throw new UserNotAuthorizedFargoApplicationException(user.Guid, action);
         }

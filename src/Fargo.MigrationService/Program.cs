@@ -1,5 +1,4 @@
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
 using Fargo.MigrationService;
 using Fargo.ServiceDefaults;
 

@@ -22,11 +22,15 @@ public sealed class BrowserClientSessionStore(IJSRuntime jsRuntime) : IClientSes
     {
         var local = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", LocalKey);
         if (!string.IsNullOrWhiteSpace(local))
+        {
             return Deserialize(local);
+        }
 
         var session = await _jsRuntime.InvokeAsync<string?>("sessionStorage.getItem", SessionKey);
         if (!string.IsNullOrWhiteSpace(session))
+        {
             return Deserialize(session);
+        }
 
         return null;
     }

@@ -16,7 +16,9 @@ public abstract class FargoHttpClientBase(HttpClient http)
         var response = await Http.GetAsync(uri, ct);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
+        {
             return default;
+        }
 
         await EnsureSuccess(response, ct);
 
@@ -28,7 +30,9 @@ public abstract class FargoHttpClientBase(HttpClient http)
         var response = await Http.GetAsync(uri, ct);
 
         if (response.StatusCode == HttpStatusCode.NoContent)
+        {
             return [];
+        }
 
         await EnsureSuccess(response, ct);
 
@@ -81,7 +85,9 @@ public abstract class FargoHttpClientBase(HttpClient http)
     private static async Task EnsureSuccess(HttpResponseMessage response, CancellationToken ct)
     {
         if (response.IsSuccessStatusCode)
+        {
             return;
+        }
 
         ProblemDetails? problem = null;
 
@@ -94,7 +100,9 @@ public abstract class FargoHttpClientBase(HttpClient http)
         }
 
         if (problem is not null)
+        {
             throw new HttpRequestException(problem.Detail);
+        }
 
         response.EnsureSuccessStatusCode();
     }

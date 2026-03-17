@@ -1,31 +1,29 @@
-﻿using Fargo.Domain.Repositories;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 
-namespace Fargo.Application.Requests.Queries.ArticleQueries
+namespace Fargo.Application.Requests.Queries.ArticleQueries;
+
+public sealed record ArticleManyQuery(
+        DateTimeOffset? AsOfDateTime = null,
+        Pagination? Pagination = null
+        ) : IQuery<IReadOnlyCollection<ArticleInformation>>;
+
+public sealed class ArticleManyQueryHandler(
+        IArticleRepository articleRepository
+        )
+    : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>
 {
-    public sealed record ArticleManyQuery(
-            DateTimeOffset? AsOfDateTime = null,
-            Pagination? Pagination = null
-            ) : IQuery<IReadOnlyCollection<ArticleInformation>>;
-
-    public sealed class ArticleManyQueryHandler(
-            IArticleRepository articleRepository
+    public async Task<IReadOnlyCollection<ArticleInformation>> Handle(
+            ArticleManyQuery query,
+            CancellationToken cancellationToken = default
             )
-        : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>
     {
-        public async Task<IReadOnlyCollection<ArticleInformation>> Handle(
-                ArticleManyQuery query,
-                CancellationToken cancellationToken = default
-                )
-        {
-            var articles = await articleRepository.GetManyInfo(
-                    query.Pagination ?? Pagination.First20Pages,
-                    query.AsOfDateTime,
-                    cancellationToken
-                    );
+        var articles = await articleRepository.GetManyInfo(
+                query.Pagination ?? Pagination.First20Pages,
+                query.AsOfDateTime,
+                cancellationToken
+                );
 
-            return articles;
-        }
+        return articles;
     }
 }

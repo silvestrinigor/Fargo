@@ -3,40 +3,39 @@ using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 
-namespace Fargo.Application.Extensions
+namespace Fargo.Application.Extensions;
+
+/// <summary>
+/// Provides extension methods for retrieving the current authenticated user.
+/// </summary>
+public static class UserRepositoryExtensions
 {
     /// <summary>
-    /// Provides extension methods for retrieving the current authenticated user.
+    /// Gets the current authenticated user and ensures that the account exists
+    /// and is active.
     /// </summary>
-    public static class UserRepositoryExtensions
+    /// <param name="repository">The user repository.</param>
+    /// <param name="currentUser">The current user context.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The authenticated and active <see cref="User"/>.</returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current user cannot be found or when the user is inactive.
+    /// </exception>
+    public static async Task<User> GetActiveActor(
+        this IUserRepository repository,
+        ICurrentUser currentUser,
+        CancellationToken cancellationToken = default)
     {
-        /// <summary>
-        /// Gets the current authenticated user and ensures that the account exists
-        /// and is active.
-        /// </summary>
-        /// <param name="repository">The user repository.</param>
-        /// <param name="currentUser">The current user context.</param>
-        /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-        /// <returns>The authenticated and active <see cref="User"/>.</returns>
-        /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the current user cannot be found or when the user is inactive.
-        /// </exception>
-        public static async Task<User> GetActiveActor(
-            this IUserRepository repository,
-            ICurrentUser currentUser,
-            CancellationToken cancellationToken = default)
+        var actor = await repository.GetByGuid(
+            currentUser.UserGuid,
+            cancellationToken
+            );
+
+        if (actor == null || !actor.IsActive)
         {
-            var actor = await repository.GetByGuid(
-                currentUser.UserGuid,
-                cancellationToken
-                );
-
-            if (actor == null || !actor.IsActive)
-            {
-                throw new UnauthorizedAccessFargoApplicationException();
-            }
-
-            return actor;
+            throw new UnauthorizedAccessFargoApplicationException();
         }
+
+        return actor;
     }
 }

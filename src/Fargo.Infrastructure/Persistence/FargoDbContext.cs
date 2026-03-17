@@ -1,88 +1,87 @@
-﻿using Fargo.Domain.Entities;
+using Fargo.Domain.Entities;
 using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fargo.Infrastructure.Persistence
+namespace Fargo.Infrastructure.Persistence;
+
+public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
-    public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
+    public DbSet<Article> Articles { get; set; }
+
+    public DbSet<Item> Items { get; set; }
+
+    public DbSet<User> Users { get; set; }
+
+    public DbSet<UserPermission> UserPermission { get; set; }
+
+    public DbSet<UserGroup> UserGroups { get; set; }
+
+    public DbSet<UserGroupPermission> UserGroupPermissions { get; set; }
+
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+    public DbSet<Partition> Partitions { get; set; }
+
+    public DbSet<UserPartitionAccess> PartitionAccesses { get; set; }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        public DbSet<Article> Articles { get; set; }
+        configurationBuilder
+            .Properties<Name>()
+            .HaveMaxLength(Name.MaxLength)
+            .HaveConversion<NameStringConverter>();
 
-        public DbSet<Item> Items { get; set; }
+        configurationBuilder
+            .Properties<Description>()
+            .HaveMaxLength(Description.MaxLength)
+            .HaveConversion<DescriptionStringConverter>();
 
-        public DbSet<User> Users { get; set; }
+        configurationBuilder
+            .Properties<Nameid>()
+            .HaveMaxLength(Nameid.MaxLength)
+            .HaveConversion<NameidStringConverter>();
 
-        public DbSet<UserPermission> UserPermission { get; set; }
+        configurationBuilder
+            .Properties<PasswordHash>()
+            .HaveMaxLength(PasswordHash.MaxLength)
+            .HaveConversion<PasswordHashStringConverter>();
 
-        public DbSet<UserGroup> UserGroups { get; set; }
+        configurationBuilder
+            .Properties<TokenHash>()
+            .HaveMaxLength(TokenHash.MaxLength)
+            .HaveConversion<TokenHashStringConverter>();
 
-        public DbSet<UserGroupPermission> UserGroupPermissions { get; set; }
+        configurationBuilder
+            .Properties<FirstName>()
+            .HaveMaxLength(FirstName.MaxLength)
+            .HaveConversion<FirstNameStringConverter>();
 
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        configurationBuilder
+            .Properties<LastName>()
+            .HaveMaxLength(LastName.MaxLength)
+            .HaveConversion<LastNameStringConverter>();
+    }
 
-        public DbSet<Partition> Partitions { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
-        public DbSet<UserPartitionAccess> PartitionAccesses { get; set; }
+        modelBuilder.ApplyConfiguration(new ItemConfiguration());
 
-        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-        {
-            configurationBuilder
-                .Properties<Name>()
-                .HaveMaxLength(Name.MaxLength)
-                .HaveConversion<NameStringConverter>();
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-            configurationBuilder
-                .Properties<Description>()
-                .HaveMaxLength(Description.MaxLength)
-                .HaveConversion<DescriptionStringConverter>();
+        modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
 
-            configurationBuilder
-                .Properties<Nameid>()
-                .HaveMaxLength(Nameid.MaxLength)
-                .HaveConversion<NameidStringConverter>();
+        modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
 
-            configurationBuilder
-                .Properties<PasswordHash>()
-                .HaveMaxLength(PasswordHash.MaxLength)
-                .HaveConversion<PasswordHashStringConverter>();
+        modelBuilder.ApplyConfiguration(new UserGroupPermissionConfiguration());
 
-            configurationBuilder
-                .Properties<TokenHash>()
-                .HaveMaxLength(TokenHash.MaxLength)
-                .HaveConversion<TokenHashStringConverter>();
+        modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
 
-            configurationBuilder
-                .Properties<FirstName>()
-                .HaveMaxLength(FirstName.MaxLength)
-                .HaveConversion<FirstNameStringConverter>();
+        modelBuilder.ApplyConfiguration(new PartitionConfiguration());
 
-            configurationBuilder
-                .Properties<LastName>()
-                .HaveMaxLength(LastName.MaxLength)
-                .HaveConversion<LastNameStringConverter>();
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfiguration(new ArticleConfiguration());
-
-            modelBuilder.ApplyConfiguration(new ItemConfiguration());
-
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
-
-            modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
-
-            modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
-
-            modelBuilder.ApplyConfiguration(new UserGroupPermissionConfiguration());
-
-            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
-
-            modelBuilder.ApplyConfiguration(new PartitionConfiguration());
-
-            modelBuilder.ApplyConfiguration(new PartitionAccessConfiguration());
-        }
+        modelBuilder.ApplyConfiguration(new PartitionAccessConfiguration());
     }
 }

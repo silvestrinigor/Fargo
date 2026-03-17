@@ -1,9 +1,7 @@
-using Fargo.Infrastructure.Client;
 using Fargo.Infrastructure.Client.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web.Components;
 using Fargo.Web.Security;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);

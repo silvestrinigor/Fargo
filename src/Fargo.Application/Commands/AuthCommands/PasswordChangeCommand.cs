@@ -5,83 +5,82 @@ using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 
-namespace Fargo.Application.Requests.Commands.AuthCommands
+namespace Fargo.Application.Requests.Commands.AuthCommands;
+
+/// <summary>
+/// Command used by an authenticated user to change their own password.
+/// </summary>
+/// <param name="Passwords">
+/// The current password and the new password.
+/// </param>
+public sealed record PasswordChangeCommand(
+        UserPasswordUpdateModel Passwords
+        ) : ICommand;
+
+/// <summary>
+/// Handles the execution of <see cref="PasswordChangeCommand"/>.
+/// </summary>
+/// <remarks>
+/// This handler validates the current authenticated user, verifies the
+/// provided current password, updates the password hash, and resets the
+/// password expiration date.
+/// </remarks>
+public sealed class PasswordChangeCommandHandler(
+        IUserRepository userRepository,
+        IPasswordHasher passwordHasher,
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
+        ) : ICommandHandler<PasswordChangeCommand>
 {
     /// <summary>
-    /// Command used by an authenticated user to change their own password.
+    /// Changes the password of the currently authenticated user.
     /// </summary>
-    /// <param name="Passwords">
-    /// The current password and the new password.
+    /// <param name="command">
+    /// The command containing the current password and the new password.
     /// </param>
-    public sealed record PasswordChangeCommand(
-            UserPasswordUpdateModel Passwords
-            ) : ICommand;
-
-    /// <summary>
-    /// Handles the execution of <see cref="PasswordChangeCommand"/>.
-    /// </summary>
-    /// <remarks>
-    /// This handler validates the current authenticated user, verifies the
-    /// provided current password, updates the password hash, and resets the
-    /// password expiration date.
-    /// </remarks>
-    public sealed class PasswordChangeCommandHandler(
-            IUserRepository userRepository,
-            IPasswordHasher passwordHasher,
-            IUnitOfWork unitOfWork,
-            ICurrentUser currentUser
-            ) : ICommandHandler<PasswordChangeCommand>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation.
+    /// </returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current user cannot be resolved or the user is inactive.
+    /// </exception>
+    /// <exception cref="InvalidPasswordFargoApplicationException">
+    /// Thrown when the current password is invalid.
+    /// </exception>
+    public async Task Handle(
+            PasswordChangeCommand command,
+            CancellationToken cancellationToken = default
+            )
     {
-        /// <summary>
-        /// Changes the password of the currently authenticated user.
-        /// </summary>
-        /// <param name="command">
-        /// The command containing the current password and the new password.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// Token used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation.
-        /// </returns>
-        /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the current user cannot be resolved or the user is inactive.
-        /// </exception>
-        /// <exception cref="InvalidPasswordFargoApplicationException">
-        /// Thrown when the current password is invalid.
-        /// </exception>
-        public async Task Handle(
-                PasswordChangeCommand command,
-                CancellationToken cancellationToken = default
-                )
+        var user = await userRepository.GetByGuid(
+                currentUser.UserGuid,
+                cancellationToken
+                ) ?? throw new UnauthorizedAccessFargoApplicationException();
+
+        if (!user.IsActive)
         {
-            var user = await userRepository.GetByGuid(
-                    currentUser.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UnauthorizedAccessFargoApplicationException();
-
-            if (!user.IsActive)
-            {
-                throw new UnauthorizedAccessFargoApplicationException();
-            }
-
-            var currentPassword = command.Passwords.CurrentPassword
-                ?? throw new InvalidPasswordFargoApplicationException();
-
-            var isValid = passwordHasher.Verify(
-                    user.PasswordHash,
-                    currentPassword
-                    );
-
-            if (!isValid)
-            {
-                throw new InvalidPasswordFargoApplicationException();
-            }
-
-            user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
-            user.ResetPasswordExpiration();
-
-            await unitOfWork.SaveChanges(cancellationToken);
+            throw new UnauthorizedAccessFargoApplicationException();
         }
+
+        var currentPassword = command.Passwords.CurrentPassword
+            ?? throw new InvalidPasswordFargoApplicationException();
+
+        var isValid = passwordHasher.Verify(
+                user.PasswordHash,
+                currentPassword
+                );
+
+        if (!isValid)
+        {
+            throw new InvalidPasswordFargoApplicationException();
+        }
+
+        user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
+        user.ResetPasswordExpiration();
+
+        await unitOfWork.SaveChanges(cancellationToken);
     }
 }

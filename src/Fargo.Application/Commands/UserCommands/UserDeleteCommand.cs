@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Exceptions;
+using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
@@ -7,58 +7,57 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Requests.Commands.UserCommands
+namespace Fargo.Application.Requests.Commands.UserCommands;
+
+/// <summary>
+/// Command used to delete an existing user.
+/// </summary>
+/// <param name="UserGuid">
+/// The unique identifier of the user to delete.
+/// </param>
+public sealed record UserDeleteCommand(
+        Guid UserGuid
+        ) : ICommand;
+
+/// <summary>
+/// Handles the execution of <see cref="UserDeleteCommand"/>.
+/// </summary>
+public sealed class UserDeleteCommandHandler(
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUser currentUser
+        ) : ICommandHandler<UserDeleteCommand>
 {
     /// <summary>
-    /// Command used to delete an existing user.
+    /// Executes the command to delete an existing user.
     /// </summary>
-    /// <param name="UserGuid">
-    /// The unique identifier of the user to delete.
-    /// </param>
-    public sealed record UserDeleteCommand(
-            Guid UserGuid
-            ) : ICommand;
-
-    /// <summary>
-    /// Handles the execution of <see cref="UserDeleteCommand"/>.
-    /// </summary>
-    public sealed class UserDeleteCommandHandler(
-            IUserRepository userRepository,
-            IUnitOfWork unitOfWork,
-            ICurrentUser currentUser
-            ) : ICommandHandler<UserDeleteCommand>
+    /// <param name="command">The command containing the user identifier.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current user cannot be resolved.
+    /// </exception>
+    /// <exception cref="UserNotFoundFargoApplicationException">
+    /// Thrown when the specified user does not exist.
+    /// </exception>
+    public async Task Handle(
+            UserDeleteCommand command,
+            CancellationToken cancellationToken = default
+            )
     {
-        /// <summary>
-        /// Executes the command to delete an existing user.
-        /// </summary>
-        /// <param name="command">The command containing the user identifier.</param>
-        /// <param name="cancellationToken">Token used to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the current user cannot be resolved.
-        /// </exception>
-        /// <exception cref="UserNotFoundFargoApplicationException">
-        /// Thrown when the specified user does not exist.
-        /// </exception>
-        public async Task Handle(
-                UserDeleteCommand command,
-                CancellationToken cancellationToken = default
-                )
-        {
-            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteUser);
+        UserPermissionHelper.ValidatePermission(actor, ActionType.DeleteUser);
 
-            var user = await userRepository.GetByGuid(
-                    command.UserGuid,
-                    cancellationToken
-                    ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
+        var user = await userRepository.GetByGuid(
+                command.UserGuid,
+                cancellationToken
+                ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
 
-            UserService.ValidateUserDelete(user, actor);
+        UserService.ValidateUserDelete(user, actor);
 
-            userRepository.Remove(user);
+        userRepository.Remove(user);
 
-            await unitOfWork.SaveChanges(cancellationToken);
-        }
+        await unitOfWork.SaveChanges(cancellationToken);
     }
 }

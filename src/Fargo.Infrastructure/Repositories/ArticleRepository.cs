@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Mappings;
+using Fargo.Application.Mappings;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
@@ -6,49 +6,48 @@ using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fargo.Infrastructure.Repositories
+namespace Fargo.Infrastructure.Repositories;
+
+public class ArticleRepository(FargoDbContext context) : IArticleRepository
 {
-    public class ArticleRepository(FargoDbContext context) : IArticleRepository
+    private readonly DbSet<Article> articles = context.Articles;
+
+    private readonly DbSet<Item> items = context.Items;
+
+    public void Add(Article article) => articles.Add(article);
+
+    public void Remove(Article article) => articles.Remove(article);
+
+    public async Task<bool> HasItemsAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
+        => await items.Where(x => x.Article.Guid == articleGuid).AnyAsync(cancellationToken);
+
+    public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+        => await articles.Where(a => a.Guid == entityGuid).SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<ArticleInformation?> GetInfoByGuid(
+        Guid entityGuid,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
     {
-        private readonly DbSet<Article> articles = context.Articles;
+        return await articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(article => article.Guid == entityGuid)
+            .Select(ArticleMappings.InformationProjection)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
 
-        private readonly DbSet<Item> items = context.Items;
-
-        public void Add(Article article) => articles.Add(article);
-
-        public void Remove(Article article) => articles.Remove(article);
-
-        public async Task<bool> HasItemsAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
-            => await items.Where(x => x.Article.Guid == articleGuid).AnyAsync(cancellationToken);
-
-        public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
-            => await articles.Where(a => a.Guid == entityGuid).SingleOrDefaultAsync(cancellationToken);
-
-        public async Task<ArticleInformation?> GetInfoByGuid(
-            Guid entityGuid,
-            DateTimeOffset? asOfDateTime = null,
-            CancellationToken cancellationToken = default)
-        {
-            return await articles
-                .TemporalAsOfIfProvided(asOfDateTime)
-                .AsNoTracking()
-                .Where(article => article.Guid == entityGuid)
-                .Select(ArticleMappings.InformationProjection)
-                .SingleOrDefaultAsync(cancellationToken);
-        }
-
-        public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfo(
-            Pagination pagination,
-            DateTimeOffset? asOfDateTime = null,
-            CancellationToken cancellationToken = default)
-        {
-            return await articles
-                .TemporalAsOfIfProvided(asOfDateTime)
-                .AsNoTracking()
-                .OrderBy(article => article.Guid)
-                .WithPagination(pagination)
-                .Select(ArticleMappings.InformationProjection)
-                .ToListAsync(cancellationToken);
-        }
+    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfo(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .OrderBy(article => article.Guid)
+            .WithPagination(pagination)
+            .Select(ArticleMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
     }
 }

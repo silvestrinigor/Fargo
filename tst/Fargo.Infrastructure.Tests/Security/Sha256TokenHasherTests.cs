@@ -99,5 +99,5 @@ public sealed class Sha256TokenHasherTests
     private static Token CreateValidTestToken()
     {
         return new Token("testtokenaflsaffasfhkjsafhsadjfhaskfhsakfjsadkfhasfhiewuudhfsakjahfaskdfhsahfsa");
-    } 
+    }
 }

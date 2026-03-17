@@ -1,80 +1,79 @@
-using Fargo.Application.Extensions;
 using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
-using Fargo.Application.Helpers;
 
-namespace Fargo.Application.Requests.Commands.PartitionCommands
+namespace Fargo.Application.Requests.Commands.PartitionCommands;
+
+/// <summary>
+/// Command used to delete an existing partition.
+/// </summary>
+/// <param name="PartitionGuid">
+/// The unique identifier of the partition to be deleted.
+/// </param>
+public sealed record PartitionDeleteCommand(
+        Guid PartitionGuid
+        ) : ICommand;
+
+/// <summary>
+/// Handles the execution of <see cref="PartitionDeleteCommand"/>.
+/// </summary>
+/// <remarks>
+/// This handler deletes an existing partition after validating that the
+/// current actor is active, has permission to delete partitions,
+/// and has access to the specified partition.
+/// </remarks>
+public sealed class PartitionDeleteCommandHandler(
+        PartitionService partitionService,
+        IPartitionRepository partitionRepository,
+        IUserRepository userRepository,
+        ICurrentUser currentUser,
+        IUnitOfWork unitOfWork
+        ) : ICommandHandler<PartitionDeleteCommand>
 {
     /// <summary>
-    /// Command used to delete an existing partition.
+    /// Executes the command to delete a partition.
     /// </summary>
-    /// <param name="PartitionGuid">
-    /// The unique identifier of the partition to be deleted.
+    /// <param name="command">
+    /// The command containing the identifier of the partition to delete.
     /// </param>
-    public sealed record PartitionDeleteCommand(
-            Guid PartitionGuid
-            ) : ICommand;
-
-    /// <summary>
-    /// Handles the execution of <see cref="PartitionDeleteCommand"/>.
-    /// </summary>
-    /// <remarks>
-    /// This handler deletes an existing partition after validating that the
-    /// current actor is active, has permission to delete partitions,
-    /// and has access to the specified partition.
-    /// </remarks>
-    public sealed class PartitionDeleteCommandHandler(
-            PartitionService partitionService,
-            IPartitionRepository partitionRepository,
-            IUserRepository userRepository,
-            ICurrentUser currentUser,
-            IUnitOfWork unitOfWork
-            ) : ICommandHandler<PartitionDeleteCommand>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="command"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current actor cannot be resolved or is not active.
+    /// </exception>
+    /// <exception cref="UserNotAuthorizedFargoDomainException">
+    /// Thrown when the actor does not have permission to delete partitions.
+    /// </exception>
+    /// <exception cref="PartitionNotFoundFargoApplicationException">
+    /// Thrown when the specified partition does not exist or the actor
+    /// does not have access to it.
+    /// </exception>
+    public async Task Handle(PartitionDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        /// <summary>
-        /// Executes the command to delete a partition.
-        /// </summary>
-        /// <param name="command">
-        /// The command containing the identifier of the partition to delete.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// Token used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="command"/> is <see langword="null"/>.
-        /// </exception>
-        /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the current actor cannot be resolved or is not active.
-        /// </exception>
-        /// <exception cref="UserNotAuthorizedFargoDomainException">
-        /// Thrown when the actor does not have permission to delete partitions.
-        /// </exception>
-        /// <exception cref="PartitionNotFoundFargoApplicationException">
-        /// Thrown when the specified partition does not exist or the actor
-        /// does not have access to it.
-        /// </exception>
-        public async Task Handle(PartitionDeleteCommand command, CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(command);
 
-            var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
+        var actor = await userRepository.GetActiveActor(currentUser, cancellationToken);
 
-            UserPermissionHelper.ValidatePermission(actor, ActionType.DeletePartition);
+        UserPermissionHelper.ValidatePermission(actor, ActionType.DeletePartition);
 
-            var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
-                ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);
+        var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
+            ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);
 
-            partitionRepository.Remove(partition);
+        partitionRepository.Remove(partition);
 
-            await unitOfWork.SaveChanges(cancellationToken);
-        }
+        await unitOfWork.SaveChanges(cancellationToken);
     }
 }
