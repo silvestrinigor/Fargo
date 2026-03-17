@@ -1,4 +1,3 @@
-using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
@@ -21,7 +20,7 @@ namespace Fargo.Domain.Entities;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : AuditedEntity, IPartition
+public class Partition : ModifiedEntity, IPartition
 {
     /// <summary>
     /// Gets or sets the name of the partition.
@@ -86,7 +85,11 @@ public class Partition : AuditedEntity, IPartition
     public Partition? ParentPartition
     {
         get;
-        private set;
+        internal set
+        {
+            ParentPartitionGuid = value?.Guid;
+            field = value;
+        }
     }
 
     /// <summary>
@@ -170,53 +173,4 @@ public class Partition : AuditedEntity, IPartition
     }
 
     private readonly List<UserGroup> userGroupMembers = [];
-
-    /// <summary>
-    /// Marks the partition as active.
-    /// </summary>
-    public void Activate()
-    {
-        IsActive = true;
-    }
-
-    /// <summary>
-    /// Marks the partition as inactive.
-    /// </summary>
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-
-    /// <summary>
-    /// Sets the parent partition of the current partition.
-    /// </summary>
-    /// <param name="parentPartition">The parent partition to associate.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="parentPartition"/> is <see langword="null"/>.
-    /// </exception>
-    /// <remarks>
-    /// Setting a parent partition places the current partition under the specified
-    /// partition in the hierarchy, causing access inheritance to flow from the
-    /// parent to the current partition.
-    /// </remarks>
-    public void SetParentPartition(Partition parentPartition)
-    {
-        ArgumentNullException.ThrowIfNull(parentPartition);
-
-        ParentPartition = parentPartition;
-        ParentPartitionGuid = parentPartition.Guid;
-    }
-
-    /// <summary>
-    /// Removes the parent partition association from the current partition.
-    /// </summary>
-    /// <remarks>
-    /// After calling this method, the current partition becomes a root partition
-    /// in the hierarchy.
-    /// </remarks>
-    public void ClearParentPartition()
-    {
-        ParentPartition = null;
-        ParentPartitionGuid = null;
-    }
 }

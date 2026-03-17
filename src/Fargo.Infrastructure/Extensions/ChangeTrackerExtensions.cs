@@ -24,19 +24,19 @@ internal static class ChangeTrackerExtensions
     /// <list type="bullet">
     /// <item>
     /// <description>
-    /// When a tracked entity implementing <see cref="IAuditedEntity"/> is in the
+    /// When a tracked entity implementing <see cref="IModifiedEntity"/> is in the
     /// <see cref="EntityState.Added"/> state, its creation audit metadata is initialized.
     /// </description>
     /// </item>
     /// <item>
     /// <description>
-    /// When a tracked entity implementing <see cref="IAuditedEntity"/> is in the
+    /// When a tracked entity implementing <see cref="IModifiedEntity"/> is in the
     /// <see cref="EntityState.Modified"/> state, its modification audit metadata is updated.
     /// </description>
     /// </item>
     /// <item>
     /// <description>
-    /// When a tracked entity implementing <see cref="IAuditedAggregateMember"/> is in the
+    /// When a tracked entity implementing <see cref="IModifiedEntityMember"/> is in the
     /// <see cref="EntityState.Added"/>, <see cref="EntityState.Modified"/>,
     /// or <see cref="EntityState.Deleted"/> state, the audit metadata of its
     /// parent audited entity is updated.
@@ -46,7 +46,7 @@ internal static class ChangeTrackerExtensions
     /// </remarks>
     public static void ApplyAuditing(this ChangeTracker changeTracker, Guid currentUserGuid)
     {
-        foreach (var entry in changeTracker.Entries<IAuditedEntity>())
+        foreach (var entry in changeTracker.Entries<IModifiedEntity>())
         {
             if (entry.State == EntityState.Added)
             {
@@ -59,9 +59,9 @@ internal static class ChangeTrackerExtensions
         }
 
         var parentEntitiesToUpdate = changeTracker
-            .Entries<IAuditedAggregateMember>()
+            .Entries<IModifiedEntityMember>()
             .Where(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
-            .Select(entry => entry.Entity.ParentAuditedEntity)
+            .Select(entry => entry.Entity.ParentEditedEntity)
             .Distinct()
             .ToList();
 

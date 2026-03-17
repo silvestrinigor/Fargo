@@ -1,6 +1,5 @@
 using Fargo.Domain.Collections;
 using Fargo.Domain.Enums;
-using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
@@ -18,7 +17,7 @@ namespace Fargo.Domain.Entities;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : AuditedEntity, IPartitioned, IPartitionUser, IUserWithPermissions
+public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUser
 {
     /// <summary>
     /// Gets or sets the unique NAMEID of the user group.
@@ -60,22 +59,6 @@ public class UserGroup : AuditedEntity, IPartitioned, IPartitionUser, IUserWithP
     } = true;
 
     /// <summary>
-    /// Marks the user group as active.
-    /// </summary>
-    public void Activate()
-    {
-        IsActive = true;
-    }
-
-    /// <summary>
-    /// Marks the user group as inactive.
-    /// </summary>
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-
-    /// <summary>
     /// Gets the read-only collection of permissions assigned to the user group.
     /// </summary>
     /// <remarks>
@@ -89,7 +72,7 @@ public class UserGroup : AuditedEntity, IPartitioned, IPartitionUser, IUserWithP
         init => userGroupPermissions = [.. value];
     }
 
-    IReadOnlyCollection<IPermission> IUserWithPermissions.Permissions => Permissions;
+    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
     private readonly List<UserGroupPermission> userGroupPermissions = [];
 

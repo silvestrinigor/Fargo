@@ -14,10 +14,10 @@ namespace Fargo.Domain.Entities;
 /// <see cref="UserPartitionAccess"/>.
 ///
 /// This entity is a member of the <see cref="User"/> aggregate and implements
-/// <see cref="IAuditedAggregateMember"/>, meaning that any modification to this
+/// <see cref="IModifiedEntityMember"/>, meaning that any modification to this
 /// entity should update the audit metadata of the parent <see cref="User"/>.
 /// </remarks>
-public class UserPartitionAccess : Entity, IAuditedAggregateMember, IPartitionAccess
+public class UserPartitionAccess : Entity, IModifiedEntityMember, IPartitionAccess
 {
     /// <summary>
     /// Gets the unique identifier of the user associated with this access entry.
@@ -81,5 +81,5 @@ public class UserPartitionAccess : Entity, IAuditedAggregateMember, IPartitionAc
     /// Since <see cref="UserPartitionAccess"/> belongs to the <see cref="User"/> aggregate,
     /// the parent audited entity is the associated user.
     /// </remarks>
-    public IAuditedEntity ParentAuditedEntity => User;
+    public IModifiedEntity ParentEditedEntity => User;
 }

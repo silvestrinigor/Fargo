@@ -2,7 +2,7 @@ using Fargo.Domain.Logics;
 
 namespace Fargo.Domain.Entities;
 
-public class UserGroupPartitionAccess : Entity, IAuditedAggregateMember, IPartitionAccess
+public class UserGroupPartitionAccess : Entity, IModifiedEntityMember, IPartitionAccess
 {
     public Guid UserGroupGuid
     {
@@ -38,5 +38,5 @@ public class UserGroupPartitionAccess : Entity, IAuditedAggregateMember, IPartit
 
     IPartition IPartitionAccess.Partition => Partition;
 
-    public IAuditedEntity ParentAuditedEntity => UserGroup;
+    public IModifiedEntity ParentEditedEntity => UserGroup;
 }

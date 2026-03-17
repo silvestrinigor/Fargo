@@ -1,5 +1,4 @@
 using Fargo.Domain.Enums;
-using Fargo.Domain.Logics;
 
 namespace Fargo.Domain.Entities;
 
@@ -13,11 +12,11 @@ namespace Fargo.Domain.Entities;
 /// This entity is part of the <see cref="UserGroup"/> aggregate and represents
 /// a single permission entry associated with the group.
 ///
-/// The entity also implements <see cref="IAuditedAggregateMember"/>, meaning
+/// The entity also implements <see cref="IModifiedEntityMember"/>, meaning
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="UserGroup"/> entity.
 /// </remarks>
-public class UserGroupPermission : Entity, IAuditedAggregateMember, IPermission
+public class UserGroupPermission : Entity, IModifiedEntityMember, IPermission
 {
     /// <summary>
     /// Gets the unique identifier of the user group that owns this permission.
@@ -75,5 +74,5 @@ public class UserGroupPermission : Entity, IAuditedAggregateMember, IPermission
     /// modifications to this entity should update the audit metadata of
     /// the parent <see cref="UserGroup"/>.
     /// </remarks>
-    public IAuditedEntity ParentAuditedEntity => UserGroup;
+    public IModifiedEntity ParentEditedEntity => UserGroup;
 }

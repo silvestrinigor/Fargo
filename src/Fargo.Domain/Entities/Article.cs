@@ -1,28 +1,29 @@
 using Fargo.Domain.Collections;
-using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
 
 /// <summary>
 /// Represents an article in the system.
-///
-/// An article defines the descriptive information of a product or item type,
-/// such as its name and description. It does not represent a physical unit,
-/// but rather the metadata describing a type of item.
 /// </summary>
 /// <remarks>
-/// An article is partitioned data and may belong to multiple <see cref="Partition"/> instances.
-/// Users can only access the article if they have access to at least one of its partitions.
+/// An article defines the descriptive information of a product or item type,
+/// such as its name and description. It does not represent a physical unit,
+/// but rather the conceptual definition shared by one or more items.
+///
+/// An article is partitioned data and may belong to multiple
+/// <see cref="Partition"/> instances. A user may access the article only
+/// if they have access to at least one of its partitions, subject to any
+/// additional authorization rules.
 /// </remarks>
-public class Article : AuditedEntity, IPartitioned
+public class Article : ModifiedEntity, IPartitioned
 {
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
     /// <remarks>
-    /// The name uniquely identifies the article in the domain context
-    /// and must satisfy the validation rules defined in <see cref="Name"/>.
+    /// The name identifies the article in the domain and must satisfy
+    /// the validation rules defined by <see cref="Name"/>.
     /// </remarks>
     public required Name Name
     {
@@ -34,7 +35,7 @@ public class Article : AuditedEntity, IPartitioned
     /// Gets or sets the description of the article.
     /// </summary>
     /// <remarks>
-    /// If no description is provided, the default value is
+    /// If no description is explicitly provided, the value defaults to
     /// <see cref="Description.Empty"/>.
     /// </remarks>
     public Description Description
@@ -43,11 +44,19 @@ public class Article : AuditedEntity, IPartitioned
         set;
     } = Description.Empty;
 
+    /// <summary>
+    /// Gets the partitions associated with the article.
+    /// </summary>
+    /// <remarks>
+    /// These partitions define the partition scope of the article and are
+    /// used in partition-based access evaluation.
+    /// </remarks>
     public PartitionCollection Partitions
     {
         get;
         init;
     } = [];
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 }

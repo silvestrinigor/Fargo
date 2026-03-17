@@ -1,5 +1,4 @@
 using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 
@@ -11,19 +10,8 @@ public class ArticleService(
 {
     public async Task DeleteArticle(
             Article article,
-            User actor,
             CancellationToken cancellationToken = default)
     {
-        if (UserService.HasPermission(actor, ActionType.DeleteArticle))
-        {
-            throw new UserNotAuthorizedFargoDomainException(actor.Guid, ActionType.DeleteArticle);
-        }
-
-        if (!actor.IsActive)
-        {
-            throw new UserInactiveFargoDomainException(actor.Guid);
-        }
-
         var hasItems = await articleRepository.HasItemsAssociated(
             article.Guid,
             cancellationToken

@@ -1,17 +1,16 @@
 using Fargo.Domain.Collections;
-using Fargo.Domain.Logics;
 
 namespace Fargo.Domain.Entities;
 
 /// <summary>
 /// Represents an item in the system.
-///
-/// An item is an individual instance associated with a specific
-/// <see cref="Article"/>. While an <see cref="Article"/> defines the
-/// descriptive information of a product, an <see cref="Item"/> represents
-/// a concrete unit of that article.
 /// </summary>
 /// <remarks>
+/// An item is a concrete instance associated with a specific
+/// <see cref="Article"/>. While an <see cref="Article"/> defines the
+/// descriptive information of a product type, an <see cref="Item"/>
+/// represents an individual unit of that article.
+///
 /// An item is partitioned data and defines its own partition scope
 /// independently of the associated <see cref="Article"/>.
 ///
@@ -20,11 +19,14 @@ namespace Fargo.Domain.Entities;
 /// only if they have access to at least one partition associated directly
 /// with the item, subject to additional authorization rules.
 /// </remarks>
-public class Item : AuditedEntity, IPartitioned
+public class Item : ModifiedEntity, IPartitioned
 {
     /// <summary>
     /// Gets the unique identifier of the associated <see cref="Article"/>.
     /// </summary>
+    /// <remarks>
+    /// This value is synchronized with <see cref="Article"/> when the item is initialized.
+    /// </remarks>
     public Guid ArticleGuid
     {
         get;
@@ -38,8 +40,8 @@ public class Item : AuditedEntity, IPartitioned
     /// The associated article defines the descriptive classification of the item,
     /// but does not determine the partition access scope of this entity.
     ///
-    /// When the article is assigned, <see cref="ArticleGuid"/>
-    /// is automatically synchronized with the article's identifier.
+    /// When this property is initialized, <see cref="ArticleGuid"/> is
+    /// automatically set to the identifier of the assigned article.
     /// </remarks>
     public required Article Article
     {
@@ -51,11 +53,19 @@ public class Item : AuditedEntity, IPartitioned
         }
     }
 
+    /// <summary>
+    /// Gets the partitions associated with the item.
+    /// </summary>
+    /// <remarks>
+    /// These partitions define the partition scope of the item and are used
+    /// in partition-based access evaluation.
+    /// </remarks>
     public PartitionCollection Partitions
     {
         get;
         init;
     } = [];
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 }

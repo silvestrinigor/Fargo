@@ -1,7 +1,9 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
+using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
+using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
@@ -43,13 +45,15 @@ public sealed class ArticleDeleteCommandHandler(
     {
         var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
+        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteArticle);
+
         var article = await articleService.GetArticle(
             command.ArticleGuid,
             actor,
             cancellationToken
         ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
-        await articleService.DeleteArticle(article, actor, cancellationToken);
+        await articleService.DeleteArticle(article, cancellationToken);
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

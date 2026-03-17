@@ -1,6 +1,5 @@
 using Fargo.Domain.Collections;
 using Fargo.Domain.Enums;
-using Fargo.Domain.Logics;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
@@ -11,7 +10,7 @@ namespace Fargo.Domain.Entities;
 /// A user contains authentication credentials, direct permissions,
 /// and group memberships that may also grant permissions.
 /// </summary>
-public class User : AuditedEntity, IPartitioned, IPartitionUser, IUserWithPermissions
+public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUser
 {
     /// <summary>
     /// Gets or sets the unique NAMEID (username) of the user.
@@ -183,30 +182,12 @@ public class User : AuditedEntity, IPartitioned, IPartitionUser, IUserWithPermis
     /// </summary>
     /// <remarks>
     /// This property represents the user's current activation status.
-    /// Use <see cref="Activate"/> and <see cref="Deactivate"/> to change the state
-    /// in a controlled way.
     /// </remarks>
     public bool IsActive
     {
         get;
         set;
     } = true;
-
-    /// <summary>
-    /// Marks the user as active.
-    /// </summary>
-    public void Activate()
-    {
-        IsActive = true;
-    }
-
-    /// <summary>
-    /// Marks the user as inactive.
-    /// </summary>
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
@@ -220,7 +201,7 @@ public class User : AuditedEntity, IPartitioned, IPartitionUser, IUserWithPermis
         init => userPermissions = [.. value];
     }
 
-    IReadOnlyCollection<IPermission> IUserWithPermissions.Permissions => Permissions;
+    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
     private readonly List<UserPermission> userPermissions = [];
 

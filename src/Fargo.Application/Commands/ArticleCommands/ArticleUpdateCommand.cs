@@ -6,7 +6,6 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.ArticleCommands;
 
@@ -28,7 +27,7 @@ public sealed record ArticleUpdateCommand(
 /// Handles the execution of <see cref="ArticleUpdateCommand"/>.
 /// </summary>
 public sealed class ArticleUpdateCommandHandler(
-        ArticleService articleService,
+        IArticleRepository articleRepository,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
@@ -55,11 +54,8 @@ public sealed class ArticleUpdateCommandHandler(
 
         UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditArticle);
 
-        var article = await articleService.GetArticle(
-            command.ArticleGuid,
-            actor,
-            cancellationToken
-        ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+        var article = await articleRepository.GetByGuid(command.ArticleGuid, cancellationToken)
+            ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
 
         if (command.Article.Name is not null)
         {
