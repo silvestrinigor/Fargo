@@ -8,5 +8,5 @@ public interface IPartitioned
     /// <summary>
     /// Gets the partitions associated with the entity.
     /// </summary>
-    IReadOnlyCollection<IPartition> Partitions { get; }
+    IReadOnlyCollection<Partition> Partitions { get; }
 }

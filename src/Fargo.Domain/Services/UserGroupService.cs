@@ -13,6 +13,18 @@ public class UserGroupService(
         )
 {
     /// <summary>
+    /// Gets the predefined unique identifier representing
+    /// the default <c>Administrators</c> user group.
+    /// </summary>
+    /// <remarks>
+    /// This GUID is used to identify the built-in administrators group
+    /// and should not be reassigned or modified.
+    /// </remarks>
+    public static Guid AdministratorsUserGroupGuid => new(AdministratorsUserGroupGuidString);
+
+    private const string AdministratorsUserGroupGuidString = "00000000-0000-0000-0000-000000000002";
+
+    /// <summary>
     /// Validates the rules required to create a new <see cref="UserGroup"/>.
     ///
     /// This validation ensures that the <see cref="UserGroup.Nameid"/>

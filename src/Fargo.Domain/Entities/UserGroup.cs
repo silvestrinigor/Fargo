@@ -127,7 +127,7 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 
     /// <summary>
     /// Gets the read-only collection of users associated with the user group.

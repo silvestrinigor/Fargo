@@ -348,5 +348,5 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 }

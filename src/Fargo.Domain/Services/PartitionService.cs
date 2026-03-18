@@ -22,10 +22,37 @@ namespace Fargo.Domain.Services;
 /// <description>indirectly through one of the user's <see cref="UserGroup"/> memberships</description>
 /// </item>
 /// </list>
+///
+/// Access inheritance flows from parent to child. This means that a user
+/// with access to a parent partition also has access to all of its descendant
+/// partitions. Access does not flow from child to parent.
 /// </remarks>
 public class PartitionService(
         IPartitionRepository partitionRepository)
 {
+    /// <summary>
+    /// The predefined unique identifier string representing
+    /// the global partition.
+    /// </summary>
+    /// <remarks>
+    /// The global partition is the root of the partition hierarchy
+    /// and has implicit access to all descendant partitions.
+    /// </remarks>
+    private const string GlobalPartitionGuidString =
+        "00000000-0000-0000-0000-000000000002";
+
+    /// <summary>
+    /// Gets the predefined unique identifier representing
+    /// the global partition.
+    /// </summary>
+    /// <remarks>
+    /// This GUID is reserved for the root partition of the system.
+    /// It must remain constant across environments and is used
+    /// to establish the top-level access scope for privileged users.
+    /// </remarks>
+    public static Guid GlobalPartitionGuid =>
+        new(GlobalPartitionGuidString);
+
     /// <summary>
     /// Gets a partition by its identifier if the specified actor has access to it.
     /// </summary>
@@ -58,9 +85,17 @@ public class PartitionService(
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
+        var partition = await partitionRepository.GetByGuid(
+                partitionGuid,
+                cancellationToken
+                );
 
-        if (partition != null && !HasAccess(partition, actor))
+        if (partition != null &&
+            !await HasAccess(
+                partition,
+                actor,
+                cancellationToken
+                ))
         {
             return null;
         }
@@ -78,30 +113,84 @@ public class PartitionService(
     /// <param name="user">
     /// The user whose access is being evaluated.
     /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
     /// <returns>
     /// <see langword="true"/> when the user has access to the partition,
-    /// either directly or through one of their group memberships;
+    /// either directly or through one of its ancestor partitions, whether
+    /// granted directly or through one of the user's group memberships;
     /// otherwise, <see langword="false"/>.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="partition"/> or <paramref name="user"/> is
     /// <see langword="null"/>.
     /// </exception>
-    public static bool HasAccess(Partition partition, User user)
+    /// <remarks>
+    /// Access inheritance flows from parent to child. Therefore, a user with
+    /// access to an ancestor partition also has access to the evaluated partition.
+    /// </remarks>
+    public async Task<bool> HasAccess(
+            Partition partition,
+            User user,
+            CancellationToken cancellationToken = default
+            )
     {
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(user);
 
-        var userHasAccess = partition.HasAccess(user);
+        var visitedPartitionGuids = new HashSet<Guid>();
+        Partition? currentPartition = partition;
 
-        if (userHasAccess)
+        while (currentPartition != null)
         {
-            return true;
+            if (!visitedPartitionGuids.Add(currentPartition.Guid))
+            {
+                throw new InvalidOperationException(
+                        $"Partition hierarchy contains a cycle involving " +
+                        $"partition '{currentPartition.Guid}'."
+                        );
+            }
+
+            var userHasAccess = currentPartition.HasAccess(user);
+
+            if (userHasAccess)
+            {
+                return true;
+            }
+
+            var userGroupHasAccess = user.UserGroups.Any(currentPartition.HasAccess);
+
+            if (userGroupHasAccess)
+            {
+                return true;
+            }
+
+            var parentPartitionGuid = currentPartition.ParentPartitionGuid;
+
+            if (parentPartitionGuid is null)
+            {
+                return false;
+            }
+
+            if (currentPartition.ParentPartition?.Guid == parentPartitionGuid.Value)
+            {
+                currentPartition = currentPartition.ParentPartition;
+                continue;
+            }
+
+            currentPartition =
+                await partitionRepository.GetByGuid(
+                        parentPartitionGuid.Value,
+                        cancellationToken
+                        )
+                ?? throw new InvalidOperationException(
+                        $"Partition hierarchy is inconsistent. " +
+                        $"Partition '{parentPartitionGuid}' was not found."
+                        );
         }
 
-        var userGroupHasAccess = user.UserGroups.Any(partition.HasAccess);
-
-        return userGroupHasAccess;
+        return false;
     }
 
     /// <summary>
@@ -114,10 +203,14 @@ public class PartitionService(
     /// <param name="user">
     /// The user whose access is being evaluated.
     /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
     /// <returns>
     /// <see langword="true"/> when the user has access to the entity,
-    /// either directly or through one of their group memberships;
-    /// otherwise, <see langword="false"/>.
+    /// either directly or through one of their group memberships,
+    /// including access inherited from ancestor partitions; otherwise,
+    /// <see langword="false"/>.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="partitioned"/> or <paramref name="user"/> is
@@ -126,23 +219,27 @@ public class PartitionService(
     /// <remarks>
     /// This method evaluates access against the partitions associated with the
     /// entity. Effective access may come from the user's own partition access
-    /// entries or from any group the user belongs to.
+    /// entries or from any group the user belongs to. If the entity has no
+    /// associated partitions, access is granted.
     /// </remarks>
-    public static bool HasAccess(IPartitioned partitioned, User user)
+    public async Task<bool> HasAccess(
+            IPartitioned partitioned,
+            User user,
+            CancellationToken cancellationToken = default
+            )
     {
         ArgumentNullException.ThrowIfNull(partitioned);
         ArgumentNullException.ThrowIfNull(user);
 
-        var userHasAccess = partitioned.HasAccess(user);
-
-        if (userHasAccess)
+        foreach (var partition in partitioned.Partitions)
         {
-            return true;
+            if (await HasAccess(partition, user, cancellationToken))
+            {
+                return true;
+            }
         }
 
-        var userGroupHasAccess = user.UserGroups.Any(partitioned.HasAccess);
-
-        return userGroupHasAccess;
+        return partitioned.Partitions.Count > 0;
     }
 
     /// <summary>
@@ -183,14 +280,14 @@ public class PartitionService(
                     );
         }
 
-        var createsCircularHiearchy =
-            await CreatesCircularHiearchy(
+        var createsCircularHierarchy =
+            await CreatesCircularHierarchy(
                     parentPartition,
                     memberPartition.Guid,
                     cancellationToken
                     );
 
-        if (createsCircularHiearchy)
+        if (createsCircularHierarchy)
         {
             throw new PartitionCircularHierarchyFargoDomainException(
                     parentPartition.Guid,
@@ -201,7 +298,7 @@ public class PartitionService(
         memberPartition.ParentPartition = parentPartition;
     }
 
-    private async Task<bool> CreatesCircularHiearchy(
+    private async Task<bool> CreatesCircularHierarchy(
             Partition candidateParentPartition,
             Guid memberPartitionGuid,
             CancellationToken cancellationToken
@@ -223,6 +320,7 @@ public class PartitionService(
             }
 
             var nextParentGuid = currentPartition.ParentPartitionGuid;
+
             if (nextParentGuid is null)
             {
                 return false;

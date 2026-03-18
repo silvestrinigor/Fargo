@@ -27,7 +27,7 @@ public static class PartitionAccessLogic
     /// <summary>
     /// Determines whether a user has access to a specific partition.
     /// </summary>
-    public static bool HasAccess(this IPartition partition, IPartitionUser partitionUser)
+    public static bool HasAccess(this Partition partition, IPartitionUser partitionUser)
     {
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(partitionUser);

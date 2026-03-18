@@ -20,7 +20,7 @@ namespace Fargo.Domain.Entities;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : ModifiedEntity, IPartition
+public class Partition : ModifiedEntity
 {
     /// <summary>
     /// Gets or sets the name of the partition.

@@ -67,5 +67,5 @@ public class Item : ModifiedEntity, IPartitioned
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 }

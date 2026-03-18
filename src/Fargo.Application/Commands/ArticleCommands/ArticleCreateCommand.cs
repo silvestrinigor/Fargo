@@ -6,6 +6,7 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
+using Fargo.Domain.Logics;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
@@ -29,6 +30,7 @@ public sealed class ArticleCreateCommandHandler(
     PartitionService partitionService,
     IArticleRepository articleRepository,
     IUserRepository userRepository,
+    IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork
     ) : ICommandHandler<ArticleCreateCommand, Guid>
@@ -54,16 +56,21 @@ public sealed class ArticleCreateCommandHandler(
             Description = command.Article.Description ?? Description.Empty
         };
 
-        if (command.Article.FirstPartition != null)
-        {
-            var articlePartition = await partitionService.GetPartition(
-                command.Article.FirstPartition.Value,
-                actor,
-                cancellationToken
-            ) ?? throw new PartitionNotFoundFargoApplicationException(command.Article.FirstPartition.Value);
+        var articlePartition = await partitionRepository.GetByGuid(
+            command.Article.FirstPartition ?? PartitionService.GlobalPartitionGuid,
+            cancellationToken
+            )
+            ?? throw new PartitionNotFoundFargoApplicationException(
+                    command.Article.FirstPartition ?? PartitionService.GlobalPartitionGuid);
 
-            article.Partitions.Add(articlePartition);
+        var hasAccessToPartition = await partitionService.HasAccess(articlePartition, actor, cancellationToken);
+
+        if (!hasAccessToPartition)
+        {
+            throw new NotImplementedException();
         }
+
+        article.Partitions.Add(articlePartition);
 
         articleRepository.Add(article);
 
