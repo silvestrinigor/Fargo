@@ -5,16 +5,23 @@ using Fargo.Domain.ValueObjects;
 namespace Fargo.Domain.Entities;
 
 /// <summary>
-/// Represents a user entity in the system.
-///
-/// A user contains authentication credentials, direct permissions,
-/// and group memberships that may also grant permissions.
+/// Represents a user in the system.
 /// </summary>
+/// <remarks>
+/// A user contains authentication credentials, direct permissions,
+/// partition access, and group memberships that may grant additional
+/// permissions and access.
+///
+/// Authorization for a user is determined by the combination of:
+/// - Direct permissions and partition access
+/// - Permissions and partition access inherited from user groups
+/// </remarks>
 public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUser
 {
     /// <summary>
     /// Gets or sets the unique NAMEID (username) of the user.
-    /// This value uniquely identifies the user in the system.
+    /// This value identifies the user in the system and must satisfy
+    /// the validation rules defined by <see cref="Nameid"/>.
     /// </summary>
     public required Nameid Nameid
     {
@@ -107,7 +114,7 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
     /// <summary>
     /// Gets or sets the date and time when the user must change their password.
     ///
-    /// By default, this value is initialized based on
+    /// This value is initialized at entity creation time based on
     /// <see cref="DefaultPasswordChangeDays"/> from the current UTC time.
     /// </summary>
     public DateTimeOffset RequirePasswordChangeAt
@@ -201,6 +208,7 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
         init => userPermissions = [.. value];
     }
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
     private readonly List<UserPermission> userPermissions = [];
@@ -241,11 +249,22 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
         userPermissions.Remove(userPermission);
     }
 
+    /// <summary>
+    /// Gets the collection of groups the user belongs to.
+    /// </summary>
+    /// <remarks>
+    /// User groups provide additional permissions and partition access
+    /// that are inherited by the user.
+    ///
+    /// Effective authorization for a user is typically the combination of:
+    /// - Direct permissions and partition access
+    /// - Permissions and partition access inherited from groups
+    /// </remarks>
     public UserGroupCollection UserGroups
     {
         get;
         init;
-    }
+    } = [];
 
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
@@ -261,6 +280,7 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
         init => partitionAccesses = [.. value];
     }
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPartitionAccess> IPartitionUser.PartitionAccesses => PartitionAccesses;
 
     private readonly List<UserPartitionAccess> partitionAccesses = [];
@@ -307,11 +327,26 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
         partitionAccesses.Remove(userPartition);
     }
 
+    /// <summary>
+    /// Gets the partitions associated with the user entity.
+    /// </summary>
+    /// <remarks>
+    /// These partitions define the partition scope of the user entity itself,
+    /// not the partitions the user has access to.
+    ///
+    /// This is used for partition-based access control on the user entity,
+    /// meaning a user can only access this user record if they have access
+    /// to at least one of these partitions.
+    ///
+    /// To determine which partitions the user can access, see
+    /// <see cref="PartitionAccesses"/> and <see cref="UserGroups"/>.
+    /// </remarks>
     public PartitionCollection Partitions
     {
         get;
         init;
     } = [];
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 }

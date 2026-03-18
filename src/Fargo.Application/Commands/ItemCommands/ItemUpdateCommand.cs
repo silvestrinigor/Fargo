@@ -54,7 +54,7 @@ public sealed class ItemUpdateCommandHandler(
 
         UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditItem);
 
-        var item = await itemRepository.GetByGuid(
+        _ = await itemRepository.GetByGuid(
                 command.ItemGuid,
                 cancellationToken
                 ) ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);

@@ -64,6 +64,7 @@ public sealed class UserAddUserGroupCommandHandler(
                 cancellationToken
                 )
             ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
+
         var userGroup = await userGroupRepository.GetByGuid(
                 command.UserGroupGuid,
                 cancellationToken

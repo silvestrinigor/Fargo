@@ -8,8 +8,8 @@ namespace Fargo.Domain.Entities;
 /// Represents a user group in the system.
 /// </summary>
 /// <remarks>
-/// A user group contains descriptive information and a collection of permissions
-/// that define which actions members of the group are allowed to perform.
+/// A user group defines a set of permissions that determine which actions
+/// its members are allowed to perform.
 ///
 /// A user group is partitioned data and may belong to multiple
 /// <see cref="Partition"/> instances.
@@ -23,7 +23,7 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     /// Gets or sets the unique NAMEID of the user group.
     /// </summary>
     /// <remarks>
-    /// This value uniquely identifies the group in the system and must satisfy
+    /// This value identifies the group in the system and must satisfy
     /// the validation rules defined by <see cref="Nameid"/>.
     /// </remarks>
     public required Nameid Nameid
@@ -36,8 +36,8 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     /// Gets or sets the textual description associated with the user group.
     /// </summary>
     /// <remarks>
-    /// This field provides additional contextual information about the purpose
-    /// of the group. If not specified, it defaults to <see cref="Description.Empty"/>.
+    /// Provides additional contextual information about the group.
+    /// Defaults to <see cref="Description.Empty"/> when not specified.
     /// </remarks>
     public Description Description
     {
@@ -49,7 +49,7 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     /// Gets or sets a value indicating whether the user group is active.
     /// </summary>
     /// <remarks>
-    /// Inactive groups should not be considered available for permission grants
+    /// Inactive groups should not be considered during permission evaluation
     /// or operational use, depending on application rules.
     /// </remarks>
     public bool IsActive
@@ -62,8 +62,7 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     /// Gets the read-only collection of permissions assigned to the user group.
     /// </summary>
     /// <remarks>
-    /// This collection represents the permissions granted by the group.
-    /// It is part of the group authorization model and is used to determine
+    /// Represents the permissions granted by the group and is used to determine
     /// which actions members of the group are allowed to perform.
     /// </remarks>
     public IReadOnlyCollection<UserGroupPermission> Permissions
@@ -72,6 +71,7 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
         init => userGroupPermissions = [.. value];
     }
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
     private readonly List<UserGroupPermission> userGroupPermissions = [];
@@ -102,7 +102,8 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     /// <param name="action">The action to remove from the user group.</param>
     public void RemovePermission(ActionType action)
     {
-        var userGroupPermission = userGroupPermissions.SingleOrDefault(x => x.Action == action);
+        var userGroupPermission = userGroupPermissions
+            .SingleOrDefault(x => x.Action == action);
 
         if (userGroupPermission == null)
         {
@@ -112,22 +113,29 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
         userGroupPermissions.Remove(userGroupPermission);
     }
 
+    /// <summary>
+    /// Gets the partitions associated with the user group.
+    /// </summary>
+    /// <remarks>
+    /// These partitions define the partition scope of the group and are used
+    /// for partition-based access evaluation.
+    /// </remarks>
     public PartitionCollection Partitions
     {
         get;
         init;
-    }
+    } = [];
 
+    /// <inheritdoc />
     IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 
     /// <summary>
     /// Gets the read-only collection of users associated with the user group.
     /// </summary>
     /// <remarks>
-    /// This collection represents users that belong to the group.
-    /// It is primarily used for relationship navigation and persistence mapping.
-    /// Domain operations related to membership should be controlled through
-    /// explicit behaviors rather than by directly mutating this collection.
+    /// Represents users that belong to the group.
+    /// This collection is intended for navigation and persistence purposes.
+    /// Membership changes should be controlled through explicit domain behaviors.
     /// </remarks>
     public IReadOnlyCollection<User> Users
     {
@@ -137,21 +145,33 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
 
     private readonly List<User> users = [];
 
-    public IReadOnlyCollection<UserGroupPartitionAccess> PartitionsAccesses
+    /// <summary>
+    /// Gets the partition access entries associated with the user group.
+    /// </summary>
+    /// <remarks>
+    /// These entries define which partitions the group has access to and are
+    /// used in access evaluation logic.
+    /// </remarks>
+    public IReadOnlyCollection<UserGroupPartitionAccess> PartitionAccesses
     {
         get => partitionAccesses;
         init => partitionAccesses = [.. value];
     }
 
-    public IReadOnlyCollection<IPartitionAccess> PartitionAccesses => PartitionAccesses;
+    /// <inheritdoc />
+    IReadOnlyCollection<IPartitionAccess> IPartitionUser.PartitionAccesses => PartitionAccesses;
 
-    private List<UserGroupPartitionAccess> partitionAccesses = [];
+    private readonly List<UserGroupPartitionAccess> partitionAccesses = [];
 
+    /// <summary>
+    /// Adds partition access to the user group if it does not already exist.
+    /// </summary>
+    /// <param name="partition">The partition to grant access to.</param>
     public void AddPartitionAccess(Partition partition)
     {
         ArgumentNullException.ThrowIfNull(partition);
 
-        if (partitionAccesses.Any(x => x == partition))
+        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
         {
             return;
         }
@@ -165,6 +185,10 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
         partitionAccesses.Add(partitionAccess);
     }
 
+    /// <summary>
+    /// Removes partition access from the user group if it exists.
+    /// </summary>
+    /// <param name="partitionGuid">The identifier of the partition to remove.</param>
     public void RemovePartitionAccess(Guid partitionGuid)
     {
         var userGroupPartition =

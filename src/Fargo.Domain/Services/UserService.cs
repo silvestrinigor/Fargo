@@ -7,18 +7,28 @@ using Fargo.Domain.Repositories;
 namespace Fargo.Domain.Services;
 
 /// <summary>
-/// Provides domain validation and business rules
-/// related to <see cref="User"/> entities.
+/// Provides domain validation and business rules related to <see cref="User"/> entities.
 /// </summary>
+/// <remarks>
+/// This service encapsulates domain rules involving users, such as uniqueness
+/// validation, self-protection rules, and effective permission evaluation.
+///
+/// Effective permissions may be granted either:
+/// <list type="bullet">
+/// <item>
+/// <description>directly to the user</description>
+/// </item>
+/// <item>
+/// <description>indirectly through one of the user's <see cref="UserGroup"/> memberships</description>
+/// </item>
+/// </list>
+/// </remarks>
 public class UserService(
         IUserRepository userRepository
         )
 {
     /// <summary>
     /// Validates the rules required to create a new <see cref="User"/>.
-    ///
-    /// This validation ensures that the <see cref="User.Nameid"/>
-    /// is unique within the system.
     /// </summary>
     /// <param name="user">
     /// The user being created.
@@ -26,14 +36,23 @@ public class UserService(
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
+    /// </exception>
     /// <exception cref="UserNameidAlreadyExistsDomainException">
     /// Thrown when another user with the same <see cref="User.Nameid"/> already exists.
     /// </exception>
+    /// <remarks>
+    /// This validation ensures that the <see cref="User.Nameid"/> is unique
+    /// within the system.
+    /// </remarks>
     public async Task ValidateUserCreate(
             User user,
             CancellationToken cancellationToken = default
             )
     {
+        ArgumentNullException.ThrowIfNull(user);
+
         var alreadyExistsWithNameid =
             await userRepository.ExistsByNameid(user.Nameid, cancellationToken);
 
@@ -45,8 +64,6 @@ public class UserService(
 
     /// <summary>
     /// Validates the rules required to delete a <see cref="User"/>.
-    ///
-    /// This validation ensures that a user cannot delete their own account.
     /// </summary>
     /// <param name="user">
     /// The user being deleted.
@@ -54,11 +71,21 @@ public class UserService(
     /// <param name="actor">
     /// The user performing the delete operation.
     /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="user"/> or <paramref name="actor"/> is
+    /// <see langword="null"/>.
+    /// </exception>
     /// <exception cref="UserCannotDeleteSelfFargoDomainException">
     /// Thrown when the acting user attempts to delete their own account.
     /// </exception>
+    /// <remarks>
+    /// This validation ensures that a user cannot delete their own account.
+    /// </remarks>
     public static void ValidateUserDelete(User user, User actor)
     {
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(actor);
+
         if (user == actor)
         {
             throw new UserCannotDeleteSelfFargoDomainException(actor.Guid);
@@ -67,8 +94,6 @@ public class UserService(
 
     /// <summary>
     /// Validates the rules required to change a user's permissions.
-    ///
-    /// This validation ensures that a user cannot modify their own permissions.
     /// </summary>
     /// <param name="user">
     /// The user whose permissions are being modified.
@@ -76,19 +101,52 @@ public class UserService(
     /// <param name="actor">
     /// The user performing the permission change operation.
     /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="user"/> or <paramref name="actor"/> is
+    /// <see langword="null"/>.
+    /// </exception>
     /// <exception cref="UserCannotChangeOwnPermissionsFargoDomainException">
     /// Thrown when the acting user attempts to modify their own permissions.
     /// </exception>
+    /// <remarks>
+    /// This validation ensures that a user cannot modify their own permissions.
+    /// </remarks>
     public static void ValidateUserPermissionChange(User user, User actor)
     {
-        if (user.Guid == actor.Guid)
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(actor);
+
+        if (user == actor)
         {
             throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
         }
     }
 
+    /// <summary>
+    /// Determines whether the specified <paramref name="user"/> has the given permission.
+    /// </summary>
+    /// <param name="user">
+    /// The user whose effective permission set is being evaluated.
+    /// </param>
+    /// <param name="action">
+    /// The action to evaluate.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the user has the requested permission,
+    /// either directly or through one of their group memberships;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
+    /// </exception>
+    /// <remarks>
+    /// Effective permissions are resolved from both the user's direct permissions
+    /// and the permissions inherited from the user's <see cref="UserGroup"/> memberships.
+    /// </remarks>
     public static bool HasPermission(User user, ActionType action)
     {
+        ArgumentNullException.ThrowIfNull(user);
+
         var userHasPermission = user.HasPermission(action);
 
         if (userHasPermission)

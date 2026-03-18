@@ -7,6 +7,7 @@ using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Commands.PartitionCommands;
@@ -19,7 +20,7 @@ namespace Fargo.Application.Commands.PartitionCommands;
 /// </param>
 /// <param name="Description">
 /// The optional description of the partition.
-/// When not provided, <see cref="Domain.ValueObjects.Description.Empty"/> is used.
+/// When not provided, <see cref="Description.Empty"/> is used.
 /// </param>
 /// <param name="ParentPartitionGuid">
 /// The optional identifier of the parent partition.
@@ -39,6 +40,7 @@ public sealed record PartitionCreateCommand(
 /// current actor is active and has permission to create partitions.
 /// </remarks>
 public sealed class PartitionCreateCommandHandler(
+        PartitionService partitionService,
         IUserRepository userRepository,
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
@@ -60,16 +62,6 @@ public sealed class PartitionCreateCommandHandler(
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="command"/> is <see langword="null"/>.
     /// </exception>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current actor cannot be resolved or is not active.
-    /// </exception>
-    /// <exception cref="UserNotAuthorizedFargoDomainException">
-    /// Thrown when the current actor does not have permission to create partitions.
-    /// </exception>
-    /// <exception cref="NotImplementedException">
-    /// Thrown when <see cref="PartitionCreateCommand.ParentPartitionGuid"/> is provided,
-    /// because parent partition assignment is not implemented yet.
-    /// </exception>
     public async Task<Guid> Handle(PartitionCreateCommand command, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -86,7 +78,10 @@ public sealed class PartitionCreateCommandHandler(
 
         if (command.ParentPartitionGuid != null)
         {
-            throw new NotImplementedException();
+            var parentPartition = await partitionService.GetPartition(command.ParentPartitionGuid.Value, actor, cancellationToken)
+                ?? throw new PartitionNotFoundFargoApplicationException(command.ParentPartitionGuid.Value);
+
+            await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
         }
 
         partitionRepository.Add(partition);
