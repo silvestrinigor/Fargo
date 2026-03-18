@@ -23,8 +23,10 @@ public sealed record ArticleDeleteCommand(
 /// Handles the execution of <see cref="ArticleDeleteCommand"/>.
 /// </summary>
 public sealed class ArticleDeleteCommandHandler(
-        IUserRepository userRepository,
         ArticleService articleService,
+        PartitionService partitionService,
+        IArticleRepository articleRepository,
+        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<ArticleDeleteCommand>
@@ -47,11 +49,17 @@ public sealed class ArticleDeleteCommandHandler(
 
         UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteArticle);
 
-        var article = await articleService.GetArticle(
+        var article = await articleRepository.GetByGuid(
             command.ArticleGuid,
-            actor,
             cancellationToken
         ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+
+        var hasAccessToArticle = await partitionService.HasAccess(article, actor, cancellationToken);
+
+        if (!hasAccessToArticle)
+        {
+            throw new PartitionedEntityAccessDeniedFargoApplicationException(article.Guid, actor.Guid);
+        }
 
         await articleService.DeleteArticle(article, cancellationToken);
 

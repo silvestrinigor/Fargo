@@ -1,4 +1,4 @@
-using Fargo.Application.Requests.Commands;
+using Fargo.Application.Commands;
 using System.Diagnostics;
 
 namespace Fargo.SeedService;

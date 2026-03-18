@@ -16,12 +16,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(x => x.Description).IsRequired();
 
-        builder.Property(x => x.CreatedAt).IsRequired();
-
-        builder.Property(x => x.CreatedByGuid);
-
-        builder.Property(x => x.EditedAt);
-
         builder.Property(x => x.EditedByGuid);
 
         builder.HasMany(a => a.Partitions).WithMany(p => p.ArticleMembers);

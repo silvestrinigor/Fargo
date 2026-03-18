@@ -96,6 +96,7 @@ public sealed class InitializeSystemCommandHandler(
 
         var admin = new User
         {
+            Guid = UserService.DefaultAdministratorUserGuid,
             Nameid = adminNameid,
             PasswordHash = passwordHash
         };

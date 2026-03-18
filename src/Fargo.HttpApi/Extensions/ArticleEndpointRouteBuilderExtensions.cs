@@ -1,8 +1,8 @@
 using Fargo.Application.Commands;
 using Fargo.Application.Commands.ArticleCommands;
 using Fargo.Application.Models.ArticleModels;
-using Fargo.Application.Requests.Queries;
-using Fargo.Application.Requests.Queries.ArticleQueries;
+using Fargo.Application.Queries;
+using Fargo.Application.Queries.ArticleQueries;
 using Fargo.Domain.ValueObjects;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;

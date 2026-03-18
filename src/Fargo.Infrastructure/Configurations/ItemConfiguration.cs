@@ -21,12 +21,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasIndex(x => x.ArticleGuid);
 
-        builder.Property(x => x.CreatedAt).IsRequired();
-
-        builder.Property(x => x.CreatedByGuid);
-
-        builder.Property(x => x.EditedAt);
-
         builder.Property(x => x.EditedByGuid);
 
         builder.HasMany(i => i.Partitions).WithMany(p => p.ItemMembers);

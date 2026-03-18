@@ -25,7 +25,8 @@ internal static class ChangeTrackerExtensions
     /// <item>
     /// <description>
     /// When a tracked entity implementing <see cref="IModifiedEntity"/> is in the
-    /// <see cref="EntityState.Added"/> state, its creation audit metadata is initialized.
+    /// <see cref="EntityState.Added"/> state, both creation and modification audit
+    /// metadata are initialized.
     /// </description>
     /// </item>
     /// <item>
@@ -50,7 +51,7 @@ internal static class ChangeTrackerExtensions
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.MarkAsCreated(currentUserGuid);
+                entry.Entity.MarkAsEdited(currentUserGuid);
             }
             else if (entry.State == EntityState.Modified)
             {

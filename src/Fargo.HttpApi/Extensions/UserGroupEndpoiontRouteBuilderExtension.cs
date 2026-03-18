@@ -1,8 +1,8 @@
 using Fargo.Application.Commands;
 using Fargo.Application.Commands.UserGroupCommands;
 using Fargo.Application.Models.UserGroupModels;
-using Fargo.Application.Requests.Queries;
-using Fargo.Application.Requests.Queries.UserGroupQueries;
+using Fargo.Application.Queries;
+using Fargo.Application.Queries.UserGroupQueries;
 using Fargo.Domain.ValueObjects;
 using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;

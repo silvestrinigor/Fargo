@@ -69,8 +69,6 @@ public class UserPartitionAccess : Entity, IModifiedEntityMember, IPartitionAcce
         }
     }
 
-    IPartition IPartitionAccess.Partition => Partition;
-
     /// <summary>
     /// Gets the parent audited entity whose audit metadata must be updated
     /// when this entity changes.

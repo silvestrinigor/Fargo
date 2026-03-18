@@ -8,5 +8,5 @@ public interface IPartitionAccess
     /// <summary>
     /// Gets the partition associated with this access.
     /// </summary>
-    IPartition Partition { get; }
+    Partition Partition { get; }
 }

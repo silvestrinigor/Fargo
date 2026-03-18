@@ -22,7 +22,7 @@ public class UserGroupService(
     /// </remarks>
     public static Guid AdministratorsUserGroupGuid => new(AdministratorsUserGroupGuidString);
 
-    private const string AdministratorsUserGroupGuidString = "00000000-0000-0000-0000-000000000002";
+    private const string AdministratorsUserGroupGuidString = "00000000-0000-0000-0000-000000000003";
 
     /// <summary>
     /// Validates the rules required to create a new <see cref="UserGroup"/>.

@@ -26,12 +26,6 @@ public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
             .HasForeignKey(x => x.ParentPartitionGuid)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(x => x.CreatedAt).IsRequired();
-
-        builder.Property(x => x.CreatedByGuid);
-
-        builder.Property(x => x.EditedAt);
-
         builder.Property(x => x.EditedByGuid);
     }
 }

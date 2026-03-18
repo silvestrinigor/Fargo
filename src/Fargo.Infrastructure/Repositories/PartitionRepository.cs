@@ -59,4 +59,39 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             .Select(PartitionMappings.InformationProjection)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+        Guid partitionGuid,
+        bool includeSelf = true,
+        CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+            WITH PartitionTree AS
+            (
+             SELECT [Guid], [ParentPartitionGuid]
+             FROM [Partitions]
+             WHERE [Guid] = {partitionGuid}
+
+             UNION ALL
+
+             SELECT child.[Guid], child.[ParentPartitionGuid]
+             FROM [Partitions] AS child
+             INNER JOIN PartitionTree AS parent
+             ON child.[ParentPartitionGuid] = parent.[Guid]
+            )
+            SELECT [Guid]
+            FROM PartitionTree
+            """;
+
+        var guids = await context.Database
+            .SqlQuery<Guid>(query)
+            .ToListAsync(cancellationToken);
+
+        if (!includeSelf)
+        {
+            guids.RemoveAll(guid => guid == partitionGuid);
+        }
+
+        return guids;
+    }
 }

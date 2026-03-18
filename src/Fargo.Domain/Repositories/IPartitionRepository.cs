@@ -75,6 +75,28 @@ public interface IPartitionRepository
     );
 
     /// <summary>
+    /// Gets the unique identifiers of all descendant partitions of a given partition.
+    /// </summary>
+    /// <param name="partitionGuid">
+    /// The unique identifier of the root partition whose descendants should be retrieved.
+    /// </param>
+    /// <param name="includeSelf">
+    /// Indicates whether the root partition itself should also be included in the result.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A read-only collection containing the unique identifiers of all descendant
+    /// partitions, optionally including the root partition itself.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+            Guid partitionGuid,
+            bool includeSelf = true,
+            CancellationToken cancellationToken = default
+            );
+
+    /// <summary>
     /// Adds a new partition to the persistence context.
     /// </summary>
     /// <param name="partition">The partition to add.</param>

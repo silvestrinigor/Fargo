@@ -28,6 +28,24 @@ public class UserService(
         )
 {
     /// <summary>
+    /// The predefined unique identifier string representing
+    /// the default administrator user.
+    /// </summary>
+    private const string DefaultAdministratorUserGuidString =
+        "00000000-0000-0000-0000-000000000004";
+
+    /// <summary>
+    /// Gets the predefined unique identifier representing
+    /// the default administrator user.
+    /// </summary>
+    /// <remarks>
+    /// This GUID is reserved for the built-in administrator account
+    /// created during system initialization.
+    /// </remarks>
+    public static Guid DefaultAdministratorUserGuid =>
+        new(DefaultAdministratorUserGuidString);
+
+    /// <summary>
     /// Validates the rules required to create a new <see cref="User"/>.
     /// </summary>
     /// <param name="user">
