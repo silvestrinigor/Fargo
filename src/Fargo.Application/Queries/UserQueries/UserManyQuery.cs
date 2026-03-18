@@ -18,7 +18,7 @@ public sealed class UserManyQueryHandler(
             )
     {
         return await userRepository.GetManyInfo(
-                query.Pagination ?? Pagination.First20Pages,
+                query.Pagination ?? Pagination.FirstPage20Items,
                 query.TemporalAsOf,
                 cancellationToken
                 );

@@ -19,7 +19,7 @@ public sealed class UserGroupManyQueryHandler(
             )
     {
         var userGroups = await userGroupRepository.GetManyInfo(
-                query.Pagination ?? Pagination.First20Pages,
+                query.Pagination ?? Pagination.FirstPage20Items,
                 query.UserGuid,
                 query.TemporalAsOf,
                 cancellationToken

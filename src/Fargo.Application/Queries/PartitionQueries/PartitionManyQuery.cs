@@ -20,7 +20,7 @@ public sealed class PartitionManyQueryHandler(
             )
     {
         var partitions = await partitionRepository.GetManyInfo(
-                query.Pagination ?? Pagination.First20Pages,
+                query.Pagination ?? Pagination.FirstPage20Items,
                 query.ParentPartitionGuid,
                 query.AsOfDateTime,
                 cancellationToken

@@ -69,6 +69,28 @@ public interface IArticleRepository
     );
 
     /// <summary>
+    /// Gets lightweight information about an article by its unique identifier,
+    /// only if the article belongs to at least one of the specified partitions.
+    /// </summary>
+    Task<ArticleInformation?> GetInfoByGuidInPartitions(
+            Guid entityGuid,
+            IReadOnlyCollection<Guid> partitionGuids,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default
+            );
+
+    /// <summary>
+    /// Gets a paginated collection of article information projections,
+    /// filtered to articles that belong to at least one of the specified partitions.
+    /// </summary>
+    Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitions(
+            Pagination pagination,
+            IReadOnlyCollection<Guid> partitionGuids,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default
+            );
+
+    /// <summary>
     /// Determines whether the specified article has any associated items.
     /// </summary>
     /// <param name="articleGuid">The unique identifier of the article.</param>
@@ -77,9 +99,9 @@ public interface IArticleRepository
     /// <see langword="true"/> if the article has associated items; otherwise, <see langword="false"/>.
     /// </returns>
     Task<bool> HasItemsAssociated(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default
-    );
+            Guid articleGuid,
+            CancellationToken cancellationToken = default
+            );
 
     /// <summary>
     /// Adds a new article to the persistence context.

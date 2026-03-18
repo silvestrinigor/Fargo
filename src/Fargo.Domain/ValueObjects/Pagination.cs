@@ -25,7 +25,7 @@ public readonly record struct Pagination
     /// new Pagination(Page.FirstPage, new Limit(20))
     /// </code>
     /// </remarks>
-    public static Pagination First20Pages => new(Page.FirstPage, new Limit(20));
+    public static Pagination FirstPage20Items => new(Page.FirstPage, new Limit(20));
 
     /// <summary>
     /// Initializes a new instance of <see cref="Pagination"/>.

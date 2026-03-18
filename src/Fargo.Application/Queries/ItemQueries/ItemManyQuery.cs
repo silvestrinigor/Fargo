@@ -19,7 +19,7 @@ public sealed class ItemManyQueryHandler(
             )
     {
         var items = await itemRepository.GetManyInfo(
-                query.Pagination ?? Pagination.First20Pages,
+                query.Pagination ?? Pagination.FirstPage20Items,
                 query.ArticleGuid,
                 query.TemporalAsOf,
                 cancellationToken

@@ -1,6 +1,5 @@
 using Fargo.Domain.Entities;
 using Fargo.Domain.Exceptions;
-using Fargo.Domain.Logics;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Domain.Services;
@@ -73,11 +72,6 @@ public class PartitionService(
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="actor"/> is <see langword="null"/>.
     /// </exception>
-    /// <remarks>
-    /// This method enforces partition-based visibility rules.
-    /// A partition is returned only when the requesting user has effective
-    /// access to it according to the domain access rules.
-    /// </remarks>
     public async Task<Partition?> GetPartition(
             Guid partitionGuid,
             User actor,
@@ -86,21 +80,24 @@ public class PartitionService(
         ArgumentNullException.ThrowIfNull(actor);
 
         var partition = await partitionRepository.GetByGuid(
-                partitionGuid,
-                cancellationToken
-                );
+            partitionGuid,
+            cancellationToken
+        );
 
-        if (partition != null &&
-            !await HasAccess(
-                partition,
-                actor,
-                cancellationToken
-                ))
+        if (partition is null)
         {
             return null;
         }
 
-        return partition;
+        var hasAccess = await HasAccess(
+            partition,
+            actor,
+            cancellationToken
+        );
+
+        return hasAccess
+            ? partition
+            : null;
     }
 
     /// <summary>
@@ -126,68 +123,52 @@ public class PartitionService(
     /// Thrown when <paramref name="partition"/> or <paramref name="user"/> is
     /// <see langword="null"/>.
     /// </exception>
-    /// <remarks>
-    /// Access inheritance flows from parent to child. Therefore, a user with
-    /// access to an ancestor partition also has access to the evaluated partition.
-    /// </remarks>
     public async Task<bool> HasAccess(
             Partition partition,
             User user,
-            CancellationToken cancellationToken = default
-            )
+            CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(user);
 
-        var visitedPartitionGuids = new HashSet<Guid>();
-        Partition? currentPartition = partition;
+        var directAccessPartitionGuids = new HashSet<Guid>();
 
-        while (currentPartition != null)
+        foreach (var userPartition in user.Partitions)
         {
-            if (!visitedPartitionGuids.Add(currentPartition.Guid))
+            directAccessPartitionGuids.Add(userPartition.Guid);
+        }
+
+        foreach (var userGroup in user.UserGroups)
+        {
+            foreach (var groupPartition in userGroup.Partitions)
             {
-                throw new InvalidOperationException(
-                        $"Partition hierarchy contains a cycle involving " +
-                        $"partition '{currentPartition.Guid}'."
-                        );
+                directAccessPartitionGuids.Add(groupPartition.Guid);
             }
+        }
 
-            var userHasAccess = currentPartition.HasAccess(user);
+        if (directAccessPartitionGuids.Count == 0)
+        {
+            return false;
+        }
 
-            if (userHasAccess)
+        if (directAccessPartitionGuids.Contains(partition.Guid))
+        {
+            return true;
+        }
+
+        foreach (var accessibleRootPartitionGuid in directAccessPartitionGuids)
+        {
+            var descendantPartitionGuids =
+                await partitionRepository.GetDescendantGuids(
+                    accessibleRootPartitionGuid,
+                    includeSelf: true,
+                    cancellationToken
+                );
+
+            if (descendantPartitionGuids.Contains(partition.Guid))
             {
                 return true;
             }
-
-            var userGroupHasAccess = user.UserGroups.Any(currentPartition.HasAccess);
-
-            if (userGroupHasAccess)
-            {
-                return true;
-            }
-
-            var parentPartitionGuid = currentPartition.ParentPartitionGuid;
-
-            if (parentPartitionGuid is null)
-            {
-                return false;
-            }
-
-            if (currentPartition.ParentPartition?.Guid == parentPartitionGuid.Value)
-            {
-                currentPartition = currentPartition.ParentPartition;
-                continue;
-            }
-
-            currentPartition =
-                await partitionRepository.GetByGuid(
-                        parentPartitionGuid.Value,
-                        cancellationToken
-                        )
-                ?? throw new InvalidOperationException(
-                        $"Partition hierarchy is inconsistent. " +
-                        $"Partition '{parentPartitionGuid}' was not found."
-                        );
         }
 
         return false;
@@ -225,11 +206,15 @@ public class PartitionService(
     public async Task<bool> HasAccess(
             IPartitioned partitioned,
             User user,
-            CancellationToken cancellationToken = default
-            )
+            CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partitioned);
         ArgumentNullException.ThrowIfNull(user);
+
+        if (partitioned.Partitions.Count == 0)
+        {
+            return true;
+        }
 
         foreach (var partition in partitioned.Partitions)
         {
@@ -239,7 +224,7 @@ public class PartitionService(
             }
         }
 
-        return partitioned.Partitions.Count > 0;
+        return false;
     }
 
     /// <summary>
@@ -267,8 +252,7 @@ public class PartitionService(
     public async Task SetParentPartition(
             Partition parentPartition,
             Partition memberPartition,
-            CancellationToken cancellationToken = default
-            )
+            CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(parentPartition);
         ArgumentNullException.ThrowIfNull(memberPartition);
@@ -276,23 +260,23 @@ public class PartitionService(
         if (parentPartition.Guid == memberPartition.Guid)
         {
             throw new PartitionCannotBeOwnParentFargoDomainException(
-                    memberPartition.Guid
-                    );
+                memberPartition.Guid
+            );
         }
 
         var createsCircularHierarchy =
             await CreatesCircularHierarchy(
-                    parentPartition,
-                    memberPartition.Guid,
-                    cancellationToken
-                    );
+                parentPartition,
+                memberPartition.Guid,
+                cancellationToken
+            );
 
         if (createsCircularHierarchy)
         {
             throw new PartitionCircularHierarchyFargoDomainException(
-                    parentPartition.Guid,
-                    memberPartition.Guid
-                    );
+                parentPartition.Guid,
+                memberPartition.Guid
+            );
         }
 
         memberPartition.ParentPartition = parentPartition;
@@ -301,48 +285,22 @@ public class PartitionService(
     private async Task<bool> CreatesCircularHierarchy(
             Partition candidateParentPartition,
             Guid memberPartitionGuid,
-            CancellationToken cancellationToken
-            )
+            CancellationToken cancellationToken)
     {
-        var visitedPartitionGuids = new HashSet<Guid>();
-        Partition? currentPartition = candidateParentPartition;
+        ArgumentNullException.ThrowIfNull(candidateParentPartition);
 
-        while (currentPartition != null)
+        if (candidateParentPartition.Guid == memberPartitionGuid)
         {
-            if (!visitedPartitionGuids.Add(currentPartition.Guid))
-            {
-                return true;
-            }
-
-            if (currentPartition.Guid == memberPartitionGuid)
-            {
-                return true;
-            }
-
-            var nextParentGuid = currentPartition.ParentPartitionGuid;
-
-            if (nextParentGuid is null)
-            {
-                return false;
-            }
-
-            if (currentPartition.ParentPartition?.Guid == nextParentGuid.Value)
-            {
-                currentPartition = currentPartition.ParentPartition;
-                continue;
-            }
-
-            currentPartition =
-                await partitionRepository.GetByGuid(
-                        nextParentGuid.Value,
-                        cancellationToken
-                        )
-                ?? throw new InvalidOperationException(
-                        $"Partition hierarchy is inconsistent. " +
-                        $"Partition '{nextParentGuid}' was not found."
-                        );
+            return true;
         }
 
-        return false;
+        var descendantPartitionGuids =
+            await partitionRepository.GetDescendantGuids(
+                memberPartitionGuid,
+                includeSelf: false,
+                cancellationToken
+            );
+
+        return descendantPartitionGuids.Contains(candidateParentPartition.Guid);
     }
 }

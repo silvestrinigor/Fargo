@@ -1,5 +1,5 @@
+using Fargo.Application.Mappings;
 using Fargo.Domain.Entities;
-using Fargo.Domain.Mappings;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Extensions;

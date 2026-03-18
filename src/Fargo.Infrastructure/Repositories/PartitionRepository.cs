@@ -94,4 +94,32 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
         return guids;
     }
+
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+            IReadOnlyCollection<Guid> partitionGuids,
+            bool includeSelf = true,
+            CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(partitionGuids);
+
+        if (partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        var result = new HashSet<Guid>();
+
+        foreach (var partitionGuid in partitionGuids.Distinct())
+        {
+            var descendants = await GetDescendantGuids(
+                    partitionGuid,
+                    includeSelf,
+                    cancellationToken
+                    );
+
+            result.UnionWith(descendants);
+        }
+
+        return [.. result];
+    }
 }

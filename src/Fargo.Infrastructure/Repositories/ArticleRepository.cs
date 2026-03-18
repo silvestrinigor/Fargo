@@ -50,4 +50,45 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
             .Select(ArticleMappings.InformationProjection)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<ArticleInformation?> GetInfoByGuidInPartitions(
+            Guid entityGuid,
+            IReadOnlyCollection<Guid> partitionGuids,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return null;
+        }
+
+        var query = articles.TemporalAsOfIfProvided(asOfDateTime);
+
+        return await query
+            .Where(a => a.Guid == entityGuid)
+            .Where(a => a.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
+            .Select(ArticleMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitions(
+            Pagination pagination,
+            IReadOnlyCollection<Guid> partitionGuids,
+            DateTimeOffset? asOfDateTime = null,
+            CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        var query = articles.TemporalAsOfIfProvided(asOfDateTime);
+
+        return await query
+            .Where(a => a.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
+            .OrderBy(a => a.Guid)
+            .WithPagination(pagination)
+            .Select(ArticleMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
 }
