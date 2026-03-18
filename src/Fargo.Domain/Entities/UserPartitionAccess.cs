@@ -1,5 +1,3 @@
-using Fargo.Domain.Logics;
-
 namespace Fargo.Domain.Entities;
 
 /// <summary>
