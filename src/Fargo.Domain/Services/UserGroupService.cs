@@ -80,5 +80,10 @@ public class UserGroupService(
         {
             throw new UserCannotDeleteParentUserGroupFargoDomainException(userGroup.Guid);
         }
+
+        if (userGroup.Guid == AdministratorsUserGroupGuid)
+        {
+            throw new DeleteDefaultAdministratorsUserGroupFargoDomainException();
+        }
     }
 }

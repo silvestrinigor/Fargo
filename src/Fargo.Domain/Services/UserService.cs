@@ -108,6 +108,11 @@ public class UserService(
         {
             throw new UserCannotDeleteSelfFargoDomainException(actor.Guid);
         }
+
+        if (user.Guid == DefaultAdministratorUserGuid)
+        {
+            throw new DeleteMainAdminUserFargoDomainException();
+        }
     }
 
     /// <summary>
@@ -137,6 +142,11 @@ public class UserService(
         if (user == actor)
         {
             throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
+        }
+
+        if (user.Guid == DefaultAdministratorUserGuid)
+        {
+            throw new ChangeMainAdminUserPermissionsFargoDomainException();
         }
     }
 
