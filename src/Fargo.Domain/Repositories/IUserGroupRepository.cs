@@ -160,6 +160,66 @@ public interface IUserGroupRepository
     );
 
     /// <summary>
+    /// Gets a paginated collection of user group unique identifiers.
+    /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="userGuid">
+    /// Optional filter used to retrieve only user groups associated with a specific user.
+    /// When provided, only groups assigned to the specified user are returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the user groups
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of user group unique identifiers.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetManyGuids(
+        Pagination pagination,
+        Guid? userGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Gets a paginated collection of user group unique identifiers,
+    /// filtered to user groups that belong to at least one of the specified partitions.
+    /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="partitionGuids">
+    /// The partitions used to filter accessible user groups.
+    /// Only user groups belonging to at least one of these partitions are returned.
+    /// </param>
+    /// <param name="userGuid">
+    /// Optional filter used to retrieve only user groups associated with a specific user.
+    /// When provided, only groups assigned to the specified user are returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the user groups
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of user group unique identifiers.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? userGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new user group to the persistence context.
     /// </summary>
     /// <param name="userGroup">The user group to add.</param>

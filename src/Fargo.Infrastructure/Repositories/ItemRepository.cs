@@ -66,6 +66,28 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<Guid>> GetManyGuids(
+        Pagination pagination,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Item> query = items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
+
+        if (articleGuid.HasValue)
+        {
+            query = query.Where(item => item.Article.Guid == articleGuid.Value);
+        }
+
+        return await query
+            .OrderBy(item => item.Guid)
+            .WithPagination(pagination)
+            .Select(item => item.Guid)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ItemInformation?> GetInfoByGuidInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,
@@ -114,6 +136,35 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
             .OrderBy(item => item.Guid)
             .WithPagination(pagination)
             .Select(ItemMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        IQueryable<Item> query = items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(item => item.Article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+
+        if (articleGuid.HasValue)
+        {
+            query = query.Where(item => item.Article.Guid == articleGuid.Value);
+        }
+
+        return await query
+            .OrderBy(item => item.Guid)
+            .WithPagination(pagination)
+            .Select(item => item.Guid)
             .ToListAsync(cancellationToken);
     }
 }

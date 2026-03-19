@@ -133,6 +133,66 @@ public interface IItemRepository
     );
 
     /// <summary>
+    /// Gets a paginated collection of item unique identifiers.
+    /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="articleGuid">
+    /// Optional filter used to retrieve only items associated with a specific article.
+    /// When provided, only items belonging to the specified article are returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the items
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of item unique identifiers.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetManyGuids(
+        Pagination pagination,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Gets a paginated collection of item unique identifiers,
+    /// filtered to items that belong to at least one of the specified partitions.
+    /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="partitionGuids">
+    /// The partitions used to filter accessible items.
+    /// Only items belonging to at least one of these partitions are returned.
+    /// </param>
+    /// <param name="articleGuid">
+    /// Optional filter used to retrieve only items associated with a specific article.
+    /// When provided, only items belonging to the specified article are returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the items
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of item unique identifiers.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new item to the persistence context.
     /// </summary>
     /// <param name="item">The item to add.</param>

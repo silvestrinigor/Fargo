@@ -91,6 +91,56 @@ public interface IArticleRepository
             );
 
     /// <summary>
+    /// Gets a paginated collection of article unique identifiers.
+    /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the articles
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of article unique identifiers.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetManyGuids(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Gets a paginated collection of article unique identifiers,
+    /// filtered to articles that belong to at least one of the specified partitions.
+    /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="partitionGuids">
+    /// The partitions used to filter accessible articles.
+    /// Only articles belonging to at least one of these partitions are returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the articles
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of article unique identifiers.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Determines whether the specified article has any associated items.
     /// </summary>
     /// <param name="articleGuid">The unique identifier of the article.</param>

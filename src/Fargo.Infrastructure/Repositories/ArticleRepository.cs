@@ -23,9 +23,9 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
 
     public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
         => await articles
-        .Include(a => a.Partitions)
-        .Where(a => a.Guid == entityGuid)
-        .SingleOrDefaultAsync(cancellationToken);
+            .Include(a => a.Partitions)
+            .Where(a => a.Guid == entityGuid)
+            .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<ArticleInformation?> GetInfoByGuid(
         Guid entityGuid,
@@ -54,44 +54,85 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<Guid>> GetManyGuids(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .OrderBy(article => article.Guid)
+            .WithPagination(pagination)
+            .Select(article => article.Guid)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ArticleInformation?> GetInfoByGuidInPartitions(
-            Guid entityGuid,
-            IReadOnlyCollection<Guid> partitionGuids,
-            DateTimeOffset? asOfDateTime = null,
-            CancellationToken cancellationToken = default)
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
     {
         if (partitionGuids == null || partitionGuids.Count == 0)
         {
             return null;
         }
 
-        var query = articles.TemporalAsOfIfProvided(asOfDateTime);
+        var query = articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
 
         return await query
-            .Where(a => a.Guid == entityGuid)
-            .Where(a => a.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
+            .Where(article => article.Guid == entityGuid)
+            .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
             .Select(ArticleMappings.InformationProjection)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitions(
-            Pagination pagination,
-            IReadOnlyCollection<Guid> partitionGuids,
-            DateTimeOffset? asOfDateTime = null,
-            CancellationToken cancellationToken = default)
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
     {
         if (partitionGuids == null || partitionGuids.Count == 0)
         {
             return [];
         }
 
-        var query = articles.TemporalAsOfIfProvided(asOfDateTime);
+        var query = articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
 
         return await query
-            .Where(a => a.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
-            .OrderBy(a => a.Guid)
+            .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .OrderBy(article => article.Guid)
             .WithPagination(pagination)
             .Select(ArticleMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        var query = articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
+
+        return await query
+            .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .OrderBy(article => article.Guid)
+            .WithPagination(pagination)
+            .Select(article => article.Guid)
             .ToListAsync(cancellationToken);
     }
 }
