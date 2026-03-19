@@ -49,13 +49,15 @@ public sealed class DescriptionTests
         // Arrange
         var value = DescriptionFakes.LongMultilingualText();
 
+        // Assert precondition
+        Assert.InRange(value.Length, Description.MinLength, Description.MaxLength);
+
         // Act
         var description = new Description(value);
 
         // Assert
         Assert.Equal(value, description.Value);
     }
-
     [Fact]
     public void Constructor_Should_CreateDescription_WithAccentedText()
     {
@@ -458,18 +460,20 @@ public static class DescriptionFakes
            "日本語: 有効な説明。 العربية: وصف صالح.";
 
     public static string LongMultilingualText()
-        => string.Join(
-            " ",
-            [
-                "Descrição longa com acentuação e cedilha: organização, atualização, eficiência, São José, útil, histórico.",
-                "English section with punctuation, numbers 12345, and symbols like % & / ( ) [ ].",
-                "Texto em español con acentos: información, administración, operación, país, corazón.",
-                "Texte en français avec accents : édition, façade, élève, rôle, coopération.",
-                "Deutscher Text mit Umlauten: Einführung, Überprüfung, Möglichkeit, Größe, Änderungen.",
-                "中文段落：这是一个较长的描述文本，用于验证系统是否正确处理多字节字符和不同语言内容。",
-                "日本語の段落：この長い説明文は、システムがマルチバイト文字を正しく扱えるかを確認するためのものです。"
-            ]
+        => FitToMaxLength(
+            "Descrição longa com acentuação: organização, atualização, eficiência, São José, útil. " +
+            "English text with punctuation and numbers 12345. " +
+            "Español con acentos: información, operación, país, corazón. " +
+            "Français: édition, façade, élève, rôle. " +
+            "Deutsch: Einführung, Überprüfung, Größe. " +
+            "中文：这是用于测试多字节字符的描述。 " +
+            "日本語：これはマルチバイト文字を確認する説明文です。"
         );
+
+    private static string FitToMaxLength(string value)
+        => value.Length <= Description.MaxLength
+            ? value
+            : value[..Description.MaxLength];
 
     public static string MaxLengthMultilingualString()
     {
