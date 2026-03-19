@@ -68,23 +68,4 @@ public sealed class PartitionCollection : Collection<Partition>
 
         base.SetItem(index, item);
     }
-
-    /// <summary>
-    /// Determines whether the specified partition exists in the collection.
-    /// </summary>
-    /// <param name="partition">
-    /// The partition to locate in the collection.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> if the specified partition exists in the collection;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-    /// </exception>
-    public bool HasPartition(Partition partition)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-        return Items.Contains(partition);
-    }
 }

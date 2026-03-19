@@ -80,23 +80,4 @@ public sealed class UserGroupCollection : Collection<UserGroup>
 
         base.SetItem(index, item);
     }
-
-    /// <summary>
-    /// Determines whether the specified group exists in the collection.
-    /// </summary>
-    /// <param name="group">
-    /// The group to locate in the collection.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> if the specified group exists in the collection;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="group"/> is <see langword="null"/>.
-    /// </exception>
-    public bool HasGroup(UserGroup group)
-    {
-        ArgumentNullException.ThrowIfNull(group);
-        return Items.Contains(group);
-    }
 }
