@@ -24,7 +24,9 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<Partition> Partitions { get; set; }
 
-    public DbSet<UserPartitionAccess> PartitionAccesses { get; set; }
+    public DbSet<UserPartitionAccess> UserPartitionAccesses { get; set; }
+
+    public DbSet<UserGroupPartitionAccess> UserGroupPartitionAccesses { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -82,6 +84,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new PartitionConfiguration());
 
-        modelBuilder.ApplyConfiguration(new PartitionAccessConfiguration());
+        modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
+
+        modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
     }
 }

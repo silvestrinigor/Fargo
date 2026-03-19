@@ -29,9 +29,9 @@ dotnet user-secrets list --project src/Fargo.HttpApi/Fargo.HttpApi.csproj
 
 dotnet ef migrations add InitialCreate \
            --project src/Fargo.Infrastructure/Fargo.Infrastructure.csproj \
-           --context FargoWriteDbContext
+           --context FargoDbContext
 
 dotnet ef database update \
            --project src/Fargo.Infrastructure/Fargo.Infrastructure.csproj \
-           --context FargoWriteDbContext \
+           --context FargoDbContext \
            --connection "${CONNECTION_STRING}"

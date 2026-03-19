@@ -204,14 +204,14 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
     /// </summary>
     public IReadOnlyCollection<UserPermission> Permissions
     {
-        get => userPermissions;
-        init => userPermissions = [.. value];
+        get => permissions;
+        init => permissions = [.. value];
     }
 
     /// <inheritdoc />
     IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
-    private readonly List<UserPermission> userPermissions = [];
+    private readonly List<UserPermission> permissions = [];
 
     /// <summary>
     /// Adds a permission to the user if it does not already exist.
@@ -219,7 +219,7 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
     /// <param name="action">The action type to allow.</param>
     public void AddPermission(ActionType action)
     {
-        if (userPermissions.Any(x => x.Action == action))
+        if (permissions.Any(x => x.Action == action))
         {
             return;
         }
@@ -230,7 +230,7 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
             User = this
         };
 
-        userPermissions.Add(userPermission);
+        permissions.Add(userPermission);
     }
 
     /// <summary>
@@ -239,14 +239,14 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
     /// <param name="action">The action type to remove.</param>
     public void RemovePermission(ActionType action)
     {
-        var userPermission = userPermissions.SingleOrDefault(x => x.Action == action);
+        var userPermission = permissions.SingleOrDefault(x => x.Action == action);
 
         if (userPermission == null)
         {
             return;
         }
 
-        userPermissions.Remove(userPermission);
+        permissions.Remove(userPermission);
     }
 
     /// <summary>

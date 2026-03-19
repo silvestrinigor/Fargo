@@ -29,7 +29,7 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
             .HasForeignKey(x => x.UserGroupGuid)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Navigation(x => x.Permissions).UsePropertyAccessMode(PropertyAccessMode.Field);
+        //builder.Navigation(x => x.Permissions).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasMany(g => g.Partitions).WithMany(p => p.UserGroupMembers);
     }
