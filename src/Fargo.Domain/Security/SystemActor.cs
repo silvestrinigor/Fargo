@@ -14,21 +14,21 @@ public sealed class SystemActor : IActor
     /// <summary>
     /// Gets the unique identifier of the actor.
     /// </summary>
+    /// <remarks>
+    /// This value is always equal to <see cref="SystemService.SystemGuid"/>,
+    /// which represents the predefined identifier of the internal system actor.
+    /// </remarks>
     public Guid Guid { get; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SystemActor"/>.
     /// </summary>
-    /// <param name="systemService">
-    /// The service that provides the default system identity.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="systemService"/> is <see langword="null"/>.
-    /// </exception>
-    public SystemActor(SystemService systemService)
+    /// <remarks>
+    /// The created instance will always use the system-defined identifier
+    /// (<see cref="SystemService.SystemGuid"/>).
+    /// </remarks>
+    public SystemActor()
     {
-        ArgumentNullException.ThrowIfNull(systemService);
-
-        Guid = systemService.SystemGuid;
+        Guid = SystemService.SystemGuid;
     }
 }
