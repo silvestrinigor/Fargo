@@ -133,16 +133,16 @@ public class PartitionService(
 
         var directAccessPartitionGuids = new HashSet<Guid>();
 
-        foreach (var userPartition in user.Partitions)
+        foreach (var access in user.PartitionAccesses)
         {
-            directAccessPartitionGuids.Add(userPartition.Guid);
+            directAccessPartitionGuids.Add(access.PartitionGuid);
         }
 
         foreach (var userGroup in user.UserGroups)
         {
-            foreach (var groupPartition in userGroup.Partitions)
+            foreach (var accesses in userGroup.PartitionAccesses)
             {
-                directAccessPartitionGuids.Add(groupPartition.Guid);
+                directAccessPartitionGuids.Add(accesses.PartitionGuid);
             }
         }
 

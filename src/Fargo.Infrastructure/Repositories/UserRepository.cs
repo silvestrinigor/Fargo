@@ -29,6 +29,8 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         return await users
             .Include(user => user.Permissions)
             .Include(user => user.UserGroups)
+            .Include(u => u.PartitionAccesses)
+            .Include(u => u.Partitions)
             .Where(user => user.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
     }
