@@ -66,7 +66,7 @@ public sealed class ArticleManyQueryHandler(
         var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
 
         var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.Guid)],
+            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
             includeRoots: true,
             cancellationToken
         );
