@@ -1,5 +1,6 @@
 using Fargo.Application.Security;
 using Fargo.Domain.Security;
+using Fargo.Domain.Services;
 
 namespace Fargo.Infrastructure.Security;
 
@@ -49,5 +50,5 @@ public sealed class SystemCurrentUser : ICurrentUser
     /// which is the predefined identifier used to represent the
     /// internal system actor during automated operations.
     /// </remarks>
-    public Guid UserGuid => SystemActor.Guid;
+    public Guid UserGuid => SystemService.SystemGuid;
 }

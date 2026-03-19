@@ -1,3 +1,5 @@
+using Fargo.Domain.Services;
+
 namespace Fargo.Domain.Security;
 
 /// <summary>
@@ -5,20 +7,28 @@ namespace Fargo.Domain.Security;
 /// </summary>
 /// <remarks>
 /// This actor is used when an operation is performed by the system
-/// itself rather than a real authenticated user.
-///
-/// Examples:
-/// - background workers
-/// - automatic processes
-/// - database seeding
-/// - migrations
+/// itself rather than by a real authenticated user.
 /// </remarks>
-public static class SystemActor
+public sealed class SystemActor : IActor
 {
-    private const string systemActorGuidString = "00000000-0000-0000-0000-000000000001";
+    /// <summary>
+    /// Gets the unique identifier of the actor.
+    /// </summary>
+    public Guid Guid { get; }
 
     /// <summary>
-    /// The predefined unique identifier representing the system actor.
+    /// Initializes a new instance of <see cref="SystemActor"/>.
     /// </summary>
-    public static readonly Guid Guid = new(systemActorGuidString);
+    /// <param name="systemService">
+    /// The service that provides the default system identity.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="systemService"/> is <see langword="null"/>.
+    /// </exception>
+    public SystemActor(SystemService systemService)
+    {
+        ArgumentNullException.ThrowIfNull(systemService);
+
+        Guid = systemService.SystemGuid;
+    }
 }
