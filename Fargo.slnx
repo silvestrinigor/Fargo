@@ -13,4 +13,5 @@
     <Project Path="tst/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tst/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
+    <Project Path="tst/Fargo.TestsSeedService/Fargo.TestsSeedService.csproj" />
 </Solution>

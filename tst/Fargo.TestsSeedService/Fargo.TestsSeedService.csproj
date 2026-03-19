@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-Fargo.TestsSeedService-69be9ecd-31e5-4895-8c72-986df088d849</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.1.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\src\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
+        <ProjectReference Include="..\..\src\Fargo.Application\Fargo.Application.csproj" />
+    </ItemGroup>
+
+</Project>
