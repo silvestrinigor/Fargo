@@ -22,7 +22,10 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
         => await items.Where(x => x.Article.Guid == articleGuid).AnyAsync(cancellationToken);
 
     public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
-        => await articles.Where(a => a.Guid == entityGuid).SingleOrDefaultAsync(cancellationToken);
+        => await articles
+        .Include(a => a.Partitions)
+        .Where(a => a.Guid == entityGuid)
+        .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<ArticleInformation?> GetInfoByGuid(
         Guid entityGuid,
