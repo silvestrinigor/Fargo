@@ -29,7 +29,7 @@ public interface IModifiedEntity
     /// <summary>
     /// Marks the entity as edited by the specified actor.
     /// </summary>
-    /// <param name="userGuid">
+    /// <param name="actorGuid">
     /// The unique identifier of the actor performing the modification.
     /// </param>
     /// <remarks>
@@ -41,5 +41,5 @@ public interface IModifiedEntity
     /// When the modification is performed by the system, the caller should pass
     /// <see cref="Security.SystemActor.Guid"/>.
     /// </remarks>
-    void MarkAsEdited(Guid userGuid);
+    void MarkAsEdited(Guid actorGuid);
 }

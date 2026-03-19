@@ -30,8 +30,8 @@ public abstract class ModifiedEntity : Entity, IModifiedEntity
     }
 
     /// <inheritdoc />
-    public void MarkAsEdited(Guid userGuid)
+    public void MarkAsEdited(Guid actorGuid)
     {
-        EditedByGuid = userGuid;
+        EditedByGuid = actorGuid;
     }
 }
