@@ -46,14 +46,43 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
     public async Task<IReadOnlyCollection<PartitionInformation>> GetManyInfo(
         Pagination pagination,
-        Guid? parentPartitionGuid,
+        Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default)
     {
         return await partitions
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Where(p => parentPartitionGuid == null || p.ParentPartitionGuid == parentPartitionGuid)
+            .Where(partition =>
+                parentPartitionGuid == null ||
+                partition.ParentPartitionGuid == parentPartitionGuid)
+            .OrderBy(partition => partition.Guid)
+            .WithPagination(pagination)
+            .Select(PartitionMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<PartitionInformation>> GetManyInfoByGuids(
+        IReadOnlyCollection<Guid> partitionGuids,
+        Pagination pagination,
+        Guid? parentPartitionGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(partitionGuids);
+
+        if (partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        return await partitions
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(partition => partitionGuids.Contains(partition.Guid))
+            .Where(partition =>
+                parentPartitionGuid == null ||
+                partition.ParentPartitionGuid == parentPartitionGuid)
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
             .Select(PartitionMappings.InformationProjection)
@@ -68,16 +97,16 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         FormattableString query = $"""
             WITH PartitionTree AS
             (
-             SELECT [Guid], [ParentPartitionGuid]
-             FROM [Partitions]
-             WHERE [Guid] = {partitionGuid}
+                SELECT [Guid], [ParentPartitionGuid]
+                FROM [Partitions]
+                WHERE [Guid] = {partitionGuid}
 
-             UNION ALL
+                UNION ALL
 
-             SELECT child.[Guid], child.[ParentPartitionGuid]
-             FROM [Partitions] AS child
-             INNER JOIN PartitionTree AS parent
-             ON child.[ParentPartitionGuid] = parent.[Guid]
+                SELECT child.[Guid], child.[ParentPartitionGuid]
+                FROM [Partitions] AS child
+                INNER JOIN PartitionTree AS parent
+                    ON child.[ParentPartitionGuid] = parent.[Guid]
             )
             SELECT [Guid]
             FROM PartitionTree
@@ -96,9 +125,9 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-            IReadOnlyCollection<Guid> partitionGuids,
-            bool includeSelf = true,
-            CancellationToken cancellationToken = default)
+        IReadOnlyCollection<Guid> partitionGuids,
+        bool includeRoots = true,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partitionGuids);
 
@@ -112,10 +141,10 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         foreach (var partitionGuid in partitionGuids.Distinct())
         {
             var descendants = await GetDescendantGuids(
-                    partitionGuid,
-                    includeSelf,
-                    cancellationToken
-                    );
+                partitionGuid,
+                includeRoots,
+                cancellationToken
+            );
 
             result.UnionWith(descendants);
         }

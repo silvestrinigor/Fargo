@@ -80,7 +80,59 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         if (userGuid.HasValue)
         {
             query = query.Where(userGroup =>
-                userGroup.Users.Any(g => g.Guid == userGuid));
+                userGroup.Users.Any(user => user.Guid == userGuid.Value));
+        }
+
+        return await query
+            .OrderBy(userGroup => userGroup.Guid)
+            .WithPagination(pagination)
+            .Select(UserGroupMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<UserGroupInformation?> GetInfoByGuidInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return null;
+        }
+
+        IQueryable<UserGroup> query = userGroups
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
+
+        return await query
+            .Where(userGroup => userGroup.Guid == entityGuid)
+            .Where(userGroup => userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(UserGroupMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<UserGroupInformation>> GetManyInfoInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? userGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        IQueryable<UserGroup> query = userGroups
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(userGroup => userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+
+        if (userGuid.HasValue)
+        {
+            query = query.Where(userGroup =>
+                userGroup.Users.Any(user => user.Guid == userGuid.Value));
         }
 
         return await query

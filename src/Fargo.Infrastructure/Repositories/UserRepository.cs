@@ -29,8 +29,8 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         return await users
             .Include(user => user.Permissions)
             .Include(user => user.UserGroups)
-            .Include(u => u.PartitionAccesses)
-            .Include(u => u.Partitions)
+            .Include(user => user.PartitionAccesses)
+            .Include(user => user.Partitions)
             .Where(user => user.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
     }
@@ -86,6 +86,51 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         return await users
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .OrderBy(user => user.Guid)
+            .WithPagination(pagination)
+            .Select(UserMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<UserInformation?> GetInfoByGuidInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return null;
+        }
+
+        IQueryable<User> query = users
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
+
+        return await query
+            .Where(user => user.Guid == entityGuid)
+            .Where(user => user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(UserMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        IQueryable<User> query = users
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(user => user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+
+        return await query
             .OrderBy(user => user.Guid)
             .WithPagination(pagination)
             .Select(UserMappings.InformationProjection)

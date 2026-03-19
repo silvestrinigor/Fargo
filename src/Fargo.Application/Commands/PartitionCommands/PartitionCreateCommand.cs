@@ -5,7 +5,6 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
-using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;

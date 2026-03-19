@@ -161,7 +161,7 @@ public class PartitionService(
             var descendantPartitionGuids =
                 await partitionRepository.GetDescendantGuids(
                     accessibleRootPartitionGuid,
-                    includeSelf: true,
+                    true,
                     cancellationToken
                 );
 
@@ -297,7 +297,7 @@ public class PartitionService(
         var descendantPartitionGuids =
             await partitionRepository.GetDescendantGuids(
                 memberPartitionGuid,
-                includeSelf: false,
+                false,
                 cancellationToken
             );
 

@@ -110,6 +110,28 @@ public interface IUserRepository
     );
 
     /// <summary>
+    /// Gets lightweight information about a user by its unique identifier,
+    /// only if the user has access to at least one of the specified partitions.
+    /// </summary>
+    Task<UserInformation?> GetInfoByGuidInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Gets a paginated collection of user information projections,
+    /// filtered to users that have access to at least one of the specified partitions.
+    /// </summary>
+    Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new user to the persistence context.
     /// </summary>
     /// <param name="user">The user to add.</param>

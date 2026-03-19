@@ -65,4 +65,55 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
             .Select(ItemMappings.InformationProjection)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<ItemInformation?> GetInfoByGuidInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return null;
+        }
+
+        var query = items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking();
+
+        return await query
+            .Where(item => item.Guid == entityGuid)
+            .Where(item => item.Article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(ItemMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<ItemInformation>> GetManyInfoInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (partitionGuids == null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        IQueryable<Item> query = items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(item => item.Article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+
+        if (articleGuid.HasValue)
+        {
+            query = query.Where(item => item.Article.Guid == articleGuid.Value);
+        }
+
+        return await query
+            .OrderBy(item => item.Guid)
+            .WithPagination(pagination)
+            .Select(ItemMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
 }

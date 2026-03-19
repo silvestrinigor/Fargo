@@ -14,7 +14,7 @@ namespace Fargo.Domain.Repositories;
 public interface IPartitionRepository
 {
     /// <summary>
-    /// Gets a partition by its unique identifier.
+    /// Retrieves a partition by its unique identifier.
     /// </summary>
     /// <param name="entityGuid">The unique identifier of the partition.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
@@ -27,7 +27,7 @@ public interface IPartitionRepository
     );
 
     /// <summary>
-    /// Gets lightweight information about a partition by its unique identifier.
+    /// Retrieves lightweight information about a partition by its unique identifier.
     /// </summary>
     /// <param name="entityGuid">The unique identifier of the partition.</param>
     /// <param name="asOfDateTime">
@@ -47,7 +47,7 @@ public interface IPartitionRepository
     );
 
     /// <summary>
-    /// Gets a paginated collection of partition information projections.
+    /// Retrieves a paginated collection of partition information projections.
     /// </summary>
     /// <param name="pagination">
     /// The pagination configuration used to control the number of returned results
@@ -55,7 +55,7 @@ public interface IPartitionRepository
     /// </param>
     /// <param name="parentPartitionGuid">
     /// Optional filter used to retrieve only partitions that belong to a specific
-    /// parent partition. When provided, only child partitions of the specified
+    /// parent partition. When provided, only direct child partitions of the specified
     /// parent are returned.
     /// </param>
     /// <param name="asOfDateTime">
@@ -75,12 +75,47 @@ public interface IPartitionRepository
     );
 
     /// <summary>
-    /// Gets the unique identifiers of all descendant partitions of a given partition.
+    /// Retrieves a paginated collection of partition information projections
+    /// by their unique identifiers.
+    /// </summary>
+    /// <param name="partitionGuids">
+    /// The unique identifiers of the partitions to retrieve.
+    /// </param>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="parentPartitionGuid">
+    /// Optional filter used to restrict the result to partitions that belong to
+    /// a specific parent partition.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the partitions
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A read-only collection of <see cref="PartitionInformation"/> objects
+    /// matching the specified identifiers and filters.
+    /// </returns>
+    Task<IReadOnlyCollection<PartitionInformation>> GetManyInfoByGuids(
+        IReadOnlyCollection<Guid> partitionGuids,
+        Pagination pagination,
+        Guid? parentPartitionGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Retrieves the unique identifiers of all descendant partitions of a given partition.
     /// </summary>
     /// <param name="partitionGuid">
     /// The unique identifier of the root partition whose descendants should be retrieved.
     /// </param>
-    /// <param name="includeSelf">
+    /// <param name="includeRoot">
     /// Indicates whether the root partition itself should also be included in the result.
     /// </param>
     /// <param name="cancellationToken">
@@ -91,13 +126,13 @@ public interface IPartitionRepository
     /// partitions, optionally including the root partition itself.
     /// </returns>
     Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-            Guid partitionGuid,
-            bool includeSelf = true,
-            CancellationToken cancellationToken = default
-            );
+        Guid partitionGuid,
+        bool includeRoot = true,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
-    /// Gets the unique identifiers of all descendant partitions of the specified root partitions.
+    /// Retrieves the unique identifiers of all descendant partitions of the specified root partitions.
     /// </summary>
     /// <param name="partitionGuids">
     /// The unique identifiers of the root partitions whose descendants should be retrieved.
@@ -113,10 +148,10 @@ public interface IPartitionRepository
     /// partitions of the specified roots, optionally including the roots themselves.
     /// </returns>
     Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-            IReadOnlyCollection<Guid> partitionGuids,
-            bool includeRoots = true,
-            CancellationToken cancellationToken = default
-            );
+        IReadOnlyCollection<Guid> partitionGuids,
+        bool includeRoots = true,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Adds a new partition to the persistence context.
