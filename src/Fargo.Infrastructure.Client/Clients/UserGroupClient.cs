@@ -11,28 +11,44 @@ public sealed class UserGroupClient(HttpClient http)
     public Task<UserGroupInformation?> GetSingleAsync(
         Guid userGroupGuid,
         DateTimeOffset? temporalAsOf = null,
-        CancellationToken ct = default)
-        => GetAsync<UserGroupInformation>(
-            $"/user-groups/{userGroupGuid}?temporalAsOf={temporalAsOf}", ct);
+        CancellationToken cancellationToken = default)
+    {
+        var uri = $"/user-groups/{userGroupGuid}?temporalAsOf={temporalAsOf}";
+        return GetAsync<UserGroupInformation?>(uri, cancellationToken);
+    }
 
     public Task<IReadOnlyCollection<UserGroupInformation>> GetManyAsync(
         Guid? userGuid,
         DateTimeOffset? temporalAsOf = null,
         Page? page = null,
         Limit? limit = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        var uri = $"/user-groups?userGuid={userGuid}&temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
+        var uri =
+            $"/user-groups?userGuid={userGuid}&temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
 
-        return GetCollectionAsync<UserGroupInformation>(uri, ct);
+        return GetCollectionAsync<UserGroupInformation>(uri, cancellationToken);
     }
 
-    public Task<Guid> CreateAsync(UserGroupCreateModel model, CancellationToken ct = default)
-        => PostAsync<Guid>("/user-groups", model, ct);
+    public Task<Guid> CreateAsync(
+        UserGroupCreateModel model,
+        CancellationToken cancellationToken = default)
+    {
+        return PostAsync<Guid>("/user-groups", model, cancellationToken);
+    }
 
-    public Task UpdateAsync(Guid userGroupGuid, UserGroupUpdateModel model, CancellationToken ct = default)
-        => PatchAsync($"/user-groups/{userGroupGuid}", model, ct);
+    public Task UpdateAsync(
+        Guid userGroupGuid,
+        UserGroupUpdateModel model,
+        CancellationToken cancellationToken = default)
+    {
+        return PatchAsync($"/user-groups/{userGroupGuid}", model, cancellationToken);
+    }
 
-    public Task DeleteAsync(Guid userGroupGuid, CancellationToken ct = default)
-        => DeleteAsync($"/user-groups/{userGroupGuid}", ct);
+    public Task DeleteAsync(
+        Guid userGroupGuid,
+        CancellationToken cancellationToken = default)
+    {
+        return base.DeleteAsync($"/user-groups/{userGroupGuid}", cancellationToken);
+    }
 }

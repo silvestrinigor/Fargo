@@ -11,28 +11,44 @@ public sealed class ItemClient(HttpClient http)
     public Task<ItemInformation?> GetSingleAsync(
         Guid itemGuid,
         DateTimeOffset? temporalAsOf = null,
-        CancellationToken ct = default)
-        => GetAsync<ItemInformation>($"/items/{itemGuid}?temporalAsOf={temporalAsOf}", ct);
+        CancellationToken cancellationToken = default)
+    {
+        var uri = $"/items/{itemGuid}?temporalAsOf={temporalAsOf}";
+        return GetAsync<ItemInformation?>(uri, cancellationToken);
+    }
 
     public Task<IReadOnlyCollection<ItemInformation>> GetManyAsync(
         Guid? articleGuid = null,
         DateTimeOffset? temporalAsOf = null,
         Page? page = null,
         Limit? limit = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var uri =
             $"/items?articleGuid={articleGuid}&temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
 
-        return GetCollectionAsync<ItemInformation>(uri, ct);
+        return GetCollectionAsync<ItemInformation>(uri, cancellationToken);
     }
 
-    public Task<Guid> CreateAsync(ItemCreateModel model, CancellationToken ct = default)
-        => PostAsync<Guid>("/items", model, ct);
+    public Task<Guid> CreateAsync(
+        ItemCreateModel model,
+        CancellationToken cancellationToken = default)
+    {
+        return PostAsync<Guid>("/items", model, cancellationToken);
+    }
 
-    public Task UpdateAsync(Guid itemGuid, ItemUpdateModel model, CancellationToken ct = default)
-        => PatchAsync($"/items/{itemGuid}", model, ct);
+    public Task UpdateAsync(
+        Guid itemGuid,
+        ItemUpdateModel model,
+        CancellationToken cancellationToken = default)
+    {
+        return PatchAsync($"/items/{itemGuid}", model, cancellationToken);
+    }
 
-    public Task DeleteAsync(Guid itemGuid, CancellationToken ct = default)
-        => DeleteAsync($"/items/{itemGuid}", ct);
+    public Task DeleteAsync(
+        Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        return base.DeleteAsync($"/items/{itemGuid}", cancellationToken);
+    }
 }

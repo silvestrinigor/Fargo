@@ -8,15 +8,37 @@ namespace Fargo.Infrastructure.Client.Clients;
 public sealed class AuthenticationClient(HttpClient http)
     : FargoHttpClientBase(http), IAuthenticationClient
 {
-    public Task<AuthResult> LoginAsync(LoginCommand command, CancellationToken ct = default)
-        => PostAsync<AuthResult>("/authentication/login", command, ct);
+    public Task<AuthResult> LoginAsync(
+        LoginCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        return PostAsync<AuthResult>(
+            "/authentication/login",
+            command,
+            cancellationToken);
+    }
 
-    public Task LogoutAsync(LogoutCommand command, CancellationToken ct = default)
-        => PostAsync("/authentication/logout", command, ct);
+    public Task LogoutAsync(
+        LogoutCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        return PostAsync("/authentication/logout", command, cancellationToken);
+    }
 
-    public Task<AuthResult> RefreshAsync(RefreshCommand command, CancellationToken ct = default)
-        => PostAsync<AuthResult>("/authentication/refresh", command, ct);
+    public Task<AuthResult> RefreshAsync(
+        RefreshCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        return PostAsync<AuthResult>(
+            "/authentication/refresh",
+            command,
+            cancellationToken);
+    }
 
-    public Task ChangePasswordAsync(PasswordChangeCommand command, CancellationToken ct = default)
-        => PostAsync("/authentication/password", command, ct);
+    public Task ChangePasswordAsync(
+        PasswordChangeCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        return PutAsync("/authentication/password", command, cancellationToken);
+    }
 }

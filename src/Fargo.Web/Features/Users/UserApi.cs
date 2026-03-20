@@ -3,7 +3,6 @@ using Fargo.Domain.ValueObjects;
 using Fargo.Infrastructure.Client.Clients.Serialization;
 using Fargo.Web.Api;
 using System.Net;
-using System.Net.Http.Json;
 
 namespace Fargo.Web.Features.Users;
 

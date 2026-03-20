@@ -7,16 +7,32 @@ namespace Fargo.Infrastructure.Client.Extensions;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddFargoHttpApiClient(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        string baseUrl = "http://apiservice",
+        Action<IHttpClientBuilder>? configureClient = null)
     {
-        var baseUrl = "http://apiservice";
-
-        services.AddHttpClient<IAuthenticationClient, AuthenticationClient>(c => c.BaseAddress = new Uri(baseUrl));
-        services.AddHttpClient<IArticleClient, ArticleClient>(c => c.BaseAddress = new Uri(baseUrl));
-        services.AddHttpClient<IItemClient, ItemClient>(c => c.BaseAddress = new Uri(baseUrl));
-        services.AddHttpClient<IUserClient, UserClient>(c => c.BaseAddress = new Uri(baseUrl));
-        services.AddHttpClient<IUserGroupClient, UserGroupClient>(c => c.BaseAddress = new Uri(baseUrl));
+        AddClient<IArticleClient, ArticleClient>(services, baseUrl, configureClient);
+        AddClient<IAuthenticationClient, AuthenticationClient>(services, baseUrl, configureClient);
+        AddClient<IItemClient, ItemClient>(services, baseUrl, configureClient);
+        AddClient<IPartitionClient, PartitionClient>(services, baseUrl, configureClient);
+        AddClient<IUserClient, UserClient>(services, baseUrl, configureClient);
+        AddClient<IUserGroupClient, UserGroupClient>(services, baseUrl, configureClient);
 
         return services;
+    }
+
+    private static void AddClient<TContract, TImplementation>(
+        IServiceCollection services,
+        string baseUrl,
+        Action<IHttpClientBuilder>? configureClient)
+        where TContract : class
+        where TImplementation : class, TContract
+    {
+        var builder = services.AddHttpClient<TContract, TImplementation>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+        });
+
+        configureClient?.Invoke(builder);
     }
 }

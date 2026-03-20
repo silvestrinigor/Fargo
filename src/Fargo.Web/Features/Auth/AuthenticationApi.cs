@@ -2,7 +2,6 @@ using Fargo.Application.Commands.AuthCommands;
 using Fargo.Application.Models.AuthModels;
 using Fargo.Infrastructure.Client.Clients.Serialization;
 using Fargo.Web.Api;
-using System.Net.Http.Json;
 
 namespace Fargo.Web.Features.Auth;
 

@@ -9,80 +9,120 @@ namespace Fargo.Infrastructure.Client.Http;
 public abstract class FargoHttpClientBase(HttpClient http)
 {
     protected readonly HttpClient Http = http;
-    protected static readonly JsonSerializerOptions JsonOptions = FargoJsonSerializerOptions.Default;
 
-    protected async Task<T?> GetAsync<T>(string uri, CancellationToken ct)
+    protected static readonly JsonSerializerOptions JsonOptions =
+        FargoJsonSerializerOptions.Default;
+
+    protected async Task<T?> GetAsync<T>(
+        string uri,
+        CancellationToken cancellationToken = default)
     {
-        var response = await Http.GetAsync(uri, ct);
+        using var response = await Http.GetAsync(uri, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             return default;
         }
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
 
-        return await response.Content.ReadFromJsonAsync<T>(JsonOptions, ct);
+        return await response.Content.ReadFromJsonAsync<T>(
+            JsonOptions,
+            cancellationToken);
     }
 
-    protected async Task<IReadOnlyCollection<T>> GetCollectionAsync<T>(string uri, CancellationToken ct)
+    protected async Task<IReadOnlyCollection<T>> GetCollectionAsync<T>(
+        string uri,
+        CancellationToken cancellationToken = default)
     {
-        var response = await Http.GetAsync(uri, ct);
+        using var response = await Http.GetAsync(uri, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
             return [];
         }
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
 
-        return await response.Content.ReadFromJsonAsync<IReadOnlyCollection<T>>(JsonOptions, ct)
-            ?? [];
+        return await response.Content.ReadFromJsonAsync<IReadOnlyCollection<T>>(
+                   JsonOptions,
+                   cancellationToken)
+               ?? [];
     }
 
-    protected async Task<T> PostAsync<T>(string uri, object body, CancellationToken ct)
+    protected async Task<TResponse> PostAsync<TResponse>(
+        string uri,
+        object body,
+        CancellationToken cancellationToken = default)
     {
-        var response = await Http.PostAsJsonAsync(uri, body, JsonOptions, ct);
+        using var response = await Http.PostAsJsonAsync(
+            uri,
+            body,
+            JsonOptions,
+            cancellationToken);
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
 
-        return (await response.Content.ReadFromJsonAsync<T>(JsonOptions, ct))!;
+        return (await response.Content.ReadFromJsonAsync<TResponse>(
+            JsonOptions,
+            cancellationToken))!;
     }
 
-    protected async Task PostAsync(string uri, object body, CancellationToken ct)
+    protected async Task PostAsync(
+        string uri,
+        object body,
+        CancellationToken cancellationToken = default)
     {
-        var response = await Http.PostAsJsonAsync(uri, body, JsonOptions, ct);
+        using var response = await Http.PostAsJsonAsync(
+            uri,
+            body,
+            JsonOptions,
+            cancellationToken);
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
     }
 
-    protected async Task PutAsync(string uri, object body, CancellationToken ct)
+    protected async Task PutAsync(
+        string uri,
+        object body,
+        CancellationToken cancellationToken = default)
     {
-        var response = await Http.PutAsJsonAsync(uri, body, JsonOptions, ct);
+        using var response = await Http.PutAsJsonAsync(
+            uri,
+            body,
+            JsonOptions,
+            cancellationToken);
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
     }
 
-    protected async Task PatchAsync(string uri, object body, CancellationToken ct)
+    protected async Task PatchAsync(
+        string uri,
+        object body,
+        CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Patch, uri)
+        using var request = new HttpRequestMessage(HttpMethod.Patch, uri)
         {
             Content = JsonContent.Create(body, options: JsonOptions)
         };
 
-        var response = await Http.SendAsync(request, ct);
+        using var response = await Http.SendAsync(request, cancellationToken);
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
     }
 
-    protected async Task DeleteAsync(string uri, CancellationToken ct)
+    protected async Task DeleteAsync(
+        string uri,
+        CancellationToken cancellationToken = default)
     {
-        var response = await Http.DeleteAsync(uri, ct);
+        using var response = await Http.DeleteAsync(uri, cancellationToken);
 
-        await EnsureSuccess(response, ct);
+        await EnsureSuccessAsync(response, cancellationToken);
     }
 
-    private static async Task EnsureSuccess(HttpResponseMessage response, CancellationToken ct)
+    private static async Task EnsureSuccessAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
     {
         if (response.IsSuccessStatusCode)
         {
@@ -93,7 +133,8 @@ public abstract class FargoHttpClientBase(HttpClient http)
 
         try
         {
-            problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: ct);
+            problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(
+                cancellationToken: cancellationToken);
         }
         catch
         {

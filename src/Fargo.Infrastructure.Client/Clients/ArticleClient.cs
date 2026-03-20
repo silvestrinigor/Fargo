@@ -11,28 +11,41 @@ public sealed class ArticleClient(HttpClient http)
     public Task<ArticleInformation?> GetSingleAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var uri = $"/articles/{articleGuid}?temporalAsOf={temporalAsOf}";
-        return GetAsync<ArticleInformation>(uri, ct);
+        return GetAsync<ArticleInformation?>(uri, cancellationToken);
     }
 
     public Task<IReadOnlyCollection<ArticleInformation>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         Page? page = null,
         Limit? limit = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         var uri = $"/articles?temporalAsOf={temporalAsOf}&page={page}&limit={limit}";
-        return GetCollectionAsync<ArticleInformation>(uri, ct);
+        return GetCollectionAsync<ArticleInformation>(uri, cancellationToken);
     }
 
-    public Task<Guid> CreateAsync(ArticleCreateModel model, CancellationToken ct = default)
-        => PostAsync<Guid>("/articles", model, ct);
+    public Task<Guid> CreateAsync(
+        ArticleCreateModel model,
+        CancellationToken cancellationToken = default)
+    {
+        return PostAsync<Guid>("/articles", model, cancellationToken);
+    }
 
-    public Task UpdateAsync(Guid articleGuid, ArticleUpdateModel model, CancellationToken ct = default)
-        => PatchAsync($"/articles/{articleGuid}", model, ct);
+    public Task UpdateAsync(
+        Guid articleGuid,
+        ArticleUpdateModel model,
+        CancellationToken cancellationToken = default)
+    {
+        return PatchAsync($"/articles/{articleGuid}", model, cancellationToken);
+    }
 
-    public Task DeleteAsync(Guid articleGuid, CancellationToken ct = default)
-        => DeleteAsync($"/articles/{articleGuid}", ct);
+    public Task DeleteAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        return base.DeleteAsync($"/articles/{articleGuid}", cancellationToken);
+    }
 }
