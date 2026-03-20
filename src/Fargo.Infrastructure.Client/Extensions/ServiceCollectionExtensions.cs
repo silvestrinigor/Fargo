@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
         AddClient<IPartitionClient, PartitionClient>(services, baseUrl, configureClient);
         AddClient<IUserClient, UserClient>(services, baseUrl, configureClient);
         AddClient<IUserGroupClient, UserGroupClient>(services, baseUrl, configureClient);
-
+        AddClient<ITreeClient, TreeClient>(services, baseUrl, configureClient);
         return services;
     }
 
