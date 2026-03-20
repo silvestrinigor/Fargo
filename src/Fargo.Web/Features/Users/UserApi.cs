@@ -1,70 +1,38 @@
 using Fargo.Application.Models.UserModels;
 using Fargo.Domain.ValueObjects;
-using Fargo.Infrastructure.Client.Clients.Serialization;
-using Fargo.Web.Api;
-using System.Net;
+using Fargo.HttpApi.Client.Contracts;
 
 namespace Fargo.Web.Features.Users;
 
-public sealed class UserApi(IHttpClientFactory httpClientFactory)
+public sealed class UserApi(IUserClient userClient)
 {
-    private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
-
-    public async Task<IReadOnlyList<UserInformation>> GetManyAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<UserInformation>> GetManyAsync(
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var response = await client.GetAsync("/users", cancellationToken);
-
-        if (response.StatusCode == HttpStatusCode.NoContent)
-        {
-            return [];
-        }
-
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-
-        return await response.Content.ReadFromJsonAsync<IReadOnlyList<UserInformation>>(FargoJsonSerializerOptions.Default, cancellationToken)
-            ?? [];
+        var users = await userClient.GetManyAsync(cancellationToken: cancellationToken);
+        return [.. users];
     }
 
-    public async Task<UserInformation?> GetSingleAsync(Guid userGuid, CancellationToken cancellationToken = default)
+    public Task<UserInformation?> GetSingleAsync(
+        Guid userGuid,
+        CancellationToken cancellationToken = default) =>
+        userClient.GetSingleAsync(userGuid, cancellationToken: cancellationToken);
+
+    public async Task CreateAsync(
+        UserCreateModel model,
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var response = await client.GetAsync($"/users/{userGuid}", cancellationToken);
-
-        if (response.StatusCode == HttpStatusCode.NotFound)
-        {
-            return null;
-        }
-
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-
-        return await response.Content.ReadFromJsonAsync<UserInformation>(FargoJsonSerializerOptions.Default, cancellationToken);
+        await userClient.CreateAsync(model, cancellationToken);
     }
 
-    public async Task CreateAsync(UserCreateModel model, CancellationToken cancellationToken = default)
-    {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var response = await client.PostAsJsonAsync("/users", model, FargoJsonSerializerOptions.Default, cancellationToken);
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-    }
+    public Task UpdateAsync(
+        Guid userGuid,
+        UserUpdateModel model,
+        CancellationToken cancellationToken = default) =>
+        userClient.UpdateAsync(userGuid, model, cancellationToken);
 
-    public async Task UpdateAsync(Guid userGuid, UserUpdateModel model, CancellationToken cancellationToken = default)
-    {
-        var client = httpClientFactory.CreateClient("FargoApi");
-
-        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/users/{userGuid}")
-        {
-            Content = JsonContent.Create(model, options: FargoJsonSerializerOptions.Default)
-        };
-
-        var response = await client.SendAsync(request, cancellationToken);
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-    }
-
-    public async Task DeleteAsync(Guid userGuid, CancellationToken cancellationToken = default)
-    {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var response = await client.DeleteAsync($"/users/{userGuid}", cancellationToken);
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-    }
+    public Task DeleteAsync(
+        Guid userGuid,
+        CancellationToken cancellationToken = default) =>
+        userClient.DeleteAsync(userGuid, cancellationToken);
 }

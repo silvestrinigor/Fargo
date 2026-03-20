@@ -1,84 +1,70 @@
 using Fargo.Application.Commands.PartitionCommands;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Domain.ValueObjects;
-using Fargo.Infrastructure.Client.Clients.Serialization;
-using Fargo.Web.Api;
-using System.Net;
+using Fargo.HttpApi.Client.Contracts;
 
 namespace Fargo.Web.Features.Partitions;
 
-public sealed class PartitionApi(IHttpClientFactory httpClientFactory)
+public sealed class PartitionApi(IPartitionClient partitionClient)
 {
-    private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
-
-    public async Task<IReadOnlyList<PartitionSummary>> GetChildrenAsync(Guid? parentPartitionGuid, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PartitionSummary>> GetChildrenAsync(
+        Guid? parentPartitionGuid,
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var uri = parentPartitionGuid.HasValue
-            ? $"/partitions?parentPartitionGuid={parentPartitionGuid.Value}"
-            : "/partitions";
+        var partitions = await partitionClient.GetManyAsync(
+            parentPartitionGuid: parentPartitionGuid,
+            cancellationToken: cancellationToken);
 
-        var response = await client.GetAsync(uri, cancellationToken);
-
-        if (response.StatusCode == HttpStatusCode.NoContent)
-        {
-            return [];
-        }
-
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-
-        return await response.Content.ReadFromJsonAsync<IReadOnlyList<PartitionSummary>>(FargoJsonSerializerOptions.Default, cancellationToken)
-            ?? [];
+        return [.. partitions.Select(ToSummary)];
     }
 
-    public async Task<PartitionSummary?> GetSingleAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
+    public async Task<PartitionSummary?> GetSingleAsync(
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var response = await client.GetAsync($"/partitions/{partitionGuid}", cancellationToken);
+        var partition = await partitionClient.GetSingleAsync(
+            partitionGuid,
+            cancellationToken: cancellationToken);
 
-        if (response.StatusCode == HttpStatusCode.NotFound)
-        {
-            return null;
-        }
-
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-
-        return await response.Content.ReadFromJsonAsync<PartitionSummary>(FargoJsonSerializerOptions.Default, cancellationToken);
+        return partition is null ? null : ToSummary(partition);
     }
 
-    public async Task<Guid> CreateAsync(string name, string? description, Guid? parentPartitionGuid, CancellationToken cancellationToken = default)
+    public Task<Guid> CreateAsync(
+        string name,
+        string? description,
+        Guid? parentPartitionGuid,
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("FargoApi");
         var command = new PartitionCreateCommand(
             new Name(name),
             string.IsNullOrWhiteSpace(description) ? null : new Description(description),
             parentPartitionGuid);
 
-        var response = await client.PostAsJsonAsync("/partitions", command, FargoJsonSerializerOptions.Default, cancellationToken);
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-
-        return (await response.Content.ReadFromJsonAsync<Guid>(FargoJsonSerializerOptions.Default, cancellationToken));
+        return partitionClient.CreateAsync(command, cancellationToken);
     }
 
-    public async Task UpdateAsync(Guid partitionGuid, string? description, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(
+        Guid partitionGuid,
+        string? description,
+        CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient("FargoApi");
         var model = new PartitionUpdateModel(
             string.IsNullOrWhiteSpace(description) ? null : new Description(description));
 
-        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/partitions/{partitionGuid}")
-        {
-            Content = JsonContent.Create(model, options: FargoJsonSerializerOptions.Default)
-        };
-
-        var response = await client.SendAsync(request, cancellationToken);
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
+        return partitionClient.UpdateAsync(partitionGuid, model, cancellationToken);
     }
 
-    public async Task DeleteAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
-    {
-        var client = httpClientFactory.CreateClient("FargoApi");
-        var response = await client.DeleteAsync($"/partitions/{partitionGuid}", cancellationToken);
-        await FargoApiErrors.EnsureSuccessAsync(response, cancellationToken);
-    }
+    public Task DeleteAsync(
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default) =>
+        partitionClient.DeleteAsync(partitionGuid, cancellationToken);
+
+    private static PartitionSummary ToSummary(PartitionInformation partition) =>
+        new(
+            partition.Guid,
+            partition.Name.Value,
+            partition.Description.Value,
+            partition.ParentPartitionGuid,
+            partition.IsActive
+        );
 }
