@@ -105,6 +105,8 @@ public sealed class InitializeSystemCommandHandler(
 
         admin.UserGroups.Add(administratorsGroup);
 
+        admin.Partitions.Add(globalPartition);
+
         foreach (var action in actions)
         {
             admin.AddPermission(action);

@@ -7,20 +7,20 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.TreeQueries;
 
-public sealed record PartitionTreeQuery(
-    Guid? ParentPartitionGuid = null,
+public sealed record PartitionSecurityTreeQuery(
+    Guid? PartitionGuid = null,
     Pagination? Pagination = null)
     : IQuery<IReadOnlyCollection<TreeNode>>;
 
-public sealed class PartitionTreeQueryHandler(
-    IPartitionTreeRepository partitionTreeRepository,
+public sealed class PartitionSecurityTreeQueryHandler(
+    IPartitionSecurityTreeRepository partitionSecurityTreeRepository,
     IPartitionRepository partitionRepository,
     IUserRepository userRepository,
     ICurrentUser currentUser)
-    : IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<TreeNode>>
+    : IQueryHandler<PartitionSecurityTreeQuery, IReadOnlyCollection<TreeNode>>
 {
     public async Task<IReadOnlyCollection<TreeNode>> Handle(
-        PartitionTreeQuery query,
+        PartitionSecurityTreeQuery query,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
@@ -32,10 +32,10 @@ public sealed class PartitionTreeQueryHandler(
             includeRoots: true,
             cancellationToken);
 
-        return await partitionTreeRepository.GetMembers(
+        return await partitionSecurityTreeRepository.GetMembers(
             query.Pagination ?? Pagination.FirstPage20Items,
             accessiblePartitionGuids,
-            query.ParentPartitionGuid,
+            query.PartitionGuid,
             cancellationToken);
     }
 }

@@ -3,11 +3,11 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Repositories;
 
-public interface IPartitionTreeRepository
+public interface IPartitionSecurityTreeRepository
 {
     Task<IReadOnlyCollection<TreeNode>> GetMembers(
         Pagination pagination,
         IReadOnlyCollection<Guid> accessiblePartitionGuids,
-        Guid? parentPartitionGuid,
+        Guid? partitionGuid,
         CancellationToken cancellationToken = default);
 }

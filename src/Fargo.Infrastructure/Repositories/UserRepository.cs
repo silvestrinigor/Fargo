@@ -40,6 +40,10 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         CancellationToken cancellationToken = default)
     {
         return await users
+            .Include(user => user.Permissions)
+            .Include(user => user.UserGroups)
+            .Include(user => user.PartitionAccesses)
+            .Include(user => user.Partitions)
             .Where(user => user.Nameid == nameid)
             .SingleOrDefaultAsync(cancellationToken);
     }
