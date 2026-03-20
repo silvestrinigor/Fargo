@@ -1,8 +1,16 @@
-﻿
-
-<Router AppAssembly="typeof(Program).Assembly">
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <PageTitle>Not found | Fargo</PageTitle>
+            <div class="page-card">
+                <h1>Page not found</h1>
+                <p>The route you tried to open does not exist in the current front-end starter.</p>
+                <a class="link-button" href="/workspace">Go to workspace</a>
+            </div>
+        </LayoutView>
+    </NotFound>
 </Router>

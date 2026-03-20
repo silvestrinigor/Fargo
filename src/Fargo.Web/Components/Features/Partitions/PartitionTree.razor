@@ -1,0 +1,119 @@
+@inject PartitionApi PartitionApi
+@inject NavigationManager Navigation
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="error-banner">@errorMessage</div>
+}
+else if (isLoading)
+{
+    <div class="muted-text">Loading partition tree...</div>
+}
+else if (rootNodes.Count == 0)
+{
+    <div class="muted-text">No root partitions available for the current user.</div>
+}
+else
+{
+    <ul class="tree-list">
+        @foreach (var node in rootNodes.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            <PartitionTreeNodeView Node="node" SelectedGuid="selectedPartitionGuid" OnToggle="ToggleAsync" OnSelect="Select" />
+        }
+    </ul>
+}
+
+@code {
+    private readonly List<PartitionTreeNode> rootNodes = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+    private Guid? selectedPartitionGuid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        selectedPartitionGuid = ReadSelectedPartitionGuid();
+        await LoadRootsAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        selectedPartitionGuid = ReadSelectedPartitionGuid();
+    }
+
+    private async Task LoadRootsAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var roots = await PartitionApi.GetChildrenAsync(null);
+            rootNodes.Clear();
+            rootNodes.AddRange(roots.Select(PartitionTreeNode.FromSummary));
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? "Failed to load partitions."
+                : ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ToggleAsync(PartitionTreeNode node)
+    {
+        node.IsExpanded = !node.IsExpanded;
+
+        if (!node.IsExpanded || node.ChildrenLoaded)
+        {
+            return;
+        }
+
+        node.IsLoadingChildren = true;
+        errorMessage = null;
+
+        try
+        {
+            var children = await PartitionApi.GetChildrenAsync(node.Guid);
+            node.Children.Clear();
+            node.Children.AddRange(children.Select(PartitionTreeNode.FromSummary));
+            node.ChildrenLoaded = true;
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? "Failed to load child partitions."
+                : ex.Message;
+        }
+        finally
+        {
+            node.IsLoadingChildren = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void Select(Guid partitionGuid)
+    {
+        selectedPartitionGuid = partitionGuid;
+        Navigation.NavigateTo($"/workspace/partitions/{partitionGuid}");
+    }
+
+    private Guid? ReadSelectedPartitionGuid()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length >= 3
+            && parts[0].Equals("workspace", StringComparison.OrdinalIgnoreCase)
+            && parts[1].Equals("partitions", StringComparison.OrdinalIgnoreCase)
+            && Guid.TryParse(parts[2], out var parsed))
+        {
+            return parsed;
+        }
+
+        return null;
+    }
+}

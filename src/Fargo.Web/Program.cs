@@ -1,6 +1,9 @@
-using Fargo.Infrastructure.Client.Extensions;
 using Fargo.ServiceDefaults;
+using Fargo.Web.Api;
 using Fargo.Web.Components;
+using Fargo.Web.Features.Auth;
+using Fargo.Web.Features.Partitions;
+using Fargo.Web.Features.Users;
 using Fargo.Web.Security;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -8,36 +11,42 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddFluentUIComponents();
-
-builder.Services.AddFargoHttpApiClient();
-
 builder.Services.AddAuthorizationCore();
 
 builder.Services.AddScoped<IClientSessionStore, BrowserClientSessionStore>();
+builder.Services.AddScoped<ClientSessionAccessor>();
+builder.Services.AddScoped<FargoApiAuthorizationHandler>();
+
+builder.Services
+    .AddHttpClient("FargoApi", client =>
+    {
+        client.BaseAddress = new Uri("http://apiservice");
+    })
+    .AddHttpMessageHandler<FargoApiAuthorizationHandler>();
+
+builder.Services.AddScoped<AuthenticationApi>();
+builder.Services.AddScoped<PartitionApi>();
+builder.Services.AddScoped<UserApi>();
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAntiforgery();
-
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

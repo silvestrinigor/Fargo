@@ -1,145 +1,133 @@
 @page "/login"
+@layout LoginLayout
 @rendermode InteractiveServer
-@using System.ComponentModel.DataAnnotations
-@using Fargo.Application.Models.AuthModels
 @using Fargo.Application.Commands.AuthCommands
-@using Fargo.HttpApi.Client.Contracts
-@using Fargo.Web.Security
-@using Microsoft.AspNetCore.Components.Authorization
-@inject IAuthenticationClient AuthenticationClient
+@using Fargo.Application.Models.AuthModels
+@using Fargo.Domain.ValueObjects
+@inject AuthenticationApi AuthenticationApi
+@inject IClientSessionStore SessionStore
+@inject ClientSessionAccessor SessionAccessor
 @inject NavigationManager Navigation
 
 <PageTitle>Login | Fargo</PageTitle>
 
 <div class="login-page">
-    <div class="login-shell">
-        <section class="login-hero">
-            <div class="hero-badge">F</div>
+    <section class="login-card">
+        <div class="hero-badge">F</div>
+        <h1>Fargo</h1>
+        <p class="muted-text">
+            Start with a simple front end, but already keep the structure ready for future modules,
+            tree navigation, and richer admin workflows.
+        </p>
 
-            <h1>Fargo</h1>
-            <p class="hero-text">
-                Entre com sua conta para acessar artigos, itens, usuários e grupos.
-            </p>
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
 
-            <div class="hero-points">
-                <div class="hero-point">
-                    <strong>Segurança</strong>
-                    <span>Autenticação centralizada pela API do Fargo.</span>
-                </div>
+        <EditForm Model="model" OnValidSubmit="HandleLoginAsync" class="editor-form">
+            <DataAnnotationsValidator />
 
-                <div class="hero-point">
-                    <strong>Produtividade</strong>
-                    <span>Um ponto único para administrar o sistema.</span>
-                </div>
-            </div>
-        </section>
+            <label>
+                <span>NameId</span>
+                <InputText @bind-Value="model.Nameid" class="text-field" />
+                <ValidationMessage For="() => model.Nameid" />
+            </label>
 
-        <FluentCard Class="login-card" MinimalStyle="true">
-            <EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
-                <DataAnnotationsValidator />
+            <label>
+                <span>Password</span>
+                <InputText @bind-Value="model.Password" Type="password" class="text-field" />
+                <ValidationMessage For="() => model.Password" />
+            </label>
 
-                <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
-                    <div>
-                        <h2 class="login-title">Entrar</h2>
-                        <p class="login-subtitle">Use seu NameId e sua senha.</p>
-                    </div>
+            <label class="checkbox-row">
+                <InputCheckbox @bind-Value="model.RememberMe" />
+                <span>Keep session on this browser</span>
+            </label>
 
-                    @if (!string.IsNullOrWhiteSpace(_errorMessage))
-                    {
-                        <FluentMessageBar Intent="MessageIntent.Error" Title="Falha no login" AllowDismiss="false">
-                            @_errorMessage
-                        </FluentMessageBar>
-                    }
-
-                    <div class="field-group">
-                        <FluentTextField Label="Usuário" Name="nameid" Placeholder="seu.nameid" Required="true"
-                                         Immediate="true" @bind-Value="_model.Nameid" />
-
-                        <ValidationMessage For="@(() => _model.Nameid)" />
-                    </div>
-
-                    <div class="field-group">
-                        <FluentTextField Label="Senha" Name="password" Placeholder="Digite sua senha" Required="true"
-                                         TextFieldType="TextFieldType.Password" @bind-Value="_model.Password" />
-
-                        <ValidationMessage For="@(() => _model.Password)" />
-                    </div>
-
-                    <FluentCheckbox @bind-Value="_model.RememberMe">
-                        Manter sessão iniciada
-                    </FluentCheckbox>
-
-                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Loading="@_isSubmitting"
-                                  Disabled="@_isSubmitting" Class="login-button">
-                        Entrar
-                    </FluentButton>
-
-                    <FluentAnchor Href="/" Appearance="Appearance.Hypertext">
-                        Voltar para a página inicial
-                    </FluentAnchor>
-                </FluentStack>
-            </EditForm>
-        </FluentCard>
-    </div>
+            <button type="submit" class="primary-button" disabled="@isSubmitting">
+                @(isSubmitting ? "Signing in..." : "Sign in")
+            </button>
+        </EditForm>
+    </section>
 </div>
 
 @code {
-    private readonly LoginInputModel _model = new();
-    private bool _isSubmitting;
-    private string? _errorMessage;
+    private readonly LoginInputModel model = new();
+    private bool isSubmitting;
+    private string? errorMessage;
 
-    private async Task HandleLoginAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_isSubmitting)
+        if (!firstRender)
+        {
             return;
-
-        _isSubmitting = true;
-        _errorMessage = null;
+        }
 
         try
         {
-            // Ajuste esta linha se o seu LoginCommand tiver outra assinatura.
-            var command = new LoginCommand(new(_model.Nameid!), new(_model.Password!));
+            var session = await SessionStore.GetAsync();
 
-            var result = await AuthenticationClient.LoginAsync(command);
-
-            await PersistSessionAsync(result, _model.RememberMe);
-
-            Navigation.NavigateTo("/", forceLoad: true);
+            if (!string.IsNullOrWhiteSpace(session?.AccessToken))
+            {
+                SessionAccessor.SetSession(session);
+                Navigation.NavigateTo("/workspace", replace: true);
+            }
         }
-        catch (HttpRequestException ex)
+        catch
         {
-            _errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Usuário ou senha inválidos."
-                : ex.Message;
-        }
-        catch (Exception)
-        {
-            _errorMessage = "Ocorreu um erro inesperado ao tentar entrar.";
-        }
-        finally
-        {
-            _isSubmitting = false;
         }
     }
 
-    private async Task PersistSessionAsync(AuthResult result, bool rememberMe)
+    private async Task HandleLoginAsync()
     {
-        var session = new AuthenticatedSession
+        if (isSubmitting)
         {
-            AccessToken = result.AccessToken,
-            RefreshToken = result.RefreshToken,
-            ExpiresAt = result.ExpiresAt
-        };
+            return;
+        }
 
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var command = new LoginCommand(new Nameid(model.Nameid!), new Password(model.Password!));
+            var result = await AuthenticationApi.LoginAsync(command);
+
+            var session = new AuthenticatedSession
+            {
+                AccessToken = result.AccessToken.ToString(),
+                RefreshToken = result.RefreshToken.ToString(),
+                ExpiresAt = result.ExpiresAt
+            };
+
+            await SessionStore.SaveAsync(session, model.RememberMe);
+            SessionAccessor.SetSession(session);
+
+            Navigation.NavigateTo("/workspace", forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? "Unable to sign in with the provided credentials."
+                : ex.Message;
+        }
+        catch
+        {
+            errorMessage = "An unexpected error happened while trying to sign in.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 
     private sealed class LoginInputModel
     {
-        [Required(ErrorMessage = "Informe o usuário.")]
+        [Required(ErrorMessage = "NameId is required.")]
         public string? Nameid { get; set; }
 
-        [Required(ErrorMessage = "Informe a senha.")]
+        [Required(ErrorMessage = "Password is required.")]
         public string? Password { get; set; }
 
         public bool RememberMe { get; set; } = true;

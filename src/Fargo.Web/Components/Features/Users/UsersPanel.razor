@@ -1,0 +1,331 @@
+@using Fargo.Application.Models.UserModels
+@using Fargo.Domain.ValueObjects
+@inject UserApi UserApi
+
+<div class="page-card">
+    <div class="section-header">
+        <div>
+            <h1>Users</h1>
+            <p>Simple administration surface, already split into a reusable module.</p>
+        </div>
+
+        <div class="section-actions">
+            <button type="button" class="ghost-button" @onclick="LoadUsersAsync">Refresh</button>
+            <button type="button" class="primary-button" @onclick="OpenCreate">New user</button>
+        </div>
+    </div>
+
+    <div class="toolbar-grid">
+        <label>
+            <span>Search</span>
+            <input class="text-field" @bind="searchTerm" @bind:event="oninput" />
+        </label>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (isLoading)
+    {
+        <p class="muted-text">Loading users...</p>
+    }
+    else if (FilteredUsers.Count == 0)
+    {
+        <p class="muted-text">No users found for the current filter.</p>
+    }
+    else
+    {
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>NameId</th>
+                        <th>First name</th>
+                        <th>Last name</th>
+                        <th>Description</th>
+                        <th>Partitions</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in FilteredUsers)
+                    {
+                        <tr>
+                            <td>@user.Nameid</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.Description</td>
+                            <td>@user.PartitionAccesses.Count</td>
+                            <td>@(user.IsActive ? "Active" : "Inactive")</td>
+                            <td class="action-cell">
+                                <button type="button" class="ghost-button small" @onclick="(() => OpenEdit(user))">Edit</button>
+                                <button type="button" class="ghost-button small danger" @onclick="(() => OpenDelete(user))">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (editorOpen)
+{
+    <div class="overlay">
+        <section class="dialog-card">
+            <h2>@(isEditing ? "Edit user" : "Create user")</h2>
+
+            <EditForm Model="editorModel" OnValidSubmit="SaveAsync" class="editor-form">
+                <DataAnnotationsValidator />
+
+                <label>
+                    <span>NameId</span>
+                    <InputText @bind-Value="editorModel.Nameid" class="text-field" />
+                    <ValidationMessage For="() => editorModel.Nameid" />
+                </label>
+
+                <div class="toolbar-grid two-columns">
+                    <label>
+                        <span>First name</span>
+                        <InputText @bind-Value="editorModel.FirstName" class="text-field" />
+                    </label>
+
+                    <label>
+                        <span>Last name</span>
+                        <InputText @bind-Value="editorModel.LastName" class="text-field" />
+                    </label>
+                </div>
+
+                <label>
+                    <span>Description</span>
+                    <InputTextArea @bind-Value="editorModel.Description" class="text-area" />
+                </label>
+
+                @if (!isEditing)
+                {
+                    <label>
+                        <span>Password</span>
+                        <InputText @bind-Value="editorModel.Password" Type="password" class="text-field" />
+                        <ValidationMessage For="() => editorModel.Password" />
+                    </label>
+                }
+
+                <div class="dialog-actions">
+                    <button type="button" class="ghost-button" @onclick="CloseEditor">Cancel</button>
+                    <button type="submit" class="primary-button" disabled="@isSaving">
+                        @(isSaving ? "Saving..." : "Save")
+                    </button>
+                </div>
+            </EditForm>
+        </section>
+    </div>
+}
+
+@if (pendingDelete is not null)
+{
+    <div class="overlay">
+        <section class="dialog-card">
+            <h2>Delete user</h2>
+            <p>Are you sure you want to delete <strong>@pendingDelete.Nameid</strong>?</p>
+
+            <div class="dialog-actions">
+                <button type="button" class="ghost-button" @onclick="CloseDelete">Cancel</button>
+                <button type="button" class="primary-button danger" @onclick="DeleteAsync" disabled="@isDeleting">
+                    @(isDeleting ? "Deleting..." : "Delete")
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    private readonly List<UserInformation> users = [];
+    private string? searchTerm;
+    private string? errorMessage;
+    private bool isLoading;
+    private bool isSaving;
+    private bool isDeleting;
+    private bool editorOpen;
+    private bool isEditing;
+    private Guid? editingUserGuid;
+    private UserInformation? pendingDelete;
+    private UserEditorModel editorModel = new();
+
+    private IReadOnlyList<UserInformation> FilteredUsers =>
+        users
+            .Where(ApplyFilter)
+            .OrderBy(x => x.Nameid.ToString(), StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private bool ApplyFilter(UserInformation user)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return true;
+        }
+
+        var term = searchTerm.Trim();
+
+        return user.Nameid.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
+            || user.FirstName.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
+            || user.LastName.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
+            || user.Description.ToString().Contains(term, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            users.Clear();
+            users.AddRange(await UserApi.GetManyAsync());
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load users." : ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OpenCreate()
+    {
+        isEditing = false;
+        editingUserGuid = null;
+        editorModel = new UserEditorModel();
+        editorOpen = true;
+    }
+
+    private void OpenEdit(UserInformation user)
+    {
+        isEditing = true;
+        editingUserGuid = user.Guid;
+        editorModel = new UserEditorModel
+        {
+            Nameid = user.Nameid.ToString(),
+            FirstName = user.FirstName.ToString(),
+            LastName = user.LastName.ToString(),
+            Description = user.Description.ToString()
+        };
+        editorOpen = true;
+    }
+
+    private void CloseEditor()
+    {
+        if (!isSaving)
+        {
+            editorOpen = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            if (isEditing && editingUserGuid.HasValue)
+            {
+                var updateModel = new UserUpdateModel(
+                    Nameid: string.IsNullOrWhiteSpace(editorModel.Nameid) ? null : new Nameid(editorModel.Nameid),
+                    FirstName: string.IsNullOrWhiteSpace(editorModel.FirstName) ? null : new FirstName(editorModel.FirstName),
+                    LastName: string.IsNullOrWhiteSpace(editorModel.LastName) ? null : new LastName(editorModel.LastName),
+                    Description: string.IsNullOrWhiteSpace(editorModel.Description) ? null : new Description(editorModel.Description),
+                    Password: null,
+                    IsActive: null,
+                    Permissions: null);
+
+                await UserApi.UpdateAsync(editingUserGuid.Value, updateModel);
+            }
+            else
+            {
+                var createModel = new UserCreateModel(
+                    Nameid: new Nameid(editorModel.Nameid!),
+                    FirstName: string.IsNullOrWhiteSpace(editorModel.FirstName) ? null : new FirstName(editorModel.FirstName),
+                    LastName: string.IsNullOrWhiteSpace(editorModel.LastName) ? null : new LastName(editorModel.LastName),
+                    Description: string.IsNullOrWhiteSpace(editorModel.Description) ? null : new Description(editorModel.Description),
+                    Password: new Password(editorModel.Password!));
+
+                await UserApi.CreateAsync(createModel);
+            }
+
+            editorOpen = false;
+            await LoadUsersAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to save user." : ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void OpenDelete(UserInformation user)
+    {
+        pendingDelete = user;
+    }
+
+    private void CloseDelete()
+    {
+        if (!isDeleting)
+        {
+            pendingDelete = null;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (pendingDelete is null)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        errorMessage = null;
+
+        try
+        {
+            await UserApi.DeleteAsync(pendingDelete.Guid);
+            pendingDelete = null;
+            await LoadUsersAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to delete user." : ex.Message;
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private sealed class UserEditorModel
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+
+        public string? FirstName { get; set; }
+
+        public string? LastName { get; set; }
+
+        public string? Description { get; set; }
+
+        [Required(ErrorMessage = "Password is required when creating a user.")]
+        public string? Password { get; set; }
+    }
+}

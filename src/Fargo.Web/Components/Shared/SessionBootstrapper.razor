@@ -1,0 +1,34 @@
+@inject IClientSessionStore SessionStore
+@inject ClientSessionAccessor SessionAccessor
+
+@code {
+    private bool attempted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || attempted)
+        {
+            return;
+        }
+
+        attempted = true;
+
+        try
+        {
+            var session = await SessionStore.GetAsync();
+            SessionAccessor.SetSession(session);
+        }
+        catch (InvalidOperationException)
+        {
+            attempted = false;
+        }
+        catch (JSDisconnectedException)
+        {
+            attempted = false;
+        }
+        catch
+        {
+            SessionAccessor.MarkReady();
+        }
+    }
+}

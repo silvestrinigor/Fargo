@@ -1,23 +1,97 @@
-﻿
+﻿@using Fargo.Web.Components.Shared
+
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
+@inject IClientSessionStore SessionStore
+@inject ClientSessionAccessor SessionAccessor
 
-<FluentLayout>
-    <FluentHeader>
-        BlazorWeb-CSharp
-    </FluentHeader>
-    <FluentStack Class="main" Orientation="Orientation.Vertical" Width="100%">
-        <FluentBodyContent Class="body-content">
-            <div class="content">
-                @Body
+<SessionBootstrapper />
+
+@if (!SessionAccessor.IsReady)
+{
+    <div class="splash-screen">
+        <h1>Fargo</h1>
+        <p>Loading workspace...</p>
+    </div>
+}
+else if (!SessionAccessor.IsAuthenticated)
+{
+    <div class="splash-screen">
+        <h1>Fargo</h1>
+        <p>Redirecting to login...</p>
+    </div>
+}
+else
+{
+    <div class="app-shell">
+        <header class="app-header">
+            <div>
+                <div class="app-brand">Fargo</div>
+                <div class="app-subtitle">Tree-first administration workspace</div>
             </div>
-        </FluentBodyContent>
-    </FluentStack>
-</FluentLayout>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+            <nav class="app-nav">
+                <a class="@(IsActive("/workspace") ? "nav-link active" : "nav-link")" href="/workspace">Workspace</a>
+                <a class="@(IsActive("/users") ? "nav-link active" : "nav-link")" href="/users">Users</a>
+                <a class="@(IsActive("/articles") ? "nav-link active" : "nav-link")" href="/articles">Articles</a>
+                <a class="@(IsActive("/entities") ? "nav-link active" : "nav-link")" href="/entities">Entities</a>
+            </nav>
 
-<FluentDialogProvider />
+            <button type="button" class="ghost-button" @onclick="LogoutAsync">Sign out</button>
+        </header>
+
+        <div class="app-body">
+            <aside class="app-sidebar">
+                <div class="sidebar-header">
+                    <h2>Partitions</h2>
+                    <p>Tree navigation already prepared for future modules.</p>
+                </div>
+
+                <PartitionTree />
+            </aside>
+
+            <main class="app-content">
+                @Body
+            </main>
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        SessionAccessor.Changed += HandleSessionChanged;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (SessionAccessor.IsReady && !SessionAccessor.IsAuthenticated && !Navigation.Uri.Contains("/login", StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/login", replace: true);
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await SessionStore.ClearAsync();
+        SessionAccessor.Clear();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private bool IsActive(string path)
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        return relative.StartsWith(path.TrimStart('/'), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void HandleSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        SessionAccessor.Changed -= HandleSessionChanged;
+    }
+}

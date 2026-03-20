@@ -1,24 +1,12 @@
-﻿@page "/articles"
-@inject IDialogService _dialogService
+@page "/articles"
 
-<FluentButton OnClick="OpenDialog" Appearance="Appearance.Accent">Open dialog</FluentButton>
+<PageTitle>Articles | Fargo</PageTitle>
 
-@code {
-    private async Task OpenDialog()
-    {
-        var text = string.Empty;
-        var dialogInstance = await _dialogService.ShowDialogAsync(@<div>
-    <FluentTextField @bind-Value=text Label="Enter a value:" />
+<div class="page-card">
+    <h1>Articles</h1>
+    <p>
+        This starter keeps the articles module intentionally light, but the shell, session handling,
+        and tree-first navigation are already in place for the next implementation step.
+    </p>
+    <p class="muted-text">Recommended next step: connect article lists and detail pages to the same shell used by partitions and users.</p>
 </div>
-    , new DialogParameters
-      {
-          Title = "Render Fragment Content",
-      });
-
-        var result = await dialogInstance.Result;
-        if (!result.Cancelled)
-        {
-            await _dialogService.ShowSuccessAsync($"You entered: {text}", "Success");
-        }
-    }
-}
