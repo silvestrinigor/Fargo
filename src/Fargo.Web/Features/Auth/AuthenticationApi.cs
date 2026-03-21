@@ -1,24 +1,30 @@
 using Fargo.Application.Commands.AuthCommands;
 using Fargo.Application.Models.AuthModels;
 using Fargo.Web.Api;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 
 namespace Fargo.Web.Features.Auth;
 
 public sealed class AuthenticationApi(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor)
-    : FargoApiClientBase(httpClientFactory, sessionAccessor)
+    ClientSessionAccessor sessionAccessor,
+    IOptions<JsonOptions> httpJsonOptions)
+    : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
 {
     public async Task<AuthResult> LoginAsync(
         LoginCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var response = await CreateClient(requireAuthentication: false)
-            .PostAsJsonAsync("/authentication/login", command, cancellationToken);
+        using var response = await PostAsJsonAsync(
+            "/authentication/login",
+            command,
+            requireAuthentication: false,
+            cancellationToken: cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<AuthResult>(cancellationToken: cancellationToken);
+        var result = await ReadFromJsonAsync<AuthResult>(response.Content, cancellationToken);
 
         return result ?? throw new InvalidOperationException("Authentication API returned no content.");
     }
@@ -27,8 +33,10 @@ public sealed class AuthenticationApi(
         LogoutCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var response = await CreateClient()
-            .PostAsJsonAsync("/authentication/logout", command, cancellationToken);
+        using var response = await PostAsJsonAsync(
+            "/authentication/logout",
+            command,
+            cancellationToken: cancellationToken);
 
         response.EnsureSuccessStatusCode();
     }
@@ -37,12 +45,15 @@ public sealed class AuthenticationApi(
         RefreshCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var response = await CreateClient(requireAuthentication: false)
-            .PostAsJsonAsync("/authentication/refresh", command, cancellationToken);
+        using var response = await PostAsJsonAsync(
+            "/authentication/refresh",
+            command,
+            requireAuthentication: false,
+            cancellationToken: cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<AuthResult>(cancellationToken: cancellationToken);
+        var result = await ReadFromJsonAsync<AuthResult>(response.Content, cancellationToken);
 
         return result ?? throw new InvalidOperationException("Refresh API returned no content.");
     }
@@ -51,8 +62,10 @@ public sealed class AuthenticationApi(
         PasswordChangeCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var response = await CreateClient()
-            .PutAsJsonAsync("/authentication/password", command, cancellationToken);
+        using var response = await PutAsJsonAsync(
+            "/authentication/password",
+            command,
+            cancellationToken: cancellationToken);
 
         response.EnsureSuccessStatusCode();
     }

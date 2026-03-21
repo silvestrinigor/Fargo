@@ -1,6 +1,7 @@
 using Fargo.ServiceDefaults;
 using Fargo.Web.Api;
 using Fargo.Web.Components;
+using Fargo.Web.Extensions;
 using Fargo.Web.Features.Auth;
 using Fargo.Web.Features.Partitions;
 using Fargo.Web.Features.Users;
@@ -17,6 +18,8 @@ builder.Services
 
 builder.Services.AddFluentUIComponents();
 builder.Services.AddAuthorizationCore();
+
+builder.Services.ConfigureFargoWebHttpJsonOptions();
 
 builder.Services.AddScoped<IClientSessionStore, BrowserClientSessionStore>();
 builder.Services.AddScoped<ClientSessionAccessor>();
@@ -44,6 +47,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

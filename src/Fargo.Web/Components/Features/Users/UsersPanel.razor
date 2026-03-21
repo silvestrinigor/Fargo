@@ -62,7 +62,8 @@
                             <td>@(user.IsActive ? "Active" : "Inactive")</td>
                             <td class="action-cell">
                                 <button type="button" class="ghost-button small" @onclick="(() => OpenEdit(user))">Edit</button>
-                                <button type="button" class="ghost-button small danger" @onclick="(() => OpenDelete(user))">Delete</button>
+                                <button type="button" class="ghost-button small danger"
+                                        @onclick="(() => OpenDelete(user))">Delete</button>
                             </td>
                         </tr>
                     }
@@ -156,8 +157,8 @@
 
     private IReadOnlyList<UserInformation> FilteredUsers =>
         users
-            .Where(ApplyFilter)
-            .OrderBy(x => x.Nameid.ToString(), StringComparer.OrdinalIgnoreCase)
+            //.Where(ApplyFilter)
+            //.OrderBy(x => x.Nameid.ToString(), StringComparer.OrdinalIgnoreCase)
             .ToList();
 
     protected override async Task OnInitializedAsync()

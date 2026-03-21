@@ -1,13 +1,16 @@
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Domain.ValueObjects;
 using Fargo.Web.Api;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 
 namespace Fargo.Web.Features.Partitions;
 
 public sealed class PartitionApi(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor)
-    : FargoApiClientBase(httpClientFactory, sessionAccessor)
+    ClientSessionAccessor sessionAccessor,
+    IOptions<JsonOptions> httpJsonOptions)
+    : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
 {
     public async Task<IReadOnlyCollection<PartitionSummary>> GetChildrenAsync(
         Guid? parentPartitionGuid,
@@ -15,8 +18,9 @@ public sealed class PartitionApi(
     {
         var uri = $"/partitions?parentPartitionGuid={parentPartitionGuid}";
 
-        var result = await CreateClient()
-            .GetFromJsonAsync<IReadOnlyCollection<PartitionInformation>>(uri, cancellationToken);
+        var result = await GetFromJsonAsync<IReadOnlyCollection<PartitionInformation>>(
+            uri,
+            cancellationToken: cancellationToken);
 
         return result?.Select(ToSummary).ToArray()
             ?? Array.Empty<PartitionSummary>();
@@ -26,8 +30,9 @@ public sealed class PartitionApi(
         Guid partitionGuid,
         CancellationToken cancellationToken = default)
     {
-        var partition = await CreateClient()
-            .GetFromJsonAsync<PartitionInformation>($"/partitions/{partitionGuid}", cancellationToken);
+        var partition = await GetFromJsonAsync<PartitionInformation>(
+            $"/partitions/{partitionGuid}",
+            cancellationToken: cancellationToken);
 
         return partition is null ? null : ToSummary(partition);
     }
@@ -45,12 +50,16 @@ public sealed class PartitionApi(
             parentPartitionGuid
         };
 
-        using var response = await CreateClient()
-            .PostAsJsonAsync("/partitions", payload, cancellationToken);
+        using var response = await PostAsJsonAsync(
+            "/partitions",
+            payload,
+            cancellationToken: cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<Guid>(cancellationToken);
+        var result = await ReadFromJsonAsync<Guid?>(response.Content, cancellationToken);
+
+        return result ?? throw new InvalidOperationException("Partition API returned no content.");
     }
 
     public async Task UpdateAsync(
@@ -63,7 +72,7 @@ public sealed class PartitionApi(
 
         using var request = new HttpRequestMessage(HttpMethod.Patch, $"/partitions/{partitionGuid}")
         {
-            Content = JsonContent.Create(model)
+            Content = CreateJsonContent(model)
         };
 
         using var response = await CreateClient()
