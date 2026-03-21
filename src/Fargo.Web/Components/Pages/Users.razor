@@ -1,6 +1,96 @@
 @page "/users"
+@page "/users/groups/{UserGroupGuid:guid}"
 @rendermode InteractiveServer
 
 <PageTitle>Users | Fargo</PageTitle>
 
-<UsersPanel />
+<div class="page-card">
+    <div class="section-header">
+        <div>
+            <h1>Users</h1>
+            <p>
+                The users workspace now uses the backend user groups tree as the left navigation source.
+                Select a user group to drive the right-side context.
+            </p>
+        </div>
+    </div>
+
+    @if (!UserGroupGuid.HasValue)
+    {
+        <div class="hero-grid">
+            <article class="mini-card">
+                <h2>User groups tree</h2>
+                <p>The sidebar is now backed by <code>/trees/user-groups</code> instead of a flat list.</p>
+            </article>
+
+            <article class="mini-card">
+                <h2>Selected group context</h2>
+                <p>When a group is selected, this page receives its identity and tree metadata from the sidebar navigation.</p>
+            </article>
+
+            <article class="mini-card">
+                <h2>Next integrations</h2>
+                <p>The next step is binding the selected group to detailed user group information and partition security trees.</p>
+            </article>
+        </div>
+
+        <p class="muted-text">Select a user group on the left to inspect the users module.</p>
+    }
+    else
+    {
+        <div class="hero-grid two-columns-layout">
+            <article class="mini-card">
+                <h2>@ResolvedTitle</h2>
+                <p>@(string.IsNullOrWhiteSpace(Subtitle) ? "No subtitle informed for this tree node." : Subtitle)</p>
+
+                <dl class="detail-list">
+                    <div>
+                        <dt>Guid</dt>
+                        <dd>@UserGroupGuid</dd>
+                    </div>
+                    <div>
+                        <dt>Members count</dt>
+                        <dd>@(MembersCount?.ToString() ?? "Not informed")</dd>
+                    </div>
+                    <div>
+                        <dt>Status</dt>
+                        <dd>@(IsActive == false ? "Inactive" : "Active")</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <article class="mini-card">
+                <h2>Tree-driven users page</h2>
+                <p>
+                    This page is now aligned with the tree endpoint contract from <code>Fargo.HttpApi</code> and
+                    <code>Fargo.Application</code>. The selected node can now drive the next user-group-specific panels.
+                </p>
+                <p class="muted-text">
+                    Recommended next binding: load <code>/user-groups/@UserGroupGuid</code> and then connect
+                    partition security with <code>/trees/partitions/security?partitionGuid=...</code>.
+                </p>
+            </article>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid? UserGroupGuid { get; set; }
+
+    [SupplyParameterFromQuery(Name = "title")]
+    public string? Title { get; set; }
+
+    [SupplyParameterFromQuery(Name = "subtitle")]
+    public string? Subtitle { get; set; }
+
+    [SupplyParameterFromQuery(Name = "membersCount")]
+    public int? MembersCount { get; set; }
+
+    [SupplyParameterFromQuery(Name = "active")]
+    public bool? IsActive { get; set; }
+
+    private string ResolvedTitle => string.IsNullOrWhiteSpace(Title)
+        ? UserGroupGuid?.ToString() ?? "Selected user group"
+        : Title;
+}

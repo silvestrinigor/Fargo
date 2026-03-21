@@ -1,0 +1,52 @@
+<li>
+    <div class="tree-node-row @(SelectedGuid == Node.EntityGuid ? "selected" : null)">
+        <button type="button"
+                class="tree-toggle"
+                disabled="@(!Node.HasChildren)"
+                @onclick="(() => OnToggle.InvokeAsync(Node))">
+            @(Node.HasChildren ? (Node.IsExpanded ? "−" : "+") : "·")
+        </button>
+
+        <button type="button" class="tree-node-button" @onclick="(() => OnSelect.InvokeAsync(Node))">
+            <span>@Node.Title</span>
+            @if (!Node.IsActive)
+            {
+                <span class="tree-badge">inactive</span>
+            }
+        </button>
+    </div>
+
+    @if (Node.IsExpanded)
+    {
+        if (Node.IsLoadingChildren)
+        {
+            <div class="tree-loading">Loading…</div>
+        }
+        else if (Node.Children.Count > 0)
+        {
+            <ul class="tree-list child-list">
+                @foreach (var child in Node.Children.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
+                {
+                    <TreeSidebarNodeView Node="child"
+                                         SelectedGuid="SelectedGuid"
+                                         OnToggle="OnToggle"
+                                         OnSelect="OnSelect" />
+                }
+            </ul>
+        }
+    }
+</li>
+
+@code {
+    [Parameter, EditorRequired]
+    public required TreeSidebarNode Node { get; set; }
+
+    [Parameter]
+    public Guid? SelectedGuid { get; set; }
+
+    [Parameter]
+    public EventCallback<TreeSidebarNode> OnToggle { get; set; }
+
+    [Parameter]
+    public EventCallback<TreeSidebarNode> OnSelect { get; set; }
+}

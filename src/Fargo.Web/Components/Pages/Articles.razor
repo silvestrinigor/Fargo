@@ -1,12 +1,95 @@
 @page "/articles"
+@page "/articles/{ArticleGuid:guid}"
 
 <PageTitle>Articles | Fargo</PageTitle>
 
 <div class="page-card">
-    <h1>Articles</h1>
-    <p>
-        This starter keeps the articles module intentionally light, but the shell, session handling,
-        and tree-first navigation are already in place for the next implementation step.
-    </p>
-    <p class="muted-text">Recommended next step: connect article lists and detail pages to the same shell used by partitions and users.</p>
+    <div class="section-header">
+        <div>
+            <h1>Articles</h1>
+            <p>
+                The articles workspace now uses the backend article tree as its primary navigation source.
+                Select an article on the left to inspect the node context.
+            </p>
+        </div>
+    </div>
+
+    @if (!ArticleGuid.HasValue)
+    {
+        <div class="hero-grid">
+            <article class="mini-card">
+                <h2>Article tree</h2>
+                <p>The sidebar is now backed by <code>/trees/articles</code>.</p>
+            </article>
+
+            <article class="mini-card">
+                <h2>Selected article context</h2>
+                <p>The selected article route is now tree-driven instead of a static placeholder page.</p>
+            </article>
+
+            <article class="mini-card">
+                <h2>Next integrations</h2>
+                <p>Bind article details, related items, and stock/location panels to the selected article node.</p>
+            </article>
+        </div>
+
+        <p class="muted-text">Select an article on the left to inspect the articles module.</p>
+    }
+    else
+    {
+        <div class="hero-grid two-columns-layout">
+            <article class="mini-card">
+                <h2>@ResolvedTitle</h2>
+                <p>@(string.IsNullOrWhiteSpace(Subtitle) ? "No subtitle informed for this tree node." : Subtitle)</p>
+
+                <dl class="detail-list">
+                    <div>
+                        <dt>Guid</dt>
+                        <dd>@ArticleGuid</dd>
+                    </div>
+                    <div>
+                        <dt>Members count</dt>
+                        <dd>@(MembersCount?.ToString() ?? "Not informed")</dd>
+                    </div>
+                    <div>
+                        <dt>Status</dt>
+                        <dd>@(IsActive == false ? "Inactive" : "Active")</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <article class="mini-card">
+                <h2>Tree-driven articles page</h2>
+                <p>
+                    The page is now aligned with the article tree endpoint contract. The next step is loading
+                    full article information and related items for the selected node.
+                </p>
+                <p class="muted-text">
+                    Recommended next binding: load <code>/articles/@ArticleGuid</code> and use the selected node
+                    as the anchor for item and inventory modules.
+                </p>
+            </article>
+        </div>
+    }
 </div>
+
+@code {
+    [Parameter]
+    public Guid? ArticleGuid { get; set; }
+
+    [SupplyParameterFromQuery(Name = "title")]
+    public string? Title { get; set; }
+
+    [SupplyParameterFromQuery(Name = "subtitle")]
+    public string? Subtitle { get; set; }
+
+    [SupplyParameterFromQuery(Name = "membersCount")]
+    public int? MembersCount { get; set; }
+
+    [SupplyParameterFromQuery(Name = "active")]
+    public bool? IsActive { get; set; }
+
+    private string ResolvedTitle => string.IsNullOrWhiteSpace(Title)
+        ? ArticleGuid?.ToString() ?? "Selected article"
+        : Title;
+}

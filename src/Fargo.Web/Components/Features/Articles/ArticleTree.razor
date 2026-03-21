@@ -1,4 +1,4 @@
-@inject PartitionTreeApi PartitionTreeApi
+@inject ArticleTreeApi ArticleTreeApi
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -7,18 +7,18 @@
 }
 else if (isLoading)
 {
-    <div class="muted-text">Loading partition tree...</div>
+    <div class="muted-text">Loading article tree...</div>
 }
 else if (rootNodes.Count == 0)
 {
-    <div class="muted-text">No root partitions available for the current user.</div>
+    <div class="muted-text">No root articles available for the current user.</div>
 }
 else
 {
     <ul class="tree-list">
         @foreach (var node in rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
         {
-            <TreeSidebarNodeView Node="node" SelectedGuid="selectedPartitionGuid" OnToggle="ToggleAsync" OnSelect="Select" />
+            <TreeSidebarNodeView Node="node" SelectedGuid="selectedArticleGuid" OnToggle="ToggleAsync" OnSelect="Select" />
         }
     </ul>
 }
@@ -27,17 +27,17 @@ else
     private readonly List<TreeSidebarNode> rootNodes = [];
     private bool isLoading = true;
     private string? errorMessage;
-    private Guid? selectedPartitionGuid;
+    private Guid? selectedArticleGuid;
 
     protected override async Task OnInitializedAsync()
     {
-        selectedPartitionGuid = ReadSelectedPartitionGuid();
+        selectedArticleGuid = ReadSelectedArticleGuid();
         await LoadRootsAsync();
     }
 
     protected override void OnParametersSet()
     {
-        selectedPartitionGuid = ReadSelectedPartitionGuid();
+        selectedArticleGuid = ReadSelectedArticleGuid();
     }
 
     private async Task LoadRootsAsync()
@@ -47,14 +47,14 @@ else
 
         try
         {
-            var roots = await PartitionTreeApi.GetChildrenAsync(null);
+            var roots = await ArticleTreeApi.GetChildrenAsync(null);
             rootNodes.Clear();
             rootNodes.AddRange(roots.Select(TreeSidebarNode.FromTreeNode));
         }
         catch (HttpRequestException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Failed to load partitions."
+                ? "Failed to load articles."
                 : ex.Message;
         }
         finally
@@ -77,7 +77,7 @@ else
 
         try
         {
-            var children = await PartitionTreeApi.GetChildrenAsync(node.EntityGuid);
+            var children = await ArticleTreeApi.GetChildrenAsync(node.EntityGuid);
             node.Children.Clear();
             node.Children.AddRange(children.Select(TreeSidebarNode.FromTreeNode));
             node.ChildrenLoaded = true;
@@ -85,7 +85,7 @@ else
         catch (HttpRequestException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Failed to load child partitions."
+                ? "Failed to load child articles."
                 : ex.Message;
         }
         finally
@@ -97,28 +97,37 @@ else
 
     private void Select(TreeSidebarNode node)
     {
-        selectedPartitionGuid = node.EntityGuid;
-        Navigation.NavigateTo($"/partitions/{node.EntityGuid}");
+        selectedArticleGuid = node.EntityGuid;
+        Navigation.NavigateTo($"/articles/{node.EntityGuid}{BuildQueryString(node)}");
     }
 
-    private Guid? ReadSelectedPartitionGuid()
+    private static string BuildQueryString(TreeSidebarNode node)
+    {
+        var queryParts = new List<string>
+        {
+            $"title={Uri.EscapeDataString(node.Title)}",
+            $"membersCount={node.MembersCount}",
+            $"active={node.IsActive.ToString().ToLowerInvariant()}"
+        };
+
+        if (!string.IsNullOrWhiteSpace(node.Subtitle))
+        {
+            queryParts.Add($"subtitle={Uri.EscapeDataString(node.Subtitle)}");
+        }
+
+        return $"?{string.Join("&", queryParts)}";
+    }
+
+    private Guid? ReadSelectedArticleGuid()
     {
         var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
         var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length >= 2
-            && parts[0].Equals("partitions", StringComparison.OrdinalIgnoreCase)
-            && Guid.TryParse(parts[1], out var selectedPartitionGuid))
+            && parts[0].Equals("articles", StringComparison.OrdinalIgnoreCase)
+            && Guid.TryParse(parts[1], out var selectedArticleGuid))
         {
-            return selectedPartitionGuid;
-        }
-
-        if (parts.Length >= 3
-            && parts[0].Equals("workspace", StringComparison.OrdinalIgnoreCase)
-            && parts[1].Equals("partitions", StringComparison.OrdinalIgnoreCase)
-            && Guid.TryParse(parts[2], out selectedPartitionGuid))
-        {
-            return selectedPartitionGuid;
+            return selectedArticleGuid;
         }
 
         return null;

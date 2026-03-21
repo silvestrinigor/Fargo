@@ -1,17 +1,19 @@
+@page "/partitions"
+@page "/partitions/{PartitionGuid:guid}"
 @page "/workspace"
 @page "/workspace/partitions/{PartitionGuid:guid}"
 @inject PartitionApi PartitionApi
 @inject NavigationManager Navigation
 
-<PageTitle>Workspace | Fargo</PageTitle>
+<PageTitle>Partitions | Fargo</PageTitle>
 
 <div class="page-card">
     <div class="section-header">
         <div>
-            <h1>Workspace</h1>
+            <h1>Partitions</h1>
             <p>
-                First implementation keeps the experience simple, but it is already structured around
-                a persistent shell, a left partition tree, and reusable feature modules.
+                The partitions module is now the primary tree-driven workspace. Select a partition on the left
+                to inspect it, create a child partition, or update its metadata.
             </p>
         </div>
 
@@ -32,104 +34,102 @@
     {
         <div class="hero-grid">
             <article class="mini-card">
-                <h2>Tree-ready shell</h2>
-                <p>The left side already behaves as the permanent navigation spine for partitions and future modules.</p>
+                <h2>Partition tree</h2>
+                <p>The left side is now bound to the backend partition tree endpoint instead of the flat partition list endpoint.</p>
             </article>
 
             <article class="mini-card">
-                <h2>Modular composition</h2>
-                <p>Users are handled in a separate module, and partitions are isolated behind their own API service and view
-                    state.</p>
-                </article>
+                <h2>Direct editing</h2>
+                <p>The selected partition can be edited immediately in this page without leaving the tree-driven workspace.</p>
+            </article>
 
-                <article class="mini-card">
-                    <h2>Future expansion</h2>
-                    <p>Articles, items, containers, and more domain trees can plug into the same shell later.</p>
-                </article>
-            </div>
-
-            <p class="muted-text">Select a partition on the left to inspect it or create child partitions.</p>
-        }
-    else if (isLoading)
-        {
-            <p class="muted-text">Loading partition...</p>
-        }
-        else if (selectedPartition is null)
-        {
-            <p class="muted-text">The selected partition could not be loaded.</p>
-        }
-        else
-        {
-            <div class="hero-grid two-columns-layout">
-                <article class="mini-card">
-                    <h2>@selectedPartition.Name</h2>
-                    <p>@(string.IsNullOrWhiteSpace(selectedPartition.Description) ? "No description informed." :
-                                                                                        selectedPartition.Description)</p>
-
-                        <dl class="detail-list">
-                            <div>
-                                <dt>Guid</dt>
-                                <dd>@selectedPartition.Guid</dd>
-                            </div>
-                            <div>
-                                <dt>Parent</dt>
-                                <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root partition")</dd>
-                            </div>
-                            <div>
-                                <dt>Status</dt>
-                                <dd>@(selectedPartition.IsActive ? "Active" : "Inactive")</dd>
-                            </div>
-                        </dl>
-                    </article>
-
-                    <article class="mini-card">
-                        <h2>Create child partition</h2>
-
-                        <EditForm Model="createModel" OnValidSubmit="CreateChildAsync" class="editor-form">
-                            <DataAnnotationsValidator />
-
-                            <label>
-                                <span>Name</span>
-                                <InputText @bind-Value="createModel.Name" class="text-field" />
-                                <ValidationMessage For="() => createModel.Name" />
-                            </label>
-
-                            <label>
-                                <span>Description</span>
-                                <InputTextArea @bind-Value="createModel.Description" class="text-area" />
-                            </label>
-
-                            <div class="dialog-actions">
-                                <button type="submit" class="primary-button" disabled="@isCreatingChild">
-                                    @(isCreatingChild ? "Creating..." : "Create child")
-                                </button>
-                            </div>
-                        </EditForm>
-                    </article>
-                </div>
-
-                <section class="page-card nested-card">
-                    <h2>Edit description</h2>
-
-                    <EditForm Model="editModel" OnValidSubmit="SaveAsync" class="editor-form">
-                        <DataAnnotationsValidator />
-                        <label>
-                            <span>Description</span>
-                            <InputTextArea @bind-Value="editModel.Description" class="text-area" />
-                        </label>
-
-                        <div class="dialog-actions">
-                            <button type="submit" class="primary-button" disabled="@isSaving">
-                                @(isSaving ? "Saving..." : "Save changes")
-                            </button>
-                            <button type="button" class="ghost-button danger" @onclick="DeleteAsync" disabled="@isDeleting">
-                                @(isDeleting ? "Deleting..." : "Delete partition")
-                            </button>
-                        </div>
-                    </EditForm>
-                </section>
-            }
+            <article class="mini-card">
+                <h2>Ready for descendants</h2>
+                <p>Create child partitions directly from the selected node and keep the hierarchy consistent with the backend tree rules.</p>
+            </article>
         </div>
+
+        <p class="muted-text">Select a partition on the left to inspect it or create child partitions.</p>
+    }
+    else if (isLoading)
+    {
+        <p class="muted-text">Loading partition...</p>
+    }
+    else if (selectedPartition is null)
+    {
+        <p class="muted-text">The selected partition could not be loaded.</p>
+    }
+    else
+    {
+        <div class="hero-grid two-columns-layout">
+            <article class="mini-card">
+                <h2>@selectedPartition.Name</h2>
+                <p>@(string.IsNullOrWhiteSpace(selectedPartition.Description) ? "No description informed." : selectedPartition.Description)</p>
+
+                <dl class="detail-list">
+                    <div>
+                        <dt>Guid</dt>
+                        <dd>@selectedPartition.Guid</dd>
+                    </div>
+                    <div>
+                        <dt>Parent</dt>
+                        <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root partition")</dd>
+                    </div>
+                    <div>
+                        <dt>Status</dt>
+                        <dd>@(selectedPartition.IsActive ? "Active" : "Inactive")</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <article class="mini-card">
+                <h2>Create child partition</h2>
+
+                <EditForm Model="createModel" OnValidSubmit="CreateChildAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+
+                    <label>
+                        <span>Name</span>
+                        <InputText @bind-Value="createModel.Name" class="text-field" />
+                        <ValidationMessage For="() => createModel.Name" />
+                    </label>
+
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="createModel.Description" class="text-area" />
+                    </label>
+
+                    <div class="dialog-actions">
+                        <button type="submit" class="primary-button" disabled="@isCreatingChild">
+                            @(isCreatingChild ? "Creating..." : "Create child")
+                        </button>
+                    </div>
+                </EditForm>
+            </article>
+        </div>
+
+        <section class="page-card nested-card">
+            <h2>Edit description</h2>
+
+            <EditForm Model="editModel" OnValidSubmit="SaveAsync" class="editor-form">
+                <DataAnnotationsValidator />
+                <label>
+                    <span>Description</span>
+                    <InputTextArea @bind-Value="editModel.Description" class="text-area" />
+                </label>
+
+                <div class="dialog-actions">
+                    <button type="submit" class="primary-button" disabled="@isSaving">
+                        @(isSaving ? "Saving..." : "Save changes")
+                    </button>
+                    <button type="button" class="ghost-button danger" @onclick="DeleteAsync" disabled="@isDeleting">
+                        @(isDeleting ? "Deleting..." : "Delete partition")
+                    </button>
+                </div>
+            </EditForm>
+        </section>
+    }
+</div>
 
 @code {
     [Parameter]
@@ -223,10 +223,9 @@
             var newPartitionGuid = await PartitionApi.CreateAsync(
                 createModel.Name!,
                 createModel.Description,
-                PartitionGuid.Value
-                );
+                PartitionGuid.Value);
 
-            Navigation.NavigateTo($"/workspace/partitions/{newPartitionGuid}", forceLoad: true);
+            Navigation.NavigateTo($"/partitions/{newPartitionGuid}", forceLoad: true);
         }
         catch (HttpRequestException ex)
         {
@@ -251,7 +250,7 @@
         try
         {
             await PartitionApi.DeleteAsync(PartitionGuid.Value);
-            Navigation.NavigateTo("/workspace", forceLoad: true);
+            Navigation.NavigateTo("/partitions", forceLoad: true);
         }
         catch (HttpRequestException ex)
         {

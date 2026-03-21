@@ -24,6 +24,8 @@ else if (!SessionAccessor.IsAuthenticated)
 }
 else
 {
+    var sidebarSection = GetSidebarSection();
+
     <div class="app-shell">
         <header class="app-header">
             <div>
@@ -32,7 +34,7 @@ else
             </div>
 
             <nav class="app-nav">
-                <a class="@(IsActive("/workspace") ? "nav-link active" : "nav-link")" href="/workspace">Workspace</a>
+                <a class="@(IsPartitionsActive() ? "nav-link active" : "nav-link")" href="/partitions">Partitions</a>
                 <a class="@(IsActive("/users") ? "nav-link active" : "nav-link")" href="/users">Users</a>
                 <a class="@(IsActive("/articles") ? "nav-link active" : "nav-link")" href="/articles">Articles</a>
                 <a class="@(IsActive("/entities") ? "nav-link active" : "nav-link")" href="/entities">Entities</a>
@@ -44,11 +46,22 @@ else
         <div class="app-body">
             <aside class="app-sidebar">
                 <div class="sidebar-header">
-                    <h2>Partitions</h2>
-                    <p>Tree navigation already prepared for future modules.</p>
+                    <h2>@sidebarSection.Title</h2>
+                    <p>@sidebarSection.Description</p>
                 </div>
 
-                <PartitionTree />
+                @switch (sidebarSection.Kind)
+                {
+                    case SidebarSectionKind.Users:
+                        <UserGroupTree />
+                        break;
+                    case SidebarSectionKind.Articles:
+                        <ArticleTree />
+                        break;
+                    default:
+                        <PartitionTree />
+                        break;
+                }
             </aside>
 
             <main class="app-content">
@@ -66,7 +79,8 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (SessionAccessor.IsReady && !SessionAccessor.IsAuthenticated && !Navigation.Uri.Contains("/login", StringComparison.OrdinalIgnoreCase))
+        if (SessionAccessor.IsReady && !SessionAccessor.IsAuthenticated && !Navigation.Uri.Contains("/login",
+StringComparison.OrdinalIgnoreCase))
         {
             Navigation.NavigateTo("/login", replace: true);
         }
@@ -79,10 +93,38 @@ else
         Navigation.NavigateTo("/login", forceLoad: true);
     }
 
+    private bool IsPartitionsActive() => IsActive("/partitions") || IsActive("/workspace");
+
     private bool IsActive(string path)
     {
         var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
         return relative.StartsWith(path.TrimStart('/'), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private SidebarSection GetSidebarSection()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        if (relative.StartsWith("users", StringComparison.OrdinalIgnoreCase))
+        {
+            return new SidebarSection(
+                "Users",
+                "Browse user groups and open the selected group in the users workspace.",
+                SidebarSectionKind.Users);
+        }
+
+        if (relative.StartsWith("articles", StringComparison.OrdinalIgnoreCase))
+        {
+            return new SidebarSection(
+                "Articles",
+                "Browse the article tree and inspect the selected article on the right.",
+                SidebarSectionKind.Articles);
+        }
+
+        return new SidebarSection(
+            "Partitions",
+            "Browse partitions and manage the selected partition on the right.",
+            SidebarSectionKind.Partitions);
     }
 
     private void HandleSessionChanged()
@@ -93,5 +135,17 @@ else
     public void Dispose()
     {
         SessionAccessor.Changed -= HandleSessionChanged;
+    }
+
+    private sealed record SidebarSection(
+        string Title,
+        string Description,
+        SidebarSectionKind Kind);
+
+    private enum SidebarSectionKind
+    {
+        Partitions,
+        Users,
+        Articles
     }
 }

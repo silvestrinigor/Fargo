@@ -4,6 +4,7 @@ using Fargo.Web.Components;
 using Fargo.Web.Extensions;
 using Fargo.Web.Features.Auth;
 using Fargo.Web.Features.Partitions;
+using Fargo.Web.Features.Trees;
 using Fargo.Web.Features.Users;
 using Fargo.Web.Security;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -32,6 +33,10 @@ builder.Services.AddHttpClient("FargoApi", client =>
 builder.Services.AddScoped<AuthenticationApi>();
 builder.Services.AddScoped<PartitionApi>();
 builder.Services.AddScoped<UserApi>();
+builder.Services.AddScoped<PartitionTreeApi>();
+builder.Services.AddScoped<UserGroupTreeApi>();
+builder.Services.AddScoped<ArticleTreeApi>();
+builder.Services.AddScoped<PartitionSecurityTreeApi>();
 
 var app = builder.Build();
 
