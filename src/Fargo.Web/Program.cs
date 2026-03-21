@@ -21,11 +21,12 @@ builder.Services.AddAuthorizationCore();
 
 builder.Services.AddScoped<IClientSessionStore, BrowserClientSessionStore>();
 builder.Services.AddScoped<ClientSessionAccessor>();
-builder.Services.AddScoped<FargoApiAuthorizationHandler>();
 
 builder.Services.AddFargoHttpApiClient(
     configureClient: client =>
         client.AddHttpMessageHandler<FargoApiAuthorizationHandler>());
+
+builder.Services.AddScoped<FargoApiClientFactory>();
 
 builder.Services.AddScoped<AuthenticationApi>();
 builder.Services.AddScoped<PartitionApi>();
