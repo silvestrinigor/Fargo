@@ -38,96 +38,98 @@
 
             <article class="mini-card">
                 <h2>Modular composition</h2>
-                <p>Users are handled in a separate module, and partitions are isolated behind their own API service and view state.</p>
-            </article>
+                <p>Users are handled in a separate module, and partitions are isolated behind their own API service and view
+                    state.</p>
+                </article>
 
-            <article class="mini-card">
-                <h2>Future expansion</h2>
-                <p>Articles, items, containers, and more domain trees can plug into the same shell later.</p>
-            </article>
-        </div>
+                <article class="mini-card">
+                    <h2>Future expansion</h2>
+                    <p>Articles, items, containers, and more domain trees can plug into the same shell later.</p>
+                </article>
+            </div>
 
-        <p class="muted-text">Select a partition on the left to inspect it or create child partitions.</p>
-    }
+            <p class="muted-text">Select a partition on the left to inspect it or create child partitions.</p>
+        }
     else if (isLoading)
-    {
-        <p class="muted-text">Loading partition...</p>
-    }
-    else if (selectedPartition is null)
-    {
-        <p class="muted-text">The selected partition could not be loaded.</p>
-    }
-    else
-    {
-        <div class="hero-grid two-columns-layout">
-            <article class="mini-card">
-                <h2>@selectedPartition.Name</h2>
-                <p>@(string.IsNullOrWhiteSpace(selectedPartition.Description) ? "No description informed." : selectedPartition.Description)</p>
+        {
+            <p class="muted-text">Loading partition...</p>
+        }
+        else if (selectedPartition is null)
+        {
+            <p class="muted-text">The selected partition could not be loaded.</p>
+        }
+        else
+        {
+            <div class="hero-grid two-columns-layout">
+                <article class="mini-card">
+                    <h2>@selectedPartition.Name</h2>
+                    <p>@(string.IsNullOrWhiteSpace(selectedPartition.Description) ? "No description informed." :
+                                                                                        selectedPartition.Description)</p>
 
-                <dl class="detail-list">
-                    <div>
-                        <dt>Guid</dt>
-                        <dd>@selectedPartition.Guid</dd>
-                    </div>
-                    <div>
-                        <dt>Parent</dt>
-                        <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root partition")</dd>
-                    </div>
-                    <div>
-                        <dt>Status</dt>
-                        <dd>@(selectedPartition.IsActive ? "Active" : "Inactive")</dd>
-                    </div>
-                </dl>
-            </article>
+                        <dl class="detail-list">
+                            <div>
+                                <dt>Guid</dt>
+                                <dd>@selectedPartition.Guid</dd>
+                            </div>
+                            <div>
+                                <dt>Parent</dt>
+                                <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root partition")</dd>
+                            </div>
+                            <div>
+                                <dt>Status</dt>
+                                <dd>@(selectedPartition.IsActive ? "Active" : "Inactive")</dd>
+                            </div>
+                        </dl>
+                    </article>
 
-            <article class="mini-card">
-                <h2>Create child partition</h2>
+                    <article class="mini-card">
+                        <h2>Create child partition</h2>
 
-                <EditForm Model="createModel" OnValidSubmit="CreateChildAsync" class="editor-form">
-                    <DataAnnotationsValidator />
+                        <EditForm Model="createModel" OnValidSubmit="CreateChildAsync" class="editor-form">
+                            <DataAnnotationsValidator />
 
-                    <label>
-                        <span>Name</span>
-                        <InputText @bind-Value="createModel.Name" class="text-field" />
-                        <ValidationMessage For="() => createModel.Name" />
-                    </label>
+                            <label>
+                                <span>Name</span>
+                                <InputText @bind-Value="createModel.Name" class="text-field" />
+                                <ValidationMessage For="() => createModel.Name" />
+                            </label>
 
-                    <label>
-                        <span>Description</span>
-                        <InputTextArea @bind-Value="createModel.Description" class="text-area" />
-                    </label>
+                            <label>
+                                <span>Description</span>
+                                <InputTextArea @bind-Value="createModel.Description" class="text-area" />
+                            </label>
 
-                    <div class="dialog-actions">
-                        <button type="submit" class="primary-button" disabled="@isCreatingChild">
-                            @(isCreatingChild ? "Creating..." : "Create child")
-                        </button>
-                    </div>
-                </EditForm>
-            </article>
-        </div>
-
-        <section class="page-card nested-card">
-            <h2>Edit description</h2>
-
-            <EditForm Model="editModel" OnValidSubmit="SaveAsync" class="editor-form">
-                <DataAnnotationsValidator />
-                <label>
-                    <span>Description</span>
-                    <InputTextArea @bind-Value="editModel.Description" class="text-area" />
-                </label>
-
-                <div class="dialog-actions">
-                    <button type="submit" class="primary-button" disabled="@isSaving">
-                        @(isSaving ? "Saving..." : "Save changes")
-                    </button>
-                    <button type="button" class="ghost-button danger" @onclick="DeleteAsync" disabled="@isDeleting">
-                        @(isDeleting ? "Deleting..." : "Delete partition")
-                    </button>
+                            <div class="dialog-actions">
+                                <button type="submit" class="primary-button" disabled="@isCreatingChild">
+                                    @(isCreatingChild ? "Creating..." : "Create child")
+                                </button>
+                            </div>
+                        </EditForm>
+                    </article>
                 </div>
-            </EditForm>
-        </section>
-    }
-</div>
+
+                <section class="page-card nested-card">
+                    <h2>Edit description</h2>
+
+                    <EditForm Model="editModel" OnValidSubmit="SaveAsync" class="editor-form">
+                        <DataAnnotationsValidator />
+                        <label>
+                            <span>Description</span>
+                            <InputTextArea @bind-Value="editModel.Description" class="text-area" />
+                        </label>
+
+                        <div class="dialog-actions">
+                            <button type="submit" class="primary-button" disabled="@isSaving">
+                                @(isSaving ? "Saving..." : "Save changes")
+                            </button>
+                            <button type="button" class="ghost-button danger" @onclick="DeleteAsync" disabled="@isDeleting">
+                                @(isDeleting ? "Deleting..." : "Delete partition")
+                            </button>
+                        </div>
+                    </EditForm>
+                </section>
+            }
+        </div>
 
 @code {
     [Parameter]
@@ -218,7 +220,12 @@
 
         try
         {
-            var newPartitionGuid = await PartitionApi.CreateAsync(createModel.Name!, createModel.Description, PartitionGuid.Value);
+            var newPartitionGuid = await PartitionApi.CreateAsync(
+                createModel.Name!,
+                createModel.Description,
+                PartitionGuid.Value
+                );
+
             Navigation.NavigateTo($"/workspace/partitions/{newPartitionGuid}", forceLoad: true);
         }
         catch (HttpRequestException ex)

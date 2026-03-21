@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using Fargo.Web.Security;
 
 namespace Fargo.Web.Api;
 

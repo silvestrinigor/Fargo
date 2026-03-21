@@ -1,38 +1,64 @@
 using Fargo.Application.Models.UserModels;
 using Fargo.Domain.ValueObjects;
-using Fargo.HttpApi.Client.Contracts;
+using Fargo.Web.Api;
 
 namespace Fargo.Web.Features.Users;
 
-public sealed class UserApi(IUserClient userClient)
+public sealed class UserApi(
+    IHttpClientFactory httpClientFactory,
+    ClientSessionAccessor sessionAccessor)
+    : FargoApiClientBase(httpClientFactory, sessionAccessor)
 {
-    public async Task<IReadOnlyList<UserInformation>> GetManyAsync(
+    public async Task<IReadOnlyCollection<UserInformation>> GetManyAsync(
         CancellationToken cancellationToken = default)
     {
-        var users = await userClient.GetManyAsync(cancellationToken: cancellationToken);
-        return [.. users];
+        var users = await CreateClient()
+            .GetFromJsonAsync<IReadOnlyCollection<UserInformation>>("/users", cancellationToken);
+
+        return users ?? Array.Empty<UserInformation>();
     }
 
     public Task<UserInformation?> GetSingleAsync(
         Guid userGuid,
-        CancellationToken cancellationToken = default) =>
-        userClient.GetSingleAsync(userGuid, cancellationToken: cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        return CreateClient()
+            .GetFromJsonAsync<UserInformation>($"/users/{userGuid}", cancellationToken);
+    }
 
     public async Task CreateAsync(
         UserCreateModel model,
         CancellationToken cancellationToken = default)
     {
-        await userClient.CreateAsync(model, cancellationToken);
+        using var response = await CreateClient()
+            .PostAsJsonAsync("/users", model, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
     }
 
-    public Task UpdateAsync(
+    public async Task UpdateAsync(
         Guid userGuid,
         UserUpdateModel model,
-        CancellationToken cancellationToken = default) =>
-        userClient.UpdateAsync(userGuid, model, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/users/{userGuid}")
+        {
+            Content = JsonContent.Create(model)
+        };
 
-    public Task DeleteAsync(
+        using var response = await CreateClient()
+            .SendAsync(request, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteAsync(
         Guid userGuid,
-        CancellationToken cancellationToken = default) =>
-        userClient.DeleteAsync(userGuid, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await CreateClient()
+            .DeleteAsync($"/users/{userGuid}", cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+    }
 }

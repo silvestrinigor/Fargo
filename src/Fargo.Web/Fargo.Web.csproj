@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -11,10 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.HttpApi.Client\Fargo.HttpApi.Client.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Fargo.Infrastructure.Client\Fargo.Infrastructure.Client.csproj" />
+    <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
     <ProjectReference Include="..\Fargo.Domain\Fargo.Domain.csproj" />
+    <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
   </ItemGroup>
-
 </Project>

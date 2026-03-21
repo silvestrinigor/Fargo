@@ -1,4 +1,3 @@
-// AuthenticatedSession.cs
 namespace Fargo.Web.Security;
 
 public sealed class AuthenticatedSession

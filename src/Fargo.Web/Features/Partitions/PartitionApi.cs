@@ -1,49 +1,59 @@
-using Fargo.Application.Commands.PartitionCommands;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Domain.ValueObjects;
-using Fargo.HttpApi.Client.Contracts;
+using Fargo.Web.Api;
 
 namespace Fargo.Web.Features.Partitions;
 
-public sealed class PartitionApi(IPartitionClient partitionClient)
+public sealed class PartitionApi(
+    IHttpClientFactory httpClientFactory,
+    ClientSessionAccessor sessionAccessor)
+    : FargoApiClientBase(httpClientFactory, sessionAccessor)
 {
-    public async Task<IReadOnlyList<PartitionSummary>> GetChildrenAsync(
+    public async Task<IReadOnlyCollection<PartitionSummary>> GetChildrenAsync(
         Guid? parentPartitionGuid,
         CancellationToken cancellationToken = default)
     {
-        var partitions = await partitionClient.GetManyAsync(
-            parentPartitionGuid: parentPartitionGuid,
-            cancellationToken: cancellationToken);
+        var uri = $"/partitions?parentPartitionGuid={parentPartitionGuid}";
 
-        return [.. partitions.Select(ToSummary)];
+        var result = await CreateClient()
+            .GetFromJsonAsync<IReadOnlyCollection<PartitionInformation>>(uri, cancellationToken);
+
+        return result?.Select(ToSummary).ToArray()
+            ?? Array.Empty<PartitionSummary>();
     }
 
     public async Task<PartitionSummary?> GetSingleAsync(
         Guid partitionGuid,
         CancellationToken cancellationToken = default)
     {
-        var partition = await partitionClient.GetSingleAsync(
-            partitionGuid,
-            cancellationToken: cancellationToken);
+        var partition = await CreateClient()
+            .GetFromJsonAsync<PartitionInformation>($"/partitions/{partitionGuid}", cancellationToken);
 
         return partition is null ? null : ToSummary(partition);
     }
 
-    public Task<Guid> CreateAsync(
+    public async Task<Guid> CreateAsync(
         string name,
         string? description,
-        Guid? parentPartitionGuid,
+        Guid parentPartitionGuid,
         CancellationToken cancellationToken = default)
     {
-        var command = new PartitionCreateCommand(
-            new Name(name),
-            string.IsNullOrWhiteSpace(description) ? null : new Description(description),
-            parentPartitionGuid);
+        var payload = new
+        {
+            name,
+            description,
+            parentPartitionGuid
+        };
 
-        return partitionClient.CreateAsync(command, cancellationToken);
+        using var response = await CreateClient()
+            .PostAsJsonAsync("/partitions", payload, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<Guid>(cancellationToken);
     }
 
-    public Task UpdateAsync(
+    public async Task UpdateAsync(
         Guid partitionGuid,
         string? description,
         CancellationToken cancellationToken = default)
@@ -51,20 +61,31 @@ public sealed class PartitionApi(IPartitionClient partitionClient)
         var model = new PartitionUpdateModel(
             string.IsNullOrWhiteSpace(description) ? null : new Description(description));
 
-        return partitionClient.UpdateAsync(partitionGuid, model, cancellationToken);
+        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/partitions/{partitionGuid}")
+        {
+            Content = JsonContent.Create(model)
+        };
+
+        using var response = await CreateClient()
+            .SendAsync(request, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
     }
 
-    public Task DeleteAsync(
+    public async Task DeleteAsync(
         Guid partitionGuid,
-        CancellationToken cancellationToken = default) =>
-        partitionClient.DeleteAsync(partitionGuid, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await CreateClient()
+            .DeleteAsync($"/partitions/{partitionGuid}", cancellationToken);
 
-    private static PartitionSummary ToSummary(PartitionInformation partition) =>
-        new(
-            partition.Guid,
-            partition.Name.Value,
-            partition.Description.Value,
-            partition.ParentPartitionGuid,
-            partition.IsActive
-        );
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static PartitionSummary ToSummary(PartitionInformation partition) => new(
+        partition.Guid,
+        partition.Name.Value,
+        partition.Description.Value,
+        partition.ParentPartitionGuid,
+        partition.IsActive);
 }

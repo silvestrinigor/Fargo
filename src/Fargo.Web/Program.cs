@@ -1,4 +1,3 @@
-using Fargo.Infrastructure.Client.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web.Api;
 using Fargo.Web.Components;
@@ -22,11 +21,10 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<IClientSessionStore, BrowserClientSessionStore>();
 builder.Services.AddScoped<ClientSessionAccessor>();
 
-builder.Services.AddFargoHttpApiClient(
-    configureClient: client =>
-        client.AddHttpMessageHandler<FargoApiAuthorizationHandler>());
-
-builder.Services.AddScoped<FargoApiClientFactory>();
+builder.Services.AddHttpClient("FargoApi", client =>
+{
+    client.BaseAddress = new Uri("http://apiservice");
+});
 
 builder.Services.AddScoped<AuthenticationApi>();
 builder.Services.AddScoped<PartitionApi>();
@@ -46,7 +44,6 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
