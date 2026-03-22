@@ -166,21 +166,6 @@
         await LoadUsersAsync();
     }
 
-    private bool ApplyFilter(UserInformation user)
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            return true;
-        }
-
-        var term = searchTerm.Trim();
-
-        return user.Nameid.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
-            || user.FirstName.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
-            || user.LastName.ToString().Contains(term, StringComparison.OrdinalIgnoreCase)
-            || user.Description.ToString().Contains(term, StringComparison.OrdinalIgnoreCase);
-    }
-
     private async Task LoadUsersAsync()
     {
         isLoading = true;

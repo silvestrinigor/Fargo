@@ -16,7 +16,7 @@ public sealed class PartitionSecurityTreeApi(
         CancellationToken cancellationToken = default)
     {
         var result = await GetFromJsonAsync<IReadOnlyCollection<TreeNode>>(
-            $"/trees/partitions/security?partitionGuid={partitionGuid}",
+            $"/trees/partitions/security",
             cancellationToken: cancellationToken);
 
         return result ?? Array.Empty<TreeNode>();

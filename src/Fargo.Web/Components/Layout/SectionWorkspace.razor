@@ -1,0 +1,73 @@
+<section class="workspace-shell">
+    <div class="workspace-header">
+        <div class="workspace-heading">
+            <h1>@Title</h1>
+            @if (!string.IsNullOrWhiteSpace(Description))
+            {
+                <p>@Description</p>
+            }
+        </div>
+
+        @if (HeaderActions is not null)
+        {
+            <div class="workspace-header-actions">
+                @HeaderActions
+            </div>
+        }
+    </div>
+
+    <div class="workspace-surface">
+        <aside class="workspace-explorer">
+            <div class="workspace-pane-header">
+                <h2>@ExplorerTitle</h2>
+                @if (!string.IsNullOrWhiteSpace(ExplorerDescription))
+                {
+                    <p>@ExplorerDescription</p>
+                }
+            </div>
+
+            <div class="workspace-pane-body">
+                @ExplorerContent
+            </div>
+
+            @if (ExplorerFooter is not null)
+            {
+                <div class="workspace-pane-footer">
+                    @ExplorerFooter
+                </div>
+            }
+        </aside>
+
+        <section class="workspace-detail">
+            <div class="workspace-detail-body">
+                @DetailContent
+            </div>
+        </section>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string ExplorerTitle { get; set; }
+
+    [Parameter]
+    public string? ExplorerDescription { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ExplorerContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ExplorerFooter { get; set; }
+
+    [Parameter]
+    public RenderFragment? HeaderActions { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment DetailContent { get; set; }
+}

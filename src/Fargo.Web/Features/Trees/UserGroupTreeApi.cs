@@ -16,7 +16,7 @@ public sealed class UserGroupTreeApi(
         CancellationToken cancellationToken = default)
     {
         var result = await GetFromJsonAsync<IReadOnlyCollection<TreeNode>>(
-            $"/trees/user-groups?userGroupGuid={userGroupGuid}",
+            $"/trees/user-groups",
             cancellationToken: cancellationToken);
 
         return result ?? Array.Empty<TreeNode>();

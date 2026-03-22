@@ -16,7 +16,7 @@ public sealed class ArticleTreeApi(
         CancellationToken cancellationToken = default)
     {
         var result = await GetFromJsonAsync<IReadOnlyCollection<TreeNode>>(
-            $"/trees/articles?articleGuid={articleGuid}",
+            $"/trees/articles",
             cancellationToken: cancellationToken);
 
         return result ?? Array.Empty<TreeNode>();

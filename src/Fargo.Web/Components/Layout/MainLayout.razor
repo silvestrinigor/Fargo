@@ -24,50 +24,28 @@ else if (!SessionAccessor.IsAuthenticated)
 }
 else
 {
-    var sidebarSection = GetSidebarSection();
-
     <div class="app-shell">
         <header class="app-header">
-            <div>
+            <div class="app-header-side app-header-branding">
                 <div class="app-brand">Fargo</div>
                 <div class="app-subtitle">Tree-first administration workspace</div>
             </div>
 
-            <nav class="app-nav">
+            <nav class="app-nav" aria-label="Primary">
                 <a class="@(IsPartitionsActive() ? "nav-link active" : "nav-link")" href="/partitions">Partitions</a>
                 <a class="@(IsActive("/users") ? "nav-link active" : "nav-link")" href="/users">Users</a>
                 <a class="@(IsActive("/articles") ? "nav-link active" : "nav-link")" href="/articles">Articles</a>
                 <a class="@(IsActive("/entities") ? "nav-link active" : "nav-link")" href="/entities">Entities</a>
             </nav>
 
-            <button type="button" class="ghost-button" @onclick="LogoutAsync">Sign out</button>
+            <div class="app-header-side app-header-actions">
+                <button type="button" class="ghost-button" @onclick="LogoutAsync">Sign out</button>
+            </div>
         </header>
 
-        <div class="app-body">
-            <aside class="app-sidebar">
-                <div class="sidebar-header">
-                    <h2>@sidebarSection.Title</h2>
-                    <p>@sidebarSection.Description</p>
-                </div>
-
-                @switch (sidebarSection.Kind)
-                {
-                    case SidebarSectionKind.Users:
-                        <UserGroupTree />
-                        break;
-                    case SidebarSectionKind.Articles:
-                        <ArticleTree />
-                        break;
-                    default:
-                        <PartitionTree />
-                        break;
-                }
-            </aside>
-
-            <main class="app-content">
-                @Body
-            </main>
-        </div>
+        <main class="app-main">
+            @Body
+        </main>
     </div>
 }
 
@@ -79,8 +57,7 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (SessionAccessor.IsReady && !SessionAccessor.IsAuthenticated && !Navigation.Uri.Contains("/login",
-StringComparison.OrdinalIgnoreCase))
+        if (SessionAccessor.IsReady && !SessionAccessor.IsAuthenticated && !Navigation.Uri.Contains("/login", StringComparison.OrdinalIgnoreCase))
         {
             Navigation.NavigateTo("/login", replace: true);
         }
@@ -101,32 +78,6 @@ StringComparison.OrdinalIgnoreCase))
         return relative.StartsWith(path.TrimStart('/'), StringComparison.OrdinalIgnoreCase);
     }
 
-    private SidebarSection GetSidebarSection()
-    {
-        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
-
-        if (relative.StartsWith("users", StringComparison.OrdinalIgnoreCase))
-        {
-            return new SidebarSection(
-                "Users",
-                "Browse user groups and open the selected group in the users workspace.",
-                SidebarSectionKind.Users);
-        }
-
-        if (relative.StartsWith("articles", StringComparison.OrdinalIgnoreCase))
-        {
-            return new SidebarSection(
-                "Articles",
-                "Browse the article tree and inspect the selected article on the right.",
-                SidebarSectionKind.Articles);
-        }
-
-        return new SidebarSection(
-            "Partitions",
-            "Browse partitions and manage the selected partition on the right.",
-            SidebarSectionKind.Partitions);
-    }
-
     private void HandleSessionChanged()
     {
         InvokeAsync(StateHasChanged);
@@ -135,17 +86,5 @@ StringComparison.OrdinalIgnoreCase))
     public void Dispose()
     {
         SessionAccessor.Changed -= HandleSessionChanged;
-    }
-
-    private sealed record SidebarSection(
-        string Title,
-        string Description,
-        SidebarSectionKind Kind);
-
-    private enum SidebarSectionKind
-    {
-        Partitions,
-        Users,
-        Articles
     }
 }

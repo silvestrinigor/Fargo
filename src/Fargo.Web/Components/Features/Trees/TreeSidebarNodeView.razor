@@ -8,11 +8,25 @@
         </button>
 
         <button type="button" class="tree-node-button" @onclick="(() => OnSelect.InvokeAsync(Node))">
-            <span>@Node.Title</span>
-            @if (!Node.IsActive)
-            {
-                <span class="tree-badge">inactive</span>
-            }
+            <span class="tree-node-copy">
+                <span class="tree-node-title">@Node.Title</span>
+                @if (!string.IsNullOrWhiteSpace(Node.Subtitle))
+                {
+                    <span class="tree-node-subtitle">@Node.Subtitle</span>
+                }
+            </span>
+
+            <span class="tree-node-meta">
+                @if (Node.MembersCount > 0)
+                {
+                    <span class="tree-count">@Node.MembersCount</span>
+                }
+
+                @if (!Node.IsActive)
+                {
+                    <span class="tree-badge">inactive</span>
+                }
+            </span>
         </button>
     </div>
 
