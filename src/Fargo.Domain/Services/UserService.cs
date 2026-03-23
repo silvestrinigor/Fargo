@@ -3,6 +3,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Logics;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Security;
 
 namespace Fargo.Domain.Services;
 
@@ -24,7 +25,8 @@ namespace Fargo.Domain.Services;
 /// </list>
 /// </remarks>
 public class UserService(
-        IUserRepository userRepository
+        IUserRepository userRepository,
+        IPartitionRepository partitionRepository
         )
 {
     /// <summary>
@@ -185,5 +187,32 @@ public class UserService(
         var userGroupHasPermission = user.UserGroups.Any(g => g.HasPermission(action));
 
         return userGroupHasPermission;
+    }
+
+    public async Task<UserActor?> GetUserActorByGuid(
+        Guid userGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await userRepository.GetByGuid(userGuid, cancellationToken);
+
+        if (user is null)
+        {
+            return null;
+        }
+
+        var parentPartitions = user.PartitionAccesses
+            .Select(p => p.PartitionGuid)
+            .ToHashSet();
+
+        parentPartitions.UnionWith(
+            user.UserGroups
+                .SelectMany(g => g.PartitionAccesses)
+                .Select(p => p.PartitionGuid)
+        );
+
+        var partitionAccess = await partitionRepository
+            .GetDescendantGuids(parentPartitions, true, cancellationToken);
+
+        return new UserActor(user, partitionAccess);
     }
 }

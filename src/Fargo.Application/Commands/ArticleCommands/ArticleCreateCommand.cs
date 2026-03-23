@@ -9,6 +9,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
+using System.Runtime.CompilerServices;
 
 namespace Fargo.Application.Commands.ArticleCommands;
 
@@ -32,6 +33,7 @@ public sealed record ArticleCreateCommand(
 /// at least one partition.
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
+    ActorService actorService,
     PartitionService partitionService,
     IArticleRepository articleRepository,
     IUserRepository userRepository,
@@ -67,12 +69,9 @@ public sealed class ArticleCreateCommandHandler(
         CancellationToken cancellationToken = default
         )
     {
-        var actor = await userRepository.GetActiveCurrentUser(
-            currentUser,
-            cancellationToken
-            );
+        var actor = await actorService.GetUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateArticle);
+        UserPermissionHelper.ValidateHasPermission(actor!.User, ActionType.CreateArticle);
 
         var article = new Article
         {
@@ -91,7 +90,7 @@ public sealed class ArticleCreateCommandHandler(
 
         var hasAccessToPartition = await partitionService.HasAccess(
             articlePartition,
-            actor,
+            actor.User,
             cancellationToken
             );
 

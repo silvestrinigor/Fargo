@@ -1,3 +1,5 @@
+using Fargo.Domain.Enums;
+
 namespace Fargo.Domain.Security;
 
 /// <summary>
@@ -16,4 +18,16 @@ public interface IActor
     /// Gets the unique identifier of the actor.
     /// </summary>
     Guid Guid { get; }
+
+    bool IsAdmin { get; }
+
+    bool IsSystem { get; }
+
+    IReadOnlyCollection<ActionType> PermissionActions { get; }
+
+    IReadOnlyCollection<Guid> PartitionAccesses { get; }
+
+    bool HasPartitionAccess(Guid partitionGuid);
+
+    bool HasActionPermission(ActionType action);
 }

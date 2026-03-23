@@ -1,3 +1,4 @@
+using Fargo.Domain.Enums;
 using Fargo.Domain.Services;
 
 namespace Fargo.Domain.Security;
@@ -9,7 +10,7 @@ namespace Fargo.Domain.Security;
 /// This actor is used when an operation is performed by the system
 /// itself rather than by a real authenticated user.
 /// </remarks>
-public sealed class SystemActor : IActor
+public sealed class SystemActor : Actor
 {
     /// <summary>
     /// Gets the unique identifier of the actor.
@@ -18,7 +19,15 @@ public sealed class SystemActor : IActor
     /// This value is always equal to <see cref="SystemService.SystemGuid"/>,
     /// which represents the predefined identifier of the internal system actor.
     /// </remarks>
-    public Guid Guid { get; }
+    public override Guid Guid { get; }
+
+    public override bool IsAdmin => true;
+
+    public override bool IsSystem => true;
+
+    public override IReadOnlyCollection<ActionType> PermissionActions => [];
+
+    public override IReadOnlyCollection<Guid> PartitionAccesses => [];
 
     /// <summary>
     /// Initializes a new instance of <see cref="SystemActor"/>.
