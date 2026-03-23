@@ -1,3 +1,4 @@
+using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 
 namespace Fargo.Domain.Security;
@@ -22,5 +23,10 @@ public abstract class Actor : IActor
     public bool HasPartitionAccess(Guid partitionGuid)
     {
         return PartitionAccesses.Any(p => p == partitionGuid);
+    }
+
+    public bool HasAccess(IPartitioned partitioned)
+    {
+        return partitioned.Partitions.Any(p => PartitionAccesses.Contains(p.Guid));
     }
 }

@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -29,9 +28,8 @@ public sealed record PartitionDeleteCommand(
 /// and has access to the specified partition.
 /// </remarks>
 public sealed class PartitionDeleteCommandHandler(
-        PartitionService partitionService,
+        ActorService actorService,
         IPartitionRepository partitionRepository,
-        IUserRepository userRepository,
         ICurrentUser currentUser,
         IUnitOfWork unitOfWork
         ) : ICommandHandler<PartitionDeleteCommand>
@@ -65,12 +63,13 @@ public sealed class PartitionDeleteCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeletePartition);
+        actor.ValidateHassPermission(ActionType.DeletePartition);
 
-        var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
-            ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);
+        var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
+
+        actor.ValidateHassPartitionAccess(partition.Guid);
 
         partitionRepository.Remove(partition);
 

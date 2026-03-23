@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -9,7 +8,6 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
-using System.Runtime.CompilerServices;
 
 namespace Fargo.Application.Commands.ArticleCommands;
 
@@ -34,9 +32,7 @@ public sealed record ArticleCreateCommand(
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
     ActorService actorService,
-    PartitionService partitionService,
     IArticleRepository articleRepository,
-    IUserRepository userRepository,
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork
@@ -69,9 +65,15 @@ public sealed class ArticleCreateCommandHandler(
         CancellationToken cancellationToken = default
         )
     {
-        var actor = await actorService.GetUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor!.User, ActionType.CreateArticle);
+        actor.ValidateHassPermission(ActionType.CreateArticle);
+
+        var partitionGuid = command.Article.FirstPartition ?? PartitionService.GlobalPartitionGuid;
+
+        var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
+        actor.ValidateHassPartitionAccess(partition.Guid);
 
         var article = new Article
         {
@@ -79,27 +81,7 @@ public sealed class ArticleCreateCommandHandler(
             Description = command.Article.Description ?? Description.Empty
         };
 
-        var partitionGuid =
-            command.Article.FirstPartition ?? PartitionService.GlobalPartitionGuid;
-
-        var articlePartition = await partitionRepository.GetByGuid(
-            partitionGuid,
-            cancellationToken
-            )
-            ?? throw new PartitionNotFoundFargoApplicationException(partitionGuid);
-
-        var hasAccessToPartition = await partitionService.HasAccess(
-            articlePartition,
-            actor.User,
-            cancellationToken
-            );
-
-        if (!hasAccessToPartition)
-        {
-            throw new PartitionAccessDeniedFargoApplicationException(partitionGuid, actor.Guid);
-        }
-
-        article.Partitions.Add(articlePartition);
+        article.Partitions.Add(partition);
 
         articleRepository.Add(article);
 

@@ -38,4 +38,12 @@ public static class UserRepositoryExtensions
 
         return actor;
     }
+
+    public static async Task<User> GetFoundByGuid(this IUserRepository repository, Guid userGuid, CancellationToken cancellationToken = default)
+    {
+        var user = await repository.GetByGuid(userGuid, cancellationToken)
+            ?? throw new UserNotFoundFargoApplicationException(userGuid);
+
+        return user;
+    }
 }

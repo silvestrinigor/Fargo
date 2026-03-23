@@ -1,11 +1,11 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.ItemCommands;
 
@@ -27,8 +27,8 @@ public sealed record ItemUpdateCommand(
 /// Handles the execution of <see cref="ItemUpdateCommand"/>.
 /// </summary>
 public sealed class ItemUpdateCommandHandler(
+        ActorService actorService,
         IItemRepository itemRepository,
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<ItemUpdateCommand>
@@ -50,14 +50,11 @@ public sealed class ItemUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditItem);
+        actor.ValidateHassPermission(ActionType.EditItem);
 
-        _ = await itemRepository.GetByGuid(
-                command.ItemGuid,
-                cancellationToken
-                ) ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);
+        _ = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

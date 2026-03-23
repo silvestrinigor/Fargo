@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -31,7 +30,9 @@ public sealed record PartitionUpdateCommand(
 /// Handles the execution of <see cref="PartitionUpdateCommand"/>.
 /// </summary>
 public sealed class PartitionUpdateCommandHandler(
+        ActorService actorService,
         PartitionService partitionService,
+        IPartitionRepository partitionRepository,
         IUserRepository userRepository,
         ICurrentUser currentUser,
         IUnitOfWork unitOfWork
@@ -66,12 +67,13 @@ public sealed class PartitionUpdateCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditPartition);
+        actor.ValidateHassPermission(ActionType.EditPartition);
 
-        var partition = await partitionService.GetPartition(command.PartitionGuid, actor, cancellationToken)
-            ?? throw new PartitionNotFoundFargoApplicationException(command.PartitionGuid);
+        var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
+
+        actor.ValidateHassPartitionAccess(partition.Guid);
 
         partition.Description = command.Partition.Description ?? Description.Empty;
 

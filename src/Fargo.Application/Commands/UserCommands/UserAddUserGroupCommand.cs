@@ -1,10 +1,10 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.UserCommands;
 
@@ -26,6 +26,7 @@ public sealed record UserAddUserGroupCommand(
 /// Handles the execution of <see cref="UserAddUserGroupCommand"/>.
 /// </summary>
 public sealed class UserAddUserGroupCommandHandler(
+        ActorService actorService,
         IUserRepository userRepository,
         IUserGroupRepository userGroupRepository,
         IUnitOfWork unitOfWork,
@@ -55,21 +56,13 @@ public sealed class UserAddUserGroupCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.ChangeUserGroupMembers);
+        actor.ValidateHassPermission(ActionType.ChangeUserGroupMembers);
 
-        var user = await userRepository.GetByGuid(
-                command.UserGuid,
-                cancellationToken
-                )
-            ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
+        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
-        var userGroup = await userGroupRepository.GetByGuid(
-                command.UserGroupGuid,
-                cancellationToken
-                )
-            ?? throw new UserGroupNotFoundFargoApplicationException(command.UserGroupGuid);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 
         user.UserGroups.Add(userGroup);
 

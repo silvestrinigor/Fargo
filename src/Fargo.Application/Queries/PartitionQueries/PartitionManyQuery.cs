@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.PartitionQueries;
@@ -42,6 +43,7 @@ public sealed record PartitionManyQuery(
 /// only partitions whose parent matches that identifier are returned.
 /// </remarks>
 public sealed class PartitionManyQueryHandler(
+        ActorService actorService,
         IPartitionRepository partitionRepository,
         IUserRepository userRepository,
         ICurrentUser currentUser
@@ -69,16 +71,10 @@ public sealed class PartitionManyQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
-
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-                [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-                includeRoots: true,
-                cancellationToken
-                );
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var partitions = await partitionRepository.GetManyInfoByGuids(
-                partitionAccessGuids,
+                actor.PartitionAccesses,
                 query.Pagination ?? Pagination.FirstPage20Items,
                 query.ParentPartitionGuid,
                 query.AsOfDateTime,

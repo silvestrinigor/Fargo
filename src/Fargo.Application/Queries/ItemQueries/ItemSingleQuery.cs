@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.ItemQueries;
@@ -18,9 +19,9 @@ namespace Fargo.Application.Queries.ItemQueries;
 /// as it existed at the specified date and time.
 /// </param>
 public sealed record ItemSingleQuery(
-    Guid ItemGuid,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<ItemInformation?>;
+        Guid ItemGuid,
+        DateTimeOffset? AsOfDateTime = null
+        ) : IQuery<ItemInformation?>;
 
 /// <summary>
 /// Handles the execution of <see cref="ItemSingleQuery"/>.
@@ -34,11 +35,12 @@ public sealed record ItemSingleQuery(
 /// <see langword="null"/> is returned.
 /// </remarks>
 public sealed class ItemSingleQueryHandler(
-    IItemRepository itemRepository,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentUser currentUser
-) : IQueryHandler<ItemSingleQuery, ItemInformation?>
+        ActorService actorService,
+        IItemRepository itemRepository,
+        IUserRepository userRepository,
+        IPartitionRepository partitionRepository,
+        ICurrentUser currentUser
+        ) : IQueryHandler<ItemSingleQuery, ItemInformation?>
 {
     /// <summary>
     /// Executes the query to retrieve a single item information projection
@@ -55,26 +57,20 @@ public sealed class ItemSingleQueryHandler(
     /// or <see langword="null"/> if the item does not exist or is not accessible.
     /// </returns>
     public async Task<ItemInformation?> Handle(
-        ItemSingleQuery query,
-        CancellationToken cancellationToken = default
-    )
+            ItemSingleQuery query,
+            CancellationToken cancellationToken = default
+            )
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
-
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var itemInformation = await itemRepository.GetInfoByGuidInPartitions(
-            query.ItemGuid,
-            partitionAccessGuids,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+                query.ItemGuid,
+                actor.PartitionAccesses,
+                query.AsOfDateTime,
+                cancellationToken
+                );
 
         return itemInformation;
     }

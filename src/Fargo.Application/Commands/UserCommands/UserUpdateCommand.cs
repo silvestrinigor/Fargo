@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -29,6 +28,7 @@ public sealed record UserUpdateCommand(
 /// Handles the execution of <see cref="UserUpdateCommand"/>.
 /// </summary>
 public sealed class UserUpdateCommandHandler(
+        ActorService actorService,
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IUnitOfWork unitOfWork,
@@ -52,14 +52,11 @@ public sealed class UserUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditUser);
+        actor.ValidateHassPermission(ActionType.EditUser);
 
-        var user = await userRepository.GetByGuid(
-                command.UserGuid,
-                cancellationToken
-                ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
+        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
         user.Nameid = command.User.Nameid ?? user.Nameid;
         user.FirstName = command.User.FirstName ?? user.FirstName;
@@ -74,9 +71,10 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.Password is not null)
         {
-            UserPermissionHelper.ValidateHasPermission(actor, ActionType.ChangeOtherUserPassword);
+            actor.ValidateHassPermission(ActionType.ChangeOtherUserPassword);
 
             user.PasswordHash = passwordHasher.Hash(command.User.Password.Value);
+
             user.MarkPasswordChangeAsRequired();
         }
 

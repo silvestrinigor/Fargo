@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.PartitionQueries;
@@ -34,8 +35,8 @@ public sealed record PartitionSingleQuery(
 /// <see langword="null"/> is returned.
 /// </remarks>
 public sealed class PartitionSingleQueryHandler(
+        ActorService actorService,
         IPartitionRepository partitionRepository,
-        IUserRepository userRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<PartitionSingleQuery, PartitionInformation?>
 {
@@ -60,15 +61,9 @@ public sealed class PartitionSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-                [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-                includeRoots: true,
-                cancellationToken
-                );
-
-        if (!partitionAccessGuids.Contains(query.PartitionGuid))
+        if (!actor.IsAdmin && !actor.IsSystem && !actor.PartitionAccesses.Contains(query.PartitionGuid))
         {
             return null;
         }

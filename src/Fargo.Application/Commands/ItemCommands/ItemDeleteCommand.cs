@@ -1,10 +1,10 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.ItemCommands;
 
@@ -22,8 +22,8 @@ public sealed record ItemDeleteCommand(
 /// Handles the execution of <see cref="ItemDeleteCommand"/>.
 /// </summary>
 public sealed class ItemDeleteCommandHandler(
+        ActorService actorService,
         IItemRepository itemRepository,
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<ItemDeleteCommand>
@@ -45,15 +45,11 @@ public sealed class ItemDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteItem);
+        actor.ValidateHassPermission(ActionType.DeleteItem);
 
-        var item = await itemRepository.GetByGuid(
-                command.ItemGuid,
-                cancellationToken
-                )
-            ?? throw new ItemNotFoundFargoApplicationException(command.ItemGuid);
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
         itemRepository.Remove(item);
 

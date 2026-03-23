@@ -1,6 +1,7 @@
 using Fargo.Domain.Entities;
 using Fargo.Domain.Exceptions;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Security;
 
 namespace Fargo.Domain.Services;
 
@@ -71,9 +72,9 @@ public class UserGroupService(
     /// </exception>
     public static void ValidateUserGroupDelete(
         UserGroup userGroup,
-        User actor)
+        UserActor actor)
     {
-        var actorIsMember = actor.UserGroups
+        var actorIsMember = actor.User.UserGroups
             .Any(x => x.Guid == userGroup.Guid);
 
         if (actorIsMember)

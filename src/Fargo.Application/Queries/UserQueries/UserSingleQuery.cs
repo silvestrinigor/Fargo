@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.UserQueries;
@@ -34,6 +35,7 @@ public sealed record UserSingleQuery(
 /// <see langword="null"/> is returned.
 /// </remarks>
 public sealed class UserSingleQueryHandler(
+        ActorService actorService,
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser
@@ -50,17 +52,11 @@ public sealed class UserSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
-
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var userInformation = await userRepository.GetInfoByGuidInPartitions(
             query.UserGuid,
-            partitionAccessGuids,
+            actor.PartitionAccesses,
             query.AsOfDateTime,
             cancellationToken
         );

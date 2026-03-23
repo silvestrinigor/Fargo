@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -23,6 +22,7 @@ public sealed record UserGroupDeleteCommand(
 /// Handles the execution of <see cref="UserGroupDeleteCommand"/>.
 /// </summary>
 public sealed class UserGroupDeleteCommandHandler(
+        ActorService actorService,
         IUserGroupRepository userGroupRepository,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
@@ -52,14 +52,11 @@ public sealed class UserGroupDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteUserGroup);
+        actor.ValidateHassPermission(ActionType.DeleteUserGroup);
 
-        var userGroup = await userGroupRepository.GetByGuid(
-                command.UserGroupGuid,
-                cancellationToken
-                ) ?? throw new UserGroupNotFoundFargoApplicationException(command.UserGroupGuid);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 
         UserGroupService.ValidateUserGroupDelete(userGroup, actor);
 

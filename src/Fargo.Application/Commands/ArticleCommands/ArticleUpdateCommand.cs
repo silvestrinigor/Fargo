@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -28,9 +27,8 @@ public sealed record ArticleUpdateCommand(
 /// Handles the execution of <see cref="ArticleUpdateCommand"/>.
 /// </summary>
 public sealed class ArticleUpdateCommandHandler(
-        PartitionService partitionService,
+        ActorService actorService,
         IArticleRepository articleRepository,
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<ArticleUpdateCommand>
@@ -52,23 +50,13 @@ public sealed class ArticleUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditArticle);
+        actor.ValidateHassPermission(ActionType.EditArticle);
 
-        var article = await articleRepository.GetByGuid(command.ArticleGuid, cancellationToken)
-            ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        var hasAccessToArticle = await partitionService.HasAccess(
-            article,
-            actor,
-            cancellationToken
-            );
-
-        if (!hasAccessToArticle)
-        {
-            throw new PartitionedEntityAccessDeniedFargoApplicationException(article.Guid, actor.Guid);
-        }
+        actor.ValidateHassAccess(article);
 
         if (command.Article.Name is not null)
         {

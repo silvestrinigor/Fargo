@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.ArticleQueries;
@@ -20,9 +21,9 @@ namespace Fargo.Application.Queries.ArticleQueries;
 /// When <see langword="null"/>, a default pagination is used.
 /// </param>
 public sealed record ArticleManyQuery(
-    DateTimeOffset? AsOfDateTime = null,
-    Pagination? Pagination = null
-) : IQuery<IReadOnlyCollection<ArticleInformation>>;
+        DateTimeOffset? AsOfDateTime = null,
+        Pagination? Pagination = null
+        ) : IQuery<IReadOnlyCollection<ArticleInformation>>;
 
 /// <summary>
 /// Handles the execution of <see cref="ArticleManyQuery"/>.
@@ -36,11 +37,10 @@ public sealed record ArticleManyQuery(
 /// an empty result set.
 /// </remarks>
 public sealed class ArticleManyQueryHandler(
-    IArticleRepository articleRepository,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentUser currentUser
-) : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>
+        ActorService actorService,
+        IArticleRepository articleRepository,
+        ICurrentUser currentUser
+        ) : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>
 {
     /// <summary>
     /// Executes the query to retrieve article information accessible
@@ -57,26 +57,20 @@ public sealed class ArticleManyQueryHandler(
     /// accessible to the current user.
     /// </returns>
     public async Task<IReadOnlyCollection<ArticleInformation>> Handle(
-        ArticleManyQuery query,
-        CancellationToken cancellationToken = default
-    )
+            ArticleManyQuery query,
+            CancellationToken cancellationToken = default
+            )
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
-
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var articles = await articleRepository.GetManyInfoInPartitions(
-            query.Pagination ?? Pagination.FirstPage20Items,
-            partitionAccessGuids,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+                query.Pagination ?? Pagination.FirstPage20Items,
+                actor.PartitionAccesses,
+                query.AsOfDateTime,
+                cancellationToken
+                );
 
         return articles;
     }

@@ -1,12 +1,12 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.ItemCommands;
 
@@ -24,9 +24,9 @@ public sealed record ItemCreateCommand(
 /// Handles the execution of <see cref="ItemCreateCommand"/>.
 /// </summary>
 public sealed class ItemCreateCommandHandler(
+        ActorService actorService,
         IItemRepository itemRepository,
         IArticleRepository articleRepository,
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<ItemCreateCommand, Guid>
@@ -48,15 +48,11 @@ public sealed class ItemCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateItem);
+        actor.ValidateHassPermission(ActionType.CreateItem);
 
-        var article = await articleRepository.GetByGuid(
-                command.Item.ArticleGuid,
-                cancellationToken
-                ) ?? throw new ArticleNotFoundFargoApplicationException(
-                        command.Item.ArticleGuid);
+        var article = await articleRepository.GetFoundByGuid(command.Item.ArticleGuid, cancellationToken);
 
         var item = new Item
         {

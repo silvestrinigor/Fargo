@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -26,6 +25,7 @@ public sealed record UserGroupCreateCommand(
 /// Handles the execution of <see cref="UserGroupCreateCommand"/>.
 /// </summary>
 public sealed class UserGroupCreateCommandHandler(
+        ActorService actorService,
         UserGroupService userGroupService,
         IUserGroupRepository userGroupRepository,
         IUserRepository userRepository,
@@ -47,9 +47,9 @@ public sealed class UserGroupCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateUserGroup);
+        actor.ValidateHassPermission(ActionType.CreateUserGroup);
 
         var userGroup = new UserGroup
         {
@@ -57,10 +57,7 @@ public sealed class UserGroupCreateCommandHandler(
             Description = command.UserGroup.Description ?? Description.Empty
         };
 
-        await userGroupService.ValidateUserGroupCreate(
-                userGroup,
-                cancellationToken
-                );
+        await userGroupService.ValidateUserGroupCreate(userGroup, cancellationToken);
 
         foreach (var permission in command.UserGroup.Permissions ?? [])
         {

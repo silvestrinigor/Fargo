@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.ArticleQueries;
@@ -18,9 +19,9 @@ namespace Fargo.Application.Queries.ArticleQueries;
 /// as it existed at the specified date and time.
 /// </param>
 public sealed record ArticleSingleQuery(
-    Guid ArticleGuid,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<ArticleInformation?>;
+        Guid ArticleGuid,
+        DateTimeOffset? AsOfDateTime = null
+        ) : IQuery<ArticleInformation?>;
 
 /// <summary>
 /// Handles the execution of <see cref="ArticleSingleQuery"/>.
@@ -34,11 +35,10 @@ public sealed record ArticleSingleQuery(
 /// <see langword="null"/> is returned.
 /// </remarks>
 public sealed class ArticleSingleQueryHandler(
-    IArticleRepository articleRepository,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentUser currentUser
-) : IQueryHandler<ArticleSingleQuery, ArticleInformation?>
+        ActorService actorService,
+        IArticleRepository articleRepository,
+        ICurrentUser currentUser
+        ) : IQueryHandler<ArticleSingleQuery, ArticleInformation?>
 {
     /// <summary>
     /// Executes the query to retrieve a single article information projection
@@ -55,25 +55,19 @@ public sealed class ArticleSingleQueryHandler(
     /// or <see langword="null"/> if the article does not exist or is not accessible.
     /// </returns>
     public async Task<ArticleInformation?> Handle(
-        ArticleSingleQuery query,
-        CancellationToken cancellationToken = default)
+            ArticleSingleQuery query,
+            CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
-
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByGuidInPartitions(
-            query.ArticleGuid,
-            partitionAccessGuids,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+                query.ArticleGuid,
+                actor.PartitionAccesses,
+                query.AsOfDateTime,
+                cancellationToken
+                );
 
         return article;
     }
