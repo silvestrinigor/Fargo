@@ -17,6 +17,18 @@ namespace Fargo.Domain.Security;
 public sealed class SystemActor : Actor
 {
     /// <summary>
+    /// Initializes a new instance of <see cref="SystemActor"/>.
+    /// </summary>
+    /// <remarks>
+    /// The created instance will always use the system-defined identifier
+    /// (<see cref="SystemService.SystemGuid"/>).
+    /// </remarks>
+    internal SystemActor()
+    {
+        Guid = SystemService.SystemGuid;
+    }
+
+    /// <summary>
     /// Gets the unique identifier of the actor.
     /// </summary>
     /// <remarks>
@@ -76,16 +88,4 @@ public sealed class SystemActor : Actor
     /// are expected to be bypassed due to <see cref="IsAdmin"/>.
     /// </remarks>
     public override IReadOnlyCollection<Guid> PartitionAccesses => [];
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="SystemActor"/>.
-    /// </summary>
-    /// <remarks>
-    /// The created instance will always use the system-defined identifier
-    /// (<see cref="SystemService.SystemGuid"/>).
-    /// </remarks>
-    public SystemActor()
-    {
-        Guid = SystemService.SystemGuid;
-    }
 }

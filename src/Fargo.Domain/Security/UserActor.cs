@@ -49,7 +49,7 @@ public sealed class UserActor : Actor
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="user"/> is null.
     /// </exception>
-    public UserActor(User user, IReadOnlyCollection<Guid> partitionAccesses)
+    internal UserActor(User user, IReadOnlyCollection<Guid> partitionAccesses)
     {
         ArgumentNullException.ThrowIfNull(user);
 
