@@ -101,12 +101,12 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot delete their own account.
     /// </remarks>
-    public static void ValidateUserDelete(User user, UserActor actor)
+    public static void ValidateUserDelete(User user, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(actor);
 
-        if (user == actor.User)
+        if (user.Guid == actor.Guid)
         {
             throw new UserCannotDeleteSelfFargoDomainException(actor.Guid);
         }
@@ -136,12 +136,12 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot modify their own permissions.
     /// </remarks>
-    public static void ValidateUserPermissionChange(User user, UserActor actor)
+    public static void ValidateUserPermissionChange(User user, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(actor);
 
-        if (user == actor.User)
+        if (user.Guid == actor.Guid)
         {
             throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
         }

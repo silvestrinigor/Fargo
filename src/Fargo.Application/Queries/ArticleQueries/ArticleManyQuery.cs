@@ -63,15 +63,28 @@ public sealed class ArticleManyQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var articles = await articleRepository.GetManyInfoInPartitions(
-                query.Pagination ?? Pagination.FirstPage20Items,
-                actor.PartitionAccesses,
-                query.AsOfDateTime,
-                cancellationToken
-                );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var articles = await articleRepository.GetManyInfo(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return articles;
+            return articles;
+        }
+        else
+        {
+            var articles = await articleRepository.GetManyInfoInPartitions(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return articles;
+        }
     }
 }

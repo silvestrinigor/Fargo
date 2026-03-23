@@ -15,7 +15,7 @@ public class ActorService(
     /// <summary>
     /// Retrieves a <see cref="UserActor"/> by the user's GUID.
     /// </summary>
-    /// <param name="userGuid">The unique identifier of the user.</param>
+    /// <param name="actorGuid">The unique identifier of the user.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>
     /// A <see cref="UserActor"/> containing the user and all accessible partitions,
@@ -29,11 +29,18 @@ public class ActorService(
     /// </list>
     /// It then resolves all descendant partitions for those accesses.
     /// </remarks>
-    public async Task<UserActor?> GetUserActorByGuid(
-        Guid userGuid,
+    public async Task<Actor?> GetActorByGuid(
+        Guid actorGuid,
         CancellationToken cancellationToken = default)
     {
-        var user = await userRepository.GetByGuid(userGuid, cancellationToken);
+        if (actorGuid == SystemService.SystemGuid)
+        {
+            var systemActor = new SystemActor();
+
+            return systemActor;
+        }
+
+        var user = await userRepository.GetByGuid(actorGuid, cancellationToken);
 
         if (user is null)
         {

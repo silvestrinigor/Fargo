@@ -67,7 +67,7 @@ public sealed class PartitionUpdateCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHassPermission(ActionType.EditPartition);
 

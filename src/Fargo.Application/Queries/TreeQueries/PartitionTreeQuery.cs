@@ -24,7 +24,7 @@ public sealed class PartitionTreeQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         return await partitionTreeRepository.GetMembers(
             query.Pagination ?? Pagination.FirstPage20Items,

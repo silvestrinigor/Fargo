@@ -37,7 +37,6 @@ public sealed record UserSingleQuery(
 public sealed class UserSingleQueryHandler(
         ActorService actorService,
     IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
     ICurrentUser currentUser
 ) : IQueryHandler<UserSingleQuery, UserInformation?>
 {
@@ -52,15 +51,28 @@ public sealed class UserSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var userInformation = await userRepository.GetInfoByGuidInPartitions(
-            query.UserGuid,
-            actor.PartitionAccesses,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var user = await userRepository.GetInfoByGuid(
+                    query.UserGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return userInformation;
+            return user;
+        }
+        else
+        {
+            var user = await userRepository.GetInfoByGuidInPartitions(
+                    query.UserGuid,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return user;
+        }
     }
 }

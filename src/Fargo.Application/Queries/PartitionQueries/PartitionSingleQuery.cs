@@ -61,7 +61,7 @@ public sealed class PartitionSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         if (!actor.IsAdmin && !actor.IsSystem && !actor.PartitionAccesses.Contains(query.PartitionGuid))
         {

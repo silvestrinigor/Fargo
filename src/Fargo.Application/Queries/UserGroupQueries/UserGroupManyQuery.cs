@@ -69,16 +69,30 @@ public sealed class UserGroupManyQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var userGroups = await userGroupRepository.GetManyInfoInPartitions(
-            query.Pagination ?? Pagination.FirstPage20Items,
-            actor.PartitionAccesses,
-            query.UserGuid,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var userGroups = await userGroupRepository.GetManyInfo(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.UserGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return userGroups;
+            return userGroups;
+        }
+        else
+        {
+            var userGroups = await userGroupRepository.GetManyInfoInPartitions(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    actor.PartitionAccesses,
+                    query.UserGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return userGroups;
+        }
     }
 }

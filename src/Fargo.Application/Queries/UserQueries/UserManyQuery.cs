@@ -64,13 +64,28 @@ public sealed class UserManyQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        return await userRepository.GetManyInfoInPartitions(
-            query.Pagination ?? Pagination.FirstPage20Items,
-            actor.PartitionAccesses,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var users = await userRepository.GetManyInfo(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return users;
+        }
+        else
+        {
+            var users = await userRepository.GetManyInfoInPartitions(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return users;
+        }
     }
 }

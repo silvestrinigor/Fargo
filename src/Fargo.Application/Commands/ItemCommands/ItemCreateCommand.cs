@@ -48,7 +48,7 @@ public sealed class ItemCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHassPermission(ActionType.CreateItem);
 

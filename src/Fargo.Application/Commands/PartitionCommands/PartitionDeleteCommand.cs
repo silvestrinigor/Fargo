@@ -63,7 +63,7 @@ public sealed class PartitionDeleteCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHassPermission(ActionType.DeletePartition);
 

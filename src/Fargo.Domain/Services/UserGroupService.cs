@@ -72,10 +72,10 @@ public class UserGroupService(
     /// </exception>
     public static void ValidateUserGroupDelete(
         UserGroup userGroup,
-        UserActor actor)
+        Actor actor)
     {
-        var actorIsMember = actor.User.UserGroups
-            .Any(x => x.Guid == userGroup.Guid);
+        var actorIsMember = actor is UserActor userActor &&
+            userActor.User.UserGroups.Any(x => x.Guid == userGroup.Guid);
 
         if (actorIsMember)
         {

@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.UserGroupQueries;
@@ -34,6 +35,7 @@ public sealed record UserGroupSingleQuery(
 /// <see langword="null"/> is returned.
 /// </remarks>
 public sealed class UserGroupSingleQueryHandler(
+        ActorService actorService,
     IUserGroupRepository userGroupRepository,
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,
@@ -61,21 +63,28 @@ public sealed class UserGroupSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var userGroup = await userGroupRepository.GetInfoByGuid(
+                    query.UserGroupGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        var userGroupInformation = await userGroupRepository.GetInfoByGuidInPartitions(
-            query.UserGroupGuid,
-            partitionAccessGuids,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+            return userGroup;
+        }
+        else
+        {
+            var userGroup = await userGroupRepository.GetInfoByGuidInPartitions(
+                    query.UserGroupGuid,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return userGroupInformation;
+            return userGroup;
+        }
     }
 }

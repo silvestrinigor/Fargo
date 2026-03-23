@@ -37,8 +37,6 @@ public sealed record ItemSingleQuery(
 public sealed class ItemSingleQueryHandler(
         ActorService actorService,
         IItemRepository itemRepository,
-        IUserRepository userRepository,
-        IPartitionRepository partitionRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<ItemSingleQuery, ItemInformation?>
 {
@@ -63,15 +61,28 @@ public sealed class ItemSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var itemInformation = await itemRepository.GetInfoByGuidInPartitions(
-                query.ItemGuid,
-                actor.PartitionAccesses,
-                query.AsOfDateTime,
-                cancellationToken
-                );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var itemInformation = await itemRepository.GetInfoByGuid(
+                    query.ItemGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return itemInformation;
+            return itemInformation;
+        }
+        else
+        {
+            var itemInformation = await itemRepository.GetInfoByGuidInPartitions(
+                    query.ItemGuid,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return itemInformation;
+        }
     }
 }

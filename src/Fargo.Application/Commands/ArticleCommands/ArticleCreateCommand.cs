@@ -19,8 +19,8 @@ namespace Fargo.Application.Commands.ArticleCommands;
 /// in which the article will be created.
 /// </param>
 public sealed record ArticleCreateCommand(
-    ArticleCreateModel Article
-    ) : ICommand<Guid>;
+        ArticleCreateModel Article
+        ) : ICommand<Guid>;
 
 /// <summary>
 /// Handles the execution of <see cref="ArticleCreateCommand"/>.
@@ -31,12 +31,12 @@ public sealed record ArticleCreateCommand(
 /// at least one partition.
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
-    ActorService actorService,
-    IArticleRepository articleRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
-    IUnitOfWork unitOfWork
-    ) : ICommandHandler<ArticleCreateCommand, Guid>
+        ActorService actorService,
+        IArticleRepository articleRepository,
+        IPartitionRepository partitionRepository,
+        ICurrentUser currentUser,
+        IUnitOfWork unitOfWork
+        ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     /// <summary>
     /// Executes the command to create a new article.
@@ -61,11 +61,11 @@ public sealed class ArticleCreateCommandHandler(
     /// explicitly provided, the global partition is used.
     /// </remarks>
     public async Task<Guid> Handle(
-        ArticleCreateCommand command,
-        CancellationToken cancellationToken = default
-        )
+            ArticleCreateCommand command,
+            CancellationToken cancellationToken = default
+            )
     {
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHassPermission(ActionType.CreateArticle);
 

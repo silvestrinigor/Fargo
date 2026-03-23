@@ -14,7 +14,7 @@ public static class ActorServiceExtensions
         /// <summary>
         /// Retrieves a <see cref="UserActor"/> by its GUID and ensures the user is authorized and active.
         /// </summary>
-        /// <param name="userGuid">The unique identifier of the user.</param>
+        /// <param name="actorGuid">The unique identifier of the user.</param>
         /// <param name="cancellationToken">A token to cancel the operation.</param>
         /// <returns>
         /// A valid and active <see cref="UserActor"/> instance.
@@ -22,11 +22,11 @@ public static class ActorServiceExtensions
         /// <exception cref="UnauthorizedAccessFargoApplicationException">
         /// Thrown when the user does not exist or is not active.
         /// </exception>
-        public async Task<UserActor> GetAuthorizedUserActorByGuid(Guid userGuid, CancellationToken cancellationToken = default)
+        public async Task<Actor> GetAuthorizedActorByGuid(Guid actorGuid, CancellationToken cancellationToken = default)
         {
-            var actor = await service.GetUserActorByGuid(userGuid, cancellationToken);
+            var actor = await service.GetActorByGuid(actorGuid, cancellationToken);
 
-            if (actor is null || !actor.User.IsActive)
+            if (actor is null || !actor.IsActive)
             {
                 throw new UnauthorizedAccessFargoApplicationException();
             }

@@ -45,7 +45,6 @@ public sealed record PartitionManyQuery(
 public sealed class PartitionManyQueryHandler(
         ActorService actorService,
         IPartitionRepository partitionRepository,
-        IUserRepository userRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>>
 {
@@ -71,16 +70,30 @@ public sealed class PartitionManyQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var partitions = await partitionRepository.GetManyInfoByGuids(
-                actor.PartitionAccesses,
-                query.Pagination ?? Pagination.FirstPage20Items,
-                query.ParentPartitionGuid,
-                query.AsOfDateTime,
-                cancellationToken
-                );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var partitions = await partitionRepository.GetManyInfo(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.ParentPartitionGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return partitions;
+            return partitions;
+        }
+        else
+        {
+            var partitions = await partitionRepository.GetManyInfoByGuids(
+                    actor.PartitionAccesses,
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.ParentPartitionGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return partitions;
+        }
     }
 }

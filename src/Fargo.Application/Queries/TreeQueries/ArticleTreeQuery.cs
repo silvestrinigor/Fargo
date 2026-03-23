@@ -24,12 +24,13 @@ public sealed class ArticleTreeQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         return await articleTreeRepository.GetMembers(
             query.Pagination ?? Pagination.FirstPage20Items,
             actor.PartitionAccesses,
             query.ArticleGuid,
-            cancellationToken);
+            cancellationToken
+            );
     }
 }

@@ -60,15 +60,28 @@ public sealed class ArticleSingleQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await actorService.GetAuthorizedUserActorByGuid(currentUser.UserGuid, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var article = await articleRepository.GetInfoByGuidInPartitions(
-                query.ArticleGuid,
-                actor.PartitionAccesses,
-                query.AsOfDateTime,
-                cancellationToken
-                );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var article = await articleRepository.GetInfoByGuid(
+                    query.ArticleGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return article;
+            return article;
+        }
+        else
+        {
+            var article = await articleRepository.GetInfoByGuidInPartitions(
+                    query.ArticleGuid,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return article;
+        }
     }
 }
