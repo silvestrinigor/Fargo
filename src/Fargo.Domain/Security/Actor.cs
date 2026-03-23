@@ -7,13 +7,18 @@ namespace Fargo.Domain.Security;
 /// Provides a base implementation for <see cref="IActor"/>.
 /// </summary>
 /// <remarks>
-/// The <see cref="Actor"/> class defines common behavior shared by all actor types,
-/// such as permission and partition access checks.
+/// The <see cref="Actor"/> class defines common authorization behavior shared by all actor types,
+/// including permission and partition access evaluation.
 ///
 /// Concrete implementations (e.g., <see cref="UserActor"/> and <see cref="SystemActor"/>)
-/// are responsible for supplying the actor's identity and access data.
+/// are responsible for supplying identity and access data.
 ///
-/// This class centralizes authorization logic to ensure consistency across the domain.
+/// Authorization rules follow a hierarchical model:
+/// <list type="number">
+/// <item><description><b>System actors</b> have unrestricted access to all operations and partitions</description></item>
+/// <item><description><b>Administrative actors</b> have unrestricted access within the domain</description></item>
+/// <item><description>All other actors are evaluated based on their assigned permissions and partition access</description></item>
+/// </list>
 /// </remarks>
 public abstract class Actor : IActor
 {
@@ -52,15 +57,25 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="action">The action to evaluate.</param>
     /// <returns>
-    /// <c>true</c> if the actor has permission for the specified action; otherwise, <c>false</c>.
+    /// <c>true</c> if the actor is a system or administrative actor, or if the action
+    /// is explicitly granted; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// This default implementation checks whether the given action exists in
-    /// <see cref="PermissionActions"/>.
+    /// Evaluation order:
+    /// <list type="number">
+    /// <item><description>System actors are always authorized</description></item>
+    /// <item><description>Administrative actors are always authorized</description></item>
+    /// <item><description>Otherwise, checks <see cref="PermissionActions"/></description></item>
+    /// </list>
     /// </remarks>
     public bool HasActionPermission(ActionType action)
     {
-        return PermissionActions.Any(p => p == action);
+        if (IsSystem || IsAdmin)
+        {
+            return true;
+        }
+
+        return PermissionActions.Contains(action);
     }
 
     /// <summary>
@@ -68,15 +83,25 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="partitionGuid">The unique identifier of the partition.</param>
     /// <returns>
-    /// <c>true</c> if the actor has access to the specified partition; otherwise, <c>false</c>.
+    /// <c>true</c> if the actor is a system or administrative actor, or if the partition
+    /// is explicitly accessible; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// This default implementation checks whether the partition identifier exists in
-    /// <see cref="PartitionAccesses"/>.
+    /// Evaluation order:
+    /// <list type="number">
+    /// <item><description>System actors have unrestricted access</description></item>
+    /// <item><description>Administrative actors have unrestricted access</description></item>
+    /// <item><description>Otherwise, checks <see cref="PartitionAccesses"/></description></item>
+    /// </list>
     /// </remarks>
     public bool HasPartitionAccess(Guid partitionGuid)
     {
-        return PartitionAccesses.Any(p => p == partitionGuid);
+        if (IsSystem || IsAdmin)
+        {
+            return true;
+        }
+
+        return PartitionAccesses.Contains(partitionGuid);
     }
 
     /// <summary>
@@ -84,15 +109,24 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="partitioned">The partitioned entity to evaluate.</param>
     /// <returns>
-    /// <c>true</c> if the actor has access to at least one partition of the entity;
-    /// otherwise, <c>false</c>.
+    /// <c>true</c> if the actor is a system or administrative actor, or if at least one
+    /// partition of the entity is accessible; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// This method evaluates whether any partition associated with the given
-    /// <see cref="IPartitioned"/> entity matches the actor's accessible partitions.
+    /// Evaluation order:
+    /// <list type="number">
+    /// <item><description>System actors have unrestricted access</description></item>
+    /// <item><description>Administrative actors have unrestricted access</description></item>
+    /// <item><description>Otherwise, checks intersection with <see cref="PartitionAccesses"/></description></item>
+    /// </list>
     /// </remarks>
     public bool HasAccess(IPartitioned partitioned)
     {
+        if (IsSystem || IsAdmin)
+        {
+            return true;
+        }
+
         return partitioned.Partitions.Any(p => PartitionAccesses.Contains(p.Guid));
     }
 }

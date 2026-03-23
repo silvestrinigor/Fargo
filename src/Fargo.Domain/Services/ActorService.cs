@@ -4,30 +4,36 @@ using Fargo.Domain.Security;
 namespace Fargo.Domain.Services;
 
 /// <summary>
-/// Provides operations for building <see cref="UserActor"/> instances,
-/// aggregating user permissions and partition access.
+/// Service responsible for resolving and constructing <see cref="Actor"/> instances,
+/// including <see cref="UserActor"/> and <see cref="SystemActor"/>.
 /// </summary>
+/// <remarks>
+/// This service centralizes the logic for loading users and aggregating their
+/// effective partition access based on direct assignments and group memberships.
+/// </remarks>
 public class ActorService(
         IUserRepository userRepository,
         IPartitionRepository partitionRepository
         )
 {
     /// <summary>
-    /// Retrieves a <see cref="UserActor"/> by the user's GUID.
+    /// Retrieves an <see cref="Actor"/> instance based on its unique identifier.
     /// </summary>
-    /// <param name="actorGuid">The unique identifier of the user.</param>
+    /// <param name="actorGuid">The unique identifier of the actor.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>
-    /// A <see cref="UserActor"/> containing the user and all accessible partitions,
-    /// or <c>null</c> if the user does not exist.
+    /// A <see cref="SystemActor"/> if the identifier matches the system actor;
+    /// a <see cref="UserActor"/> if a corresponding user is found;
+    /// otherwise, <c>null</c>.
     /// </returns>
     /// <remarks>
-    /// This method aggregates partition access from:
+    /// For user actors, this method resolves effective partition access by:
     /// <list type="bullet">
-    /// <item><description>Direct user partition accesses</description></item>
-    /// <item><description>Partition accesses inherited from user groups</description></item>
+    /// <item><description>Including partitions directly assigned to the user</description></item>
+    /// <item><description>Including partitions inherited through user group memberships</description></item>
+    /// <item><description>Expanding all collected partitions to include their descendants</description></item>
     /// </list>
-    /// It then resolves all descendant partitions for those accesses.
+    /// This ensures the returned actor contains the complete set of accessible partitions.
     /// </remarks>
     public async Task<Actor?> GetActorByGuid(
         Guid actorGuid,
