@@ -1,11 +1,11 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.UserGroupCommands;
 
@@ -27,8 +27,8 @@ public sealed record UserGroupUpdateCommand(
 /// Handles the execution of <see cref="UserGroupUpdateCommand"/>.
 /// </summary>
 public sealed class UserGroupUpdateCommandHandler(
+        ActorService actorService,
         IUserGroupRepository userGroupRepository,
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<UserGroupUpdateCommand>
@@ -56,14 +56,11 @@ public sealed class UserGroupUpdateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.EditUserGroup);
+        actor.HasActionPermission(ActionType.EditUserGroup);
 
-        var userGroup = await userGroupRepository.GetByGuid(
-                command.UserGroupGuid,
-                cancellationToken
-                ) ?? throw new UserGroupNotFoundFargoApplicationException(command.UserGroupGuid);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 
         userGroup.Nameid = command.UserGroup.Nameid ?? userGroup.Nameid;
         userGroup.Description = command.UserGroup.Description ?? userGroup.Description;
