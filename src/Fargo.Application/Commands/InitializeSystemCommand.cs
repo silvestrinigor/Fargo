@@ -1,3 +1,5 @@
+using Fargo.Application.Exceptions;
+using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
@@ -11,40 +13,96 @@ using Microsoft.Extensions.Options;
 namespace Fargo.Application.Commands;
 
 /// <summary>
-/// Command used to initialize the system when it is first started.
-///
-/// When the system is empty, this command creates the built-in global
-/// partition, the administrators user group, and the default
-/// administrator user.
+/// Command used to initialize the system during its first startup.
 /// </summary>
+/// <remarks>
+/// This command bootstraps the minimum required data for the system to operate.
+/// It is intended to be executed only once, when no users exist in the system.
+/// </remarks>
 public sealed record InitializeSystemCommand() : ICommand;
 
 /// <summary>
-/// Handles the execution of <see cref="InitializeSystemCommand"/>.
+/// Handles <see cref="InitializeSystemCommand"/>.
 /// </summary>
+/// <remarks>
+/// This handler is responsible for initializing the system with its required
+/// built-in entities:
+/// <list type="bullet">
+/// <item><description>The global partition.</description></item>
+/// <item><description>The administrators user group.</description></item>
+/// <item><description>The default administrator user.</description></item>
+/// </list>
+///
+/// <para>
+/// This operation is idempotent:
+/// if any user already exists, the initialization is skipped.
+/// </para>
+///
+/// <para>
+/// Only the system actor is allowed to execute this command.
+/// </para>
+/// </remarks>
 public sealed class InitializeSystemCommandHandler(
+        ActorService actorService,
         IUserRepository userRepository,
         IUserGroupRepository userGroupRepository,
         IPartitionRepository partitionRepository,
         IPasswordHasher passwordHasher,
         IUnitOfWork unitOfWork,
+        ICurrentUser currentUser,
         IOptions<DefaultAdminOptions> defaultAdminOptions
         )
     : ICommandHandler<InitializeSystemCommand>
 {
     /// <summary>
-    /// Initializes the system when no users exist.
+    /// Executes the system initialization process.
     /// </summary>
+    /// <param name="command">
+    /// The initialization command.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current actor is not the system actor.
+    /// </exception>
     /// <remarks>
-    /// This operation bootstraps the minimum built-in data required for the
-    /// system to function, including the global partition, the administrators
-    /// user group, and the default administrator user.
+    /// The initialization process performs the following steps:
+    /// <list type="number">
+    /// <item><description>Validates that the current actor is the system actor.</description></item>
+    /// <item><description>Checks whether any user already exists in the system.</description></item>
+    /// <item><description>Ensures the global partition exists.</description></item>
+    /// <item><description>Ensures the administrators user group exists with full permissions.</description></item>
+    /// <item><description>Creates the default administrator user.</description></item>
+    /// </list>
+    ///
+    /// <para>
+    /// The default administrator user is created using values provided through
+    /// <see cref="DefaultAdminOptions"/> and is assigned:
+    /// <list type="bullet">
+    /// <item><description>Access to the global partition.</description></item>
+    /// <item><description>Membership in the administrators group.</description></item>
+    /// <item><description>All available permissions.</description></item>
+    /// </list>
+    /// </para>
+    ///
+    /// <para>
+    /// If the system has already been initialized (i.e., at least one user exists),
+    /// the operation completes without making any changes.
+    /// </para>
     /// </remarks>
     public async Task Handle(
             InitializeSystemCommand command,
             CancellationToken cancellationToken = default
             )
     {
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+        if (!actor.IsSystem)
+        {
+            throw new UnauthorizedAccessFargoApplicationException();
+        }
+
         var anyUser = await userRepository.Any(cancellationToken);
 
         if (anyUser)
