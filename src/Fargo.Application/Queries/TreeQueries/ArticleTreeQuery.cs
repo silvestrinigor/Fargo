@@ -2,7 +2,7 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Models.TreeModels;
 using Fargo.Application.Repositories;
 using Fargo.Application.Security;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.TreeQueries;
@@ -13,9 +13,8 @@ public sealed record ArticleTreeQuery(
     : IQuery<IReadOnlyCollection<TreeNode>>;
 
 public sealed class ArticleTreeQueryHandler(
+        ActorService actorService,
     IArticleTreeRepository articleTreeRepository,
-    IPartitionRepository partitionRepository,
-    IUserRepository userRepository,
     ICurrentUser currentUser)
     : IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<TreeNode>>
 {
@@ -25,17 +24,13 @@ public sealed class ArticleTreeQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
-
-        var accessiblePartitionGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         return await articleTreeRepository.GetMembers(
             query.Pagination ?? Pagination.FirstPage20Items,
-            accessiblePartitionGuids,
+            actor.PartitionAccesses,
             query.ArticleGuid,
-            cancellationToken);
+            cancellationToken
+            );
     }
 }

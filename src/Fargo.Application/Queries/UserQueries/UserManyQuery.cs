@@ -1,13 +1,15 @@
+using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.UserQueries;
 
 /// <summary>
-/// Query used to retrieve a paginated collection of user information
-/// accessible to the current user.
+/// Query used to retrieve a paginated collection of <see cref="UserInformation"/>
+/// accessible to the current actor.
 /// </summary>
 /// <param name="AsOfDateTime">
 /// Optional point in time used to retrieve historical data.
@@ -17,44 +19,91 @@ namespace Fargo.Application.Queries.UserQueries;
 /// <param name="Pagination">
 /// Optional pagination configuration used to control the number of returned
 /// results and the starting position of the query.
-/// When <see langword="null"/>, a default pagination is used.
+/// When <see langword="null"/>, a default pagination is applied.
 /// </param>
+/// <remarks>
+/// This query respects authorization and partition-based access control rules,
+/// ensuring that only users visible to the current actor are returned.
+/// </remarks>
 public sealed record UserManyQuery(
     DateTimeOffset? AsOfDateTime = null,
     Pagination? Pagination = null
 ) : IQuery<IReadOnlyCollection<UserInformation>>;
 
 /// <summary>
-/// Handles the execution of <see cref="UserManyQuery"/>.
+/// Handles <see cref="UserManyQuery"/>.
 /// </summary>
 /// <remarks>
-/// This handler retrieves the current active user, resolves all partitions
-/// the user can access including descendant partitions, and then returns
-/// only users that belong to at least one of those partitions.
+/// This handler is responsible for:
+/// <list type="bullet">
+/// <item><description>Validating and retrieving the current actor.</description></item>
+/// <item><description>Applying role-based access rules (admin/system vs regular actor).</description></item>
+/// <item><description>Filtering users based on partition access.</description></item>
+/// <item><description>Applying optional temporal (as-of) and pagination constraints.</description></item>
+/// </list>
 ///
-/// If the current user has no accessible partitions, the repository returns
-/// an empty result set.
+/// <para>
+/// Actors with administrative or system privileges bypass partition filtering
+/// and can access all users.
+/// </para>
+///
+/// <para>
+/// Regular actors can only access users that belong to at least one
+/// partition they have access to.
+/// </para>
+///
+/// <para>
+/// When using temporal queries (<c>AsOfDateTime</c>), if a user belonged
+/// to a partition that has since been deleted at the time of the request,
+/// the following rules apply:
+/// <list type="bullet">
+/// <item>
+/// <description>
+/// Administrative and system actors can still access the historical data.
+/// </description>
+/// </item>
+/// <item>
+/// <description>
+/// Regular actors will not have access to such users, as the partition
+/// no longer exists in the current context, and the result will be excluded
+/// from the returned collection.
+/// </description>
+/// </item>
+/// </list>
+/// </para>
 /// </remarks>
 public sealed class UserManyQueryHandler(
+        ActorService actorService,
     IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
     ICurrentUser currentUser
 ) : IQueryHandler<UserManyQuery, IReadOnlyCollection<UserInformation>>
 {
     /// <summary>
     /// Executes the query to retrieve user information accessible
-    /// to the current user.
+    /// to the current actor.
     /// </summary>
     /// <param name="query">
-    /// The query containing the optional as-of date and pagination settings.
+    /// The query containing the optional temporal parameter and pagination settings.
     /// </param>
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
     /// <returns>
     /// A read-only collection of <see cref="UserInformation"/> objects
-    /// accessible to the current user.
+    /// visible to the current actor.
     /// </returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current actor is not authenticated or inactive.
+    /// </exception>
+    /// <remarks>
+    /// If the actor has administrative or system privileges, users are retrieved
+    /// without partition filtering.
+    ///
+    /// Otherwise, only users belonging to partitions accessible to the actor
+    /// are returned.
+    ///
+    /// Pagination defaults to <see cref="Pagination.FirstPage20Items"/> when not specified.
+    /// </remarks>
     public async Task<IReadOnlyCollection<UserInformation>> Handle(
         UserManyQuery query,
         CancellationToken cancellationToken = default
@@ -62,19 +111,28 @@ public sealed class UserManyQueryHandler(
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var users = await userRepository.GetManyInfo(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return await userRepository.GetManyInfoInPartitions(
-            query.Pagination ?? Pagination.FirstPage20Items,
-            partitionAccessGuids,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+            return users;
+        }
+        else
+        {
+            var users = await userRepository.GetManyInfoInPartitions(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
+
+            return users;
+        }
     }
 }

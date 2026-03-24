@@ -1,8 +1,7 @@
 using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
 using Fargo.Domain.Exceptions;
-using Fargo.Domain.Logics;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Security;
 
 namespace Fargo.Domain.Services;
 
@@ -11,17 +10,7 @@ namespace Fargo.Domain.Services;
 /// </summary>
 /// <remarks>
 /// This service encapsulates domain rules involving users, such as uniqueness
-/// validation, self-protection rules, and effective permission evaluation.
-///
-/// Effective permissions may be granted either:
-/// <list type="bullet">
-/// <item>
-/// <description>directly to the user</description>
-/// </item>
-/// <item>
-/// <description>indirectly through one of the user's <see cref="UserGroup"/> memberships</description>
-/// </item>
-/// </list>
+/// validation, and self-protection rules.
 /// </remarks>
 public class UserService(
         IUserRepository userRepository
@@ -99,12 +88,12 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot delete their own account.
     /// </remarks>
-    public static void ValidateUserDelete(User user, User actor)
+    public static void ValidateUserDelete(User user, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(actor);
 
-        if (user == actor)
+        if (user.Guid == actor.Guid)
         {
             throw new UserCannotDeleteSelfFargoDomainException(actor.Guid);
         }
@@ -134,12 +123,12 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot modify their own permissions.
     /// </remarks>
-    public static void ValidateUserPermissionChange(User user, User actor)
+    public static void ValidateUserPermissionChange(User user, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(actor);
 
-        if (user == actor)
+        if (user.Guid == actor.Guid)
         {
             throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
         }
@@ -148,42 +137,5 @@ public class UserService(
         {
             throw new ChangeMainAdminUserPermissionsFargoDomainException();
         }
-    }
-
-    /// <summary>
-    /// Determines whether the specified <paramref name="user"/> has the given permission.
-    /// </summary>
-    /// <param name="user">
-    /// The user whose effective permission set is being evaluated.
-    /// </param>
-    /// <param name="action">
-    /// The action to evaluate.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when the user has the requested permission,
-    /// either directly or through one of their group memberships;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
-    /// </exception>
-    /// <remarks>
-    /// Effective permissions are resolved from both the user's direct permissions
-    /// and the permissions inherited from the user's <see cref="UserGroup"/> memberships.
-    /// </remarks>
-    public static bool HasPermission(User user, ActionType action)
-    {
-        ArgumentNullException.ThrowIfNull(user);
-
-        var userHasPermission = user.HasPermission(action);
-
-        if (userHasPermission)
-        {
-            return true;
-        }
-
-        var userGroupHasPermission = user.UserGroups.Any(g => g.HasPermission(action));
-
-        return userGroupHasPermission;
     }
 }

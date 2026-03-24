@@ -79,8 +79,21 @@ public class Partition : ModifiedEntity
     /// Gets the parent partition of the current partition, if any.
     /// </summary>
     /// <remarks>
-    /// The parent partition defines the hierarchical relationship used
-    /// for access inheritance from parent to child.
+    /// The parent partition defines the hierarchical relationship between partitions,
+    /// enabling access inheritance from parent to child.
+    ///
+    /// This property has an <see langword="internal"/> setter to ensure that changes
+    /// to the partition hierarchy are controlled by the domain.
+    ///
+    /// Direct modification from outside the domain is restricted in order to:
+    /// <list type="bullet">
+    /// <item><description>Prevent circular hierarchies</description></item>
+    /// <item><description>Enforce consistency of parent-child relationships</description></item>
+    /// <item><description>Ensure domain invariants are validated before changes are applied</description></item>
+    /// </list>
+    ///
+    /// Setting this property automatically updates <see cref="ParentPartitionGuid"/>
+    /// to keep both properties consistent.
     /// </remarks>
     public Partition? ParentPartition
     {

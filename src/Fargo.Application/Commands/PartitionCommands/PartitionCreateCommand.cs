@@ -1,6 +1,4 @@
-using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Entities;
@@ -39,6 +37,7 @@ public sealed record PartitionCreateCommand(
 /// current actor is active and has permission to create partitions.
 /// </remarks>
 public sealed class PartitionCreateCommandHandler(
+        ActorService actorService,
         PartitionService partitionService,
         IUserRepository userRepository,
         IPartitionRepository partitionRepository,
@@ -65,9 +64,9 @@ public sealed class PartitionCreateCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreatePartition);
+        actor.ValidateHasPermission(ActionType.CreatePartition);
 
         var partition = new Partition
         {
@@ -75,13 +74,14 @@ public sealed class PartitionCreateCommandHandler(
             Description = command.Description ?? Description.Empty
         };
 
-        if (command.ParentPartitionGuid != null)
-        {
-            var parentPartition = await partitionService.GetPartition(command.ParentPartitionGuid.Value, actor, cancellationToken)
-                ?? throw new PartitionNotFoundFargoApplicationException(command.ParentPartitionGuid.Value);
+        var parentPartition = await partitionRepository.GetFoundByGuid(
+                command.ParentPartitionGuid ?? PartitionService.GlobalPartitionGuid,
+                cancellationToken
+                );
 
-            await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
-        }
+        actor.ValidateHasPartitionAccess(parentPartition.Guid);
+
+        await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
 
         partitionRepository.Add(partition);
 

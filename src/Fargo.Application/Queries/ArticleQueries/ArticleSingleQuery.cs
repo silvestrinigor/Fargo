@@ -1,13 +1,15 @@
+using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.ArticleQueries;
 
 /// <summary>
-/// Query used to retrieve a single article information projection
-/// accessible to the current user.
+/// Query used to retrieve a single <see cref="ArticleInformation"/> projection
+/// accessible to the current actor.
 /// </summary>
 /// <param name="ArticleGuid">
 /// The unique identifier of the article to retrieve.
@@ -17,64 +19,119 @@ namespace Fargo.Application.Queries.ArticleQueries;
 /// When provided, the returned result represents the state of the article
 /// as it existed at the specified date and time.
 /// </param>
+/// <remarks>
+/// This query respects authorization and partition-based access control rules,
+/// ensuring that only articles visible to the current actor are returned.
+/// </remarks>
 public sealed record ArticleSingleQuery(
-    Guid ArticleGuid,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<ArticleInformation?>;
+        Guid ArticleGuid,
+        DateTimeOffset? AsOfDateTime = null
+        ) : IQuery<ArticleInformation?>;
 
 /// <summary>
-/// Handles the execution of <see cref="ArticleSingleQuery"/>.
+/// Handles <see cref="ArticleSingleQuery"/>.
 /// </summary>
 /// <remarks>
-/// This handler retrieves the current active user, resolves all partitions
-/// the user can access including descendant partitions, and then returns
-/// the requested article only if it belongs to at least one of those partitions.
+/// This handler is responsible for:
+/// <list type="bullet">
+/// <item><description>Validating and retrieving the current actor.</description></item>
+/// <item><description>Applying role-based access rules (admin/system vs regular actor).</description></item>
+/// <item><description>Filtering the article based on partition access.</description></item>
+/// <item><description>Applying optional temporal (as-of) constraints.</description></item>
+/// </list>
 ///
-/// If the article does not exist or is not accessible to the current user,
+/// <para>
+/// Actors with administrative or system privileges bypass partition filtering
+/// and can access any article.
+/// </para>
+///
+/// <para>
+/// Regular actors can only access the article if it belongs to at least one
+/// partition they have access to.
+/// </para>
+///
+/// <para>
+/// When using temporal queries (<c>AsOfDateTime</c>), if the article belonged
+/// to a partition that has since been deleted at the time of the request,
+/// the following rules apply:
+/// <list type="bullet">
+/// <item>
+/// <description>
+/// Administrative and system actors can still access the historical data.
+/// </description>
+/// </item>
+/// <item>
+/// <description>
+/// Regular actors will not have access to the article, as the partition
+/// no longer exists in the current context, and <see langword="null"/> is returned.
+/// </description>
+/// </item>
+/// </list>
+/// </para>
+///
+/// <para>
+/// If the article does not exist or is not accessible to the current actor,
 /// <see langword="null"/> is returned.
+/// </para>
 /// </remarks>
 public sealed class ArticleSingleQueryHandler(
-    IArticleRepository articleRepository,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentUser currentUser
-) : IQueryHandler<ArticleSingleQuery, ArticleInformation?>
+        ActorService actorService,
+        IArticleRepository articleRepository,
+        ICurrentUser currentUser
+        ) : IQueryHandler<ArticleSingleQuery, ArticleInformation?>
 {
     /// <summary>
     /// Executes the query to retrieve a single article information projection
-    /// accessible to the current user.
+    /// accessible to the current actor.
     /// </summary>
     /// <param name="query">
-    /// The query containing the article identifier and optional as-of date.
+    /// The query containing the article identifier and optional temporal parameter.
     /// </param>
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
     /// <returns>
-    /// The <see cref="ArticleInformation"/> accessible to the current user,
+    /// The <see cref="ArticleInformation"/> visible to the current actor,
     /// or <see langword="null"/> if the article does not exist or is not accessible.
     /// </returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current actor is not authenticated or inactive.
+    /// </exception>
+    /// <remarks>
+    /// If the actor has administrative or system privileges, the article is retrieved
+    /// without partition filtering.
+    ///
+    /// Otherwise, the article is only returned if it belongs to at least one
+    /// partition accessible to the actor.
+    /// </remarks>
     public async Task<ArticleInformation?> Handle(
-        ArticleSingleQuery query,
-        CancellationToken cancellationToken = default)
+            ArticleSingleQuery query,
+            CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var article = await articleRepository.GetInfoByGuid(
+                    query.ArticleGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        var article = await articleRepository.GetInfoByGuidInPartitions(
-            query.ArticleGuid,
-            partitionAccessGuids,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+            return article;
+        }
+        else
+        {
+            var article = await articleRepository.GetInfoByGuidInPartitions(
+                    query.ArticleGuid,
+                    actor.PartitionAccesses,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return article;
+            return article;
+        }
     }
 }

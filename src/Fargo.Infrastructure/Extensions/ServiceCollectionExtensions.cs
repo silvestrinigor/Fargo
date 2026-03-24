@@ -168,6 +168,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<UserService>();
             services.AddScoped<UserGroupService>();
             services.AddScoped<PartitionService>();
+            services.AddScoped<ActorService>();
         }
 
         private void AddSecurity()

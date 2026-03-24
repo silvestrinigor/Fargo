@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -23,6 +22,7 @@ public sealed record UserDeleteCommand(
 /// Handles the execution of <see cref="UserDeleteCommand"/>.
 /// </summary>
 public sealed class UserDeleteCommandHandler(
+        ActorService actorService,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
@@ -45,14 +45,11 @@ public sealed class UserDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteUser);
+        actor.ValidateHasPermission(ActionType.DeleteUser);
 
-        var user = await userRepository.GetByGuid(
-                command.UserGuid,
-                cancellationToken
-                ) ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
+        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
         UserService.ValidateUserDelete(user, actor);
 

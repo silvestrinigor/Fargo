@@ -1,10 +1,10 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.UserCommands;
 
@@ -26,6 +26,7 @@ public sealed record UserRemoveUserGroupCommand(
 /// Handles the execution of <see cref="UserRemoveUserGroupCommand"/>.
 /// </summary>
 public sealed class UserRemoveUserGroupCommandHandler(
+        ActorService actorService,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
@@ -51,15 +52,11 @@ public sealed class UserRemoveUserGroupCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.ChangeUserGroupMembers);
+        actor.ValidateHasPermission(ActionType.ChangeUserGroupMembers);
 
-        var user = await userRepository.GetByGuid(
-                command.UserGuid,
-                cancellationToken
-                )
-            ?? throw new UserNotFoundFargoApplicationException(command.UserGuid);
+        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
         var userGroupToRemove = user.UserGroups.FirstOrDefault(g => g.Guid == command.UserGroupGuid);
 

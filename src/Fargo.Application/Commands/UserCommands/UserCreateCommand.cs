@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
@@ -27,6 +26,7 @@ public sealed record UserCreateCommand(
 /// Handles the execution of <see cref="UserCreateCommand"/>.
 /// </summary>
 public sealed class UserCreateCommandHandler(
+        ActorService actorService,
         UserService userService,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
@@ -48,9 +48,9 @@ public sealed class UserCreateCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.CreateUser);
+        actor.ValidateHasPermission(ActionType.CreateUser);
 
         var userPasswordHash = passwordHasher.Hash(command.User.Password);
 

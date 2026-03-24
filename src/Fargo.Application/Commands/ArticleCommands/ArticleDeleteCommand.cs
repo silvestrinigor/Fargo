@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
-using Fargo.Application.Helpers;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Enums;
@@ -23,10 +22,9 @@ public sealed record ArticleDeleteCommand(
 /// Handles the execution of <see cref="ArticleDeleteCommand"/>.
 /// </summary>
 public sealed class ArticleDeleteCommandHandler(
+        ActorService actorService,
         ArticleService articleService,
-        PartitionService partitionService,
         IArticleRepository articleRepository,
-        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
         ) : ICommandHandler<ArticleDeleteCommand>
@@ -45,21 +43,13 @@ public sealed class ArticleDeleteCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        UserPermissionHelper.ValidateHasPermission(actor, ActionType.DeleteArticle);
+        actor.ValidateHasPermission(ActionType.DeleteArticle);
 
-        var article = await articleRepository.GetByGuid(
-            command.ArticleGuid,
-            cancellationToken
-        ) ?? throw new ArticleNotFoundFargoApplicationException(command.ArticleGuid);
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        var hasAccessToArticle = await partitionService.HasAccess(article, actor, cancellationToken);
-
-        if (!hasAccessToArticle)
-        {
-            throw new PartitionedEntityAccessDeniedFargoApplicationException(article.Guid, actor.Guid);
-        }
+        actor.ValidateHasAccess(article);
 
         await articleService.DeleteArticle(article, cancellationToken);
 

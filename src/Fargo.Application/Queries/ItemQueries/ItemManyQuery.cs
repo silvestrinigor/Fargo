@@ -1,13 +1,15 @@
+using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.ItemQueries;
 
 /// <summary>
-/// Query used to retrieve a paginated collection of item information
-/// accessible to the current user.
+/// Query used to retrieve a paginated collection of <see cref="ItemInformation"/>
+/// accessible to the current actor.
 /// </summary>
 /// <param name="ArticleGuid">
 /// Optional filter used to retrieve only items associated with a specific article.
@@ -21,38 +23,72 @@ namespace Fargo.Application.Queries.ItemQueries;
 /// <param name="Pagination">
 /// Optional pagination configuration used to control the number of returned
 /// results and the starting position of the query.
-/// When <see langword="null"/>, a default pagination is used.
+/// When <see langword="null"/>, a default pagination is applied.
 /// </param>
+/// <remarks>
+/// This query respects authorization and partition-based access control rules,
+/// ensuring that only items visible to the current actor are returned.
+/// </remarks>
 public sealed record ItemManyQuery(
-    Guid? ArticleGuid = null,
-    DateTimeOffset? AsOfDateTime = null,
-    Pagination? Pagination = null
-) : IQuery<IReadOnlyCollection<ItemInformation>>;
+        Guid? ArticleGuid = null,
+        DateTimeOffset? AsOfDateTime = null,
+        Pagination? Pagination = null
+        ) : IQuery<IReadOnlyCollection<ItemInformation>>;
 
 /// <summary>
-/// Handles the execution of <see cref="ItemManyQuery"/>.
+/// Handles <see cref="ItemManyQuery"/>.
 /// </summary>
 /// <remarks>
-/// This handler retrieves the current active user, resolves all partitions
-/// the user can access including descendant partitions, and then returns
-/// only items that belong to at least one of those partitions.
+/// This handler is responsible for:
+/// <list type="bullet">
+/// <item><description>Validating and retrieving the current actor.</description></item>
+/// <item><description>Applying role-based access rules (admin/system vs regular actor).</description></item>
+/// <item><description>Filtering items based on partition access.</description></item>
+/// <item><description>Applying optional article filter, temporal (as-of), and pagination constraints.</description></item>
+/// </list>
 ///
-/// If the current user has no accessible partitions, the repository returns
-/// an empty result set.
+/// <para>
+/// Actors with administrative or system privileges bypass partition filtering
+/// and can access all items.
+/// </para>
+///
+/// <para>
+/// Regular actors can only access items that belong to at least one
+/// partition they have access to.
+/// </para>
+///
+/// <para>
+/// When using temporal queries (<c>AsOfDateTime</c>), if an item belonged
+/// to a partition that has since been deleted at the time of the request,
+/// the following rules apply:
+/// <list type="bullet">
+/// <item>
+/// <description>
+/// Administrative and system actors can still access the historical data.
+/// </description>
+/// </item>
+/// <item>
+/// <description>
+/// Regular actors will not have access to such items, as the partition
+/// no longer exists in the current context, and the result will be excluded
+/// from the returned collection.
+/// </description>
+/// </item>
+/// </list>
+/// </para>
 /// </remarks>
 public sealed class ItemManyQueryHandler(
-    IItemRepository itemRepository,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentUser currentUser
-) : IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>
+        ActorService actorService,
+        IItemRepository itemRepository,
+        ICurrentUser currentUser
+        ) : IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>
 {
     /// <summary>
     /// Executes the query to retrieve item information accessible
-    /// to the current user.
+    /// to the current actor.
     /// </summary>
     /// <param name="query">
-    /// The query containing the optional article filter, as-of date,
+    /// The query containing optional article filter, temporal parameter,
     /// and pagination settings.
     /// </param>
     /// <param name="cancellationToken">
@@ -60,31 +96,51 @@ public sealed class ItemManyQueryHandler(
     /// </param>
     /// <returns>
     /// A read-only collection of <see cref="ItemInformation"/> objects
-    /// accessible to the current user.
+    /// visible to the current actor.
     /// </returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current actor is not authenticated or inactive.
+    /// </exception>
+    /// <remarks>
+    /// If the actor has administrative or system privileges, items are retrieved
+    /// without partition filtering.
+    ///
+    /// Otherwise, only items belonging to partitions accessible to the actor
+    /// are returned.
+    ///
+    /// Pagination defaults to <see cref="Pagination.FirstPage20Items"/> when not specified.
+    /// </remarks>
     public async Task<IReadOnlyCollection<ItemInformation>> Handle(
-        ItemManyQuery query,
-        CancellationToken cancellationToken = default
-    )
+            ItemManyQuery query,
+            CancellationToken cancellationToken = default
+            )
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var actor = await userRepository.GetActiveCurrentUser(currentUser, cancellationToken);
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var partitionAccessGuids = await partitionRepository.GetDescendantGuids(
-            [.. actor.PartitionAccesses.Select(x => x.PartitionGuid)],
-            includeRoots: true,
-            cancellationToken
-        );
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            var items = await itemRepository.GetManyInfo(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    query.ArticleGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        var items = await itemRepository.GetManyInfoInPartitions(
-            query.Pagination ?? Pagination.FirstPage20Items,
-            partitionAccessGuids,
-            query.ArticleGuid,
-            query.AsOfDateTime,
-            cancellationToken
-        );
+            return items;
+        }
+        else
+        {
+            var items = await itemRepository.GetManyInfoInPartitions(
+                    query.Pagination ?? Pagination.FirstPage20Items,
+                    actor.PartitionAccesses,
+                    query.ArticleGuid,
+                    query.AsOfDateTime,
+                    cancellationToken
+                    );
 
-        return items;
+            return items;
+        }
     }
 }
