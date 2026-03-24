@@ -13,7 +13,7 @@ public sealed record PartitionTreeQuery(
     : IQuery<IReadOnlyCollection<TreeNode>>;
 
 public sealed class PartitionTreeQueryHandler(
-        ActorService actorService,
+    ActorService actorService,
     IPartitionTreeRepository partitionTreeRepository,
     ICurrentUser currentUser)
     : IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<TreeNode>>
@@ -26,9 +26,8 @@ public sealed class PartitionTreeQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        return await partitionTreeRepository.GetMembers(
+        return await partitionTreeRepository.GetPartitionChilds(
             query.Pagination ?? Pagination.FirstPage20Items,
-            actor.PartitionAccesses,
             query.ParentPartitionGuid,
             cancellationToken);
     }

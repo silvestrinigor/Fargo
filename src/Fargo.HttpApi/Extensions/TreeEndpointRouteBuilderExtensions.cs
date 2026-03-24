@@ -28,12 +28,6 @@ public static class TreeEndpointRouteBuilderExtension
             .Produces<IReadOnlyCollection<TreeNode>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
-        group.MapGet("/partitions/security", GetPartitionSecurityTree)
-            .WithName("GetPartitionSecurityTree")
-            .WithSummary("Gets partition security tree members")
-            .Produces<IReadOnlyCollection<TreeNode>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
-
         group.MapGet("/articles", GetArticleTree)
             .WithName("GetArticleTree")
             .WithSummary("Gets article tree members")
@@ -67,22 +61,6 @@ public static class TreeEndpointRouteBuilderExtension
         var response = await handler.Handle(
             new UserGroupTreeQuery(
                 UserGroupGuid: userGroupGuid,
-                Pagination: PaginationHelpers.CreatePagination(page, limit)),
-            cancellationToken);
-
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
-    }
-
-    private static async Task<Results<Ok<IReadOnlyCollection<TreeNode>>, NoContent>> GetPartitionSecurityTree(
-        Guid? partitionGuid,
-        Page? page,
-        Limit? limit,
-        IQueryHandler<PartitionSecurityTreeQuery, IReadOnlyCollection<TreeNode>> handler,
-        CancellationToken cancellationToken)
-    {
-        var response = await handler.Handle(
-            new PartitionSecurityTreeQuery(
-                PartitionGuid: partitionGuid,
                 Pagination: PaginationHelpers.CreatePagination(page, limit)),
             cancellationToken);
 

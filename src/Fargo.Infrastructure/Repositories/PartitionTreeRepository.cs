@@ -12,64 +12,25 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
 {
     private readonly DbSet<Partition> partitions = dbContext.Partitions;
 
-    public Task<IReadOnlyCollection<TreeNode>> GetMembers(
+    public async Task<IReadOnlyCollection<TreeNode>> GetPartitionChilds(
         Pagination pagination,
-        Guid? parentPartitionGuid,
+        Guid? partitionGuid,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
+        var partitionTreeQuery = partitions
+            .Where(p => p.ParentPartitionGuid == partitionGuid)
+            .Select(p => new TreeNode(
+                new Nodeid(TreeNodeType.Partition, p.Guid),
+                p.Name,
+                p.Description,
+                p.PartitionMembers.Count > 0,
+                p.IsActive
+            ));
 
-    public async Task<IReadOnlyCollection<TreeNode>> GetMembersFilteredByAccess(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> accessiblePartitionGuids,
-        Guid? parentPartitionGuid,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(accessiblePartitionGuids);
-
-        if (accessiblePartitionGuids.Count == 0)
-        {
-            return [];
-        }
-
-        var visiblePartitionGuids = accessiblePartitionGuids.Distinct().ToArray();
-
-        var baseQuery = partitions
-            .AsNoTracking()
-            .Where(x => visiblePartitionGuids.Contains(x.Guid));
-
-        baseQuery = parentPartitionGuid == null
-            ? baseQuery.Where(x => x.ParentPartitionGuid == null)
-            : baseQuery.Where(x => x.ParentPartitionGuid == parentPartitionGuid);
-
-        var rows = await baseQuery
-            .OrderBy(x => x.Name)
+        return await partitionTreeQuery
             .WithPagination(pagination)
-            .Select(x => new
-            {
-                x.Guid,
-                Title = x.Name.Value,
-                Subtitle = x.Description.Value,
-                x.ParentPartitionGuid,
-                x.IsActive,
-                MembersCount = partitions.Count(c =>
-                    c.ParentPartitionGuid == x.Guid &&
-                    visiblePartitionGuids.Contains(c.Guid))
-            })
+            .OrderBy(t => t.Title)
+            .ThenBy(t => t.EntityGuid)
             .ToListAsync(cancellationToken);
-
-        return
-        [
-            .. rows.Select(x => new TreeNode(
-                Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Partition, x.Guid),
-                Title: x.Title,
-                Subtitle: string.IsNullOrWhiteSpace(x.Subtitle) ? null : x.Subtitle,
-                ParentNodeId: x.ParentPartitionGuid is null
-                    ? null
-                    : TreeNodeIdFactory.Create(TreeNodeType.Partition, x.ParentPartitionGuid.Value),
-                MembersCount: x.MembersCount,
-                IsActive: x.IsActive))
-        ];
     }
 }

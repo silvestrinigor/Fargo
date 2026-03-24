@@ -14,12 +14,10 @@ public static class TreeServiceCollectionExtensions
         services.AddScoped<IPartitionTreeRepository, PartitionTreeRepository>();
         services.AddScoped<IArticleTreeRepository, ArticleTreeRepository>();
         services.AddScoped<IUserGroupTreeRepository, UserGroupTreeRepository>();
-        services.AddScoped<IPartitionSecurityTreeRepository, PartitionSecurityTreeRepository>();
 
         services.AddScoped<IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<TreeNode>>, PartitionTreeQueryHandler>();
         services.AddScoped<IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<TreeNode>>, ArticleTreeQueryHandler>();
         services.AddScoped<IQueryHandler<UserGroupTreeQuery, IReadOnlyCollection<TreeNode>>, UserGroupTreeQueryHandler>();
-        services.AddScoped<IQueryHandler<PartitionSecurityTreeQuery, IReadOnlyCollection<TreeNode>>, PartitionSecurityTreeQueryHandler>();
 
         return services;
     }

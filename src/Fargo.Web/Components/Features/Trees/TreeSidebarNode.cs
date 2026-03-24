@@ -10,8 +10,6 @@ public sealed class TreeSidebarNode
 
     public string? Subtitle { get; init; }
 
-    public int MembersCount { get; init; }
-
     public bool IsActive { get; init; }
 
     public bool HasChildren { get; init; }
@@ -29,8 +27,7 @@ public sealed class TreeSidebarNode
         EntityGuid = node.EntityGuid,
         Title = node.Title,
         Subtitle = node.Subtitle,
-        MembersCount = node.MembersCount,
         IsActive = node.IsActive,
-        HasChildren = node.HasChildren
+        HasChildren = node.HasChilds
     };
 }
