@@ -137,6 +137,8 @@ public sealed class InitializeSystemCommandHandler(
 
             administratorsGroup.AddPartitionAccess(globalPartition);
 
+            administratorsGroup.Partitions.Add(globalPartition);
+
             userGroupRepository.Add(administratorsGroup);
 
             foreach (var a in actions)
