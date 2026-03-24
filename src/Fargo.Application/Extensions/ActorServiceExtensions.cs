@@ -5,24 +5,40 @@ using Fargo.Domain.Services;
 namespace Fargo.Application.Extensions;
 
 /// <summary>
-/// Provides extension methods for <see cref="ActorService"/> related to authorization.
+/// Provides authorization-related extension methods for <see cref="ActorService"/>.
 /// </summary>
+/// <remarks>
+/// These extensions centralize common validation logic for retrieving actors,
+/// ensuring they exist and are in a valid state before being used in application operations.
+/// </remarks>
 public static class ActorServiceExtensions
 {
     extension(ActorService service)
     {
         /// <summary>
-        /// Retrieves a <see cref="UserActor"/> by its GUID and ensures the user is authorized and active.
+        /// Retrieves an <see cref="Actor"/> by its GUID and ensures it is valid and active.
         /// </summary>
-        /// <param name="actorGuid">The unique identifier of the user.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        /// <param name="actorGuid">
+        /// The unique identifier of the actor.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the operation.
+        /// </param>
         /// <returns>
-        /// A valid and active <see cref="UserActor"/> instance.
+        /// A valid and active <see cref="Actor"/> instance.
         /// </returns>
         /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the user does not exist or is not active.
+        /// Thrown when the actor does not exist or is not active.
         /// </exception>
-        public async Task<Actor> GetAuthorizedActorByGuid(Guid actorGuid, CancellationToken cancellationToken = default)
+        /// <remarks>
+        /// This method is typically used at the beginning of application workflows
+        /// to ensure that the current actor is authenticated and eligible to perform
+        /// further operations.
+        /// </remarks>
+        public async Task<Actor> GetAuthorizedActorByGuid(
+            Guid actorGuid,
+            CancellationToken cancellationToken = default
+        )
         {
             var actor = await service.GetActorByGuid(actorGuid, cancellationToken);
 

@@ -1,49 +1,51 @@
 using Fargo.Application.Exceptions;
-using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 
 namespace Fargo.Application.Extensions;
 
 /// <summary>
-/// Provides extension methods for retrieving the current authenticated user.
+/// Provides extension methods for <see cref="IUserRepository"/>
+/// to simplify retrieval operations with validation.
 /// </summary>
+/// <remarks>
+/// These helpers encapsulate common patterns such as retrieving entities
+/// and ensuring their existence, promoting consistency and reducing
+/// repetitive null-check logic across the application layer.
+/// </remarks>
 public static class UserRepositoryExtensions
 {
-    /// <summary>
-    /// Gets the current authenticated user and ensures that the account exists
-    /// and is active.
-    /// </summary>
-    /// <param name="repository">The user repository.</param>
-    /// <param name="currentUser">The current user context.</param>
-    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    /// <returns>The authenticated and active <see cref="User"/>.</returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current user cannot be found or when the user is inactive.
-    /// </exception>
-    public static async Task<User> GetActiveCurrentUser(
-        this IUserRepository repository,
-        ICurrentUser currentUser,
-        CancellationToken cancellationToken = default)
+    extension(IUserRepository repository)
     {
-        var actor = await repository.GetByGuid(
-            currentUser.UserGuid,
-            cancellationToken
-            );
-
-        if (actor == null || !actor.IsActive)
+        /// <summary>
+        /// Retrieves a <see cref="User"/> by its GUID and ensures it exists.
+        /// </summary>
+        /// <param name="userGuid">
+        /// The unique identifier of the user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// The <see cref="User"/> associated with the specified GUID.
+        /// </returns>
+        /// <exception cref="UserNotFoundFargoApplicationException">
+        /// Thrown when no user is found with the specified GUID.
+        /// </exception>
+        /// <remarks>
+        /// This method follows a fail-fast approach by throwing an exception
+        /// when the requested entity does not exist, eliminating the need
+        /// for null checks in the calling code.
+        /// </remarks>
+        public async Task<User> GetFoundByGuid(
+            Guid userGuid,
+            CancellationToken cancellationToken = default
+        )
         {
-            throw new UnauthorizedAccessFargoApplicationException();
+            var user = await repository.GetByGuid(userGuid, cancellationToken)
+                ?? throw new UserNotFoundFargoApplicationException(userGuid);
+
+            return user;
         }
-
-        return actor;
-    }
-
-    public static async Task<User> GetFoundByGuid(this IUserRepository repository, Guid userGuid, CancellationToken cancellationToken = default)
-    {
-        var user = await repository.GetByGuid(userGuid, cancellationToken)
-            ?? throw new UserNotFoundFargoApplicationException(userGuid);
-
-        return user;
     }
 }

@@ -15,20 +15,30 @@ namespace Fargo.Application.Commands.ArticleCommands;
 /// Command used to create a new <see cref="Article"/>.
 /// </summary>
 /// <param name="Article">
-/// The data required to create the article, including the partition
-/// in which the article will be created.
+/// The data required to create the article, including its name,
+/// description, and optional target partition.
 /// </param>
+/// <remarks>
+/// This command represents an intention to create an article while
+/// respecting authorization and partition-based access rules.
+/// </remarks>
 public sealed record ArticleCreateCommand(
         ArticleCreateModel Article
         ) : ICommand<Guid>;
 
 /// <summary>
-/// Handles the execution of <see cref="ArticleCreateCommand"/>.
+/// Handles <see cref="ArticleCreateCommand"/>.
 /// </summary>
 /// <remarks>
-/// This handler creates a new <see cref="Article"/> in a partition
-/// accessible to the current user. Every article must belong to
-/// at least one partition.
+/// This handler is responsible for:
+/// <list type="bullet">
+/// <item><description>Validating the current user's authorization.</description></item>
+/// <item><description>Ensuring the target partition exists and is accessible.</description></item>
+/// <item><description>Enforcing that every article belongs to at least one partition.</description></item>
+/// </list>
+///
+/// The article is always associated with a valid partition to guarantee
+/// proper data isolation and access control within the system.
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
         ActorService actorService,
@@ -42,14 +52,20 @@ public sealed class ArticleCreateCommandHandler(
     /// Executes the command to create a new article.
     /// </summary>
     /// <param name="command">
-    /// The command containing article creation data.
+    /// The command containing the data required for article creation.
     /// </param>
     /// <param name="cancellationToken">
-    /// Token used to cancel the operation.
+    /// A token used to cancel the operation.
     /// </param>
     /// <returns>
-    /// The unique identifier of the created article.
+    /// The unique identifier of the newly created <see cref="Article"/>.
     /// </returns>
+    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// Thrown when the current user is not authenticated or inactive.
+    /// </exception>
+    /// <exception cref="UserNotAuthorizedFargoApplicationException">
+    /// Thrown when the user does not have permission to create articles.
+    /// </exception>
     /// <exception cref="PartitionNotFoundFargoApplicationException">
     /// Thrown when the specified partition does not exist.
     /// </exception>
@@ -58,7 +74,10 @@ public sealed class ArticleCreateCommandHandler(
     /// </exception>
     /// <remarks>
     /// The article is created in the specified partition. If no partition is
-    /// explicitly provided, the global partition is used.
+    /// explicitly provided, the global partition is used as a fallback.
+    ///
+    /// This ensures that every article is always associated with at least one
+    /// partition, enforcing partition-based isolation and access control.
     /// </remarks>
     public async Task<Guid> Handle(
             ArticleCreateCommand command,
@@ -67,13 +86,13 @@ public sealed class ArticleCreateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.CreateArticle);
+        actor.ValidateHasPermission(ActionType.CreateArticle);
 
         var partitionGuid = command.Article.FirstPartition ?? PartitionService.GlobalPartitionGuid;
 
         var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-        actor.ValidateHassPartitionAccess(partition.Guid);
+        actor.ValidateHasPartitionAccess(partition.Guid);
 
         var article = new Article
         {

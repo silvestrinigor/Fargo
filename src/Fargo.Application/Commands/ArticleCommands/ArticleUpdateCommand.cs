@@ -52,11 +52,11 @@ public sealed class ArticleUpdateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.EditArticle);
+        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHassAccess(article);
+        actor.ValidateHasAccess(article);
 
         if (command.Article.Name is not null)
         {

@@ -47,7 +47,7 @@ public sealed class UserDeleteCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.DeleteUser);
+        actor.ValidateHasPermission(ActionType.DeleteUser);
 
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 

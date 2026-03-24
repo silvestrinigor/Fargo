@@ -54,7 +54,7 @@ public sealed class UserUpdateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.EditUser);
+        actor.ValidateHasPermission(ActionType.EditUser);
 
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
@@ -71,7 +71,7 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.Password is not null)
         {
-            actor.ValidateHassPermission(ActionType.ChangeOtherUserPassword);
+            actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
 
             user.PasswordHash = passwordHasher.Hash(command.User.Password.Value);
 

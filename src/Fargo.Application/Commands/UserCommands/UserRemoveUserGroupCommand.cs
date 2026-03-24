@@ -54,7 +54,7 @@ public sealed class UserRemoveUserGroupCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.ChangeUserGroupMembers);
+        actor.ValidateHasPermission(ActionType.ChangeUserGroupMembers);
 
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 

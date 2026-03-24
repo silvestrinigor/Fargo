@@ -54,7 +54,7 @@ public sealed class UserGroupDeleteCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.DeleteUserGroup);
+        actor.ValidateHasPermission(ActionType.DeleteUserGroup);
 
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 

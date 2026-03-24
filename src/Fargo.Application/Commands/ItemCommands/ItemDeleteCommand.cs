@@ -47,7 +47,7 @@ public sealed class ItemDeleteCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.DeleteItem);
+        actor.ValidateHasPermission(ActionType.DeleteItem);
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 

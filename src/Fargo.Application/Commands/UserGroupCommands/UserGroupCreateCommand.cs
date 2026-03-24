@@ -49,7 +49,7 @@ public sealed class UserGroupCreateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.CreateUserGroup);
+        actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
         var userGroup = new UserGroup
         {

@@ -52,7 +52,7 @@ public sealed class ItemUpdateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.EditItem);
+        actor.ValidateHasPermission(ActionType.EditItem);
 
         _ = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 

@@ -45,11 +45,11 @@ public sealed class ArticleDeleteCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.DeleteArticle);
+        actor.ValidateHasPermission(ActionType.DeleteArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHassAccess(article);
+        actor.ValidateHasAccess(article);
 
         await articleService.DeleteArticle(article, cancellationToken);
 

@@ -66,7 +66,7 @@ public sealed class PartitionCreateCommandHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.CreatePartition);
+        actor.ValidateHasPermission(ActionType.CreatePartition);
 
         var partition = new Partition
         {
@@ -79,7 +79,7 @@ public sealed class PartitionCreateCommandHandler(
                 cancellationToken
                 );
 
-        actor.ValidateHassPartitionAccess(parentPartition.Guid);
+        actor.ValidateHasPartitionAccess(parentPartition.Guid);
 
         await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
 

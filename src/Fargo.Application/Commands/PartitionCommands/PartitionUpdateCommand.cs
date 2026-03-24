@@ -69,11 +69,11 @@ public sealed class PartitionUpdateCommandHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.EditPartition);
+        actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHassPartitionAccess(partition.Guid);
+        actor.ValidateHasPartitionAccess(partition.Guid);
 
         partition.Description = command.Partition.Description ?? Description.Empty;
 

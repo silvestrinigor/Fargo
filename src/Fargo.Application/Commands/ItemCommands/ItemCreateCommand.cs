@@ -50,7 +50,7 @@ public sealed class ItemCreateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.CreateItem);
+        actor.ValidateHasPermission(ActionType.CreateItem);
 
         var article = await articleRepository.GetFoundByGuid(command.Item.ArticleGuid, cancellationToken);
 

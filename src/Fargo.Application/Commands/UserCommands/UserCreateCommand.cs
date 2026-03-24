@@ -50,7 +50,7 @@ public sealed class UserCreateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHassPermission(ActionType.CreateUser);
+        actor.ValidateHasPermission(ActionType.CreateUser);
 
         var userPasswordHash = passwordHasher.Hash(command.User.Password);
 
