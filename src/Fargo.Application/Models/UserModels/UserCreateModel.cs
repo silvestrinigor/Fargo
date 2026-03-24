@@ -10,7 +10,7 @@ namespace Fargo.Application.Models.UserModels;
 /// This value must satisfy the validation rules defined in <see cref="Nameid"/>.
 /// </param>
 /// <param name="Password">
-/// The plaintext password that will be hashed before being stored.
+/// The plaintext password that will be securely hashed before being stored.
 /// </param>
 /// <param name="FirstName">
 /// Optional first name of the user.
@@ -44,6 +44,24 @@ namespace Fargo.Application.Models.UserModels;
 /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
 /// immediately after it is changed.
 /// </param>
+/// <param name="FirstPartition">
+/// Optional identifier of the first partition to associate with the user
+/// during creation.
+/// </param>
+/// <remarks>
+/// Users are partitioned entities and may belong to one or more partitions.
+///
+/// When <paramref name="FirstPartition"/> is provided, the user is initially
+/// associated with that partition. Otherwise, the default partition behavior
+/// defined by the application or domain is applied.
+///
+/// Security considerations:
+/// <list type="bullet">
+/// <item><description>The provided password is never stored in plaintext</description></item>
+/// <item><description>Password hashing and validation rules are enforced by the domain</description></item>
+/// <item><description>Permissions define the actions the user is authorized to perform</description></item>
+/// </list>
+/// </remarks>
 public record UserCreateModel(
         Nameid Nameid,
         Password Password,
@@ -51,5 +69,6 @@ public record UserCreateModel(
         LastName? LastName = null,
         Description? Description = null,
         IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null,
-        TimeSpan? DefaultPasswordExpirationTimeSpan = null
+        TimeSpan? DefaultPasswordExpirationTimeSpan = null,
+        Guid? FirstPartition = null
         );
