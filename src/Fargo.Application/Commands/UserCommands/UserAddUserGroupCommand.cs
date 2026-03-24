@@ -62,7 +62,11 @@ public sealed class UserAddUserGroupCommandHandler(
 
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
+        actor.ValidateHasAccess(user);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
+        actor.ValidateHasAccess(userGroup);
 
         user.UserGroups.Add(userGroup);
 

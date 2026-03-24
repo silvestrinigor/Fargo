@@ -13,7 +13,18 @@ public sealed class ArticleTreeRepository(FargoDbContext dbContext) : IArticleTr
     private readonly DbSet<Article> articles = dbContext.Articles;
     private readonly DbSet<Item> items = dbContext.Items;
 
-    public async Task<IReadOnlyCollection<TreeNode>> GetMembers(
+    public Task<IReadOnlyCollection<TreeNode>> GetMembers(
+        Pagination pagination,
+        Guid? articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        if (articleGuid is not null)
+        {
+
+        }
+    }
+
+    public async Task<IReadOnlyCollection<TreeNode>> GetMembersInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> accessiblePartitionGuids,
         Guid? articleGuid,
@@ -47,17 +58,15 @@ public sealed class ArticleTreeRepository(FargoDbContext dbContext) : IArticleTr
                 .ToListAsync(cancellationToken);
 
             return
-            [
+                [
                 .. rows.Select(x => new TreeNode(
                     Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Article, x.Guid),
-                    TreeNodeType: TreeNodeType.Article,
-                    EntityGuid: x.Guid,
                     Title: x.Title,
                     Subtitle: string.IsNullOrWhiteSpace(x.Subtitle) ? null : x.Subtitle,
                     ParentNodeId: null,
                     MembersCount: x.MembersCount
                     ))
-            ];
+                ];
         }
 
         var parentNodeId = TreeNodeIdFactory.Create(TreeNodeType.Article, articleGuid.Value);
@@ -75,16 +84,14 @@ public sealed class ArticleTreeRepository(FargoDbContext dbContext) : IArticleTr
             .ToListAsync(cancellationToken);
 
         return
-        [
+            [
             .. itemRows.Select(x => new TreeNode(
                 Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Item, x.Guid, parentNodeId),
-                TreeNodeType: TreeNodeType.Item,
-                EntityGuid: x.Guid,
                 Title: x.Guid.ToString(),
                 Subtitle: null,
                 ParentNodeId: parentNodeId,
                 MembersCount: 0,
                 IsActive: true))
-        ];
+            ];
     }
 }

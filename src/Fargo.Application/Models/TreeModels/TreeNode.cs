@@ -2,8 +2,6 @@ namespace Fargo.Application.Models.TreeModels;
 
 public sealed record TreeNode(
     Nodeid Nodeid,
-    TreeNodeType TreeNodeType,
-    Guid EntityGuid,
     string Title,
     string? Subtitle,
     Nodeid? ParentNodeId,
@@ -11,4 +9,8 @@ public sealed record TreeNode(
     bool IsActive = true)
 {
     public bool HasChildren => MembersCount > 0;
+
+    public TreeNodeType TreeNodeType => Nodeid.TreeNodeType;
+
+    public Guid EntityGuid => Nodeid.EntityGuid;
 }

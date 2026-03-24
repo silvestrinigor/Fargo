@@ -12,7 +12,15 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
 {
     private readonly DbSet<Partition> partitions = dbContext.Partitions;
 
-    public async Task<IReadOnlyCollection<TreeNode>> GetMembers(
+    public Task<IReadOnlyCollection<TreeNode>> GetMembers(
+        Pagination pagination,
+        Guid? parentPartitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<IReadOnlyCollection<TreeNode>> GetMembersFilteredByAccess(
         Pagination pagination,
         IReadOnlyCollection<Guid> accessiblePartitionGuids,
         Guid? parentPartitionGuid,
@@ -55,8 +63,6 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
         [
             .. rows.Select(x => new TreeNode(
                 Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Partition, x.Guid),
-                TreeNodeType: TreeNodeType.Partition,
-                EntityGuid: x.Guid,
                 Title: x.Title,
                 Subtitle: string.IsNullOrWhiteSpace(x.Subtitle) ? null : x.Subtitle,
                 ParentNodeId: x.ParentPartitionGuid is null
