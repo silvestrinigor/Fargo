@@ -28,6 +28,7 @@ public sealed record PartitionDeleteCommand(
 /// and has access to the specified partition.
 /// </remarks>
 public sealed class PartitionDeleteCommandHandler(
+        PartitionService partitionService,
         ActorService actorService,
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
@@ -71,7 +72,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
-        partitionRepository.Remove(partition);
+        partitionService.DeletePartition(partition);
 
         await unitOfWork.SaveChanges(cancellationToken);
     }
