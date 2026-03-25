@@ -28,7 +28,7 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
     {
         includedTypes ??= Enum.GetValues<TreeNodeType>();
 
-        IQueryable<EntityTreeNode> query = Enumerable.Empty<EntityTreeNode>().AsQueryable();
+        IQueryable<EntityTreeNode>? query = null;
 
         if (includedTypes.Contains(TreeNodeType.Partition))
         {
@@ -42,7 +42,7 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
                     p.IsActive
                 ));
 
-            query = query.Concat(partitionQuery);
+            query = query == null ? partitionQuery : query.Concat(partitionQuery);
         }
 
         if (includedTypes.Contains(TreeNodeType.User))
@@ -60,7 +60,7 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
                     u.IsActive
                 ));
 
-            query = query.Concat(usersQuery);
+            query = query == null ? usersQuery : query.Concat(usersQuery);
         }
 
         if (includedTypes.Contains(TreeNodeType.UserGroup))
@@ -78,7 +78,7 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
                     g.IsActive
                 ));
 
-            query = query.Concat(groupsQuery);
+            query = query == null ? groupsQuery : query.Concat(groupsQuery);
         }
 
         if (includedTypes.Contains(TreeNodeType.Article))
@@ -96,7 +96,7 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
                     true
                     ));
 
-            query = query.Concat(articlesQuery);
+            query = query == null ? articlesQuery : query.Concat(articlesQuery);
         }
 
         if (includedTypes.Contains(TreeNodeType.Item))
@@ -114,7 +114,12 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
                     true
                 ));
 
-            query = query.Concat(itemsQuery);
+            query = query == null ? itemsQuery : query.Concat(itemsQuery);
+        }
+
+        if (query is null)
+        {
+            return [];
         }
 
         return await query
@@ -237,7 +242,10 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
             query = query == null ? itemsQuery : query.Concat(itemsQuery);
         }
 
-        query ??= Enumerable.Empty<EntityTreeNode>().AsQueryable();
+        if (query is null)
+        {
+            return [];
+        }
 
         return await query
             .OrderBy(x => x.Title)
