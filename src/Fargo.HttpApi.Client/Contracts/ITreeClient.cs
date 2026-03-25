@@ -5,25 +5,25 @@ namespace Fargo.HttpApi.Client.Contracts;
 
 public interface ITreeClient
 {
-    Task<IReadOnlyCollection<TreeNode>> GetPartitionTreeAsync(
+    Task<IReadOnlyCollection<EntityTreeNode>> GetPartitionTreeAsync(
         Guid? parentPartitionGuid = null,
         Page? page = null,
         Limit? limit = null,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<TreeNode>> GetUserGroupTreeAsync(
+    Task<IReadOnlyCollection<EntityTreeNode>> GetUserGroupTreeAsync(
         Guid? userGroupGuid = null,
         Page? page = null,
         Limit? limit = null,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<TreeNode>> GetPartitionSecurityTreeAsync(
+    Task<IReadOnlyCollection<EntityTreeNode>> GetPartitionSecurityTreeAsync(
         Guid? partitionGuid = null,
         Page? page = null,
         Limit? limit = null,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<TreeNode>> GetArticleTreeAsync(
+    Task<IReadOnlyCollection<EntityTreeNode>> GetArticleTreeAsync(
         Guid? articleGuid = null,
         Page? page = null,
         Limit? limit = null,

@@ -10,15 +10,15 @@ namespace Fargo.Application.Queries.TreeQueries;
 public sealed record ArticleTreeQuery(
         Guid? ArticleGuid = null,
         Pagination? Pagination = null)
-    : IQuery<IReadOnlyCollection<TreeNode>>;
+    : IQuery<IReadOnlyCollection<EntityTreeNode>>;
 
 public sealed class ArticleTreeQueryHandler(
         ActorService actorService,
         IArticleTreeRepository articleTreeRepository,
         ICurrentUser currentUser)
-    : IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<TreeNode>>
+    : IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<EntityTreeNode>>
 {
-    public async Task<IReadOnlyCollection<TreeNode>> Handle(
+    public async Task<IReadOnlyCollection<EntityTreeNode>> Handle(
             ArticleTreeQuery query,
             CancellationToken cancellationToken = default)
     {
@@ -26,11 +26,20 @@ public sealed class ArticleTreeQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        return await articleTreeRepository.GetMembersInPartitions(
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            return await articleTreeRepository.GetArticleTreeNodes(
                 query.Pagination ?? Pagination.FirstPage20Items,
-                actor.PartitionAccesses,
                 query.ArticleGuid,
                 cancellationToken
                 );
+        }
+
+        return await articleTreeRepository.GetArticleTreeNodesInPartitions(
+            query.Pagination ?? Pagination.FirstPage20Items,
+            query.ArticleGuid,
+            actor.PartitionAccesses,
+            cancellationToken
+            );
     }
 }

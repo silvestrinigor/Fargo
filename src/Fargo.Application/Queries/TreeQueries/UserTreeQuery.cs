@@ -7,26 +7,34 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.TreeQueries;
 
-public sealed record UserGroupTreeQuery(
+public sealed record UserTreeQuery(
     Guid? UserGroupGuid = null,
     Pagination? Pagination = null)
-    : IQuery<IReadOnlyCollection<TreeNode>>;
+    : IQuery<IReadOnlyCollection<EntityTreeNode>>;
 
-public sealed class UserGroupTreeQueryHandler(
-        ActorService actorService,
-    IUserGroupTreeRepository userGroupTreeRepository,
+public sealed class UserTreeQueryHandler(
+    ActorService actorService,
+    IUserTreeRepository userGroupTreeRepository,
     ICurrentUser currentUser)
-    : IQueryHandler<UserGroupTreeQuery, IReadOnlyCollection<TreeNode>>
+    : IQueryHandler<UserTreeQuery, IReadOnlyCollection<EntityTreeNode>>
 {
-    public async Task<IReadOnlyCollection<TreeNode>> Handle(
-        UserGroupTreeQuery query,
+    public async Task<IReadOnlyCollection<EntityTreeNode>> Handle(
+        UserTreeQuery query,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        return await userGroupTreeRepository.GetMembers(
+        if (actor.IsAdmin || actor.IsSystem)
+        {
+            return await userGroupTreeRepository.GetUserTreeNodes(
+                query.Pagination ?? Pagination.FirstPage20Items,
+                query.UserGroupGuid,
+                cancellationToken);
+        }
+
+        return await userGroupTreeRepository.GetUserTreeNodesInPartitions(
             query.Pagination ?? Pagination.FirstPage20Items,
             actor.PartitionAccesses,
             query.UserGroupGuid,

@@ -21,17 +21,17 @@ namespace Fargo.Application.Models.TreeModels;
 /// <param name="Subtitle">
 /// An optional secondary text providing additional context.
 /// </param>
-/// <param name="HasChilds">
+/// <param name="HasChildren">
 /// Indicates whether the node contains related members or children.
 /// </param>
 /// <param name="IsActive">
 /// Indicates whether the node is active and should be considered in use.
 /// </param>
-public sealed record TreeNode(
+public sealed record EntityTreeNode(
     Nodeid Nodeid,
     string Title,
     string? Subtitle,
-    bool HasChilds,
+    bool HasChildren,
     bool IsActive)
 {
     /// <summary>

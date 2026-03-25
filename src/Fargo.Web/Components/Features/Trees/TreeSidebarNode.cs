@@ -22,12 +22,12 @@ public sealed class TreeSidebarNode
 
     public List<TreeSidebarNode> Children { get; } = [];
 
-    public static TreeSidebarNode FromTreeNode(TreeNode node) => new()
+    public static TreeSidebarNode FromTreeNode(EntityTreeNode node) => new()
     {
         EntityGuid = node.EntityGuid,
         Title = node.Title,
         Subtitle = node.Subtitle,
         IsActive = node.IsActive,
-        HasChildren = node.HasChilds
+        HasChildren = node.HasChildren
     };
 }

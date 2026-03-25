@@ -11,14 +11,14 @@ public sealed class PartitionSecurityTreeApi(
     IOptions<JsonOptions> httpJsonOptions)
     : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
 {
-    public async Task<IReadOnlyCollection<TreeNode>> GetChildrenAsync(
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetChildrenAsync(
         Guid? partitionGuid,
         CancellationToken cancellationToken = default)
     {
-        var result = await GetFromJsonAsync<IReadOnlyCollection<TreeNode>>(
+        var result = await GetFromJsonAsync<IReadOnlyCollection<EntityTreeNode>>(
             $"/trees/partitions/security",
             cancellationToken: cancellationToken);
 
-        return result ?? Array.Empty<TreeNode>();
+        return result ?? Array.Empty<EntityTreeNode>();
     }
 }

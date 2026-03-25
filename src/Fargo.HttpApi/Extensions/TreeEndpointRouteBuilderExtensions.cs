@@ -19,27 +19,27 @@ public static class TreeEndpointRouteBuilderExtension
         group.MapGet("/partitions", GetPartitionTree)
             .WithName("GetPartitionTree")
             .WithSummary("Gets partition tree members")
-            .Produces<IReadOnlyCollection<TreeNode>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<EntityTreeNode>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/user-groups", GetUserGroupTree)
             .WithName("GetUserGroupTree")
             .WithSummary("Gets user group tree members")
-            .Produces<IReadOnlyCollection<TreeNode>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<EntityTreeNode>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/articles", GetArticleTree)
             .WithName("GetArticleTree")
             .WithSummary("Gets article tree members")
-            .Produces<IReadOnlyCollection<TreeNode>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<EntityTreeNode>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<TreeNode>>, NoContent>> GetPartitionTree(
+    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNode>>, NoContent>> GetPartitionTree(
         Guid? parentPartitionGuid,
         Page? page,
         Limit? limit,
-        IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<TreeNode>> handler,
+        IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<EntityTreeNode>> handler,
         CancellationToken cancellationToken)
     {
         var response = await handler.Handle(
@@ -51,15 +51,15 @@ public static class TreeEndpointRouteBuilderExtension
         return TypedResultsHelpers.HandleCollectionQueryResult(response);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<TreeNode>>, NoContent>> GetUserGroupTree(
+    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNode>>, NoContent>> GetUserGroupTree(
         Guid? userGroupGuid,
         Page? page,
         Limit? limit,
-        IQueryHandler<UserGroupTreeQuery, IReadOnlyCollection<TreeNode>> handler,
+        IQueryHandler<UserTreeQuery, IReadOnlyCollection<EntityTreeNode>> handler,
         CancellationToken cancellationToken)
     {
         var response = await handler.Handle(
-            new UserGroupTreeQuery(
+            new UserTreeQuery(
                 UserGroupGuid: userGroupGuid,
                 Pagination: PaginationHelpers.CreatePagination(page, limit)),
             cancellationToken);
@@ -67,11 +67,11 @@ public static class TreeEndpointRouteBuilderExtension
         return TypedResultsHelpers.HandleCollectionQueryResult(response);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<TreeNode>>, NoContent>> GetArticleTree(
+    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNode>>, NoContent>> GetArticleTree(
         Guid? articleGuid,
         Page? page,
         Limit? limit,
-        IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<TreeNode>> handler,
+        IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<EntityTreeNode>> handler,
         CancellationToken cancellationToken)
     {
         var response = await handler.Handle(
