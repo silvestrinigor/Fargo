@@ -24,7 +24,6 @@ namespace Fargo.Application.Models.ArticleModels;
 /// is initially associated with that partition.
 /// </remarks>
 public record ArticleCreateModel(
-        Name Name,
-        Description? Description = null,
-        Guid? FirstPartition = null
-        );
+    Name Name,
+    Description? Description = null,
+    IReadOnlyCollection<Guid>? PartitionGuids = null);
