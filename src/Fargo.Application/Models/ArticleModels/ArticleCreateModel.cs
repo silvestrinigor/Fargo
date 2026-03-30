@@ -26,4 +26,4 @@ namespace Fargo.Application.Models.ArticleModels;
 public record ArticleCreateModel(
     Name Name,
     Description? Description = null,
-    IReadOnlyCollection<Guid>? PartitionGuids = null);
+    Guid? FirstPartition = null);
