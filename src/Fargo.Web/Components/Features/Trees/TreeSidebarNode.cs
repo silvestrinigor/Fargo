@@ -10,8 +10,6 @@ public sealed class TreeSidebarNode
 
     public string? Subtitle { get; init; }
 
-    public int MembersCount { get; init; }
-
     public bool IsActive { get; init; }
 
     public bool HasChildren { get; init; }
@@ -24,12 +22,11 @@ public sealed class TreeSidebarNode
 
     public List<TreeSidebarNode> Children { get; } = [];
 
-    public static TreeSidebarNode FromTreeNode(TreeNode node) => new()
+    public static TreeSidebarNode FromTreeNode(EntityTreeNode node) => new()
     {
         EntityGuid = node.EntityGuid,
         Title = node.Title,
         Subtitle = node.Subtitle,
-        MembersCount = node.MembersCount,
         IsActive = node.IsActive,
         HasChildren = node.HasChildren
     };

@@ -51,6 +51,8 @@ public sealed class ItemDeleteCommandHandler(
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
+        actor.ValidateHasAccess(item);
+
         itemRepository.Remove(item);
 
         await unitOfWork.SaveChanges(cancellationToken);

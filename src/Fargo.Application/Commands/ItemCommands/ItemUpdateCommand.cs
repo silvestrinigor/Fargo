@@ -54,7 +54,9 @@ public sealed class ItemUpdateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.EditItem);
 
-        _ = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+
+        actor.ValidateHasAccess(item);
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

@@ -16,6 +16,14 @@ namespace Fargo.Application.Models.PartitionModels;
 /// The new description for the partition.
 /// If <see langword="null"/>, the description will not be modified.
 /// </param>
+/// <param name="ParentPartitionGuid">
+/// The identifier of the new parent partition.
+/// When provided, the partition will be moved from its current parent
+/// to the specified parent partition.
+///
+/// If <see langword="null"/>, the parent partition will not be modified.
+/// </param>
 public sealed record PartitionUpdateModel(
-        Description? Description = null
+        Description? Description = null,
+        Guid? ParentPartitionGuid = null
         );

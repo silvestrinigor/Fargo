@@ -58,6 +58,8 @@ public sealed class UserUpdateCommandHandler(
 
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
+        actor.ValidateHasAccess(user);
+
         user.Nameid = command.User.Nameid ?? user.Nameid;
         user.FirstName = command.User.FirstName ?? user.FirstName;
         user.LastName = command.User.LastName ?? user.LastName;

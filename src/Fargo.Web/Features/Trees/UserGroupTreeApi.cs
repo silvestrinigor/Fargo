@@ -11,14 +11,14 @@ public sealed class UserGroupTreeApi(
     IOptions<JsonOptions> httpJsonOptions)
     : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
 {
-    public async Task<IReadOnlyCollection<TreeNode>> GetChildrenAsync(
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetChildrenAsync(
         Guid? userGroupGuid,
         CancellationToken cancellationToken = default)
     {
-        var result = await GetFromJsonAsync<IReadOnlyCollection<TreeNode>>(
+        var result = await GetFromJsonAsync<IReadOnlyCollection<EntityTreeNode>>(
             $"/trees/user-groups",
             cancellationToken: cancellationToken);
 
-        return result ?? Array.Empty<TreeNode>();
+        return result ?? Array.Empty<EntityTreeNode>();
     }
 }

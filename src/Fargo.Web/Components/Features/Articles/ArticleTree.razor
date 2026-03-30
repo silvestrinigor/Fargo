@@ -106,7 +106,6 @@ else
         var queryParts = new List<string>
         {
             $"title={Uri.EscapeDataString(node.Title)}",
-            $"membersCount={node.MembersCount}",
             $"active={node.IsActive.ToString().ToLowerInvariant()}"
         };
 

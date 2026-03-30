@@ -58,10 +58,14 @@ public sealed class UserRemoveUserGroupCommandHandler(
 
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
 
+        actor.ValidateHasAccess(user);
+
         var userGroupToRemove = user.UserGroups.FirstOrDefault(g => g.Guid == command.UserGroupGuid);
 
         if (userGroupToRemove != null)
         {
+            actor.ValidateHasAccess(userGroupToRemove);
+
             user.UserGroups.Remove(userGroupToRemove);
         }
 

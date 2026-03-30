@@ -53,178 +53,35 @@ public class PartitionService(
         new(GlobalPartitionGuidString);
 
     /// <summary>
-    /// Gets a partition by its identifier if the specified actor has access to it.
-    /// </summary>
-    /// <param name="partitionGuid">
-    /// The unique identifier of the partition to retrieve.
-    /// </param>
-    /// <param name="actor">
-    /// The user performing the operation. The actor must have effective access
-    /// to the requested partition, either directly or through a group membership.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The matching <see cref="Partition"/> when it exists and the actor has
-    /// access to it; otherwise, <see langword="null"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="actor"/> is <see langword="null"/>.
-    /// </exception>
-    public async Task<Partition?> GetPartition(
-            Guid partitionGuid,
-            User actor,
-            CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-
-        var partition = await partitionRepository.GetByGuid(
-            partitionGuid,
-            cancellationToken
-        );
-
-        if (partition is null)
-        {
-            return null;
-        }
-
-        var hasAccess = await HasAccess(
-            partition,
-            actor,
-            cancellationToken
-        );
-
-        return hasAccess
-            ? partition
-            : null;
-    }
-
-    /// <summary>
-    /// Determines whether the specified <paramref name="user"/> has effective
-    /// access to the given <paramref name="partition"/>.
+    /// Deletes the specified <see cref="Partition"/> from the system.
     /// </summary>
     /// <param name="partition">
-    /// The partition to evaluate access for.
+    /// The partition to be deleted.
     /// </param>
-    /// <param name="user">
-    /// The user whose access is being evaluated.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when the user has access to the partition,
-    /// either directly or through one of its ancestor partitions, whether
-    /// granted directly or through one of the user's group memberships;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partition"/> or <paramref name="user"/> is
-    /// <see langword="null"/>.
-    /// </exception>
-    public async Task<bool> HasAccess(
-            Partition partition,
-            User user,
-            CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(user);
-
-        var directAccessPartitionGuids = new HashSet<Guid>();
-
-        foreach (var access in user.PartitionAccesses)
-        {
-            directAccessPartitionGuids.Add(access.PartitionGuid);
-        }
-
-        foreach (var userGroup in user.UserGroups)
-        {
-            foreach (var accesses in userGroup.PartitionAccesses)
-            {
-                directAccessPartitionGuids.Add(accesses.PartitionGuid);
-            }
-        }
-
-        if (directAccessPartitionGuids.Count == 0)
-        {
-            return false;
-        }
-
-        if (directAccessPartitionGuids.Contains(partition.Guid))
-        {
-            return true;
-        }
-
-        foreach (var accessibleRootPartitionGuid in directAccessPartitionGuids)
-        {
-            var descendantPartitionGuids =
-                await partitionRepository.GetDescendantGuids(
-                    accessibleRootPartitionGuid,
-                    true,
-                    cancellationToken
-                );
-
-            if (descendantPartitionGuids.Contains(partition.Guid))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Determines whether the specified <paramref name="user"/> has effective
-    /// access to the given partitioned entity.
-    /// </summary>
-    /// <param name="partitioned">
-    /// The partitioned entity whose access is being evaluated.
-    /// </param>
-    /// <param name="user">
-    /// The user whose access is being evaluated.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when the user has access to the entity,
-    /// either directly or through one of their group memberships,
-    /// including access inherited from ancestor partitions; otherwise,
-    /// <see langword="false"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partitioned"/> or <paramref name="user"/> is
-    /// <see langword="null"/>.
+    /// <exception cref="PartitionGlobalDeleteFargoDomainException">
+    /// Thrown when an attempt is made to delete the global partition.
     /// </exception>
     /// <remarks>
-    /// This method evaluates access against the partitions associated with the
-    /// entity. Effective access may come from the user's own partition access
-    /// entries or from any group the user belongs to. If the entity has no
-    /// associated partitions, access is granted.
+    /// This operation removes the partition from the system.
     /// </remarks>
-    public async Task<bool> HasAccess(
-            IPartitioned partitioned,
-            User user,
-            CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// <b>Important:</b>
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// The global partition cannot be deleted under any circumstances.
+    /// </description>
+    /// </item>
+    /// </list>
+    /// </remarks>
+    public void DeletePartition(Partition partition)
     {
-        ArgumentNullException.ThrowIfNull(partitioned);
-        ArgumentNullException.ThrowIfNull(user);
-
-        if (partitioned.Partitions.Count == 0)
+        if (partition.Guid == GlobalPartitionGuid)
         {
-            return true;
+            throw new PartitionGlobalDeleteFargoDomainException();
         }
 
-        foreach (var partition in partitioned.Partitions)
-        {
-            if (await HasAccess(partition, user, cancellationToken))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        partitionRepository.Remove(partition);
     }
 
     /// <summary>

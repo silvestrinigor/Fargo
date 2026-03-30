@@ -11,80 +11,103 @@ namespace Fargo.Infrastructure.Repositories;
 public sealed class ArticleTreeRepository(FargoDbContext dbContext) : IArticleTreeRepository
 {
     private readonly DbSet<Article> articles = dbContext.Articles;
+
     private readonly DbSet<Item> items = dbContext.Items;
 
-    public async Task<IReadOnlyCollection<TreeNode>> GetMembers(
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetArticleItemTreeNodesInPartitions(
         Pagination pagination,
-        IReadOnlyCollection<Guid> accessiblePartitionGuids,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var articleItemTreeQuery = items
+            .Where(i => i.ArticleGuid == articleGuid)
+            .Where(p => p.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
+            .Select(i => new EntityTreeNode(
+                new Nodeid(TreeNodeType.Item, i.Guid),
+                i.Article.Name,
+                i.Article.Description,
+                HasChildren: false,
+                IsActive: false
+            ));
+
+        return await articleItemTreeQuery
+            .WithPagination(pagination)
+            .OrderBy(t => t.Title)
+            .ThenBy(t => t.EntityGuid)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetArticleTreeNodes(
+        Pagination pagination,
         Guid? articleGuid,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(accessiblePartitionGuids);
+        var articleItemTreeQuery = items
+            .Where(i => i.ArticleGuid == articleGuid)
+            .Select(i => new EntityTreeNode(
+                new Nodeid(TreeNodeType.Partition, i.Guid),
+                i.Article.Name,
+                i.Article.Description,
+                HasChildren: false,
+                IsActive: false
+            ));
 
-        if (accessiblePartitionGuids.Count == 0)
-        {
-            return [];
-        }
+        var articleTreeQuery = articles
+            .Select(a => new EntityTreeNode(
+                new Nodeid(TreeNodeType.Article, a.Guid),
+                a.Name,
+                a.Description,
+                HasChildren: items.Any(i => i.ArticleGuid == a.Guid),
+                IsActive: false
+            ));
 
-        var visiblePartitionGuids = accessiblePartitionGuids.Distinct().ToArray();
+        var articleAndItemTreeQuery = articleGuid is null
+            ? articleTreeQuery
+            : articleItemTreeQuery;
 
-        if (articleGuid == null)
-        {
-            var rows = await articles
-                .AsNoTracking()
-                .Where(article => article.Partitions.Any(partition => visiblePartitionGuids.Contains(partition.Guid)))
-                .OrderBy(article => article.Name)
-                .WithPagination(pagination)
-                .Select(article => new
-                {
-                    article.Guid,
-                    Title = article.Name.Value,
-                    Subtitle = article.Description.Value,
-                    MembersCount = items.Count(item =>
-                        item.ArticleGuid == article.Guid &&
-                        item.Partitions.Any(partition => visiblePartitionGuids.Contains(partition.Guid)))
-                })
-                .ToListAsync(cancellationToken);
-
-            return
-            [
-                .. rows.Select(x => new TreeNode(
-                    Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Article, x.Guid),
-                    TreeNodeType: TreeNodeType.Article,
-                    EntityGuid: x.Guid,
-                    Title: x.Title,
-                    Subtitle: string.IsNullOrWhiteSpace(x.Subtitle) ? null : x.Subtitle,
-                    ParentNodeId: null,
-                    MembersCount: x.MembersCount
-                    ))
-            ];
-        }
-
-        var parentNodeId = TreeNodeIdFactory.Create(TreeNodeType.Article, articleGuid.Value);
-
-        var itemRows = await items
-            .AsNoTracking()
-            .Where(item => item.ArticleGuid == articleGuid.Value)
-            .Where(item => item.Partitions.Any(partition => visiblePartitionGuids.Contains(partition.Guid)))
-            .OrderBy(item => item.Guid)
+        return await articleAndItemTreeQuery
             .WithPagination(pagination)
-            .Select(item => new
-            {
-                item.Guid
-            })
+            .OrderBy(t => t.Title)
+            .ThenBy(t => t.EntityGuid)
             .ToListAsync(cancellationToken);
+    }
 
-        return
-        [
-            .. itemRows.Select(x => new TreeNode(
-                Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Item, x.Guid, parentNodeId),
-                TreeNodeType: TreeNodeType.Item,
-                EntityGuid: x.Guid,
-                Title: x.Guid.ToString(),
-                Subtitle: null,
-                ParentNodeId: parentNodeId,
-                MembersCount: 0,
-                IsActive: true))
-        ];
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetArticleTreeNodesInPartitions(
+        Pagination pagination,
+        Guid? articleGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        CancellationToken cancellationToken = default)
+    {
+        var articleItemTreeQuery = items
+            .Where(i => i.ArticleGuid == articleGuid)
+            .Where(i => i.Partitions.Any(p => partitionGuids.Contains(p.Guid)))
+            .Select(i => new EntityTreeNode(
+                new Nodeid(TreeNodeType.Item, i.Guid),
+                i.Article.Name,
+                i.Article.Description,
+                HasChildren: false,
+                IsActive: false
+            ));
+
+        var articleTreeQuery = articles
+            .Where(a => a.Partitions.Any(p => partitionGuids.Contains(a.Guid)))
+            .Select(a => new EntityTreeNode(
+                new Nodeid(TreeNodeType.Article, a.Guid),
+                a.Name,
+                a.Description,
+                HasChildren: items.Any(i => i.ArticleGuid == a.Guid),
+                IsActive: false
+            ));
+
+        var articleAndItemTreeQuery = articleGuid is null
+            ? articleTreeQuery
+            : articleItemTreeQuery;
+
+        return await articleTreeQuery
+            .WithPagination(pagination)
+            .OrderBy(t => t.Title)
+            .ThenBy(t => t.EntityGuid)
+            .ToListAsync(cancellationToken);
     }
 }

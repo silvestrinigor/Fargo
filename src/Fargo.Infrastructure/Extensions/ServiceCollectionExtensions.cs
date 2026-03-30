@@ -63,6 +63,7 @@ public static class ServiceCollectionExtensions
             AddRepositories(services);
             AddSecurity(services);
             AddPersistence(services);
+            AddDomainServices(services);
 
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 

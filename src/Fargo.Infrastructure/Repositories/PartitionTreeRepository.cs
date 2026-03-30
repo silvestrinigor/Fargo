@@ -12,58 +12,246 @@ public sealed class PartitionTreeRepository(FargoDbContext dbContext) : IPartiti
 {
     private readonly DbSet<Partition> partitions = dbContext.Partitions;
 
-    public async Task<IReadOnlyCollection<TreeNode>> GetMembers(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> accessiblePartitionGuids,
-        Guid? parentPartitionGuid,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(accessiblePartitionGuids);
+    private readonly DbSet<Item> items = dbContext.Items;
 
-        if (accessiblePartitionGuids.Count == 0)
+    private readonly DbSet<Article> articles = dbContext.Articles;
+
+    private readonly DbSet<User> users = dbContext.Users;
+
+    private readonly DbSet<UserGroup> userGroups = dbContext.UserGroups;
+
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetPartitionTreeNodes(
+            Pagination pagination,
+            Guid? partitionGuid,
+            IReadOnlyCollection<TreeNodeType>? includedTypes = null,
+            CancellationToken cancellationToken = default)
+    {
+        includedTypes ??= Enum.GetValues<TreeNodeType>();
+
+        IQueryable<EntityTreeNode>? query = null;
+
+        if (includedTypes.Contains(TreeNodeType.Partition))
+        {
+            var partitionQuery = partitions
+                .Where(p => p.ParentPartitionGuid == partitionGuid)
+                .Select(p => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.Partition, p.Guid),
+                    p.Name,
+                    p.Description,
+                    p.PartitionMembers.Any(),
+                    p.IsActive
+                ));
+
+            query = query == null ? partitionQuery : query.Concat(partitionQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.User))
+        {
+            var usersQuery = users
+                .Where(u =>
+                    partitionGuid == null
+                        ? !u.Partitions.Any()
+                        : u.Partitions.Any(p => p.Guid == partitionGuid))
+                .Select(u => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.User, u.Guid),
+                    u.Nameid,
+                    u.Description,
+                    false,
+                    u.IsActive
+                ));
+
+            query = query == null ? usersQuery : query.Concat(usersQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.UserGroup))
+        {
+            var groupsQuery = userGroups
+                .Where(g =>
+                    partitionGuid == null
+                        ? !g.Partitions.Any()
+                        : g.Partitions.Any(p => p.Guid == partitionGuid))
+                .Select(g => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.UserGroup, g.Guid),
+                    g.Nameid,
+                    g.Description,
+                    false,
+                    g.IsActive
+                ));
+
+            query = query == null ? groupsQuery : query.Concat(groupsQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.Article))
+        {
+            var articlesQuery = articles
+                .Where(a =>
+                    partitionGuid == null
+                        ? !a.Partitions.Any()
+                        : a.Partitions.Any(p => p.Guid == partitionGuid))
+                .Select(a => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.Article, a.Guid),
+                    a.Name,
+                    a.Description,
+                    false,
+                    true
+                    ));
+
+            query = query == null ? articlesQuery : query.Concat(articlesQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.Item))
+        {
+            var itemsQuery = items
+                .Where(i =>
+                    partitionGuid == null
+                        ? !i.Partitions.Any()
+                        : i.Partitions.Any(p => p.Guid == partitionGuid))
+                .Select(i => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.Item, i.Guid),
+                    i.Article.Name,
+                    i.Article.Description,
+                    false,
+                    true
+                ));
+
+            query = query == null ? itemsQuery : query.Concat(itemsQuery);
+        }
+
+        if (query is null)
         {
             return [];
         }
 
-        var visiblePartitionGuids = accessiblePartitionGuids.Distinct().ToArray();
-
-        var baseQuery = partitions
-            .AsNoTracking()
-            .Where(x => visiblePartitionGuids.Contains(x.Guid));
-
-        baseQuery = parentPartitionGuid == null
-            ? baseQuery.Where(x => x.ParentPartitionGuid == null)
-            : baseQuery.Where(x => x.ParentPartitionGuid == parentPartitionGuid);
-
-        var rows = await baseQuery
-            .OrderBy(x => x.Name)
+        return await query
+            .OrderBy(x => x.Title)
+            .ThenBy(x => x.TreeNodeType)
+            .ThenBy(x => x.EntityGuid)
             .WithPagination(pagination)
-            .Select(x => new
-            {
-                x.Guid,
-                Title = x.Name.Value,
-                Subtitle = x.Description.Value,
-                x.ParentPartitionGuid,
-                x.IsActive,
-                MembersCount = partitions.Count(c =>
-                    c.ParentPartitionGuid == x.Guid &&
-                    visiblePartitionGuids.Contains(c.Guid))
-            })
             .ToListAsync(cancellationToken);
+    }
 
-        return
-        [
-            .. rows.Select(x => new TreeNode(
-                Nodeid: TreeNodeIdFactory.Create(TreeNodeType.Partition, x.Guid),
-                TreeNodeType: TreeNodeType.Partition,
-                EntityGuid: x.Guid,
-                Title: x.Title,
-                Subtitle: string.IsNullOrWhiteSpace(x.Subtitle) ? null : x.Subtitle,
-                ParentNodeId: x.ParentPartitionGuid is null
-                    ? null
-                    : TreeNodeIdFactory.Create(TreeNodeType.Partition, x.ParentPartitionGuid.Value),
-                MembersCount: x.MembersCount,
-                IsActive: x.IsActive))
-        ];
+    public async Task<IReadOnlyCollection<EntityTreeNode>> GetPartitionTreeNodesInPartitions(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? partitionGuid,
+        IReadOnlyCollection<TreeNodeType>? includedTypes = null,
+        CancellationToken cancellationToken = default)
+    {
+        includedTypes ??= Enum.GetValues<TreeNodeType>();
+
+        IQueryable<EntityTreeNode>? query = null;
+
+        if (includedTypes.Contains(TreeNodeType.Partition))
+        {
+            var partitionQuery = partitions
+                .Where(p =>
+                    p.ParentPartitionGuid == partitionGuid &&
+                    partitionGuids.Contains(p.Guid))
+                .Select(p => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.Partition, p.Guid),
+                    p.Name,
+                    p.Description,
+                    p.PartitionMembers.Any(),
+                    p.IsActive
+                    ));
+
+            query = query == null ? partitionQuery : query.Concat(partitionQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.User))
+        {
+            var usersQuery = users
+                .Where(u =>
+                    partitionGuid == null
+                    ? !u.Partitions.Any() ||
+                    u.Partitions.Any(p => partitionGuids.Contains(p.Guid))
+                    : u.Partitions.Any(p =>
+                        p.Guid == partitionGuid &&
+                        partitionGuids.Contains(p.Guid)))
+                .Select(u => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.User, u.Guid),
+                    u.Nameid,
+                    u.Description,
+                    false,
+                    u.IsActive
+                    ));
+
+            query = query == null ? usersQuery : query.Concat(usersQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.UserGroup))
+        {
+            var groupsQuery = userGroups
+                .Where(g =>
+                    partitionGuid == null
+                    ? !g.Partitions.Any() ||
+                    g.Partitions.Any(p => partitionGuids.Contains(p.Guid))
+                    : g.Partitions.Any(p =>
+                        p.Guid == partitionGuid &&
+                        partitionGuids.Contains(p.Guid)))
+                .Select(g => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.UserGroup, g.Guid),
+                    g.Nameid,
+                    g.Description,
+                    false,
+                    g.IsActive
+                    ));
+
+            query = query == null ? groupsQuery : query.Concat(groupsQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.Article))
+        {
+            var articlesQuery = articles
+                .Where(a =>
+                    partitionGuid == null
+                    ? !a.Partitions.Any() ||
+                    a.Partitions.Any(p => partitionGuids.Contains(p.Guid))
+                    : a.Partitions.Any(p =>
+                        p.Guid == partitionGuid &&
+                        partitionGuids.Contains(p.Guid)))
+                .Select(a => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.Article, a.Guid),
+                    a.Name,
+                    a.Description,
+                    false,
+                    true
+                    ));
+
+            query = query == null ? articlesQuery : query.Concat(articlesQuery);
+        }
+
+        if (includedTypes.Contains(TreeNodeType.Item))
+        {
+            var itemsQuery = items
+                .Where(i =>
+                    partitionGuid == null
+                    ? !i.Partitions.Any() ||
+                    i.Partitions.Any(p => partitionGuids.Contains(p.Guid))
+                    : i.Partitions.Any(p =>
+                        p.Guid == partitionGuid &&
+                        partitionGuids.Contains(p.Guid)))
+                .Select(i => new EntityTreeNode(
+                    new Nodeid(TreeNodeType.Item, i.Guid),
+                    i.Article.Name,
+                    i.Article.Description,
+                    false,
+                    true
+                    ));
+
+            query = query == null ? itemsQuery : query.Concat(itemsQuery);
+        }
+
+        if (query is null)
+        {
+            return [];
+        }
+
+        return await query
+            .OrderBy(x => x.Title)
+            .ThenBy(x => x.TreeNodeType)
+            .ThenBy(x => x.EntityGuid)
+            .WithPagination(pagination)
+            .ToListAsync(cancellationToken);
     }
 }

@@ -13,13 +13,11 @@ public static class TreeServiceCollectionExtensions
     {
         services.AddScoped<IPartitionTreeRepository, PartitionTreeRepository>();
         services.AddScoped<IArticleTreeRepository, ArticleTreeRepository>();
-        services.AddScoped<IUserGroupTreeRepository, UserGroupTreeRepository>();
-        services.AddScoped<IPartitionSecurityTreeRepository, PartitionSecurityTreeRepository>();
+        services.AddScoped<IUserTreeRepository, UserTreeRepository>();
 
-        services.AddScoped<IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<TreeNode>>, PartitionTreeQueryHandler>();
-        services.AddScoped<IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<TreeNode>>, ArticleTreeQueryHandler>();
-        services.AddScoped<IQueryHandler<UserGroupTreeQuery, IReadOnlyCollection<TreeNode>>, UserGroupTreeQueryHandler>();
-        services.AddScoped<IQueryHandler<PartitionSecurityTreeQuery, IReadOnlyCollection<TreeNode>>, PartitionSecurityTreeQueryHandler>();
+        services.AddScoped<IQueryHandler<PartitionTreeQuery, IReadOnlyCollection<EntityTreeNode>>, PartitionTreeQueryHandler>();
+        services.AddScoped<IQueryHandler<ArticleTreeQuery, IReadOnlyCollection<EntityTreeNode>>, ArticleTreeQueryHandler>();
+        services.AddScoped<IQueryHandler<UserTreeQuery, IReadOnlyCollection<EntityTreeNode>>, UserTreeQueryHandler>();
 
         return services;
     }
