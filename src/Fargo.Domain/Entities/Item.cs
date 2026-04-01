@@ -19,7 +19,7 @@ namespace Fargo.Domain.Entities;
 /// only if they have access to at least one partition associated directly
 /// with the item, subject to additional authorization rules.
 /// </remarks>
-public class Item : ModifiedEntity, IPartitioned
+public class Item : ModifiedEntity, IPartitionedEntity
 {
     /// <summary>
     /// Gets the unique identifier of the associated <see cref="Article"/>.
@@ -67,5 +67,5 @@ public class Item : ModifiedEntity, IPartitioned
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 }

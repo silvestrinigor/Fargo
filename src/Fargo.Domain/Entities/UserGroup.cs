@@ -17,7 +17,7 @@ namespace Fargo.Domain.Entities;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUser
+public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser
 {
     /// <summary>
     /// Gets or sets the unique NAMEID of the user group.
@@ -127,7 +127,7 @@ public class UserGroup : ModifiedEntity, IPartitioned, IPartitionUser, IPermissi
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 
     /// <summary>
     /// Gets the read-only collection of users associated with the user group.

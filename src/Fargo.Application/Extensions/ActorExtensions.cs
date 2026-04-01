@@ -77,7 +77,7 @@ public static class ActorExtensions
         /// partition associations.
         /// </remarks>
         public void ValidateHasAccess<TEntity>(TEntity partitioned)
-            where TEntity : IEntity, IPartitioned
+            where TEntity : IEntity, IPartitionedEntity
         {
             if (!actor.HasAccess(partitioned))
             {

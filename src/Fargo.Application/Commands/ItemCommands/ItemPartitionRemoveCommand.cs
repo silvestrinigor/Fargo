@@ -5,40 +5,40 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Commands.UserCommands;
+namespace Fargo.Application.Commands.ItemCommands;
 
-public sealed record UserRemovePartitionCommand(
-        Guid UserGuid,
+public sealed record ItemRemovePartitionCommand(
+        Guid ItemGuid,
         Guid PartitionGuid
         ) : ICommand;
 
-public sealed class UserRemovePartitionCommandHandler(
+public sealed class ItemRemovePartitionCommandHandler(
         ActorService actorService,
-        IUserRepository userRepository,
+        IItemRepository itemRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<UserRemovePartitionCommand>
+        ) : ICommandHandler<ItemRemovePartitionCommand>
 {
     public async Task Handle(
-            UserRemovePartitionCommand command,
+            ItemRemovePartitionCommand command,
             CancellationToken cancellationToken = default
             )
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.EditUser);
+        actor.ValidateHasPermission(ActionType.EditItem);
 
-        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(user);
+        actor.ValidateHasAccess(item);
 
-        var partitionToRemove = user.Partitions.FirstOrDefault(p => p.Guid == command.PartitionGuid);
+        var partitionToRemove = item.Partitions.FirstOrDefault(p => p.Guid == command.PartitionGuid);
 
         if (partitionToRemove is not null)
         {
             actor.ValidateHasPartitionAccess(partitionToRemove.Guid);
 
-            user.Partitions.Remove(partitionToRemove);
+            item.Partitions.Remove(partitionToRemove);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

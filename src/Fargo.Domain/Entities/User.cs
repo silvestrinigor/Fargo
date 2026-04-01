@@ -16,7 +16,7 @@ namespace Fargo.Domain.Entities;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUser
+public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser
 {
     /// <summary>
     /// Gets or sets the unique NAMEID (username) of the user.
@@ -348,5 +348,5 @@ public class User : ModifiedEntity, IPartitioned, IPartitionUser, IPermissionUse
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 }

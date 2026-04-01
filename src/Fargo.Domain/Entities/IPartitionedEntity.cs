@@ -3,10 +3,10 @@ namespace Fargo.Domain.Entities;
 /// <summary>
 /// Represents an entity that is associated with one or more partitions.
 /// </summary>
-public interface IPartitioned
+public interface IPartitionedEntity
 {
     /// <summary>
     /// Gets the partitions associated with the entity.
     /// </summary>
-    IReadOnlyCollection<Partition> Partitions { get; }
+    IReadOnlyCollection<IPartitionEntity> Partitions { get; }
 }

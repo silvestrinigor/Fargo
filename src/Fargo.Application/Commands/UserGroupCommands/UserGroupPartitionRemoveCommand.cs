@@ -5,40 +5,40 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Commands.UserCommands;
+namespace Fargo.Application.Commands.UserGroupCommands;
 
-public sealed record UserRemovePartitionCommand(
-        Guid UserGuid,
+public sealed record UserGroupPartitionRemoveCommand(
+        Guid UserGroupGuid,
         Guid PartitionGuid
         ) : ICommand;
 
-public sealed class UserRemovePartitionCommandHandler(
+public sealed class UserGroupPartitionRemoveCommandHandler(
         ActorService actorService,
-        IUserRepository userRepository,
+        IUserGroupRepository userGroupRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<UserRemovePartitionCommand>
+        ) : ICommandHandler<UserGroupPartitionRemoveCommand>
 {
     public async Task Handle(
-            UserRemovePartitionCommand command,
+            UserGroupPartitionRemoveCommand command,
             CancellationToken cancellationToken = default
             )
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.EditUser);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
 
-        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 
-        actor.ValidateHasAccess(user);
+        actor.ValidateHasAccess(userGroup);
 
-        var partitionToRemove = user.Partitions.FirstOrDefault(p => p.Guid == command.PartitionGuid);
+        var partitionToRemove = userGroup.Partitions.FirstOrDefault(p => p.Guid == command.PartitionGuid);
 
         if (partitionToRemove is not null)
         {
             actor.ValidateHasPartitionAccess(partitionToRemove.Guid);
 
-            user.Partitions.Remove(partitionToRemove);
+            userGroup.Partitions.Remove(partitionToRemove);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
