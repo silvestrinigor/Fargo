@@ -63,16 +63,7 @@ public class PartitionService(
     /// </exception>
     /// <remarks>
     /// This operation removes the partition from the system.
-    /// </remarks>
-    /// <remarks>
-    /// <b>Important:</b>
-    /// <list type="bullet">
-    /// <item>
-    /// <description>
     /// The global partition cannot be deleted under any circumstances.
-    /// </description>
-    /// </item>
-    /// </list>
     /// </remarks>
     public void DeletePartition(Partition partition)
     {

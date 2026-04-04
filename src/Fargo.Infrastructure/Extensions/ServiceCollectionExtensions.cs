@@ -128,20 +128,28 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleAddPartitionCommand>, ArticleAddPartitionCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleRemovePartitionCommand>, ArticleRemovePartitionCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemAddPartitionCommand>, ItemAddPartitionCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemRemovePartitionCommand>, ItemRemovePartitionCommandHandler>();
 
             services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
             services.AddScoped<ICommandHandler<UserAddUserGroupCommand>, UserAddUserGroupCommandHandler>();
             services.AddScoped<ICommandHandler<UserRemoveUserGroupCommand>, UserRemoveUserGroupCommandHandler>();
+            services.AddScoped<ICommandHandler<UserAddPartitionCommand>, UserAddPartitionCommandHandler>();
+            services.AddScoped<ICommandHandler<UserRemovePartitionCommand>, UserRemovePartitionCommandHandler>();
 
             services.AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupPartitionAddCommand>, UserGroupPartitionAddCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupPartitionRemoveCommand>, UserGroupPartitionRemoveCommandHandler>();
 
             services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
             services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();

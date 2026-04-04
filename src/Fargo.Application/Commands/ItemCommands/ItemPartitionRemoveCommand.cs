@@ -5,48 +5,48 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Commands.UserCommands;
+namespace Fargo.Application.Commands.ItemCommands;
 
 /// <summary>
-/// Command used to remove a partition from a user's partition access set.
+/// Command used to remove a partition from an item.
 /// </summary>
-/// <param name="UserGuid">The unique identifier of the user.</param>
+/// <param name="ItemGuid">The unique identifier of the item.</param>
 /// <param name="PartitionGuid">The unique identifier of the partition to remove.</param>
-public sealed record UserRemovePartitionCommand(
-        Guid UserGuid,
+public sealed record ItemRemovePartitionCommand(
+        Guid ItemGuid,
         Guid PartitionGuid
         ) : ICommand;
 
 /// <summary>
-/// Handles <see cref="UserRemovePartitionCommand"/> requests.
+/// Handles <see cref="ItemRemovePartitionCommand"/> requests.
 /// </summary>
-public sealed class UserRemovePartitionCommandHandler(
+public sealed class ItemRemovePartitionCommandHandler(
         ActorService actorService,
-        IUserRepository userRepository,
+        IItemRepository itemRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<UserRemovePartitionCommand>
+        ) : ICommandHandler<ItemRemovePartitionCommand>
 {
     public async Task Handle(
-            UserRemovePartitionCommand command,
+            ItemRemovePartitionCommand command,
             CancellationToken cancellationToken = default
             )
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.EditUser);
+        actor.ValidateHasPermission(ActionType.EditItem);
 
-        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(user);
+        actor.ValidateHasAccess(item);
 
-        var partitionToRemove = user.Partitions.FirstOrDefault(p => p.Guid == command.PartitionGuid);
+        var partitionToRemove = item.Partitions.FirstOrDefault(p => p.Guid == command.PartitionGuid);
 
         if (partitionToRemove is not null)
         {
             actor.ValidateHasPartitionAccess(partitionToRemove.Guid);
 
-            user.Partitions.Remove(partitionToRemove);
+            item.Partitions.Remove(partitionToRemove);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

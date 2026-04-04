@@ -16,7 +16,7 @@ namespace Fargo.Domain.Entities;
 /// if they have access to at least one of its partitions, subject to any
 /// additional authorization rules.
 /// </remarks>
-public class Article : ModifiedEntity, IPartitioned
+public class Article : ModifiedEntity, IPartitionedEntity
 {
     /// <summary>
     /// Gets or sets the name of the article.
@@ -58,5 +58,5 @@ public class Article : ModifiedEntity, IPartitioned
     } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 }

@@ -120,7 +120,7 @@ public abstract class Actor : IActor
     /// <item><description>Otherwise, checks intersection with <see cref="PartitionAccesses"/></description></item>
     /// </list>
     /// </remarks>
-    public bool HasAccess(IPartitioned partitioned)
+    public bool HasAccess(IPartitionedEntity partitioned)
     {
         if (IsSystem || IsAdmin)
         {

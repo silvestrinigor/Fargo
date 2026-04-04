@@ -5,49 +5,49 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
 
-namespace Fargo.Application.Commands.UserCommands;
+namespace Fargo.Application.Commands.ItemCommands;
 
 /// <summary>
-/// Command used to add a partition to a user's partition access set.
+/// Command used to add a partition to an item.
 /// </summary>
-/// <param name="UserGuid">The unique identifier of the user.</param>
+/// <param name="ItemGuid">The unique identifier of the item.</param>
 /// <param name="PartitionGuid">The unique identifier of the partition to add.</param>
-public sealed record UserAddPartitionCommand(
-        Guid UserGuid,
+public sealed record ItemAddPartitionCommand(
+        Guid ItemGuid,
         Guid PartitionGuid
         ) : ICommand;
 
 /// <summary>
-/// Handles <see cref="UserAddPartitionCommand"/> requests.
+/// Handles <see cref="ItemAddPartitionCommand"/> requests.
 /// </summary>
-public sealed class UserAddPartitionCommandHandler(
+public sealed class ItemAddPartitionCommandHandler(
         ActorService actorService,
-        IUserRepository userRepository,
+        IItemRepository itemRepository,
         IPartitionRepository partitionRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser
-        ) : ICommandHandler<UserAddPartitionCommand>
+        ) : ICommandHandler<ItemAddPartitionCommand>
 {
     public async Task Handle(
-            UserAddPartitionCommand command,
+            ItemAddPartitionCommand command,
             CancellationToken cancellationToken = default
             )
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.EditUser);
+        actor.ValidateHasPermission(ActionType.EditItem);
 
-        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(user);
+        actor.ValidateHasAccess(item);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
-        if (!user.Partitions.Contains(partition))
+        if (!item.Partitions.Contains(partition))
         {
-            user.Partitions.Add(partition);
+            item.Partitions.Add(partition);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
