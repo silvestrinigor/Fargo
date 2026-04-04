@@ -7,11 +7,19 @@ using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.UserCommands;
 
+/// <summary>
+/// Command used to add a partition to a user's partition access set.
+/// </summary>
+/// <param name="UserGuid">The unique identifier of the user.</param>
+/// <param name="PartitionGuid">The unique identifier of the partition to add.</param>
 public sealed record UserAddPartitionCommand(
         Guid UserGuid,
         Guid PartitionGuid
         ) : ICommand;
 
+/// <summary>
+/// Handles <see cref="UserAddPartitionCommand"/> requests.
+/// </summary>
 public sealed class UserAddPartitionCommandHandler(
         ActorService actorService,
         IUserRepository userRepository,

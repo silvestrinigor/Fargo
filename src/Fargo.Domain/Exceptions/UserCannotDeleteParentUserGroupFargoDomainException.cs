@@ -9,10 +9,6 @@ namespace Fargo.Domain.Exceptions;
 /// that grants their own permissions, which could result in
 /// privilege loss or inconsistent authorization state.
 /// </remarks>
-/// <remarks>
-/// Initializes a new instance of the
-/// <see cref="UserCannotDeleteParentUserGroupFargoDomainException"/> class.
-/// </remarks>
 /// <param name="userGroupGuid">
 /// The unique identifier of the user group that the user attempted to delete.
 /// </param>

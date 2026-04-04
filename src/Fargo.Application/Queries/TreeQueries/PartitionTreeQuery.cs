@@ -14,13 +14,18 @@ namespace Fargo.Application.Queries.TreeQueries;
 /// The unique identifier of the parent partition.
 /// If <c>null</c>, the root-level partitions will be retrieved.
 /// </param>
+/// <param name="IncludedTypes">
+/// An optional collection of <see cref="TreeNodeType"/> values used to filter
+/// which node types are included in the result.
+/// If <c>null</c>, all node types are included.
+/// </param>
 /// <param name="Pagination">
 /// The pagination settings used to limit and organize the result set.
 /// If not provided, defaults to <see cref="Pagination.FirstPage20Items"/>.
 /// </param>
 public sealed record PartitionTreeQuery(
     Guid? ParentPartitionGuid = null,
-    IReadOnlyCollection<TreeNodeType> IncludedTypes = null,
+    IReadOnlyCollection<TreeNodeType>? IncludedTypes = null,
     Pagination? Pagination = null)
     : IQuery<IReadOnlyCollection<EntityTreeNode>>;
 

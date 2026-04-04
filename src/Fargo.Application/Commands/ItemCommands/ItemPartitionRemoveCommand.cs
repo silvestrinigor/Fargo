@@ -7,11 +7,19 @@ using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.ItemCommands;
 
+/// <summary>
+/// Command used to remove a partition from an item.
+/// </summary>
+/// <param name="ItemGuid">The unique identifier of the item.</param>
+/// <param name="PartitionGuid">The unique identifier of the partition to remove.</param>
 public sealed record ItemRemovePartitionCommand(
         Guid ItemGuid,
         Guid PartitionGuid
         ) : ICommand;
 
+/// <summary>
+/// Handles <see cref="ItemRemovePartitionCommand"/> requests.
+/// </summary>
 public sealed class ItemRemovePartitionCommandHandler(
         ActorService actorService,
         IItemRepository itemRepository,

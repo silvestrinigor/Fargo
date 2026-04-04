@@ -7,11 +7,19 @@ using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.ArticleCommands;
 
+/// <summary>
+/// Command used to add a partition to an article.
+/// </summary>
+/// <param name="ArticleGuid">The unique identifier of the article.</param>
+/// <param name="PartitionGuid">The unique identifier of the partition to add.</param>
 public sealed record ArticleAddPartitionCommand(
         Guid ArticleGuid,
         Guid PartitionGuid
         ) : ICommand;
 
+/// <summary>
+/// Handles <see cref="ArticleAddPartitionCommand"/> requests.
+/// </summary>
 public sealed class ArticleAddPartitionCommandHandler(
         ActorService actorService,
         IArticleRepository articleRepository,

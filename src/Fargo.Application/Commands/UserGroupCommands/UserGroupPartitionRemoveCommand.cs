@@ -7,11 +7,19 @@ using Fargo.Domain.Services;
 
 namespace Fargo.Application.Commands.UserGroupCommands;
 
+/// <summary>
+/// Command used to remove a partition from a user group's partition access set.
+/// </summary>
+/// <param name="UserGroupGuid">The unique identifier of the user group.</param>
+/// <param name="PartitionGuid">The unique identifier of the partition to remove.</param>
 public sealed record UserGroupPartitionRemoveCommand(
         Guid UserGroupGuid,
         Guid PartitionGuid
         ) : ICommand;
 
+/// <summary>
+/// Handles <see cref="UserGroupPartitionRemoveCommand"/> requests.
+/// </summary>
 public sealed class UserGroupPartitionRemoveCommandHandler(
         ActorService actorService,
         IUserGroupRepository userGroupRepository,
