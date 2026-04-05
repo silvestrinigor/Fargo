@@ -1,6 +1,6 @@
 namespace Fargo.Sdk.Models;
 
-public sealed class ArticleInfo
+internal sealed class ArticleInfo
 {
     public Guid Guid { get; set; }
     public string Name { get; set; } = string.Empty;

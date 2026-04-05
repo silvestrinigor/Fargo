@@ -1,5 +1,5 @@
 using Fargo.Sdk.Exceptions;
-using Fargo.Sdk.Security;
+using Fargo.Sdk.Authentication;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -12,10 +12,10 @@ public sealed class FargoHttpClient
     private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Web;
 
     private readonly HttpClient httpClient;
-    private readonly FargoAuthSession session;
+    private readonly AuthSession session;
     private string baseUrl = string.Empty;
 
-    public FargoHttpClient(HttpClient httpClient, FargoAuthSession session)
+    public FargoHttpClient(HttpClient httpClient, AuthSession session)
     {
         this.httpClient = httpClient;
         this.session = session;
