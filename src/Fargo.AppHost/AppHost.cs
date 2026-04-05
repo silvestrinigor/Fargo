@@ -20,7 +20,7 @@ builder
     .WaitForCompletion(migrations);
 
 var apiService = builder
-    .AddProject<Projects.Fargo_HttpApi>("apiservice")
+    .AddProject<Projects.Fargo_Api>("apiservice")
     .WithHttpHealthCheck("/health")
     .WithReference(fargodb)
     .WithReference(migrations)

@@ -1,5 +1,5 @@
-using Fargo.Sdk.Managers;
 using Fargo.Sdk.Http;
+using Fargo.Sdk.Managers;
 using Fargo.Sdk.Models;
 using Fargo.Sdk.Security;
 using Fargo.Sdk.Services;

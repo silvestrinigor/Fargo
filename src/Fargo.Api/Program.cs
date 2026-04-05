@@ -1,5 +1,5 @@
-using Fargo.HttpApi.Extensions;
-using Fargo.HttpApi.Middlewares;
+using Fargo.Api.Extensions;
+using Fargo.Api.Middlewares;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 

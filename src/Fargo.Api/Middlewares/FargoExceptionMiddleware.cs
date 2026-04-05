@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.HttpApi.Middlewares;
+namespace Fargo.Api.Middlewares;
 
 /// <summary>
 /// Middleware responsible for handling exceptions thrown during HTTP request processing.

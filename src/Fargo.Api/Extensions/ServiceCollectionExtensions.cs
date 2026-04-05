@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace Fargo.HttpApi.Extensions;
+namespace Fargo.Api.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring HTTP API services.

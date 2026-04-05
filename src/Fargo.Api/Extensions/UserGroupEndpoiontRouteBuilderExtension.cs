@@ -1,13 +1,13 @@
+using Fargo.Api.Helpers;
 using Fargo.Application.Commands;
 using Fargo.Application.Commands.UserGroupCommands;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Queries;
 using Fargo.Application.Queries.UserGroupQueries;
 using Fargo.Domain.ValueObjects;
-using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Extensions;
+namespace Fargo.Api.Extensions;
 
 /// <summary>
 /// Extension responsible for mapping all UserGroup endpoints.

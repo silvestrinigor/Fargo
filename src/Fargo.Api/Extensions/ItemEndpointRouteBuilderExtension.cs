@@ -1,13 +1,13 @@
+using Fargo.Api.Helpers;
 using Fargo.Application.Commands;
 using Fargo.Application.Commands.ItemCommands;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Queries;
 using Fargo.Application.Queries.ItemQueries;
 using Fargo.Domain.ValueObjects;
-using Fargo.HttpApi.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Extensions;
+namespace Fargo.Api.Extensions;
 
 /// <summary>
 /// Extension responsible for mapping all Item endpoints.

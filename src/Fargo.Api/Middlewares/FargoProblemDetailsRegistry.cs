@@ -1,7 +1,7 @@
 using Fargo.Application.Exceptions;
 using Fargo.Domain.Exceptions;
 
-namespace Fargo.HttpApi.Middlewares;
+namespace Fargo.Api.Middlewares;
 
 /// <summary>
 /// Central registry that maps application and domain exceptions

@@ -3,7 +3,7 @@ using Fargo.Application.Commands.AuthCommands;
 using Fargo.Application.Models.AuthModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Extensions;
+namespace Fargo.Api.Extensions;
 
 /// <summary>
 /// Extension responsible for mapping authentication endpoints.

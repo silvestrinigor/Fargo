@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Helpers;
+namespace Fargo.Api.Helpers;
 
 /// <summary>
 /// Helper methods for handling typed results in REST API responses.
