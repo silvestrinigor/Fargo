@@ -1,3 +1,7 @@
+# Docfx
+_site/
+api/
+
 # Dotnet Migrations Bug
 # https://github.com/dotnet/efcore/issues/36142
 [Bb]in\\Debug/
