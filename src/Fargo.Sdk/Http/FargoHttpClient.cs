@@ -12,7 +12,9 @@ public sealed class FargoHttpClient
     private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Web;
 
     private readonly HttpClient httpClient;
+
     private readonly AuthSession session;
+
     private string baseUrl = string.Empty;
 
     public FargoHttpClient(HttpClient httpClient, AuthSession session)

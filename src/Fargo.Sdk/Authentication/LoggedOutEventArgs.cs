@@ -2,13 +2,10 @@ namespace Fargo.Sdk.Authentication;
 
 public sealed class LoggedOutEventArgs
 {
-    internal LoggedOutEventArgs(string server, string nameid)
+    internal LoggedOutEventArgs(string nameid)
     {
-        Server = server;
         Nameid = nameid;
     }
-
-    public string Server { get; }
 
     public string Nameid { get; }
 }

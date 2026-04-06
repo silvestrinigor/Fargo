@@ -1,18 +1,18 @@
 namespace Fargo.Sdk.Authentication;
 
-internal sealed class AuthenticationManager : IAuthenticationManager
+public sealed class AuthenticationManager : IAuthenticationManager
 {
-    private readonly IAuthenticationClient client;
-    private readonly AuthSession session;
-
-    private string currentServer = string.Empty;
-    private string currentNameid = string.Empty;
-
     public AuthenticationManager(IAuthenticationClient client, AuthSession session)
     {
         this.client = client;
         this.session = session;
     }
+
+    private readonly IAuthenticationClient client;
+
+    private readonly AuthSession session;
+
+    private string currentNameid = string.Empty;
 
     public event EventHandler<LoggedInEventArgs>? LoggedIn;
 
@@ -30,7 +30,7 @@ internal sealed class AuthenticationManager : IAuthenticationManager
 
         currentNameid = nameid;
 
-        LoggedIn?.Invoke(this, new LoggedInEventArgs(currentServer, nameid));
+        LoggedIn?.Invoke(this, new LoggedInEventArgs(nameid));
 
         return result;
     }
@@ -42,17 +42,15 @@ internal sealed class AuthenticationManager : IAuthenticationManager
             return;
         }
 
-        var server = currentServer;
         var nameid = currentNameid;
         var refreshToken = session.RefreshToken;
 
         session.Clear();
-        currentServer = string.Empty;
         currentNameid = string.Empty;
 
         await client.LogOutAsync(refreshToken);
 
-        LoggedOut?.Invoke(this, new LoggedOutEventArgs(server, nameid));
+        LoggedOut?.Invoke(this, new LoggedOutEventArgs(nameid));
     }
 
     public async Task<AuthResult> RefreshAsync(CancellationToken cancellationToken = default)
@@ -61,7 +59,7 @@ internal sealed class AuthenticationManager : IAuthenticationManager
 
         session.SetTokens(result.AccessToken, result.RefreshToken, result.ExpiresAt);
 
-        Refreshed?.Invoke(this, new RefreshedEventArgs(currentServer, currentNameid));
+        Refreshed?.Invoke(this, new RefreshedEventArgs(currentNameid));
 
         return result;
     }
@@ -70,11 +68,6 @@ internal sealed class AuthenticationManager : IAuthenticationManager
     {
         await client.ChangePassword(newPassword, currentPassword);
 
-        PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(currentServer, currentNameid));
-    }
-
-    internal void SetServer(string server)
-    {
-        currentServer = server;
+        PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(currentNameid));
     }
 }

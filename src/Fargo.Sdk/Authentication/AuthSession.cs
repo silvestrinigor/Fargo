@@ -10,14 +10,14 @@ public sealed class AuthSession
 
     public bool IsAuthenticated => !string.IsNullOrEmpty(AccessToken);
 
-    public void SetTokens(string accessToken, string refreshToken, DateTimeOffset expiresAt)
+    internal void SetTokens(string accessToken, string refreshToken, DateTimeOffset expiresAt)
     {
         AccessToken = accessToken;
         RefreshToken = refreshToken;
         ExpiresAt = expiresAt;
     }
 
-    public void Clear()
+    internal void Clear()
     {
         AccessToken = string.Empty;
         RefreshToken = string.Empty;

@@ -2,14 +2,14 @@ using Fargo.Sdk.Http;
 
 namespace Fargo.Sdk.Authentication;
 
-internal sealed class AuthenticationClient : IAuthenticationClient
+public sealed class AuthenticationClient : IAuthenticationClient
 {
-    private readonly FargoHttpClient httpClient;
-
-    public AuthenticationClient(FargoHttpClient httpClient)
+    internal AuthenticationClient(FargoHttpClient httpClient)
     {
         this.httpClient = httpClient;
     }
+
+    private readonly FargoHttpClient httpClient;
 
     public Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
