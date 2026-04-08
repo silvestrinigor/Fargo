@@ -1,12 +1,12 @@
 namespace Fargo.Sdk.Authentication;
 
-public sealed class AuthSession
+public sealed class AuthSession : IAuthSession
 {
-    public string AccessToken { get; private set; } = string.Empty;
+    public string? AccessToken { get; private set; } = default;
 
-    public string RefreshToken { get; private set; } = string.Empty;
+    public string? RefreshToken { get; private set; } = default;
 
-    public DateTimeOffset ExpiresAt { get; private set; }
+    public DateTimeOffset? ExpiresAt { get; private set; } = default;
 
     public bool IsAuthenticated => !string.IsNullOrEmpty(AccessToken);
 
@@ -19,8 +19,8 @@ public sealed class AuthSession
 
     internal void Clear()
     {
-        AccessToken = string.Empty;
-        RefreshToken = string.Empty;
+        AccessToken = default;
+        RefreshToken = default;
         ExpiresAt = default;
     }
 }

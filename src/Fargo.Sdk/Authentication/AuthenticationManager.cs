@@ -14,6 +14,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     private string currentNameid = string.Empty;
 
+    private Timer? refreshTimer = null;
+
     public event EventHandler<LoggedInEventArgs>? LoggedIn;
 
     public event EventHandler<LoggedOutEventArgs>? LoggedOut;
@@ -29,6 +31,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
         session.SetTokens(result.AccessToken, result.RefreshToken, result.ExpiresAt);
 
         currentNameid = nameid;
+
+        ScheduleRefresh();
 
         LoggedIn?.Invoke(this, new LoggedInEventArgs(nameid));
 
@@ -59,6 +63,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         session.SetTokens(result.AccessToken, result.RefreshToken, result.ExpiresAt);
 
+        ScheduleRefresh();
+
         Refreshed?.Invoke(this, new RefreshedEventArgs(currentNameid));
 
         return result;
@@ -69,5 +75,16 @@ public sealed class AuthenticationManager : IAuthenticationManager
         await client.ChangePassword(newPassword, currentPassword);
 
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(currentNameid));
+    }
+
+    private void ScheduleRefresh()
+    {
+        var refreshIn = session.ExpiresAt - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
+
+        if (refreshIn < TimeSpan.Zero) refreshIn = TimeSpan.Zero;
+
+        refreshTimer?.Dispose();
+
+        refreshTimer = new Timer(async _ => await RefreshAsync(), null, refreshIn, Timeout.InfiniteTimeSpan);
     }
 }
