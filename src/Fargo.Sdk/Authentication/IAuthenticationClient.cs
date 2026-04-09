@@ -6,7 +6,7 @@ public interface IAuthenticationClient
 
     Task<AuthResult> Refresh(string refreshToken, CancellationToken cancellationToken = default);
 
-    Task LogOutAsync(string refreshToken);
+    Task LogOutAsync(string refreshToken, CancellationToken cancellationToken = default);
 
-    Task ChangePassword(string newPassword, string currentPassword);
+    Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default);
 }

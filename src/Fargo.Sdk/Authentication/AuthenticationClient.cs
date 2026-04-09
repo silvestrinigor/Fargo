@@ -27,14 +27,14 @@ public sealed class AuthenticationClient : IAuthenticationClient
             cancellationToken);
     }
 
-    public Task LogOutAsync(string refreshToken)
+    public Task LogOutAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         return httpClient.PostJsonAsync(
             "/authentication/logout",
             new { refreshToken });
     }
 
-    public Task ChangePassword(string newPassword, string currentPassword)
+    public Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         return httpClient.PutJsonAsync(
             "/authentication/password",
