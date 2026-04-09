@@ -1,6 +1,6 @@
 namespace Fargo.Sdk.Authentication;
 
-public sealed class AuthenticationManager : IAuthenticationManager, IDisposable
+public sealed class AuthenticationManager : IAuthenticationManager
 {
     public AuthenticationManager(IAuthenticationClient client, AuthSession session)
     {

@@ -3,7 +3,7 @@ using Fargo.Sdk.Http;
 
 namespace Fargo.Sdk;
 
-public sealed class Engine : IEngine, IDisposable
+public sealed class Engine : IEngine
 {
     public Engine()
     {
@@ -18,10 +18,6 @@ public sealed class Engine : IEngine, IDisposable
         AuthenticationManager = new AuthenticationManager(authClient, session);
     }
 
-    private readonly HttpClient httpClient;
-
-    private readonly FargoHttpClient fargoHttpClient;
-
     public IAuthenticationManager AuthenticationManager { get; }
 
     public async Task LogInAsync(string server, string nameid, string password, CancellationToken ct = default)
@@ -33,6 +29,12 @@ public sealed class Engine : IEngine, IDisposable
 
     public void Dispose()
     {
+        AuthenticationManager.Dispose();
+
         httpClient.Dispose();
     }
+
+    private readonly HttpClient httpClient;
+
+    private readonly FargoHttpClient fargoHttpClient;
 }

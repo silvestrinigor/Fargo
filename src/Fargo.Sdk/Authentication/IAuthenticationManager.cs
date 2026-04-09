@@ -3,7 +3,7 @@ namespace Fargo.Sdk.Authentication;
 /// <summary>
 /// Manages user authentication lifecycle, including login, logout, token refresh, and password changes.
 /// </summary>
-public interface IAuthenticationManager
+public interface IAuthenticationManager : IDisposable
 {
     /// <summary>Raised when the user successfully logs in.</summary>
     event EventHandler<LoggedInEventArgs>? LoggedIn;

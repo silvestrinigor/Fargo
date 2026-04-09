@@ -1,4 +1,3 @@
-using Fargo.Sdk.Exceptions;
 using Fargo.Sdk.Authentication;
 using System.Net;
 using System.Net.Http.Headers;
@@ -123,16 +122,16 @@ public sealed class FargoHttpClient
 
         if (statusCode == 401)
         {
-            throw new UnauthorizedException();
+            throw new Exception();
         }
 
         if (statusCode == 404)
         {
-            throw new NotFoundException();
+            throw new Exception();
         }
 
         var content = await response.Content.ReadAsStringAsync(ct);
 
-        throw new FargoApiException(statusCode, $"Request failed with status {statusCode}: {content}");
+        throw new Exception();
     }
 }
