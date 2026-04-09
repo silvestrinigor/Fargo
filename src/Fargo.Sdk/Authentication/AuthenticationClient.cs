@@ -4,42 +4,50 @@ namespace Fargo.Sdk.Authentication;
 
 public sealed class AuthenticationClient : IAuthenticationClient
 {
-    internal AuthenticationClient(FargoHttpClient httpClient)
+    internal AuthenticationClient(FargoSdkHttpClient httpClient)
     {
         this.httpClient = httpClient;
     }
 
-    private readonly FargoHttpClient httpClient;
+    private readonly FargoSdkHttpClient httpClient;
 
-    public Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<AuthResult>> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
-        return httpClient.PostFromJsonAsync<object, AuthResult>(
+        var httpResponse = await httpClient.PostFromJsonAsync<object, AuthResult>(
             "/authentication/login",
             new { nameid, password },
             cancellationToken);
+
+        return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
 
-    public Task<AuthResult> Refresh(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<AuthResult>> Refresh(string refreshToken, CancellationToken cancellationToken = default)
     {
-        return httpClient.PostFromJsonAsync<object, AuthResult>(
+        var httpResponse = await httpClient.PostFromJsonAsync<object, AuthResult>(
             "/authentication/refresh",
             new { refreshToken },
             cancellationToken);
+
+        return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
 
-    public Task LogOutAsync(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> LogOutAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        return httpClient.PostJsonAsync(
+        var httpResponse = await httpClient.PostJsonAsync(
             "/authentication/logout",
             new { refreshToken },
             cancellationToken);
+
+        return new FargoSdkResponse<EmptyResult>();
     }
 
-    public Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
-        return httpClient.PutJsonAsync(
+        var httpResponse = await httpClient.PutJsonAsync(
             "/authentication/password",
             new { passwords = new { newPassword, currentPassword } },
             cancellationToken);
+
+        return new FargoSdkResponse<EmptyResult>();
     }
 }

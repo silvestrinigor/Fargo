@@ -1,0 +1,223 @@
+using Fargo.Sdk.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+
+namespace Fargo.Sdk.Http;
+
+public sealed class FargoSdkHttpClient
+{
+    private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Web;
+
+    private readonly HttpClient httpClient;
+
+    private readonly AuthSession session;
+
+    private readonly ILogger logger;
+
+    private string? baseUrl;
+
+    public FargoSdkHttpClient(HttpClient httpClient, AuthSession session, ILogger logger)
+    {
+        this.httpClient = httpClient;
+        this.session = session;
+        this.logger = logger;
+    }
+
+    internal void SetBaseUrl(string url) => baseUrl = url.TrimEnd('/');
+
+    public async Task<FargoSdkHttpResponse<TResponse>> GetAsync<TResponse>(string path, CancellationToken ct = default)
+        where TResponse : class
+    {
+        ApplyAuth();
+
+        var url = ResolveUrl(path);
+        logger.LogRequest("GET", url);
+
+        using var response = await httpClient.GetAsync(url, ct);
+        logger.LogResponse("GET", url, (int)response.StatusCode);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<TResponse>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                StatusCode: response.StatusCode
+            );
+        }
+
+        return new FargoSdkHttpResponse<TResponse>(
+            IsSuccess: true,
+            Data: await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, ct),
+            Problem: null,
+            StatusCode: response.StatusCode
+        );
+    }
+
+    public async Task<FargoSdkHttpResponse<TResponse>> PostFromJsonAsync<TRequest, TResponse>(string path, TRequest request, CancellationToken ct = default)
+        where TResponse : class
+    {
+        ApplyAuth();
+
+        var url = ResolveUrl(path);
+        logger.LogRequest("POST", url);
+
+        using var response = await httpClient.PostAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("POST", url, (int)response.StatusCode);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<TResponse>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                StatusCode: response.StatusCode
+            );
+        }
+
+        return new FargoSdkHttpResponse<TResponse>(
+            IsSuccess: true,
+            Data: await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, ct),
+            Problem: null,
+            StatusCode: response.StatusCode
+        );
+    }
+
+    public async Task<FargoSdkHttpResponse<EmptyResult>> PostJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default)
+    {
+        ApplyAuth();
+
+        var url = ResolveUrl(path);
+        logger.LogRequest("POST", url);
+
+        using var response = await httpClient.PostAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("POST", url, (int)response.StatusCode);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<EmptyResult>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                StatusCode: response.StatusCode
+            );
+        }
+
+        return new FargoSdkHttpResponse<EmptyResult>(
+            IsSuccess: true,
+            Data: null,
+            Problem: null,
+            StatusCode: response.StatusCode
+        );
+    }
+
+    public async Task<FargoSdkHttpResponse<EmptyResult>> PatchJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default)
+    {
+        ApplyAuth();
+
+        var url = ResolveUrl(path);
+        logger.LogRequest("PATCH", url);
+
+        using var response = await httpClient.PatchAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("PATCH", url, (int)response.StatusCode);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<EmptyResult>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                StatusCode: response.StatusCode
+            );
+        }
+
+        return new FargoSdkHttpResponse<EmptyResult>(
+            IsSuccess: true,
+            Data: null,
+            Problem: null,
+            StatusCode: response.StatusCode
+        );
+    }
+
+    public async Task<FargoSdkHttpResponse<EmptyResult>> PutJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default)
+    {
+        ApplyAuth();
+
+        var url = ResolveUrl(path);
+        logger.LogRequest("PUT", url);
+
+        using var response = await httpClient.PutAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("PUT", url, (int)response.StatusCode);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<EmptyResult>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                StatusCode: response.StatusCode
+            );
+        }
+
+        return new FargoSdkHttpResponse<EmptyResult>(
+            IsSuccess: true,
+            Data: null,
+            Problem: null,
+            StatusCode: response.StatusCode
+        );
+    }
+
+    public async Task<FargoSdkHttpResponse<EmptyResult>> DeleteAsync(string path, CancellationToken ct = default)
+    {
+        ApplyAuth();
+
+        var url = ResolveUrl(path);
+        logger.LogRequest("DELETE", url);
+
+        using var response = await httpClient.DeleteAsync(url, ct);
+        logger.LogResponse("DELETE", url, (int)response.StatusCode);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<EmptyResult>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                StatusCode: response.StatusCode
+            );
+        }
+
+        return new FargoSdkHttpResponse<EmptyResult>(
+            IsSuccess: true,
+            Data: null,
+            Problem: null,
+            StatusCode: response.StatusCode
+        );
+    }
+
+    public static string BuildQuery(params (string Key, string? Value)[] parameters)
+    {
+        var parts = parameters
+            .Where(p => p.Value is not null)
+            .Select(p => Uri.EscapeDataString(p.Key) + "=" + Uri.EscapeDataString(p.Value!));
+
+        var query = string.Join("&", parts);
+
+        return query.Length > 0 ? "?" + query : string.Empty;
+    }
+
+    private string ResolveUrl(string path) =>
+        baseUrl is not null
+            ? baseUrl + path
+            : throw new InvalidOperationException("Server URL is not configured. Set it via engine.Server.SetUrlAsync() before making requests.");
+
+    private void ApplyAuth()
+    {
+        httpClient.DefaultRequestHeaders.Authorization = session.IsAuthenticated
+            ? new AuthenticationHeaderValue("Bearer", session.AccessToken)
+            : null;
+    }
+}

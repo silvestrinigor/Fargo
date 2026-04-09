@@ -1,4 +1,4 @@
-namespace Fargo.Sdk;
+namespace Fargo.Sdk.Authentication;
 
 public class UserNotAuthenticatedFargoSdkException : FargoSdkException
 {

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Http;
 
-internal static class FargoHttpClientLog
+internal static class FargoSdkHttpClientLog
 {
     private static readonly Action<ILogger, string, string, Exception?> _request =
         LoggerMessage.Define<string, string>(LogLevel.Debug, default, "{Method} {Url}");

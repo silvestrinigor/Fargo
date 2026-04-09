@@ -40,7 +40,11 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         var result = await client.LogInAsync(nameid, password, cancellationToken);
 
-        session.SetTokens(nameid, result.AccessToken, result.RefreshToken, result.ExpiresAt);
+        if (!result.IsSuccess)
+        {
+        }
+
+        session.SetTokens(nameid, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
 
         ScheduleRefresh();
 
@@ -48,7 +52,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         LoggedIn?.Invoke(this, new LoggedInEventArgs(nameid));
 
-        return result;
+        return result.Data;
     }
 
     public async Task LogOutAsync(CancellationToken cancellationToken = default)
@@ -85,7 +89,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         var result = await client.Refresh(session.RefreshToken!, cancellationToken);
 
-        session.SetTokens(session.Nameid!, result.AccessToken, result.RefreshToken, result.ExpiresAt);
+        session.SetTokens(session.Nameid!, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
 
         ScheduleRefresh();
 
@@ -93,7 +97,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         Refreshed?.Invoke(this, new RefreshedEventArgs(session.Nameid!));
 
-        return result;
+        return result.Data;
     }
 
     public async Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
@@ -133,11 +137,9 @@ public sealed class AuthenticationManager : IAuthenticationManager
             refreshTimer?.Dispose();
 
             refreshTimer = new Timer(async _ =>
-                await AutoRefreshAsync(), null, refreshIn!.Value, Timeout.InfiniteTimeSpan);
+                await RefreshAsync(), null, refreshIn!.Value, Timeout.InfiniteTimeSpan);
         }
     }
-
-    private Task AutoRefreshAsync() => RefreshAsync();
 
     public void Dispose()
     {
