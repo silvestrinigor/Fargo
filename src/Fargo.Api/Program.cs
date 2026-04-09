@@ -1,9 +1,18 @@
 using Fargo.Api.Extensions;
+using Fargo.Api.Hubs;
 using Fargo.Api.Middlewares;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
+using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSignalR();
+
+builder.Services.AddResponseCompression(opts =>
+{
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
+});
 
 builder.AddServiceDefaults();
 
@@ -22,6 +31,8 @@ builder.Services.AddFargoAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseResponseCompression();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
 
@@ -49,5 +60,7 @@ app.MapFargoTree();
 app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();
+
+app.MapHub<FargoEventHub>("/events");
 
 app.Run();

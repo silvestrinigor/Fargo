@@ -2,13 +2,13 @@ namespace Fargo.Sdk.Authentication;
 
 public interface IAuthSession
 {
-    public string? Nameid { get; }
+    string? Nameid { get; }
 
-    public string? AccessToken { get; }
+    string? AccessToken { get; }
 
-    public string? RefreshToken { get; }
+    string? RefreshToken { get; }
 
-    public DateTimeOffset? ExpiresAt { get;  }
+    DateTimeOffset? ExpiresAt { get; }
 
-    public bool IsAuthenticated { get; }
+    bool IsAuthenticated { get; }
 }

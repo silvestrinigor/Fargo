@@ -13,9 +13,9 @@ public sealed class Engine : IEngine
 
         var session = new AuthSession();
 
-        var logger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<FargoHttpClient>();
+        var logger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<FargoSdkHttpClient>();
 
-        fargoHttpClient = new FargoHttpClient(httpClient, session, logger);
+        fargoHttpClient = new FargoSdkHttpClient(httpClient, session, logger);
 
         var authClient = new AuthenticationClient(fargoHttpClient);
 
@@ -51,5 +51,5 @@ public sealed class Engine : IEngine
 
     private readonly HttpClient httpClient;
 
-    private readonly FargoHttpClient fargoHttpClient;
+    private readonly FargoSdkHttpClient fargoHttpClient;
 }
