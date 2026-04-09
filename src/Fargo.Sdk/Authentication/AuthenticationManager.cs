@@ -1,16 +1,21 @@
+using Microsoft.Extensions.Logging;
+
 namespace Fargo.Sdk.Authentication;
 
 public sealed class AuthenticationManager : IAuthenticationManager
 {
-    public AuthenticationManager(IAuthenticationClient client, AuthSession session)
+    public AuthenticationManager(IAuthenticationClient client, AuthSession session, ILogger logger)
     {
         this.client = client;
         this.session = session;
+        this.logger = logger;
     }
 
     private readonly IAuthenticationClient client;
 
     private readonly AuthSession session;
+
+    private readonly ILogger logger;
 
     private Timer? refreshTimer = null;
 
@@ -39,6 +44,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         ScheduleRefresh();
 
+        logger.LogLoggedIn(nameid);
+
         LoggedIn?.Invoke(this, new LoggedInEventArgs(nameid));
 
         return result;
@@ -64,6 +71,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         session.Clear();
 
+        logger.LogLoggedOut(nameid!);
+
         LoggedOut?.Invoke(this, new LoggedOutEventArgs(nameid!));
     }
 
@@ -80,6 +89,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         ScheduleRefresh();
 
+        logger.LogRefreshed(session.Nameid!);
+
         Refreshed?.Invoke(this, new RefreshedEventArgs(session.Nameid!));
 
         return result;
@@ -93,6 +104,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
         }
 
         await client.ChangePassword(newPassword, currentPassword, cancellationToken);
+
+        logger.LogPasswordChanged(session.Nameid!);
 
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
     }
@@ -113,6 +126,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
             refreshIn = TimeSpan.Zero;
         }
 
+        logger.LogRefreshScheduled(refreshIn!.Value.TotalMinutes);
+
         lock (refreshTimerLock)
         {
             refreshTimer?.Dispose();
@@ -128,8 +143,12 @@ public sealed class AuthenticationManager : IAuthenticationManager
     {
         lock (refreshTimerLock)
         {
-            refreshTimer?.Dispose();
-            refreshTimer = null;
+            if (refreshTimer is not null)
+            {
+                refreshTimer.Dispose();
+                refreshTimer = null;
+                logger.LogRefreshCancelled();
+            }
         }
     }
 }

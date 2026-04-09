@@ -1,21 +1,27 @@
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Fargo.Sdk;
 
 public sealed class Engine : IEngine
 {
-    public Engine()
+    public Engine(ILoggerFactory? loggerFactory = null)
     {
         httpClient = new HttpClient();
 
         var session = new AuthSession();
 
-        fargoHttpClient = new FargoHttpClient(httpClient, session);
+        var logger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<FargoHttpClient>();
+
+        fargoHttpClient = new FargoHttpClient(httpClient, session, logger);
 
         var authClient = new AuthenticationClient(fargoHttpClient);
 
-        Authentication = new AuthenticationManager(authClient, session);
+        var authLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationManager>();
+
+        Authentication = new AuthenticationManager(authClient, session, authLogger);
     }
 
     public IAuthenticationManager Authentication { get; }
