@@ -46,7 +46,10 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     public async Task LogOutAsync(CancellationToken cancellationToken = default)
     {
-        if (!IsAuthenticated) return;
+        if (!IsAuthenticated)
+        {
+            return;
+        }
 
         var refreshToken = session.RefreshToken;
 
@@ -105,7 +108,10 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         var refreshIn = session.ExpiresAt - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
 
-        if (refreshIn < TimeSpan.Zero) refreshIn = TimeSpan.Zero;
+        if (refreshIn < TimeSpan.Zero)
+        {
+            refreshIn = TimeSpan.Zero;
+        }
 
         lock (refreshTimerLock)
         {
@@ -116,17 +122,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
         }
     }
 
-    private async Task AutoRefreshAsync()
-    {
-        try
-        {
-            await RefreshAsync();
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
+    private Task AutoRefreshAsync() => RefreshAsync();
 
     public void Dispose()
     {

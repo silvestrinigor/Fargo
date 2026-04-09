@@ -31,13 +31,15 @@ public sealed class AuthenticationClient : IAuthenticationClient
     {
         return httpClient.PostJsonAsync(
             "/authentication/logout",
-            new { refreshToken });
+            new { refreshToken },
+            cancellationToken);
     }
 
     public Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         return httpClient.PutJsonAsync(
             "/authentication/password",
-            new { passwords = new { newPassword, currentPassword } });
+            new { passwords = new { newPassword, currentPassword } },
+            cancellationToken);
     }
 }

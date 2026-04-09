@@ -7,9 +7,17 @@ namespace Fargo.Sdk;
 /// </summary>
 public interface IEngine : IDisposable
 {
+    /// <summary>Gets the manager responsible for authentication operations.</summary>
+    IAuthenticationManager Authentication { get; }
+
     /// <summary>
-    /// Gets the manager responsible for authentication operations,
-    /// including login, logout, token refresh, and password changes.
+    /// Authenticates the user, switching to the specified server first.
+    /// Logs out first if already authenticated.
     /// </summary>
-    IAuthenticationManager AuthenticationManager { get; }
+    Task LogInAsync(string server, string nameid, string password, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ends the current authenticated session.
+    /// </summary>
+    Task LogOutAsync(CancellationToken ct = default);
 }

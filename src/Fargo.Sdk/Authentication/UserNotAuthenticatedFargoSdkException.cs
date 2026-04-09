@@ -1,6 +1,6 @@
 namespace Fargo.Sdk;
 
-public class UserNotAuthenticatedFargoSdkException : Exception
+public class UserNotAuthenticatedFargoSdkException : FargoSdkException
 {
     internal UserNotAuthenticatedFargoSdkException()
         : base("User is not authenticated.")

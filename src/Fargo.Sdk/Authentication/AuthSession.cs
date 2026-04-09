@@ -16,6 +16,7 @@ public sealed class AuthSession : IAuthSession
 
     internal void SetTokens(string nameid, string accessToken, string refreshToken, DateTimeOffset expiresAt)
     {
+        Nameid = nameid;
         AccessToken = accessToken;
         RefreshToken = refreshToken;
         ExpiresAt = expiresAt;

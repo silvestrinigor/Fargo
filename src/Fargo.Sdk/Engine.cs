@@ -15,22 +15,31 @@ public sealed class Engine : IEngine
 
         var authClient = new AuthenticationClient(fargoHttpClient);
 
-        AuthenticationManager = new AuthenticationManager(authClient, session);
+        Authentication = new AuthenticationManager(authClient, session);
     }
 
-    public IAuthenticationManager AuthenticationManager { get; }
+    public IAuthenticationManager Authentication { get; }
 
     public async Task LogInAsync(string server, string nameid, string password, CancellationToken ct = default)
     {
+        if (Authentication.IsAuthenticated)
+        {
+            await Authentication.LogOutAsync(ct);
+        }
+
         fargoHttpClient.SetBaseUrl(server);
 
-        await AuthenticationManager.LogInAsync(nameid, password, ct);
+        await Authentication.LogInAsync(nameid, password, ct);
+    }
+
+    public Task LogOutAsync(CancellationToken ct = default)
+    {
+        return Authentication.LogOutAsync(ct);
     }
 
     public void Dispose()
     {
-        AuthenticationManager.Dispose();
-
+        Authentication.Dispose();
         httpClient.Dispose();
     }
 
