@@ -14,10 +14,10 @@ public interface IEngine : IDisposable
     /// Authenticates the user, switching to the specified server first.
     /// Logs out first if already authenticated.
     /// </summary>
-    Task LogInAsync(string server, string nameid, string password, CancellationToken ct = default);
+    Task LogInAsync(string server, string nameid, string password, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ends the current authenticated session.
     /// </summary>
-    Task LogOutAsync(CancellationToken ct = default);
+    Task LogOutAsync(CancellationToken cancellationToken = default);
 }
