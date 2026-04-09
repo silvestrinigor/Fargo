@@ -133,6 +133,6 @@ public sealed class FargoHttpClient
 
         var content = await response.Content.ReadAsStringAsync(ct);
 
-        throw new FargoHttpException(statusCode, content);
+        throw new FargoSdkHttpException(statusCode, content);
     }
 }

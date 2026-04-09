@@ -20,21 +20,21 @@ public sealed class Engine : IEngine
 
     public IAuthenticationManager Authentication { get; }
 
-    public async Task LogInAsync(string server, string nameid, string password, CancellationToken ct = default)
+    public async Task LogInAsync(string server, string nameid, string password, CancellationToken cancellationToken = default)
     {
         if (Authentication.IsAuthenticated)
         {
-            await Authentication.LogOutAsync(ct);
+            await Authentication.LogOutAsync(cancellationToken);
         }
 
         fargoHttpClient.SetBaseUrl(server);
 
-        await Authentication.LogInAsync(nameid, password, ct);
+        await Authentication.LogInAsync(nameid, password, cancellationToken);
     }
 
-    public Task LogOutAsync(CancellationToken ct = default)
+    public Task LogOutAsync(CancellationToken cancellationToken = default)
     {
-        return Authentication.LogOutAsync(ct);
+        return Authentication.LogOutAsync(cancellationToken);
     }
 
     public void Dispose()
