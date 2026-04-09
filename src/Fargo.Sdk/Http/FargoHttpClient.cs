@@ -1,5 +1,5 @@
-using Fargo.Sdk.Exceptions;
-using Fargo.Sdk.Security;
+using Fargo.Sdk.Authentication;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -12,26 +12,32 @@ public sealed class FargoHttpClient
     private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Web;
 
     private readonly HttpClient httpClient;
-    private readonly FargoAuthSession session;
-    private string baseUrl = string.Empty;
 
-    public FargoHttpClient(HttpClient httpClient, FargoAuthSession session)
+    private readonly AuthSession session;
+
+    private readonly ILogger logger;
+
+    private string? baseUrl;
+
+    public FargoHttpClient(HttpClient httpClient, AuthSession session, ILogger logger)
     {
         this.httpClient = httpClient;
         this.session = session;
+        this.logger = logger;
     }
 
-    public void SetBaseUrl(string url)
-    {
-        baseUrl = url.TrimEnd('/');
-    }
+    internal void SetBaseUrl(string url) => baseUrl = url.TrimEnd('/');
 
     public async Task<TResponse?> GetFromJsonAsync<TResponse>(string path, CancellationToken ct = default)
         where TResponse : class
     {
         ApplyAuth();
 
-        using var response = await httpClient.GetAsync(baseUrl + path, ct);
+        var url = ResolveUrl(path);
+        logger.LogRequest("GET", url);
+
+        using var response = await httpClient.GetAsync(url, ct);
+        logger.LogResponse("GET", url, (int)response.StatusCode);
 
         if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.NoContent)
         {
@@ -47,7 +53,11 @@ public sealed class FargoHttpClient
     {
         ApplyAuth();
 
-        using var response = await httpClient.PostAsJsonAsync(baseUrl + path, request, JsonOptions, ct);
+        var url = ResolveUrl(path);
+        logger.LogRequest("POST", url);
+
+        using var response = await httpClient.PostAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("POST", url, (int)response.StatusCode);
 
         await EnsureSuccessAsync(response, ct);
 
@@ -60,7 +70,11 @@ public sealed class FargoHttpClient
     {
         ApplyAuth();
 
-        using var response = await httpClient.PostAsJsonAsync(baseUrl + path, request, JsonOptions, ct);
+        var url = ResolveUrl(path);
+        logger.LogRequest("POST", url);
+
+        using var response = await httpClient.PostAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("POST", url, (int)response.StatusCode);
 
         await EnsureSuccessAsync(response, ct);
     }
@@ -69,7 +83,11 @@ public sealed class FargoHttpClient
     {
         ApplyAuth();
 
-        using var response = await httpClient.PatchAsJsonAsync(baseUrl + path, request, JsonOptions, ct);
+        var url = ResolveUrl(path);
+        logger.LogRequest("PATCH", url);
+
+        using var response = await httpClient.PatchAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("PATCH", url, (int)response.StatusCode);
 
         await EnsureSuccessAsync(response, ct);
     }
@@ -78,7 +96,11 @@ public sealed class FargoHttpClient
     {
         ApplyAuth();
 
-        using var response = await httpClient.PutAsJsonAsync(baseUrl + path, request, JsonOptions, ct);
+        var url = ResolveUrl(path);
+        logger.LogRequest("PUT", url);
+
+        using var response = await httpClient.PutAsJsonAsync(url, request, JsonOptions, ct);
+        logger.LogResponse("PUT", url, (int)response.StatusCode);
 
         await EnsureSuccessAsync(response, ct);
     }
@@ -87,7 +109,11 @@ public sealed class FargoHttpClient
     {
         ApplyAuth();
 
-        using var response = await httpClient.DeleteAsync(baseUrl + path, ct);
+        var url = ResolveUrl(path);
+        logger.LogRequest("DELETE", url);
+
+        using var response = await httpClient.DeleteAsync(url, ct);
+        logger.LogResponse("DELETE", url, (int)response.StatusCode);
 
         await EnsureSuccessAsync(response, ct);
     }
@@ -102,6 +128,11 @@ public sealed class FargoHttpClient
 
         return query.Length > 0 ? "?" + query : string.Empty;
     }
+
+    private string ResolveUrl(string path) =>
+        baseUrl is not null
+            ? baseUrl + path
+            : throw new InvalidOperationException("Server URL is not configured. Set it via engine.Server.SetUrlAsync() before making requests.");
 
     private void ApplyAuth()
     {
@@ -121,16 +152,15 @@ public sealed class FargoHttpClient
 
         if (statusCode == 401)
         {
-            throw new UnauthorizedException();
+            throw new FargoUnauthorizedException();
         }
-
         if (statusCode == 404)
         {
-            throw new NotFoundException();
+            throw new FargoNotFoundException();
         }
 
         var content = await response.Content.ReadAsStringAsync(ct);
 
-        throw new FargoApiException(statusCode, $"Request failed with status {statusCode}: {content}");
+        throw new FargoSdkHttpException(statusCode, content);
     }
 }

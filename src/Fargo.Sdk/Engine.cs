@@ -1,0 +1,55 @@
+using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Fargo.Sdk;
+
+public sealed class Engine : IEngine
+{
+    public Engine(ILoggerFactory? loggerFactory = null)
+    {
+        httpClient = new HttpClient();
+
+        var session = new AuthSession();
+
+        var logger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<FargoHttpClient>();
+
+        fargoHttpClient = new FargoHttpClient(httpClient, session, logger);
+
+        var authClient = new AuthenticationClient(fargoHttpClient);
+
+        var authLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationManager>();
+
+        Authentication = new AuthenticationManager(authClient, session, authLogger);
+    }
+
+    public IAuthenticationManager Authentication { get; }
+
+    public async Task LogInAsync(string server, string nameid, string password, CancellationToken cancellationToken = default)
+    {
+        if (Authentication.IsAuthenticated)
+        {
+            await Authentication.LogOutAsync(cancellationToken);
+        }
+
+        fargoHttpClient.SetBaseUrl(server);
+
+        await Authentication.LogInAsync(nameid, password, cancellationToken);
+    }
+
+    public Task LogOutAsync(CancellationToken cancellationToken = default)
+    {
+        return Authentication.LogOutAsync(cancellationToken);
+    }
+
+    public void Dispose()
+    {
+        Authentication.Dispose();
+        httpClient.Dispose();
+    }
+
+    private readonly HttpClient httpClient;
+
+    private readonly FargoHttpClient fargoHttpClient;
+}
