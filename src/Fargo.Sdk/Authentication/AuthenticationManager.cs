@@ -41,8 +41,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
         var result = await client.LogInAsync(nameid, password, cancellationToken);
 
         if (!result.IsSuccess)
-        {
-        }
+            ThrowAuthError(result.Error!);
 
         session.SetTokens(nameid, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
 
@@ -89,6 +88,9 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         var result = await client.Refresh(session.RefreshToken!, cancellationToken);
 
+        if (!result.IsSuccess)
+            ThrowAuthError(result.Error!);
+
         session.SetTokens(session.Nameid!, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
 
         ScheduleRefresh();
@@ -100,14 +102,17 @@ public sealed class AuthenticationManager : IAuthenticationManager
         return result.Data;
     }
 
-    public async Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
+    public async Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
         {
             throw new UserNotAuthenticatedFargoSdkException();
         }
 
-        await client.ChangePassword(newPassword, currentPassword, cancellationToken);
+        var result = await client.ChangePassword(newPassword, currentPassword, cancellationToken);
+
+        if (!result.IsSuccess)
+            ThrowAuthError(result.Error!);
 
         logger.LogPasswordChanged(session.Nameid!);
 
@@ -153,4 +158,12 @@ public sealed class AuthenticationManager : IAuthenticationManager
             }
         }
     }
+
+    private static void ThrowAuthError(FargoSdkError error) =>
+        throw error.Type switch
+        {
+            FargoSdkErrorType.InvalidCredentials => (FargoSdkException)new InvalidCredentialsFargoSdkException(error.Detail),
+            FargoSdkErrorType.PasswordChangeRequired => new PasswordChangeRequiredFargoSdkException(error.Detail),
+            _ => new FargoSdkApiException(error.Detail)
+        };
 }

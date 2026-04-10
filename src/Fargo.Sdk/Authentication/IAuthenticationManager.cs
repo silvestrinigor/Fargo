@@ -51,5 +51,5 @@ public interface IAuthenticationManager : IDisposable
     /// <param name="newPassword">The desired new password.</param>
     /// <param name="currentPassword">The user's current password for verification.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default);
+    Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default);
 }
