@@ -13,6 +13,7 @@
     <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
     <ProjectReference Include="..\Fargo.Domain\Fargo.Domain.csproj" />
     <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
+    <ProjectReference Include="..\Fargo.Sdk\Fargo.Sdk.csproj" />
     <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

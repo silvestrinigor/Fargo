@@ -11,6 +11,14 @@ public interface IEngine : IDisposable
     IAuthenticationManager Authentication { get; }
 
     /// <summary>
+    /// Configures the server URL without performing any authentication.
+    /// Use this in hosted scenarios where the server address is known upfront
+    /// (e.g. read from configuration) and authentication is managed separately
+    /// via <see cref="IAuthenticationManager"/>.
+    /// </summary>
+    void Configure(string server);
+
+    /// <summary>
     /// Authenticates the user, switching to the specified server first.
     /// Logs out first if already authenticated.
     /// </summary>

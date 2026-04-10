@@ -227,7 +227,7 @@ public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
     private string ResolveUrl(string path) =>
         baseUrl is not null
             ? baseUrl + path
-            : throw new InvalidOperationException("Server URL is not configured. Set it via engine.Server.SetUrlAsync() before making requests.");
+            : throw new InvalidOperationException("Server URL is not configured. Call engine.LogInAsync(server, ...) or engine.RestoreSessionAsync(server, ...) first.");
 
     private void ApplyAuth()
     {

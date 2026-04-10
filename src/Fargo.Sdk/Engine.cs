@@ -26,6 +26,14 @@ public sealed class Engine : IEngine
 
     public IAuthenticationManager Authentication { get; }
 
+    /// <summary>
+    /// Configures the server URL without performing any authentication.
+    /// Use this in hosted scenarios where the server address is known upfront
+    /// (e.g. read from configuration) and authentication is managed separately
+    /// via <see cref="IAuthenticationManager"/>.
+    /// </summary>
+    public void Configure(string server) => fargoHttpClient.SetBaseUrl(server);
+
     public async Task LogInAsync(string server, string nameid, string password, CancellationToken cancellationToken = default)
     {
         if (Authentication.IsAuthenticated)
