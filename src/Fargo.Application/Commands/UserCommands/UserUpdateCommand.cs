@@ -61,7 +61,8 @@ public sealed class UserUpdateCommandHandler(
 
         actor.ValidateHasAccess(user);
 
-        user.Nameid = command.User.Nameid ?? user.Nameid;
+        if (command.User.Nameid is not null)
+            user.Nameid = ValidateNameid(command.User.Nameid);
         user.FirstName = command.User.FirstName ?? user.FirstName;
         user.LastName = command.User.LastName ?? user.LastName;
         user.Description = command.User.Description ?? user.Description;
@@ -116,6 +117,18 @@ public sealed class UserUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+    }
+
+    private static Nameid ValidateNameid(string value)
+    {
+        try
+        {
+            return new Nameid(value);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new InvalidNameidFargoApplicationException(ex.Message);
+        }
     }
 
     private static void ValidatePasswordPolicy(string password)

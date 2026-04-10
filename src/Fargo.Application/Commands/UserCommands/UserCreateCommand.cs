@@ -114,13 +114,15 @@ public sealed class UserCreateCommandHandler(
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        var nameid = ValidateNameid(command.User.Nameid);
+
         ValidatePasswordPolicy(command.User.Password);
 
         var userPasswordHash = passwordHasher.Hash(command.User.Password);
 
         var user = new User
         {
-            Nameid = command.User.Nameid,
+            Nameid = nameid,
             FirstName = command.User.FirstName,
             LastName = command.User.LastName,
             Description = command.User.Description ?? Description.Empty,
@@ -149,6 +151,18 @@ public sealed class UserCreateCommandHandler(
         await unitOfWork.SaveChanges(cancellationToken);
 
         return user.Guid;
+    }
+
+    private static Nameid ValidateNameid(string value)
+    {
+        try
+        {
+            return new Nameid(value);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new InvalidNameidFargoApplicationException(ex.Message);
+        }
     }
 
     private static void ValidatePasswordPolicy(string password)

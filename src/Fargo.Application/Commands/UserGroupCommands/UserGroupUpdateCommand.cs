@@ -6,6 +6,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Commands.UserGroupCommands;
 
@@ -62,7 +63,8 @@ public sealed class UserGroupUpdateCommandHandler(
 
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 
-        userGroup.Nameid = command.UserGroup.Nameid ?? userGroup.Nameid;
+        if (command.UserGroup.Nameid is not null)
+            userGroup.Nameid = ValidateNameid(command.UserGroup.Nameid);
         userGroup.Description = command.UserGroup.Description ?? userGroup.Description;
 
         if (command.UserGroup.Permissions is not null)
@@ -96,5 +98,17 @@ public sealed class UserGroupUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+    }
+
+    private static Nameid ValidateNameid(string value)
+    {
+        try
+        {
+            return new Nameid(value);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new InvalidNameidFargoApplicationException(ex.Message);
+        }
     }
 }

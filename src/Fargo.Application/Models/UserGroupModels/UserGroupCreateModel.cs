@@ -37,7 +37,7 @@ namespace Fargo.Application.Models.UserGroupModels;
 /// defined by the application or domain is applied.
 /// </remarks>
 public sealed record UserGroupCreateModel(
-        Nameid Nameid,
+        string Nameid,
         Description? Description = null,
         IReadOnlyCollection<UserGroupPermissionUpdateModel>? Permissions = null,
         Guid? FirstPartition = null

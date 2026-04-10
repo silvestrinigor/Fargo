@@ -20,7 +20,7 @@ namespace Fargo.Application.Commands.AuthCommands;
 /// The plaintext password provided for authentication.
 /// </param>
 public sealed record LoginCommand(
-        Nameid Nameid,
+        string Nameid,
         string Password
         ) : ICommand<AuthResult>;
 
@@ -67,8 +67,19 @@ public sealed class LoginCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
+        Nameid nameid;
+
+        try
+        {
+            nameid = new Nameid(command.Nameid);
+        }
+        catch (ArgumentException)
+        {
+            throw new InvalidCredentialsFargoApplicationException();
+        }
+
         var user = await userRepository.GetByNameid(
-                command.Nameid,
+                nameid,
                 cancellationToken
                 ) ?? throw new InvalidCredentialsFargoApplicationException();
 
