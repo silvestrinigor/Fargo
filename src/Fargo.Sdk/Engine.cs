@@ -1,5 +1,8 @@
+using Fargo.Sdk.Articles;
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Http;
+using Fargo.Sdk.Items;
+using Fargo.Sdk.Partitions;
 using Fargo.Sdk.UserGroups;
 using Fargo.Sdk.Users;
 using Microsoft.Extensions.Logging;
@@ -26,6 +29,9 @@ public sealed class Engine : IEngine
         Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
         Users = new UserClient(fargoHttpClient);
         UserGroups = new UserGroupClient(fargoHttpClient);
+        Articles = new ArticleClient(fargoHttpClient);
+        Items = new ItemClient(fargoHttpClient);
+        Partitions = new PartitionClient(fargoHttpClient);
     }
 
     public IAuthenticationManager Authentication { get; }
@@ -33,6 +39,12 @@ public sealed class Engine : IEngine
     public IUserClient Users { get; }
 
     public IUserGroupClient UserGroups { get; }
+
+    public IArticleClient Articles { get; }
+
+    public IItemClient Items { get; }
+
+    public IPartitionClient Partitions { get; }
 
     /// <summary>
     /// Configures the server URL without performing any authentication.
