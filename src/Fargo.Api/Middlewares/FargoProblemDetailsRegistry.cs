@@ -49,6 +49,10 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(401, "Unauthorized", "auth/unauthorized")
             },
             {
+                typeof(InvalidCredentialsFargoApplicationException),
+                new ProblemDetailsDefinition(401, "Invalid credentials", "auth/invalid-credentials")
+            },
+            {
                 typeof(InvalidPasswordFargoApplicationException),
                 new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
             },

@@ -76,6 +76,7 @@ public sealed class AuthenticationClient : IAuthenticationClient
         var type = problem?.Type switch
         {
             "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
+            "auth/invalid-credentials" => FargoSdkErrorType.InvalidCredentials,
             "auth/invalid-password" => FargoSdkErrorType.InvalidCredentials,
             "auth/password-change-required" => FargoSdkErrorType.PasswordChangeRequired,
             _ => FargoSdkErrorType.Undefined
