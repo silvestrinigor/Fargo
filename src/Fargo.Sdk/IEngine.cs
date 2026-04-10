@@ -21,8 +21,8 @@ public interface IEngine : IDisposable
     /// <summary>Gets the client for user group operations.</summary>
     IUserGroupClient UserGroups { get; }
 
-    /// <summary>Gets the client for article operations.</summary>
-    IArticleClient Articles { get; }
+    /// <summary>Gets the manager for article operations.</summary>
+    IArticleManager Articles { get; }
 
     /// <summary>Gets the client for item operations.</summary>
     IItemClient Items { get; }

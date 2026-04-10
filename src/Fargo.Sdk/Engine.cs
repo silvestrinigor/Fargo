@@ -32,7 +32,8 @@ public sealed class Engine : IEngine
         Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
         Users = new UserClient(fargoHttpClient);
         UserGroups = new UserGroupClient(fargoHttpClient);
-        Articles = new ArticleClient(fargoHttpClient);
+        var articlesLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<ArticleManager>();
+        Articles = new ArticleManager(new ArticleClient(fargoHttpClient), articlesLogger);
         Items = new ItemClient(fargoHttpClient);
         Partitions = new PartitionClient(fargoHttpClient);
     }
@@ -43,7 +44,7 @@ public sealed class Engine : IEngine
 
     public IUserGroupClient UserGroups { get; }
 
-    public IArticleClient Articles { get; }
+    public IArticleManager Articles { get; }
 
     public IItemClient Items { get; }
 
