@@ -1,10 +1,18 @@
+using Fargo.Sdk.Articles;
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Http;
+using Fargo.Sdk.Items;
+using Fargo.Sdk.Partitions;
+using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Fargo.Sdk;
 
+/// <summary>
+/// The default implementation of <see cref="IEngine"/>. Create one instance per application and dispose it on shutdown.
+/// </summary>
 public sealed class Engine : IEngine
 {
     public Engine(ILoggerFactory? loggerFactory = null, ISessionStore? sessionStore = null)
@@ -22,9 +30,25 @@ public sealed class Engine : IEngine
         var authLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationManager>();
 
         Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
+        Users = new UserClient(fargoHttpClient);
+        UserGroups = new UserGroupClient(fargoHttpClient);
+        var articlesLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<ArticleManager>();
+        Articles = new ArticleManager(new ArticleClient(fargoHttpClient), articlesLogger);
+        Items = new ItemClient(fargoHttpClient);
+        Partitions = new PartitionClient(fargoHttpClient);
     }
 
     public IAuthenticationManager Authentication { get; }
+
+    public IUserClient Users { get; }
+
+    public IUserGroupClient UserGroups { get; }
+
+    public IArticleManager Articles { get; }
+
+    public IItemClient Items { get; }
+
+    public IPartitionClient Partitions { get; }
 
     /// <summary>
     /// Configures the server URL without performing any authentication.

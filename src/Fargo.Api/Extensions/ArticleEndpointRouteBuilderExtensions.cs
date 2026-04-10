@@ -56,6 +56,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithSummary("Deletes an article")
             .WithDescription("Deletes the specified article from the system.")
             .Produces(StatusCodes.Status204NoContent);
+
+        group.MapGet("/{articleGuid:guid}/partitions", GetArticlePartitions)
+            .WithName("GetArticlePartitions")
+            .WithSummary("Gets the partitions containing an article")
+            .WithDescription("Returns the partitions that directly contain the specified article.")
+            .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<Results<Ok<ArticleInformation>, NotFound>> GetSingleArticle(
@@ -121,5 +129,15 @@ public static class ArticleEndpointRouteBuilderExtension
         await handler.Handle(command, cancellationToken);
 
         return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NotFound, NoContent>> GetArticlePartitions(
+        Guid articleGuid,
+        IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.Handle(new ArticlePartitionsQuery(articleGuid), cancellationToken);
+
+        return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
     }
 }

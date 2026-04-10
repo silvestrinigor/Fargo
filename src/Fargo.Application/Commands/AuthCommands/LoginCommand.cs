@@ -20,8 +20,8 @@ namespace Fargo.Application.Commands.AuthCommands;
 /// The plaintext password provided for authentication.
 /// </param>
 public sealed record LoginCommand(
-        Nameid Nameid,
-        Password Password
+        string Nameid,
+        string Password
         ) : ICommand<AuthResult>;
 
 /// <summary>
@@ -55,7 +55,7 @@ public sealed class LoginCommandHandler(
     /// An <see cref="AuthResult"/> containing the generated access token,
     /// refresh token, and access token expiration time.
     /// </returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
+    /// <exception cref="InvalidCredentialsFargoApplicationException">
     /// Thrown when the user does not exist, the password is invalid,
     /// or the user is inactive.
     /// </exception>
@@ -67,14 +67,25 @@ public sealed class LoginCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
+        Nameid nameid;
+
+        try
+        {
+            nameid = new Nameid(command.Nameid);
+        }
+        catch (ArgumentException)
+        {
+            throw new InvalidCredentialsFargoApplicationException();
+        }
+
         var user = await userRepository.GetByNameid(
-                command.Nameid,
+                nameid,
                 cancellationToken
-                ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                ) ?? throw new InvalidCredentialsFargoApplicationException();
 
         if (!user.IsActive)
         {
-            throw new UnauthorizedAccessFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException();
         }
 
         var isValid = passwordHasher.Verify(
@@ -84,7 +95,7 @@ public sealed class LoginCommandHandler(
 
         if (!isValid)
         {
-            throw new UnauthorizedAccessFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (user.IsPasswordChangeRequired)

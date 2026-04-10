@@ -31,7 +31,7 @@ namespace Fargo.Application.Models.UserGroupModels;
 /// If <see langword="null"/>, the existing permissions are preserved.
 /// </param>
 public sealed record UserGroupUpdateModel(
-        Nameid? Nameid = null,
+        string? Nameid = null,
         Description? Description = null,
         bool? IsActive = null,
         IReadOnlyCollection<UserGroupPermissionUpdateModel>? Permissions = null

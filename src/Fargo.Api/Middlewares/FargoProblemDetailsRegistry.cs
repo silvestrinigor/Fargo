@@ -49,8 +49,20 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(401, "Unauthorized", "auth/unauthorized")
             },
             {
+                typeof(InvalidCredentialsFargoApplicationException),
+                new ProblemDetailsDefinition(401, "Invalid credentials", "auth/invalid-credentials")
+            },
+            {
                 typeof(InvalidPasswordFargoApplicationException),
                 new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
+            },
+            {
+                typeof(WeakPasswordFargoApplicationException),
+                new ProblemDetailsDefinition(400, "Weak password", "auth/weak-password")
+            },
+            {
+                typeof(InvalidNameidFargoApplicationException),
+                new ProblemDetailsDefinition(400, "Invalid nameid", "user/invalid-nameid")
             },
             {
                 typeof(PasswordChangeRequiredFargoApplicationException),
@@ -99,6 +111,54 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(UserInactiveFargoDomainException),
                 new ProblemDetailsDefinition(403, "User inactive", "user/inactive")
+            },
+            {
+                typeof(PartitionNotFoundFargoApplicationException),
+                new ProblemDetailsDefinition(404, "Partition not found", "partition/not-found")
+            },
+            {
+                typeof(UserNotAuthorizedFargoApplicationException),
+                new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
+            },
+            {
+                typeof(PartitionAccessDeniedFargoApplicationException),
+                new ProblemDetailsDefinition(403, "Access denied", "partition/access-denied")
+            },
+            {
+                typeof(PartitionedEntityAccessDeniedFargoApplicationException),
+                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
+            },
+            {
+                typeof(UserGroupInactiveFargoDomainException),
+                new ProblemDetailsDefinition(403, "User group inactive", "user-group/inactive")
+            },
+            {
+                typeof(PartitionCircularHierarchyFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "partition/circular-hierarchy")
+            },
+            {
+                typeof(PartitionCannotBeOwnParentFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "partition/cannot-be-own-parent")
+            },
+            {
+                typeof(DeleteMainAdminUserFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-delete-main-admin")
+            },
+            {
+                typeof(DeleteDefaultAdministratorsUserGroupFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "user-group/cannot-delete-default-admins")
+            },
+            {
+                typeof(ChangeMainAdminUserPermissionsFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-change-main-admin-permissions")
+            },
+            {
+                typeof(PartitionGlobalDeleteFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "partition/cannot-delete-global")
+            },
+            {
+                typeof(UserCannotDeleteParentUserGroupFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "user-group/cannot-delete-parent-group")
             }
         };
 

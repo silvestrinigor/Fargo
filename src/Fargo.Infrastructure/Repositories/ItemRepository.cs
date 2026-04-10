@@ -12,6 +12,31 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
 {
     private readonly DbSet<Item> items = context.Items;
 
+    public async Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await items.AnyAsync(i => i.Guid == entityGuid, cancellationToken))
+        {
+            return null;
+        }
+
+        IQueryable<Partition> query = items
+            .Where(i => i.Guid == entityGuid)
+            .SelectMany(i => i.Partitions);
+
+        if (partitionFilter is not null)
+        {
+            query = query.Where(p => partitionFilter.Contains(p.Guid));
+        }
+
+        return await query
+            .AsNoTracking()
+            .Select(PartitionMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Add(Item item)
     {
         context.Items.Add(item);

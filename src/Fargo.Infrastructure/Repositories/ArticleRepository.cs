@@ -113,6 +113,31 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await articles.AnyAsync(a => a.Guid == entityGuid, cancellationToken))
+        {
+            return null;
+        }
+
+        IQueryable<Partition> query = articles
+            .Where(a => a.Guid == entityGuid)
+            .SelectMany(a => a.Partitions);
+
+        if (partitionFilter is not null)
+        {
+            query = query.Where(p => partitionFilter.Contains(p.Guid));
+        }
+
+        return await query
+            .AsNoTracking()
+            .Select(PartitionMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,

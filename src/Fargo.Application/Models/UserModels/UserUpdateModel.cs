@@ -61,11 +61,11 @@ namespace Fargo.Application.Models.UserModels;
 /// immediately after it is changed.
 /// </param>
 public sealed record UserUpdateModel(
-        Nameid? Nameid = null,
+        string? Nameid = null,
         FirstName? FirstName = null,
         LastName? LastName = null,
         Description? Description = null,
-        Password? Password = null,
+        string? Password = null,
         bool? IsActive = null,
         IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null,
         TimeSpan? DefaultPasswordExpirationPeriod = null

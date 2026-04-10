@@ -28,7 +28,6 @@ public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
     internal void SetBaseUrl(string url) => baseUrl = url.TrimEnd('/');
 
     public async Task<FargoSdkHttpResponse<TResponse>> GetAsync<TResponse>(string path, CancellationToken ct = default)
-        where TResponse : class
     {
         ApplyAuth();
 
@@ -42,7 +41,7 @@ public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
         {
             return new FargoSdkHttpResponse<TResponse>(
                 IsSuccess: false,
-                Data: null,
+                Data: default,
                 Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
@@ -57,7 +56,6 @@ public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
     }
 
     public async Task<FargoSdkHttpResponse<TResponse>> PostFromJsonAsync<TRequest, TResponse>(string path, TRequest request, CancellationToken ct = default)
-        where TResponse : class
     {
         ApplyAuth();
 
@@ -71,7 +69,7 @@ public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
         {
             return new FargoSdkHttpResponse<TResponse>(
                 IsSuccess: false,
-                Data: null,
+                Data: default,
                 Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );

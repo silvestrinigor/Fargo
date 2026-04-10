@@ -182,6 +182,26 @@ public interface IUserRepository
     );
 
     /// <summary>
+    /// Gets the partitions that directly contain the specified user.
+    /// </summary>
+    /// <param name="entityGuid">The unique identifier of the user.</param>
+    /// <param name="partitionFilter">
+    /// When provided, only partitions within this set are returned.
+    /// Pass <see langword="null"/> to return all partitions (admin/system path).
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of <see cref="PartitionInformation"/> representing the
+    /// partitions that directly contain the user; or <see langword="null"/> if
+    /// the user does not exist.
+    /// </returns>
+    Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new user to the persistence context.
     /// </summary>
     /// <param name="user">The user to add.</param>

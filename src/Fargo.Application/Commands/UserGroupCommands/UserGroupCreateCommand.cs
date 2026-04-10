@@ -119,9 +119,11 @@ public sealed class UserGroupCreateCommandHandler(
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        var nameid = ValidateNameid(command.UserGroup.Nameid);
+
         var userGroup = new UserGroup
         {
-            Nameid = command.UserGroup.Nameid,
+            Nameid = nameid,
             Description = command.UserGroup.Description ?? Description.Empty
         };
 
@@ -139,5 +141,17 @@ public sealed class UserGroupCreateCommandHandler(
         await unitOfWork.SaveChanges(cancellationToken);
 
         return userGroup.Guid;
+    }
+
+    private static Nameid ValidateNameid(string value)
+    {
+        try
+        {
+            return new Nameid(value);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new InvalidNameidFargoApplicationException(ex.Message);
+        }
     }
 }

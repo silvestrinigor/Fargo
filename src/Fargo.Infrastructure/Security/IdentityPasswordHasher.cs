@@ -23,13 +23,13 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// Hashes the specified password.
     /// </summary>
     /// <param name="password">
-    /// The plain text password to hash.
+    /// The plain text password string to hash.
     /// </param>
     /// <returns>
     /// A <see cref="PasswordHash"/> containing the hashed representation
     /// of the provided password.
     /// </returns>
-    public PasswordHash Hash(Password password)
+    public PasswordHash Hash(string password)
     {
         var passwordHashString = _hasher.HashPassword(null!, password);
 
@@ -43,7 +43,7 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// The stored password hash.
     /// </param>
     /// <param name="providedPassword">
-    /// The plain text password supplied for verification.
+    /// The plain text password string supplied for verification.
     /// </param>
     /// <returns>
     /// <see langword="true"/> when the provided password matches the stored hash;
@@ -55,7 +55,7 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>,
     /// since both indicate that the password is valid.
     /// </remarks>
-    public bool Verify(PasswordHash hashedPassword, Password providedPassword)
+    public bool Verify(PasswordHash hashedPassword, string providedPassword)
     {
         var result = _hasher.VerifyHashedPassword(
             null!,

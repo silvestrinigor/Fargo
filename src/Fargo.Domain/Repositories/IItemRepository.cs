@@ -193,6 +193,26 @@ public interface IItemRepository
     );
 
     /// <summary>
+    /// Gets the partitions that directly contain the specified item.
+    /// </summary>
+    /// <param name="entityGuid">The unique identifier of the item.</param>
+    /// <param name="partitionFilter">
+    /// When provided, only partitions within this set are returned.
+    /// Pass <see langword="null"/> to return all partitions (admin/system path).
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of <see cref="PartitionInformation"/> representing the
+    /// partitions that directly contain the item; or <see langword="null"/> if
+    /// the item does not exist.
+    /// </returns>
+    Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new item to the persistence context.
     /// </summary>
     /// <param name="item">The item to add.</param>
