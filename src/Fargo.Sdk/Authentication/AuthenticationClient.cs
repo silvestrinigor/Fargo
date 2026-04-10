@@ -1,5 +1,4 @@
 using Fargo.Sdk.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Sdk.Authentication;
 
@@ -72,7 +71,7 @@ public sealed class AuthenticationClient : IAuthenticationClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(ProblemDetails? problem)
+    private static FargoSdkError MapError(FargoProblemDetails? problem)
     {
         var type = problem?.Type switch
         {
