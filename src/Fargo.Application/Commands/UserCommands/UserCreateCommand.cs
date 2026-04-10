@@ -114,6 +114,8 @@ public sealed class UserCreateCommandHandler(
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        ValidatePasswordPolicy(command.User.Password);
+
         var userPasswordHash = passwordHasher.Hash(command.User.Password);
 
         var user = new User
@@ -147,5 +149,17 @@ public sealed class UserCreateCommandHandler(
         await unitOfWork.SaveChanges(cancellationToken);
 
         return user.Guid;
+    }
+
+    private static void ValidatePasswordPolicy(string password)
+    {
+        try
+        {
+            _ = new Password(password);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new WeakPasswordFargoApplicationException(ex.Message);
+        }
     }
 }

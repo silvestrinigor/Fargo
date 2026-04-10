@@ -4,6 +4,7 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Security;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Commands.AuthCommands;
 
@@ -78,9 +79,23 @@ public sealed class PasswordChangeCommandHandler(
             throw new InvalidPasswordFargoApplicationException();
         }
 
+        ValidatePasswordPolicy(command.Passwords.NewPassword);
+
         user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
         user.ResetPasswordExpiration();
 
         await unitOfWork.SaveChanges(cancellationToken);
+    }
+
+    private static void ValidatePasswordPolicy(string password)
+    {
+        try
+        {
+            _ = new Password(password);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new WeakPasswordFargoApplicationException(ex.Message);
+        }
     }
 }

@@ -1,5 +1,3 @@
-using Fargo.Domain.ValueObjects;
-
 namespace Fargo.Application.Models.UserModels;
 
 /// <summary>
@@ -28,6 +26,6 @@ namespace Fargo.Application.Models.UserModels;
 /// when an administrator resets the password of another user.
 /// </param>
 public sealed record UserPasswordUpdateModel(
-        Password NewPassword,
-        Password? CurrentPassword = null
+        string NewPassword,
+        string? CurrentPassword = null
         );

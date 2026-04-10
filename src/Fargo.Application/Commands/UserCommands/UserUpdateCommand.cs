@@ -7,6 +7,7 @@ using Fargo.Domain.Enums;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Commands.UserCommands;
 
@@ -75,7 +76,9 @@ public sealed class UserUpdateCommandHandler(
         {
             actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
 
-            user.PasswordHash = passwordHasher.Hash(command.User.Password.Value);
+            ValidatePasswordPolicy(command.User.Password);
+
+            user.PasswordHash = passwordHasher.Hash(command.User.Password);
 
             user.MarkPasswordChangeAsRequired();
         }
@@ -113,5 +116,17 @@ public sealed class UserUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+    }
+
+    private static void ValidatePasswordPolicy(string password)
+    {
+        try
+        {
+            _ = new Password(password);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new WeakPasswordFargoApplicationException(ex.Message);
+        }
     }
 }

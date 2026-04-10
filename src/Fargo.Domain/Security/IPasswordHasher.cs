@@ -13,17 +13,17 @@ public interface IPasswordHasher
     /// <summary>
     /// Generates a secure hash for the specified password.
     /// </summary>
-    /// <param name="password">The plaintext password.</param>
+    /// <param name="password">The plaintext password string.</param>
     /// <returns>A <see cref="PasswordHash"/> representing the hashed password.</returns>
-    PasswordHash Hash(Password password);
+    PasswordHash Hash(string password);
 
     /// <summary>
     /// Verifies whether the provided password matches the stored hash.
     /// </summary>
     /// <param name="hashedPassword">The stored password hash.</param>
-    /// <param name="providedPassword">The plaintext password provided for verification.</param>
+    /// <param name="providedPassword">The plaintext password string provided for verification.</param>
     /// <returns>
     /// <see langword="true"/> if the password matches the hash; otherwise, <see langword="false"/>.
     /// </returns>
-    bool Verify(PasswordHash hashedPassword, Password providedPassword);
+    bool Verify(PasswordHash hashedPassword, string providedPassword);
 }

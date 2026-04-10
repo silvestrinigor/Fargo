@@ -57,6 +57,10 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
             },
             {
+                typeof(WeakPasswordFargoApplicationException),
+                new ProblemDetailsDefinition(400, "Weak password", "auth/weak-password")
+            },
+            {
                 typeof(PasswordChangeRequiredFargoApplicationException),
                 new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
             },

@@ -65,7 +65,7 @@ public sealed record UserUpdateModel(
         FirstName? FirstName = null,
         LastName? LastName = null,
         Description? Description = null,
-        Password? Password = null,
+        string? Password = null,
         bool? IsActive = null,
         IReadOnlyCollection<UserPermissionUpdateModel>? Permissions = null,
         TimeSpan? DefaultPasswordExpirationPeriod = null

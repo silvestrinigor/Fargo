@@ -64,7 +64,7 @@ namespace Fargo.Application.Models.UserModels;
 /// </remarks>
 public record UserCreateModel(
         Nameid Nameid,
-        Password Password,
+        string Password,
         FirstName? FirstName = null,
         LastName? LastName = null,
         Description? Description = null,

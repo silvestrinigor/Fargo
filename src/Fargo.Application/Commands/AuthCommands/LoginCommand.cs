@@ -21,7 +21,7 @@ namespace Fargo.Application.Commands.AuthCommands;
 /// </param>
 public sealed record LoginCommand(
         Nameid Nameid,
-        Password Password
+        string Password
         ) : ICommand<AuthResult>;
 
 /// <summary>
