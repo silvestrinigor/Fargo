@@ -35,7 +35,7 @@ public sealed class FargoSdkHttpClient
         var url = ResolveUrl(path);
         logger.LogRequest("GET", url);
 
-        using var response = await httpClient.GetAsync(url, ct);
+        using var response = await SendAsync(() => httpClient.GetAsync(url, ct));
         logger.LogResponse("GET", url, (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
@@ -64,7 +64,7 @@ public sealed class FargoSdkHttpClient
         var url = ResolveUrl(path);
         logger.LogRequest("POST", url);
 
-        using var response = await httpClient.PostAsJsonAsync(url, request, JsonOptions, ct);
+        using var response = await SendAsync(() => httpClient.PostAsJsonAsync(url, request, JsonOptions, ct));
         logger.LogResponse("POST", url, (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
@@ -92,7 +92,7 @@ public sealed class FargoSdkHttpClient
         var url = ResolveUrl(path);
         logger.LogRequest("POST", url);
 
-        using var response = await httpClient.PostAsJsonAsync(url, request, JsonOptions, ct);
+        using var response = await SendAsync(() => httpClient.PostAsJsonAsync(url, request, JsonOptions, ct));
         logger.LogResponse("POST", url, (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
@@ -120,7 +120,7 @@ public sealed class FargoSdkHttpClient
         var url = ResolveUrl(path);
         logger.LogRequest("PATCH", url);
 
-        using var response = await httpClient.PatchAsJsonAsync(url, request, JsonOptions, ct);
+        using var response = await SendAsync(() => httpClient.PatchAsJsonAsync(url, request, JsonOptions, ct));
         logger.LogResponse("PATCH", url, (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
@@ -148,7 +148,7 @@ public sealed class FargoSdkHttpClient
         var url = ResolveUrl(path);
         logger.LogRequest("PUT", url);
 
-        using var response = await httpClient.PutAsJsonAsync(url, request, JsonOptions, ct);
+        using var response = await SendAsync(() => httpClient.PutAsJsonAsync(url, request, JsonOptions, ct));
         logger.LogResponse("PUT", url, (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
@@ -176,7 +176,7 @@ public sealed class FargoSdkHttpClient
         var url = ResolveUrl(path);
         logger.LogRequest("DELETE", url);
 
-        using var response = await httpClient.DeleteAsync(url, ct);
+        using var response = await SendAsync(() => httpClient.DeleteAsync(url, ct));
         logger.LogResponse("DELETE", url, (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
@@ -206,6 +206,22 @@ public sealed class FargoSdkHttpClient
         var query = string.Join("&", parts);
 
         return query.Length > 0 ? "?" + query : string.Empty;
+    }
+
+    private static async Task<HttpResponseMessage> SendAsync(Func<Task<HttpResponseMessage>> send)
+    {
+        try
+        {
+            return await send();
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new FargoSdkConnectionException(ex.Message, ex);
+        }
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        {
+            throw new FargoSdkConnectionException("The request timed out.", ex);
+        }
     }
 
     private string ResolveUrl(string path) =>
