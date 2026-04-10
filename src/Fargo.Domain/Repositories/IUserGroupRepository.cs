@@ -220,6 +220,26 @@ public interface IUserGroupRepository
     );
 
     /// <summary>
+    /// Gets the partitions that directly contain the specified user group.
+    /// </summary>
+    /// <param name="entityGuid">The unique identifier of the user group.</param>
+    /// <param name="partitionFilter">
+    /// When provided, only partitions within this set are returned.
+    /// Pass <see langword="null"/> to return all partitions (admin/system path).
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of <see cref="PartitionInformation"/> representing the
+    /// partitions that directly contain the user group; or <see langword="null"/> if
+    /// the user group does not exist.
+    /// </returns>
+    Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new user group to the persistence context.
     /// </summary>
     /// <param name="userGroup">The user group to add.</param>

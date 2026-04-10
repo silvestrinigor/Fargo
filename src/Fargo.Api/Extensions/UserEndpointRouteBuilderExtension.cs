@@ -72,6 +72,14 @@ public static class UserEndpointRouteBuilderExtension
             .WithDescription("Removes the association between an existing user group and the specified user.")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{userGuid:guid}/partitions", GetUserPartitions)
+            .WithName("GetUserPartitions")
+            .WithSummary("Gets the partitions containing a user")
+            .WithDescription("Returns the partitions that directly contain the specified user.")
+            .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<Results<Ok<UserInformation>, NotFound>> GetSingleUser(
@@ -163,5 +171,15 @@ public static class UserEndpointRouteBuilderExtension
         await handler.Handle(command, cancellationToken);
 
         return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NotFound, NoContent>> GetUserPartitions(
+        Guid userGuid,
+        IQueryHandler<UserPartitionsQuery, IReadOnlyCollection<PartitionInformation>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.Handle(new UserPartitionsQuery(userGuid), cancellationToken);
+
+        return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
     }
 }

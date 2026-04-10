@@ -141,6 +141,26 @@ public interface IArticleRepository
     );
 
     /// <summary>
+    /// Gets the partitions that directly contain the specified article.
+    /// </summary>
+    /// <param name="entityGuid">The unique identifier of the article.</param>
+    /// <param name="partitionFilter">
+    /// When provided, only partitions within this set are returned.
+    /// Pass <see langword="null"/> to return all partitions (admin/system path).
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of <see cref="PartitionInformation"/> representing the
+    /// partitions that directly contain the article; or <see langword="null"/> if
+    /// the article does not exist.
+    /// </returns>
+    Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Determines whether the specified article has any associated items.
     /// </summary>
     /// <param name="articleGuid">The unique identifier of the article.</param>

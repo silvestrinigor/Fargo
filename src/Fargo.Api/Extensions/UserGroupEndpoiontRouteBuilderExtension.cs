@@ -58,6 +58,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithDescription("Deletes the specified user group from the system.")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{userGroupGuid:guid}/partitions", GetUserGroupPartitions)
+            .WithName("GetUserGroupPartitions")
+            .WithSummary("Gets the partitions containing a user group")
+            .WithDescription("Returns the partitions that directly contain the specified user group.")
+            .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<Results<Ok<UserGroupInformation>, NotFound>> GetSingleUserGroup(
@@ -125,5 +133,15 @@ public static class UserGroupEndpointRouteBuilderExtension
         await handler.Handle(command, cancellationToken);
 
         return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NotFound, NoContent>> GetUserGroupPartitions(
+        Guid userGroupGuid,
+        IQueryHandler<UserGroupPartitionsQuery, IReadOnlyCollection<PartitionInformation>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.Handle(new UserGroupPartitionsQuery(userGroupGuid), cancellationToken);
+
+        return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
     }
 }

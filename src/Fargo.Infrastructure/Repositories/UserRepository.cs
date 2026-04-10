@@ -54,6 +54,31 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? partitionFilter = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await users.AnyAsync(u => u.Guid == entityGuid, cancellationToken))
+        {
+            return null;
+        }
+
+        IQueryable<Partition> query = users
+            .Where(u => u.Guid == entityGuid)
+            .SelectMany(u => u.Partitions);
+
+        if (partitionFilter is not null)
+        {
+            query = query.Where(p => partitionFilter.Contains(p.Guid));
+        }
+
+        return await query
+            .AsNoTracking()
+            .Select(PartitionMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Remove(User user)
     {
         context.Users.Remove(user);

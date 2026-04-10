@@ -64,7 +64,10 @@ public sealed class UserGroupUpdateCommandHandler(
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
 
         if (command.UserGroup.Nameid is not null)
+        {
             userGroup.Nameid = ValidateNameid(command.UserGroup.Nameid);
+        }
+
         userGroup.Description = command.UserGroup.Description ?? userGroup.Description;
 
         if (command.UserGroup.Permissions is not null)

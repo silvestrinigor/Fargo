@@ -1,6 +1,5 @@
 using Fargo.Sdk;
 using Fargo.ServiceDefaults;
-using Microsoft.Extensions.Configuration;
 using Fargo.Web.Api;
 using Fargo.Web.Components;
 using Fargo.Web.Extensions;
