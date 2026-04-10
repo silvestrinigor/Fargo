@@ -1,5 +1,7 @@
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Http;
+using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -22,9 +24,15 @@ public sealed class Engine : IEngine
         var authLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationManager>();
 
         Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
+        Users = new UserClient(fargoHttpClient);
+        UserGroups = new UserGroupClient(fargoHttpClient);
     }
 
     public IAuthenticationManager Authentication { get; }
+
+    public IUserClient Users { get; }
+
+    public IUserGroupClient UserGroups { get; }
 
     /// <summary>
     /// Configures the server URL without performing any authentication.

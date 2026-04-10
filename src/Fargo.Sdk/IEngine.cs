@@ -1,4 +1,6 @@
 using Fargo.Sdk.Authentication;
+using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 
 namespace Fargo.Sdk;
 
@@ -9,6 +11,12 @@ public interface IEngine : IDisposable
 {
     /// <summary>Gets the manager responsible for authentication operations.</summary>
     IAuthenticationManager Authentication { get; }
+
+    /// <summary>Gets the client for user operations.</summary>
+    IUserClient Users { get; }
+
+    /// <summary>Gets the client for user group operations.</summary>
+    IUserGroupClient UserGroups { get; }
 
     /// <summary>
     /// Configures the server URL without performing any authentication.

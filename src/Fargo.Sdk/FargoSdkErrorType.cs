@@ -5,5 +5,9 @@ public enum FargoSdkErrorType
     Undefined,
     UnauthorizedAccess,
     InvalidCredentials,
-    PasswordChangeRequired
+    PasswordChangeRequired,
+    NotFound,
+    InvalidInput,
+    Conflict,
+    Forbidden
 }
