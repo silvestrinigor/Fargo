@@ -18,6 +18,11 @@ public sealed class AuthenticationClient : IAuthenticationClient
             new { nameid, password },
             cancellationToken);
 
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<AuthResult>(MapError(httpResponse.Problem));
+        }
+
         return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
 
@@ -27,6 +32,11 @@ public sealed class AuthenticationClient : IAuthenticationClient
             "/authentication/refresh",
             new { refreshToken },
             cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<AuthResult>(MapError(httpResponse.Problem));
+        }
 
         return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
@@ -38,6 +48,11 @@ public sealed class AuthenticationClient : IAuthenticationClient
             new { refreshToken },
             cancellationToken);
 
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
         return new FargoSdkResponse<EmptyResult>();
     }
 
@@ -48,6 +63,26 @@ public sealed class AuthenticationClient : IAuthenticationClient
             new { passwords = new { newPassword, currentPassword } },
             cancellationToken);
 
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
         return new FargoSdkResponse<EmptyResult>();
+    }
+
+    private static FargoSdkError MapError(FargoProblemDetails? problem)
+    {
+        var type = problem?.Type switch
+        {
+            "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
+            "auth/invalid-password" => FargoSdkErrorType.InvalidCredentials,
+            "auth/password-change-required" => FargoSdkErrorType.PasswordChangeRequired,
+            _ => FargoSdkErrorType.Undefined
+        };
+
+        var detail = problem?.Detail ?? "An unexpected error occurred.";
+
+        return new FargoSdkError(type, detail);
     }
 }

@@ -4,11 +4,12 @@ namespace Fargo.Sdk.Authentication;
 
 public sealed class AuthenticationManager : IAuthenticationManager
 {
-    public AuthenticationManager(IAuthenticationClient client, AuthSession session, ILogger logger)
+    public AuthenticationManager(IAuthenticationClient client, AuthSession session, ILogger logger, ISessionStore? sessionStore = null)
     {
         this.client = client;
         this.session = session;
         this.logger = logger;
+        this.sessionStore = sessionStore;
     }
 
     private readonly IAuthenticationClient client;
@@ -17,7 +18,9 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     private readonly ILogger logger;
 
-    private Timer? refreshTimer = null;
+    private readonly ISessionStore? sessionStore;
+
+    private CancellationTokenSource? refreshCts;
 
     public event EventHandler<LoggedInEventArgs>? LoggedIn;
 
@@ -25,7 +28,11 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     public event EventHandler<RefreshedEventArgs>? Refreshed;
 
+    public event EventHandler<RefreshFailedEventArgs>? RefreshFailed;
+
     public event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
+
+    public IAuthSession Session => session;
 
     public bool IsAuthenticated => session.IsAuthenticated;
 
@@ -42,9 +49,15 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         if (!result.IsSuccess)
         {
+            ThrowAuthError(result.Error!);
         }
 
         session.SetTokens(nameid, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
+
+        if (sessionStore is not null)
+        {
+            await sessionStore.SaveAsync(ToStoredSession(), cancellationToken);
+        }
 
         ScheduleRefresh();
 
@@ -69,11 +82,18 @@ public sealed class AuthenticationManager : IAuthenticationManager
             return;
         }
 
+        CancelRefresh();
+
         await client.LogOutAsync(refreshToken, cancellationToken);
 
         var nameid = session.Nameid;
 
         session.Clear();
+
+        if (sessionStore is not null)
+        {
+            await sessionStore.ClearAsync(cancellationToken);
+        }
 
         logger.LogLoggedOut(nameid!);
 
@@ -89,7 +109,17 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         var result = await client.Refresh(session.RefreshToken!, cancellationToken);
 
+        if (!result.IsSuccess)
+        {
+            ThrowAuthError(result.Error!);
+        }
+
         session.SetTokens(session.Nameid!, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
+
+        if (sessionStore is not null)
+        {
+            await sessionStore.SaveAsync(ToStoredSession(), cancellationToken);
+        }
 
         ScheduleRefresh();
 
@@ -100,57 +130,110 @@ public sealed class AuthenticationManager : IAuthenticationManager
         return result.Data;
     }
 
-    public async Task ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
+    public async Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
         {
             throw new UserNotAuthenticatedFargoSdkException();
         }
 
-        await client.ChangePassword(newPassword, currentPassword, cancellationToken);
+        var result = await client.ChangePassword(newPassword, currentPassword, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            ThrowAuthError(result.Error!);
+        }
 
         logger.LogPasswordChanged(session.Nameid!);
 
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
     }
 
-    private readonly object refreshTimerLock = new();
-
-    private void ScheduleRefresh()
+    public async Task<bool> RestoreAsync(CancellationToken cancellationToken = default)
     {
-        if (!IsAuthenticated)
+        if (sessionStore is null)
         {
-            throw new UserNotAuthenticatedFargoSdkException();
+            return false;
         }
 
-        var refreshIn = session.ExpiresAt - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
+        var stored = await sessionStore.LoadAsync(cancellationToken);
 
-        if (refreshIn < TimeSpan.Zero)
+        if (stored is null)
         {
-            refreshIn = TimeSpan.Zero;
+            return false;
         }
 
-        logger.LogRefreshScheduled(refreshIn!.Value.TotalMinutes);
+        session.SetTokens(stored.Nameid, stored.AccessToken, stored.RefreshToken, stored.ExpiresAt);
 
-        lock (refreshTimerLock)
+        if (IsExpired)
         {
-            refreshTimer?.Dispose();
-
-            refreshTimer = new Timer(async _ =>
-                await RefreshAsync(), null, refreshIn!.Value, Timeout.InfiniteTimeSpan);
+            await RefreshAsync(cancellationToken);
         }
+        else
+        {
+            ScheduleRefresh();
+        }
+
+        return true;
     }
 
     public void Dispose()
     {
-        lock (refreshTimerLock)
+        CancelRefresh();
+        logger.LogRefreshCancelled();
+    }
+
+    private void ScheduleRefresh()
+    {
+        var delay = session.ExpiresAt.GetValueOrDefault() - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
+
+        if (delay < TimeSpan.Zero)
         {
-            if (refreshTimer is not null)
-            {
-                refreshTimer.Dispose();
-                refreshTimer = null;
-                logger.LogRefreshCancelled();
-            }
+            delay = TimeSpan.Zero;
+        }
+
+        logger.LogRefreshScheduled(delay.TotalMinutes);
+
+        CancelRefresh();
+
+        refreshCts = new CancellationTokenSource();
+
+        _ = RefreshAfterDelayAsync(delay, refreshCts.Token);
+    }
+
+    private async Task RefreshAfterDelayAsync(TimeSpan delay, CancellationToken ct)
+    {
+        try
+        {
+            await Task.Delay(delay, ct);
+            await RefreshAsync(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            // expected on logout or dispose
+        }
+        catch (Exception ex)
+        {
+            logger.LogRefreshFailed(session.Nameid, ex);
+            RefreshFailed?.Invoke(this, new RefreshFailedEventArgs(session.Nameid, ex));
         }
     }
+
+    private void CancelRefresh()
+    {
+        refreshCts?.Cancel();
+        refreshCts?.Dispose();
+        refreshCts = null;
+    }
+
+    private StoredSession ToStoredSession() =>
+        new(session.Nameid!, session.AccessToken!, session.RefreshToken!, session.ExpiresAt!.Value);
+
+    private static void ThrowAuthError(FargoSdkError error) =>
+        throw error.Type switch
+        {
+            FargoSdkErrorType.InvalidCredentials => (FargoSdkException)new InvalidCredentialsFargoSdkException(error.Detail),
+            FargoSdkErrorType.PasswordChangeRequired => new PasswordChangeRequiredFargoSdkException(error.Detail),
+            _ => new FargoSdkApiException(error.Detail)
+        };
 }

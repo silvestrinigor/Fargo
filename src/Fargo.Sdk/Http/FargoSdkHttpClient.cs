@@ -1,5 +1,4 @@
 using Fargo.Sdk.Authentication;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -44,7 +43,7 @@ public sealed class FargoSdkHttpClient
             return new FargoSdkHttpResponse<TResponse>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
         }
@@ -73,7 +72,7 @@ public sealed class FargoSdkHttpClient
             return new FargoSdkHttpResponse<TResponse>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
         }
@@ -101,7 +100,7 @@ public sealed class FargoSdkHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
         }
@@ -129,7 +128,7 @@ public sealed class FargoSdkHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
         }
@@ -157,7 +156,7 @@ public sealed class FargoSdkHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
         }
@@ -185,7 +184,7 @@ public sealed class FargoSdkHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions, ct),
+                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
                 StatusCode: response.StatusCode
             );
         }
