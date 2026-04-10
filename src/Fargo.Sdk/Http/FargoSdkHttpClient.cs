@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Fargo.Sdk.Http;
 
-public sealed class FargoSdkHttpClient
+public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
 {
     private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Web;
 
