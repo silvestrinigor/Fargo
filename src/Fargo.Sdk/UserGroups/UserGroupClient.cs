@@ -1,4 +1,5 @@
 using Fargo.Sdk.Http;
+using Fargo.Sdk.Partitions;
 
 namespace Fargo.Sdk.UserGroups;
 
@@ -126,6 +127,22 @@ public sealed class UserGroupClient : IUserGroupClient
         }
 
         return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
+        Guid userGroupGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>(
+            $"/user-groups/{userGroupGuid}/partitions",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
     private static FargoSdkError MapError(FargoProblemDetails? problem)

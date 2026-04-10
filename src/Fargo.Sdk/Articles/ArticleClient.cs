@@ -1,4 +1,5 @@
 using Fargo.Sdk.Http;
+using Fargo.Sdk.Partitions;
 
 namespace Fargo.Sdk.Articles;
 
@@ -114,6 +115,22 @@ public sealed class ArticleClient : IArticleClient
         }
 
         return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>(
+            $"/articles/{articleGuid}/partitions",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
     private static FargoSdkError MapError(FargoProblemDetails? problem)

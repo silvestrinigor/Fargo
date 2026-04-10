@@ -1,3 +1,5 @@
+using Fargo.Sdk.Partitions;
+
 namespace Fargo.Sdk.UserGroups;
 
 public interface IUserGroupClient
@@ -30,6 +32,10 @@ public interface IUserGroupClient
         CancellationToken cancellationToken = default);
 
     Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
+        Guid userGroupGuid,
+        CancellationToken cancellationToken = default);
+
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         Guid userGroupGuid,
         CancellationToken cancellationToken = default);
 }

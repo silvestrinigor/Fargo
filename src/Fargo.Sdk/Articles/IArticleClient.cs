@@ -1,3 +1,5 @@
+using Fargo.Sdk.Partitions;
+
 namespace Fargo.Sdk.Articles;
 
 public interface IArticleClient
@@ -26,6 +28,10 @@ public interface IArticleClient
         CancellationToken cancellationToken = default);
 
     Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 }

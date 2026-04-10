@@ -1,3 +1,5 @@
+using Fargo.Sdk.Partitions;
+
 namespace Fargo.Sdk.Users;
 
 public interface IUserClient
@@ -48,5 +50,9 @@ public interface IUserClient
     Task<FargoSdkResponse<EmptyResult>> RemoveUserGroupAsync(
         Guid userGuid,
         Guid userGroupGuid,
+        CancellationToken cancellationToken = default);
+
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
+        Guid userGuid,
         CancellationToken cancellationToken = default);
 }

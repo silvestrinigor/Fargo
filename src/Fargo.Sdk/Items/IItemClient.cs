@@ -1,3 +1,5 @@
+using Fargo.Sdk.Partitions;
+
 namespace Fargo.Sdk.Items;
 
 public interface IItemClient
@@ -24,6 +26,10 @@ public interface IItemClient
         CancellationToken cancellationToken = default);
 
     Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
+        Guid itemGuid,
+        CancellationToken cancellationToken = default);
+
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         Guid itemGuid,
         CancellationToken cancellationToken = default);
 }
