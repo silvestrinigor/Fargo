@@ -17,13 +17,15 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     private readonly ILogger logger;
 
-    private Timer? refreshTimer = null;
+    private CancellationTokenSource? refreshCts;
 
     public event EventHandler<LoggedInEventArgs>? LoggedIn;
 
     public event EventHandler<LoggedOutEventArgs>? LoggedOut;
 
     public event EventHandler<RefreshedEventArgs>? Refreshed;
+
+    public event EventHandler<RefreshFailedEventArgs>? RefreshFailed;
 
     public event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
 
@@ -67,6 +69,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
         {
             return;
         }
+
+        CancelRefresh();
 
         await client.LogOutAsync(refreshToken, cancellationToken);
 
@@ -119,44 +123,51 @@ public sealed class AuthenticationManager : IAuthenticationManager
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
     }
 
-    private readonly object refreshTimerLock = new();
+    public void Dispose()
+    {
+        CancelRefresh();
+        logger.LogRefreshCancelled();
+    }
 
     private void ScheduleRefresh()
     {
-        if (!IsAuthenticated)
+        var delay = session.ExpiresAt.GetValueOrDefault() - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
+
+        if (delay < TimeSpan.Zero)
+            delay = TimeSpan.Zero;
+
+        logger.LogRefreshScheduled(delay.TotalMinutes);
+
+        CancelRefresh();
+
+        refreshCts = new CancellationTokenSource();
+
+        _ = RefreshAfterDelayAsync(delay, refreshCts.Token);
+    }
+
+    private async Task RefreshAfterDelayAsync(TimeSpan delay, CancellationToken ct)
+    {
+        try
         {
-            throw new UserNotAuthenticatedFargoSdkException();
+            await Task.Delay(delay, ct);
+            await RefreshAsync(ct);
         }
-
-        var refreshIn = session.ExpiresAt - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
-
-        if (refreshIn < TimeSpan.Zero)
+        catch (OperationCanceledException)
         {
-            refreshIn = TimeSpan.Zero;
+            // expected on logout or dispose
         }
-
-        logger.LogRefreshScheduled(refreshIn!.Value.TotalMinutes);
-
-        lock (refreshTimerLock)
+        catch (Exception ex)
         {
-            refreshTimer?.Dispose();
-
-            refreshTimer = new Timer(async _ =>
-                await RefreshAsync(), null, refreshIn!.Value, Timeout.InfiniteTimeSpan);
+            logger.LogRefreshFailed(session.Nameid, ex);
+            RefreshFailed?.Invoke(this, new RefreshFailedEventArgs(session.Nameid, ex));
         }
     }
 
-    public void Dispose()
+    private void CancelRefresh()
     {
-        lock (refreshTimerLock)
-        {
-            if (refreshTimer is not null)
-            {
-                refreshTimer.Dispose();
-                refreshTimer = null;
-                logger.LogRefreshCancelled();
-            }
-        }
+        refreshCts?.Cancel();
+        refreshCts?.Dispose();
+        refreshCts = null;
     }
 
     private static void ThrowAuthError(FargoSdkError error) =>

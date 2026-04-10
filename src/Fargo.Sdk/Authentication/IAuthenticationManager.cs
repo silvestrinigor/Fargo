@@ -14,6 +14,9 @@ public interface IAuthenticationManager : IDisposable
     /// <summary>Raised when the authentication token is successfully refreshed.</summary>
     event EventHandler<RefreshedEventArgs>? Refreshed;
 
+    /// <summary>Raised when the background token refresh fails. The session remains in its previous state.</summary>
+    event EventHandler<RefreshFailedEventArgs>? RefreshFailed;
+
     /// <summary>Raised when the user's password is successfully changed.</summary>
     event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
 
