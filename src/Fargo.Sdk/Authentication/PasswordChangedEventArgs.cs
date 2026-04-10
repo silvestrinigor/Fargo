@@ -1,5 +1,8 @@
 namespace Fargo.Sdk.Authentication;
 
+/// <summary>
+/// Provides data for the <see cref="IAuthenticationManager.PasswordChanged"/> event.
+/// </summary>
 public sealed class PasswordChangedEventArgs
 {
     internal PasswordChangedEventArgs(string nameid)
@@ -7,5 +10,6 @@ public sealed class PasswordChangedEventArgs
         Nameid = nameid;
     }
 
+    /// <summary>Gets the name identifier of the user whose password was changed.</summary>
     public string Nameid { get; }
 }

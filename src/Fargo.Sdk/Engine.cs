@@ -10,6 +10,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Fargo.Sdk;
 
+/// <summary>
+/// The default implementation of <see cref="IEngine"/>. Create one instance per application and dispose it on shutdown.
+/// </summary>
 public sealed class Engine : IEngine
 {
     public Engine(ILoggerFactory? loggerFactory = null, ISessionStore? sessionStore = null)
