@@ -1,3 +1,4 @@
+using Fargo.Sdk;
 using Fargo.Sdk.Authentication;
 
 namespace Fargo.Sdk.Tests.Authentication;
@@ -22,7 +23,7 @@ public sealed class AuthSessionTests
         var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
 
         // Act
-        session.SetTokens("user1", "access-token", "refresh-token", expiresAt);
+        session.SetTokens("user1", "access-token", "refresh-token", expiresAt, false, [], []);
 
         // Assert
         Assert.Equal("user1", session.Nameid);
@@ -38,7 +39,7 @@ public sealed class AuthSessionTests
         var session = new AuthSession();
 
         // Act
-        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         // Assert
         Assert.True(session.IsAuthenticated);
@@ -49,7 +50,7 @@ public sealed class AuthSessionTests
     {
         // Arrange
         var session = new AuthSession();
-        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         // Act
         session.Clear();
@@ -66,7 +67,7 @@ public sealed class AuthSessionTests
     {
         // Arrange
         var session = new AuthSession();
-        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         // Act
         session.Clear();
@@ -80,7 +81,7 @@ public sealed class AuthSessionTests
     {
         // Arrange
         var session = new AuthSession();
-        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         // Act / Assert
         Assert.False(session.IsExpired);
@@ -91,10 +92,98 @@ public sealed class AuthSessionTests
     {
         // Arrange
         var session = new AuthSession();
-        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(-1));
+        session.SetTokens("user1", "access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(-1), false, [], []);
 
         // Act / Assert
         Assert.True(session.IsExpired);
+    }
+
+    [Fact]
+    public void HasActionPermission_Should_ReturnFalse_When_NotAuthenticated()
+    {
+        var session = new AuthSession();
+
+        Assert.False(session.HasActionPermission(ActionType.CreateArticle));
+    }
+
+    [Fact]
+    public void HasActionPermission_Should_ReturnTrue_When_IsAdmin()
+    {
+        var session = new AuthSession();
+        session.SetTokens("admin", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), true, [], []);
+
+        Assert.True(session.HasActionPermission(ActionType.CreateArticle));
+        Assert.True(session.HasActionPermission(ActionType.DeleteUser));
+    }
+
+    [Fact]
+    public void HasActionPermission_Should_ReturnTrue_When_PermissionGranted()
+    {
+        var session = new AuthSession();
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [ActionType.EditArticle], []);
+
+        Assert.True(session.HasActionPermission(ActionType.EditArticle));
+    }
+
+    [Fact]
+    public void HasActionPermission_Should_ReturnFalse_When_PermissionNotGranted()
+    {
+        var session = new AuthSession();
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [ActionType.EditArticle], []);
+
+        Assert.False(session.HasActionPermission(ActionType.DeleteArticle));
+    }
+
+    [Fact]
+    public void HasPartitionAccess_Should_ReturnFalse_When_NotAuthenticated()
+    {
+        var session = new AuthSession();
+
+        Assert.False(session.HasPartitionAccess(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void HasPartitionAccess_Should_ReturnTrue_When_IsAdmin()
+    {
+        var session = new AuthSession();
+        session.SetTokens("admin", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), true, [], []);
+
+        Assert.True(session.HasPartitionAccess(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void HasPartitionAccess_Should_ReturnTrue_When_PartitionInList()
+    {
+        var partitionGuid = Guid.NewGuid();
+        var session = new AuthSession();
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], [partitionGuid]);
+
+        Assert.True(session.HasPartitionAccess(partitionGuid));
+    }
+
+    [Fact]
+    public void HasPartitionAccess_Should_ReturnFalse_When_PartitionNotInList()
+    {
+        var session = new AuthSession();
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], [Guid.NewGuid()]);
+
+        Assert.False(session.HasPartitionAccess(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void PermissionActions_Should_ReturnEmpty_When_NotAuthenticated()
+    {
+        var session = new AuthSession();
+
+        Assert.Empty(session.PermissionActions);
+    }
+
+    [Fact]
+    public void PartitionAccesses_Should_ReturnEmpty_When_NotAuthenticated()
+    {
+        var session = new AuthSession();
+
+        Assert.Empty(session.PartitionAccesses);
     }
 
     [Fact]
@@ -102,12 +191,12 @@ public sealed class AuthSessionTests
     {
         // Arrange
         var session = new AuthSession();
-        session.SetTokens("user1", "old-access", "old-refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "old-access", "old-refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         var newExpiry = DateTimeOffset.UtcNow.AddHours(2);
 
         // Act
-        session.SetTokens("user2", "new-access", "new-refresh", newExpiry);
+        session.SetTokens("user2", "new-access", "new-refresh", newExpiry, false, [], []);
 
         // Assert
         Assert.Equal("user2", session.Nameid);

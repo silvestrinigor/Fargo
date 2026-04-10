@@ -94,7 +94,7 @@ public sealed class AuthenticationManagerTests
     public async Task LogInAsync_Should_LogOutFirst_When_AlreadyAuthenticated()
     {
         // Arrange
-        session.SetTokens("old-user", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("old-user", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         client.LogOutAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
@@ -115,7 +115,7 @@ public sealed class AuthenticationManagerTests
     public async Task LogOutAsync_Should_ClearSession_When_Authenticated()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.LogOutAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
@@ -130,7 +130,7 @@ public sealed class AuthenticationManagerTests
     public async Task LogOutAsync_Should_ClearStore_When_Authenticated()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.LogOutAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
@@ -145,7 +145,7 @@ public sealed class AuthenticationManagerTests
     public async Task LogOutAsync_Should_RaiseLoggedOutEvent_When_Authenticated()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.LogOutAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
@@ -184,9 +184,9 @@ public sealed class AuthenticationManagerTests
     public async Task RefreshAsync_Should_UpdateSession_When_TokenIsValid()
     {
         // Arrange
-        session.SetTokens("user1", "old-access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "old-access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
-        var newResult = new AuthResult("new-access", "new-refresh", DateTimeOffset.UtcNow.AddHours(2));
+        var newResult = new AuthResult("new-access", "new-refresh", DateTimeOffset.UtcNow.AddHours(2), false, [], []);
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<AuthResult>(newResult));
 
@@ -202,7 +202,7 @@ public sealed class AuthenticationManagerTests
     public async Task RefreshAsync_Should_SaveToStore_When_TokenIsValid()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
 
@@ -217,7 +217,7 @@ public sealed class AuthenticationManagerTests
     public async Task RefreshAsync_Should_RaiseRefreshedEvent_When_TokenIsValid()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
 
@@ -246,7 +246,7 @@ public sealed class AuthenticationManagerTests
     public async Task ChangePasswordAsync_Should_ThrowInvalidCredentials_When_CurrentPasswordIsWrong()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.ChangePassword(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>(new FargoSdkError(FargoSdkErrorType.InvalidCredentials, "Invalid password.")));
 
@@ -259,7 +259,7 @@ public sealed class AuthenticationManagerTests
     public async Task ChangePasswordAsync_Should_RaisePasswordChangedEvent_When_Successful()
     {
         // Arrange
-        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.ChangePassword(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
@@ -306,7 +306,7 @@ public sealed class AuthenticationManagerTests
     public async Task RestoreAsync_Should_ReturnTrue_And_SetSession_When_SessionExists()
     {
         // Arrange
-        var stored = new StoredSession("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1));
+        var stored = new StoredSession("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         store.LoadAsync(Arg.Any<CancellationToken>()).Returns(stored);
 
         // Act
@@ -322,7 +322,7 @@ public sealed class AuthenticationManagerTests
     public async Task RestoreAsync_Should_RefreshToken_When_StoredSessionIsExpired()
     {
         // Arrange
-        var stored = new StoredSession("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(-1));
+        var stored = new StoredSession("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(-1), false, [], []);
         store.LoadAsync(Arg.Any<CancellationToken>()).Returns(stored);
 
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -338,6 +338,6 @@ public sealed class AuthenticationManagerTests
     private static class Fakes
     {
         public static AuthResult AuthResult() =>
-            new("access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1));
+            new("access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
     }
 }

@@ -183,7 +183,7 @@ public sealed class AuthenticationClientTests
     private static class Fakes
     {
         public static AuthResult AuthResult() =>
-            new("access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1));
+            new("access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         public static FargoProblemDetails Problem(string type, string detail = "An error occurred.") =>
             new() { Type = type, Detail = detail };

@@ -11,4 +11,14 @@ public interface IAuthSession
     DateTimeOffset? ExpiresAt { get; }
 
     bool IsAuthenticated { get; }
+
+    bool IsAdmin { get; }
+
+    IReadOnlyCollection<ActionType> PermissionActions { get; }
+
+    IReadOnlyCollection<Guid> PartitionAccesses { get; }
+
+    bool HasActionPermission(ActionType action);
+
+    bool HasPartitionAccess(Guid partitionGuid);
 }
