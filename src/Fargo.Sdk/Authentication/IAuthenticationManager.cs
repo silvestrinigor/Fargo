@@ -20,6 +20,9 @@ public interface IAuthenticationManager : IDisposable
     /// <summary>Raised when the user's password is successfully changed.</summary>
     event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
 
+    /// <summary>Gets the current authentication session.</summary>
+    IAuthSession Session { get; }
+
     /// <summary>Gets a value indicating whether the user is currently authenticated.</summary>
     bool IsAuthenticated { get; }
 

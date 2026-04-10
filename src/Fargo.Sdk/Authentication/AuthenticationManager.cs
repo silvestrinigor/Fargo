@@ -32,6 +32,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     public event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
 
+    public IAuthSession Session => session;
+
     public bool IsAuthenticated => session.IsAuthenticated;
 
     public bool IsExpired => session.IsExpired;
