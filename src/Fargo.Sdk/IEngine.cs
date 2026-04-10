@@ -20,4 +20,11 @@ public interface IEngine : IDisposable
     /// Ends the current authenticated session.
     /// </summary>
     Task LogOutAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Attempts to restore a previously saved session from the configured <see cref="Authentication.ISessionStore"/>.
+    /// Sets the server URL and refreshes the token automatically if it has expired.
+    /// Returns <see langword="false"/> if no session store is configured or no saved session exists.
+    /// </summary>
+    Task<bool> RestoreSessionAsync(string server, CancellationToken cancellationToken = default);
 }

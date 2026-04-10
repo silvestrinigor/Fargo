@@ -55,4 +55,11 @@ public interface IAuthenticationManager : IDisposable
     /// <param name="currentPassword">The user's current password for verification.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Restores a previously saved session without re-authenticating.
+    /// If the stored token is expired, a refresh is attempted automatically.
+    /// Returns <see langword="false"/> if no session store is configured or no saved session exists.
+    /// </summary>
+    Task<bool> RestoreAsync(CancellationToken cancellationToken = default);
 }

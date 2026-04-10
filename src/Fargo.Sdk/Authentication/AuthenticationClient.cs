@@ -20,7 +20,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
+        {
             return new FargoSdkResponse<AuthResult>(MapError(httpResponse.Problem));
+        }
 
         return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
@@ -33,7 +35,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
+        {
             return new FargoSdkResponse<AuthResult>(MapError(httpResponse.Problem));
+        }
 
         return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
@@ -46,7 +50,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
+        {
             return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
 
         return new FargoSdkResponse<EmptyResult>();
     }
@@ -59,7 +65,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
+        {
             return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
 
         return new FargoSdkResponse<EmptyResult>();
     }

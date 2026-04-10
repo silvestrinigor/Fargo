@@ -7,7 +7,7 @@ namespace Fargo.Sdk;
 
 public sealed class Engine : IEngine
 {
-    public Engine(ILoggerFactory? loggerFactory = null)
+    public Engine(ILoggerFactory? loggerFactory = null, ISessionStore? sessionStore = null)
     {
         httpClient = new HttpClient();
 
@@ -21,7 +21,7 @@ public sealed class Engine : IEngine
 
         var authLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationManager>();
 
-        Authentication = new AuthenticationManager(authClient, session, authLogger);
+        Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
     }
 
     public IAuthenticationManager Authentication { get; }
@@ -41,6 +41,13 @@ public sealed class Engine : IEngine
     public Task LogOutAsync(CancellationToken cancellationToken = default)
     {
         return Authentication.LogOutAsync(cancellationToken);
+    }
+
+    public async Task<bool> RestoreSessionAsync(string server, CancellationToken cancellationToken = default)
+    {
+        fargoHttpClient.SetBaseUrl(server);
+
+        return await Authentication.RestoreAsync(cancellationToken);
     }
 
     public void Dispose()

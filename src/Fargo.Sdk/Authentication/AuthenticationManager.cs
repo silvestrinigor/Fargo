@@ -4,11 +4,12 @@ namespace Fargo.Sdk.Authentication;
 
 public sealed class AuthenticationManager : IAuthenticationManager
 {
-    public AuthenticationManager(IAuthenticationClient client, AuthSession session, ILogger logger)
+    public AuthenticationManager(IAuthenticationClient client, AuthSession session, ILogger logger, ISessionStore? sessionStore = null)
     {
         this.client = client;
         this.session = session;
         this.logger = logger;
+        this.sessionStore = sessionStore;
     }
 
     private readonly IAuthenticationClient client;
@@ -16,6 +17,8 @@ public sealed class AuthenticationManager : IAuthenticationManager
     private readonly AuthSession session;
 
     private readonly ILogger logger;
+
+    private readonly ISessionStore? sessionStore;
 
     private CancellationTokenSource? refreshCts;
 
@@ -43,9 +46,16 @@ public sealed class AuthenticationManager : IAuthenticationManager
         var result = await client.LogInAsync(nameid, password, cancellationToken);
 
         if (!result.IsSuccess)
+        {
             ThrowAuthError(result.Error!);
+        }
 
         session.SetTokens(nameid, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
+
+        if (sessionStore is not null)
+        {
+            await sessionStore.SaveAsync(ToStoredSession(), cancellationToken);
+        }
 
         ScheduleRefresh();
 
@@ -78,6 +88,11 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         session.Clear();
 
+        if (sessionStore is not null)
+        {
+            await sessionStore.ClearAsync(cancellationToken);
+        }
+
         logger.LogLoggedOut(nameid!);
 
         LoggedOut?.Invoke(this, new LoggedOutEventArgs(nameid!));
@@ -93,9 +108,16 @@ public sealed class AuthenticationManager : IAuthenticationManager
         var result = await client.Refresh(session.RefreshToken!, cancellationToken);
 
         if (!result.IsSuccess)
+        {
             ThrowAuthError(result.Error!);
+        }
 
         session.SetTokens(session.Nameid!, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
+
+        if (sessionStore is not null)
+        {
+            await sessionStore.SaveAsync(ToStoredSession(), cancellationToken);
+        }
 
         ScheduleRefresh();
 
@@ -116,11 +138,41 @@ public sealed class AuthenticationManager : IAuthenticationManager
         var result = await client.ChangePassword(newPassword, currentPassword, cancellationToken);
 
         if (!result.IsSuccess)
+        {
             ThrowAuthError(result.Error!);
+        }
 
         logger.LogPasswordChanged(session.Nameid!);
 
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
+    }
+
+    public async Task<bool> RestoreAsync(CancellationToken cancellationToken = default)
+    {
+        if (sessionStore is null)
+        {
+            return false;
+        }
+
+        var stored = await sessionStore.LoadAsync(cancellationToken);
+
+        if (stored is null)
+        {
+            return false;
+        }
+
+        session.SetTokens(stored.Nameid, stored.AccessToken, stored.RefreshToken, stored.ExpiresAt);
+
+        if (IsExpired)
+        {
+            await RefreshAsync(cancellationToken);
+        }
+        else
+        {
+            ScheduleRefresh();
+        }
+
+        return true;
     }
 
     public void Dispose()
@@ -134,7 +186,9 @@ public sealed class AuthenticationManager : IAuthenticationManager
         var delay = session.ExpiresAt.GetValueOrDefault() - DateTimeOffset.UtcNow - TimeSpan.FromMinutes(2);
 
         if (delay < TimeSpan.Zero)
+        {
             delay = TimeSpan.Zero;
+        }
 
         logger.LogRefreshScheduled(delay.TotalMinutes);
 
@@ -169,6 +223,9 @@ public sealed class AuthenticationManager : IAuthenticationManager
         refreshCts?.Dispose();
         refreshCts = null;
     }
+
+    private StoredSession ToStoredSession() =>
+        new(session.Nameid!, session.AccessToken!, session.RefreshToken!, session.ExpiresAt!.Value);
 
     private static void ThrowAuthError(FargoSdkError error) =>
         throw error.Type switch
