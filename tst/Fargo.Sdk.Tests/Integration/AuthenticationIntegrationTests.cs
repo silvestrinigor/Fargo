@@ -1,5 +1,3 @@
-using Fargo.Sdk;
-using Fargo.Sdk.Authentication;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Tests.Integration;

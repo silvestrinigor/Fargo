@@ -1,4 +1,3 @@
-using Fargo.Sdk;
 using Fargo.Sdk.Authentication;
 
 namespace Fargo.Sdk.Tests.Authentication;
