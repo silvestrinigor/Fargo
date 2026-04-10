@@ -7,9 +7,9 @@ namespace Fargo.Web.Features.Trees;
 
 public sealed class PartitionTreeApi(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor,
+    FargoSession session,
     IOptions<JsonOptions> httpJsonOptions)
-    : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
+    : FargoApiClientBase(httpClientFactory, session, httpJsonOptions)
 {
     public async Task<IReadOnlyCollection<EntityTreeNode>> GetChildrenAsync(
         Guid? parentPartitionGuid,

@@ -7,11 +7,11 @@ namespace Fargo.Web.Api;
 
 public abstract class FargoApiClientBase(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor,
+    FargoSession session,
     IOptions<JsonOptions> httpJsonOptions)
 {
     private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
-    private readonly ClientSessionAccessor sessionAccessor = sessionAccessor;
+    private readonly FargoSession session = session;
     private readonly JsonSerializerOptions jsonSerializerOptions = httpJsonOptions.Value.SerializerOptions;
 
     protected HttpClient CreateClient(bool requireAuthentication = true)
@@ -25,7 +25,7 @@ public abstract class FargoApiClientBase(
             return client;
         }
 
-        var accessToken = sessionAccessor.Session?.AccessToken;
+        var accessToken = session.Session.AccessToken;
 
         if (string.IsNullOrWhiteSpace(accessToken))
         {

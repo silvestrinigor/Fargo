@@ -52,7 +52,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
             ThrowAuthError(result.Error!);
         }
 
-        session.SetTokens(nameid, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
+        session.SetTokens(nameid, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt, result.Data.IsAdmin, result.Data.PermissionActions, result.Data.PartitionAccesses);
 
         if (sessionStore is not null)
         {
@@ -114,7 +114,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
             ThrowAuthError(result.Error!);
         }
 
-        session.SetTokens(session.Nameid!, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt);
+        session.SetTokens(session.Nameid!, result.Data!.AccessToken, result.Data.RefreshToken, result.Data.ExpiresAt, result.Data.IsAdmin, result.Data.PermissionActions, result.Data.PartitionAccesses);
 
         if (sessionStore is not null)
         {
@@ -163,7 +163,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
             return false;
         }
 
-        session.SetTokens(stored.Nameid, stored.AccessToken, stored.RefreshToken, stored.ExpiresAt);
+        session.SetTokens(stored.Nameid, stored.AccessToken, stored.RefreshToken, stored.ExpiresAt, stored.IsAdmin, stored.PermissionActions, stored.PartitionAccesses);
 
         if (IsExpired)
         {
@@ -227,7 +227,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
     }
 
     private StoredSession ToStoredSession() =>
-        new(session.Nameid!, session.AccessToken!, session.RefreshToken!, session.ExpiresAt!.Value);
+        new(session.Nameid!, session.AccessToken!, session.RefreshToken!, session.ExpiresAt!.Value, session.IsAdmin, session.PermissionActions, session.PartitionAccesses);
 
     private static void ThrowAuthError(FargoSdkError error) =>
         throw error.Type switch

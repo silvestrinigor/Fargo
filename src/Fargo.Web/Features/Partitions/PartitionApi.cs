@@ -8,9 +8,9 @@ namespace Fargo.Web.Features.Partitions;
 
 public sealed class PartitionApi(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor,
+    FargoSession session,
     IOptions<JsonOptions> httpJsonOptions)
-    : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
+    : FargoApiClientBase(httpClientFactory, session, httpJsonOptions)
 {
     public async Task<IReadOnlyCollection<PartitionSummary>> GetChildrenAsync(
         Guid? parentPartitionGuid,

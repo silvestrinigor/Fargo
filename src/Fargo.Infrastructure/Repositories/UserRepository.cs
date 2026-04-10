@@ -29,6 +29,9 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         return await users
             .Include(user => user.Permissions)
             .Include(user => user.UserGroups)
+                .ThenInclude(g => g.Permissions)
+            .Include(user => user.UserGroups)
+                .ThenInclude(g => g.PartitionAccesses)
             .Include(user => user.PartitionAccesses)
             .Include(user => user.Partitions)
             .Where(user => user.Guid == entityGuid)
@@ -42,6 +45,9 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         return await users
             .Include(user => user.Permissions)
             .Include(user => user.UserGroups)
+                .ThenInclude(g => g.Permissions)
+            .Include(user => user.UserGroups)
+                .ThenInclude(g => g.PartitionAccesses)
             .Include(user => user.PartitionAccesses)
             .Include(user => user.Partitions)
             .Where(user => user.Nameid == nameid)

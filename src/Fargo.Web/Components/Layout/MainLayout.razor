@@ -1,21 +1,22 @@
-﻿@using Fargo.Web.Components.Shared
+@using Fargo.Sdk
+@using Fargo.Web.Components.Shared
 
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject NavigationManager Navigation
-@inject IClientSessionStore SessionStore
-@inject ClientSessionAccessor SessionAccessor
+@inject IEngine Engine
+@inject FargoSession FargoSession
 
 <SessionBootstrapper />
 
-@if (!SessionAccessor.IsReady)
+@if (!FargoSession.IsReady)
 {
     <div class="splash-screen">
         <h1>Fargo</h1>
         <p>Loading workspace...</p>
     </div>
 }
-else if (!SessionAccessor.IsAuthenticated)
+else if (!FargoSession.IsAuthenticated)
 {
     <div class="splash-screen">
         <h1>Fargo</h1>
@@ -52,12 +53,12 @@ else
 @code {
     protected override void OnInitialized()
     {
-        SessionAccessor.Changed += HandleSessionChanged;
+        FargoSession.Changed += HandleSessionChanged;
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (SessionAccessor.IsReady && !SessionAccessor.IsAuthenticated && !Navigation.Uri.Contains("/login", StringComparison.OrdinalIgnoreCase))
+        if (FargoSession.IsReady && !FargoSession.IsAuthenticated && !Navigation.Uri.Contains("/login", StringComparison.OrdinalIgnoreCase))
         {
             Navigation.NavigateTo("/login", replace: true);
         }
@@ -65,8 +66,7 @@ else
 
     private async Task LogoutAsync()
     {
-        await SessionStore.ClearAsync();
-        SessionAccessor.Clear();
+        await Engine.LogOutAsync();
         Navigation.NavigateTo("/login", forceLoad: true);
     }
 
@@ -85,6 +85,6 @@ else
 
     public void Dispose()
     {
-        SessionAccessor.Changed -= HandleSessionChanged;
+        FargoSession.Changed -= HandleSessionChanged;
     }
 }

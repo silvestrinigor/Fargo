@@ -1,5 +1,6 @@
-@inject IClientSessionStore SessionStore
-@inject ClientSessionAccessor SessionAccessor
+@using Fargo.Sdk
+@inject IEngine Engine
+@inject FargoSession FargoSession
 
 @code {
     private bool attempted;
@@ -15,8 +16,8 @@
 
         try
         {
-            var session = await SessionStore.GetAsync();
-            SessionAccessor.SetSession(session);
+            await Engine.Authentication.RestoreAsync();
+            FargoSession.MarkReady();
         }
         catch (InvalidOperationException)
         {
@@ -28,7 +29,7 @@
         }
         catch
         {
-            SessionAccessor.MarkReady();
+            FargoSession.MarkReady();
         }
     }
 }

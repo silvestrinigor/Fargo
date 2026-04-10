@@ -2,13 +2,12 @@
 @layout LoginLayout
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
-@using Fargo.Application.Commands.AuthCommands
-@using Fargo.Application.Models.AuthModels
-@using Fargo.Domain.ValueObjects
+@using Fargo.Sdk
+@using Fargo.Sdk.Authentication
 @using Fargo.Web.Security
-@inject AuthenticationApi AuthenticationApi
-@inject IClientSessionStore SessionStore
-@inject ClientSessionAccessor SessionAccessor
+@inject IEngine Engine
+@inject BrowserSdkSessionStore SessionStore
+@inject FargoSession FargoSession
 @inject NavigationManager Navigation
 
 <PageTitle>Login | Fargo</PageTitle>
@@ -61,24 +60,23 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || SessionAccessor.IsAuthenticated)
+        if (!firstRender || FargoSession.IsAuthenticated)
         {
             return;
         }
 
         try
         {
-            var session = await SessionStore.GetAsync();
+            var restored = await Engine.Authentication.RestoreAsync();
 
-            if (!string.IsNullOrWhiteSpace(session?.AccessToken))
+            if (restored)
             {
-                SessionAccessor.SetSession(session);
                 Navigation.NavigateTo("/workspace", replace: true);
             }
         }
         catch
         {
-            SessionAccessor.MarkReady();
+            FargoSession.MarkReady();
         }
     }
 
@@ -94,29 +92,21 @@
 
         try
         {
-            var command = new LoginCommand(
-                new Nameid(model.Nameid!),
-                new Password(model.Password!));
-
-            var result = await AuthenticationApi.LoginAsync(command);
-
-            var session = new AuthenticatedSession
-            {
-                AccessToken = result.AccessToken.ToString(),
-                RefreshToken = result.RefreshToken.ToString(),
-                ExpiresAt = result.ExpiresAt
-            };
-
-            await SessionStore.SaveAsync(session, model.RememberMe);
-            SessionAccessor.SetSession(session);
-
+            SessionStore.RememberMe = model.RememberMe;
+            await Engine.Authentication.LogInAsync(model.Nameid!, model.Password!);
             Navigation.NavigateTo("/workspace", replace: true);
         }
-        catch (HttpRequestException ex)
+        catch (InvalidCredentialsFargoSdkException)
         {
-            errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Unable to sign in with the provided credentials."
-                : ex.Message;
+            errorMessage = "Unable to sign in with the provided credentials.";
+        }
+        catch (PasswordChangeRequiredFargoSdkException)
+        {
+            errorMessage = "You must change your password before signing in.";
+        }
+        catch (FargoSdkConnectionException ex)
+        {
+            errorMessage = ex.Message;
         }
         catch
         {

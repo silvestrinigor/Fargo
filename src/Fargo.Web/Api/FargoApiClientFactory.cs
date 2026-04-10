@@ -4,10 +4,10 @@ namespace Fargo.Web.Api;
 
 public sealed class FargoApiClientFactory(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor)
+    FargoSession session)
 {
     private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
-    private readonly ClientSessionAccessor sessionAccessor = sessionAccessor;
+    private readonly FargoSession session = session;
 
     public HttpClient Create(bool includeAccessToken = true)
     {
@@ -17,7 +17,7 @@ public sealed class FargoApiClientFactory(
 
         if (includeAccessToken)
         {
-            var accessToken = sessionAccessor.Session?.AccessToken;
+            var accessToken = session.Session.AccessToken;
 
             if (!string.IsNullOrWhiteSpace(accessToken))
             {

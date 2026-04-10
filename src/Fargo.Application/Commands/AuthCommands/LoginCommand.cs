@@ -5,6 +5,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Commands.AuthCommands;
@@ -37,6 +38,7 @@ public sealed class LoginCommandHandler(
         IRefreshTokenGenerator refreshTokenGenerator,
         ITokenHasher tokenHasher,
         IRefreshTokenRepository refreshTokenRepository,
+        ActorService actorService,
         IUnitOfWork unitOfWork
         ) : ICommandHandler<LoginCommand, AuthResult>
 {
@@ -90,6 +92,8 @@ public sealed class LoginCommandHandler(
             throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
+        var actor = (UserActor)(await actorService.GetActorByGuid(user.Guid, cancellationToken))!;
+
         var accessTokenResult = tokenGenerator.Generate(user);
 
         var rawRefreshToken = refreshTokenGenerator.Generate();
@@ -109,7 +113,10 @@ public sealed class LoginCommandHandler(
         return new AuthResult(
                 accessTokenResult.AccessToken,
                 rawRefreshToken,
-                accessTokenResult.ExpiresAt
+                accessTokenResult.ExpiresAt,
+                actor.IsAdmin,
+                actor.IsAdmin ? [] : actor.PermissionActions,
+                actor.IsAdmin ? [] : actor.PartitionAccesses
                 );
     }
 }

@@ -5,6 +5,7 @@ using Fargo.Application.Security;
 using Fargo.Domain.Entities;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
+using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Commands.AuthCommands;
@@ -33,6 +34,7 @@ public sealed class RefreshCommandHandler(
         IRefreshTokenGenerator refreshTokenGenerator,
         ITokenHasher tokenHasher,
         IRefreshTokenRepository refreshTokenRepository,
+        ActorService actorService,
         IUnitOfWork unitOfWork
         ) : ICommandHandler<RefreshCommand, AuthResult>
 {
@@ -82,6 +84,8 @@ public sealed class RefreshCommandHandler(
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
+        var actor = (UserActor)(await actorService.GetActorByGuid(user.Guid, cancellationToken))!;
+
         var rawNewRefreshToken = refreshTokenGenerator.Generate();
 
         var newRefreshTokenHash = tokenHasher.Hash(rawNewRefreshToken);
@@ -103,7 +107,10 @@ public sealed class RefreshCommandHandler(
         return new AuthResult(
                 newAccessTokenResult.AccessToken,
                 rawNewRefreshToken,
-                newAccessTokenResult.ExpiresAt
+                newAccessTokenResult.ExpiresAt,
+                actor.IsAdmin,
+                actor.IsAdmin ? [] : actor.PermissionActions,
+                actor.IsAdmin ? [] : actor.PartitionAccesses
                 );
     }
 }

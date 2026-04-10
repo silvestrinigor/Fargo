@@ -8,9 +8,9 @@ namespace Fargo.Web.Features.Users;
 
 public sealed class UserApi(
     IHttpClientFactory httpClientFactory,
-    ClientSessionAccessor sessionAccessor,
+    FargoSession session,
     IOptions<JsonOptions> httpJsonOptions)
-    : FargoApiClientBase(httpClientFactory, sessionAccessor, httpJsonOptions)
+    : FargoApiClientBase(httpClientFactory, session, httpJsonOptions)
 {
     public async Task<IReadOnlyCollection<UserInformation>> GetManyAsync(
         CancellationToken cancellationToken = default)
