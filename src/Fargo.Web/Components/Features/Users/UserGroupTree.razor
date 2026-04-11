@@ -7,18 +7,18 @@
 }
 else if (isLoading)
 {
-    <div class="muted-text">Loading user groups tree...</div>
+    <div class="muted-text">Loading users...</div>
 }
 else if (rootNodes.Count == 0)
 {
-    <div class="muted-text">No root user groups available for the current user.</div>
+    <div class="muted-text">No users available for the current user.</div>
 }
 else
 {
     <ul class="tree-list">
         @foreach (var node in rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
         {
-            <TreeSidebarNodeView Node="node" SelectedGuid="selectedUserGroupGuid" OnToggle="ToggleAsync" OnSelect="Select" />
+            <TreeSidebarNodeView Node="node" SelectedGuid="selectedUserGuid" OnToggle="ToggleAsync" OnSelect="Select" />
         }
     </ul>
 }
@@ -27,17 +27,23 @@ else
     private readonly List<TreeSidebarNode> rootNodes = [];
     private bool isLoading = true;
     private string? errorMessage;
-    private Guid? selectedUserGroupGuid;
+    private Guid? selectedUserGuid;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        selectedUserGroupGuid = ReadSelectedUserGroupGuid();
-        await LoadRootsAsync();
+        selectedUserGuid = ReadSelectedGuid();
+        _ = LoadAndRenderAsync();
     }
 
     protected override void OnParametersSet()
     {
-        selectedUserGroupGuid = ReadSelectedUserGroupGuid();
+        selectedUserGuid = ReadSelectedGuid();
+    }
+
+    private async Task LoadAndRenderAsync()
+    {
+        await LoadRootsAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadRootsAsync()
@@ -47,14 +53,14 @@ else
 
         try
         {
-            var groups = await Engine.UserGroups.GetManyAsync();
+            var users = await Engine.Users.GetManyAsync();
             rootNodes.Clear();
-            rootNodes.AddRange(groups.Select(TreeSidebarNode.FromUserGroup));
+            rootNodes.AddRange(users.Select(TreeSidebarNode.FromUser));
         }
         catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Failed to load user groups."
+                ? "Failed to load users."
                 : ex.Message;
         }
         finally
@@ -71,37 +77,22 @@ else
 
     private void Select(TreeSidebarNode node)
     {
-        selectedUserGroupGuid = node.EntityGuid;
-        Navigation.NavigateTo($"/users/groups/{node.EntityGuid}{BuildQueryString(node)}");
+        selectedUserGuid = node.EntityGuid;
+        Navigation.NavigateTo($"/entities/users/{node.EntityGuid}");
     }
 
-    private static string BuildQueryString(TreeSidebarNode node)
-    {
-        var queryParts = new List<string>
-        {
-            $"title={Uri.EscapeDataString(node.Title)}",
-            $"active={node.IsActive.ToString().ToLowerInvariant()}"
-        };
-
-        if (!string.IsNullOrWhiteSpace(node.Subtitle))
-        {
-            queryParts.Add($"subtitle={Uri.EscapeDataString(node.Subtitle)}");
-        }
-
-        return $"?{string.Join("&", queryParts)}";
-    }
-
-    private Guid? ReadSelectedUserGroupGuid()
+    private Guid? ReadSelectedGuid()
     {
         var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
         var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
+        // /entities/users/{guid}
         if (parts.Length >= 3
-            && parts[0].Equals("users", StringComparison.OrdinalIgnoreCase)
-            && parts[1].Equals("groups", StringComparison.OrdinalIgnoreCase)
-            && Guid.TryParse(parts[2], out var selectedUserGroupGuid))
+            && parts[0].Equals("entities", StringComparison.OrdinalIgnoreCase)
+            && parts[1].Equals("users", StringComparison.OrdinalIgnoreCase)
+            && Guid.TryParse(parts[2], out var guid))
         {
-            return selectedUserGroupGuid;
+            return guid;
         }
 
         return null;

@@ -431,6 +431,106 @@ label {
     background: rgba(28, 35, 48, 0.58);
 }
 
+.entities-surface {
+    margin: -1.5rem;
+    border: none;
+    border-radius: 0;
+    border-top: 1px solid var(--border);
+    box-shadow: none;
+    min-height: calc(100vh - 88px);
+}
+
+.section-picker {
+    position: relative;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-picker-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 120ms ease;
+}
+
+.section-picker-trigger:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.picker-arrow {
+    color: var(--muted);
+    font-size: 0.8rem;
+    transition: transform 150ms ease;
+    display: inline-block;
+}
+
+.picker-arrow.open {
+    transform: rotate(180deg);
+}
+
+.section-picker-menu {
+    position: absolute;
+    top: calc(100% - 0.15rem);
+    left: 0.75rem;
+    right: 0.75rem;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 10;
+    box-shadow: var(--shadow);
+}
+
+.section-picker-item {
+    display: block;
+    padding: 0.72rem 0.9rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--muted);
+    transition: background 100ms ease, color 100ms ease;
+}
+
+.section-picker-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+}
+
+.section-picker-item.active {
+    color: var(--accent);
+}
+
+.picker-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+}
+
+.detail-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.detail-list--inline {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    background: rgba(28, 35, 48, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+}
+
 .tree-list {
     list-style: none;
     padding: 0;

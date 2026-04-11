@@ -1,6 +1,8 @@
 using Fargo.Sdk.Articles;
+using Fargo.Sdk.Items;
 using Fargo.Sdk.Partitions;
 using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 
 namespace Fargo.Web.Components.Features.Trees;
 
@@ -45,6 +47,26 @@ public sealed class TreeSidebarNode
         EntityGuid = a.Guid,
         Title = a.Name,
         IsActive = true,
+        HasChildren = false
+    };
+
+    public static TreeSidebarNode FromItem(Item item, string? articleTitle = null) => new()
+    {
+        EntityGuid = item.Guid,
+        Title = articleTitle ?? item.Guid.ToString("N")[..8],
+        Subtitle = $"Article: {item.ArticleGuid}",
+        IsActive = true,
+        HasChildren = false
+    };
+
+    public static TreeSidebarNode FromUser(User user) => new()
+    {
+        EntityGuid = user.Guid,
+        Title = user.Nameid,
+        Subtitle = string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName)
+            ? null
+            : $"{user.FirstName} {user.LastName}".Trim(),
+        IsActive = user.IsActive,
         HasChildren = false
     };
 }
