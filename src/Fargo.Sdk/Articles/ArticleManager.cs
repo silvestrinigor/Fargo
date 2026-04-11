@@ -1,5 +1,4 @@
 using Fargo.Sdk.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Articles;
 
@@ -8,10 +7,10 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class ArticleManager : IArticleManager
 {
-    internal ArticleManager(IArticleClient client, FargoHubConnection hub, ILogger logger)
+    internal ArticleManager(IArticleClient client, FargoHubConnection hub)
     {
         this.client = client;
-        this.logger = logger;
+        this.hub = hub;
 
         hub.On<Guid>("OnArticleCreated", guid =>
             Created?.Invoke(this, new ArticleCreatedEventArgs(guid)));
@@ -19,13 +18,17 @@ public sealed class ArticleManager : IArticleManager
         hub.On<Guid>("OnArticleUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var article))
+            {
                 article.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnArticleDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var article))
+            {
                 article.RaiseDeleted();
+            }
         });
     }
 
@@ -33,7 +36,7 @@ public sealed class ArticleManager : IArticleManager
 
     private readonly Dictionary<Guid, Article> _tracked = new();
     private readonly IArticleClient client;
-    private readonly ILogger logger;
+    private readonly FargoHubConnection hub;
 
     public async Task<Article> GetAsync(
         Guid articleGuid,
@@ -47,7 +50,7 @@ public sealed class ArticleManager : IArticleManager
             ThrowError(response.Error!);
         }
 
-        return ToEntity(response.Data!);
+        return await ToEntityAsync(response.Data!);
     }
 
     public async Task<IReadOnlyCollection<Article>> GetManyAsync(
@@ -63,7 +66,13 @@ public sealed class ArticleManager : IArticleManager
             ThrowError(response.Error!);
         }
 
-        return response.Data!.Select(ToEntity).ToList();
+        var entities = new List<Article>();
+        foreach (var r in response.Data!)
+        {
+            entities.Add(await ToEntityAsync(r));
+        }
+
+        return entities;
     }
 
     public async Task<Article> CreateAsync(
@@ -79,8 +88,9 @@ public sealed class ArticleManager : IArticleManager
             ThrowError(response.Error!);
         }
 
-        var article = new Article(response.Data, name, description ?? string.Empty, client, logger);
+        var article = new Article(response.Data, name, description ?? string.Empty, client, MakeDisposeCallback(response.Data));
         _tracked[article.Guid] = article;
+        await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;
     }
 
@@ -96,12 +106,19 @@ public sealed class ArticleManager : IArticleManager
         }
     }
 
-    private Article ToEntity(ArticleResult r)
+    private async Task<Article> ToEntityAsync(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, client, logger);
+        var article = new Article(r.Guid, r.Name, r.Description, client, MakeDisposeCallback(r.Guid));
         _tracked[article.Guid] = article;
+        await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;
     }
+
+    private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
+    {
+        _tracked.Remove(guid);
+        await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
+    };
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

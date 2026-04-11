@@ -1,4 +1,4 @@
-@inject UserGroupTreeApi UserGroupTreeApi
+@inject IEngine Engine
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -47,11 +47,11 @@ else
 
         try
         {
-            var roots = await UserGroupTreeApi.GetChildrenAsync(null);
+            var groups = await Engine.UserGroups.GetManyAsync();
             rootNodes.Clear();
-            rootNodes.AddRange(roots.Select(TreeSidebarNode.FromTreeNode));
+            rootNodes.AddRange(groups.Select(TreeSidebarNode.FromUserGroup));
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
                 ? "Failed to load user groups."
@@ -63,36 +63,10 @@ else
         }
     }
 
-    private async Task ToggleAsync(TreeSidebarNode node)
+    private Task ToggleAsync(TreeSidebarNode node)
     {
         node.IsExpanded = !node.IsExpanded;
-
-        if (!node.IsExpanded || node.ChildrenLoaded || !node.HasChildren)
-        {
-            return;
-        }
-
-        node.IsLoadingChildren = true;
-        errorMessage = null;
-
-        try
-        {
-            var children = await UserGroupTreeApi.GetChildrenAsync(node.EntityGuid);
-            node.Children.Clear();
-            node.Children.AddRange(children.Select(TreeSidebarNode.FromTreeNode));
-            node.ChildrenLoaded = true;
-        }
-        catch (HttpRequestException ex)
-        {
-            errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Failed to load child user groups."
-                : ex.Message;
-        }
-        finally
-        {
-            node.IsLoadingChildren = false;
-            await InvokeAsync(StateHasChanged);
-        }
+        return Task.CompletedTask;
     }
 
     private void Select(TreeSidebarNode node)

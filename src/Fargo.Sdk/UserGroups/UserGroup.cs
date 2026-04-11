@@ -1,13 +1,12 @@
 using Fargo.Sdk.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.UserGroups;
 
 /// <summary>
-/// Represents a live user group entity. Setting <see cref="Nameid"/>, <see cref="Description"/>,
-/// or <see cref="IsActive"/> automatically sends a PATCH request to the backend to persist the change.
+/// Represents a live user group entity. Call <see cref="UpdateAsync"/> to persist property changes.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class UserGroup
+public sealed class UserGroup : IAsyncDisposable
 {
     internal UserGroup(
         Guid guid,
@@ -16,7 +15,7 @@ public sealed class UserGroup
         bool isActive,
         IReadOnlyCollection<ActionType> permissions,
         IUserGroupClient client,
-        ILogger logger)
+        Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         _nameid = nameid;
@@ -24,73 +23,40 @@ public sealed class UserGroup
         _isActive = isActive;
         Permissions = permissions;
         this.client = client;
-        this.logger = logger;
+        _onDispose = onDispose;
     }
 
     private readonly IUserGroupClient client;
-    private readonly ILogger logger;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the user group.</summary>
     public Guid Guid { get; }
 
     private string _nameid;
 
-    /// <summary>
-    /// The name identifier of the user group. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The name identifier of the user group.</summary>
     public string Nameid
     {
         get => _nameid;
-        set
-        {
-            if (_nameid == value)
-            {
-                return;
-            }
-
-            _nameid = value;
-            _ = SendUpdateAsync();
-        }
+        set => _nameid = value;
     }
 
     private string _description;
 
-    /// <summary>
-    /// The description of the user group. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The description of the user group.</summary>
     public string Description
     {
         get => _description;
-        set
-        {
-            if (_description == value)
-            {
-                return;
-            }
-
-            _description = value;
-            _ = SendUpdateAsync();
-        }
+        set => _description = value;
     }
 
     private bool _isActive;
 
-    /// <summary>
-    /// Whether the user group is active. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>Whether the user group is active.</summary>
     public bool IsActive
     {
         get => _isActive;
-        set
-        {
-            if (_isActive == value)
-            {
-                return;
-            }
-
-            _isActive = value;
-            _ = SendUpdateAsync();
-        }
+        set => _isActive = value;
     }
 
     /// <summary>Raised when this user group is updated by any authenticated client.</summary>
@@ -111,13 +77,22 @@ public sealed class UserGroup
         CancellationToken cancellationToken = default)
         => client.GetPartitionsAsync(Guid, cancellationToken);
 
-    private async Task SendUpdateAsync()
+    /// <summary>
+    /// Applies <paramref name="update"/> to this user group and persists all changes in a single request.
+    /// </summary>
+    /// <param name="update">An action that sets one or more properties on this user group.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the update fails.</exception>
+    public async Task UpdateAsync(Action<UserGroup> update, CancellationToken cancellationToken = default)
     {
-        var result = await client.UpdateAsync(Guid, _nameid, _description, _isActive);
-
+        update(this);
+        var result = await client.UpdateAsync(Guid, _nameid, _description, _isActive, null, cancellationToken);
         if (!result.IsSuccess)
         {
-            logger.LogUserGroupUpdateFailed(Guid, result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

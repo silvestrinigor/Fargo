@@ -4,17 +4,20 @@ namespace Fargo.Sdk.Items;
 
 /// <summary>
 /// Represents a live item entity — a concrete instance of an <see cref="ArticleResult"/>.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class Item
+public sealed class Item : IAsyncDisposable
 {
-    internal Item(Guid guid, Guid articleGuid, IItemClient client)
+    internal Item(Guid guid, Guid articleGuid, IItemClient client, Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         ArticleGuid = articleGuid;
         this.client = client;
+        _onDispose = onDispose;
     }
 
     private readonly IItemClient client;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the item.</summary>
     public Guid Guid { get; }
@@ -36,4 +39,7 @@ public sealed class Item
     public Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         CancellationToken cancellationToken = default)
         => client.GetPartitionsAsync(Guid, cancellationToken);
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

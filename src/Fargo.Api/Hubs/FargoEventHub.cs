@@ -37,4 +37,16 @@ public sealed class FargoEventHub(ActorService actorService, ICurrentUser curren
 
         await base.OnConnectedAsync();
     }
+
+    /// <summary>
+    /// Subscribes the calling client to Updated/Deleted events for a specific entity.
+    /// </summary>
+    public Task SubscribeToEntityAsync(Guid entityGuid)
+        => Groups.AddToGroupAsync(Context.ConnectionId, $"e:{entityGuid}");
+
+    /// <summary>
+    /// Unsubscribes the calling client from Updated/Deleted events for a specific entity.
+    /// </summary>
+    public Task UnsubscribeFromEntityAsync(Guid entityGuid)
+        => Groups.RemoveFromGroupAsync(Context.ConnectionId, $"e:{entityGuid}");
 }

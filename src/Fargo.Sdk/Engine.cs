@@ -33,15 +33,11 @@ public sealed class Engine : IEngine
 
         Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
         hubConnection = new FargoHubConnection();
-        var usersLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<UserManager>();
-        Users = new UserManager(new UserClient(fargoHttpClient), hubConnection, usersLogger);
-        var userGroupsLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<UserGroupManager>();
-        UserGroups = new UserGroupManager(new UserGroupClient(fargoHttpClient), hubConnection, userGroupsLogger);
-        var articlesLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<ArticleManager>();
-        Articles = new ArticleManager(new ArticleClient(fargoHttpClient), hubConnection, articlesLogger);
+        Users = new UserManager(new UserClient(fargoHttpClient), hubConnection);
+        UserGroups = new UserGroupManager(new UserGroupClient(fargoHttpClient), hubConnection);
+        Articles = new ArticleManager(new ArticleClient(fargoHttpClient), hubConnection);
         Items = new ItemManager(new ItemClient(fargoHttpClient), hubConnection);
-        var partitionsLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<PartitionManager>();
-        Partitions = new PartitionManager(new PartitionClient(fargoHttpClient), hubConnection, partitionsLogger);
+        Partitions = new PartitionManager(new PartitionClient(fargoHttpClient), hubConnection);
     }
 
     public IAuthenticationManager Authentication { get; }

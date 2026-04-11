@@ -2,7 +2,7 @@
 @page "/partitions/{PartitionGuid:guid}"
 @page "/workspace"
 @page "/workspace/partitions/{PartitionGuid:guid}"
-@inject PartitionApi PartitionApi
+@inject IEngine Engine
 @inject NavigationManager Navigation
 
 <PageTitle>Partitions | Fargo</PageTitle>
@@ -146,7 +146,7 @@
     [Parameter]
     public Guid? PartitionGuid { get; set; }
 
-    private PartitionSummary? selectedPartition;
+    private Fargo.Sdk.Partitions.Partition? selectedPartition;
     private string? errorMessage;
     private bool isLoading;
     private bool isSaving;
@@ -176,10 +176,10 @@
 
         try
         {
-            selectedPartition = await PartitionApi.GetSingleAsync(PartitionGuid.Value);
-            editModel.Description = selectedPartition?.Description;
+            selectedPartition = await Engine.Partitions.GetAsync(PartitionGuid.Value);
+            editModel.Description = selectedPartition.Description;
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load partition." : ex.Message;
         }
@@ -196,7 +196,7 @@
 
     private async Task SaveAsync()
     {
-        if (!PartitionGuid.HasValue)
+        if (!PartitionGuid.HasValue || selectedPartition is null)
         {
             return;
         }
@@ -206,10 +206,10 @@
 
         try
         {
-            await PartitionApi.UpdateAsync(PartitionGuid.Value, editModel.Description);
+            await selectedPartition.UpdateAsync(p => p.Description = editModel.Description ?? string.Empty);
             await LoadSelectedPartitionAsync();
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to save partition changes." : ex.Message;
         }
@@ -231,14 +231,14 @@
 
         try
         {
-            var newPartitionGuid = await PartitionApi.CreateAsync(
+            var partition = await Engine.Partitions.CreateAsync(
                 createModel.Name!,
                 createModel.Description,
                 PartitionGuid.Value);
 
-            Navigation.NavigateTo($"/partitions/{newPartitionGuid}", forceLoad: true);
+            Navigation.NavigateTo($"/partitions/{partition.Guid}", forceLoad: true);
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create child partition." : ex.Message;
         }
@@ -260,10 +260,10 @@
 
         try
         {
-            await PartitionApi.DeleteAsync(PartitionGuid.Value);
+            await Engine.Partitions.DeleteAsync(PartitionGuid.Value);
             Navigation.NavigateTo("/partitions", forceLoad: true);
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to delete partition." : ex.Message;
         }

@@ -1,15 +1,14 @@
 using Fargo.Sdk.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.UserGroups;
 
 /// <summary>Default implementation of <see cref="IUserGroupManager"/>.</summary>
 public sealed class UserGroupManager : IUserGroupManager
 {
-    internal UserGroupManager(IUserGroupClient client, FargoHubConnection hub, ILogger logger)
+    internal UserGroupManager(IUserGroupClient client, FargoHubConnection hub)
     {
         this.client = client;
-        this.logger = logger;
+        this.hub = hub;
 
         hub.On<Guid, string>("OnUserGroupCreated", (guid, nameid) =>
             Created?.Invoke(this, new UserGroupCreatedEventArgs(guid, nameid)));
@@ -17,13 +16,17 @@ public sealed class UserGroupManager : IUserGroupManager
         hub.On<Guid>("OnUserGroupUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var userGroup))
+            {
                 userGroup.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnUserGroupDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var userGroup))
+            {
                 userGroup.RaiseDeleted();
+            }
         });
     }
 
@@ -31,7 +34,7 @@ public sealed class UserGroupManager : IUserGroupManager
 
     private readonly Dictionary<Guid, UserGroup> _tracked = new();
     private readonly IUserGroupClient client;
-    private readonly ILogger logger;
+    private readonly FargoHubConnection hub;
 
     public async Task<UserGroup> GetAsync(
         Guid userGroupGuid,
@@ -45,7 +48,7 @@ public sealed class UserGroupManager : IUserGroupManager
             ThrowError(response.Error!);
         }
 
-        return ToEntity(response.Data!);
+        return await ToEntityAsync(response.Data!);
     }
 
     public async Task<IReadOnlyCollection<UserGroup>> GetManyAsync(
@@ -62,7 +65,13 @@ public sealed class UserGroupManager : IUserGroupManager
             ThrowError(response.Error!);
         }
 
-        return response.Data!.Select(ToEntity).ToList();
+        var entities = new List<UserGroup>();
+        foreach (var r in response.Data!)
+        {
+            entities.Add(await ToEntityAsync(r));
+        }
+
+        return entities;
     }
 
     public async Task<UserGroup> CreateAsync(
@@ -86,8 +95,9 @@ public sealed class UserGroupManager : IUserGroupManager
             true,
             (permissions ?? []).ToList(),
             client,
-            logger);
+            MakeDisposeCallback(response.Data));
         _tracked[userGroup.Guid] = userGroup;
+        await hub.InvokeAsync("SubscribeToEntityAsync", userGroup.Guid);
         return userGroup;
     }
 
@@ -103,7 +113,7 @@ public sealed class UserGroupManager : IUserGroupManager
         }
     }
 
-    private UserGroup ToEntity(UserGroupResult r)
+    private async Task<UserGroup> ToEntityAsync(UserGroupResult r)
     {
         var userGroup = new UserGroup(
             r.Guid,
@@ -112,10 +122,17 @@ public sealed class UserGroupManager : IUserGroupManager
             r.IsActive,
             r.Permissions.Select(p => p.Action).ToList(),
             client,
-            logger);
+            MakeDisposeCallback(r.Guid));
         _tracked[userGroup.Guid] = userGroup;
+        await hub.InvokeAsync("SubscribeToEntityAsync", userGroup.Guid);
         return userGroup;
     }
+
+    private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
+    {
+        _tracked.Remove(guid);
+        await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
+    };
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

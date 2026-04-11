@@ -159,6 +159,6 @@ public sealed class PartitionUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishPartitionUpdated(partition.Guid, [partition.Guid], cancellationToken);
+        await eventPublisher.PublishPartitionUpdated(partition.Guid, cancellationToken);
     }
 }

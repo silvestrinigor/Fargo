@@ -1,13 +1,11 @@
-using Microsoft.Extensions.Logging;
-
 namespace Fargo.Sdk.Partitions;
 
 /// <summary>
-/// Represents a live partition entity. Setting <see cref="Description"/> automatically
-/// sends a PATCH request to the backend to persist the change.
+/// Represents a live partition entity. Call <see cref="UpdateAsync"/> to persist property changes.
 /// Use <see cref="MoveAsync"/> to change the partition's position in the hierarchy.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class Partition
+public sealed class Partition : IAsyncDisposable
 {
     internal Partition(
         Guid guid,
@@ -16,7 +14,7 @@ public sealed class Partition
         Guid? parentPartitionGuid,
         bool isActive,
         IPartitionClient client,
-        ILogger logger)
+        Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         Name = name;
@@ -24,11 +22,11 @@ public sealed class Partition
         ParentPartitionGuid = parentPartitionGuid;
         IsActive = isActive;
         this.client = client;
-        this.logger = logger;
+        _onDispose = onDispose;
     }
 
     private readonly IPartitionClient client;
-    private readonly ILogger logger;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the partition.</summary>
     public Guid Guid { get; }
@@ -54,22 +52,11 @@ public sealed class Partition
 
     private string _description;
 
-    /// <summary>
-    /// The description of the partition. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The description of the partition.</summary>
     public string Description
     {
         get => _description;
-        set
-        {
-            if (_description == value)
-            {
-                return;
-            }
-
-            _description = value;
-            _ = SendUpdateAsync();
-        }
+        set => _description = value;
     }
 
     /// <summary>
@@ -82,13 +69,22 @@ public sealed class Partition
         CancellationToken cancellationToken = default)
         => client.UpdateAsync(Guid, null, newParentPartitionGuid, cancellationToken);
 
-    private async Task SendUpdateAsync()
+    /// <summary>
+    /// Applies <paramref name="update"/> to this partition and persists all changes in a single request.
+    /// </summary>
+    /// <param name="update">An action that sets one or more properties on this partition.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the update fails.</exception>
+    public async Task UpdateAsync(Action<Partition> update, CancellationToken cancellationToken = default)
     {
-        var result = await client.UpdateAsync(Guid, _description);
-
+        update(this);
+        var result = await client.UpdateAsync(Guid, _description, null, cancellationToken);
         if (!result.IsSuccess)
         {
-            logger.LogPartitionUpdateFailed(Guid, result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

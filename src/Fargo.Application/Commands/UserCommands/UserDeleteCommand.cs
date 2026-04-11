@@ -59,6 +59,6 @@ public sealed class UserDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserDeleted(user.Guid, user.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
+        await eventPublisher.PublishUserDeleted(user.Guid, cancellationToken);
     }
 }
