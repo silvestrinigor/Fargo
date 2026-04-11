@@ -1,15 +1,13 @@
 using Fargo.Sdk.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Partitions;
 
 /// <summary>Default implementation of <see cref="IPartitionManager"/>.</summary>
 public sealed class PartitionManager : IPartitionManager
 {
-    internal PartitionManager(IPartitionClient client, FargoHubConnection hub, ILogger logger)
+    internal PartitionManager(IPartitionClient client, FargoHubConnection hub)
     {
         this.client = client;
-        this.logger = logger;
 
         hub.On<Guid>("OnPartitionCreated", guid =>
             Created?.Invoke(this, new PartitionCreatedEventArgs(guid)));
@@ -17,13 +15,17 @@ public sealed class PartitionManager : IPartitionManager
         hub.On<Guid>("OnPartitionUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var partition))
+            {
                 partition.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnPartitionDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var partition))
+            {
                 partition.RaiseDeleted();
+            }
         });
     }
 
@@ -31,7 +33,6 @@ public sealed class PartitionManager : IPartitionManager
 
     private readonly Dictionary<Guid, Partition> _tracked = new();
     private readonly IPartitionClient client;
-    private readonly ILogger logger;
 
     public async Task<Partition> GetAsync(
         Guid partitionGuid,
@@ -84,8 +85,7 @@ public sealed class PartitionManager : IPartitionManager
             description ?? string.Empty,
             parentPartitionGuid,
             true,
-            client,
-            logger);
+            client);
         _tracked[partition.Guid] = partition;
         return partition;
     }
@@ -110,8 +110,7 @@ public sealed class PartitionManager : IPartitionManager
             r.Description,
             r.ParentPartitionGuid,
             r.IsActive,
-            client,
-            logger);
+            client);
         _tracked[partition.Guid] = partition;
         return partition;
     }

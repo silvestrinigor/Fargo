@@ -1,12 +1,9 @@
 using Fargo.Sdk.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Users;
 
 /// <summary>
-/// Represents a live user entity. Setting <see cref="Nameid"/>, <see cref="FirstName"/>,
-/// <see cref="LastName"/>, <see cref="Description"/>, or <see cref="IsActive"/> automatically
-/// sends a PATCH request to the backend to persist the change.
+/// Represents a live user entity. Call <see cref="UpdateAsync"/> to persist property changes.
 /// </summary>
 public sealed class User
 {
@@ -21,8 +18,7 @@ public sealed class User
         bool isActive,
         IReadOnlyCollection<ActionType> permissions,
         IReadOnlyCollection<Guid> partitionAccesses,
-        IUserClient client,
-        ILogger logger)
+        IUserClient client)
     {
         Guid = guid;
         _nameid = nameid;
@@ -35,113 +31,56 @@ public sealed class User
         Permissions = permissions;
         PartitionAccesses = partitionAccesses;
         this.client = client;
-        this.logger = logger;
     }
 
     private readonly IUserClient client;
-    private readonly ILogger logger;
 
     /// <summary>The unique identifier of the user.</summary>
     public Guid Guid { get; }
 
     private string _nameid;
 
-    /// <summary>
-    /// The login name identifier. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The login name identifier.</summary>
     public string Nameid
     {
         get => _nameid;
-        set
-        {
-            if (_nameid == value)
-            {
-                return;
-            }
-
-            _nameid = value;
-            _ = SendUpdateAsync();
-        }
+        set => _nameid = value;
     }
 
     private string? _firstName;
 
-    /// <summary>
-    /// The user's first name. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The user's first name.</summary>
     public string? FirstName
     {
         get => _firstName;
-        set
-        {
-            if (_firstName == value)
-            {
-                return;
-            }
-
-            _firstName = value;
-            _ = SendUpdateAsync();
-        }
+        set => _firstName = value;
     }
 
     private string? _lastName;
 
-    /// <summary>
-    /// The user's last name. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The user's last name.</summary>
     public string? LastName
     {
         get => _lastName;
-        set
-        {
-            if (_lastName == value)
-            {
-                return;
-            }
-
-            _lastName = value;
-            _ = SendUpdateAsync();
-        }
+        set => _lastName = value;
     }
 
     private string _description;
 
-    /// <summary>
-    /// The description of the user. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The description of the user.</summary>
     public string Description
     {
         get => _description;
-        set
-        {
-            if (_description == value)
-            {
-                return;
-            }
-
-            _description = value;
-            _ = SendUpdateAsync();
-        }
+        set => _description = value;
     }
 
     private bool _isActive;
 
-    /// <summary>
-    /// Whether the user account is active. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>Whether the user account is active.</summary>
     public bool IsActive
     {
         get => _isActive;
-        set
-        {
-            if (_isActive == value)
-            {
-                return;
-            }
-
-            _isActive = value;
-            _ = SendUpdateAsync();
-        }
+        set => _isActive = value;
     }
 
     /// <summary>Raised when this user is updated by any authenticated client.</summary>
@@ -183,13 +122,19 @@ public sealed class User
         CancellationToken cancellationToken = default)
         => client.RemoveUserGroupAsync(Guid, userGroupGuid, cancellationToken);
 
-    private async Task SendUpdateAsync()
+    /// <summary>
+    /// Applies <paramref name="update"/> to this user and persists all changes in a single request.
+    /// </summary>
+    /// <param name="update">An action that sets one or more properties on this user.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the update fails.</exception>
+    public async Task UpdateAsync(Action<User> update, CancellationToken cancellationToken = default)
     {
-        var result = await client.UpdateAsync(Guid, _nameid, _firstName, _lastName, _description, null, _isActive);
-
+        update(this);
+        var result = await client.UpdateAsync(Guid, _nameid, _firstName, _lastName, _description, null, _isActive, null, null, cancellationToken);
         if (!result.IsSuccess)
         {
-            logger.LogUserUpdateFailed(Guid, result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
 }

@@ -1,15 +1,13 @@
 using Fargo.Sdk.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Users;
 
 /// <summary>Default implementation of <see cref="IUserManager"/>.</summary>
 public sealed class UserManager : IUserManager
 {
-    internal UserManager(IUserClient client, FargoHubConnection hub, ILogger logger)
+    internal UserManager(IUserClient client, FargoHubConnection hub)
     {
         this.client = client;
-        this.logger = logger;
 
         hub.On<Guid, string>("OnUserCreated", (guid, nameid) =>
             Created?.Invoke(this, new UserCreatedEventArgs(guid, nameid)));
@@ -17,13 +15,17 @@ public sealed class UserManager : IUserManager
         hub.On<Guid>("OnUserUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var user))
+            {
                 user.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnUserDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var user))
+            {
                 user.RaiseDeleted();
+            }
         });
     }
 
@@ -31,7 +33,6 @@ public sealed class UserManager : IUserManager
 
     private readonly Dictionary<Guid, User> _tracked = new();
     private readonly IUserClient client;
-    private readonly ILogger logger;
 
     public async Task<User> GetAsync(
         Guid userGuid,
@@ -119,8 +120,7 @@ public sealed class UserManager : IUserManager
             r.IsActive,
             r.Permissions.Select(p => p.Action).ToList(),
             r.PartitionAccesses,
-            client,
-            logger);
+            client);
         _tracked[user.Guid] = user;
         return user;
     }

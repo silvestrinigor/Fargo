@@ -1,5 +1,4 @@
 using Fargo.Sdk.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Articles;
 
@@ -8,10 +7,9 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class ArticleManager : IArticleManager
 {
-    internal ArticleManager(IArticleClient client, FargoHubConnection hub, ILogger logger)
+    internal ArticleManager(IArticleClient client, FargoHubConnection hub)
     {
         this.client = client;
-        this.logger = logger;
 
         hub.On<Guid>("OnArticleCreated", guid =>
             Created?.Invoke(this, new ArticleCreatedEventArgs(guid)));
@@ -19,13 +17,17 @@ public sealed class ArticleManager : IArticleManager
         hub.On<Guid>("OnArticleUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var article))
+            {
                 article.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnArticleDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var article))
+            {
                 article.RaiseDeleted();
+            }
         });
     }
 
@@ -33,7 +35,6 @@ public sealed class ArticleManager : IArticleManager
 
     private readonly Dictionary<Guid, Article> _tracked = new();
     private readonly IArticleClient client;
-    private readonly ILogger logger;
 
     public async Task<Article> GetAsync(
         Guid articleGuid,
@@ -79,7 +80,7 @@ public sealed class ArticleManager : IArticleManager
             ThrowError(response.Error!);
         }
 
-        var article = new Article(response.Data, name, description ?? string.Empty, client, logger);
+        var article = new Article(response.Data, name, description ?? string.Empty, client);
         _tracked[article.Guid] = article;
         return article;
     }
@@ -98,7 +99,7 @@ public sealed class ArticleManager : IArticleManager
 
     private Article ToEntity(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, client, logger);
+        var article = new Article(r.Guid, r.Name, r.Description, client);
         _tracked[article.Guid] = article;
         return article;
     }

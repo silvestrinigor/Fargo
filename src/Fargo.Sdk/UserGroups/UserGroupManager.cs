@@ -1,15 +1,13 @@
 using Fargo.Sdk.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.UserGroups;
 
 /// <summary>Default implementation of <see cref="IUserGroupManager"/>.</summary>
 public sealed class UserGroupManager : IUserGroupManager
 {
-    internal UserGroupManager(IUserGroupClient client, FargoHubConnection hub, ILogger logger)
+    internal UserGroupManager(IUserGroupClient client, FargoHubConnection hub)
     {
         this.client = client;
-        this.logger = logger;
 
         hub.On<Guid, string>("OnUserGroupCreated", (guid, nameid) =>
             Created?.Invoke(this, new UserGroupCreatedEventArgs(guid, nameid)));
@@ -17,13 +15,17 @@ public sealed class UserGroupManager : IUserGroupManager
         hub.On<Guid>("OnUserGroupUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var userGroup))
+            {
                 userGroup.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnUserGroupDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var userGroup))
+            {
                 userGroup.RaiseDeleted();
+            }
         });
     }
 
@@ -31,7 +33,6 @@ public sealed class UserGroupManager : IUserGroupManager
 
     private readonly Dictionary<Guid, UserGroup> _tracked = new();
     private readonly IUserGroupClient client;
-    private readonly ILogger logger;
 
     public async Task<UserGroup> GetAsync(
         Guid userGroupGuid,
@@ -85,8 +86,7 @@ public sealed class UserGroupManager : IUserGroupManager
             description ?? string.Empty,
             true,
             (permissions ?? []).ToList(),
-            client,
-            logger);
+            client);
         _tracked[userGroup.Guid] = userGroup;
         return userGroup;
     }
@@ -111,8 +111,7 @@ public sealed class UserGroupManager : IUserGroupManager
             r.Description,
             r.IsActive,
             r.Permissions.Select(p => p.Action).ToList(),
-            client,
-            logger);
+            client);
         _tracked[userGroup.Guid] = userGroup;
         return userGroup;
     }

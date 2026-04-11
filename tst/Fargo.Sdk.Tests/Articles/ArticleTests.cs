@@ -1,6 +1,5 @@
 using Fargo.Sdk.Articles;
 using Fargo.Sdk.Partitions;
-using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Fargo.Sdk.Tests.Articles;
@@ -16,32 +15,62 @@ public sealed class ArticleTests
         client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
-        sut = new Article(ArticleGuid, "Original Name", "Original Description", client, NullLogger.Instance);
+        sut = new Article(ArticleGuid, "Original Name", "Original Description", client);
     }
 
-    // --- Name property ---
+    // --- UpdateAsync ---
 
     [Fact]
-    public async Task Name_Setter_Should_CallUpdateAsync_When_ValueChanges()
+    public async Task UpdateAsync_Should_CallClientUpdateAsync_With_ProvidedValues()
     {
         // Act
-        sut.Name = "New Name";
-        await Task.Yield(); // allow fire-and-forget to complete
+        await sut.UpdateAsync(x => x.Name = "New Name");
 
         // Assert
         await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Name_Setter_Should_NotCallUpdateAsync_When_ValueIsUnchanged()
+    public async Task UpdateAsync_Should_BatchMultipleChangesIntoOneRequest()
     {
         // Act
-        sut.Name = "Original Name";
-        await Task.Yield();
+        await sut.UpdateAsync(x =>
+        {
+            x.Name = "New Name";
+            x.Description = "New Description";
+        });
 
         // Assert
-        await client.DidNotReceive().UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task UpdateAsync_Should_UpdateLocalValues()
+    {
+        // Act
+        await sut.UpdateAsync(x =>
+        {
+            x.Name = "New Name";
+            x.Description = "New Description";
+        });
+
+        // Assert
+        Assert.Equal("New Name", sut.Name);
+        Assert.Equal("New Description", sut.Description);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Should_ThrowFargoSdkApiException_When_UpdateFails()
+    {
+        // Arrange
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<EmptyResult>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
+
+        // Act / Assert
+        await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.UpdateAsync(x => x.Name = string.Empty));
+    }
+
+    // --- Name / Description getters ---
 
     [Fact]
     public void Name_Getter_Should_ReturnUpdatedValue_After_Set()
@@ -53,30 +82,6 @@ public sealed class ArticleTests
         Assert.Equal("New Name", sut.Name);
     }
 
-    // --- Description property ---
-
-    [Fact]
-    public async Task Description_Setter_Should_CallUpdateAsync_When_ValueChanges()
-    {
-        // Act
-        sut.Description = "New Description";
-        await Task.Yield();
-
-        // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "Original Name", "New Description", Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Description_Setter_Should_NotCallUpdateAsync_When_ValueIsUnchanged()
-    {
-        // Act
-        sut.Description = "Original Description";
-        await Task.Yield();
-
-        // Assert
-        await client.DidNotReceive().UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
-    }
-
     [Fact]
     public void Description_Getter_Should_ReturnUpdatedValue_After_Set()
     {
@@ -85,20 +90,6 @@ public sealed class ArticleTests
 
         // Assert
         Assert.Equal("New Description", sut.Description);
-    }
-
-    // --- Both properties changed ---
-
-    [Fact]
-    public async Task Setting_Both_Properties_Should_CallUpdateAsync_Twice()
-    {
-        // Act
-        sut.Name = "New Name";
-        sut.Description = "New Description";
-        await Task.Yield();
-
-        // Assert
-        await client.Received(2).UpdateAsync(ArticleGuid, Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
     }
 
     // --- Guid property ---

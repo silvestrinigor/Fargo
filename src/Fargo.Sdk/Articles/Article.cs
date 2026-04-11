@@ -1,67 +1,41 @@
 using Fargo.Sdk.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Articles;
 
 /// <summary>
-/// Represents a live article entity. Setting <see cref="Name"/> or <see cref="Description"/>
-/// automatically sends a PATCH request to the backend to persist the change.
+/// Represents a live article entity. Call <see cref="UpdateAsync"/> to persist property changes.
 /// </summary>
 public sealed class Article
 {
-    internal Article(Guid guid, string name, string description, IArticleClient client, ILogger logger)
+    internal Article(Guid guid, string name, string description, IArticleClient client)
     {
         Guid = guid;
         _name = name;
         _description = description;
         this.client = client;
-        this.logger = logger;
     }
 
     private readonly IArticleClient client;
-    private readonly ILogger logger;
 
     /// <summary>The unique identifier of the article.</summary>
     public Guid Guid { get; }
 
     private string _name;
 
-    /// <summary>
-    /// The display name of the article. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The display name of the article.</summary>
     public string Name
     {
         get => _name;
-        set
-        {
-            if (_name == value)
-            {
-                return;
-            }
-
-            _name = value;
-            _ = SendUpdateAsync();
-        }
+        set => _name = value;
     }
 
     private string _description;
 
-    /// <summary>
-    /// The description of the article. Setting this property fires a background update request.
-    /// </summary>
+    /// <summary>The description of the article.</summary>
     public string Description
     {
         get => _description;
-        set
-        {
-            if (_description == value)
-            {
-                return;
-            }
-
-            _description = value;
-            _ = SendUpdateAsync();
-        }
+        set => _description = value;
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -82,13 +56,19 @@ public sealed class Article
         CancellationToken cancellationToken = default)
         => client.GetPartitionsAsync(Guid, cancellationToken);
 
-    private async Task SendUpdateAsync()
+    /// <summary>
+    /// Applies <paramref name="update"/> to this article and persists all changes in a single request.
+    /// </summary>
+    /// <param name="update">An action that sets one or more properties on this article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the update fails.</exception>
+    public async Task UpdateAsync(Action<Article> update, CancellationToken cancellationToken = default)
     {
-        var result = await client.UpdateAsync(Guid, _name, _description);
-
+        update(this);
+        var result = await client.UpdateAsync(Guid, _name, _description, cancellationToken);
         if (!result.IsSuccess)
         {
-            logger.LogArticleUpdateFailed(Guid, result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
 }

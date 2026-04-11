@@ -15,13 +15,17 @@ public sealed class ItemManager : IItemManager
         hub.On<Guid>("OnItemUpdated", guid =>
         {
             if (_tracked.TryGetValue(guid, out var item))
+            {
                 item.RaiseUpdated();
+            }
         });
 
         hub.On<Guid>("OnItemDeleted", guid =>
         {
             if (_tracked.TryGetValue(guid, out var item))
+            {
                 item.RaiseDeleted();
+            }
         });
     }
 
