@@ -7,60 +7,60 @@
 }
 else if (isLoading)
 {
-    <div class="muted-text">Loading articles...</div>
+    <div class="muted-text">Loading items...</div>
 }
-else if (rootNodes.Count == 0)
+else if (nodes.Count == 0)
 {
-    <div class="muted-text">No articles available for the current user.</div>
+    <div class="muted-text">No items available for the current user.</div>
 }
 else
 {
     <ul class="tree-list">
-        @foreach (var node in rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
+        @foreach (var node in nodes)
         {
-            <TreeSidebarNodeView Node="node" SelectedGuid="selectedArticleGuid" OnToggle="ToggleAsync" OnSelect="Select" />
+            <TreeSidebarNodeView Node="node" SelectedGuid="selectedItemGuid" OnToggle="ToggleAsync" OnSelect="Select" />
         }
     </ul>
 }
 
 @code {
-    private readonly List<TreeSidebarNode> rootNodes = [];
+    private readonly List<TreeSidebarNode> nodes = [];
     private bool isLoading = true;
     private string? errorMessage;
-    private Guid? selectedArticleGuid;
+    private Guid? selectedItemGuid;
 
     protected override void OnInitialized()
     {
-        selectedArticleGuid = ReadSelectedGuid();
+        selectedItemGuid = ReadSelectedGuid();
         _ = LoadAndRenderAsync();
     }
 
     protected override void OnParametersSet()
     {
-        selectedArticleGuid = ReadSelectedGuid();
+        selectedItemGuid = ReadSelectedGuid();
     }
 
     private async Task LoadAndRenderAsync()
     {
-        await LoadRootsAsync();
+        await LoadAsync();
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task LoadRootsAsync()
+    private async Task LoadAsync()
     {
         isLoading = true;
         errorMessage = null;
 
         try
         {
-            var articles = await Engine.Articles.GetManyAsync();
-            rootNodes.Clear();
-            rootNodes.AddRange(articles.Select(TreeSidebarNode.FromArticle));
+            var items = await Engine.Items.GetManyAsync();
+            nodes.Clear();
+            nodes.AddRange(items.Select(i => TreeSidebarNode.FromItem(i)));
         }
         catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Failed to load articles."
+                ? "Failed to load items."
                 : ex.Message;
         }
         finally
@@ -77,8 +77,8 @@ else
 
     private void Select(TreeSidebarNode node)
     {
-        selectedArticleGuid = node.EntityGuid;
-        Navigation.NavigateTo($"/entities/articles/{node.EntityGuid}");
+        selectedItemGuid = node.EntityGuid;
+        Navigation.NavigateTo($"/entities/items/{node.EntityGuid}");
     }
 
     private Guid? ReadSelectedGuid()
@@ -86,10 +86,10 @@ else
         var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
         var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-        // /entities/articles/{guid}
+        // /entities/items/{guid}
         if (parts.Length >= 3
             && parts[0].Equals("entities", StringComparison.OrdinalIgnoreCase)
-            && parts[1].Equals("articles", StringComparison.OrdinalIgnoreCase)
+            && parts[1].Equals("items", StringComparison.OrdinalIgnoreCase)
             && Guid.TryParse(parts[2], out var guid))
         {
             return guid;

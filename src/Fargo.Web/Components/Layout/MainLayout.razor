@@ -33,9 +33,6 @@ else
             </div>
 
             <nav class="app-nav" aria-label="Primary">
-                <a class="@(IsPartitionsActive() ? "nav-link active" : "nav-link")" href="/partitions">Partitions</a>
-                <a class="@(IsActive("/users") ? "nav-link active" : "nav-link")" href="/users">Users</a>
-                <a class="@(IsActive("/articles") ? "nav-link active" : "nav-link")" href="/articles">Articles</a>
                 <a class="@(IsActive("/entities") ? "nav-link active" : "nav-link")" href="/entities">Entities</a>
             </nav>
 
@@ -69,8 +66,6 @@ else
         await Engine.LogOutAsync();
         Navigation.NavigateTo("/login", forceLoad: true);
     }
-
-    private bool IsPartitionsActive() => IsActive("/partitions") || IsActive("/workspace");
 
     private bool IsActive(string path)
     {

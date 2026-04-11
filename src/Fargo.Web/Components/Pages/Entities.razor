@@ -1,21 +1,622 @@
 @page "/entities"
+@page "/entities/{Section}"
+@page "/entities/{Section}/{EntityGuid:guid}"
+@inject IEngine Engine
+@inject NavigationManager Navigation
 
 <PageTitle>Entities | Fargo</PageTitle>
 
-<div class="page-card">
-    <h1>Entities</h1>
-    <p>
-        The previous placeholder page was replaced with a stable module stub so the front end stays coherent while
-        more domain entities are added.
-    </p>
-    <div class="hero-grid">
-        <article class="mini-card">
-            <h2>Ready for more trees</h2>
-            <p>Containers, locations, and temporal nodes can follow the same composition pattern.</p>
-        </article>
-        <article class="mini-card">
-            <h2>Simple now</h2>
-            <p>The initial implementation avoids overbuilding while still preparing shared navigation and services.</p>
-        </article>
-    </div>
+@if (sectionPickerOpen)
+{
+    <div class="picker-backdrop" @onclick="ClosePicker"></div>
+}
+
+<div class="workspace-surface entities-surface">
+    <aside class="workspace-explorer">
+        <div class="section-picker">
+            <button type="button" class="section-picker-trigger" @onclick="TogglePicker">
+                <span>@ActiveSectionLabel</span>
+                <span class="picker-arrow @(sectionPickerOpen ? "open" : null)">▾</span>
+            </button>
+            @if (sectionPickerOpen)
+            {
+                <div class="section-picker-menu">
+                    <a href="/entities/partitions" class="section-picker-item @(ActiveSection == "partitions" ? "active" : null)">Partitions</a>
+                    <a href="/entities/articles" class="section-picker-item @(ActiveSection == "articles" ? "active" : null)">Articles</a>
+                    <a href="/entities/users" class="section-picker-item @(ActiveSection == "users" ? "active" : null)">Users</a>
+                    <a href="/entities/items" class="section-picker-item @(ActiveSection == "items" ? "active" : null)">Items</a>
+                </div>
+            }
+        </div>
+
+        <div class="workspace-pane-body">
+            @if (ActiveSection == "articles")
+            {
+                <ArticleTree />
+            }
+            else if (ActiveSection == "users")
+            {
+                <UserGroupTree />
+            }
+            else if (ActiveSection == "items")
+            {
+                <ItemTree />
+            }
+            else
+            {
+                <PartitionTree />
+            }
+        </div>
+    </aside>
+
+    <section class="workspace-detail">
+        <div class="workspace-detail-body">
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="error-banner">@errorMessage</div>
+            }
+
+            @if (ActiveSection == "users")
+            {
+                @if (!EntityGuid.HasValue)
+                {
+                    <UsersPanel />
+                }
+                else if (userIsLoading)
+                {
+                    <p class="muted-text">Loading...</p>
+                }
+                else if (selectedUser is null)
+                {
+                    <p class="muted-text">User could not be loaded.</p>
+                }
+                else
+                {
+                    <div class="workspace-stack">
+                        <section class="workspace-panel">
+                            <dl class="detail-list detail-list--inline">
+                                <div>
+                                    <dt>Guid</dt>
+                                    <dd>@selectedUser.Guid</dd>
+                                </div>
+                                <div>
+                                    <dt>Status</dt>
+                                    <dd>@(selectedUser.IsActive ? "Active" : "Inactive")</dd>
+                                </div>
+                                <div>
+                                    <dt>Partitions</dt>
+                                    <dd>@selectedUser.PartitionAccesses.Count</dd>
+                                </div>
+                            </dl>
+                            <EditForm Model="userEditModel" OnValidSubmit="SaveUserAsync" class="editor-form">
+                                <DataAnnotationsValidator />
+                                <label>
+                                    <span>NameId</span>
+                                    <InputText @bind-Value="userEditModel.Nameid" class="text-field" />
+                                    <ValidationMessage For="() => userEditModel.Nameid" />
+                                </label>
+                                <div class="editor-form two-columns">
+                                    <label>
+                                        <span>First name</span>
+                                        <InputText @bind-Value="userEditModel.FirstName" class="text-field" />
+                                    </label>
+                                    <label>
+                                        <span>Last name</span>
+                                        <InputText @bind-Value="userEditModel.LastName" class="text-field" />
+                                    </label>
+                                </div>
+                                <label>
+                                    <span>Description</span>
+                                    <InputTextArea @bind-Value="userEditModel.Description" class="text-area" />
+                                </label>
+                                <div class="dialog-actions">
+                                    <button type="submit" class="primary-button" disabled="@isSavingUser">
+                                        @(isSavingUser ? "Saving..." : "Save")
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </section>
+                    </div>
+                }
+            }
+            else if (ActiveSection == "articles")
+            {
+                @if (!EntityGuid.HasValue)
+                {
+                    <div class="detail-empty">
+                        <p class="muted-text">Select an article to view and edit its details.</p>
+                    </div>
+                }
+                else if (articleIsLoading)
+                {
+                    <p class="muted-text">Loading...</p>
+                }
+                else if (selectedArticle is null)
+                {
+                    <p class="muted-text">Article could not be loaded.</p>
+                }
+                else
+                {
+                    <div class="workspace-stack">
+                        <section class="workspace-panel">
+                            <dl class="detail-list detail-list--inline">
+                                <div>
+                                    <dt>Guid</dt>
+                                    <dd>@selectedArticle.Guid</dd>
+                                </div>
+                            </dl>
+                            <EditForm Model="articleEditModel" OnValidSubmit="SaveArticleAsync" class="editor-form">
+                                <DataAnnotationsValidator />
+                                <label>
+                                    <span>Name</span>
+                                    <InputText @bind-Value="articleEditModel.Name" class="text-field" />
+                                    <ValidationMessage For="() => articleEditModel.Name" />
+                                </label>
+                                <label>
+                                    <span>Description</span>
+                                    <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
+                                </label>
+                                <div class="dialog-actions">
+                                    <button type="submit" class="primary-button" disabled="@isSavingArticle">
+                                        @(isSavingArticle ? "Saving..." : "Save")
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </section>
+                    </div>
+                }
+            }
+            else if (ActiveSection == "items")
+            {
+                @if (!EntityGuid.HasValue)
+                {
+                    <div class="detail-empty">
+                        <p class="muted-text">Select an item to view its details.</p>
+                    </div>
+                }
+                else if (itemIsLoading)
+                {
+                    <p class="muted-text">Loading...</p>
+                }
+                else if (selectedItem is null)
+                {
+                    <p class="muted-text">Item could not be loaded.</p>
+                }
+                else
+                {
+                    <div class="workspace-stack">
+                        <section class="workspace-panel">
+                            <dl class="detail-list detail-list--inline">
+                                <div>
+                                    <dt>Guid</dt>
+                                    <dd>@selectedItem.Guid</dd>
+                                </div>
+                                <div>
+                                    <dt>Article</dt>
+                                    <dd>@selectedItem.ArticleGuid</dd>
+                                </div>
+                            </dl>
+                        </section>
+                    </div>
+                }
+            }
+            else
+            {
+                @* Partitions *@
+                @if (!EntityGuid.HasValue)
+                {
+                    <div class="detail-empty">
+                        <p class="muted-text">Select a partition to inspect its details, edit its description, or create a child.</p>
+                    </div>
+                }
+                else if (partitionIsLoading)
+                {
+                    <p class="muted-text">Loading...</p>
+                }
+                else if (selectedPartition is null)
+                {
+                    <p class="muted-text">Partition could not be loaded.</p>
+                }
+                else
+                {
+                    <div class="workspace-stack">
+                        <section class="workspace-panel">
+                            <h2>@selectedPartition.Name</h2>
+                            <dl class="detail-list detail-list--inline">
+                                <div>
+                                    <dt>Guid</dt>
+                                    <dd>@selectedPartition.Guid</dd>
+                                </div>
+                                <div>
+                                    <dt>Parent</dt>
+                                    <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root")</dd>
+                                </div>
+                                <div>
+                                    <dt>Status</dt>
+                                    <dd>@(selectedPartition.IsActive ? "Active" : "Inactive")</dd>
+                                </div>
+                            </dl>
+                            <EditForm Model="partitionEditModel" OnValidSubmit="SavePartitionAsync" class="editor-form">
+                                <label>
+                                    <span>Description</span>
+                                    <InputTextArea @bind-Value="partitionEditModel.Description" class="text-area" />
+                                </label>
+                                <div class="dialog-actions">
+                                    <button type="button" class="ghost-button danger" @onclick="DeletePartitionAsync" disabled="@isDeletingPartition">
+                                        @(isDeletingPartition ? "Deleting..." : "Delete")
+                                    </button>
+                                    <button type="submit" class="primary-button" disabled="@isSavingPartition">
+                                        @(isSavingPartition ? "Saving..." : "Save")
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </section>
+
+                        <section class="workspace-panel">
+                            <h2>Create child</h2>
+                            <EditForm Model="partitionCreateModel" OnValidSubmit="CreateChildPartitionAsync" class="editor-form">
+                                <DataAnnotationsValidator />
+                                <label>
+                                    <span>Name</span>
+                                    <InputText @bind-Value="partitionCreateModel.Name" class="text-field" />
+                                    <ValidationMessage For="() => partitionCreateModel.Name" />
+                                </label>
+                                <label>
+                                    <span>Description</span>
+                                    <InputTextArea @bind-Value="partitionCreateModel.Description" class="text-area" />
+                                </label>
+                                <div class="dialog-actions">
+                                    <button type="submit" class="primary-button" disabled="@isCreatingChild">
+                                        @(isCreatingChild ? "Creating..." : "Create")
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </section>
+                    </div>
+                }
+            }
+
+        </div>
+    </section>
 </div>
+
+@code {
+    [Parameter] public string? Section { get; set; }
+    [Parameter] public Guid? EntityGuid { get; set; }
+
+    private string ActiveSection => Section?.ToLowerInvariant() switch
+    {
+        "articles" => "articles",
+        "users" => "users",
+        "items" => "items",
+        _ => "partitions"
+    };
+
+    private string ActiveSectionLabel => ActiveSection switch
+    {
+        "articles" => "Articles",
+        "users" => "Users",
+        "items" => "Items",
+        _ => "Partitions"
+    };
+
+    private bool sectionPickerOpen;
+    private string? errorMessage;
+
+    // Partition state
+    private Fargo.Sdk.Partitions.Partition? selectedPartition;
+    private bool partitionIsLoading;
+    private bool isSavingPartition;
+    private bool isDeletingPartition;
+    private bool isCreatingChild;
+    private PartitionEditForm partitionEditModel = new();
+    private PartitionCreateForm partitionCreateModel = new();
+
+    // Article state
+    private Fargo.Sdk.Articles.Article? selectedArticle;
+    private bool articleIsLoading;
+    private bool isSavingArticle;
+    private ArticleEditForm articleEditModel = new();
+
+    // Item state
+    private Fargo.Sdk.Items.Item? selectedItem;
+    private bool itemIsLoading;
+
+    // User state
+    private Fargo.Sdk.Users.User? selectedUser;
+    private bool userIsLoading;
+    private bool isSavingUser;
+    private UserEditForm userEditModel = new();
+
+    protected override Task OnParametersSetAsync()
+    {
+        sectionPickerOpen = false;
+        errorMessage = null;
+
+        if (!EntityGuid.HasValue)
+        {
+            selectedPartition = null;
+            selectedArticle = null;
+            selectedItem = null;
+            selectedUser = null;
+            partitionEditModel = new PartitionEditForm();
+            articleEditModel = new ArticleEditForm();
+            userEditModel = new UserEditForm();
+            return Task.CompletedTask;
+        }
+
+        _ = LoadEntityAndRenderAsync();
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadEntityAndRenderAsync()
+    {
+        switch (ActiveSection)
+        {
+            case "partitions":
+                await LoadPartitionAsync();
+                break;
+            case "articles":
+                await LoadArticleAsync();
+                break;
+            case "items":
+                await LoadItemAsync();
+                break;
+            case "users":
+                await LoadUserAsync();
+                break;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void TogglePicker() => sectionPickerOpen = !sectionPickerOpen;
+    private void ClosePicker() => sectionPickerOpen = false;
+
+    // Partition
+
+    private async Task LoadPartitionAsync()
+    {
+        selectedPartition = null;
+        partitionEditModel = new PartitionEditForm();
+        partitionCreateModel = new PartitionCreateForm();
+        partitionIsLoading = true;
+
+        try
+        {
+            selectedPartition = await Engine.Partitions.GetAsync(EntityGuid!.Value);
+            partitionEditModel.Description = selectedPartition.Description;
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load partition." : ex.Message;
+        }
+        finally
+        {
+            partitionIsLoading = false;
+        }
+    }
+
+    private async Task SavePartitionAsync()
+    {
+        if (selectedPartition is null) return;
+
+        isSavingPartition = true;
+        errorMessage = null;
+
+        try
+        {
+            await selectedPartition.UpdateAsync(p => p.Description = partitionEditModel.Description ?? string.Empty);
+            await LoadPartitionAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to save." : ex.Message;
+        }
+        finally
+        {
+            isSavingPartition = false;
+        }
+    }
+
+    private async Task CreateChildPartitionAsync()
+    {
+        if (!EntityGuid.HasValue) return;
+
+        isCreatingChild = true;
+        errorMessage = null;
+
+        try
+        {
+            var partition = await Engine.Partitions.CreateAsync(
+                partitionCreateModel.Name!,
+                partitionCreateModel.Description,
+                EntityGuid.Value);
+            Navigation.NavigateTo($"/entities/partitions/{partition.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreatingChild = false;
+        }
+    }
+
+    private async Task DeletePartitionAsync()
+    {
+        if (!EntityGuid.HasValue) return;
+
+        isDeletingPartition = true;
+        errorMessage = null;
+
+        try
+        {
+            await Engine.Partitions.DeleteAsync(EntityGuid.Value);
+            Navigation.NavigateTo("/entities/partitions", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to delete." : ex.Message;
+        }
+        finally
+        {
+            isDeletingPartition = false;
+        }
+    }
+
+    // Article
+
+    private async Task LoadArticleAsync()
+    {
+        selectedArticle = null;
+        articleEditModel = new ArticleEditForm();
+        articleIsLoading = true;
+
+        try
+        {
+            selectedArticle = await Engine.Articles.GetAsync(EntityGuid!.Value);
+            articleEditModel.Name = selectedArticle.Name;
+            articleEditModel.Description = selectedArticle.Description;
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load article." : ex.Message;
+        }
+        finally
+        {
+            articleIsLoading = false;
+        }
+    }
+
+    private async Task SaveArticleAsync()
+    {
+        if (selectedArticle is null) return;
+
+        isSavingArticle = true;
+        errorMessage = null;
+
+        try
+        {
+            await selectedArticle.UpdateAsync(a =>
+            {
+                a.Name = articleEditModel.Name!;
+                a.Description = articleEditModel.Description ?? string.Empty;
+            });
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to save." : ex.Message;
+        }
+        finally
+        {
+            isSavingArticle = false;
+        }
+    }
+
+    // Item
+
+    private async Task LoadItemAsync()
+    {
+        selectedItem = null;
+        itemIsLoading = true;
+
+        try
+        {
+            selectedItem = await Engine.Items.GetAsync(EntityGuid!.Value);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load item." : ex.Message;
+        }
+        finally
+        {
+            itemIsLoading = false;
+        }
+    }
+
+    // User
+
+    private async Task LoadUserAsync()
+    {
+        selectedUser = null;
+        userEditModel = new UserEditForm();
+        userIsLoading = true;
+
+        try
+        {
+            selectedUser = await Engine.Users.GetAsync(EntityGuid!.Value);
+            userEditModel.Nameid = selectedUser.Nameid;
+            userEditModel.FirstName = selectedUser.FirstName;
+            userEditModel.LastName = selectedUser.LastName;
+            userEditModel.Description = selectedUser.Description;
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load user." : ex.Message;
+        }
+        finally
+        {
+            userIsLoading = false;
+        }
+    }
+
+    private async Task SaveUserAsync()
+    {
+        if (selectedUser is null) return;
+
+        isSavingUser = true;
+        errorMessage = null;
+
+        try
+        {
+            await selectedUser.UpdateAsync(u =>
+            {
+                u.Nameid = userEditModel.Nameid!;
+                u.FirstName = string.IsNullOrWhiteSpace(userEditModel.FirstName) ? null : userEditModel.FirstName;
+                u.LastName = string.IsNullOrWhiteSpace(userEditModel.LastName) ? null : userEditModel.LastName;
+                u.Description = userEditModel.Description ?? string.Empty;
+            });
+            await LoadUserAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to save." : ex.Message;
+        }
+        finally
+        {
+            isSavingUser = false;
+        }
+    }
+
+    // Form models
+
+    private sealed class PartitionCreateForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+
+    private sealed class PartitionEditForm
+    {
+        public string? Description { get; set; }
+    }
+
+    private sealed class ArticleEditForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+
+    private sealed class UserEditForm
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Description { get; set; }
+    }
+}

@@ -68,7 +68,7 @@
 
             if (restored)
             {
-                Navigation.NavigateTo("/workspace", replace: true);
+                Navigation.NavigateTo("/entities", replace: true);
             }
         }
         catch
@@ -91,7 +91,7 @@
         {
             SessionStore.RememberMe = model.RememberMe;
             await Engine.Authentication.LogInAsync(model.Nameid!, model.Password!);
-            Navigation.NavigateTo("/workspace", replace: true);
+            Navigation.NavigateTo("/entities", replace: true);
         }
         catch (InvalidCredentialsFargoSdkException)
         {

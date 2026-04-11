@@ -2,22 +2,8 @@
 
 <div class="page-card">
     <div class="section-header">
-        <div>
-            <h1>Users</h1>
-            <p>Simple administration surface, already split into a reusable module.</p>
-        </div>
-
-        <div class="section-actions">
-            <button type="button" class="ghost-button" @onclick="LoadUsersAsync">Refresh</button>
-            <button type="button" class="primary-button" @onclick="OpenCreate">New user</button>
-        </div>
-    </div>
-
-    <div class="toolbar-grid">
-        <label>
-            <span>Search</span>
-            <input class="text-field" @bind="searchTerm" @bind:event="oninput" />
-        </label>
+        <h1>Users</h1>
+        <button type="button" class="primary-button" @onclick="OpenCreate">New user</button>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -142,7 +128,6 @@
 
 @code {
     private readonly List<Fargo.Sdk.Users.User> users = [];
-    private string? searchTerm;
     private string? errorMessage;
     private bool isLoading;
     private bool isSaving;
@@ -153,7 +138,7 @@
     private Fargo.Sdk.Users.User? pendingDelete;
     private UserEditorModel editorModel = new();
 
-    private IReadOnlyList<Fargo.Sdk.Users.User> FilteredUsers => users.ToList();
+    private IReadOnlyList<Fargo.Sdk.Users.User> FilteredUsers => users;
 
     protected override async Task OnInitializedAsync()
     {

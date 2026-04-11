@@ -29,15 +29,21 @@ else
     private string? errorMessage;
     private Guid? selectedPartitionGuid;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        selectedPartitionGuid = ReadSelectedPartitionGuid();
-        await LoadRootsAsync();
+        selectedPartitionGuid = ReadSelectedGuid();
+        _ = LoadAndRenderAsync();
     }
 
     protected override void OnParametersSet()
     {
-        selectedPartitionGuid = ReadSelectedPartitionGuid();
+        selectedPartitionGuid = ReadSelectedGuid();
+    }
+
+    private async Task LoadAndRenderAsync()
+    {
+        await LoadRootsAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadRootsAsync()
@@ -103,27 +109,21 @@ else
     private void Select(TreeSidebarNode node)
     {
         selectedPartitionGuid = node.EntityGuid;
-        Navigation.NavigateTo($"/partitions/{node.EntityGuid}");
+        Navigation.NavigateTo($"/entities/partitions/{node.EntityGuid}");
     }
 
-    private Guid? ReadSelectedPartitionGuid()
+    private Guid? ReadSelectedGuid()
     {
         var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
         var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Length >= 2
-            && parts[0].Equals("partitions", StringComparison.OrdinalIgnoreCase)
-            && Guid.TryParse(parts[1], out var selectedPartitionGuid))
-        {
-            return selectedPartitionGuid;
-        }
-
+        // /entities/partitions/{guid}
         if (parts.Length >= 3
-            && parts[0].Equals("workspace", StringComparison.OrdinalIgnoreCase)
+            && parts[0].Equals("entities", StringComparison.OrdinalIgnoreCase)
             && parts[1].Equals("partitions", StringComparison.OrdinalIgnoreCase)
-            && Guid.TryParse(parts[2], out selectedPartitionGuid))
+            && Guid.TryParse(parts[2], out var guid))
         {
-            return selectedPartitionGuid;
+            return guid;
         }
 
         return null;

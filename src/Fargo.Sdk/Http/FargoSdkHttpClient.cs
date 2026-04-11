@@ -47,6 +47,16 @@ public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
             );
         }
 
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            return new FargoSdkHttpResponse<TResponse>(
+                IsSuccess: true,
+                Data: default,
+                Problem: null,
+                StatusCode: response.StatusCode
+            );
+        }
+
         return new FargoSdkHttpResponse<TResponse>(
             IsSuccess: true,
             Data: await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, ct),
