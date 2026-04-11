@@ -4,18 +4,21 @@ namespace Fargo.Sdk.Articles;
 
 /// <summary>
 /// Represents a live article entity. Call <see cref="UpdateAsync"/> to persist property changes.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class Article
+public sealed class Article : IAsyncDisposable
 {
-    internal Article(Guid guid, string name, string description, IArticleClient client)
+    internal Article(Guid guid, string name, string description, IArticleClient client, Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         _name = name;
         _description = description;
         this.client = client;
+        _onDispose = onDispose;
     }
 
     private readonly IArticleClient client;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the article.</summary>
     public Guid Guid { get; }
@@ -71,4 +74,7 @@ public sealed class Article
             throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

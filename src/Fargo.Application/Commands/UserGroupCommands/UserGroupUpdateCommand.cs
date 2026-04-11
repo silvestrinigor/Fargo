@@ -104,7 +104,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserGroupUpdated(userGroup.Guid, userGroup.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
+        await eventPublisher.PublishUserGroupUpdated(userGroup.Guid, cancellationToken);
     }
 
     private static Nameid ValidateNameid(string value)

@@ -48,6 +48,16 @@ internal sealed class FargoHubConnection : IAsyncDisposable
     internal void On<T1, T2, T3>(string methodName, Action<T1, T2, T3> handler)
         => registrations.Add(c => c.On(methodName, handler));
 
+    internal Task InvokeAsync(string methodName, Guid arg, CancellationToken ct = default)
+    {
+        if (connection is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return connection.InvokeAsync(methodName, arg, ct);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (connection is not null)

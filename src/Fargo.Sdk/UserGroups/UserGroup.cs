@@ -4,8 +4,9 @@ namespace Fargo.Sdk.UserGroups;
 
 /// <summary>
 /// Represents a live user group entity. Call <see cref="UpdateAsync"/> to persist property changes.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class UserGroup
+public sealed class UserGroup : IAsyncDisposable
 {
     internal UserGroup(
         Guid guid,
@@ -13,7 +14,8 @@ public sealed class UserGroup
         string description,
         bool isActive,
         IReadOnlyCollection<ActionType> permissions,
-        IUserGroupClient client)
+        IUserGroupClient client,
+        Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         _nameid = nameid;
@@ -21,9 +23,11 @@ public sealed class UserGroup
         _isActive = isActive;
         Permissions = permissions;
         this.client = client;
+        _onDispose = onDispose;
     }
 
     private readonly IUserGroupClient client;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the user group.</summary>
     public Guid Guid { get; }
@@ -88,4 +92,7 @@ public sealed class UserGroup
             throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

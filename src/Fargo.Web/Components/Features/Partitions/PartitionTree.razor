@@ -1,4 +1,4 @@
-@inject PartitionTreeApi PartitionTreeApi
+@inject IEngine Engine
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -47,11 +47,11 @@ else
 
         try
         {
-            var roots = await PartitionTreeApi.GetChildrenAsync(null);
+            var roots = await Engine.Partitions.GetManyAsync();
             rootNodes.Clear();
-            rootNodes.AddRange(roots.Select(TreeSidebarNode.FromTreeNode));
+            rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
                 ? "Failed to load partitions."
@@ -77,12 +77,17 @@ else
 
         try
         {
-            var children = await PartitionTreeApi.GetChildrenAsync(node.EntityGuid);
+            var children = await Engine.Partitions.GetManyAsync(node.EntityGuid);
             node.Children.Clear();
-            node.Children.AddRange(children.Select(TreeSidebarNode.FromTreeNode));
+            node.Children.AddRange(children.Select(TreeSidebarNode.FromPartition));
             node.ChildrenLoaded = true;
+
+            if (node.Children.Count == 0)
+            {
+                node.HasChildren = false;
+            }
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
                 ? "Failed to load child partitions."

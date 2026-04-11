@@ -1,6 +1,4 @@
-@using Fargo.Application.Models.UserModels
-@using Fargo.Domain.ValueObjects
-@inject UserApi UserApi
+@inject IEngine Engine
 
 <div class="page-card">
     <div class="section-header">
@@ -143,7 +141,7 @@
 }
 
 @code {
-    private readonly List<UserInformation> users = [];
+    private readonly List<Fargo.Sdk.Users.User> users = [];
     private string? searchTerm;
     private string? errorMessage;
     private bool isLoading;
@@ -152,14 +150,10 @@
     private bool editorOpen;
     private bool isEditing;
     private Guid? editingUserGuid;
-    private UserInformation? pendingDelete;
+    private Fargo.Sdk.Users.User? pendingDelete;
     private UserEditorModel editorModel = new();
 
-    private IReadOnlyList<UserInformation> FilteredUsers =>
-        users
-            //.Where(ApplyFilter)
-            //.OrderBy(x => x.Nameid.ToString(), StringComparer.OrdinalIgnoreCase)
-            .ToList();
+    private IReadOnlyList<Fargo.Sdk.Users.User> FilteredUsers => users.ToList();
 
     protected override async Task OnInitializedAsync()
     {
@@ -174,9 +168,9 @@
         try
         {
             users.Clear();
-            users.AddRange(await UserApi.GetManyAsync());
+            users.AddRange(await Engine.Users.GetManyAsync());
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load users." : ex.Message;
         }
@@ -194,16 +188,16 @@
         editorOpen = true;
     }
 
-    private void OpenEdit(UserInformation user)
+    private void OpenEdit(Fargo.Sdk.Users.User user)
     {
         isEditing = true;
         editingUserGuid = user.Guid;
         editorModel = new UserEditorModel
         {
-            Nameid = user.Nameid.ToString(),
-            FirstName = user.FirstName.ToString(),
-            LastName = user.LastName.ToString(),
-            Description = user.Description.ToString()
+            Nameid = user.Nameid,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Description = user.Description
         };
         editorOpen = true;
     }
@@ -225,33 +219,32 @@
         {
             if (isEditing && editingUserGuid.HasValue)
             {
-                var updateModel = new UserUpdateModel(
-                    Nameid: string.IsNullOrWhiteSpace(editorModel.Nameid) ? null : new Nameid(editorModel.Nameid),
-                    FirstName: string.IsNullOrWhiteSpace(editorModel.FirstName) ? null : new FirstName(editorModel.FirstName),
-                    LastName: string.IsNullOrWhiteSpace(editorModel.LastName) ? null : new LastName(editorModel.LastName),
-                    Description: string.IsNullOrWhiteSpace(editorModel.Description) ? null : new Description(editorModel.Description),
-                    Password: null,
-                    IsActive: null,
-                    Permissions: null);
-
-                await UserApi.UpdateAsync(editingUserGuid.Value, updateModel);
+                var user = users.FirstOrDefault(u => u.Guid == editingUserGuid.Value);
+                if (user is not null)
+                {
+                    await user.UpdateAsync(u =>
+                    {
+                        u.Nameid = editorModel.Nameid!;
+                        u.FirstName = string.IsNullOrWhiteSpace(editorModel.FirstName) ? null : editorModel.FirstName;
+                        u.LastName = string.IsNullOrWhiteSpace(editorModel.LastName) ? null : editorModel.LastName;
+                        u.Description = editorModel.Description ?? string.Empty;
+                    });
+                }
             }
             else
             {
-                var createModel = new UserCreateModel(
-                    Nameid: new Nameid(editorModel.Nameid!),
-                    FirstName: string.IsNullOrWhiteSpace(editorModel.FirstName) ? null : new FirstName(editorModel.FirstName),
-                    LastName: string.IsNullOrWhiteSpace(editorModel.LastName) ? null : new LastName(editorModel.LastName),
-                    Description: string.IsNullOrWhiteSpace(editorModel.Description) ? null : new Description(editorModel.Description),
-                    Password: new Password(editorModel.Password!));
-
-                await UserApi.CreateAsync(createModel);
+                await Engine.Users.CreateAsync(
+                    editorModel.Nameid!,
+                    editorModel.Password!,
+                    string.IsNullOrWhiteSpace(editorModel.FirstName) ? null : editorModel.FirstName,
+                    string.IsNullOrWhiteSpace(editorModel.LastName) ? null : editorModel.LastName,
+                    string.IsNullOrWhiteSpace(editorModel.Description) ? null : editorModel.Description);
             }
 
             editorOpen = false;
             await LoadUsersAsync();
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to save user." : ex.Message;
         }
@@ -261,7 +254,7 @@
         }
     }
 
-    private void OpenDelete(UserInformation user)
+    private void OpenDelete(Fargo.Sdk.Users.User user)
     {
         pendingDelete = user;
     }
@@ -286,11 +279,11 @@
 
         try
         {
-            await UserApi.DeleteAsync(pendingDelete.Guid);
+            await Engine.Users.DeleteAsync(pendingDelete.Guid);
             pendingDelete = null;
             await LoadUsersAsync();
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to delete user." : ex.Message;
         }

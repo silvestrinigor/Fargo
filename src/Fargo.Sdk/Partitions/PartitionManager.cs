@@ -8,6 +8,7 @@ public sealed class PartitionManager : IPartitionManager
     internal PartitionManager(IPartitionClient client, FargoHubConnection hub)
     {
         this.client = client;
+        this.hub = hub;
 
         hub.On<Guid>("OnPartitionCreated", guid =>
             Created?.Invoke(this, new PartitionCreatedEventArgs(guid)));
@@ -33,6 +34,7 @@ public sealed class PartitionManager : IPartitionManager
 
     private readonly Dictionary<Guid, Partition> _tracked = new();
     private readonly IPartitionClient client;
+    private readonly FargoHubConnection hub;
 
     public async Task<Partition> GetAsync(
         Guid partitionGuid,
@@ -46,7 +48,7 @@ public sealed class PartitionManager : IPartitionManager
             ThrowError(response.Error!);
         }
 
-        return ToEntity(response.Data!);
+        return await ToEntityAsync(response.Data!);
     }
 
     public async Task<IReadOnlyCollection<Partition>> GetManyAsync(
@@ -63,7 +65,13 @@ public sealed class PartitionManager : IPartitionManager
             ThrowError(response.Error!);
         }
 
-        return response.Data!.Select(ToEntity).ToList();
+        var entities = new List<Partition>();
+        foreach (var r in response.Data!)
+        {
+            entities.Add(await ToEntityAsync(r));
+        }
+
+        return entities;
     }
 
     public async Task<Partition> CreateAsync(
@@ -85,8 +93,10 @@ public sealed class PartitionManager : IPartitionManager
             description ?? string.Empty,
             parentPartitionGuid,
             true,
-            client);
+            client,
+            MakeDisposeCallback(response.Data));
         _tracked[partition.Guid] = partition;
+        await hub.InvokeAsync("SubscribeToEntityAsync", partition.Guid);
         return partition;
     }
 
@@ -102,7 +112,7 @@ public sealed class PartitionManager : IPartitionManager
         }
     }
 
-    private Partition ToEntity(PartitionResult r)
+    private async Task<Partition> ToEntityAsync(PartitionResult r)
     {
         var partition = new Partition(
             r.Guid,
@@ -110,10 +120,18 @@ public sealed class PartitionManager : IPartitionManager
             r.Description,
             r.ParentPartitionGuid,
             r.IsActive,
-            client);
+            client,
+            MakeDisposeCallback(r.Guid));
         _tracked[partition.Guid] = partition;
+        await hub.InvokeAsync("SubscribeToEntityAsync", partition.Guid);
         return partition;
     }
+
+    private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
+    {
+        _tracked.Remove(guid);
+        await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
+    };
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

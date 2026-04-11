@@ -1,4 +1,4 @@
-@inject ArticleTreeApi ArticleTreeApi
+@inject IEngine Engine
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -47,11 +47,11 @@ else
 
         try
         {
-            var roots = await ArticleTreeApi.GetChildrenAsync(null);
+            var articles = await Engine.Articles.GetManyAsync();
             rootNodes.Clear();
-            rootNodes.AddRange(roots.Select(TreeSidebarNode.FromTreeNode));
+            rootNodes.AddRange(articles.Select(TreeSidebarNode.FromArticle));
         }
-        catch (HttpRequestException ex)
+        catch (FargoSdkApiException ex)
         {
             errorMessage = string.IsNullOrWhiteSpace(ex.Message)
                 ? "Failed to load articles."
@@ -63,36 +63,10 @@ else
         }
     }
 
-    private async Task ToggleAsync(TreeSidebarNode node)
+    private Task ToggleAsync(TreeSidebarNode node)
     {
         node.IsExpanded = !node.IsExpanded;
-
-        if (!node.IsExpanded || node.ChildrenLoaded || !node.HasChildren)
-        {
-            return;
-        }
-
-        node.IsLoadingChildren = true;
-        errorMessage = null;
-
-        try
-        {
-            var children = await ArticleTreeApi.GetChildrenAsync(node.EntityGuid);
-            node.Children.Clear();
-            node.Children.AddRange(children.Select(TreeSidebarNode.FromTreeNode));
-            node.ChildrenLoaded = true;
-        }
-        catch (HttpRequestException ex)
-        {
-            errorMessage = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Failed to load child articles."
-                : ex.Message;
-        }
-        finally
-        {
-            node.IsLoadingChildren = false;
-            await InvokeAsync(StateHasChanged);
-        }
+        return Task.CompletedTask;
     }
 
     private void Select(TreeSidebarNode node)

@@ -4,8 +4,9 @@ namespace Fargo.Sdk.Users;
 
 /// <summary>
 /// Represents a live user entity. Call <see cref="UpdateAsync"/> to persist property changes.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class User
+public sealed class User : IAsyncDisposable
 {
     internal User(
         Guid guid,
@@ -18,7 +19,8 @@ public sealed class User
         bool isActive,
         IReadOnlyCollection<ActionType> permissions,
         IReadOnlyCollection<Guid> partitionAccesses,
-        IUserClient client)
+        IUserClient client,
+        Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         _nameid = nameid;
@@ -31,9 +33,11 @@ public sealed class User
         Permissions = permissions;
         PartitionAccesses = partitionAccesses;
         this.client = client;
+        _onDispose = onDispose;
     }
 
     private readonly IUserClient client;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the user.</summary>
     public Guid Guid { get; }
@@ -137,4 +141,7 @@ public sealed class User
             throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

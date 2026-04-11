@@ -3,8 +3,9 @@ namespace Fargo.Sdk.Partitions;
 /// <summary>
 /// Represents a live partition entity. Call <see cref="UpdateAsync"/> to persist property changes.
 /// Use <see cref="MoveAsync"/> to change the partition's position in the hierarchy.
+/// Dispose to unsubscribe from real-time events.
 /// </summary>
-public sealed class Partition
+public sealed class Partition : IAsyncDisposable
 {
     internal Partition(
         Guid guid,
@@ -12,7 +13,8 @@ public sealed class Partition
         string description,
         Guid? parentPartitionGuid,
         bool isActive,
-        IPartitionClient client)
+        IPartitionClient client,
+        Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         Name = name;
@@ -20,9 +22,11 @@ public sealed class Partition
         ParentPartitionGuid = parentPartitionGuid;
         IsActive = isActive;
         this.client = client;
+        _onDispose = onDispose;
     }
 
     private readonly IPartitionClient client;
+    private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the partition.</summary>
     public Guid Guid { get; }
@@ -80,4 +84,7 @@ public sealed class Partition
             throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

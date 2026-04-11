@@ -8,6 +8,7 @@ public sealed class UserManager : IUserManager
     internal UserManager(IUserClient client, FargoHubConnection hub)
     {
         this.client = client;
+        this.hub = hub;
 
         hub.On<Guid, string>("OnUserCreated", (guid, nameid) =>
             Created?.Invoke(this, new UserCreatedEventArgs(guid, nameid)));
@@ -33,6 +34,7 @@ public sealed class UserManager : IUserManager
 
     private readonly Dictionary<Guid, User> _tracked = new();
     private readonly IUserClient client;
+    private readonly FargoHubConnection hub;
 
     public async Task<User> GetAsync(
         Guid userGuid,
@@ -46,7 +48,7 @@ public sealed class UserManager : IUserManager
             ThrowError(response.Error!);
         }
 
-        return ToEntity(response.Data!);
+        return await ToEntityAsync(response.Data!);
     }
 
     public async Task<IReadOnlyCollection<User>> GetManyAsync(
@@ -62,7 +64,13 @@ public sealed class UserManager : IUserManager
             ThrowError(response.Error!);
         }
 
-        return response.Data!.Select(ToEntity).ToList();
+        var entities = new List<User>();
+        foreach (var r in response.Data!)
+        {
+            entities.Add(await ToEntityAsync(r));
+        }
+
+        return entities;
     }
 
     public async Task<User> CreateAsync(
@@ -92,7 +100,7 @@ public sealed class UserManager : IUserManager
             ThrowError(getResponse.Error!);
         }
 
-        return ToEntity(getResponse.Data!);
+        return await ToEntityAsync(getResponse.Data!);
     }
 
     public async Task DeleteAsync(
@@ -107,7 +115,7 @@ public sealed class UserManager : IUserManager
         }
     }
 
-    private User ToEntity(UserResult r)
+    private async Task<User> ToEntityAsync(UserResult r)
     {
         var user = new User(
             r.Guid,
@@ -120,10 +128,18 @@ public sealed class UserManager : IUserManager
             r.IsActive,
             r.Permissions.Select(p => p.Action).ToList(),
             r.PartitionAccesses,
-            client);
+            client,
+            MakeDisposeCallback(r.Guid));
         _tracked[user.Guid] = user;
+        await hub.InvokeAsync("SubscribeToEntityAsync", user.Guid);
         return user;
     }
+
+    private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
+    {
+        _tracked.Remove(guid);
+        await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
+    };
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

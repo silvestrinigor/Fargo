@@ -8,6 +8,7 @@ public sealed class ItemManager : IItemManager
     internal ItemManager(IItemClient client, FargoHubConnection hub)
     {
         this.client = client;
+        this.hub = hub;
 
         hub.On<Guid, Guid>("OnItemCreated", (guid, articleGuid) =>
             Created?.Invoke(this, new ItemCreatedEventArgs(guid, articleGuid)));
@@ -33,6 +34,7 @@ public sealed class ItemManager : IItemManager
 
     private readonly Dictionary<Guid, Item> _tracked = new();
     private readonly IItemClient client;
+    private readonly FargoHubConnection hub;
 
     public async Task<Item> GetAsync(
         Guid itemGuid,
@@ -46,7 +48,7 @@ public sealed class ItemManager : IItemManager
             ThrowError(response.Error!);
         }
 
-        return ToEntity(response.Data!);
+        return await ToEntityAsync(response.Data!);
     }
 
     public async Task<IReadOnlyCollection<Item>> GetManyAsync(
@@ -63,7 +65,13 @@ public sealed class ItemManager : IItemManager
             ThrowError(response.Error!);
         }
 
-        return response.Data!.Select(ToEntity).ToList();
+        var entities = new List<Item>();
+        foreach (var r in response.Data!)
+        {
+            entities.Add(await ToEntityAsync(r));
+        }
+
+        return entities;
     }
 
     public async Task<Item> CreateAsync(
@@ -78,8 +86,9 @@ public sealed class ItemManager : IItemManager
             ThrowError(response.Error!);
         }
 
-        var item = new Item(response.Data, articleGuid, client);
+        var item = new Item(response.Data, articleGuid, client, MakeDisposeCallback(response.Data));
         _tracked[item.Guid] = item;
+        await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
         return item;
     }
 
@@ -95,12 +104,19 @@ public sealed class ItemManager : IItemManager
         }
     }
 
-    private Item ToEntity(ItemResult r)
+    private async Task<Item> ToEntityAsync(ItemResult r)
     {
-        var item = new Item(r.Guid, r.ArticleGuid, client);
+        var item = new Item(r.Guid, r.ArticleGuid, client, MakeDisposeCallback(r.Guid));
         _tracked[item.Guid] = item;
+        await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
         return item;
     }
+
+    private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
+    {
+        _tracked.Remove(guid);
+        await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
+    };
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);
