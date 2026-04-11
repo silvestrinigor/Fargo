@@ -142,7 +142,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserGroupCreated(userGroup.Guid, userGroup.Nameid, cancellationToken);
+        await eventPublisher.PublishUserGroupCreated(userGroup.Guid, userGroup.Nameid, [partition.Guid], cancellationToken);
 
         return userGroup.Guid;
     }

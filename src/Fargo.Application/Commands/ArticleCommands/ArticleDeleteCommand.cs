@@ -57,6 +57,6 @@ public sealed class ArticleDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishArticleDeleted(command.ArticleGuid, cancellationToken);
+        await eventPublisher.PublishArticleDeleted(article.Guid, article.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

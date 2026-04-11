@@ -15,16 +15,21 @@ public sealed class PartitionManager : IPartitionManager
             Created?.Invoke(this, new PartitionCreatedEventArgs(guid)));
 
         hub.On<Guid>("OnPartitionUpdated", guid =>
-            Updated?.Invoke(this, new PartitionUpdatedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var partition))
+                partition.RaiseUpdated();
+        });
 
         hub.On<Guid>("OnPartitionDeleted", guid =>
-            Deleted?.Invoke(this, new PartitionDeletedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var partition))
+                partition.RaiseDeleted();
+        });
     }
 
     public event EventHandler<PartitionCreatedEventArgs>? Created;
-    public event EventHandler<PartitionUpdatedEventArgs>? Updated;
-    public event EventHandler<PartitionDeletedEventArgs>? Deleted;
 
+    private readonly Dictionary<Guid, Partition> _tracked = new();
     private readonly IPartitionClient client;
     private readonly ILogger logger;
 
@@ -73,7 +78,7 @@ public sealed class PartitionManager : IPartitionManager
             ThrowError(response.Error!);
         }
 
-        return new Partition(
+        var partition = new Partition(
             response.Data,
             name,
             description ?? string.Empty,
@@ -81,6 +86,8 @@ public sealed class PartitionManager : IPartitionManager
             true,
             client,
             logger);
+        _tracked[partition.Guid] = partition;
+        return partition;
     }
 
     public async Task DeleteAsync(
@@ -95,14 +102,19 @@ public sealed class PartitionManager : IPartitionManager
         }
     }
 
-    private Partition ToEntity(PartitionResult r) => new(
-        r.Guid,
-        r.Name,
-        r.Description,
-        r.ParentPartitionGuid,
-        r.IsActive,
-        client,
-        logger);
+    private Partition ToEntity(PartitionResult r)
+    {
+        var partition = new Partition(
+            r.Guid,
+            r.Name,
+            r.Description,
+            r.ParentPartitionGuid,
+            r.IsActive,
+            client,
+            logger);
+        _tracked[partition.Guid] = partition;
+        return partition;
+    }
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

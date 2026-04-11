@@ -93,6 +93,16 @@ public sealed class UserGroup
         }
     }
 
+    /// <summary>Raised when this user group is updated by any authenticated client.</summary>
+    public event EventHandler<UserGroupUpdatedEventArgs>? Updated;
+
+    /// <summary>Raised when this user group is deleted by any authenticated client.</summary>
+    public event EventHandler<UserGroupDeletedEventArgs>? Deleted;
+
+    internal void RaiseUpdated() => Updated?.Invoke(this, new UserGroupUpdatedEventArgs(Guid));
+
+    internal void RaiseDeleted() => Deleted?.Invoke(this, new UserGroupDeletedEventArgs(Guid));
+
     /// <summary>The permissions assigned to this user group.</summary>
     public IReadOnlyCollection<ActionType> Permissions { get; }
 

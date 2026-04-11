@@ -152,7 +152,7 @@ public sealed class UserCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserCreated(user.Guid, user.Nameid, cancellationToken);
+        await eventPublisher.PublishUserCreated(user.Guid, user.Nameid, [partition.Guid], cancellationToken);
 
         return user.Guid;
     }

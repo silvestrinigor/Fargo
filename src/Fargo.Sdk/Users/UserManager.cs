@@ -15,16 +15,21 @@ public sealed class UserManager : IUserManager
             Created?.Invoke(this, new UserCreatedEventArgs(guid, nameid)));
 
         hub.On<Guid>("OnUserUpdated", guid =>
-            Updated?.Invoke(this, new UserUpdatedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var user))
+                user.RaiseUpdated();
+        });
 
         hub.On<Guid>("OnUserDeleted", guid =>
-            Deleted?.Invoke(this, new UserDeletedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var user))
+                user.RaiseDeleted();
+        });
     }
 
     public event EventHandler<UserCreatedEventArgs>? Created;
-    public event EventHandler<UserUpdatedEventArgs>? Updated;
-    public event EventHandler<UserDeletedEventArgs>? Deleted;
 
+    private readonly Dictionary<Guid, User> _tracked = new();
     private readonly IUserClient client;
     private readonly ILogger logger;
 
@@ -101,19 +106,24 @@ public sealed class UserManager : IUserManager
         }
     }
 
-    private User ToEntity(UserResult r) => new(
-        r.Guid,
-        r.Nameid,
-        r.FirstName,
-        r.LastName,
-        r.Description,
-        r.DefaultPasswordExpirationPeriod,
-        r.RequirePasswordChangeAt,
-        r.IsActive,
-        r.Permissions.Select(p => p.Action).ToList(),
-        r.PartitionAccesses,
-        client,
-        logger);
+    private User ToEntity(UserResult r)
+    {
+        var user = new User(
+            r.Guid,
+            r.Nameid,
+            r.FirstName,
+            r.LastName,
+            r.Description,
+            r.DefaultPasswordExpirationPeriod,
+            r.RequirePasswordChangeAt,
+            r.IsActive,
+            r.Permissions.Select(p => p.Action).ToList(),
+            r.PartitionAccesses,
+            client,
+            logger);
+        _tracked[user.Guid] = user;
+        return user;
+    }
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

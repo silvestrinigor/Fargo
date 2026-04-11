@@ -72,6 +72,6 @@ public sealed class ArticleUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);
+        await eventPublisher.PublishArticleUpdated(article.Guid, article.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

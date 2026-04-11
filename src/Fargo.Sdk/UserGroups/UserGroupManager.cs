@@ -15,16 +15,21 @@ public sealed class UserGroupManager : IUserGroupManager
             Created?.Invoke(this, new UserGroupCreatedEventArgs(guid, nameid)));
 
         hub.On<Guid>("OnUserGroupUpdated", guid =>
-            Updated?.Invoke(this, new UserGroupUpdatedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var userGroup))
+                userGroup.RaiseUpdated();
+        });
 
         hub.On<Guid>("OnUserGroupDeleted", guid =>
-            Deleted?.Invoke(this, new UserGroupDeletedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var userGroup))
+                userGroup.RaiseDeleted();
+        });
     }
 
     public event EventHandler<UserGroupCreatedEventArgs>? Created;
-    public event EventHandler<UserGroupUpdatedEventArgs>? Updated;
-    public event EventHandler<UserGroupDeletedEventArgs>? Deleted;
 
+    private readonly Dictionary<Guid, UserGroup> _tracked = new();
     private readonly IUserGroupClient client;
     private readonly ILogger logger;
 
@@ -74,7 +79,7 @@ public sealed class UserGroupManager : IUserGroupManager
             ThrowError(response.Error!);
         }
 
-        return new UserGroup(
+        var userGroup = new UserGroup(
             response.Data,
             nameid,
             description ?? string.Empty,
@@ -82,6 +87,8 @@ public sealed class UserGroupManager : IUserGroupManager
             (permissions ?? []).ToList(),
             client,
             logger);
+        _tracked[userGroup.Guid] = userGroup;
+        return userGroup;
     }
 
     public async Task DeleteAsync(
@@ -96,14 +103,19 @@ public sealed class UserGroupManager : IUserGroupManager
         }
     }
 
-    private UserGroup ToEntity(UserGroupResult r) => new(
-        r.Guid,
-        r.Nameid,
-        r.Description,
-        r.IsActive,
-        r.Permissions.Select(p => p.Action).ToList(),
-        client,
-        logger);
+    private UserGroup ToEntity(UserGroupResult r)
+    {
+        var userGroup = new UserGroup(
+            r.Guid,
+            r.Nameid,
+            r.Description,
+            r.IsActive,
+            r.Permissions.Select(p => p.Action).ToList(),
+            client,
+            logger);
+        _tracked[userGroup.Guid] = userGroup;
+        return userGroup;
+    }
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

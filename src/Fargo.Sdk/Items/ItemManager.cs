@@ -13,16 +13,21 @@ public sealed class ItemManager : IItemManager
             Created?.Invoke(this, new ItemCreatedEventArgs(guid, articleGuid)));
 
         hub.On<Guid>("OnItemUpdated", guid =>
-            Updated?.Invoke(this, new ItemUpdatedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var item))
+                item.RaiseUpdated();
+        });
 
         hub.On<Guid>("OnItemDeleted", guid =>
-            Deleted?.Invoke(this, new ItemDeletedEventArgs(guid)));
+        {
+            if (_tracked.TryGetValue(guid, out var item))
+                item.RaiseDeleted();
+        });
     }
 
     public event EventHandler<ItemCreatedEventArgs>? Created;
-    public event EventHandler<ItemUpdatedEventArgs>? Updated;
-    public event EventHandler<ItemDeletedEventArgs>? Deleted;
 
+    private readonly Dictionary<Guid, Item> _tracked = new();
     private readonly IItemClient client;
 
     public async Task<Item> GetAsync(
@@ -69,7 +74,9 @@ public sealed class ItemManager : IItemManager
             ThrowError(response.Error!);
         }
 
-        return new Item(response.Data, articleGuid, client);
+        var item = new Item(response.Data, articleGuid, client);
+        _tracked[item.Guid] = item;
+        return item;
     }
 
     public async Task DeleteAsync(
@@ -84,7 +91,12 @@ public sealed class ItemManager : IItemManager
         }
     }
 
-    private Item ToEntity(ItemResult r) => new(r.Guid, r.ArticleGuid, client);
+    private Item ToEntity(ItemResult r)
+    {
+        var item = new Item(r.Guid, r.ArticleGuid, client);
+        _tracked[item.Guid] = item;
+        return item;
+    }
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

@@ -4,53 +4,60 @@ using Microsoft.AspNetCore.SignalR;
 namespace Fargo.Api.Hubs;
 
 /// <summary>
-/// Implements <see cref="IFargoEventPublisher"/> by broadcasting events
-/// to all connected SignalR clients via <see cref="FargoEventHub"/>.
+/// Implements <see cref="IFargoEventPublisher"/> by broadcasting events to partition-specific
+/// SignalR groups via <see cref="FargoEventHub"/>. Admin clients receive all events via
+/// the <c>"fargo-admin"</c> group.
 /// </summary>
 public sealed class SignalREventPublisher(IHubContext<FargoEventHub, IFargoEventClient> hub) : IFargoEventPublisher
 {
-    public Task PublishArticleCreated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnArticleCreated(guid);
+    public Task PublishArticleCreated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnArticleCreated(guid);
 
-    public Task PublishArticleUpdated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnArticleUpdated(guid);
+    public Task PublishArticleUpdated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnArticleUpdated(guid);
 
-    public Task PublishArticleDeleted(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnArticleDeleted(guid);
+    public Task PublishArticleDeleted(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnArticleDeleted(guid);
 
-    public Task PublishItemCreated(Guid guid, Guid articleGuid, CancellationToken ct = default)
-        => hub.Clients.All.OnItemCreated(guid, articleGuid);
+    public Task PublishItemCreated(Guid guid, Guid articleGuid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnItemCreated(guid, articleGuid);
 
-    public Task PublishItemUpdated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnItemUpdated(guid);
+    public Task PublishItemUpdated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnItemUpdated(guid);
 
-    public Task PublishItemDeleted(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnItemDeleted(guid);
+    public Task PublishItemDeleted(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnItemDeleted(guid);
 
-    public Task PublishUserCreated(Guid guid, string nameid, CancellationToken ct = default)
-        => hub.Clients.All.OnUserCreated(guid, nameid);
+    public Task PublishUserCreated(Guid guid, string nameid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnUserCreated(guid, nameid);
 
-    public Task PublishUserUpdated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnUserUpdated(guid);
+    public Task PublishUserUpdated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnUserUpdated(guid);
 
-    public Task PublishUserDeleted(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnUserDeleted(guid);
+    public Task PublishUserDeleted(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnUserDeleted(guid);
 
-    public Task PublishUserGroupCreated(Guid guid, string nameid, CancellationToken ct = default)
-        => hub.Clients.All.OnUserGroupCreated(guid, nameid);
+    public Task PublishUserGroupCreated(Guid guid, string nameid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnUserGroupCreated(guid, nameid);
 
-    public Task PublishUserGroupUpdated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnUserGroupUpdated(guid);
+    public Task PublishUserGroupUpdated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnUserGroupUpdated(guid);
 
-    public Task PublishUserGroupDeleted(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnUserGroupDeleted(guid);
+    public Task PublishUserGroupDeleted(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnUserGroupDeleted(guid);
 
-    public Task PublishPartitionCreated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnPartitionCreated(guid);
+    public Task PublishPartitionCreated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnPartitionCreated(guid);
 
-    public Task PublishPartitionUpdated(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnPartitionUpdated(guid);
+    public Task PublishPartitionUpdated(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnPartitionUpdated(guid);
 
-    public Task PublishPartitionDeleted(Guid guid, CancellationToken ct = default)
-        => hub.Clients.All.OnPartitionDeleted(guid);
+    public Task PublishPartitionDeleted(Guid guid, IReadOnlyCollection<Guid> partitionGuids, CancellationToken ct = default)
+        => Clients(partitionGuids).OnPartitionDeleted(guid);
+
+    private IFargoEventClient Clients(IReadOnlyCollection<Guid> partitionGuids)
+    {
+        var groups = partitionGuids.Select(g => g.ToString()).Append("fargo-admin").ToList();
+        return hub.Clients.Groups(groups);
+    }
 }

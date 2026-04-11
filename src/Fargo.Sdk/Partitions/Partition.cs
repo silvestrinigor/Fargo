@@ -42,6 +42,16 @@ public sealed class Partition
     /// <summary>Whether the partition is currently active.</summary>
     public bool IsActive { get; }
 
+    /// <summary>Raised when this partition is updated by any authenticated client.</summary>
+    public event EventHandler<PartitionUpdatedEventArgs>? Updated;
+
+    /// <summary>Raised when this partition is deleted by any authenticated client.</summary>
+    public event EventHandler<PartitionDeletedEventArgs>? Deleted;
+
+    internal void RaiseUpdated() => Updated?.Invoke(this, new PartitionUpdatedEventArgs(Guid));
+
+    internal void RaiseDeleted() => Deleted?.Invoke(this, new PartitionDeletedEventArgs(Guid));
+
     private string _description;
 
     /// <summary>

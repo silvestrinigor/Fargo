@@ -78,6 +78,6 @@ public sealed class PartitionDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishPartitionDeleted(command.PartitionGuid, cancellationToken);
+        await eventPublisher.PublishPartitionDeleted(partition.Guid, [partition.Guid], cancellationToken);
     }
 }

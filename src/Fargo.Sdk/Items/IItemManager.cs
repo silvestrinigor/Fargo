@@ -38,10 +38,4 @@ public interface IItemManager
 
     /// <summary>Raised when any authenticated client creates an item.</summary>
     event EventHandler<ItemCreatedEventArgs>? Created;
-
-    /// <summary>Raised when any authenticated client updates an item.</summary>
-    event EventHandler<ItemUpdatedEventArgs>? Updated;
-
-    /// <summary>Raised when any authenticated client deletes an item.</summary>
-    event EventHandler<ItemDeletedEventArgs>? Deleted;
 }

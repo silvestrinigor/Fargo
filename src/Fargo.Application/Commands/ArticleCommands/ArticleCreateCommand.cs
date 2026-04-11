@@ -108,7 +108,7 @@ public sealed class ArticleCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishArticleCreated(article.Guid, cancellationToken);
+        await eventPublisher.PublishArticleCreated(article.Guid, [partition.Guid], cancellationToken);
 
         return article.Guid;
     }

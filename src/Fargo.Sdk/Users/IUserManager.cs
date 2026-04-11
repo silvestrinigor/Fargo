@@ -43,10 +43,4 @@ public interface IUserManager
 
     /// <summary>Raised when any authenticated client creates a user.</summary>
     event EventHandler<UserCreatedEventArgs>? Created;
-
-    /// <summary>Raised when any authenticated client updates a user.</summary>
-    event EventHandler<UserUpdatedEventArgs>? Updated;
-
-    /// <summary>Raised when any authenticated client deletes a user.</summary>
-    event EventHandler<UserDeletedEventArgs>? Deleted;
 }

@@ -41,10 +41,4 @@ public interface IUserGroupManager
 
     /// <summary>Raised when any authenticated client creates a user group.</summary>
     event EventHandler<UserGroupCreatedEventArgs>? Created;
-
-    /// <summary>Raised when any authenticated client updates a user group.</summary>
-    event EventHandler<UserGroupUpdatedEventArgs>? Updated;
-
-    /// <summary>Raised when any authenticated client deletes a user group.</summary>
-    event EventHandler<UserGroupDeletedEventArgs>? Deleted;
 }

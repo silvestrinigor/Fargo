@@ -65,10 +65,4 @@ public interface IArticleManager
 
     /// <summary>Raised when any authenticated client creates an article.</summary>
     event EventHandler<ArticleCreatedEventArgs>? Created;
-
-    /// <summary>Raised when any authenticated client updates an article.</summary>
-    event EventHandler<ArticleUpdatedEventArgs>? Updated;
-
-    /// <summary>Raised when any authenticated client deletes an article.</summary>
-    event EventHandler<ArticleDeletedEventArgs>? Deleted;
 }

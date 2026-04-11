@@ -40,10 +40,4 @@ public interface IPartitionManager
 
     /// <summary>Raised when any authenticated client creates a partition.</summary>
     event EventHandler<PartitionCreatedEventArgs>? Created;
-
-    /// <summary>Raised when any authenticated client updates a partition.</summary>
-    event EventHandler<PartitionUpdatedEventArgs>? Updated;
-
-    /// <summary>Raised when any authenticated client deletes a partition.</summary>
-    event EventHandler<PartitionDeletedEventArgs>? Deleted;
 }

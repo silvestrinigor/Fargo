@@ -123,7 +123,7 @@ public sealed class UserUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserUpdated(command.UserGuid, cancellationToken);
+        await eventPublisher.PublishUserUpdated(user.Guid, user.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 
     private static Nameid ValidateNameid(string value)

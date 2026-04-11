@@ -59,6 +59,6 @@ public sealed class ItemDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishItemDeleted(item.Guid, cancellationToken);
+        await eventPublisher.PublishItemDeleted(item.Guid, item.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

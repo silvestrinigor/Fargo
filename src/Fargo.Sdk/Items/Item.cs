@@ -22,6 +22,16 @@ public sealed class Item
     /// <summary>The unique identifier of the article this item is an instance of.</summary>
     public Guid ArticleGuid { get; }
 
+    /// <summary>Raised when this item is updated by any authenticated client.</summary>
+    public event EventHandler<ItemUpdatedEventArgs>? Updated;
+
+    /// <summary>Raised when this item is deleted by any authenticated client.</summary>
+    public event EventHandler<ItemDeletedEventArgs>? Deleted;
+
+    internal void RaiseUpdated() => Updated?.Invoke(this, new ItemUpdatedEventArgs(Guid));
+
+    internal void RaiseDeleted() => Deleted?.Invoke(this, new ItemDeletedEventArgs(Guid));
+
     /// <summary>Gets the partitions that directly contain this item.</summary>
     public Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         CancellationToken cancellationToken = default)

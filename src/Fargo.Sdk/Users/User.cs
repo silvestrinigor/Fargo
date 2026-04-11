@@ -144,6 +144,16 @@ public sealed class User
         }
     }
 
+    /// <summary>Raised when this user is updated by any authenticated client.</summary>
+    public event EventHandler<UserUpdatedEventArgs>? Updated;
+
+    /// <summary>Raised when this user is deleted by any authenticated client.</summary>
+    public event EventHandler<UserDeletedEventArgs>? Deleted;
+
+    internal void RaiseUpdated() => Updated?.Invoke(this, new UserUpdatedEventArgs(Guid));
+
+    internal void RaiseDeleted() => Deleted?.Invoke(this, new UserDeletedEventArgs(Guid));
+
     /// <summary>The period after which the user's password expires.</summary>
     public TimeSpan DefaultPasswordExpirationPeriod { get; }
 

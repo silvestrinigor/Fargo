@@ -62,6 +62,6 @@ public sealed class ItemUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishItemUpdated(item.Guid, cancellationToken);
+        await eventPublisher.PublishItemUpdated(item.Guid, item.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

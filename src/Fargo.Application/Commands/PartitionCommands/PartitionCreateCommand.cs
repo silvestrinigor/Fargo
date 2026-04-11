@@ -138,7 +138,7 @@ public sealed class PartitionCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishPartitionCreated(partition.Guid, cancellationToken);
+        await eventPublisher.PublishPartitionCreated(partition.Guid, [parentPartition.Guid], cancellationToken);
 
         return partition.Guid;
     }
