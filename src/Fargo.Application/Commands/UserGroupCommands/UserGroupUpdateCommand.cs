@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.UserGroupModels;
@@ -31,7 +32,8 @@ public sealed class UserGroupUpdateCommandHandler(
         ActorService actorService,
         IUserGroupRepository userGroupRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserGroupUpdateCommand>
 {
     /// <summary>
@@ -101,6 +103,8 @@ public sealed class UserGroupUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishUserGroupUpdated(command.UserGroupGuid, cancellationToken);
     }
 
     private static Nameid ValidateNameid(string value)

@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.PartitionModels;
@@ -79,7 +80,8 @@ public sealed class PartitionUpdateCommandHandler(
         ActorService actorService,
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<PartitionUpdateCommand>
 {
     /// <summary>
@@ -156,5 +158,7 @@ public sealed class PartitionUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishPartitionUpdated(command.PartitionGuid, cancellationToken);
     }
 }

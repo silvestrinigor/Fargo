@@ -1,4 +1,5 @@
 using Fargo.Sdk.Articles;
+using Fargo.Sdk.Events;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
@@ -11,7 +12,7 @@ public sealed class ArticleManagerTests
 
     public ArticleManagerTests()
     {
-        sut = new ArticleManager(client, NullLogger.Instance);
+        sut = new ArticleManager(client, new FargoHubConnection(), NullLogger.Instance);
     }
 
     // --- GetAsync ---

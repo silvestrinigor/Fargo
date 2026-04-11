@@ -1,3 +1,4 @@
+using Fargo.Sdk.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Articles;
@@ -7,11 +8,24 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class ArticleManager : IArticleManager
 {
-    internal ArticleManager(IArticleClient client, ILogger logger)
+    internal ArticleManager(IArticleClient client, FargoHubConnection hub, ILogger logger)
     {
         this.client = client;
         this.logger = logger;
+
+        hub.On<Guid>("OnArticleCreated", guid =>
+            Created?.Invoke(this, new ArticleCreatedEventArgs(guid)));
+
+        hub.On<Guid>("OnArticleUpdated", guid =>
+            Updated?.Invoke(this, new ArticleUpdatedEventArgs(guid)));
+
+        hub.On<Guid>("OnArticleDeleted", guid =>
+            Deleted?.Invoke(this, new ArticleDeletedEventArgs(guid)));
     }
+
+    public event EventHandler<ArticleCreatedEventArgs>? Created;
+    public event EventHandler<ArticleUpdatedEventArgs>? Updated;
+    public event EventHandler<ArticleDeletedEventArgs>? Deleted;
 
     private readonly IArticleClient client;
     private readonly ILogger logger;

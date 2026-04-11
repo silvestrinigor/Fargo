@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.UserModels;
@@ -33,7 +34,8 @@ public sealed class UserUpdateCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserUpdateCommand>
 {
     /// <summary>
@@ -120,6 +122,8 @@ public sealed class UserUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishUserUpdated(command.UserGuid, cancellationToken);
     }
 
     private static Nameid ValidateNameid(string value)

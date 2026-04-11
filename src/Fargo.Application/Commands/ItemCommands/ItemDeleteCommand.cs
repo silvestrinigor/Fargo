@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
@@ -25,7 +26,8 @@ public sealed class ItemDeleteCommandHandler(
         ActorService actorService,
         IItemRepository itemRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ItemDeleteCommand>
 {
     /// <summary>
@@ -56,5 +58,7 @@ public sealed class ItemDeleteCommandHandler(
         itemRepository.Remove(item);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishItemDeleted(item.Guid, cancellationToken);
     }
 }

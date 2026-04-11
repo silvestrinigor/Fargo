@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
@@ -32,7 +33,8 @@ public sealed class PartitionDeleteCommandHandler(
         ActorService actorService,
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<PartitionDeleteCommand>
 {
     /// <summary>
@@ -75,5 +77,7 @@ public sealed class PartitionDeleteCommandHandler(
         partitionService.DeletePartition(partition);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishPartitionDeleted(command.PartitionGuid, cancellationToken);
     }
 }

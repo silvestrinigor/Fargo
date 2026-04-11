@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.ItemModels;
@@ -54,7 +55,8 @@ public sealed class ItemCreateCommandHandler(
         IArticleRepository articleRepository,
         IPartitionRepository partitionRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ItemCreateCommand, Guid>
 {
     /// <summary>
@@ -113,6 +115,8 @@ public sealed class ItemCreateCommandHandler(
         itemRepository.Add(item);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishItemCreated(item.Guid, article.Guid, cancellationToken);
 
         return item.Guid;
     }

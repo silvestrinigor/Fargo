@@ -1,11 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Fargo.Api.Hubs;
 
-public class FargoEventHub : Hub
-{
-    public async Task SendMessage(string user, string message)
-    {
-        await Clients.All.SendAsync("ReceiveMessage", user, message);
-    }
-}
+/// <summary>
+/// SignalR hub that broadcasts domain events to all connected authenticated clients.
+/// </summary>
+[Authorize]
+public sealed class FargoEventHub : Hub<IFargoEventClient> { }
