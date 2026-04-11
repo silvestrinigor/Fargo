@@ -37,6 +37,7 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new TokenJsonConverter());
                 options.SerializerOptions.Converters.Add(new FirstNameJsonConverter());
                 options.SerializerOptions.Converters.Add(new LastNameJsonConverter());
+                options.SerializerOptions.Converters.Add(new NameidJsonConverter());
                 options.SerializerOptions.Converters.Add(new NodeidJsonConverter());
             });
 
