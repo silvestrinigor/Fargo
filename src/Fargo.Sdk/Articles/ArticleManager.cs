@@ -1,3 +1,4 @@
+using Fargo.Sdk.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Sdk.Articles;
@@ -7,12 +8,30 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class ArticleManager : IArticleManager
 {
-    internal ArticleManager(IArticleClient client, ILogger logger)
+    internal ArticleManager(IArticleClient client, FargoHubConnection hub, ILogger logger)
     {
         this.client = client;
         this.logger = logger;
+
+        hub.On<Guid>("OnArticleCreated", guid =>
+            Created?.Invoke(this, new ArticleCreatedEventArgs(guid)));
+
+        hub.On<Guid>("OnArticleUpdated", guid =>
+        {
+            if (_tracked.TryGetValue(guid, out var article))
+                article.RaiseUpdated();
+        });
+
+        hub.On<Guid>("OnArticleDeleted", guid =>
+        {
+            if (_tracked.TryGetValue(guid, out var article))
+                article.RaiseDeleted();
+        });
     }
 
+    public event EventHandler<ArticleCreatedEventArgs>? Created;
+
+    private readonly Dictionary<Guid, Article> _tracked = new();
     private readonly IArticleClient client;
     private readonly ILogger logger;
 
@@ -60,7 +79,9 @@ public sealed class ArticleManager : IArticleManager
             ThrowError(response.Error!);
         }
 
-        return new Article(response.Data, name, description ?? string.Empty, client, logger);
+        var article = new Article(response.Data, name, description ?? string.Empty, client, logger);
+        _tracked[article.Guid] = article;
+        return article;
     }
 
     public async Task DeleteAsync(
@@ -75,7 +96,12 @@ public sealed class ArticleManager : IArticleManager
         }
     }
 
-    private Article ToEntity(ArticleResult r) => new(r.Guid, r.Name, r.Description, client, logger);
+    private Article ToEntity(ArticleResult r)
+    {
+        var article = new Article(r.Guid, r.Name, r.Description, client, logger);
+        _tracked[article.Guid] = article;
+        return article;
+    }
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

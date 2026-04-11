@@ -5,6 +5,7 @@ using Fargo.Sdk.Partitions;
 using Fargo.Sdk.UserGroups;
 using Fargo.Sdk.Users;
 
+
 namespace Fargo.Sdk;
 
 /// <summary>
@@ -15,20 +16,20 @@ public interface IEngine : IDisposable
     /// <summary>Gets the manager responsible for authentication operations.</summary>
     IAuthenticationManager Authentication { get; }
 
-    /// <summary>Gets the client for user operations.</summary>
-    IUserClient Users { get; }
+    /// <summary>Gets the manager for user operations.</summary>
+    IUserManager Users { get; }
 
-    /// <summary>Gets the client for user group operations.</summary>
-    IUserGroupClient UserGroups { get; }
+    /// <summary>Gets the manager for user group operations.</summary>
+    IUserGroupManager UserGroups { get; }
 
     /// <summary>Gets the manager for article operations.</summary>
     IArticleManager Articles { get; }
 
-    /// <summary>Gets the client for item operations.</summary>
-    IItemClient Items { get; }
+    /// <summary>Gets the manager for item operations.</summary>
+    IItemManager Items { get; }
 
-    /// <summary>Gets the client for partition operations.</summary>
-    IPartitionClient Partitions { get; }
+    /// <summary>Gets the manager for partition operations.</summary>
+    IPartitionManager Partitions { get; }
 
     /// <summary>
     /// Configures the server URL without performing any authentication.

@@ -64,6 +64,16 @@ public sealed class Article
         }
     }
 
+    /// <summary>Raised when this article is updated by any authenticated client.</summary>
+    public event EventHandler<ArticleUpdatedEventArgs>? Updated;
+
+    /// <summary>Raised when this article is deleted by any authenticated client.</summary>
+    public event EventHandler<ArticleDeletedEventArgs>? Deleted;
+
+    internal void RaiseUpdated() => Updated?.Invoke(this, new ArticleUpdatedEventArgs(Guid));
+
+    internal void RaiseDeleted() => Deleted?.Invoke(this, new ArticleDeletedEventArgs(Guid));
+
     /// <summary>
     /// Gets the partitions that directly contain this article.
     /// </summary>

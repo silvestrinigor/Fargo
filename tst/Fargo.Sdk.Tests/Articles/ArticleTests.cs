@@ -109,6 +109,54 @@ public sealed class ArticleTests
         Assert.Equal(ArticleGuid, sut.Guid);
     }
 
+    // --- Updated event ---
+
+    [Fact]
+    public void Updated_Should_Fire_When_RaiseUpdatedIsCalled()
+    {
+        // Arrange
+        ArticleUpdatedEventArgs? received = null;
+        sut.Updated += (_, e) => received = e;
+
+        // Act
+        sut.RaiseUpdated();
+
+        // Assert
+        Assert.NotNull(received);
+        Assert.Equal(ArticleGuid, received.Guid);
+    }
+
+    [Fact]
+    public void Updated_Should_NotFire_When_NoHandlerIsAttached()
+    {
+        // Act / Assert — must not throw
+        sut.RaiseUpdated();
+    }
+
+    // --- Deleted event ---
+
+    [Fact]
+    public void Deleted_Should_Fire_When_RaiseDeletedIsCalled()
+    {
+        // Arrange
+        ArticleDeletedEventArgs? received = null;
+        sut.Deleted += (_, e) => received = e;
+
+        // Act
+        sut.RaiseDeleted();
+
+        // Assert
+        Assert.NotNull(received);
+        Assert.Equal(ArticleGuid, received.Guid);
+    }
+
+    [Fact]
+    public void Deleted_Should_NotFire_When_NoHandlerIsAttached()
+    {
+        // Act / Assert — must not throw
+        sut.RaiseDeleted();
+    }
+
     // --- GetPartitionsAsync ---
 
     [Fact]

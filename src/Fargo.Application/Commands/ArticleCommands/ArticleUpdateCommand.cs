@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.ArticleModels;
@@ -30,7 +31,8 @@ public sealed class ArticleUpdateCommandHandler(
         ActorService actorService,
         IArticleRepository articleRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ArticleUpdateCommand>
 {
     /// <summary>
@@ -69,5 +71,7 @@ public sealed class ArticleUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishArticleUpdated(article.Guid, article.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

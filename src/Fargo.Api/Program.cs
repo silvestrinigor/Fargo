@@ -1,6 +1,7 @@
 using Fargo.Api.Extensions;
 using Fargo.Api.Hubs;
 using Fargo.Api.Middlewares;
+using Fargo.Application.Events;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IFargoEventPublisher, SignalREventPublisher>();
 
 builder.Services.AddResponseCompression(opts =>
 {

@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.UserGroupModels;
@@ -73,7 +74,8 @@ public sealed class UserGroupCreateCommandHandler(
         IUserGroupRepository userGroupRepository,
         IPartitionRepository partitionRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserGroupCreateCommand, Guid>
 {
     /// <summary>
@@ -139,6 +141,8 @@ public sealed class UserGroupCreateCommandHandler(
         userGroupRepository.Add(userGroup);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishUserGroupCreated(userGroup.Guid, userGroup.Nameid, [partition.Guid], cancellationToken);
 
         return userGroup.Guid;
     }

@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
@@ -72,7 +73,8 @@ public sealed class PartitionCreateCommandHandler(
         PartitionService partitionService,
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
     /// <summary>
@@ -135,6 +137,8 @@ public sealed class PartitionCreateCommandHandler(
         partitionRepository.Add(partition);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishPartitionCreated(partition.Guid, [parentPartition.Guid], cancellationToken);
 
         return partition.Guid;
     }

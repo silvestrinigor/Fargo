@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Models.ItemModels;
@@ -30,7 +31,8 @@ public sealed class ItemUpdateCommandHandler(
         ActorService actorService,
         IItemRepository itemRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ItemUpdateCommand>
 {
     /// <summary>
@@ -59,5 +61,7 @@ public sealed class ItemUpdateCommandHandler(
         actor.ValidateHasAccess(item);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishItemUpdated(item.Guid, item.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

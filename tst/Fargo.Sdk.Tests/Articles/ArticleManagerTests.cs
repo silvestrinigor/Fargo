@@ -1,4 +1,5 @@
 using Fargo.Sdk.Articles;
+using Fargo.Sdk.Events;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
@@ -11,7 +12,7 @@ public sealed class ArticleManagerTests
 
     public ArticleManagerTests()
     {
-        sut = new ArticleManager(client, NullLogger.Instance);
+        sut = new ArticleManager(client, new FargoHubConnection(), NullLogger.Instance);
     }
 
     // --- GetAsync ---
@@ -168,6 +169,71 @@ public sealed class ArticleManagerTests
 
         // Act / Assert
         await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.DeleteAsync(Guid.NewGuid()));
+    }
+
+    // --- Entity tracking ---
+
+    [Fact]
+    public async Task GetAsync_Should_TrackEntity_So_RaiseUpdated_FiresEntityUpdatedEvent()
+    {
+        // Arrange
+        var result = Fakes.ArticleResult();
+        client.GetAsync(result.Guid, Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ArticleResult>(result));
+
+        var article = await sut.GetAsync(result.Guid);
+
+        ArticleUpdatedEventArgs? received = null;
+        article.Updated += (_, e) => received = e;
+
+        // Act
+        article.RaiseUpdated();
+
+        // Assert
+        Assert.NotNull(received);
+        Assert.Equal(result.Guid, received.Guid);
+    }
+
+    [Fact]
+    public async Task GetAsync_Should_TrackEntity_So_RaiseDeleted_FiresEntityDeletedEvent()
+    {
+        // Arrange
+        var result = Fakes.ArticleResult();
+        client.GetAsync(result.Guid, Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ArticleResult>(result));
+
+        var article = await sut.GetAsync(result.Guid);
+
+        ArticleDeletedEventArgs? received = null;
+        article.Deleted += (_, e) => received = e;
+
+        // Act
+        article.RaiseDeleted();
+
+        // Assert
+        Assert.NotNull(received);
+        Assert.Equal(result.Guid, received.Guid);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Should_TrackEntity_So_RaiseUpdated_FiresEntityUpdatedEvent()
+    {
+        // Arrange
+        var guid = Guid.NewGuid();
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<Guid>(guid));
+
+        var article = await sut.CreateAsync("My Article");
+
+        ArticleUpdatedEventArgs? received = null;
+        article.Updated += (_, e) => received = e;
+
+        // Act
+        article.RaiseUpdated();
+
+        // Assert
+        Assert.NotNull(received);
+        Assert.Equal(guid, received.Guid);
     }
 
     private static class Fakes

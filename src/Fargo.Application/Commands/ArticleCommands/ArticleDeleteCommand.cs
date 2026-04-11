@@ -1,3 +1,4 @@
+using Fargo.Application.Events;
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
@@ -26,7 +27,8 @@ public sealed class ArticleDeleteCommandHandler(
         ArticleService articleService,
         IArticleRepository articleRepository,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ArticleDeleteCommand>
 {
     /// <summary>
@@ -54,5 +56,7 @@ public sealed class ArticleDeleteCommandHandler(
         await articleService.DeleteArticle(article, cancellationToken);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await eventPublisher.PublishArticleDeleted(article.Guid, article.Partitions.Select(p => p.Guid).ToList(), cancellationToken);
     }
 }

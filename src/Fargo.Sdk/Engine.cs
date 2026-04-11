@@ -1,5 +1,6 @@
 using Fargo.Sdk.Articles;
 using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Events;
 using Fargo.Sdk.Http;
 using Fargo.Sdk.Items;
 using Fargo.Sdk.Partitions;
@@ -7,6 +8,7 @@ using Fargo.Sdk.UserGroups;
 using Fargo.Sdk.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+
 
 namespace Fargo.Sdk;
 
@@ -19,7 +21,7 @@ public sealed class Engine : IEngine
     {
         httpClient = new HttpClient();
 
-        var session = new AuthSession();
+        session = new AuthSession();
 
         var logger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<FargoSdkHttpClient>();
 
@@ -30,25 +32,29 @@ public sealed class Engine : IEngine
         var authLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationManager>();
 
         Authentication = new AuthenticationManager(authClient, session, authLogger, sessionStore);
-        Users = new UserClient(fargoHttpClient);
-        UserGroups = new UserGroupClient(fargoHttpClient);
+        hubConnection = new FargoHubConnection();
+        var usersLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<UserManager>();
+        Users = new UserManager(new UserClient(fargoHttpClient), hubConnection, usersLogger);
+        var userGroupsLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<UserGroupManager>();
+        UserGroups = new UserGroupManager(new UserGroupClient(fargoHttpClient), hubConnection, userGroupsLogger);
         var articlesLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<ArticleManager>();
-        Articles = new ArticleManager(new ArticleClient(fargoHttpClient), articlesLogger);
-        Items = new ItemClient(fargoHttpClient);
-        Partitions = new PartitionClient(fargoHttpClient);
+        Articles = new ArticleManager(new ArticleClient(fargoHttpClient), hubConnection, articlesLogger);
+        Items = new ItemManager(new ItemClient(fargoHttpClient), hubConnection);
+        var partitionsLogger = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<PartitionManager>();
+        Partitions = new PartitionManager(new PartitionClient(fargoHttpClient), hubConnection, partitionsLogger);
     }
 
     public IAuthenticationManager Authentication { get; }
 
-    public IUserClient Users { get; }
+    public IUserManager Users { get; }
 
-    public IUserGroupClient UserGroups { get; }
+    public IUserGroupManager UserGroups { get; }
 
     public IArticleManager Articles { get; }
 
-    public IItemClient Items { get; }
+    public IItemManager Items { get; }
 
-    public IPartitionClient Partitions { get; }
+    public IPartitionManager Partitions { get; }
 
     /// <summary>
     /// Configures the server URL without performing any authentication.
@@ -68,27 +74,43 @@ public sealed class Engine : IEngine
         fargoHttpClient.SetBaseUrl(server);
 
         await Authentication.LogInAsync(nameid, password, cancellationToken);
+
+        await hubConnection.ConnectAsync(server, () => Task.FromResult(session.AccessToken), cancellationToken);
     }
 
-    public Task LogOutAsync(CancellationToken cancellationToken = default)
+    public async Task LogOutAsync(CancellationToken cancellationToken = default)
     {
-        return Authentication.LogOutAsync(cancellationToken);
+        await hubConnection.DisconnectAsync(cancellationToken);
+
+        await Authentication.LogOutAsync(cancellationToken);
     }
 
     public async Task<bool> RestoreSessionAsync(string server, CancellationToken cancellationToken = default)
     {
         fargoHttpClient.SetBaseUrl(server);
 
-        return await Authentication.RestoreAsync(cancellationToken);
+        var restored = await Authentication.RestoreAsync(cancellationToken);
+
+        if (restored)
+        {
+            await hubConnection.ConnectAsync(server, () => Task.FromResult(session.AccessToken), cancellationToken);
+        }
+
+        return restored;
     }
 
     public void Dispose()
     {
         Authentication.Dispose();
+        _ = hubConnection.DisposeAsync();
         httpClient.Dispose();
     }
 
     private readonly HttpClient httpClient;
 
     private readonly FargoSdkHttpClient fargoHttpClient;
+
+    private readonly AuthSession session;
+
+    private readonly FargoHubConnection hubConnection;
 }

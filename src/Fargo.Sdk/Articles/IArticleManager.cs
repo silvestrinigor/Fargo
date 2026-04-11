@@ -62,4 +62,7 @@ public interface IArticleManager
     Task DeleteAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
+
+    /// <summary>Raised when any authenticated client creates an article.</summary>
+    event EventHandler<ArticleCreatedEventArgs>? Created;
 }
