@@ -1,32 +1,33 @@
 <li>
-    <div class="tree-node-row @(SelectedGuid == Node.EntityGuid ? "selected" : null)">
+    <div class="tree-node-row @(SelectedGuid == Node.EntityGuid ? "selected" : null)"
+         @onclick="(() => OnSelect.InvokeAsync(Node))">
+
         <button type="button"
-                class="tree-toggle"
-                disabled="@(!Node.HasChildren)"
-                @onclick="(() => OnToggle.InvokeAsync(Node))">
-            @(Node.HasChildren ? (Node.IsExpanded ? "−" : "+") : "·")
+                class="tree-chevron @(Node.IsExpanded ? "open" : null)"
+                style="@(Node.HasChildren ? null : "visibility:hidden")"
+                @onclick="(() => OnToggle.InvokeAsync(Node))"
+                @onclick:stopPropagation="true">
         </button>
 
-        <button type="button" class="tree-node-button" @onclick="(() => OnSelect.InvokeAsync(Node))">
-            @if (Node.Icon is not null)
+        @if (Node.Icon is not null)
+        {
+            <img src="@Node.Icon" class="tree-node-icon" alt="" aria-hidden="true" />
+        }
+
+        <span class="tree-node-copy">
+            <span class="tree-node-title">@Node.Title</span>
+            @if (!string.IsNullOrWhiteSpace(Node.Subtitle))
             {
-                <img src="@Node.Icon" class="tree-node-icon" alt="" aria-hidden="true" />
+                <span class="tree-node-subtitle">@Node.Subtitle</span>
             }
-            <span class="tree-node-copy">
-                <span class="tree-node-title">@Node.Title</span>
-                @if (!string.IsNullOrWhiteSpace(Node.Subtitle))
-                {
-                    <span class="tree-node-subtitle">@Node.Subtitle</span>
-                }
-            </span>
+        </span>
 
-            <span class="tree-node-meta">
-                @if (!Node.IsActive)
-                {
-                    <span class="tree-badge">inactive</span>
-                }
-            </span>
-        </button>
+        <span class="tree-node-meta">
+            @if (!Node.IsActive)
+            {
+                <span class="tree-badge">inactive</span>
+            }
+        </span>
     </div>
 
     @if (Node.IsExpanded)

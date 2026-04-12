@@ -134,9 +134,7 @@ label {
 
 .primary-button,
 .ghost-button,
-.link-button,
-.tree-toggle,
-.tree-node-button {
+.link-button {
     border-radius: 12px;
     border: 1px solid transparent;
     cursor: pointer;
@@ -155,9 +153,7 @@ label {
     filter: brightness(1.05);
 }
 
-.ghost-button,
-.tree-toggle,
-.tree-node-button {
+.ghost-button {
     padding: 0.7rem 0.95rem;
     background: rgba(255, 255, 255, 0.02);
     color: var(--text);
@@ -567,33 +563,52 @@ label {
 }
 
 .tree-node-row {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.45rem;
-}
-
-.tree-node-row.selected .tree-node-button {
-    border-color: rgba(91, 156, 255, 0.6);
-    background: rgba(91, 156, 255, 0.12);
-}
-
-.tree-toggle {
-    width: 2.4rem;
-    padding-inline: 0;
-}
-
-.tree-toggle:disabled {
-    cursor: default;
-    opacity: 0.75;
-}
-
-.tree-node-button {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    text-align: left;
+    gap: 0.3rem;
+    padding: 0.38rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 100ms ease;
     min-width: 0;
+}
+
+.tree-node-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tree-node-row.selected {
+    background: rgba(91, 156, 255, 0.1);
+    outline: 1px solid rgba(91, 156, 255, 0.4);
+    outline-offset: -1px;
+}
+
+.tree-chevron {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--muted);
+    line-height: 1;
+}
+
+.tree-chevron::before {
+    content: "›";
+    font-size: 0.95rem;
+    display: inline-block;
+    transition: transform 150ms ease;
+    opacity: 0.7;
+}
+
+.tree-chevron.open::before {
+    transform: rotate(90deg);
 }
 
 .tree-node-icon {
@@ -626,6 +641,7 @@ label {
     align-items: center;
     gap: 0.45rem;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .tree-count,
