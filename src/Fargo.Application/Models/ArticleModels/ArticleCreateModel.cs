@@ -27,4 +27,7 @@ public record ArticleCreateModel(
     Name Name,
     Description? Description = null,
     Guid? FirstPartition = null,
-    Mass? Mass = null);
+    Mass? Mass = null,
+    Length? LengthX = null,
+    Length? LengthY = null,
+    Length? LengthZ = null);

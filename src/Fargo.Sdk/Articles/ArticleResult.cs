@@ -10,5 +10,8 @@ public sealed record ArticleResult(
     Guid Guid,
     string Name,
     string Description,
-    MassDto? Mass = null
+    MassDto? Mass = null,
+    LengthDto? LengthX = null,
+    LengthDto? LengthY = null,
+    LengthDto? LengthZ = null
 );

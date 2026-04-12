@@ -100,7 +100,10 @@ public sealed class ArticleCreateCommandHandler(
         {
             Name = command.Article.Name,
             Description = command.Article.Description ?? Description.Empty,
-            Mass = command.Article.Mass
+            Mass = command.Article.Mass,
+            LengthX = command.Article.LengthX,
+            LengthY = command.Article.LengthY,
+            LengthZ = command.Article.LengthZ
         };
 
         article.Partitions.Add(partition);

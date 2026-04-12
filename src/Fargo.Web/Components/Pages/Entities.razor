@@ -145,31 +145,83 @@
                 else
                 {
                     <div class="workspace-stack">
+                        <div class="tab-bar">
+                            <button type="button" class="tab-button @(articleTab == "info" ? "active" : null)" @onclick='() => articleTab = "info"'>Info</button>
+                            <button type="button" class="tab-button @(articleTab == "metrics" ? "active" : null)" @onclick='() => articleTab = "metrics"'>Metrics</button>
+                        </div>
                         <section class="workspace-panel">
                             <EditForm Model="articleEditModel" OnValidSubmit="SaveArticleAsync" class="editor-form">
                                 <DataAnnotationsValidator />
-                                <label>
-                                    <span>Name</span>
-                                    <InputText @bind-Value="articleEditModel.Name" class="text-field" />
-                                    <ValidationMessage For="() => articleEditModel.Name" />
-                                </label>
-                                <label>
-                                    <span>Description</span>
-                                    <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
-                                </label>
-                                <label>
-                                    <span>Mass</span>
-                                    <div class="mass-input">
-                                        <InputNumber @bind-Value="articleEditModel.MassValue" class="text-field" placeholder="optional" />
-                                        <select value="@articleEditModel.MassUnit" @onchange="OnArticleMassUnitChanged" class="select-field">
-                                            <option value="g">g</option>
-                                            <option value="kg">kg</option>
-                                            <option value="mg">mg</option>
-                                            <option value="lb">lb</option>
-                                            <option value="oz">oz</option>
-                                        </select>
-                                    </div>
-                                </label>
+                                @if (articleTab == "info")
+                                {
+                                    <label>
+                                        <span>Name</span>
+                                        <InputText @bind-Value="articleEditModel.Name" class="text-field" />
+                                        <ValidationMessage For="() => articleEditModel.Name" />
+                                    </label>
+                                    <label>
+                                        <span>Description</span>
+                                        <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label>
+                                        <span>Mass</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.MassValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.MassUnit" @onchange="OnArticleMassUnitChanged" class="select-field">
+                                                <option value="g">g</option>
+                                                <option value="kg">kg</option>
+                                                <option value="mg">mg</option>
+                                                <option value="lb">lb</option>
+                                                <option value="oz">oz</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <span>LengthX</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.LengthXValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.LengthXUnit" @onchange="OnArticleLengthXUnitChanged" class="select-field">
+                                                <option value="mm">mm</option>
+                                                <option value="cm">cm</option>
+                                                <option value="m">m</option>
+                                                <option value="km">km</option>
+                                                <option value="in">in</option>
+                                                <option value="ft">ft</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <span>LengthY</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.LengthYValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.LengthYUnit" @onchange="OnArticleLengthYUnitChanged" class="select-field">
+                                                <option value="mm">mm</option>
+                                                <option value="cm">cm</option>
+                                                <option value="m">m</option>
+                                                <option value="km">km</option>
+                                                <option value="in">in</option>
+                                                <option value="ft">ft</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <span>LengthZ</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.LengthZValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.LengthZUnit" @onchange="OnArticleLengthZUnitChanged" class="select-field">
+                                                <option value="mm">mm</option>
+                                                <option value="cm">cm</option>
+                                                <option value="m">m</option>
+                                                <option value="km">km</option>
+                                                <option value="in">in</option>
+                                                <option value="ft">ft</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                }
                                 <div class="dialog-actions">
                                     <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
                                         @(isSavingArticle ? "Saving..." : "Save")
@@ -291,30 +343,82 @@
             @if (ActiveSection == "articles")
             {
                 <h2>New Article</h2>
+                <div class="tab-bar">
+                    <button type="button" class="tab-button @(articleCreateTab == "info" ? "active" : null)" @onclick='() => articleCreateTab = "info"'>Info</button>
+                    <button type="button" class="tab-button @(articleCreateTab == "metrics" ? "active" : null)" @onclick='() => articleCreateTab = "metrics"'>Metrics</button>
+                </div>
                 <EditForm Model="articleCreateModel" OnValidSubmit="CreateArticleAsync" class="editor-form">
                     <DataAnnotationsValidator />
-                    <label>
-                        <span>Name</span>
-                        <InputText @bind-Value="articleCreateModel.Name" class="text-field" />
-                        <ValidationMessage For="() => articleCreateModel.Name" />
-                    </label>
-                    <label>
-                        <span>Description</span>
-                        <InputTextArea @bind-Value="articleCreateModel.Description" class="text-area" />
-                    </label>
-                    <label>
-                        <span>Mass</span>
-                        <div class="mass-input">
-                            <InputNumber @bind-Value="articleCreateModel.MassValue" class="text-field" placeholder="optional" />
-                            <select @bind="articleCreateModel.MassUnit" class="select-field">
-                                <option value="g">g</option>
-                                <option value="kg">kg</option>
-                                <option value="mg">mg</option>
-                                <option value="lb">lb</option>
-                                <option value="oz">oz</option>
-                            </select>
-                        </div>
-                    </label>
+                    @if (articleCreateTab == "info")
+                    {
+                        <label>
+                            <span>Name</span>
+                            <InputText @bind-Value="articleCreateModel.Name" class="text-field" />
+                            <ValidationMessage For="() => articleCreateModel.Name" />
+                        </label>
+                        <label>
+                            <span>Description</span>
+                            <InputTextArea @bind-Value="articleCreateModel.Description" class="text-area" />
+                        </label>
+                    }
+                    else
+                    {
+                        <label>
+                            <span>Mass</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.MassValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.MassUnit" class="select-field">
+                                    <option value="g">g</option>
+                                    <option value="kg">kg</option>
+                                    <option value="mg">mg</option>
+                                    <option value="lb">lb</option>
+                                    <option value="oz">oz</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <span>LengthX</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.LengthXValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.LengthXUnit" class="select-field">
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <span>LengthY</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.LengthYValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.LengthYUnit" class="select-field">
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <span>LengthZ</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.LengthZValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.LengthZUnit" class="select-field">
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </label>
+                    }
                     <div class="dialog-actions">
                         <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
                         <button type="submit" class="primary-button" disabled="@isCreating">
@@ -447,7 +551,13 @@
         articleEditModel.Name != _origArticleName ||
         (articleEditModel.Description ?? "") != (_origArticleDescription ?? "") ||
         articleEditModel.MassValue != _origArticleMassValue ||
-        articleEditModel.MassUnit != (selectedArticle.Mass?.Unit ?? "g"));
+        articleEditModel.MassUnit != (selectedArticle.Mass?.Unit ?? "g") ||
+        articleEditModel.LengthXValue != _origArticleLengthXValue ||
+        articleEditModel.LengthXUnit != (selectedArticle.LengthX?.Unit ?? "m") ||
+        articleEditModel.LengthYValue != _origArticleLengthYValue ||
+        articleEditModel.LengthYUnit != (selectedArticle.LengthY?.Unit ?? "m") ||
+        articleEditModel.LengthZValue != _origArticleLengthZValue ||
+        articleEditModel.LengthZUnit != (selectedArticle.LengthZ?.Unit ?? "m"));
 
     private bool userIsDirty => selectedUser is not null && (
         userEditModel.Nameid != _origUserNameid ||
@@ -481,6 +591,11 @@
     private string? _origArticleName;
     private string? _origArticleDescription;
     private double? _origArticleMassValue;
+    private double? _origArticleLengthXValue;
+    private double? _origArticleLengthYValue;
+    private double? _origArticleLengthZValue;
+    private string articleTab = "info";
+    private string articleCreateTab = "info";
 
     // Item state
     private Fargo.Sdk.Items.Item? selectedItem;
@@ -515,6 +630,10 @@
             _origArticleName = null;
             _origArticleDescription = null;
             _origArticleMassValue = null;
+            _origArticleLengthXValue = null;
+            _origArticleLengthYValue = null;
+            _origArticleLengthZValue = null;
+            articleTab = "info";
             _origUserNameid = null;
             _origUserFirstName = null;
             _origUserLastName = null;
@@ -555,6 +674,7 @@
         createErrorMessage = null;
         partitionCreateModel = new PartitionCreateForm();
         articleCreateModel = new ArticleCreateForm();
+        articleCreateTab = "info";
         userCreateModel = new UserCreateForm();
         itemCreateModel = new ItemCreateForm();
     }
@@ -678,9 +798,18 @@
             articleEditModel.Description = selectedArticle.Description;
             articleEditModel.MassValue = selectedArticle.Mass?.Value;
             articleEditModel.MassUnit = selectedArticle.Mass?.Unit ?? "g";
+            articleEditModel.LengthXValue = selectedArticle.LengthX?.Value;
+            articleEditModel.LengthXUnit = selectedArticle.LengthX?.Unit ?? "m";
+            articleEditModel.LengthYValue = selectedArticle.LengthY?.Value;
+            articleEditModel.LengthYUnit = selectedArticle.LengthY?.Unit ?? "m";
+            articleEditModel.LengthZValue = selectedArticle.LengthZ?.Value;
+            articleEditModel.LengthZUnit = selectedArticle.LengthZ?.Unit ?? "m";
             _origArticleName = selectedArticle.Name;
             _origArticleDescription = selectedArticle.Description;
             _origArticleMassValue = selectedArticle.Mass?.Value;
+            _origArticleLengthXValue = selectedArticle.LengthX?.Value;
+            _origArticleLengthYValue = selectedArticle.LengthY?.Value;
+            _origArticleLengthZValue = selectedArticle.LengthZ?.Value;
         }
         catch (FargoSdkApiException ex)
         {
@@ -704,11 +833,23 @@
             var newMass = articleEditModel.MassValue is null
                 ? null
                 : new Fargo.Sdk.Articles.MassDto(articleEditModel.MassValue.Value, articleEditModel.MassUnit);
+            var newX = articleEditModel.LengthXValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleEditModel.LengthXValue.Value, articleEditModel.LengthXUnit);
+            var newY = articleEditModel.LengthYValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleEditModel.LengthYValue.Value, articleEditModel.LengthYUnit);
+            var newZ = articleEditModel.LengthZValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleEditModel.LengthZValue.Value, articleEditModel.LengthZUnit);
             await selectedArticle.UpdateAsync(a =>
             {
                 a.Name = articleEditModel.Name!;
                 a.Description = articleEditModel.Description ?? string.Empty;
                 a.Mass = newMass;
+                a.LengthX = newX;
+                a.LengthY = newY;
+                a.LengthZ = newZ;
             });
             await LoadArticleAsync();
         }
@@ -732,10 +873,22 @@
             var createMass = articleCreateModel.MassValue is null
                 ? null
                 : new Fargo.Sdk.Articles.MassDto(articleCreateModel.MassValue.Value, articleCreateModel.MassUnit);
+            var createX = articleCreateModel.LengthXValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleCreateModel.LengthXValue.Value, articleCreateModel.LengthXUnit);
+            var createY = articleCreateModel.LengthYValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleCreateModel.LengthYValue.Value, articleCreateModel.LengthYUnit);
+            var createZ = articleCreateModel.LengthZValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleCreateModel.LengthZValue.Value, articleCreateModel.LengthZUnit);
             var article = await Engine.Articles.CreateAsync(
                 articleCreateModel.Name!,
                 articleCreateModel.Description,
-                mass: createMass);
+                mass: createMass,
+                lengthX: createX,
+                lengthY: createY,
+                lengthZ: createZ);
             Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
         }
         catch (FargoSdkApiException ex)
@@ -752,6 +905,22 @@
     {
         articleEditModel.MassUnit = e.Value?.ToString() ?? "g";
     }
+
+    private void OnArticleLengthXUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.LengthXUnit = e.Value?.ToString() ?? "m";
+    }
+
+    private void OnArticleLengthYUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.LengthYUnit = e.Value?.ToString() ?? "m";
+    }
+
+    private void OnArticleLengthZUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.LengthZUnit = e.Value?.ToString() ?? "m";
+    }
+
 
     // Item
 
@@ -906,6 +1075,12 @@
         public string? Description { get; set; }
         public double? MassValue { get; set; }
         public string MassUnit { get; set; } = "g";
+        public double? LengthXValue { get; set; }
+        public string LengthXUnit { get; set; } = "m";
+        public double? LengthYValue { get; set; }
+        public string LengthYUnit { get; set; } = "m";
+        public double? LengthZValue { get; set; }
+        public string LengthZUnit { get; set; } = "m";
     }
 
     private sealed class ArticleEditForm
@@ -915,6 +1090,12 @@
         public string? Description { get; set; }
         public double? MassValue { get; set; }
         public string MassUnit { get; set; } = "g";
+        public double? LengthXValue { get; set; }
+        public string LengthXUnit { get; set; } = "m";
+        public double? LengthYValue { get; set; }
+        public string LengthYUnit { get; set; } = "m";
+        public double? LengthZValue { get; set; }
+        public string LengthZUnit { get; set; } = "m";
     }
 
     private sealed class UserCreateForm

@@ -22,5 +22,8 @@ public sealed record ArticleInformation(
     Guid Guid,
     Name Name,
     Description Description,
-    Mass? Mass
+    Mass? Mass,
+    Length? LengthX = null,
+    Length? LengthY = null,
+    Length? LengthZ = null
 );

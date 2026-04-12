@@ -104,7 +104,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         // Act
@@ -121,7 +121,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         // Act
@@ -135,7 +135,7 @@ public sealed class ArticleManagerTests
     public async Task CreateAsync_Should_ThrowFargoSdkApiException_When_CreationFails()
     {
         // Arrange
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         // Act / Assert
@@ -219,7 +219,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         var article = await sut.CreateAsync("My Article");

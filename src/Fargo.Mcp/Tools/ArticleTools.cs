@@ -37,7 +37,7 @@ public sealed class ArticleTools(IEngine engine)
         try
         {
             await using var article = await engine.Articles.GetAsync(Guid.Parse(articleGuid));
-            return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Mass });
+            return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Mass, article.LengthX, article.LengthY, article.LengthZ });
         }
         catch (Exception ex)
         {
@@ -51,13 +51,22 @@ public sealed class ArticleTools(IEngine engine)
         [Description("An optional description.")] string? description = null,
         [Description("GUID of the partition to associate with the article. Omit to use the global partition.")] string? partitionGuid = null,
         [Description("Mass value of the article. Omit if unknown.")] double? massValue = null,
-        [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g")
+        [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g",
+        [Description("LengthX dimension value of the article. Omit if unknown.")] double? lengthXValue = null,
+        [Description("LengthX dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthXUnit = "m",
+        [Description("LengthY dimension value of the article. Omit if unknown.")] double? lengthYValue = null,
+        [Description("LengthY dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthYUnit = "m",
+        [Description("LengthZ dimension value of the article. Omit if unknown.")] double? lengthZValue = null,
+        [Description("LengthZ dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthZUnit = "m")
     {
         try
         {
             Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
             var mass = massValue is null ? null : new Fargo.Sdk.Articles.MassDto(massValue.Value, massUnit);
-            await using var article = await engine.Articles.CreateAsync(name, description, firstPartition, mass);
+            var lengthX = lengthXValue is null ? null : new Fargo.Sdk.Articles.LengthDto(lengthXValue.Value, lengthXUnit);
+            var lengthY = lengthYValue is null ? null : new Fargo.Sdk.Articles.LengthDto(lengthYValue.Value, lengthYUnit);
+            var lengthZ = lengthZValue is null ? null : new Fargo.Sdk.Articles.LengthDto(lengthZValue.Value, lengthZUnit);
+            await using var article = await engine.Articles.CreateAsync(name, description, firstPartition, mass, lengthX, lengthY, lengthZ);
             return $"Created article with GUID: {article.Guid}";
         }
         catch (Exception ex)
@@ -66,13 +75,19 @@ public sealed class ArticleTools(IEngine engine)
         }
     }
 
-    [McpServerTool(Name = "update_article"), Description("Updates an article's name, description, and/or mass.")]
+    [McpServerTool(Name = "update_article"), Description("Updates an article's name, description, mass, and/or dimensions.")]
     public async Task<string> UpdateArticle(
         [Description("The GUID of the article to update.")] string articleGuid,
         [Description("The new name. Omit to leave unchanged.")] string? name = null,
         [Description("The new description. Omit to leave unchanged.")] string? description = null,
         [Description("New mass value. Omit to leave unchanged.")] double? massValue = null,
-        [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g")
+        [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g",
+        [Description("New LengthX dimension value. Omit to leave unchanged.")] double? lengthXValue = null,
+        [Description("LengthX dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthXUnit = "m",
+        [Description("New LengthY dimension value. Omit to leave unchanged.")] double? lengthYValue = null,
+        [Description("LengthY dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthYUnit = "m",
+        [Description("New LengthZ dimension value. Omit to leave unchanged.")] double? lengthZValue = null,
+        [Description("LengthZ dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthZUnit = "m")
     {
         try
         {
@@ -92,6 +107,21 @@ public sealed class ArticleTools(IEngine engine)
                 if (massValue is not null)
                 {
                     a.Mass = new Fargo.Sdk.Articles.MassDto(massValue.Value, massUnit);
+                }
+
+                if (lengthXValue is not null)
+                {
+                    a.LengthX = new Fargo.Sdk.Articles.LengthDto(lengthXValue.Value, lengthXUnit);
+                }
+
+                if (lengthYValue is not null)
+                {
+                    a.LengthY = new Fargo.Sdk.Articles.LengthDto(lengthYValue.Value, lengthYUnit);
+                }
+
+                if (lengthZValue is not null)
+                {
+                    a.LengthZ = new Fargo.Sdk.Articles.LengthDto(lengthZValue.Value, lengthZUnit);
                 }
             });
             return "Article updated successfully.";

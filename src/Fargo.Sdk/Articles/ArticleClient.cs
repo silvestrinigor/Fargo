@@ -60,6 +60,9 @@ public sealed class ArticleClient : IArticleClient
         string? description = null,
         Guid? firstPartition = null,
         MassDto? mass = null,
+        LengthDto? lengthX = null,
+        LengthDto? lengthY = null,
+        LengthDto? lengthZ = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
@@ -71,7 +74,10 @@ public sealed class ArticleClient : IArticleClient
                     name,
                     description,
                     firstPartition,
-                    mass
+                    mass,
+                    lengthX,
+                    lengthY,
+                    lengthZ
                 }
             },
             cancellationToken);
@@ -89,11 +95,14 @@ public sealed class ArticleClient : IArticleClient
         string? name = null,
         string? description = null,
         MassDto? mass = null,
+        LengthDto? lengthX = null,
+        LengthDto? lengthY = null,
+        LengthDto? lengthZ = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
             $"/articles/{articleGuid}",
-            new { name, description, mass },
+            new { name, description, mass, lengthX, lengthY, lengthZ },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

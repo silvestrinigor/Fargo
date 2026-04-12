@@ -75,6 +75,21 @@ public sealed class ArticleUpdateCommandHandler(
             article.Mass = command.Article.Mass;
         }
 
+        if (command.Article.LengthX is not null)
+        {
+            article.LengthX = command.Article.LengthX;
+        }
+
+        if (command.Article.LengthY is not null)
+        {
+            article.LengthY = command.Article.LengthY;
+        }
+
+        if (command.Article.LengthZ is not null)
+        {
+            article.LengthZ = command.Article.LengthZ;
+        }
+
         await unitOfWork.SaveChanges(cancellationToken);
 
         await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);

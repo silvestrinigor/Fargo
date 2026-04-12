@@ -23,6 +23,18 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             .HasConversion<MassDoubleConverter>()
             .IsRequired(false);
 
+        builder.Property(x => x.LengthX)
+            .HasConversion<LengthDoubleConverter>()
+            .IsRequired(false);
+
+        builder.Property(x => x.LengthY)
+            .HasConversion<LengthDoubleConverter>()
+            .IsRequired(false);
+
+        builder.Property(x => x.LengthZ)
+            .HasConversion<LengthDoubleConverter>()
+            .IsRequired(false);
+
         builder.HasMany(a => a.Partitions).WithMany(p => p.ArticleMembers);
     }
 }

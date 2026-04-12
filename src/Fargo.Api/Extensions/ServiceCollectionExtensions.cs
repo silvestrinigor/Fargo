@@ -40,6 +40,7 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new NameidJsonConverter());
                 options.SerializerOptions.Converters.Add(new NodeidJsonConverter());
                 options.SerializerOptions.Converters.Add(new MassJsonConverter());
+                options.SerializerOptions.Converters.Add(new LengthJsonConverter());
             });
 
             return services;

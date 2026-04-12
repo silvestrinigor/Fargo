@@ -49,7 +49,10 @@ public static class ArticleMappings
             a.Guid,
             a.Name,
             a.Description,
-            a.Mass
+            a.Mass,
+            a.LengthX,
+            a.LengthY,
+            a.LengthZ
         );
 
     /// <summary>
@@ -77,7 +80,10 @@ public static class ArticleMappings
             a.Guid,
             a.Name,
             a.Description,
-            a.Mass
+            a.Mass,
+            a.LengthX,
+            a.LengthY,
+            a.LengthZ
         );
     }
 }

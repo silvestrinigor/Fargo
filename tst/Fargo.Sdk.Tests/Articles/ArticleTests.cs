@@ -12,7 +12,7 @@ public sealed class ArticleTests
 
     public ArticleTests()
     {
-        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<CancellationToken>())
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
         sut = new Article(ArticleGuid, "Original Name", "Original Description", (MassDto?)null, client);
@@ -27,7 +27,7 @@ public sealed class ArticleTests
         await sut.UpdateAsync(x => x.Name = "New Name");
 
         // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<MassDto?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class ArticleTests
         });
 
         // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<MassDto?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public sealed class ArticleTests
     public async Task UpdateAsync_Should_ThrowFargoSdkApiException_When_UpdateFails()
     {
         // Arrange
-        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<CancellationToken>())
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         // Act / Assert

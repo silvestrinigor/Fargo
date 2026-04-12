@@ -144,6 +144,44 @@ label {
     flex: 1;
 }
 
+.metric-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.metric-input .text-field {
+    flex: 1;
+}
+
+.tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.5rem 1rem;
+    color: var(--text-muted, #888);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px;
+}
+
+.tab-button:hover {
+    color: var(--text);
+}
+
+.tab-button.active {
+    color: var(--text);
+    border-bottom-color: var(--accent, #4a9eff);
+    font-weight: 500;
+}
+
 .checkbox-row {
     display: flex;
     align-items: center;

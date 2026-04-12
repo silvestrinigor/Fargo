@@ -17,5 +17,8 @@ namespace Fargo.Application.Models.ArticleModels;
 public sealed record ArticleUpdateModel(
         Name? Name = null,
         Description? Description = null,
-        Mass? Mass = null
+        Mass? Mass = null,
+        Length? LengthX = null,
+        Length? LengthY = null,
+        Length? LengthZ = null
         );
