@@ -8,6 +8,10 @@
         </button>
 
         <button type="button" class="tree-node-button" @onclick="(() => OnSelect.InvokeAsync(Node))">
+            @if (Node.Icon is not null)
+            {
+                <img src="@Node.Icon" class="tree-node-icon" alt="" aria-hidden="true" />
+            }
             <span class="tree-node-copy">
                 <span class="tree-node-title">@Node.Title</span>
                 @if (!string.IsNullOrWhiteSpace(Node.Subtitle))
