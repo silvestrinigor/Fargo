@@ -1,5 +1,5 @@
+using Fargo.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using UnitsNet;
 
 namespace Fargo.Infrastructure.Converters;
 

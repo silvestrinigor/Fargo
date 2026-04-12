@@ -1,5 +1,3 @@
-using UnitsNet;
-
 namespace Fargo.Domain.ValueObjects;
 
 /// <summary>

@@ -1,5 +1,4 @@
 using Fargo.Domain.ValueObjects;
-using UnitsNet;
 
 namespace Fargo.Application.Models.ArticleModels;
 
