@@ -1,4 +1,5 @@
 using Fargo.Domain.ValueObjects;
+using UnitsNet;
 
 namespace Fargo.Application.Models.ArticleModels;
 
@@ -16,5 +17,6 @@ namespace Fargo.Application.Models.ArticleModels;
 /// </param>
 public sealed record ArticleUpdateModel(
         Name? Name = null,
-        Description? Description = null
+        Description? Description = null,
+        Mass? Mass = null
         );

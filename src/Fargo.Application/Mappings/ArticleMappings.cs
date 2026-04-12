@@ -48,7 +48,8 @@ public static class ArticleMappings
         a => new ArticleInformation(
             a.Guid,
             a.Name,
-            a.Description
+            a.Description,
+            a.Mass
         );
 
     /// <summary>
@@ -75,7 +76,8 @@ public static class ArticleMappings
         return new ArticleInformation(
             a.Guid,
             a.Name,
-            a.Description
+            a.Description,
+            a.Mass
         );
     }
 }

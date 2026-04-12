@@ -51,6 +51,7 @@ public interface IArticleManager
         string name,
         string? description = null,
         Guid? firstPartition = null,
+        MassDto? mass = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

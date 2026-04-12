@@ -70,6 +70,11 @@ public sealed class ArticleUpdateCommandHandler(
             article.Description = command.Article.Description.Value;
         }
 
+        if (command.Article.Mass is not null)
+        {
+            article.Mass = command.Article.Mass;
+        }
+
         await unitOfWork.SaveChanges(cancellationToken);
 
         await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);

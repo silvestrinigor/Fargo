@@ -99,7 +99,8 @@ public sealed class ArticleCreateCommandHandler(
         var article = new Article
         {
             Name = command.Article.Name,
-            Description = command.Article.Description ?? Description.Empty
+            Description = command.Article.Description ?? Description.Empty,
+            Mass = command.Article.Mass
         };
 
         article.Partitions.Add(partition);

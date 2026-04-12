@@ -126,6 +126,24 @@ label {
     resize: vertical;
 }
 
+.select-field {
+    padding: 0.8rem 0.95rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #111723;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.mass-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mass-input .text-field {
+    flex: 1;
+}
+
 .checkbox-row {
     display: flex;
     align-items: center;

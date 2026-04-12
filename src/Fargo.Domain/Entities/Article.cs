@@ -1,5 +1,6 @@
 using Fargo.Domain.Collections;
 using Fargo.Domain.ValueObjects;
+using UnitsNet;
 
 namespace Fargo.Domain.Entities;
 
@@ -56,6 +57,12 @@ public class Article : ModifiedEntity, IPartitionedEntity
         get;
         init;
     } = [];
+
+    /// <summary>
+    /// Gets or sets the physical mass of the article.
+    /// Stored in grams; clients may use any <see cref="UnitsNet.Mass"/> unit for display.
+    /// </summary>
+    public Mass? Mass { get; set; }
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

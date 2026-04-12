@@ -37,7 +37,7 @@ public sealed class ArticleTools(IEngine engine)
         try
         {
             await using var article = await engine.Articles.GetAsync(Guid.Parse(articleGuid));
-            return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description });
+            return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Mass });
         }
         catch (Exception ex)
         {
@@ -49,12 +49,15 @@ public sealed class ArticleTools(IEngine engine)
     public async Task<string> CreateArticle(
         [Description("The display name of the article.")] string name,
         [Description("An optional description.")] string? description = null,
-        [Description("GUID of the partition to associate with the article. Omit to use the global partition.")] string? partitionGuid = null)
+        [Description("GUID of the partition to associate with the article. Omit to use the global partition.")] string? partitionGuid = null,
+        [Description("Mass value of the article. Omit if unknown.")] double? massValue = null,
+        [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g")
     {
         try
         {
             Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-            await using var article = await engine.Articles.CreateAsync(name, description, firstPartition);
+            var mass = massValue is null ? null : new Fargo.Sdk.Articles.MassDto(massValue.Value, massUnit);
+            await using var article = await engine.Articles.CreateAsync(name, description, firstPartition, mass);
             return $"Created article with GUID: {article.Guid}";
         }
         catch (Exception ex)
@@ -63,11 +66,13 @@ public sealed class ArticleTools(IEngine engine)
         }
     }
 
-    [McpServerTool(Name = "update_article"), Description("Updates an article's name and/or description.")]
+    [McpServerTool(Name = "update_article"), Description("Updates an article's name, description, and/or mass.")]
     public async Task<string> UpdateArticle(
         [Description("The GUID of the article to update.")] string articleGuid,
         [Description("The new name. Omit to leave unchanged.")] string? name = null,
-        [Description("The new description. Omit to leave unchanged.")] string? description = null)
+        [Description("The new description. Omit to leave unchanged.")] string? description = null,
+        [Description("New mass value. Omit to leave unchanged.")] double? massValue = null,
+        [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g")
     {
         try
         {
@@ -82,6 +87,11 @@ public sealed class ArticleTools(IEngine engine)
                 if (description is not null)
                 {
                     a.Description = description;
+                }
+
+                if (massValue is not null)
+                {
+                    a.Mass = new Fargo.Sdk.Articles.MassDto(massValue.Value, massUnit);
                 }
             });
             return "Article updated successfully.";

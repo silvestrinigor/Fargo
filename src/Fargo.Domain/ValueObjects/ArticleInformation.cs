@@ -1,3 +1,5 @@
+using UnitsNet;
+
 namespace Fargo.Domain.ValueObjects;
 
 /// <summary>
@@ -21,5 +23,6 @@ namespace Fargo.Domain.ValueObjects;
 public sealed record ArticleInformation(
     Guid Guid,
     Name Name,
-    Description Description
+    Description Description,
+    Mass? Mass
 );

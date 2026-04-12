@@ -8,11 +8,12 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class Article : IAsyncDisposable
 {
-    internal Article(Guid guid, string name, string description, IArticleClient client, Func<ValueTask>? onDispose = null)
+    internal Article(Guid guid, string name, string description, MassDto? mass, IArticleClient client, Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
         _name = name;
         _description = description;
+        _mass = mass;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -39,6 +40,18 @@ public sealed class Article : IAsyncDisposable
     {
         get => _description;
         set => _description = value;
+    }
+
+    private MassDto? _mass;
+
+    /// <summary>
+    /// The physical mass of the article.
+    /// The value and unit are preserved as returned by the API; no unit conversion is performed.
+    /// </summary>
+    public MassDto? Mass
+    {
+        get => _mass;
+        set => _mass = value;
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -68,7 +81,7 @@ public sealed class Article : IAsyncDisposable
     public async Task UpdateAsync(Action<Article> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        var result = await client.UpdateAsync(Guid, _name, _description, cancellationToken);
+        var result = await client.UpdateAsync(Guid, _name, _description, _mass, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!.Detail);

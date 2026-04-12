@@ -53,6 +53,7 @@ public interface IArticleClient
         string name,
         string? description = null,
         Guid? firstPartition = null,
+        MassDto? mass = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -66,6 +67,7 @@ public interface IArticleClient
         Guid articleGuid,
         string? name = null,
         string? description = null,
+        MassDto? mass = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

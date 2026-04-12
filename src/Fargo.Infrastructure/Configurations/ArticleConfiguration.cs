@@ -1,4 +1,5 @@
 using Fargo.Domain.Entities;
+using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,6 +18,10 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(x => x.Description).IsRequired();
 
         builder.Property(x => x.EditedByGuid);
+
+        builder.Property(x => x.Mass)
+            .HasConversion<MassDoubleConverter>()
+            .IsRequired(false);
 
         builder.HasMany(a => a.Partitions).WithMany(p => p.ArticleMembers);
     }

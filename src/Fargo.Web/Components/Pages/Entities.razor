@@ -157,6 +157,19 @@
                                     <span>Description</span>
                                     <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
                                 </label>
+                                <label>
+                                    <span>Mass</span>
+                                    <div class="mass-input">
+                                        <InputNumber @bind-Value="articleEditModel.MassValue" class="text-field" placeholder="optional" />
+                                        <select value="@articleEditModel.MassUnit" @onchange="OnArticleMassUnitChanged" class="select-field">
+                                            <option value="g">g</option>
+                                            <option value="kg">kg</option>
+                                            <option value="mg">mg</option>
+                                            <option value="lb">lb</option>
+                                            <option value="oz">oz</option>
+                                        </select>
+                                    </div>
+                                </label>
                                 <div class="dialog-actions">
                                     <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
                                         @(isSavingArticle ? "Saving..." : "Save")
@@ -289,6 +302,19 @@
                         <span>Description</span>
                         <InputTextArea @bind-Value="articleCreateModel.Description" class="text-area" />
                     </label>
+                    <label>
+                        <span>Mass</span>
+                        <div class="mass-input">
+                            <InputNumber @bind-Value="articleCreateModel.MassValue" class="text-field" placeholder="optional" />
+                            <select @bind="articleCreateModel.MassUnit" class="select-field">
+                                <option value="g">g</option>
+                                <option value="kg">kg</option>
+                                <option value="mg">mg</option>
+                                <option value="lb">lb</option>
+                                <option value="oz">oz</option>
+                            </select>
+                        </div>
+                    </label>
                     <div class="dialog-actions">
                         <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
                         <button type="submit" class="primary-button" disabled="@isCreating">
@@ -419,7 +445,9 @@
 
     private bool articleIsDirty => selectedArticle is not null && (
         articleEditModel.Name != _origArticleName ||
-        (articleEditModel.Description ?? "") != (_origArticleDescription ?? ""));
+        (articleEditModel.Description ?? "") != (_origArticleDescription ?? "") ||
+        articleEditModel.MassValue != _origArticleMassValue ||
+        articleEditModel.MassUnit != (selectedArticle.Mass?.Unit ?? "g"));
 
     private bool userIsDirty => selectedUser is not null && (
         userEditModel.Nameid != _origUserNameid ||
@@ -452,6 +480,7 @@
     private ArticleEditForm articleEditModel = new();
     private string? _origArticleName;
     private string? _origArticleDescription;
+    private double? _origArticleMassValue;
 
     // Item state
     private Fargo.Sdk.Items.Item? selectedItem;
@@ -485,6 +514,7 @@
             _origPartitionDescription = null;
             _origArticleName = null;
             _origArticleDescription = null;
+            _origArticleMassValue = null;
             _origUserNameid = null;
             _origUserFirstName = null;
             _origUserLastName = null;
@@ -646,8 +676,11 @@
             selectedArticle = await Engine.Articles.GetAsync(EntityGuid!.Value);
             articleEditModel.Name = selectedArticle.Name;
             articleEditModel.Description = selectedArticle.Description;
+            articleEditModel.MassValue = selectedArticle.Mass?.Value;
+            articleEditModel.MassUnit = selectedArticle.Mass?.Unit ?? "g";
             _origArticleName = selectedArticle.Name;
             _origArticleDescription = selectedArticle.Description;
+            _origArticleMassValue = selectedArticle.Mass?.Value;
         }
         catch (FargoSdkApiException ex)
         {
@@ -668,10 +701,14 @@
 
         try
         {
+            var newMass = articleEditModel.MassValue is null
+                ? null
+                : new Fargo.Sdk.Articles.MassDto(articleEditModel.MassValue.Value, articleEditModel.MassUnit);
             await selectedArticle.UpdateAsync(a =>
             {
                 a.Name = articleEditModel.Name!;
                 a.Description = articleEditModel.Description ?? string.Empty;
+                a.Mass = newMass;
             });
             await LoadArticleAsync();
         }
@@ -692,9 +729,13 @@
 
         try
         {
+            var createMass = articleCreateModel.MassValue is null
+                ? null
+                : new Fargo.Sdk.Articles.MassDto(articleCreateModel.MassValue.Value, articleCreateModel.MassUnit);
             var article = await Engine.Articles.CreateAsync(
                 articleCreateModel.Name!,
-                articleCreateModel.Description);
+                articleCreateModel.Description,
+                mass: createMass);
             Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
         }
         catch (FargoSdkApiException ex)
@@ -705,6 +746,11 @@
         {
             isCreating = false;
         }
+    }
+
+    private void OnArticleMassUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.MassUnit = e.Value?.ToString() ?? "g";
     }
 
     // Item
@@ -858,6 +904,8 @@
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
         public string? Description { get; set; }
+        public double? MassValue { get; set; }
+        public string MassUnit { get; set; } = "g";
     }
 
     private sealed class ArticleEditForm
@@ -865,6 +913,8 @@
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
         public string? Description { get; set; }
+        public double? MassValue { get; set; }
+        public string MassUnit { get; set; } = "g";
     }
 
     private sealed class UserCreateForm

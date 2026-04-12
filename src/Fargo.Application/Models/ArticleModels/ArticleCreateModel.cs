@@ -1,4 +1,5 @@
 using Fargo.Domain.ValueObjects;
+using UnitsNet;
 
 namespace Fargo.Application.Models.ArticleModels;
 
@@ -26,4 +27,5 @@ namespace Fargo.Application.Models.ArticleModels;
 public record ArticleCreateModel(
     Name Name,
     Description? Description = null,
-    Guid? FirstPartition = null);
+    Guid? FirstPartition = null,
+    Mass? Mass = null);
