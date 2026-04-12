@@ -24,6 +24,7 @@ namespace Fargo.Application.Models.PartitionModels;
 /// If <see langword="null"/>, the parent partition will not be modified.
 /// </param>
 public sealed record PartitionUpdateModel(
+        Name? Name = null,
         Description? Description = null,
         Guid? ParentPartitionGuid = null
         );

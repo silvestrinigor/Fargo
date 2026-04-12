@@ -387,7 +387,16 @@ label {
     background: rgba(255, 255, 255, 0.02);
 }
 
-.workspace-pane-footer .primary-button {
+.workspace-pane-footer .ghost-button {
+    width: 100%;
+}
+
+.workspace-detail-body {
+    align-content: start;
+}
+
+.workspace-detail-body > .workspace-stack {
+    max-width: 560px;
     width: 100%;
 }
 

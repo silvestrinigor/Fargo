@@ -33,7 +33,8 @@ namespace Fargo.Application.Queries.PartitionQueries;
 public sealed record PartitionManyQuery(
         Guid? ParentPartitionGuid = null,
         DateTimeOffset? AsOfDateTime = null,
-        Pagination? Pagination = null
+        Pagination? Pagination = null,
+        bool RootOnly = false
         ) : IQuery<IReadOnlyCollection<PartitionInformation>>;
 
 /// <summary>
@@ -130,6 +131,7 @@ public sealed class PartitionManyQueryHandler(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     query.ParentPartitionGuid,
                     query.AsOfDateTime,
+                    query.RootOnly,
                     cancellationToken
                     );
 
@@ -142,6 +144,7 @@ public sealed class PartitionManyQueryHandler(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     query.ParentPartitionGuid,
                     query.AsOfDateTime,
+                    query.RootOnly,
                     cancellationToken
                     );
 

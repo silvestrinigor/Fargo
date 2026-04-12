@@ -40,6 +40,7 @@ public interface IPartitionClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        bool? rootOnly = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -69,6 +70,7 @@ public interface IPartitionClient
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid partitionGuid,
+        string? name = null,
         string? description = null,
         Guid? parentPartitionGuid = null,
         CancellationToken cancellationToken = default);

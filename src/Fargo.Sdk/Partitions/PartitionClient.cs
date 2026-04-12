@@ -36,13 +36,15 @@ public sealed class PartitionClient : IPartitionClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        bool? rootOnly = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
             ("parentPartitionGuid", parentPartitionGuid?.ToString()),
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
-            ("limit", limit?.ToString()));
+            ("limit", limit?.ToString()),
+            ("rootOnly", rootOnly?.ToString().ToLowerInvariant()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>(
             $"/partitions{query}",
@@ -77,13 +79,14 @@ public sealed class PartitionClient : IPartitionClient
 
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid partitionGuid,
+        string? name = null,
         string? description = null,
         Guid? parentPartitionGuid = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
             $"/partitions/{partitionGuid}",
-            new { description, parentPartitionGuid },
+            new { name, description, parentPartitionGuid },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

@@ -71,6 +71,7 @@ public interface IPartitionRepository
         Pagination pagination,
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
+        bool rootOnly = false,
         CancellationToken cancellationToken = default
     );
 
@@ -106,6 +107,7 @@ public interface IPartitionRepository
         Pagination pagination,
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
+        bool rootOnly = false,
         CancellationToken cancellationToken = default
     );
 

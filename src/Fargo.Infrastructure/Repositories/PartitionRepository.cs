@@ -48,11 +48,14 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         Pagination pagination,
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
+        bool rootOnly = false,
         CancellationToken cancellationToken = default)
     {
         return await partitions
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Where(partition =>
+                !rootOnly || partition.ParentPartitionGuid == null)
             .Where(partition =>
                 parentPartitionGuid == null ||
                 partition.ParentPartitionGuid == parentPartitionGuid)
@@ -67,6 +70,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         Pagination pagination,
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
+        bool rootOnly = false,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partitionGuids);
@@ -80,6 +84,8 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
             .Where(partition => partitionGuids.Contains(partition.Guid))
+            .Where(partition =>
+                !rootOnly || partition.ParentPartitionGuid == null)
             .Where(partition =>
                 parentPartitionGuid == null ||
                 partition.ParentPartitionGuid == parentPartitionGuid)

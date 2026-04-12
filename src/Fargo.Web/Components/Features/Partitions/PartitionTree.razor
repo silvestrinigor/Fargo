@@ -53,7 +53,7 @@ else
 
         try
         {
-            var roots = await Engine.Partitions.GetManyAsync();
+            var roots = await Engine.Partitions.GetManyAsync(rootOnly: true);
             rootNodes.Clear();
             rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }

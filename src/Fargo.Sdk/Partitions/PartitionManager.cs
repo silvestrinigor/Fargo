@@ -56,9 +56,10 @@ public sealed class PartitionManager : IPartitionManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        bool? rootOnly = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await client.GetManyAsync(parentPartitionGuid, temporalAsOf, page, limit, cancellationToken);
+        var response = await client.GetManyAsync(parentPartitionGuid, temporalAsOf, page, limit, rootOnly, cancellationToken);
 
         if (!response.IsSuccess)
         {
