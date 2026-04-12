@@ -387,6 +387,19 @@ label {
     background: rgba(255, 255, 255, 0.02);
 }
 
+.workspace-pane-footer .primary-button {
+    width: 100%;
+}
+
+.workspace-detail-body .dialog-actions {
+    position: sticky;
+    bottom: -1rem;
+    background: rgba(22, 28, 38, 0.96);
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+    z-index: 1;
+}
+
 .explorer-caption {
     margin: 0;
     color: var(--muted);

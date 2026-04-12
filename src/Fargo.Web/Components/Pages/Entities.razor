@@ -47,6 +47,10 @@
                 <PartitionTree />
             }
         </div>
+
+        <div class="workspace-pane-footer">
+            <button type="button" class="primary-button" @onclick="OpenCreateDialog">New @ActiveSectionSingularLabel</button>
+        </div>
     </aside>
 
     <section class="workspace-detail">
@@ -61,7 +65,9 @@
             {
                 @if (!EntityGuid.HasValue)
                 {
-                    <UsersPanel />
+                    <div class="detail-empty">
+                        <p class="muted-text">Select a user to view and edit their details.</p>
+                    </div>
                 }
                 else if (userIsLoading)
                 {
@@ -76,10 +82,6 @@
                     <div class="workspace-stack">
                         <section class="workspace-panel">
                             <dl class="detail-list detail-list--inline">
-                                <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedUser.Guid</dd>
-                                </div>
                                 <div>
                                     <dt>Status</dt>
                                     <dd>@(selectedUser.IsActive ? "Active" : "Inactive")</dd>
@@ -140,12 +142,6 @@
                 {
                     <div class="workspace-stack">
                         <section class="workspace-panel">
-                            <dl class="detail-list detail-list--inline">
-                                <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedArticle.Guid</dd>
-                                </div>
-                            </dl>
                             <EditForm Model="articleEditModel" OnValidSubmit="SaveArticleAsync" class="editor-form">
                                 <DataAnnotationsValidator />
                                 <label>
@@ -189,10 +185,6 @@
                         <section class="workspace-panel">
                             <dl class="detail-list detail-list--inline">
                                 <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedItem.Guid</dd>
-                                </div>
-                                <div>
                                     <dt>Article</dt>
                                     <dd>@selectedItem.ArticleGuid</dd>
                                 </div>
@@ -207,7 +199,7 @@
                 @if (!EntityGuid.HasValue)
                 {
                     <div class="detail-empty">
-                        <p class="muted-text">Select a partition to inspect its details, edit its description, or create a child.</p>
+                        <p class="muted-text">Select a partition to inspect its details and edit its description.</p>
                     </div>
                 }
                 else if (partitionIsLoading)
@@ -222,12 +214,7 @@
                 {
                     <div class="workspace-stack">
                         <section class="workspace-panel">
-                            <h2>@selectedPartition.Name</h2>
                             <dl class="detail-list detail-list--inline">
-                                <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedPartition.Guid</dd>
-                                </div>
                                 <div>
                                     <dt>Parent</dt>
                                     <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root")</dd>
@@ -238,6 +225,10 @@
                                 </div>
                             </dl>
                             <EditForm Model="partitionEditModel" OnValidSubmit="SavePartitionAsync" class="editor-form">
+                                <label>
+                                    <span>Name</span>
+                                    <input type="text" class="text-field" value="@selectedPartition.Name" disabled />
+                                </label>
                                 <label>
                                     <span>Description</span>
                                     <InputTextArea @bind-Value="partitionEditModel.Description" class="text-area" />
@@ -252,27 +243,6 @@
                                 </div>
                             </EditForm>
                         </section>
-
-                        <section class="workspace-panel">
-                            <h2>Create child</h2>
-                            <EditForm Model="partitionCreateModel" OnValidSubmit="CreateChildPartitionAsync" class="editor-form">
-                                <DataAnnotationsValidator />
-                                <label>
-                                    <span>Name</span>
-                                    <InputText @bind-Value="partitionCreateModel.Name" class="text-field" />
-                                    <ValidationMessage For="() => partitionCreateModel.Name" />
-                                </label>
-                                <label>
-                                    <span>Description</span>
-                                    <InputTextArea @bind-Value="partitionCreateModel.Description" class="text-area" />
-                                </label>
-                                <div class="dialog-actions">
-                                    <button type="submit" class="primary-button" disabled="@isCreatingChild">
-                                        @(isCreatingChild ? "Creating..." : "Create")
-                                    </button>
-                                </div>
-                            </EditForm>
-                        </section>
                     </div>
                 }
             }
@@ -280,6 +250,118 @@
         </div>
     </section>
 </div>
+
+@if (createDialogOpen)
+{
+    <div class="overlay">
+        <section class="dialog-card">
+            @if (!string.IsNullOrWhiteSpace(createErrorMessage))
+            {
+                <div class="error-banner">@createErrorMessage</div>
+            }
+            @if (ActiveSection == "articles")
+            {
+                <h2>New Article</h2>
+                <EditForm Model="articleCreateModel" OnValidSubmit="CreateArticleAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>Name</span>
+                        <InputText @bind-Value="articleCreateModel.Name" class="text-field" />
+                        <ValidationMessage For="() => articleCreateModel.Name" />
+                    </label>
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="articleCreateModel.Description" class="text-area" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else if (ActiveSection == "users")
+            {
+                <h2>New User</h2>
+                <EditForm Model="userCreateModel" OnValidSubmit="CreateUserAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>NameId</span>
+                        <InputText @bind-Value="userCreateModel.Nameid" class="text-field" />
+                        <ValidationMessage For="() => userCreateModel.Nameid" />
+                    </label>
+                    <label>
+                        <span>Password</span>
+                        <input type="password" class="text-field" @bind="userCreateModel.Password" />
+                        <ValidationMessage For="() => userCreateModel.Password" />
+                    </label>
+                    <div class="editor-form two-columns">
+                        <label>
+                            <span>First name</span>
+                            <InputText @bind-Value="userCreateModel.FirstName" class="text-field" />
+                        </label>
+                        <label>
+                            <span>Last name</span>
+                            <InputText @bind-Value="userCreateModel.LastName" class="text-field" />
+                        </label>
+                    </div>
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="userCreateModel.Description" class="text-area" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else if (ActiveSection == "items")
+            {
+                <h2>New Item</h2>
+                <EditForm Model="itemCreateModel" OnValidSubmit="CreateItemAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>Article GUID</span>
+                        <InputText @bind-Value="itemCreateModel.ArticleGuid" class="text-field" />
+                        <ValidationMessage For="() => itemCreateModel.ArticleGuid" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else
+            {
+                @* Partitions *@
+                <h2>New Partition</h2>
+                <EditForm Model="partitionCreateModel" OnValidSubmit="CreatePartitionAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>Name</span>
+                        <InputText @bind-Value="partitionCreateModel.Name" class="text-field" />
+                        <ValidationMessage For="() => partitionCreateModel.Name" />
+                    </label>
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="partitionCreateModel.Description" class="text-area" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </section>
+    </div>
+}
 
 @code {
     [Parameter] public string? Section { get; set; }
@@ -301,17 +383,32 @@
         _ => "Partitions"
     };
 
+    private string ActiveSectionSingularLabel => ActiveSection switch
+    {
+        "articles" => "Article",
+        "users" => "User",
+        "items" => "Item",
+        _ => "Partition"
+    };
+
     private bool sectionPickerOpen;
     private string? errorMessage;
+
+    // Create dialog state
+    private bool createDialogOpen;
+    private bool isCreating;
+    private string? createErrorMessage;
+    private PartitionCreateForm partitionCreateModel = new();
+    private ArticleCreateForm articleCreateModel = new();
+    private UserCreateForm userCreateModel = new();
+    private ItemCreateForm itemCreateModel = new();
 
     // Partition state
     private Fargo.Sdk.Partitions.Partition? selectedPartition;
     private bool partitionIsLoading;
     private bool isSavingPartition;
     private bool isDeletingPartition;
-    private bool isCreatingChild;
     private PartitionEditForm partitionEditModel = new();
-    private PartitionCreateForm partitionCreateModel = new();
 
     // Article state
     private Fargo.Sdk.Articles.Article? selectedArticle;
@@ -373,13 +470,28 @@
     private void TogglePicker() => sectionPickerOpen = !sectionPickerOpen;
     private void ClosePicker() => sectionPickerOpen = false;
 
+    private void OpenCreateDialog()
+    {
+        createDialogOpen = true;
+        createErrorMessage = null;
+        partitionCreateModel = new PartitionCreateForm();
+        articleCreateModel = new ArticleCreateForm();
+        userCreateModel = new UserCreateForm();
+        itemCreateModel = new ItemCreateForm();
+    }
+
+    private void CloseCreateDialog()
+    {
+        createDialogOpen = false;
+        createErrorMessage = null;
+    }
+
     // Partition
 
     private async Task LoadPartitionAsync()
     {
         selectedPartition = null;
         partitionEditModel = new PartitionEditForm();
-        partitionCreateModel = new PartitionCreateForm();
         partitionIsLoading = true;
 
         try
@@ -419,28 +531,26 @@
         }
     }
 
-    private async Task CreateChildPartitionAsync()
+    private async Task CreatePartitionAsync()
     {
-        if (!EntityGuid.HasValue) return;
-
-        isCreatingChild = true;
-        errorMessage = null;
+        isCreating = true;
+        createErrorMessage = null;
 
         try
         {
             var partition = await Engine.Partitions.CreateAsync(
                 partitionCreateModel.Name!,
                 partitionCreateModel.Description,
-                EntityGuid.Value);
+                EntityGuid.HasValue ? EntityGuid.Value : null);
             Navigation.NavigateTo($"/entities/partitions/{partition.Guid}", forceLoad: true);
         }
         catch (FargoSdkApiException ex)
         {
-            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
         }
         finally
         {
-            isCreatingChild = false;
+            isCreating = false;
         }
     }
 
@@ -515,6 +625,28 @@
         }
     }
 
+    private async Task CreateArticleAsync()
+    {
+        isCreating = true;
+        createErrorMessage = null;
+
+        try
+        {
+            var article = await Engine.Articles.CreateAsync(
+                articleCreateModel.Name!,
+                articleCreateModel.Description);
+            Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
     // Item
 
     private async Task LoadItemAsync()
@@ -533,6 +665,31 @@
         finally
         {
             itemIsLoading = false;
+        }
+    }
+
+    private async Task CreateItemAsync()
+    {
+        isCreating = true;
+        createErrorMessage = null;
+
+        try
+        {
+            if (!Guid.TryParse(itemCreateModel.ArticleGuid, out var articleGuid))
+            {
+                createErrorMessage = "Invalid article GUID.";
+                return;
+            }
+            var item = await Engine.Items.CreateAsync(articleGuid);
+            Navigation.NavigateTo($"/entities/items/{item.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreating = false;
         }
     }
 
@@ -590,6 +747,31 @@
         }
     }
 
+    private async Task CreateUserAsync()
+    {
+        isCreating = true;
+        createErrorMessage = null;
+
+        try
+        {
+            var user = await Engine.Users.CreateAsync(
+                userCreateModel.Nameid!,
+                userCreateModel.Password!,
+                string.IsNullOrWhiteSpace(userCreateModel.FirstName) ? null : userCreateModel.FirstName,
+                string.IsNullOrWhiteSpace(userCreateModel.LastName) ? null : userCreateModel.LastName,
+                userCreateModel.Description);
+            Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
     // Form models
 
     private sealed class PartitionCreateForm
@@ -604,10 +786,28 @@
         public string? Description { get; set; }
     }
 
+    private sealed class ArticleCreateForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+
     private sealed class ArticleEditForm
     {
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+
+    private sealed class UserCreateForm
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+        [Required(ErrorMessage = "Password is required.")]
+        public string? Password { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? Description { get; set; }
     }
 
@@ -618,5 +818,11 @@
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Description { get; set; }
+    }
+
+    private sealed class ItemCreateForm
+    {
+        [Required(ErrorMessage = "Article GUID is required.")]
+        public string? ArticleGuid { get; set; }
     }
 }

@@ -29,7 +29,6 @@ else
         <header class="app-header">
             <div class="app-header-side app-header-branding">
                 <div class="app-brand">Fargo</div>
-                <div class="app-subtitle">Tree-first administration workspace</div>
             </div>
 
             <nav class="app-nav" aria-label="Primary">
@@ -55,7 +54,8 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (FargoSession.IsReady && !FargoSession.IsAuthenticated && !Navigation.Uri.Contains("/login", StringComparison.OrdinalIgnoreCase))
+        if (FargoSession.IsReady && !FargoSession.IsAuthenticated && !Navigation.Uri.Contains("/login",
+StringComparison.OrdinalIgnoreCase))
         {
             Navigation.NavigateTo("/login", replace: true);
         }
