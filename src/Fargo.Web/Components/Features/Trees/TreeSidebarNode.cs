@@ -54,7 +54,6 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = item.Guid,
         Title = articleTitle ?? item.Guid.ToString("N")[..8],
-        Subtitle = $"Article: {item.ArticleGuid}",
         IsActive = true,
         HasChildren = false
     };
@@ -63,9 +62,6 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = user.Guid,
         Title = user.Nameid,
-        Subtitle = string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName)
-            ? null
-            : $"{user.FirstName} {user.LastName}".Trim(),
         IsActive = user.IsActive,
         HasChildren = false
     };
