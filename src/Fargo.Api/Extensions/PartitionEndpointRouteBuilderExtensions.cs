@@ -76,13 +76,15 @@ public static class PartitionEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOf,
         Page? page,
         Limit? limit,
+        bool? rootOnly,
         IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>> handler,
         CancellationToken cancellationToken)
     {
         var query = new PartitionManyQuery(
             parentPartitionGuid,
             temporalAsOf,
-            PaginationHelpers.CreatePagination(page, limit)
+            PaginationHelpers.CreatePagination(page, limit),
+            rootOnly ?? false
         );
 
         var response = await handler.Handle(query, cancellationToken);

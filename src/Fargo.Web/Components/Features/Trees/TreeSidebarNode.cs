@@ -14,6 +14,8 @@ public sealed class TreeSidebarNode
 
     public string? Subtitle { get; init; }
 
+    public string? Icon { get; init; }
+
     public bool IsActive { get; init; }
 
     public bool HasChildren { get; set; }
@@ -30,6 +32,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = p.Guid,
         Title = p.Name,
+        Icon = "partition.svg",
         IsActive = p.IsActive,
         HasChildren = true
     };
@@ -38,6 +41,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = ug.Guid,
         Title = ug.Nameid,
+        Icon = "user.svg",
         IsActive = ug.IsActive,
         HasChildren = false
     };
@@ -46,6 +50,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = a.Guid,
         Title = a.Name,
+        Icon = "article.svg",
         IsActive = true,
         HasChildren = false
     };
@@ -54,7 +59,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = item.Guid,
         Title = articleTitle ?? item.Guid.ToString("N")[..8],
-        Subtitle = $"Article: {item.ArticleGuid}",
+        Icon = "item.svg",
         IsActive = true,
         HasChildren = false
     };
@@ -63,9 +68,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = user.Guid,
         Title = user.Nameid,
-        Subtitle = string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName)
-            ? null
-            : $"{user.FirstName} {user.LastName}".Trim(),
+        Icon = "user.svg",
         IsActive = user.IsActive,
         HasChildren = false
     };

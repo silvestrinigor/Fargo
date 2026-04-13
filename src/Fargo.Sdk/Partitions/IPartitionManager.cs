@@ -22,6 +22,7 @@ public interface IPartitionManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        bool? rootOnly = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new partition and returns it as a live entity.</summary>

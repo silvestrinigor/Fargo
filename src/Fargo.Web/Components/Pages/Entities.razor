@@ -4,7 +4,7 @@
 @inject IEngine Engine
 @inject NavigationManager Navigation
 
-<PageTitle>Entities | Fargo</PageTitle>
+<PageTitle>Fargo Entities</PageTitle>
 
 @if (sectionPickerOpen)
 {
@@ -21,10 +21,14 @@
             @if (sectionPickerOpen)
             {
                 <div class="section-picker-menu">
-                    <a href="/entities/partitions" class="section-picker-item @(ActiveSection == "partitions" ? "active" : null)">Partitions</a>
-                    <a href="/entities/articles" class="section-picker-item @(ActiveSection == "articles" ? "active" : null)">Articles</a>
-                    <a href="/entities/users" class="section-picker-item @(ActiveSection == "users" ? "active" : null)">Users</a>
-                    <a href="/entities/items" class="section-picker-item @(ActiveSection == "items" ? "active" : null)">Items</a>
+                    <a href="/entities/partitions"
+                       class="section-picker-item @(ActiveSection == "partitions" ? "active" : null)">Partitions</a>
+                    <a href="/entities/articles"
+                       class="section-picker-item @(ActiveSection == "articles" ? "active" : null)">Articles</a>
+                    <a href="/entities/users"
+                       class="section-picker-item @(ActiveSection == "users" ? "active" : null)">Users</a>
+                    <a href="/entities/items"
+                       class="section-picker-item @(ActiveSection == "items" ? "active" : null)">Items</a>
                 </div>
             }
         </div>
@@ -47,6 +51,10 @@
                 <PartitionTree />
             }
         </div>
+
+        <div class="workspace-pane-footer">
+            <button type="button" class="ghost-button" @onclick="OpenCreateDialog">New @ActiveSectionSingularLabel</button>
+        </div>
     </aside>
 
     <section class="workspace-detail">
@@ -61,7 +69,9 @@
             {
                 @if (!EntityGuid.HasValue)
                 {
-                    <UsersPanel />
+                    <div class="detail-empty">
+                        <p class="muted-text">Select a user to view and edit their details.</p>
+                    </div>
                 }
                 else if (userIsLoading)
                 {
@@ -76,10 +86,6 @@
                     <div class="workspace-stack">
                         <section class="workspace-panel">
                             <dl class="detail-list detail-list--inline">
-                                <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedUser.Guid</dd>
-                                </div>
                                 <div>
                                     <dt>Status</dt>
                                     <dd>@(selectedUser.IsActive ? "Active" : "Inactive")</dd>
@@ -111,7 +117,7 @@
                                     <InputTextArea @bind-Value="userEditModel.Description" class="text-area" />
                                 </label>
                                 <div class="dialog-actions">
-                                    <button type="submit" class="primary-button" disabled="@isSavingUser">
+                                    <button type="submit" class="primary-button" disabled="@(!userIsDirty || isSavingUser)">
                                         @(isSavingUser ? "Saving..." : "Save")
                                     </button>
                                 </div>
@@ -139,26 +145,85 @@
                 else
                 {
                     <div class="workspace-stack">
+                        <div class="tab-bar">
+                            <button type="button" class="tab-button @(articleTab == "info" ? "active" : null)" @onclick='() => articleTab = "info"'>Info</button>
+                            <button type="button" class="tab-button @(articleTab == "metrics" ? "active" : null)" @onclick='() => articleTab = "metrics"'>Metrics</button>
+                        </div>
                         <section class="workspace-panel">
-                            <dl class="detail-list detail-list--inline">
-                                <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedArticle.Guid</dd>
-                                </div>
-                            </dl>
                             <EditForm Model="articleEditModel" OnValidSubmit="SaveArticleAsync" class="editor-form">
                                 <DataAnnotationsValidator />
-                                <label>
-                                    <span>Name</span>
-                                    <InputText @bind-Value="articleEditModel.Name" class="text-field" />
-                                    <ValidationMessage For="() => articleEditModel.Name" />
-                                </label>
-                                <label>
-                                    <span>Description</span>
-                                    <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
-                                </label>
+                                @if (articleTab == "info")
+                                {
+                                    <label>
+                                        <span>Name</span>
+                                        <InputText @bind-Value="articleEditModel.Name" class="text-field" />
+                                        <ValidationMessage For="() => articleEditModel.Name" />
+                                    </label>
+                                    <label>
+                                        <span>Description</span>
+                                        <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label>
+                                        <span>Mass</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.MassValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.MassUnit" @onchange="OnArticleMassUnitChanged" class="select-field">
+                                                <option value="g">g</option>
+                                                <option value="kg">kg</option>
+                                                <option value="mg">mg</option>
+                                                <option value="lb">lb</option>
+                                                <option value="oz">oz</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <span>LengthX</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.LengthXValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.LengthXUnit" @onchange="OnArticleLengthXUnitChanged" class="select-field">
+                                                <option value="mm">mm</option>
+                                                <option value="cm">cm</option>
+                                                <option value="m">m</option>
+                                                <option value="km">km</option>
+                                                <option value="in">in</option>
+                                                <option value="ft">ft</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <span>LengthY</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.LengthYValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.LengthYUnit" @onchange="OnArticleLengthYUnitChanged" class="select-field">
+                                                <option value="mm">mm</option>
+                                                <option value="cm">cm</option>
+                                                <option value="m">m</option>
+                                                <option value="km">km</option>
+                                                <option value="in">in</option>
+                                                <option value="ft">ft</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <span>LengthZ</span>
+                                        <div class="metric-input">
+                                            <InputNumber @bind-Value="articleEditModel.LengthZValue" class="text-field" placeholder="optional" />
+                                            <select value="@articleEditModel.LengthZUnit" @onchange="OnArticleLengthZUnitChanged" class="select-field">
+                                                <option value="mm">mm</option>
+                                                <option value="cm">cm</option>
+                                                <option value="m">m</option>
+                                                <option value="km">km</option>
+                                                <option value="in">in</option>
+                                                <option value="ft">ft</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                }
                                 <div class="dialog-actions">
-                                    <button type="submit" class="primary-button" disabled="@isSavingArticle">
+                                    <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
                                         @(isSavingArticle ? "Saving..." : "Save")
                                     </button>
                                 </div>
@@ -189,10 +254,6 @@
                         <section class="workspace-panel">
                             <dl class="detail-list detail-list--inline">
                                 <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedItem.Guid</dd>
-                                </div>
-                                <div>
                                     <dt>Article</dt>
                                     <dd>@selectedItem.ArticleGuid</dd>
                                 </div>
@@ -207,7 +268,7 @@
                 @if (!EntityGuid.HasValue)
                 {
                     <div class="detail-empty">
-                        <p class="muted-text">Select a partition to inspect its details, edit its description, or create a child.</p>
+                        <p class="muted-text">Select a partition to inspect its details and edit its description.</p>
                     </div>
                 }
                 else if (partitionIsLoading)
@@ -222,12 +283,7 @@
                 {
                     <div class="workspace-stack">
                         <section class="workspace-panel">
-                            <h2>@selectedPartition.Name</h2>
                             <dl class="detail-list detail-list--inline">
-                                <div>
-                                    <dt>Guid</dt>
-                                    <dd>@selectedPartition.Guid</dd>
-                                </div>
                                 <div>
                                     <dt>Parent</dt>
                                     <dd>@(selectedPartition.ParentPartitionGuid?.ToString() ?? "Root")</dd>
@@ -238,6 +294,22 @@
                                 </div>
                             </dl>
                             <EditForm Model="partitionEditModel" OnValidSubmit="SavePartitionAsync" class="editor-form">
+                                <DataAnnotationsValidator />
+                                @if (isGlobalPartition)
+                                {
+                                    <label>
+                                        <span>Name</span>
+                                        <input type="text" class="text-field" value="@selectedPartition.Name" disabled />
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label>
+                                        <span>Name</span>
+                                        <InputText @bind-Value="partitionEditModel.Name" class="text-field" />
+                                        <ValidationMessage For="() => partitionEditModel.Name" />
+                                    </label>
+                                }
                                 <label>
                                     <span>Description</span>
                                     <InputTextArea @bind-Value="partitionEditModel.Description" class="text-area" />
@@ -246,29 +318,8 @@
                                     <button type="button" class="ghost-button danger" @onclick="DeletePartitionAsync" disabled="@isDeletingPartition">
                                         @(isDeletingPartition ? "Deleting..." : "Delete")
                                     </button>
-                                    <button type="submit" class="primary-button" disabled="@isSavingPartition">
+                                    <button type="submit" class="primary-button" disabled="@(!partitionIsDirty || isSavingPartition)">
                                         @(isSavingPartition ? "Saving..." : "Save")
-                                    </button>
-                                </div>
-                            </EditForm>
-                        </section>
-
-                        <section class="workspace-panel">
-                            <h2>Create child</h2>
-                            <EditForm Model="partitionCreateModel" OnValidSubmit="CreateChildPartitionAsync" class="editor-form">
-                                <DataAnnotationsValidator />
-                                <label>
-                                    <span>Name</span>
-                                    <InputText @bind-Value="partitionCreateModel.Name" class="text-field" />
-                                    <ValidationMessage For="() => partitionCreateModel.Name" />
-                                </label>
-                                <label>
-                                    <span>Description</span>
-                                    <InputTextArea @bind-Value="partitionCreateModel.Description" class="text-area" />
-                                </label>
-                                <div class="dialog-actions">
-                                    <button type="submit" class="primary-button" disabled="@isCreatingChild">
-                                        @(isCreatingChild ? "Creating..." : "Create")
                                     </button>
                                 </div>
                             </EditForm>
@@ -280,6 +331,183 @@
         </div>
     </section>
 </div>
+
+@if (createDialogOpen)
+{
+    <div class="overlay">
+        <section class="dialog-card">
+            @if (!string.IsNullOrWhiteSpace(createErrorMessage))
+            {
+                <div class="error-banner">@createErrorMessage</div>
+            }
+            @if (ActiveSection == "articles")
+            {
+                <h2>New Article</h2>
+                <div class="tab-bar">
+                    <button type="button" class="tab-button @(articleCreateTab == "info" ? "active" : null)" @onclick='() => articleCreateTab = "info"'>Info</button>
+                    <button type="button" class="tab-button @(articleCreateTab == "metrics" ? "active" : null)" @onclick='() => articleCreateTab = "metrics"'>Metrics</button>
+                </div>
+                <EditForm Model="articleCreateModel" OnValidSubmit="CreateArticleAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    @if (articleCreateTab == "info")
+                    {
+                        <label>
+                            <span>Name</span>
+                            <InputText @bind-Value="articleCreateModel.Name" class="text-field" />
+                            <ValidationMessage For="() => articleCreateModel.Name" />
+                        </label>
+                        <label>
+                            <span>Description</span>
+                            <InputTextArea @bind-Value="articleCreateModel.Description" class="text-area" />
+                        </label>
+                    }
+                    else
+                    {
+                        <label>
+                            <span>Mass</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.MassValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.MassUnit" class="select-field">
+                                    <option value="g">g</option>
+                                    <option value="kg">kg</option>
+                                    <option value="mg">mg</option>
+                                    <option value="lb">lb</option>
+                                    <option value="oz">oz</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <span>LengthX</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.LengthXValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.LengthXUnit" class="select-field">
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <span>LengthY</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.LengthYValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.LengthYUnit" class="select-field">
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <span>LengthZ</span>
+                            <div class="metric-input">
+                                <InputNumber @bind-Value="articleCreateModel.LengthZValue" class="text-field" placeholder="optional" />
+                                <select @bind="articleCreateModel.LengthZUnit" class="select-field">
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </label>
+                    }
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else if (ActiveSection == "users")
+            {
+                <h2>New User</h2>
+                <EditForm Model="userCreateModel" OnValidSubmit="CreateUserAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>NameId</span>
+                        <InputText @bind-Value="userCreateModel.Nameid" class="text-field" />
+                        <ValidationMessage For="() => userCreateModel.Nameid" />
+                    </label>
+                    <label>
+                        <span>Password</span>
+                        <input type="password" class="text-field" @bind="userCreateModel.Password" />
+                        <ValidationMessage For="() => userCreateModel.Password" />
+                    </label>
+                    <div class="editor-form two-columns">
+                        <label>
+                            <span>First name</span>
+                            <InputText @bind-Value="userCreateModel.FirstName" class="text-field" />
+                        </label>
+                        <label>
+                            <span>Last name</span>
+                            <InputText @bind-Value="userCreateModel.LastName" class="text-field" />
+                        </label>
+                    </div>
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="userCreateModel.Description" class="text-area" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else if (ActiveSection == "items")
+            {
+                <h2>New Item</h2>
+                <EditForm Model="itemCreateModel" OnValidSubmit="CreateItemAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>Article GUID</span>
+                        <InputText @bind-Value="itemCreateModel.ArticleGuid" class="text-field" />
+                        <ValidationMessage For="() => itemCreateModel.ArticleGuid" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else
+            {
+                @* Partitions *@
+                <h2>New Partition</h2>
+                <EditForm Model="partitionCreateModel" OnValidSubmit="CreatePartitionAsync" class="editor-form">
+                    <DataAnnotationsValidator />
+                    <label>
+                        <span>Name</span>
+                        <InputText @bind-Value="partitionCreateModel.Name" class="text-field" />
+                        <ValidationMessage For="() => partitionCreateModel.Name" />
+                    </label>
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="partitionCreateModel.Description" class="text-area" />
+                    </label>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="CloseCreateDialog" disabled="@isCreating">Cancel</button>
+                        <button type="submit" class="primary-button" disabled="@isCreating">
+                            @(isCreating ? "Creating..." : "Create")
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </section>
+    </div>
+}
 
 @code {
     [Parameter] public string? Section { get; set; }
@@ -301,23 +529,73 @@
         _ => "Partitions"
     };
 
+    private string ActiveSectionSingularLabel => ActiveSection switch
+    {
+        "articles" => "Article",
+        "users" => "User",
+        "items" => "Item",
+        _ => "Partition"
+    };
+
     private bool sectionPickerOpen;
     private string? errorMessage;
+
+    // Computed partition properties
+    private bool isGlobalPartition => selectedPartition?.ParentPartitionGuid == null;
+
+    private bool partitionIsDirty => selectedPartition is not null && (
+        (!isGlobalPartition && partitionEditModel.Name != _origPartitionName) ||
+        (partitionEditModel.Description ?? "") != (_origPartitionDescription ?? ""));
+
+    private bool articleIsDirty => selectedArticle is not null && (
+        articleEditModel.Name != _origArticleName ||
+        (articleEditModel.Description ?? "") != (_origArticleDescription ?? "") ||
+        articleEditModel.MassValue != _origArticleMassValue ||
+        articleEditModel.MassUnit != (selectedArticle.Mass?.Unit ?? "g") ||
+        articleEditModel.LengthXValue != _origArticleLengthXValue ||
+        articleEditModel.LengthXUnit != (selectedArticle.LengthX?.Unit ?? "m") ||
+        articleEditModel.LengthYValue != _origArticleLengthYValue ||
+        articleEditModel.LengthYUnit != (selectedArticle.LengthY?.Unit ?? "m") ||
+        articleEditModel.LengthZValue != _origArticleLengthZValue ||
+        articleEditModel.LengthZUnit != (selectedArticle.LengthZ?.Unit ?? "m"));
+
+    private bool userIsDirty => selectedUser is not null && (
+        userEditModel.Nameid != _origUserNameid ||
+        (userEditModel.FirstName ?? "") != (_origUserFirstName ?? "") ||
+        (userEditModel.LastName ?? "") != (_origUserLastName ?? "") ||
+        (userEditModel.Description ?? "") != (_origUserDescription ?? ""));
+
+    // Create dialog state
+    private bool createDialogOpen;
+    private bool isCreating;
+    private string? createErrorMessage;
+    private PartitionCreateForm partitionCreateModel = new();
+    private ArticleCreateForm articleCreateModel = new();
+    private UserCreateForm userCreateModel = new();
+    private ItemCreateForm itemCreateModel = new();
 
     // Partition state
     private Fargo.Sdk.Partitions.Partition? selectedPartition;
     private bool partitionIsLoading;
     private bool isSavingPartition;
     private bool isDeletingPartition;
-    private bool isCreatingChild;
     private PartitionEditForm partitionEditModel = new();
-    private PartitionCreateForm partitionCreateModel = new();
+    private string? _origPartitionName;
+    private string? _origPartitionDescription;
 
     // Article state
     private Fargo.Sdk.Articles.Article? selectedArticle;
     private bool articleIsLoading;
     private bool isSavingArticle;
     private ArticleEditForm articleEditModel = new();
+    private string? _origArticleName;
+    private string? _origArticleDescription;
+    private double? _origArticleMassValue;
+    private double? _origArticleLengthXValue;
+    private double? _origArticleLengthYValue;
+    private double? _origArticleLengthZValue;
+    private string articleTab = "info";
+    private string articleCreateTab = "info";
 
     // Item state
     private Fargo.Sdk.Items.Item? selectedItem;
@@ -328,6 +606,10 @@
     private bool userIsLoading;
     private bool isSavingUser;
     private UserEditForm userEditModel = new();
+    private string? _origUserNameid;
+    private string? _origUserFirstName;
+    private string? _origUserLastName;
+    private string? _origUserDescription;
 
     protected override Task OnParametersSetAsync()
     {
@@ -343,6 +625,19 @@
             partitionEditModel = new PartitionEditForm();
             articleEditModel = new ArticleEditForm();
             userEditModel = new UserEditForm();
+            _origPartitionName = null;
+            _origPartitionDescription = null;
+            _origArticleName = null;
+            _origArticleDescription = null;
+            _origArticleMassValue = null;
+            _origArticleLengthXValue = null;
+            _origArticleLengthYValue = null;
+            _origArticleLengthZValue = null;
+            articleTab = "info";
+            _origUserNameid = null;
+            _origUserFirstName = null;
+            _origUserLastName = null;
+            _origUserDescription = null;
             return Task.CompletedTask;
         }
 
@@ -373,19 +668,38 @@
     private void TogglePicker() => sectionPickerOpen = !sectionPickerOpen;
     private void ClosePicker() => sectionPickerOpen = false;
 
+    private void OpenCreateDialog()
+    {
+        createDialogOpen = true;
+        createErrorMessage = null;
+        partitionCreateModel = new PartitionCreateForm();
+        articleCreateModel = new ArticleCreateForm();
+        articleCreateTab = "info";
+        userCreateModel = new UserCreateForm();
+        itemCreateModel = new ItemCreateForm();
+    }
+
+    private void CloseCreateDialog()
+    {
+        createDialogOpen = false;
+        createErrorMessage = null;
+    }
+
     // Partition
 
     private async Task LoadPartitionAsync()
     {
         selectedPartition = null;
         partitionEditModel = new PartitionEditForm();
-        partitionCreateModel = new PartitionCreateForm();
         partitionIsLoading = true;
 
         try
         {
             selectedPartition = await Engine.Partitions.GetAsync(EntityGuid!.Value);
+            partitionEditModel.Name = selectedPartition.Name;
             partitionEditModel.Description = selectedPartition.Description;
+            _origPartitionName = selectedPartition.Name;
+            _origPartitionDescription = selectedPartition.Description;
         }
         catch (FargoSdkApiException ex)
         {
@@ -406,7 +720,12 @@
 
         try
         {
-            await selectedPartition.UpdateAsync(p => p.Description = partitionEditModel.Description ?? string.Empty);
+            await selectedPartition.UpdateAsync(p =>
+            {
+                if (!isGlobalPartition && partitionEditModel.Name is not null)
+                    p.Name = partitionEditModel.Name;
+                p.Description = partitionEditModel.Description ?? string.Empty;
+            });
             await LoadPartitionAsync();
         }
         catch (FargoSdkApiException ex)
@@ -419,28 +738,26 @@
         }
     }
 
-    private async Task CreateChildPartitionAsync()
+    private async Task CreatePartitionAsync()
     {
-        if (!EntityGuid.HasValue) return;
-
-        isCreatingChild = true;
-        errorMessage = null;
+        isCreating = true;
+        createErrorMessage = null;
 
         try
         {
             var partition = await Engine.Partitions.CreateAsync(
                 partitionCreateModel.Name!,
                 partitionCreateModel.Description,
-                EntityGuid.Value);
+                EntityGuid.HasValue ? EntityGuid.Value : null);
             Navigation.NavigateTo($"/entities/partitions/{partition.Guid}", forceLoad: true);
         }
         catch (FargoSdkApiException ex)
         {
-            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
         }
         finally
         {
-            isCreatingChild = false;
+            isCreating = false;
         }
     }
 
@@ -479,6 +796,20 @@
             selectedArticle = await Engine.Articles.GetAsync(EntityGuid!.Value);
             articleEditModel.Name = selectedArticle.Name;
             articleEditModel.Description = selectedArticle.Description;
+            articleEditModel.MassValue = selectedArticle.Mass?.Value;
+            articleEditModel.MassUnit = selectedArticle.Mass?.Unit ?? "g";
+            articleEditModel.LengthXValue = selectedArticle.LengthX?.Value;
+            articleEditModel.LengthXUnit = selectedArticle.LengthX?.Unit ?? "m";
+            articleEditModel.LengthYValue = selectedArticle.LengthY?.Value;
+            articleEditModel.LengthYUnit = selectedArticle.LengthY?.Unit ?? "m";
+            articleEditModel.LengthZValue = selectedArticle.LengthZ?.Value;
+            articleEditModel.LengthZUnit = selectedArticle.LengthZ?.Unit ?? "m";
+            _origArticleName = selectedArticle.Name;
+            _origArticleDescription = selectedArticle.Description;
+            _origArticleMassValue = selectedArticle.Mass?.Value;
+            _origArticleLengthXValue = selectedArticle.LengthX?.Value;
+            _origArticleLengthYValue = selectedArticle.LengthY?.Value;
+            _origArticleLengthZValue = selectedArticle.LengthZ?.Value;
         }
         catch (FargoSdkApiException ex)
         {
@@ -499,11 +830,28 @@
 
         try
         {
+            var newMass = articleEditModel.MassValue is null
+                ? null
+                : new Fargo.Sdk.Articles.MassDto(articleEditModel.MassValue.Value, articleEditModel.MassUnit);
+            var newX = articleEditModel.LengthXValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleEditModel.LengthXValue.Value, articleEditModel.LengthXUnit);
+            var newY = articleEditModel.LengthYValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleEditModel.LengthYValue.Value, articleEditModel.LengthYUnit);
+            var newZ = articleEditModel.LengthZValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleEditModel.LengthZValue.Value, articleEditModel.LengthZUnit);
             await selectedArticle.UpdateAsync(a =>
             {
                 a.Name = articleEditModel.Name!;
                 a.Description = articleEditModel.Description ?? string.Empty;
+                a.Mass = newMass;
+                a.LengthX = newX;
+                a.LengthY = newY;
+                a.LengthZ = newZ;
             });
+            await LoadArticleAsync();
         }
         catch (FargoSdkApiException ex)
         {
@@ -514,6 +862,65 @@
             isSavingArticle = false;
         }
     }
+
+    private async Task CreateArticleAsync()
+    {
+        isCreating = true;
+        createErrorMessage = null;
+
+        try
+        {
+            var createMass = articleCreateModel.MassValue is null
+                ? null
+                : new Fargo.Sdk.Articles.MassDto(articleCreateModel.MassValue.Value, articleCreateModel.MassUnit);
+            var createX = articleCreateModel.LengthXValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleCreateModel.LengthXValue.Value, articleCreateModel.LengthXUnit);
+            var createY = articleCreateModel.LengthYValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleCreateModel.LengthYValue.Value, articleCreateModel.LengthYUnit);
+            var createZ = articleCreateModel.LengthZValue is null
+                ? null
+                : new Fargo.Sdk.Articles.LengthDto(articleCreateModel.LengthZValue.Value, articleCreateModel.LengthZUnit);
+            var article = await Engine.Articles.CreateAsync(
+                articleCreateModel.Name!,
+                articleCreateModel.Description,
+                mass: createMass,
+                lengthX: createX,
+                lengthY: createY,
+                lengthZ: createZ);
+            Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
+    private void OnArticleMassUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.MassUnit = e.Value?.ToString() ?? "g";
+    }
+
+    private void OnArticleLengthXUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.LengthXUnit = e.Value?.ToString() ?? "m";
+    }
+
+    private void OnArticleLengthYUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.LengthYUnit = e.Value?.ToString() ?? "m";
+    }
+
+    private void OnArticleLengthZUnitChanged(ChangeEventArgs e)
+    {
+        articleEditModel.LengthZUnit = e.Value?.ToString() ?? "m";
+    }
+
 
     // Item
 
@@ -536,6 +943,31 @@
         }
     }
 
+    private async Task CreateItemAsync()
+    {
+        isCreating = true;
+        createErrorMessage = null;
+
+        try
+        {
+            if (!Guid.TryParse(itemCreateModel.ArticleGuid, out var articleGuid))
+            {
+                createErrorMessage = "Invalid article GUID.";
+                return;
+            }
+            var item = await Engine.Items.CreateAsync(articleGuid);
+            Navigation.NavigateTo($"/entities/items/{item.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
     // User
 
     private async Task LoadUserAsync()
@@ -551,6 +983,10 @@
             userEditModel.FirstName = selectedUser.FirstName;
             userEditModel.LastName = selectedUser.LastName;
             userEditModel.Description = selectedUser.Description;
+            _origUserNameid = selectedUser.Nameid;
+            _origUserFirstName = selectedUser.FirstName;
+            _origUserLastName = selectedUser.LastName;
+            _origUserDescription = selectedUser.Description;
         }
         catch (FargoSdkApiException ex)
         {
@@ -590,6 +1026,31 @@
         }
     }
 
+    private async Task CreateUserAsync()
+    {
+        isCreating = true;
+        createErrorMessage = null;
+
+        try
+        {
+            var user = await Engine.Users.CreateAsync(
+                userCreateModel.Nameid!,
+                userCreateModel.Password!,
+                string.IsNullOrWhiteSpace(userCreateModel.FirstName) ? null : userCreateModel.FirstName,
+                string.IsNullOrWhiteSpace(userCreateModel.LastName) ? null : userCreateModel.LastName,
+                userCreateModel.Description);
+            Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            createErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to create." : ex.Message;
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
     // Form models
 
     private sealed class PartitionCreateForm
@@ -601,13 +1062,50 @@
 
     private sealed class PartitionEditForm
     {
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 100 characters.")]
+        public string? Name { get; set; }
         public string? Description { get; set; }
+    }
+
+    private sealed class ArticleCreateForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public double? MassValue { get; set; }
+        public string MassUnit { get; set; } = "g";
+        public double? LengthXValue { get; set; }
+        public string LengthXUnit { get; set; } = "m";
+        public double? LengthYValue { get; set; }
+        public string LengthYUnit { get; set; } = "m";
+        public double? LengthZValue { get; set; }
+        public string LengthZUnit { get; set; } = "m";
     }
 
     private sealed class ArticleEditForm
     {
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
+        public string? Description { get; set; }
+        public double? MassValue { get; set; }
+        public string MassUnit { get; set; } = "g";
+        public double? LengthXValue { get; set; }
+        public string LengthXUnit { get; set; } = "m";
+        public double? LengthYValue { get; set; }
+        public string LengthYUnit { get; set; } = "m";
+        public double? LengthZValue { get; set; }
+        public string LengthZUnit { get; set; } = "m";
+    }
+
+    private sealed class UserCreateForm
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+        [Required(ErrorMessage = "Password is required.")]
+        public string? Password { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? Description { get; set; }
     }
 
@@ -618,5 +1116,11 @@
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Description { get; set; }
+    }
+
+    private sealed class ItemCreateForm
+    {
+        [Required(ErrorMessage = "Article GUID is required.")]
+        public string? ArticleGuid { get; set; }
     }
 }

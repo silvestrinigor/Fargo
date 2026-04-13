@@ -152,6 +152,11 @@ public sealed class PartitionUpdateCommandHandler(
                     cancellationToken);
         }
 
+        if (command.Partition.Name is not null)
+        {
+            partition.Name = command.Partition.Name.Value;
+        }
+
         if (command.Partition.Description is not null)
         {
             partition.Description = command.Partition.Description.Value;

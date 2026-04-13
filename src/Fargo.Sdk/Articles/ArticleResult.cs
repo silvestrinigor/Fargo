@@ -9,5 +9,9 @@ namespace Fargo.Sdk.Articles;
 public sealed record ArticleResult(
     Guid Guid,
     string Name,
-    string Description
+    string Description,
+    MassDto? Mass = null,
+    LengthDto? LengthX = null,
+    LengthDto? LengthY = null,
+    LengthDto? LengthZ = null
 );

@@ -79,16 +79,20 @@ public sealed class ArticleManager : IArticleManager
         string name,
         string? description = null,
         Guid? firstPartition = null,
+        MassDto? mass = null,
+        LengthDto? lengthX = null,
+        LengthDto? lengthY = null,
+        LengthDto? lengthZ = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await client.CreateAsync(name, description, firstPartition, cancellationToken);
+        var response = await client.CreateAsync(name, description, firstPartition, mass, lengthX, lengthY, lengthZ, cancellationToken);
 
         if (!response.IsSuccess)
         {
             ThrowError(response.Error!);
         }
 
-        var article = new Article(response.Data, name, description ?? string.Empty, client, MakeDisposeCallback(response.Data));
+        var article = new Article(response.Data, name, description ?? string.Empty, mass, client, MakeDisposeCallback(response.Data), lengthX, lengthY, lengthZ);
         _tracked[article.Guid] = article;
         await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;
@@ -108,7 +112,7 @@ public sealed class ArticleManager : IArticleManager
 
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, client, MakeDisposeCallback(r.Guid));
+        var article = new Article(r.Guid, r.Name, r.Description, r.Mass, client, MakeDisposeCallback(r.Guid), r.LengthX, r.LengthY, r.LengthZ);
         _tracked[article.Guid] = article;
         await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;

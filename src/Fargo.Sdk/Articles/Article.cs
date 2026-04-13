@@ -8,11 +8,16 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class Article : IAsyncDisposable
 {
-    internal Article(Guid guid, string name, string description, IArticleClient client, Func<ValueTask>? onDispose = null)
+    internal Article(Guid guid, string name, string description, MassDto? mass, IArticleClient client, Func<ValueTask>? onDispose = null,
+        LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null)
     {
         Guid = guid;
         _name = name;
         _description = description;
+        _mass = mass;
+        _lengthX = lengthX;
+        _lengthY = lengthY;
+        _lengthZ = lengthZ;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -39,6 +44,45 @@ public sealed class Article : IAsyncDisposable
     {
         get => _description;
         set => _description = value;
+    }
+
+    private MassDto? _mass;
+
+    /// <summary>
+    /// The physical mass of the article.
+    /// The value and unit are preserved as returned by the API; no unit conversion is performed.
+    /// </summary>
+    public MassDto? Mass
+    {
+        get => _mass;
+        set => _mass = value;
+    }
+
+    private LengthDto? _lengthX;
+
+    /// <summary>The X dimension of the article.</summary>
+    public LengthDto? LengthX
+    {
+        get => _lengthX;
+        set => _lengthX = value;
+    }
+
+    private LengthDto? _lengthY;
+
+    /// <summary>The Y dimension of the article.</summary>
+    public LengthDto? LengthY
+    {
+        get => _lengthY;
+        set => _lengthY = value;
+    }
+
+    private LengthDto? _lengthZ;
+
+    /// <summary>The Z dimension of the article.</summary>
+    public LengthDto? LengthZ
+    {
+        get => _lengthZ;
+        set => _lengthZ = value;
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -68,7 +112,7 @@ public sealed class Article : IAsyncDisposable
     public async Task UpdateAsync(Action<Article> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        var result = await client.UpdateAsync(Guid, _name, _description, cancellationToken);
+        var result = await client.UpdateAsync(Guid, _name, _description, _mass, _lengthX, _lengthY, _lengthZ, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!.Detail);

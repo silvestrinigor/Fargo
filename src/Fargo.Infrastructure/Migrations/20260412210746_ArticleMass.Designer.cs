@@ -4,6 +4,7 @@ using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    partial class FargoWriteDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260412210746_ArticleMass")]
+    partial class ArticleMass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,15 +92,6 @@ namespace Fargo.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
-
-                    b.Property<double?>("LengthX")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("LengthY")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("LengthZ")
-                        .HasColumnType("float");
 
                     b.HasKey("Guid");
 
