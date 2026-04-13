@@ -64,6 +64,27 @@ public static class ArticleEndpointRouteBuilderExtension
             .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPut("/{articleGuid:guid}/image", UploadArticleImage)
+            .WithName("UploadArticleImage")
+            .WithSummary("Uploads or replaces the article image")
+            .WithDescription("Stores an image for the article. If an image already exists it is replaced. Accepts multipart/form-data with a single file field named 'file'.")
+            .Accepts<IFormFile>("multipart/form-data")
+            .Produces(StatusCodes.Status204NoContent)
+            .DisableAntiforgery();
+
+        group.MapDelete("/{articleGuid:guid}/image", DeleteArticleImage)
+            .WithName("DeleteArticleImage")
+            .WithSummary("Removes the article image")
+            .WithDescription("Deletes the image associated with the article. If no image exists the operation is a no-op.")
+            .Produces(StatusCodes.Status204NoContent);
+
+        group.MapGet("/{articleGuid:guid}/image", GetArticleImage)
+            .WithName("GetArticleImage")
+            .WithSummary("Streams the article image")
+            .WithDescription("Returns the raw image bytes with the appropriate content type.")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<Results<Ok<ArticleInformation>, NotFound>> GetSingleArticle(
@@ -139,5 +160,47 @@ public static class ArticleEndpointRouteBuilderExtension
         var result = await handler.Handle(new ArticlePartitionsQuery(articleGuid), cancellationToken);
 
         return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
+    }
+
+    private static async Task<NoContent> UploadArticleImage(
+        Guid articleGuid,
+        IFormFile file,
+        ICommandHandler<ArticleImageUploadCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await using var stream = file.OpenReadStream();
+
+        var command = new ArticleImageUploadCommand(articleGuid, stream, file.ContentType);
+
+        await handler.Handle(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<NoContent> DeleteArticleImage(
+        Guid articleGuid,
+        ICommandHandler<ArticleImageDeleteCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ArticleImageDeleteCommand(articleGuid);
+
+        await handler.Handle(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<FileStreamHttpResult, NotFound>> GetArticleImage(
+        Guid articleGuid,
+        IQueryHandler<ArticleImageQuery, ArticleImageResult?> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.Handle(new ArticleImageQuery(articleGuid), cancellationToken);
+
+        if (result is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return TypedResults.Stream(result.Stream, result.ContentType);
     }
 }

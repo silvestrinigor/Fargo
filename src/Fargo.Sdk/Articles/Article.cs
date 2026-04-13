@@ -9,7 +9,7 @@ namespace Fargo.Sdk.Articles;
 public sealed class Article : IAsyncDisposable
 {
     internal Article(Guid guid, string name, string description, MassDto? mass, IArticleClient client, Func<ValueTask>? onDispose = null,
-        LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null)
+        LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null, bool hasImage = false)
     {
         Guid = guid;
         _name = name;
@@ -18,6 +18,7 @@ public sealed class Article : IAsyncDisposable
         _lengthX = lengthX;
         _lengthY = lengthY;
         _lengthZ = lengthZ;
+        _hasImage = hasImage;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -85,6 +86,15 @@ public sealed class Article : IAsyncDisposable
         set => _lengthZ = value;
     }
 
+    private bool _hasImage;
+
+    /// <summary>Indicates whether this article has an image stored on the server.</summary>
+    public bool HasImage
+    {
+        get => _hasImage;
+        internal set => _hasImage = value;
+    }
+
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
     public event EventHandler<ArticleUpdatedEventArgs>? Updated;
 
@@ -118,6 +128,54 @@ public sealed class Article : IAsyncDisposable
             throw new FargoSdkApiException(result.Error!.Detail);
         }
     }
+
+    /// <summary>
+    /// Uploads or replaces the image for this article.
+    /// </summary>
+    /// <param name="stream">The image data to upload.</param>
+    /// <param name="contentType">The MIME type of the image (e.g., <c>image/jpeg</c>).</param>
+    /// <param name="fileName">The file name hint sent to the server (e.g., <c>photo.jpg</c>).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the upload fails.</exception>
+    public async Task UploadImageAsync(
+        Stream stream,
+        string contentType,
+        string fileName = "image",
+        CancellationToken cancellationToken = default)
+    {
+        var result = await client.UploadImageAsync(Guid, stream, contentType, fileName, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new FargoSdkApiException(result.Error!.Detail);
+        }
+        _hasImage = true;
+    }
+
+    /// <summary>
+    /// Removes the image from this article.
+    /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the deletion fails.</exception>
+    public async Task DeleteImageAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await client.DeleteImageAsync(Guid, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new FargoSdkApiException(result.Error!.Detail);
+        }
+        _hasImage = false;
+    }
+
+    /// <summary>
+    /// Retrieves the image for this article as a stream.
+    /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>
+    /// A tuple of the image <see cref="Stream"/> and its MIME content type,
+    /// or <see langword="null"/> if the article has no image.
+    /// </returns>
+    public Task<(Stream Stream, string ContentType)?> GetImageAsync(CancellationToken cancellationToken = default)
+        => client.GetImageAsync(Guid, cancellationToken);
 
     /// <inheritdoc/>
     public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;

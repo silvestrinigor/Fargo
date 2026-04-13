@@ -35,6 +35,10 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             .HasConversion<LengthDoubleConverter>()
             .IsRequired(false);
 
+        builder.Property(x => x.ImageKey)
+            .HasMaxLength(500)
+            .IsRequired(false);
+
         builder.HasMany(a => a.Partitions).WithMany(p => p.ArticleMembers);
     }
 }

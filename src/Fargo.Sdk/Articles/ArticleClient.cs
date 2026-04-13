@@ -145,6 +145,49 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
+    public async Task<FargoSdkResponse<EmptyResult>> UploadImageAsync(
+        Guid articleGuid,
+        Stream stream,
+        string contentType,
+        string fileName = "image",
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.PutMultipartAsync(
+            $"/articles/{articleGuid}/image",
+            stream,
+            contentType,
+            fileName,
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> DeleteImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.DeleteAsync(
+            $"/articles/{articleGuid}/image",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public Task<(Stream Stream, string ContentType)?> GetImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+        => httpClient.GetStreamAsync($"/articles/{articleGuid}/image", cancellationToken);
+
     private static FargoSdkError MapError(FargoProblemDetails? problem)
     {
         var type = problem?.Type switch

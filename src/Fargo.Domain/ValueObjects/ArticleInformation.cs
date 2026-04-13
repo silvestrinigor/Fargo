@@ -25,5 +25,6 @@ public sealed record ArticleInformation(
     Mass? Mass,
     Length? LengthX = null,
     Length? LengthY = null,
-    Length? LengthZ = null
+    Length? LengthZ = null,
+    bool HasImage = false
 );

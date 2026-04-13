@@ -69,4 +69,44 @@ public interface IArticleManager
 
     /// <summary>Raised when any authenticated client creates an article.</summary>
     event EventHandler<ArticleCreatedEventArgs>? Created;
+
+    /// <summary>
+    /// Uploads or replaces the image for the specified article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="stream">The image data to upload.</param>
+    /// <param name="contentType">The MIME type of the image (e.g., <c>image/jpeg</c>).</param>
+    /// <param name="fileName">A file name hint (e.g., <c>photo.jpg</c>).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown on a server or access error.</exception>
+    Task UploadImageAsync(
+        Guid articleGuid,
+        Stream stream,
+        string contentType,
+        string fileName = "image",
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes the image from the specified article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown on a server or access error.</exception>
+    Task DeleteImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves the image for the specified article as a stream.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>
+    /// A tuple of the image <see cref="Stream"/> and its MIME content type,
+    /// or <see langword="null"/> if the article has no image.
+    /// </returns>
+    /// <exception cref="FargoSdkApiException">Thrown on a server error.</exception>
+    Task<(Stream Stream, string ContentType)?> GetImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
 }

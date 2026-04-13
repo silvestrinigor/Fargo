@@ -13,5 +13,6 @@ public sealed record ArticleResult(
     MassDto? Mass = null,
     LengthDto? LengthX = null,
     LengthDto? LengthY = null,
-    LengthDto? LengthZ = null
+    LengthDto? LengthZ = null,
+    bool HasImage = false
 );
