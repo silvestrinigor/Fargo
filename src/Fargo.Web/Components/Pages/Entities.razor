@@ -148,6 +148,7 @@
                         <div class="tab-bar">
                             <button type="button" class="tab-button @(articleTab == "info" ? "active" : null)" @onclick='() => articleTab = "info"'>Info</button>
                             <button type="button" class="tab-button @(articleTab == "metrics" ? "active" : null)" @onclick='() => articleTab = "metrics"'>Metrics</button>
+                            <button type="button" class="tab-button @(articleTab == "image" ? "active" : null)" @onclick='() => articleTab = "image"'>Image</button>
                         </div>
                         <section class="workspace-panel">
                             <EditForm Model="articleEditModel" OnValidSubmit="SaveArticleAsync" class="editor-form">
@@ -163,6 +164,41 @@
                                         <span>Description</span>
                                         <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
                                     </label>
+                                }
+                                else if (articleTab == "image")
+                                {
+                                    <div class="article-image-section">
+                                        @if (!string.IsNullOrEmpty(imageErrorMessage))
+                                        {
+                                            <div class="error-banner">@imageErrorMessage</div>
+                                        }
+                                        @if (articleImageDataUrl is not null)
+                                        {
+                                            <div class="article-image-container">
+                                                <img src="@articleImageDataUrl" class="article-image-preview" alt="Article image" />
+                                            </div>
+                                        }
+                                        else if (selectedArticle!.HasImage)
+                                        {
+                                            <p class="muted-text">Loading image...</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="muted-text">No image has been uploaded yet.</p>
+                                        }
+                                        <div class="article-image-actions">
+                                            <label class="ghost-button article-image-upload-label @(isUploadingImage ? "disabled" : null)">
+                                                @(isUploadingImage ? "Uploading..." : "Upload Image")
+                                                <InputFile OnChange="UploadArticleImageAsync" accept="image/*" disabled="@isUploadingImage" style="display:none" />
+                                            </label>
+                                            @if (selectedArticle!.HasImage)
+                                            {
+                                                <button type="button" class="ghost-button danger" @onclick="DeleteArticleImageAsync" disabled="@isDeletingImage">
+                                                    @(isDeletingImage ? "Removing..." : "Remove")
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
                                 }
                                 else
                                 {
@@ -222,11 +258,14 @@
                                         </div>
                                     </label>
                                 }
-                                <div class="dialog-actions">
-                                    <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
-                                        @(isSavingArticle ? "Saving..." : "Save")
-                                    </button>
-                                </div>
+                                @if (articleTab != "image")
+                                {
+                                    <div class="dialog-actions">
+                                        <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
+                                            @(isSavingArticle ? "Saving..." : "Save")
+                                        </button>
+                                    </div>
+                                }
                             </EditForm>
                         </section>
                     </div>
@@ -587,6 +626,10 @@
     private Fargo.Sdk.Articles.Article? selectedArticle;
     private bool articleIsLoading;
     private bool isSavingArticle;
+    private bool isUploadingImage;
+    private bool isDeletingImage;
+    private string? articleImageDataUrl;
+    private string? imageErrorMessage;
     private ArticleEditForm articleEditModel = new();
     private string? _origArticleName;
     private string? _origArticleDescription;
@@ -634,6 +677,8 @@
             _origArticleLengthYValue = null;
             _origArticleLengthZValue = null;
             articleTab = "info";
+            articleImageDataUrl = null;
+            imageErrorMessage = null;
             _origUserNameid = null;
             _origUserFirstName = null;
             _origUserLastName = null;
@@ -789,6 +834,8 @@
     {
         selectedArticle = null;
         articleEditModel = new ArticleEditForm();
+        articleImageDataUrl = null;
+        imageErrorMessage = null;
         articleIsLoading = true;
 
         try
@@ -810,6 +857,11 @@
             _origArticleLengthXValue = selectedArticle.LengthX?.Value;
             _origArticleLengthYValue = selectedArticle.LengthY?.Value;
             _origArticleLengthZValue = selectedArticle.LengthZ?.Value;
+
+            if (selectedArticle.HasImage)
+            {
+                await LoadArticleImageAsync();
+            }
         }
         catch (FargoSdkApiException ex)
         {
@@ -818,6 +870,27 @@
         finally
         {
             articleIsLoading = false;
+        }
+    }
+
+    private async Task LoadArticleImageAsync()
+    {
+        articleImageDataUrl = null;
+        try
+        {
+            var result = await selectedArticle!.GetImageAsync();
+            if (result is not null)
+            {
+                using var ms = new MemoryStream();
+                await result.Value.Stream.CopyToAsync(ms);
+                result.Value.Stream.Dispose();
+                var base64 = Convert.ToBase64String(ms.ToArray());
+                articleImageDataUrl = $"data:{result.Value.ContentType};base64,{base64}";
+            }
+        }
+        catch
+        {
+            // Image preview is best-effort; don't disrupt the rest of the page
         }
     }
 
@@ -860,6 +933,56 @@
         finally
         {
             isSavingArticle = false;
+        }
+    }
+
+    private async Task UploadArticleImageAsync(InputFileChangeEventArgs e)
+    {
+        if (selectedArticle is null) return;
+
+        isUploadingImage = true;
+        imageErrorMessage = null;
+
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await selectedArticle.UploadImageAsync(stream, file.ContentType, file.Name);
+            await LoadArticleImageAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            imageErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to upload image." : ex.Message;
+        }
+        catch
+        {
+            imageErrorMessage = "Failed to upload image.";
+        }
+        finally
+        {
+            isUploadingImage = false;
+        }
+    }
+
+    private async Task DeleteArticleImageAsync()
+    {
+        if (selectedArticle is null) return;
+
+        isDeletingImage = true;
+        imageErrorMessage = null;
+
+        try
+        {
+            await selectedArticle.DeleteImageAsync();
+            articleImageDataUrl = null;
+        }
+        catch (FargoSdkApiException ex)
+        {
+            imageErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove image." : ex.Message;
+        }
+        finally
+        {
+            isDeletingImage = false;
         }
     }
 
