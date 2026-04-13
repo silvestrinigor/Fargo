@@ -81,6 +81,14 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// </summary>
     public Length? LengthZ { get; set; }
 
+    /// <summary>
+    /// Gets or sets the storage key of the article's image.
+    /// When <see langword="null"/>, the article has no image.
+    /// The format of this key is determined by the configured storage provider,
+    /// allowing transparent migration between local disk, S3, or other backends.
+    /// </summary>
+    public string? ImageKey { get; set; }
+
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 }

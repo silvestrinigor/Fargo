@@ -98,4 +98,41 @@ public interface IArticleClient
     Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Uploads or replaces the image for an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="stream">The image data to upload.</param>
+    /// <param name="contentType">The MIME type of the image.</param>
+    /// <param name="fileName">A file name hint sent as part of the multipart body.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    Task<FargoSdkResponse<EmptyResult>> UploadImageAsync(
+        Guid articleGuid,
+        Stream stream,
+        string contentType,
+        string fileName = "image",
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes the image from an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    Task<FargoSdkResponse<EmptyResult>> DeleteImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves the image for an article as a stream.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>
+    /// A tuple of the image <see cref="Stream"/> and its MIME content type,
+    /// or <see langword="null"/> if the article has no image.
+    /// </returns>
+    Task<(Stream Stream, string ContentType)?> GetImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
 }

@@ -92,7 +92,7 @@ public sealed class ArticleManager : IArticleManager
             ThrowError(response.Error!);
         }
 
-        var article = new Article(response.Data, name, description ?? string.Empty, mass, client, MakeDisposeCallback(response.Data), lengthX, lengthY, lengthZ);
+        var article = new Article(response.Data, name, description ?? string.Empty, mass, client, MakeDisposeCallback(response.Data), lengthX, lengthY, lengthZ, hasImage: false);
         _tracked[article.Guid] = article;
         await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;
@@ -110,9 +110,51 @@ public sealed class ArticleManager : IArticleManager
         }
     }
 
+    public async Task UploadImageAsync(
+        Guid articleGuid,
+        Stream stream,
+        string contentType,
+        string fileName = "image",
+        CancellationToken cancellationToken = default)
+    {
+        var response = await client.UploadImageAsync(articleGuid, stream, contentType, fileName, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            ThrowError(response.Error!);
+        }
+
+        if (_tracked.TryGetValue(articleGuid, out var article))
+        {
+            article.HasImage = true;
+        }
+    }
+
+    public async Task DeleteImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await client.DeleteImageAsync(articleGuid, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            ThrowError(response.Error!);
+        }
+
+        if (_tracked.TryGetValue(articleGuid, out var article))
+        {
+            article.HasImage = false;
+        }
+    }
+
+    public Task<(Stream Stream, string ContentType)?> GetImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+        => client.GetImageAsync(articleGuid, cancellationToken);
+
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, r.Mass, client, MakeDisposeCallback(r.Guid), r.LengthX, r.LengthY, r.LengthZ);
+        var article = new Article(r.Guid, r.Name, r.Description, r.Mass, client, MakeDisposeCallback(r.Guid), r.LengthX, r.LengthY, r.LengthZ, r.HasImage);
         _tracked[article.Guid] = article;
         await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;
