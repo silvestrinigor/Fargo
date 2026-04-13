@@ -4,6 +4,7 @@ using Fargo.Application.Security;
 using Fargo.Application.Storage;
 using Fargo.Domain.Repositories;
 using Fargo.Domain.Services;
+using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Application.Queries.ArticleQueries;
 

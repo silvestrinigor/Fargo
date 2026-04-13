@@ -72,6 +72,10 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid?>("EditedByGuid")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ImageKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<double?>("Mass")
                         .HasColumnType("float");
 
