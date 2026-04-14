@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Defines the contract for entities that track last modification metadata.
 /// </summary>

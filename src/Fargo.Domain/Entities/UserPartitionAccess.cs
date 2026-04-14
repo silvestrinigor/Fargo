@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Represents the access relationship between a <see cref="User"/> and a <see cref="Partition"/>.
 /// </summary>

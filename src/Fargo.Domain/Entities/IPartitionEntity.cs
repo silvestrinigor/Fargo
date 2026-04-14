@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Marker interface for domain entities that belong to one or more partitions.
 /// </summary>

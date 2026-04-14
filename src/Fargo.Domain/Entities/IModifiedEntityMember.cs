@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Defines a contract for entities that belong to an audited aggregate
 /// and whose modifications must update the audit metadata of the aggregate root.

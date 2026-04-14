@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Enums;
 
+// TODO: add the enum type numbers
 /// <summary>
 /// Represents the barcode format (symbology) of a barcode.
 /// </summary>

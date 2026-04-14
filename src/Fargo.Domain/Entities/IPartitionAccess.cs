@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Represents a user's access to a specific partition.
 /// </summary>

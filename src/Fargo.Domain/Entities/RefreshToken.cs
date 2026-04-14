@@ -2,6 +2,7 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Represents a refresh token used to obtain a new access token
 /// without requiring the user to authenticate again.

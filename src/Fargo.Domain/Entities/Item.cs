@@ -2,6 +2,7 @@ using Fargo.Domain.Collections;
 
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Represents an item in the system.
 /// </summary>

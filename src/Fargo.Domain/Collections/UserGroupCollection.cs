@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Fargo.Domain.Collections;
 
+// TODO: check this documentation to be like the others collections
 /// <summary>
 /// Represents a collection of <see cref="UserGroup"/> instances.
 /// </summary>

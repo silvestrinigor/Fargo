@@ -2,6 +2,9 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation.
+// TODO: the Global partition is a application logic. The domain should be able to handle cenarios that the global partition dont exist. 
+// TODO: When the entity is not in any partition means that the entity is public.
 /// <summary>
 /// Represents a partition used to isolate and scope access to domain entities.
 /// </summary>

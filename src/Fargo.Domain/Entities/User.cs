@@ -4,6 +4,9 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
+// TODO: the default should be the password never expire
+// TODO: organize the class
 /// <summary>
 /// Represents a user in the system.
 /// </summary>

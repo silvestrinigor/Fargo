@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Enums;
 
+// TODO: add the enum type numbers
 /// <summary>
 /// Represents the set of actions that can be authorized in the system.
 ///

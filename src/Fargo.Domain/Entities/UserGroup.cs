@@ -4,6 +4,8 @@ using Fargo.Domain.ValueObjects;
 
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
+// TODO: organize the class
 /// <summary>
 /// Represents a user group in the system.
 /// </summary>

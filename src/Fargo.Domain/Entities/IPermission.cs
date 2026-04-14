@@ -2,6 +2,7 @@ using Fargo.Domain.Enums;
 
 namespace Fargo.Domain.Entities;
 
+// TODO: validate documentation
 /// <summary>
 /// Represents an object that grants a specific permission action.
 /// </summary>
