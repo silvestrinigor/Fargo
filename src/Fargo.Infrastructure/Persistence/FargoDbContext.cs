@@ -10,6 +10,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 {
     public DbSet<Article> Articles { get; set; }
 
+    public DbSet<Barcode> Barcodes { get; set; }
+
     public DbSet<Item> Items { get; set; }
 
     public DbSet<User> Users { get; set; }
@@ -69,6 +71,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+
+        modelBuilder.ApplyConfiguration(new BarcodeConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 

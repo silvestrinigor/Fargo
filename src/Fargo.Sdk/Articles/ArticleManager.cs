@@ -152,6 +152,49 @@ public sealed class ArticleManager : IArticleManager
         CancellationToken cancellationToken = default)
         => client.GetImageAsync(articleGuid, cancellationToken);
 
+    public async Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await client.GetBarcodesAsync(articleGuid, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            ThrowError(response.Error!);
+        }
+
+        return response.Data ?? [];
+    }
+
+    public async Task<Guid> AddBarcodeAsync(
+        Guid articleGuid,
+        string code,
+        BarcodeFormat format,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await client.AddBarcodeAsync(articleGuid, code, format, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            ThrowError(response.Error!);
+        }
+
+        return response.Data;
+    }
+
+    public async Task RemoveBarcodeAsync(
+        Guid articleGuid,
+        Guid barcodeGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await client.RemoveBarcodeAsync(articleGuid, barcodeGuid, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            ThrowError(response.Error!);
+        }
+    }
+
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
         var article = new Article(r.Guid, r.Name, r.Description, r.Mass, client, MakeDisposeCallback(r.Guid), r.LengthX, r.LengthY, r.LengthZ, r.HasImage);

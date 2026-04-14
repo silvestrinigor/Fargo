@@ -19,6 +19,7 @@ using Fargo.Domain.Repositories;
 using Fargo.Domain.Security;
 using Fargo.Domain.Services;
 using Fargo.Domain.ValueObjects;
+using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Options;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
@@ -113,6 +114,7 @@ public static class ServiceCollectionExtensions
         private void AddRepositories()
         {
             services.AddScoped<IArticleRepository, ArticleRepository>();
+            services.AddScoped<IBarcodeRepository, BarcodeRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserGroupRepository, UserGroupRepository>();
@@ -136,6 +138,8 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleRemovePartitionCommand>, ArticleRemovePartitionCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleImageUploadCommand>, ArticleImageUploadCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleImageDeleteCommand>, ArticleImageDeleteCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleAddBarcodeCommand, Guid>, ArticleAddBarcodeCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleRemoveBarcodeCommand>, ArticleRemoveBarcodeCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
@@ -165,6 +169,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>, ArticleManyQueryHandler>();
             services.AddScoped<IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, ArticlePartitionsQueryHandler>();
             services.AddScoped<IQueryHandler<ArticleImageQuery, ArticleImageResult?>, ArticleImageQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>, ArticleBarcodesQueryHandler>();
 
             services.AddScoped<IQueryHandler<ItemSingleQuery, ItemInformation?>, ItemSingleQueryHandler>();
             services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>, ItemManyQueryHandler>();

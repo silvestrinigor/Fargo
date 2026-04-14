@@ -188,17 +188,72 @@ public sealed class ArticleClient : IArticleClient
         CancellationToken cancellationToken = default)
         => httpClient.GetStreamAsync($"/articles/{articleGuid}/image", cancellationToken);
 
+    public async Task<FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>> GetBarcodesAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<BarcodeResult>>(
+            $"/articles/{articleGuid}/barcodes",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(httpResponse.Data ?? []);
+    }
+
+    public async Task<FargoSdkResponse<Guid>> AddBarcodeAsync(
+        Guid articleGuid,
+        string code,
+        BarcodeFormat format,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
+            $"/articles/{articleGuid}/barcodes",
+            new { code, format },
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<Guid>(httpResponse.Data);
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> RemoveBarcodeAsync(
+        Guid articleGuid,
+        Guid barcodeGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.DeleteAsync(
+            $"/articles/{articleGuid}/barcodes/{barcodeGuid}",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
     private static FargoSdkError MapError(FargoProblemDetails? problem)
     {
         var type = problem?.Type switch
         {
-            "article/not-found" => FargoSdkErrorType.NotFound,
+            "article/not-found"
+                or "barcode/not-found" => FargoSdkErrorType.NotFound,
             "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
             "user/forbidden"
                 or "partition/access-denied"
                 or "entity/access-denied" => FargoSdkErrorType.Forbidden,
             "request/invalid"
-                or "article/delete-with-items" => FargoSdkErrorType.InvalidInput,
+                or "article/delete-with-items"
+                or "barcode/invalid-value" => FargoSdkErrorType.InvalidInput,
+            "barcode/already-exists" => FargoSdkErrorType.Conflict,
             _ => FargoSdkErrorType.Undefined
         };
 

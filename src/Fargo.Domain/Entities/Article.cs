@@ -82,6 +82,11 @@ public class Article : ModifiedEntity, IPartitionedEntity
     public Length? LengthZ { get; set; }
 
     /// <summary>
+    /// Gets the barcodes associated with the article.
+    /// </summary>
+    public BarcodeCollection Barcodes { get; init; } = [];
+
+    /// <summary>
     /// Gets or sets the storage key of the article's image.
     /// When <see langword="null"/>, the article has no image.
     /// The format of this key is determined by the configured storage provider,

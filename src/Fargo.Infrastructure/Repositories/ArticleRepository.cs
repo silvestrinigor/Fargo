@@ -24,6 +24,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
     public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
         => await articles
             .Include(a => a.Partitions)
+            .Include(a => a.Barcodes)
             .Where(a => a.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
 
