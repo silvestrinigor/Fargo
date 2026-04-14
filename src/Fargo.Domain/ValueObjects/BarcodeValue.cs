@@ -1,5 +1,5 @@
-using System.Text.RegularExpressions;
 using Fargo.Domain.Enums;
+using System.Text.RegularExpressions;
 
 namespace Fargo.Domain.ValueObjects;
 
@@ -105,44 +105,68 @@ public readonly struct BarcodeValue : IEquatable<BarcodeValue>
         {
             case BarcodeFormat.Ean13:
                 if (!DigitsOnly.IsMatch(code) || code.Length != 13)
+                {
                     throw new ArgumentException("EAN-13 code must be exactly 13 digits.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.Ean8:
                 if (!DigitsOnly.IsMatch(code) || code.Length != 8)
+                {
                     throw new ArgumentException("EAN-8 code must be exactly 8 digits.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.UpcA:
                 if (!DigitsOnly.IsMatch(code) || code.Length != 12)
+                {
                     throw new ArgumentException("UPC-A code must be exactly 12 digits.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.UpcE:
                 if (!DigitsOnly.IsMatch(code) || code.Length != 8)
+                {
                     throw new ArgumentException("UPC-E code must be exactly 8 digits.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.Itf14:
                 if (!DigitsOnly.IsMatch(code) || code.Length != 14)
+                {
                     throw new ArgumentException("ITF-14 code must be exactly 14 digits.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.Code128:
             case BarcodeFormat.Code39:
             case BarcodeFormat.Gs1128:
                 if (!PrintableChars.IsMatch(code) || code.Length is < 1 or > 80)
+                {
                     throw new ArgumentException($"{format} code must be 1–80 printable ASCII characters.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.QrCode:
                 if (code.Length is < 1 or > 2953)
+                {
                     throw new ArgumentException("QR Code must be 1–2953 characters.", nameof(code));
+                }
+
                 break;
 
             case BarcodeFormat.DataMatrix:
                 if (code.Length is < 1 or > 2335)
+                {
                     throw new ArgumentException("Data Matrix code must be 1–2335 characters.", nameof(code));
+                }
+
                 break;
 
             default:

@@ -25,10 +25,15 @@ public sealed class LengthJsonConverter : JsonConverter<DomainLength>
 
         while (reader.Read())
         {
-            if (reader.TokenType == JsonTokenType.EndObject) break;
+            if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                break;
+            }
 
             if (reader.TokenType != JsonTokenType.PropertyName)
+            {
                 throw new JsonException("Expected property name inside length object.");
+            }
 
             string propName = reader.GetString()!;
             reader.Read();

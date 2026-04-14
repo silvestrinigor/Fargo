@@ -1,5 +1,5 @@
-using System.Collections.ObjectModel;
 using Fargo.Domain.Entities;
+using System.Collections.ObjectModel;
 
 namespace Fargo.Domain.Collections;
 

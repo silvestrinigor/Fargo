@@ -25,10 +25,15 @@ public sealed class MassJsonConverter : JsonConverter<DomainMass>
 
         while (reader.Read())
         {
-            if (reader.TokenType == JsonTokenType.EndObject) break;
+            if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                break;
+            }
 
             if (reader.TokenType != JsonTokenType.PropertyName)
+            {
                 throw new JsonException("Expected property name inside mass object.");
+            }
 
             string propName = reader.GetString()!;
             reader.Read();
