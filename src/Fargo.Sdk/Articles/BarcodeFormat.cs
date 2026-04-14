@@ -7,32 +7,32 @@ namespace Fargo.Sdk.Articles;
 public enum BarcodeFormat
 {
     /// <summary>EAN-13 — 13-digit retail barcode.</summary>
-    Ean13,
+    Ean13 = 0,
 
     /// <summary>EAN-8 — 8-digit compact retail barcode.</summary>
-    Ean8,
+    Ean8 = 1,
 
     /// <summary>UPC-A — 12-digit North American retail barcode.</summary>
-    UpcA,
+    UpcA = 2,
 
     /// <summary>UPC-E — 8-digit compressed UPC barcode.</summary>
-    UpcE,
+    UpcE = 3,
 
     /// <summary>Code 128 — variable-length alphanumeric barcode widely used in logistics.</summary>
-    Code128,
+    Code128 = 4,
 
     /// <summary>Code 39 — variable-length alphanumeric barcode used in industrial and military contexts.</summary>
-    Code39,
+    Code39 = 5,
 
     /// <summary>ITF-14 — 14-digit barcode used on outer packaging and pallets.</summary>
-    Itf14,
+    Itf14 = 6,
 
     /// <summary>GS1-128 — Code 128 with GS1 Application Identifiers for supply chain.</summary>
-    Gs1128,
+    Gs1128 = 7,
 
     /// <summary>QR Code — 2D matrix barcode for URLs and structured data.</summary>
-    QrCode,
+    QrCode = 8,
 
     /// <summary>Data Matrix — compact 2D matrix barcode for small item labelling.</summary>
-    DataMatrix,
+    DataMatrix = 9,
 }

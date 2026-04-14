@@ -1,6 +1,5 @@
 namespace Fargo.Domain.Enums;
 
-// TODO: add the enum type numbers
 /// <summary>
 /// Represents the set of actions that can be authorized in the system.
 ///
@@ -12,47 +11,47 @@ public enum ActionType
     /// <summary>
     /// Allows creating new articles.
     /// </summary>
-    CreateArticle,
+    CreateArticle = 0,
 
     /// <summary>
     /// Allows deleting existing articles.
     /// </summary>
-    DeleteArticle,
+    DeleteArticle = 1,
 
     /// <summary>
     /// Allows editing existing articles.
     /// </summary>
-    EditArticle,
+    EditArticle = 2,
 
     /// <summary>
     /// Allows creating new items associated with articles.
     /// </summary>
-    CreateItem,
+    CreateItem = 3,
 
     /// <summary>
     /// Allows deleting existing items.
     /// </summary>
-    DeleteItem,
+    DeleteItem = 4,
 
     /// <summary>
     /// Allows editing existing items.
     /// </summary>
-    EditItem,
+    EditItem = 5,
 
     /// <summary>
     /// Allows creating new users.
     /// </summary>
-    CreateUser,
+    CreateUser = 6,
 
     /// <summary>
     /// Allows deleting existing users.
     /// </summary>
-    DeleteUser,
+    DeleteUser = 7,
 
     /// <summary>
     /// Allows editing existing users.
     /// </summary>
-    EditUser,
+    EditUser = 8,
 
     /// <summary>
     /// Allows changing the password of another user without requiring
@@ -63,22 +62,22 @@ public enum ActionType
     /// a user changing their own password, which should require the
     /// current password.
     /// </summary>
-    ChangeOtherUserPassword,
+    ChangeOtherUserPassword = 9,
 
     /// <summary>
     /// Allows creating new user groups.
     /// </summary>
-    CreateUserGroup,
+    CreateUserGroup = 10,
 
     /// <summary>
     /// Allows deleting existing user groups.
     /// </summary>
-    DeleteUserGroup,
+    DeleteUserGroup = 11,
 
     /// <summary>
     /// Allows editing existing user groups.
     /// </summary>
-    EditUserGroup,
+    EditUserGroup = 12,
 
     /// <summary>
     /// Allows modifying the membership of a user group,
@@ -90,30 +89,30 @@ public enum ActionType
     /// itself, which are controlled by <see cref="CreateUserGroup"/>,
     /// <see cref="DeleteUserGroup"/>, and <see cref="EditUserGroup"/>.
     /// </summary>
-    ChangeUserGroupMembers,
+    ChangeUserGroupMembers = 13,
 
     /// <summary>
     /// Allows creating partitions.
     /// </summary>
-    CreatePartition,
+    CreatePartition = 14,
 
     /// <summary>
     /// Allows deleting existing partitions.
     /// </summary>
-    DeletePartition,
+    DeletePartition = 15,
 
     /// <summary>
     /// Allows editing existing partitions.
     /// </summary>
-    EditPartition,
+    EditPartition = 16,
 
     /// <summary>
     /// Allows adding barcodes to articles.
     /// </summary>
-    AddBarcode,
+    AddBarcode = 17,
 
     /// <summary>
     /// Allows removing barcodes from articles.
     /// </summary>
-    RemoveBarcode,
+    RemoveBarcode = 18,
 }
