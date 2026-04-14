@@ -66,6 +66,7 @@ public sealed class ArticleAddBarcodeCommandHandler(
 
         actor.ValidateHasPermission(ActionType.AddBarcode);
 
+        // TODO: need to validate if user has access to the article
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
         if (article.Barcodes.Any(b => b.Format == command.Barcode.Format))
