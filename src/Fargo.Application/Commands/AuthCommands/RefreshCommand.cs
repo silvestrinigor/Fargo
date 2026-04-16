@@ -86,6 +86,7 @@ public sealed class RefreshCommandHandler(
 
         var actor = (UserActor)(await actorService.GetActorByGuid(user.Guid, cancellationToken))!;
 
+        // TODO: Validate if the refreshToken type should be Token or should create a new struct especifcy for the refreshToken.
         var rawNewRefreshToken = refreshTokenGenerator.Generate();
 
         var newRefreshTokenHash = tokenHasher.Hash(rawNewRefreshToken);

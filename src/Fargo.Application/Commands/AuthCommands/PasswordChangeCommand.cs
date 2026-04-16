@@ -95,6 +95,8 @@ public sealed class PasswordChangeCommandHandler(
         }
         catch (ArgumentException ex)
         {
+            // TODO: A password exception does not necessarily mean the password is weak.
+            // TODO: If this changes, the SDK and the web should also be validated.
             throw new WeakPasswordFargoApplicationException(ex.Message);
         }
     }
