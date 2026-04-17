@@ -1,5 +1,4 @@
-using Fargo.Domain.Security;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Tokens;
 using System.Security.Cryptography;
 
 namespace Fargo.Infrastructure.Security;

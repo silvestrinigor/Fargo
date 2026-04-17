@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents pagination parameters used in paginated queries.

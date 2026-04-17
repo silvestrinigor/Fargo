@@ -1,6 +1,4 @@
-using Fargo.Domain.ValueObjects;
-
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Exception thrown when attempting to create a <see cref="Entities.UserGroup"/>

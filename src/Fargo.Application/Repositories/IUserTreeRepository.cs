@@ -1,5 +1,5 @@
 using Fargo.Application.Models.TreeModels;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
 
 namespace Fargo.Application.Repositories;
 

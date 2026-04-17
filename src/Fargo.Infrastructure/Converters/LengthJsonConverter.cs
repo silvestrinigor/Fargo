@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainLength = Fargo.Domain.ValueObjects.Length;
+using DomainLength = Fargo.Domain.Length;
 
 namespace Fargo.Infrastructure.Converters;
 

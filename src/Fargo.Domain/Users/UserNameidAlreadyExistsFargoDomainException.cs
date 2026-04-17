@@ -1,6 +1,4 @@
-using Fargo.Domain.ValueObjects;
-
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents an error that occurs when attempting to create

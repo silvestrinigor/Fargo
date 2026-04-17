@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Partitions;
 
 /// <summary>
 /// Exception thrown when an attempt is made to delete the global partition.

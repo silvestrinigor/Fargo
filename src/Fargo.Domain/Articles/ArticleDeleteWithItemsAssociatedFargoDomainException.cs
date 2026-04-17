@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Articles;
 
 /// <summary>
 /// Exception thrown when an attempt is made to delete an article

@@ -2,9 +2,7 @@ using Fargo.Application.Exceptions;
 using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Security;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Commands.AuthCommands;
 

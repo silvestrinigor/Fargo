@@ -1,6 +1,8 @@
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Items;
+using Fargo.Domain.Users;
 
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Partitions;
 
 // TODO: validate documentation.
 // TODO: the Global partition is a application logic. The domain should be able to handle cenarios that the global partition dont exist. 

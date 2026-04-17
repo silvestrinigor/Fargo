@@ -1,7 +1,6 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
+using Fargo.Domain.Partitions;
 
-namespace Fargo.Domain.Security;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Provides a base implementation for <see cref="IActor"/>.

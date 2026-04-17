@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents a lightweight information projection of a user group.

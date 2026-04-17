@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents a hashed password stored in the system.

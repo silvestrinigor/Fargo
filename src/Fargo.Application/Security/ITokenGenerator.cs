@@ -1,5 +1,5 @@
 using Fargo.Application.Models.AuthModels;
-using Fargo.Domain.Entities;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Security;
 

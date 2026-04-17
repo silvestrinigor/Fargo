@@ -1,6 +1,4 @@
-using Fargo.Domain.Enums;
-
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents a permission granted to a user or role within the system.

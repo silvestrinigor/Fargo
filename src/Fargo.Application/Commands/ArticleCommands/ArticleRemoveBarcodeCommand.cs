@@ -3,9 +3,9 @@ using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
+using Fargo.Domain;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Commands.ArticleCommands;
 

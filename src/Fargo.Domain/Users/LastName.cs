@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents a validated last name value object used in the domain.

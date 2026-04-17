@@ -1,8 +1,4 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.Exceptions;
-using Fargo.Domain.Repositories;
-
-namespace Fargo.Domain.Services;
+namespace Fargo.Domain.Partitions;
 
 /// <summary>
 /// Provides domain operations related to partition retrieval

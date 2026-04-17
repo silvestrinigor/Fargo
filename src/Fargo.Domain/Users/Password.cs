@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents a validated plaintext password in the domain.

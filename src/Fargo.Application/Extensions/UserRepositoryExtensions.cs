@@ -1,6 +1,5 @@
 using Fargo.Application.Exceptions;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Extensions;
 

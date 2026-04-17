@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Services;
+namespace Fargo.Domain.System;
 
 /// <summary>
 /// Provides domain operations and definitions related to the internal system.

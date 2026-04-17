@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Enums;
+namespace Fargo.Domain.Barcodes;
 
 /// <summary>
 /// Represents the barcode format (symbology) of a barcode.

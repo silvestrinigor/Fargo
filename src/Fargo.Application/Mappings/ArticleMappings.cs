@@ -1,5 +1,4 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Articles;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Mappings;

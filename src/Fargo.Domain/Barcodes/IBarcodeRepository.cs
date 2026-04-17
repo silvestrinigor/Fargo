@@ -1,6 +1,4 @@
-using Fargo.Domain.Entities;
-
-namespace Fargo.Domain.Repositories;
+namespace Fargo.Domain.Barcodes;
 
 /// <summary>
 /// Defines data access operations for <see cref="Barcode"/> entities.

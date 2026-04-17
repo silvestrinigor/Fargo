@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Users;
 
 // TODO: validate documentation
 /// <summary>

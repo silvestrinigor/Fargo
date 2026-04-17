@@ -1,4 +1,4 @@
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Tokens;
 
 namespace Fargo.Application.Models.AuthModels;
 

@@ -1,8 +1,4 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.Exceptions;
-using Fargo.Domain.Repositories;
-
-namespace Fargo.Domain.Services;
+namespace Fargo.Domain.Articles;
 
 /// <summary>
 /// Provides domain operations related to <see cref="Article"/> entities.

@@ -1,6 +1,7 @@
-using Fargo.Domain.Collections;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Partitions;
 
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Items;
 
 // TODO: validate documentation
 /// <summary>

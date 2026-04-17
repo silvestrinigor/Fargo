@@ -1,10 +1,10 @@
-namespace Fargo.Domain.Enums;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents the set of actions that can be authorized in the system.
 ///
 /// Each value defines a specific permission that can be granted
-/// to a user through <see cref="Entities.UserPermission"/>.
+/// to a user through <see cref="UserPermission"/>.
 /// </summary>
 public enum ActionType
 {

@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Base exception for all domain-related errors in the Fargo domain model.

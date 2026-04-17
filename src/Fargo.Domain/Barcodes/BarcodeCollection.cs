@@ -1,7 +1,6 @@
-using Fargo.Domain.Entities;
 using System.Collections.ObjectModel;
 
-namespace Fargo.Domain.Collections;
+namespace Fargo.Domain.Barcodes;
 
 /// <summary>
 /// Represents a collection of <see cref="Barcode"/> instances associated with an article.

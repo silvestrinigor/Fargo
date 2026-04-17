@@ -1,5 +1,4 @@
 using Fargo.Application.Exceptions;
-using Fargo.Domain.Exceptions;
 
 namespace Fargo.Api.Middlewares;
 

@@ -1,6 +1,4 @@
-using Fargo.Domain.ValueObjects;
-
-namespace Fargo.Domain.Security;
+namespace Fargo.Domain.Tokens;
 
 /// <summary>
 /// Defines the contract for hashing security tokens.

@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents a validated name value object used across the domain.

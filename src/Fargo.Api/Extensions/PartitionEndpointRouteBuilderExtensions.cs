@@ -4,7 +4,6 @@ using Fargo.Application.Commands.PartitionCommands;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Queries;
 using Fargo.Application.Queries.PartitionQueries;
-using Fargo.Domain.ValueObjects;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

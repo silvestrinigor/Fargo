@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents a validated textual description in the domain.

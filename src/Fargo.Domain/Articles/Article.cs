@@ -1,7 +1,7 @@
-using Fargo.Domain.Collections;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Barcodes;
+using Fargo.Domain.Partitions;
 
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Articles;
 
 /// <summary>
 /// Represents an article in the system.

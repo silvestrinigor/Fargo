@@ -1,7 +1,5 @@
 using Fargo.Application.Persistence;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Security;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Tokens;
 
 namespace Fargo.Application.Commands.AuthCommands;
 

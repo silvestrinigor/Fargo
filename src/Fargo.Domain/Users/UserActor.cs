@@ -1,8 +1,4 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Services;
-
-namespace Fargo.Domain.Security;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Represents an actor corresponding to a real authenticated <see cref="User"/>.

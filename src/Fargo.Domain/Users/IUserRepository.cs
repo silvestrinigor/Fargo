@@ -1,7 +1,6 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Partitions;
 
-namespace Fargo.Domain.Repositories;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Defines the repository contract for managing <see cref="User"/> entities.

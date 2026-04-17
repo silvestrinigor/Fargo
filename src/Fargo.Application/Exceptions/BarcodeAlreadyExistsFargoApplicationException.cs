@@ -1,4 +1,4 @@
-using Fargo.Domain.Enums;
+using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Exceptions;
 

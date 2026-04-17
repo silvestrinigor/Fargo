@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Partitions;
 
 // TODO: validate documentation
 /// <summary>

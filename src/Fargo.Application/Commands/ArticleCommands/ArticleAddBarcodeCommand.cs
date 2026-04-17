@@ -4,11 +4,9 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Models.BarcodeModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Commands.ArticleCommands;
 

@@ -1,6 +1,4 @@
-using Fargo.Domain.Enums;
-
-namespace Fargo.Domain.Security;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents an actor responsible for performing operations within the system.

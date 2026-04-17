@@ -1,6 +1,4 @@
-using Fargo.Domain.ValueObjects;
-
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Tokens;
 
 // TODO: validate documentation
 /// <summary>

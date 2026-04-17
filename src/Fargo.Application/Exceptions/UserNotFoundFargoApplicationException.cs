@@ -1,4 +1,4 @@
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Exceptions;
 

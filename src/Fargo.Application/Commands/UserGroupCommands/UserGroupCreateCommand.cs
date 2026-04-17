@@ -4,11 +4,9 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Commands.UserGroupCommands;
 

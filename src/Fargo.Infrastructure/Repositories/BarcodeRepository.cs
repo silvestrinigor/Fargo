@@ -1,5 +1,4 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
+using Fargo.Domain.Barcodes;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

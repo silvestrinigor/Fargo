@@ -1,7 +1,6 @@
-using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Articles;
 
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Barcodes;
 
 /// <summary>
 /// Represents a barcode associated with an article.

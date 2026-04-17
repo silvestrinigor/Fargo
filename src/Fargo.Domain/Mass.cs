@@ -1,6 +1,6 @@
 using UnitsNet.Units;
 
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents a physical mass value in the domain.

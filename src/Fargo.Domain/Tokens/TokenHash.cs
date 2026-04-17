@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Tokens;
 
 /// <summary>
 /// Represents a hashed token stored by the system.

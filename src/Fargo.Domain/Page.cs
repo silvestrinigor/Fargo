@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Represents the page index used in paginated queries.

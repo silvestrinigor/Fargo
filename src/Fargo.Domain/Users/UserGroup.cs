@@ -1,8 +1,6 @@
-using Fargo.Domain.Collections;
-using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Partitions;
 
-namespace Fargo.Domain.Entities;
+namespace Fargo.Domain.Users;
 
 // TODO: validate documentation
 // TODO: organize the class

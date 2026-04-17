@@ -2,8 +2,7 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Models.TreeModels;
 using Fargo.Application.Repositories;
 using Fargo.Application.Security;
-using Fargo.Domain.Services;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
 
 namespace Fargo.Application.Queries.TreeQueries;
 

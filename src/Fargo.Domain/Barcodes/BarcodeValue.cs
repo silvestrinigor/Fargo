@@ -1,7 +1,6 @@
-using Fargo.Domain.Enums;
 using System.Text.RegularExpressions;
 
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Barcodes;
 
 /// <summary>
 /// Represents a barcode value combining a code string and its format (symbology).

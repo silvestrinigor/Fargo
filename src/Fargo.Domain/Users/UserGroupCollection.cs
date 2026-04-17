@@ -1,7 +1,6 @@
-using Fargo.Domain.Entities;
 using System.Collections.ObjectModel;
 
-namespace Fargo.Domain.Collections;
+namespace Fargo.Domain.Users;
 
 // TODO: check this documentation to be like the others collections
 /// <summary>

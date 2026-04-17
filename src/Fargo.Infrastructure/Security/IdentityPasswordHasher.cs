@@ -1,5 +1,4 @@
-using Fargo.Domain.Security;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fargo.Infrastructure.Security;

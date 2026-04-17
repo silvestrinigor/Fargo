@@ -1,6 +1,4 @@
-using Fargo.Domain.ValueObjects;
-
-namespace Fargo.Domain.Security;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Defines the contract for password hashing operations.

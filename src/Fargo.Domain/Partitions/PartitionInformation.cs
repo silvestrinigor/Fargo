@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Partitions;
 
 /// <summary>
 /// Represents a lightweight information projection of a Partition entity.

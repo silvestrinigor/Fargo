@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Tokens;
 
 /// <summary>
 /// Represents a security token used by the system.

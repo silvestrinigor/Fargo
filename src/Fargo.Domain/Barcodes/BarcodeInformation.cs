@@ -1,9 +1,7 @@
-using Fargo.Domain.Enums;
-
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Barcodes;
 
 /// <summary>
-/// A read-only projection of a <see cref="Entities.Barcode"/> entity,
+/// A read-only projection of a <see cref="Barcode"/> entity,
 /// used in query results to avoid exposing domain entities to callers.
 /// </summary>
 /// <param name="Guid">The unique identifier of the barcode.</param>

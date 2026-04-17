@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Partitions;
 
 /// <summary>
 /// Exception thrown when a partition is assigned as its own parent.

@@ -1,7 +1,6 @@
-using Fargo.Domain.Entities;
 using System.Collections.ObjectModel;
 
-namespace Fargo.Domain.Collections;
+namespace Fargo.Domain.Partitions;
 
 /// <summary>
 /// Represents a collection of <see cref="Partition"/> instances associated with an entity.

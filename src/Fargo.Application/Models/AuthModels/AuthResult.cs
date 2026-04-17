@@ -1,5 +1,5 @@
-using Fargo.Domain.Enums;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
+using Fargo.Domain.Tokens;
 
 namespace Fargo.Application.Models.AuthModels;
 

@@ -1,7 +1,6 @@
 using Fargo.Application.Exceptions;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Security;
+using Fargo.Domain;
+using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Extensions;
 

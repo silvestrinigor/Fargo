@@ -1,9 +1,4 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.Exceptions;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Security;
-
-namespace Fargo.Domain.Services;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Provides domain validation and business rules related to <see cref="User"/> entities.

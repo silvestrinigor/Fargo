@@ -1,4 +1,5 @@
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Models.UserModels;
 

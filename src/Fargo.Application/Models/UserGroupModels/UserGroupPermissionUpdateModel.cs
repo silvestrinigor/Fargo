@@ -1,4 +1,4 @@
-using Fargo.Domain.Enums;
+using Fargo.Domain;
 
 namespace Fargo.Application.Models.UserGroupModels;
 

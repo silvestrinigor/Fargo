@@ -1,7 +1,8 @@
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Security;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.System;
+using Fargo.Domain.Users;
 
-namespace Fargo.Domain.Services;
+namespace Fargo.Domain;
 
 /// <summary>
 /// Service responsible for resolving and constructing <see cref="Actor"/> instances,
@@ -22,7 +23,7 @@ public class ActorService(
     /// <param name="actorGuid">The unique identifier of the actor.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>
-    /// A <see cref="SystemActor"/> if the identifier matches the system actor;
+    /// A <see cref="System.SystemActor"/> if the identifier matches the system actor;
     /// a <see cref="UserActor"/> if a corresponding user is found;
     /// otherwise, <c>null</c>.
     /// </returns>

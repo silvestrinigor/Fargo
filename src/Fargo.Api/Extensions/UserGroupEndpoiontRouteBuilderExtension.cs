@@ -4,7 +4,6 @@ using Fargo.Application.Commands.UserGroupCommands;
 using Fargo.Application.Models.UserGroupModels;
 using Fargo.Application.Queries;
 using Fargo.Application.Queries.UserGroupQueries;
-using Fargo.Domain.ValueObjects;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

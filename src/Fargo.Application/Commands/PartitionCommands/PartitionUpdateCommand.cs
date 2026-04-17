@@ -4,10 +4,8 @@ using Fargo.Application.Extensions;
 using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
 using Fargo.Application.Security;
-using Fargo.Domain.Enums;
-using Fargo.Domain.Exceptions;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
+using Fargo.Domain;
+using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Commands.PartitionCommands;
 

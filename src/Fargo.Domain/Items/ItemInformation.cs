@@ -1,4 +1,4 @@
-namespace Fargo.Domain.ValueObjects;
+namespace Fargo.Domain.Items;
 
 /// <summary>
 /// Represents a lightweight information projection of an Item entity.

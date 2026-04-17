@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainMass = Fargo.Domain.ValueObjects.Mass;
+using DomainMass = Fargo.Domain.Mass;
 
 namespace Fargo.Infrastructure.Converters;
 

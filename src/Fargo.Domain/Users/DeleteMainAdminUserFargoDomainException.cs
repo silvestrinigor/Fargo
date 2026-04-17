@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Exception thrown when an attempt is made to delete the main administrator user.

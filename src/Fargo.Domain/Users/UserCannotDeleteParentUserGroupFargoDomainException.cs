@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Exception thrown when a user attempts to delete a user group

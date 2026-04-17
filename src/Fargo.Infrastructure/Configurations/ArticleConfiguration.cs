@@ -1,4 +1,4 @@
-using Fargo.Domain.Entities;
+using Fargo.Domain.Articles;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

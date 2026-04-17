@@ -1,9 +1,8 @@
 using Fargo.Application.Exceptions;
 using Fargo.Application.Extensions;
 using Fargo.Application.Security;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.Services;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
+using Fargo.Domain.Users;
 
 namespace Fargo.Application.Queries.UserGroupQueries;
 

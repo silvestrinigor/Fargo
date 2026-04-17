@@ -1,6 +1,4 @@
-using Fargo.Domain.Enums;
-
-namespace Fargo.Domain.Exceptions;
+namespace Fargo.Domain.Users;
 
 /// <summary>
 /// Exception thrown when a user attempts to perform an action
