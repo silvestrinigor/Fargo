@@ -1,3 +1,4 @@
+using Fargo.Domain;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

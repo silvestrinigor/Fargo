@@ -5,6 +5,10 @@ using Fargo.Application.Models.ArticleModels;
 using Fargo.Application.Models.BarcodeModels;
 using Fargo.Application.Queries;
 using Fargo.Application.Queries.ArticleQueries;
+using Fargo.Domain;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
+using Fargo.Domain.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

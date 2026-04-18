@@ -1,5 +1,7 @@
 using Fargo.Application.Models.TreeModels;
 using Fargo.Application.Repositories;
+using Fargo.Domain;
+using Fargo.Domain.Users;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

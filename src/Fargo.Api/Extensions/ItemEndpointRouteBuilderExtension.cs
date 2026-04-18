@@ -4,6 +4,9 @@ using Fargo.Application.Commands.ItemCommands;
 using Fargo.Application.Models.ItemModels;
 using Fargo.Application.Queries;
 using Fargo.Application.Queries.ItemQueries;
+using Fargo.Domain;
+using Fargo.Domain.Items;
+using Fargo.Domain.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

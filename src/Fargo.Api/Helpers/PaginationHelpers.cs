@@ -1,3 +1,5 @@
+using Fargo.Domain;
+
 namespace Fargo.Api.Helpers;
 
 /// <summary>

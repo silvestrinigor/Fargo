@@ -1,6 +1,7 @@
 using Fargo.Application.Commands;
 using Fargo.Application.Commands.ArticleCommands;
 using Fargo.Application.Models.ArticleModels;
+using Fargo.Domain.Partitions;
 using System.Diagnostics;
 
 namespace Fargo.TestsSeedService;

@@ -1,4 +1,7 @@
 using Fargo.Application.Exceptions;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.Users;
 
 namespace Fargo.Api.Middlewares;
 
