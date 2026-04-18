@@ -1,11 +1,9 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Commands.UserCommands;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Command used to remove an existing user group membership from a user.

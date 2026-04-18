@@ -1,7 +1,7 @@
 using Fargo.Domain;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Models.UserModels;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Represents the data required to create a new user.

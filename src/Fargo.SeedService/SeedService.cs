@@ -1,4 +1,5 @@
-using Fargo.Application.Commands;
+using Fargo.Application;
+using Fargo.Application.System;
 using System.Diagnostics;
 
 namespace Fargo.SeedService;

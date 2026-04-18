@@ -1,7 +1,6 @@
-using Fargo.Application.Models.TreeModels;
 using Fargo.Domain;
 
-namespace Fargo.Application.Repositories;
+namespace Fargo.Application.Tree;
 
 /// <summary>
 /// Repository responsible for retrieving user group-related tree nodes.

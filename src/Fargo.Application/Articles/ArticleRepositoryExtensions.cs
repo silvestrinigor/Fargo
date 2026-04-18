@@ -1,7 +1,6 @@
-using Fargo.Application.Exceptions;
 using Fargo.Domain.Articles;
 
-namespace Fargo.Application.Extensions;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Provides extension methods for <see cref="IArticleRepository"/>

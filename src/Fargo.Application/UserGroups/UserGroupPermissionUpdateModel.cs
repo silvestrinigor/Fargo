@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Models.UserGroupModels;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Represents a permission update operation for a user group.

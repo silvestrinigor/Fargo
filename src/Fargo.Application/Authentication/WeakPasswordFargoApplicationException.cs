@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Exception thrown when a new password does not meet the required security policy.

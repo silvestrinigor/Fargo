@@ -1,11 +1,11 @@
-using Fargo.Application.Extensions;
+using Fargo.Application.Partitions;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Commands.UserGroupCommands;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Command used to add a partition to a user group's partition access set.

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Commands;
+namespace Fargo.Application;
 
 /// <summary>
 /// Represents a command in the application layer.

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Exception thrown when a barcode with the specified identifier cannot be found.

@@ -1,8 +1,9 @@
-using Fargo.Application.Exceptions;
+using Fargo.Application.Partitions;
+using Fargo.Application.Users;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 
-namespace Fargo.Application.Extensions;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Provides extension methods for <see cref="Actor"/> to enforce

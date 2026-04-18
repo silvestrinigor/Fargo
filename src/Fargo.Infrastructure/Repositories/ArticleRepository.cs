@@ -1,4 +1,5 @@
-using Fargo.Application.Mappings;
+using Fargo.Application.Partitions;
+using Fargo.Application.Articles;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Items;

@@ -1,10 +1,8 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 
-namespace Fargo.Application.Queries.PartitionQueries;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Query used to retrieve a single <see cref="PartitionInformation"/> projection

@@ -1,7 +1,6 @@
-using Fargo.Application.Models.TreeModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.TreeQueries;
-using Fargo.Application.Repositories;
+using Fargo.Application.Tree;
+using Fargo.Application;
+
 using Fargo.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 

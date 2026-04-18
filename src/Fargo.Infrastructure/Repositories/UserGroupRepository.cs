@@ -1,4 +1,5 @@
-using Fargo.Application.Mappings;
+using Fargo.Application.Partitions;
+using Fargo.Application.UserGroups;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;

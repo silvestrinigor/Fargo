@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Exception thrown when a partition with the specified identifier cannot be found.

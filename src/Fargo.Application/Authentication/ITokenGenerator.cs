@@ -1,7 +1,6 @@
-using Fargo.Application.Models.AuthModels;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Security;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Defines a service responsible for generating access tokens

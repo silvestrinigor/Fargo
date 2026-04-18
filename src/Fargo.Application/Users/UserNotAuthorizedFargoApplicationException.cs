@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Exception thrown when a user attempts to perform an action

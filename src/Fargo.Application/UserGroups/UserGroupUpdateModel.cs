@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Models.UserGroupModels;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Represents the data used to update an existing user group.

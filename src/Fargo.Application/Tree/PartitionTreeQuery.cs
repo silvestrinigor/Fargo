@@ -1,10 +1,7 @@
-using Fargo.Application.Extensions;
-using Fargo.Application.Models.TreeModels;
-using Fargo.Application.Repositories;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 
-namespace Fargo.Application.Queries.TreeQueries;
+namespace Fargo.Application.Tree;
 
 /// <summary>
 /// Query used to retrieve a paginated collection of partition tree nodes.

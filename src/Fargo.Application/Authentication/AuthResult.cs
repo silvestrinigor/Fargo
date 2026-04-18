@@ -1,7 +1,7 @@
 using Fargo.Domain;
 using Fargo.Domain.Tokens;
 
-namespace Fargo.Application.Models.AuthModels;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Represents the result of a successful authentication.

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Security;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Configuration options used to create the default administrator

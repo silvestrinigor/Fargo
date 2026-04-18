@@ -1,13 +1,10 @@
 using Fargo.Application.Events;
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
-using Fargo.Application.Models.PartitionModels;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 
-namespace Fargo.Application.Commands.PartitionCommands;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Command used to update an existing partition.

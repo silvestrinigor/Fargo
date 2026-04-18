@@ -1,4 +1,4 @@
-namespace Fargo.Application.Storage;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Abstraction for article image storage.

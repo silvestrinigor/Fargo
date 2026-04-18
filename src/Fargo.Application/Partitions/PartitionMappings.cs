@@ -1,7 +1,7 @@
 using Fargo.Domain.Partitions;
 using System.Linq.Expressions;
 
-namespace Fargo.Application.Mappings;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Provides mapping utilities for transforming <see cref="Partition"/> entities

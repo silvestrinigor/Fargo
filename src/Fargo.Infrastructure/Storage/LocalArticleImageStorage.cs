@@ -1,4 +1,4 @@
-using Fargo.Application.Storage;
+using Fargo.Application.Articles;
 using Fargo.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 

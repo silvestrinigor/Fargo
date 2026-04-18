@@ -1,6 +1,5 @@
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.ArticleCommands;
-using Fargo.Application.Models.ArticleModels;
+using Fargo.Application;
+using Fargo.Application.Articles;
 using Fargo.Domain.Partitions;
 using System.Diagnostics;
 

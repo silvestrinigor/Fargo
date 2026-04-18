@@ -1,10 +1,8 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Models.UserModels;
+using Fargo.Application.Users;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Commands.AuthCommands;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Command used by an authenticated user to change their own password.

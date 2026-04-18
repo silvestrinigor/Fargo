@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Exception thrown when a user must change their password before accessing the system.

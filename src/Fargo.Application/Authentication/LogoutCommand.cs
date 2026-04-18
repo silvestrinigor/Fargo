@@ -1,7 +1,7 @@
 using Fargo.Application.Persistence;
 using Fargo.Domain.Tokens;
 
-namespace Fargo.Application.Commands.AuthCommands;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Command used to log out a user by invalidating a refresh token.

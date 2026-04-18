@@ -1,4 +1,4 @@
-namespace Fargo.Application.Models.TreeModels;
+namespace Fargo.Application.Tree;
 
 /// <summary>
 /// Represents a node in a hierarchical tree structure.

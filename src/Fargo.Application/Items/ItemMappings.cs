@@ -1,7 +1,7 @@
 using Fargo.Domain.Items;
 using System.Linq.Expressions;
 
-namespace Fargo.Application.Mappings;
+namespace Fargo.Application.Items;
 
 /// <summary>
 /// Provides mapping utilities for transforming <see cref="Item"/> entities

@@ -1,6 +1,6 @@
 using Fargo.Domain.Tokens;
 
-namespace Fargo.Application.Models.AuthModels;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Represents the result of generating an access token.

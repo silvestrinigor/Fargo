@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Exception thrown when the provided password does not match

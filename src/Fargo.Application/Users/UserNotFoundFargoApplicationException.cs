@@ -1,6 +1,6 @@
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Exception thrown when a user cannot be found.

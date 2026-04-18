@@ -1,13 +1,11 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
+using Fargo.Application.Authentication;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Options;
 
-namespace Fargo.Application.Commands;
+namespace Fargo.Application.System;
 
 /// <summary>
 /// Command used to initialize the system during its first startup.

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Exception thrown when a user group with the specified identifier

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Exception thrown when a user attempts to access a partitioned entity

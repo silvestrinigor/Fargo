@@ -1,7 +1,7 @@
 using Fargo.Domain.Users;
 using System.Linq.Expressions;
 
-namespace Fargo.Application.Mappings;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Provides mapping utilities for transforming <see cref="UserGroup"/> entities

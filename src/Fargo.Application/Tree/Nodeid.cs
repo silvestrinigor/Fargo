@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Fargo.Application.Models.TreeModels;
+namespace Fargo.Application.Tree;
 
 /// <summary>
 /// Represents a strongly-typed identifier for a tree node.

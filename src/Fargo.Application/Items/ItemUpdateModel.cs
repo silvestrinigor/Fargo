@@ -1,4 +1,4 @@
-namespace Fargo.Application.Models.ItemModels;
+namespace Fargo.Application.Items;
 
 /// <summary>
 /// Represents the data used to update an existing item.

@@ -1,7 +1,6 @@
-using Fargo.Application.Exceptions;
 using Fargo.Domain.Items;
 
-namespace Fargo.Application.Extensions;
+namespace Fargo.Application.Items;
 
 /// <summary>
 /// Provides extension methods for <see cref="IItemRepository"/>

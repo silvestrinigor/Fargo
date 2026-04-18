@@ -1,10 +1,7 @@
 using Fargo.Api.Helpers;
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.ArticleCommands;
-using Fargo.Application.Models.ArticleModels;
-using Fargo.Application.Models.BarcodeModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.ArticleQueries;
+using Fargo.Application;
+using Fargo.Application.Articles;
+
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;

@@ -1,11 +1,11 @@
-using Fargo.Application.Extensions;
+using Fargo.Application.Partitions;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Partitions;
 
-namespace Fargo.Application.Commands.ArticleCommands;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Command used to add a partition to an article.

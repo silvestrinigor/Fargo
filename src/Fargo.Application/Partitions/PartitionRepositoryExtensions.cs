@@ -1,7 +1,6 @@
-using Fargo.Application.Exceptions;
 using Fargo.Domain.Partitions;
 
-namespace Fargo.Application.Extensions;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Provides extension methods for <see cref="IPartitionRepository"/>

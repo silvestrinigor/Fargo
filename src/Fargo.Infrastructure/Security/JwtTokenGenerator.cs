@@ -1,5 +1,5 @@
-using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
+
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Options;

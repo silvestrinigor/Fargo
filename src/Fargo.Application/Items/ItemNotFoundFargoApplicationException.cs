@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Items;
 
 /// <summary>
 /// Exception thrown when an item with the specified identifier cannot be found.

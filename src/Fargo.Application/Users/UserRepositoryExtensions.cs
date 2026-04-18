@@ -1,7 +1,6 @@
-using Fargo.Application.Exceptions;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Extensions;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Provides extension methods for <see cref="IUserRepository"/>

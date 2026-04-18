@@ -1,10 +1,8 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 
-namespace Fargo.Application.Queries.ArticleQueries;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Query used to retrieve a paginated collection of <see cref="ArticleInformation"/>

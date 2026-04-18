@@ -1,11 +1,9 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Partitions;
 
-namespace Fargo.Application.Queries.ArticleQueries;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Query used to retrieve the partitions that directly contain a specific article.

@@ -1,14 +1,12 @@
+using Fargo.Application.Partitions;
 using Fargo.Application.Events;
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
-using Fargo.Application.Models.UserModels;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Commands.UserCommands;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Command used to create a new <see cref="User"/>.

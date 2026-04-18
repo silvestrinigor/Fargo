@@ -1,10 +1,9 @@
-using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Commands.UserGroupCommands;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Command used to remove a partition from a user group's partition access set.

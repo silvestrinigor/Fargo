@@ -1,4 +1,4 @@
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Exception thrown when a nameid string does not satisfy the required format rules.

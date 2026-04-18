@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Models.UserGroupModels;
+namespace Fargo.Application.UserGroups;
 
 /// <summary>
 /// Represents the data required to create a new user group.

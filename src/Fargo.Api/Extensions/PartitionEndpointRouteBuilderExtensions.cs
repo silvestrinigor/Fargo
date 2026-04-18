@@ -1,9 +1,7 @@
 using Fargo.Api.Helpers;
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.PartitionCommands;
-using Fargo.Application.Models.PartitionModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.PartitionQueries;
+using Fargo.Application;
+using Fargo.Application.Partitions;
+
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;

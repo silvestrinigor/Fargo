@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Models.UserModels;
+namespace Fargo.Application.Users;
 
 /// <summary>
 /// Represents the data required to assign a permission to a user.

@@ -1,20 +1,14 @@
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.ArticleCommands;
-using Fargo.Application.Commands.AuthCommands;
-using Fargo.Application.Commands.ItemCommands;
-using Fargo.Application.Commands.PartitionCommands;
-using Fargo.Application.Commands.UserCommands;
-using Fargo.Application.Commands.UserGroupCommands;
-using Fargo.Application.Models.AuthModels;
+using Fargo.Application.System;
+using Fargo.Application;
+using Fargo.Application.Articles;
+using Fargo.Application.Authentication;
+using Fargo.Application.Items;
+using Fargo.Application.Partitions;
+using Fargo.Application.Users;
+using Fargo.Application.UserGroups;
+
 using Fargo.Application.Persistence;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.ArticleQueries;
-using Fargo.Application.Queries.ItemQueries;
-using Fargo.Application.Queries.PartitionQueries;
-using Fargo.Application.Queries.UserGroupQueries;
-using Fargo.Application.Queries.UserQueries;
-using Fargo.Application.Security;
-using Fargo.Application.Storage;
+
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;

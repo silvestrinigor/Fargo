@@ -1,4 +1,4 @@
-namespace Fargo.Application.Models.TreeModels;
+namespace Fargo.Application.Tree;
 
 /// <summary>
 /// Defines the types of nodes that can exist in a tree structure.

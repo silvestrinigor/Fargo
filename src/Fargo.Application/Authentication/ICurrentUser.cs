@@ -1,4 +1,4 @@
-namespace Fargo.Application.Security;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Provides information about the currently authenticated user.

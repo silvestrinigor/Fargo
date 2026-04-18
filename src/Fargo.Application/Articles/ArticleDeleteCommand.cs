@@ -1,13 +1,10 @@
 using Fargo.Application.Events;
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
-using Fargo.Application.Storage;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 
-namespace Fargo.Application.Commands.ArticleCommands;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Command used to delete an existing article.

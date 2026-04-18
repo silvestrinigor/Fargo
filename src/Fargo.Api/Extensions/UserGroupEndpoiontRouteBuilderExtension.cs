@@ -1,9 +1,7 @@
 using Fargo.Api.Helpers;
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.UserGroupCommands;
-using Fargo.Application.Models.UserGroupModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.UserGroupQueries;
+using Fargo.Application;
+using Fargo.Application.UserGroups;
+
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;

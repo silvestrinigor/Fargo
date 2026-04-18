@@ -1,5 +1,5 @@
-using Fargo.Application.Models.TreeModels;
-using Fargo.Application.Repositories;
+using Fargo.Application.Tree;
+
 using Fargo.Domain;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Extensions;

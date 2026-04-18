@@ -1,5 +1,5 @@
-using Fargo.Application.Extensions;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
+
 using Fargo.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;

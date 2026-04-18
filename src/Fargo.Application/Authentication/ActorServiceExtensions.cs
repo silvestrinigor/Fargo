@@ -1,7 +1,6 @@
-using Fargo.Application.Exceptions;
 using Fargo.Domain;
 
-namespace Fargo.Application.Extensions;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Provides authorization-related extension methods for <see cref="ActorService"/>.

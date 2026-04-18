@@ -1,11 +1,8 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Extensions;
-using Fargo.Application.Security;
-using Fargo.Application.Storage;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 
-namespace Fargo.Application.Queries.ArticleQueries;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Represents the result of retrieving an article's image.

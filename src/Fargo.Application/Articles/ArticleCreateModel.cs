@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Models.ArticleModels;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Represents the data required to create a new article.

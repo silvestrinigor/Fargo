@@ -1,4 +1,4 @@
-using Fargo.Application.Mappings;
+using Fargo.Application.Partitions;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Infrastructure.Extensions;

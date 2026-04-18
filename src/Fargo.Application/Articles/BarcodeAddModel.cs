@@ -1,6 +1,6 @@
 using Fargo.Domain.Barcodes;
 
-namespace Fargo.Application.Models.BarcodeModels;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Represents the data required to add a barcode to an article.

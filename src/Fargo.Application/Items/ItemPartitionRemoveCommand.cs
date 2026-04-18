@@ -1,10 +1,9 @@
-using Fargo.Application.Extensions;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
+using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Items;
 
-namespace Fargo.Application.Commands.ItemCommands;
+namespace Fargo.Application.Items;
 
 /// <summary>
 /// Command used to remove a partition from an item.

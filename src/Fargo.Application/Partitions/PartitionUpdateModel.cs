@@ -1,6 +1,6 @@
 using Fargo.Domain;
 
-namespace Fargo.Application.Models.PartitionModels;
+namespace Fargo.Application.Partitions;
 
 /// <summary>
 /// Represents the data used to update an existing partition.

@@ -1,12 +1,9 @@
-using Fargo.Application.Exceptions;
-using Fargo.Application.Models.AuthModels;
 using Fargo.Application.Persistence;
-using Fargo.Application.Security;
 using Fargo.Domain;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
 
-namespace Fargo.Application.Commands.AuthCommands;
+namespace Fargo.Application.Authentication;
 
 /// <summary>
 /// Command used to refresh authentication tokens using a valid refresh token.

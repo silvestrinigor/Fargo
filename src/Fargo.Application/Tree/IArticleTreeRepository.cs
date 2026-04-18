@@ -1,7 +1,6 @@
-using Fargo.Application.Models.TreeModels;
 using Fargo.Domain;
 
-namespace Fargo.Application.Repositories;
+namespace Fargo.Application.Tree;
 
 /// <summary>
 /// Provides access methods for retrieving article-related nodes in a tree structure.

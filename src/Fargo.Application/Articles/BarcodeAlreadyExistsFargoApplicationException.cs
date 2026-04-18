@@ -1,6 +1,6 @@
 using Fargo.Domain.Barcodes;
 
-namespace Fargo.Application.Exceptions;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Exception thrown when an article already has a barcode with the specified format.

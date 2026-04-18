@@ -1,7 +1,7 @@
 using Fargo.Api.Helpers;
-using Fargo.Application.Models.TreeModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.TreeQueries;
+using Fargo.Application.Tree;
+using Fargo.Application;
+
 using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
 
