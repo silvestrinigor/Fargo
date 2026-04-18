@@ -1,6 +1,5 @@
 namespace Fargo.Domain.Users;
 
-// TODO: validate documentation
 /// <summary>
 /// Represents a permission assigned to a user group.
 /// </summary>

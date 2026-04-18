@@ -110,8 +110,23 @@ public interface IUserRepository
 
     /// <summary>
     /// Gets lightweight information about a user by its unique identifier,
-    /// only if the user has access to at least one of the specified partitions.
+    /// only if the user belongs to at least one of the specified partitions.
     /// </summary>
+    /// <param name="entityGuid">The unique identifier of the user.</param>
+    /// <param name="partitionGuids">
+    /// The partitions used to filter access to the user.
+    /// The user must belong to at least one of these partitions to be returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned information represents the state of the user
+    /// as it existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A <see cref="UserInformation"/> projection if the user exists and belongs
+    /// to at least one of the specified partitions; otherwise, <see langword="null"/>.
+    /// </returns>
     Task<UserInformation?> GetInfoByGuidInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,
@@ -121,8 +136,25 @@ public interface IUserRepository
 
     /// <summary>
     /// Gets a paginated collection of user information projections,
-    /// filtered to users that have access to at least one of the specified partitions.
+    /// filtered to users that belong to at least one of the specified partitions.
     /// </summary>
+    /// <param name="pagination">
+    /// The pagination configuration used to control the number of returned results
+    /// and the starting position of the query.
+    /// </param>
+    /// <param name="partitionGuids">
+    /// The partitions used to filter accessible users.
+    /// Only users belonging to at least one of these partitions are returned.
+    /// </param>
+    /// <param name="asOfDateTime">
+    /// Optional point in time used to retrieve historical data.
+    /// When provided, the returned results represent the state of the users
+    /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A read-only collection of <see cref="UserInformation"/> objects.
+    /// </returns>
     Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,

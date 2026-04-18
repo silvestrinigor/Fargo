@@ -1,6 +1,5 @@
 namespace Fargo.Domain;
 
-// TODO: validate documentation
 /// <summary>
 /// Defines the contract for entities that track last modification metadata.
 /// </summary>
@@ -23,7 +22,7 @@ public interface IModifiedEntity
     ///
     /// When the modification is performed by an internal system process,
     /// implementations should typically use
-    /// <see cref="Security.SystemActor.Guid"/>.
+    /// <see cref="System.SystemService.SystemGuid"/>.
     /// </remarks>
     Guid? EditedByGuid { get; }
 
@@ -40,7 +39,7 @@ public interface IModifiedEntity
     /// (such as timestamps, if applicable).
     ///
     /// When the modification is performed by the system, the caller should pass
-    /// <see cref="Security.SystemActor.Guid"/>.
+    /// <see cref="System.SystemService.SystemGuid"/>.
     /// </remarks>
     void MarkAsEdited(Guid actorGuid);
 }

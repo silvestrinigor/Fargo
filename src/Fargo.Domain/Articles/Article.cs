@@ -57,31 +57,23 @@ public class Article : ModifiedEntity, IPartitionedEntity
         init;
     } = [];
 
-    // TODO: Fix documentation. Is stored in database the unit value and unit type of the mass to dont lose precision
     /// <summary>
     /// Gets or sets the physical mass of the article.
-    /// Stored in grams in the database; the original value and unit are preserved while in memory.
     /// </summary>
     public Mass? Mass { get; set; }
 
-    // TODO: Fix documentation. Is stored in database the unit value and unit type of the mass to dont lose precision
     /// <summary>
     /// Gets or sets the X dimension of the article.
-    /// Stored in meters in the database; the original value and unit are preserved while in memory.
     /// </summary>
     public Length? LengthX { get; set; }
 
-    // TODO: Fix documentation. Is stored in database the unit value and unit type of the mass to dont lose precision
     /// <summary>
     /// Gets or sets the Y dimension of the article.
-    /// Stored in meters in the database; the original value and unit are preserved while in memory.
     /// </summary>
     public Length? LengthY { get; set; }
 
-    // TODO: Fix documentation. Is stored in database the unit value and unit type of the mass to dont lose precision
     /// <summary>
     /// Gets or sets the Z dimension of the article.
-    /// Stored in meters in the database; the original value and unit are preserved while in memory.
     /// </summary>
     public Length? LengthZ { get; set; }
 

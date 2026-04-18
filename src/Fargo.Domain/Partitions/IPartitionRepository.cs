@@ -60,6 +60,10 @@ public interface IPartitionRepository
     /// When provided, the returned results represent the state of the partitions
     /// as they existed at the specified date and time.
     /// </param>
+    /// <param name="rootOnly">
+    /// When <see langword="true"/>, only root partitions (those without a parent) are returned,
+    /// regardless of the <paramref name="parentPartitionGuid"/> filter.
+    /// </param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>
     /// A read-only collection of <see cref="PartitionInformation"/> objects.
@@ -91,6 +95,10 @@ public interface IPartitionRepository
     /// Optional point in time used to retrieve historical data.
     /// When provided, the returned results represent the state of the partitions
     /// as they existed at the specified date and time.
+    /// </param>
+    /// <param name="rootOnly">
+    /// When <see langword="true"/>, only root partitions (those without a parent) are returned,
+    /// regardless of the <paramref name="parentPartitionGuid"/> filter.
     /// </param>
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.

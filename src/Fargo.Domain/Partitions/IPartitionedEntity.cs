@@ -1,6 +1,5 @@
 namespace Fargo.Domain.Partitions;
 
-// TODO: validate documentation
 /// <summary>
 /// Represents an entity that is associated with one or more partitions.
 /// </summary>

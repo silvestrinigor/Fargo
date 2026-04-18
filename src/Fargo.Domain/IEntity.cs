@@ -1,6 +1,5 @@
 namespace Fargo.Domain;
 
-// TODO: validate this documentation
 /// <summary>
 /// Defines the contract for domain entities identified by a <see cref="Guid"/>.
 /// </summary>

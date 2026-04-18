@@ -1,6 +1,5 @@
 namespace Fargo.Domain;
 
-// TODO: validate documentation
 /// <summary>
 /// Represents a base entity that tracks last modification metadata.
 /// </summary>

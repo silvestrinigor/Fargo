@@ -1,6 +1,5 @@
 namespace Fargo.Domain.Tokens;
 
-// TODO: validate documentation
 /// <summary>
 /// Represents a refresh token used to obtain a new access token
 /// without requiring the user to authenticate again.

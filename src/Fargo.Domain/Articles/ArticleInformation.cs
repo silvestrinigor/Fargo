@@ -18,6 +18,21 @@ namespace Fargo.Domain.Articles;
 /// <param name="Description">
 /// A short description summarizing the article content.
 /// </param>
+/// <param name="Mass">
+/// The physical mass of the article, or <see langword="null"/> if not specified.
+/// </param>
+/// <param name="LengthX">
+/// The X dimension of the article, or <see langword="null"/> if not specified.
+/// </param>
+/// <param name="LengthY">
+/// The Y dimension of the article, or <see langword="null"/> if not specified.
+/// </param>
+/// <param name="LengthZ">
+/// The Z dimension of the article, or <see langword="null"/> if not specified.
+/// </param>
+/// <param name="HasImage">
+/// Indicates whether the article has an image stored.
+/// </param>
 public sealed record ArticleInformation(
     Guid Guid,
     Name Name,

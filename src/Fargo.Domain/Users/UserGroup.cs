@@ -2,7 +2,6 @@ using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Users;
 
-// TODO: validate documentation
 // TODO: organize the class
 /// <summary>
 /// Represents a user group in the system.

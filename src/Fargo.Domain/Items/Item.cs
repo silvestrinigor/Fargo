@@ -3,7 +3,6 @@ using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Items;
 
-// TODO: validate documentation
 /// <summary>
 /// Represents an item in the system.
 /// </summary>

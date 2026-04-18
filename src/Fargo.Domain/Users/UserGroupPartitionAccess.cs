@@ -2,7 +2,6 @@ using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Users;
 
-// TODO: validate documentation
 /// <summary>
 /// Represents the access relationship between a <see cref="UserGroup"/> and a <see cref="Partition"/>.
 /// </summary>

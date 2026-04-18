@@ -2,7 +2,6 @@ using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Users;
 
-// TODO: validate documentation
 // TODO: the default should be the password never expire
 // TODO: organize the class
 /// <summary>
@@ -34,7 +33,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// Gets or sets the user's first name.
     ///
     /// This value is optional and, when provided, must satisfy the
-    /// validation rules defined by <see cref="ValueObjects.FirstName"/>.
+    /// validation rules defined by <see cref="FirstName"/>.
     /// </summary>
     /// <remarks>
     /// A <see langword="null"/> value indicates that the first name
@@ -50,7 +49,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// Gets or sets the user's last name.
     ///
     /// This value is optional and, when provided, must satisfy the
-    /// validation rules defined by <see cref="ValueObjects.LastName"/>.
+    /// validation rules defined by <see cref="LastName"/>.
     /// </summary>
     /// <remarks>
     /// A <see langword="null"/> value indicates that the last name
