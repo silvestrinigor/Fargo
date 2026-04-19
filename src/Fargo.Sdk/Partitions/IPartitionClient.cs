@@ -73,6 +73,7 @@ public interface IPartitionClient
         string? name = null,
         string? description = null,
         Guid? parentPartitionGuid = null,
+        bool? isActive = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

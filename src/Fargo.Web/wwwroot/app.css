@@ -236,6 +236,12 @@ label {
     font-size: 0.9rem;
 }
 
+.ghost-button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(91, 156, 255, 0.08);
+}
+
 .danger {
     background: rgba(255, 122, 122, 0.1);
     color: #ffd7d7;
@@ -684,6 +690,11 @@ label {
     color: var(--accent);
 }
 
+.section-view-toggle {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
 .picker-backdrop {
     position: fixed;
     inset: 0;
@@ -739,6 +750,12 @@ label {
 .tree-node-row.selected {
     background: rgba(91, 156, 255, 0.1);
     outline: 1px solid rgba(91, 156, 255, 0.4);
+    outline-offset: -1px;
+}
+
+.tree-node-row.drag-over {
+    background: rgba(91, 156, 255, 0.15);
+    outline: 1px dashed rgba(91, 156, 255, 0.6);
     outline-offset: -1px;
 }
 

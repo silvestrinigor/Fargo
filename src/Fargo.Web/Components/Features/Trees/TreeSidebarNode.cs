@@ -10,13 +10,17 @@ public sealed class TreeSidebarNode
 {
     public required Guid EntityGuid { get; init; }
 
-    public required string Title { get; init; }
+    public required string Title { get; set; }
 
     public string? Subtitle { get; init; }
 
     public string? Icon { get; init; }
 
-    public bool IsActive { get; init; }
+    public bool IsActive { get; set; }
+
+    public bool IsPartitionNode { get; init; }
+
+    public Guid? ContextPartitionGuid { get; set; }
 
     public bool HasChildren { get; set; }
 
@@ -34,6 +38,7 @@ public sealed class TreeSidebarNode
         Title = p.Name,
         Icon = "partition.svg",
         IsActive = p.IsActive,
+        IsPartitionNode = true,
         HasChildren = true
     };
 

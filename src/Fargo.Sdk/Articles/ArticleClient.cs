@@ -36,12 +36,14 @@ public sealed class ArticleClient : IArticleClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
-            ("limit", limit?.ToString()));
+            ("limit", limit?.ToString()),
+            ("partitionGuid", partitionGuid?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleResult>>(
             $"/articles{query}",
@@ -119,6 +121,41 @@ public sealed class ArticleClient : IArticleClient
     {
         var httpResponse = await httpClient.DeleteAsync(
             $"/articles/{articleGuid}",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid articleGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.PostJsonAsync(
+            $"/articles/{articleGuid}/partitions/{partitionGuid}",
+            new { },
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid articleGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.DeleteAsync(
+            $"/articles/{articleGuid}/partitions/{partitionGuid}",
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

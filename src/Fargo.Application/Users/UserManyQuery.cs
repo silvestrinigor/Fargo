@@ -24,7 +24,8 @@ namespace Fargo.Application.Users;
 /// </remarks>
 public sealed record UserManyQuery(
     DateTimeOffset? AsOfDateTime = null,
-    Pagination? Pagination = null
+    Pagination? Pagination = null,
+    Guid? PartitionGuid = null
 ) : IQuery<IReadOnlyCollection<UserInformation>>;
 
 /// <summary>
@@ -112,24 +113,37 @@ public sealed class UserManyQueryHandler(
 
         if (actor.IsAdmin || actor.IsSystem)
         {
-            var users = await userRepository.GetManyInfo(
+            if (query.PartitionGuid.HasValue)
+            {
+                return await userRepository.GetManyInfoInPartitions(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        [query.PartitionGuid.Value],
+                        query.AsOfDateTime,
+                        cancellationToken
+                        );
+            }
+
+            return await userRepository.GetManyInfo(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     query.AsOfDateTime,
                     cancellationToken
                     );
-
-            return users;
         }
         else
         {
-            var users = await userRepository.GetManyInfoInPartitions(
+            if (query.PartitionGuid.HasValue && !actor.PartitionAccesses.Contains(query.PartitionGuid.Value))
+                return [];
+
+            var partitions = query.PartitionGuid.HasValue
+                ? (IReadOnlyCollection<Guid>)[query.PartitionGuid.Value]
+                : actor.PartitionAccesses;
+
+            return await userRepository.GetManyInfoInPartitions(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    actor.PartitionAccesses,
+                    partitions,
                     query.AsOfDateTime,
                     cancellationToken
                     );
-
-            return users;
         }
     }
 }

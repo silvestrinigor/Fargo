@@ -1,0 +1,259 @@
+@inject IEngine Engine
+@inject NavigationManager Navigation
+
+@if (!string.IsNullOrWhiteSpace(_errorMessage))
+{
+    <div class="error-banner">@_errorMessage</div>
+}
+else if (_isLoading)
+{
+    <div class="muted-text">Loading partition tree...</div>
+}
+else if (_rootNodes.Count == 0)
+{
+    <div class="muted-text">No partitions available.</div>
+}
+else
+{
+    <ul class="tree-list">
+        @foreach (var node in _rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
+        {
+            <TreeSidebarNodeView Node="node" SelectedGuid="_selectedEntityGuid" OnToggle="ToggleAsync"
+                                 OnSelect="Select" OnDragStart="StartDrag" OnDrop="DropAsync" />
+        }
+    </ul>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required string EntitySection { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string NavigationBase { get; set; }
+
+    private readonly List<TreeSidebarNode> _rootNodes = [];
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private Guid? _selectedEntityGuid;
+    private TreeSidebarNode? _dragging;
+
+    protected override void OnInitialized()
+    {
+        _selectedEntityGuid = ReadSelectedGuid();
+        _ = LoadAndRenderAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _selectedEntityGuid = ReadSelectedGuid();
+    }
+
+    private async Task LoadAndRenderAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var roots = await Engine.Partitions.GetManyAsync(rootOnly: true);
+            _rootNodes.Clear();
+            _rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load partitions." : ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ToggleAsync(TreeSidebarNode node)
+    {
+        node.IsExpanded = !node.IsExpanded;
+
+        if (!node.IsExpanded || node.ChildrenLoaded || !node.HasChildren)
+            return;
+
+        node.IsLoadingChildren = true;
+        _errorMessage = null;
+
+        try
+        {
+            var childPartitions = await Engine.Partitions.GetManyAsync(node.EntityGuid);
+            var entityNodes = await LoadEntityNodesForPartitionAsync(node.EntityGuid);
+
+            node.Children.Clear();
+            node.Children.AddRange(childPartitions.Select(TreeSidebarNode.FromPartition));
+            node.Children.AddRange(entityNodes);
+            node.ChildrenLoaded = true;
+
+            if (node.Children.Count == 0)
+                node.HasChildren = false;
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load children." : ex.Message;
+        }
+        finally
+        {
+            node.IsLoadingChildren = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task<IEnumerable<TreeSidebarNode>> LoadEntityNodesForPartitionAsync(Guid partitionGuid)
+    {
+        switch (EntitySection)
+        {
+            case "articles":
+            {
+                var articles = await Engine.Articles.GetManyAsync(partitionGuid: partitionGuid);
+                return articles.Select(a =>
+                {
+                    var n = TreeSidebarNode.FromArticle(a);
+                    n.ContextPartitionGuid = partitionGuid;
+                    return n;
+                });
+            }
+            case "items":
+            {
+                var items = await Engine.Items.GetManyAsync(partitionGuid: partitionGuid);
+                return items.Select(i =>
+                {
+                    var n = TreeSidebarNode.FromItem(i);
+                    n.ContextPartitionGuid = partitionGuid;
+                    return n;
+                });
+            }
+            case "users":
+            {
+                var users = await Engine.Users.GetManyAsync(partitionGuid: partitionGuid);
+                return users.Select(u =>
+                {
+                    var n = TreeSidebarNode.FromUser(u);
+                    n.ContextPartitionGuid = partitionGuid;
+                    return n;
+                });
+            }
+            default:
+                return [];
+        }
+    }
+
+    private void Select(TreeSidebarNode node)
+    {
+        if (node.IsPartitionNode) return;
+        _selectedEntityGuid = node.EntityGuid;
+        Navigation.NavigateTo($"{NavigationBase}/{node.EntityGuid}");
+    }
+
+    private Guid? ReadSelectedGuid()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length >= 3
+            && parts[0].Equals("entities", StringComparison.OrdinalIgnoreCase)
+            && parts[1].Equals(EntitySection, StringComparison.OrdinalIgnoreCase)
+            && Guid.TryParse(parts[2], out var guid))
+        {
+            return guid;
+        }
+
+        return null;
+    }
+
+    private void StartDrag(TreeSidebarNode node)
+    {
+        if (!node.IsPartitionNode)
+            _dragging = node;
+    }
+
+    private async Task DropAsync(TreeSidebarNode target)
+    {
+        var source = _dragging;
+        _dragging = null;
+
+        if (source is null || !target.IsPartitionNode) return;
+        if (source.ContextPartitionGuid == target.EntityGuid) return;
+
+        _errorMessage = null;
+
+        try
+        {
+            FargoSdkResponse<EmptyResult> addResult;
+            FargoSdkResponse<EmptyResult>? removeResult = null;
+
+            switch (EntitySection)
+            {
+                case "articles":
+                    var article = await Engine.Articles.GetAsync(source.EntityGuid);
+                    addResult = await article.AddPartitionAsync(target.EntityGuid);
+                    if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
+                        removeResult = await article.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                    break;
+                case "items":
+                    var item = await Engine.Items.GetAsync(source.EntityGuid);
+                    addResult = await item.AddPartitionAsync(target.EntityGuid);
+                    if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
+                        removeResult = await item.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                    break;
+                case "users":
+                    var user = await Engine.Users.GetAsync(source.EntityGuid);
+                    addResult = await user.AddPartitionAsync(target.EntityGuid);
+                    if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
+                        removeResult = await user.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                    break;
+                default:
+                    return;
+            }
+
+            if (!addResult.IsSuccess)
+            {
+                _errorMessage = addResult.Error?.Detail ?? "Failed to move entity.";
+                return;
+            }
+
+            if (removeResult is { IsSuccess: false })
+            {
+                _errorMessage = removeResult.Error?.Detail ?? "Failed to remove from previous partition.";
+                return;
+            }
+
+            MoveNodeInTree(source, target);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to move entity." : ex.Message;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void MoveNodeInTree(TreeSidebarNode source, TreeSidebarNode target)
+    {
+        var sourceList = FindParentList(source.EntityGuid, _rootNodes);
+        sourceList?.Remove(source);
+
+        source.ContextPartitionGuid = target.EntityGuid;
+
+        if (target.ChildrenLoaded)
+            target.Children.Add(source);
+        target.HasChildren = true;
+    }
+
+    private List<TreeSidebarNode>? FindParentList(Guid guid, List<TreeSidebarNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            if (node.Children.Any(c => c.EntityGuid == guid))
+                return node.Children;
+            var found = FindParentList(guid, node.Children);
+            if (found is not null) return found;
+        }
+        return null;
+    }
+}

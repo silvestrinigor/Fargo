@@ -42,6 +42,7 @@ public interface IItemClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -75,6 +76,18 @@ public interface IItemClient
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
         Guid itemGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Adds a partition to the specified item.</summary>
+    Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid itemGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Removes a partition from the specified item.</summary>
+    Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid itemGuid,
+        Guid partitionGuid,
         CancellationToken cancellationToken = default);
 
     /// <summary>

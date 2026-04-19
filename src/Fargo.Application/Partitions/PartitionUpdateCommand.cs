@@ -157,6 +157,11 @@ public sealed class PartitionUpdateCommandHandler(
             partition.Description = command.Partition.Description.Value;
         }
 
+        if (command.Partition.IsActive is not null)
+        {
+            partition.IsActive = command.Partition.IsActive.Value;
+        }
+
         await unitOfWork.SaveChanges(cancellationToken);
 
         await eventPublisher.PublishPartitionUpdated(partition.Guid, cancellationToken);

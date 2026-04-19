@@ -20,7 +20,7 @@ public sealed class Partition : IAsyncDisposable
         _name = name;
         _description = description;
         ParentPartitionGuid = parentPartitionGuid;
-        IsActive = isActive;
+        _isActive = isActive;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -51,8 +51,22 @@ public sealed class Partition : IAsyncDisposable
     /// <summary>The unique identifier of the parent partition, or <see langword="null"/> for top-level partitions.</summary>
     public Guid? ParentPartitionGuid { get; }
 
+    private bool _isActive;
+    private bool _isActiveChanged;
+
     /// <summary>Whether the partition is currently active.</summary>
-    public bool IsActive { get; }
+    public bool IsActive
+    {
+        get => _isActive;
+        set
+        {
+            if (_isActive != value)
+            {
+                _isActive = value;
+                _isActiveChanged = true;
+            }
+        }
+    }
 
     /// <summary>Raised when this partition is updated by any authenticated client.</summary>
     public event EventHandler<PartitionUpdatedEventArgs>? Updated;
@@ -81,7 +95,7 @@ public sealed class Partition : IAsyncDisposable
     public Task<FargoSdkResponse<EmptyResult>> MoveAsync(
         Guid newParentPartitionGuid,
         CancellationToken cancellationToken = default)
-        => client.UpdateAsync(Guid, null, null, newParentPartitionGuid, cancellationToken);
+        => client.UpdateAsync(Guid, null, null, newParentPartitionGuid, null, cancellationToken);
 
     /// <summary>
     /// Applies <paramref name="update"/> to this partition and persists all changes in a single request.
@@ -92,10 +106,13 @@ public sealed class Partition : IAsyncDisposable
     public async Task UpdateAsync(Action<Partition> update, CancellationToken cancellationToken = default)
     {
         _nameChanged = false;
+        _isActiveChanged = false;
         update(this);
         var nameToSend = _nameChanged ? _name : null;
+        var isActiveToSend = _isActiveChanged ? (bool?)_isActive : null;
         _nameChanged = false;
-        var result = await client.UpdateAsync(Guid, nameToSend, _description, null, cancellationToken);
+        _isActiveChanged = false;
+        var result = await client.UpdateAsync(Guid, nameToSend, _description, null, isActiveToSend, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!.Detail);

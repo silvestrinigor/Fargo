@@ -80,6 +80,18 @@ public static class UserEndpointRouteBuilderExtension
             .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPost("/{userGuid:guid}/partitions/{partitionGuid:guid}", AddUserPartition)
+            .WithName("AddUserPartition")
+            .WithSummary("Adds a partition to a user")
+            .WithDescription("Associates an existing partition with the specified user.")
+            .Produces(StatusCodes.Status204NoContent);
+
+        group.MapDelete("/{userGuid:guid}/partitions/{partitionGuid:guid}", RemoveUserPartition)
+            .WithName("RemoveUserPartition")
+            .WithSummary("Removes a partition from a user")
+            .WithDescription("Removes the association between a partition and the specified user.")
+            .Produces(StatusCodes.Status204NoContent);
     }
 
     private static async Task<Results<Ok<UserInformation>, NotFound>> GetSingleUser(
@@ -99,12 +111,14 @@ public static class UserEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOf,
         Page? page,
         Limit? limit,
+        Guid? partitionGuid,
         IQueryHandler<UserManyQuery, IReadOnlyCollection<UserInformation>> handler,
         CancellationToken cancellationToken)
     {
         var query = new UserManyQuery(
             temporalAsOf,
-            PaginationHelpers.CreatePagination(page, limit)
+            PaginationHelpers.CreatePagination(page, limit),
+            partitionGuid
         );
 
         var response = await handler.Handle(query, cancellationToken);
@@ -181,5 +195,25 @@ public static class UserEndpointRouteBuilderExtension
         var result = await handler.Handle(new UserPartitionsQuery(userGuid), cancellationToken);
 
         return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
+    }
+
+    private static async Task<NoContent> AddUserPartition(
+        Guid userGuid,
+        Guid partitionGuid,
+        ICommandHandler<UserAddPartitionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.Handle(new UserAddPartitionCommand(userGuid, partitionGuid), cancellationToken);
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<NoContent> RemoveUserPartition(
+        Guid userGuid,
+        Guid partitionGuid,
+        ICommandHandler<UserRemovePartitionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.Handle(new UserRemovePartitionCommand(userGuid, partitionGuid), cancellationToken);
+        return TypedResults.NoContent();
     }
 }

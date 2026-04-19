@@ -37,13 +37,15 @@ public sealed class ItemClient : IItemClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
             ("articleGuid", articleGuid?.ToString()),
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
-            ("limit", limit?.ToString()));
+            ("limit", limit?.ToString()),
+            ("partitionGuid", partitionGuid?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ItemResult>>(
             $"/items{query}",
@@ -105,6 +107,41 @@ public sealed class ItemClient : IItemClient
     {
         var httpResponse = await httpClient.DeleteAsync(
             $"/items/{itemGuid}",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid itemGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.PostJsonAsync(
+            $"/items/{itemGuid}/partitions/{partitionGuid}",
+            new { },
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid itemGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.DeleteAsync(
+            $"/items/{itemGuid}/partitions/{partitionGuid}",
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

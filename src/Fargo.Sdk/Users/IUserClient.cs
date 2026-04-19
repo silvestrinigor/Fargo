@@ -36,6 +36,7 @@ public interface IUserClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -128,6 +129,18 @@ public interface IUserClient
     Task<FargoSdkResponse<EmptyResult>> RemoveUserGroupAsync(
         Guid userGuid,
         Guid userGroupGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Adds a partition to the specified user.</summary>
+    Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid userGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Removes a partition from the specified user.</summary>
+    Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid userGuid,
+        Guid partitionGuid,
         CancellationToken cancellationToken = default);
 
     /// <summary>
