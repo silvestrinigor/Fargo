@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainLength = Fargo.Domain.ValueObjects.Length;
+using DomainLength = Fargo.Domain.Length;
 
 namespace Fargo.Infrastructure.Converters;
 
@@ -25,10 +25,15 @@ public sealed class LengthJsonConverter : JsonConverter<DomainLength>
 
         while (reader.Read())
         {
-            if (reader.TokenType == JsonTokenType.EndObject) break;
+            if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                break;
+            }
 
             if (reader.TokenType != JsonTokenType.PropertyName)
+            {
                 throw new JsonException("Expected property name inside length object.");
+            }
 
             string propName = reader.GetString()!;
             reader.Read();

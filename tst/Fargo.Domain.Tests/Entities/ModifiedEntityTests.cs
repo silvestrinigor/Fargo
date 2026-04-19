@@ -1,5 +1,3 @@
-using Fargo.Domain.Entities;
-
 namespace Fargo.Domain.Tests.Entities;
 
 public sealed class ModifiedEntityTests

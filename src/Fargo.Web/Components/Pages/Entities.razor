@@ -3,6 +3,7 @@
 @page "/entities/{Section}/{EntityGuid:guid}"
 @inject IEngine Engine
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Fargo Entities</PageTitle>
 
@@ -146,8 +147,10 @@
                 {
                     <div class="workspace-stack">
                         <div class="tab-bar">
-                            <button type="button" class="tab-button @(articleTab == "info" ? "active" : null)" @onclick='() => articleTab = "info"'>Info</button>
-                            <button type="button" class="tab-button @(articleTab == "metrics" ? "active" : null)" @onclick='() => articleTab = "metrics"'>Metrics</button>
+                            <button type="button" class="tab-button @(articleTab == "info" ? "active" : null)" @onclick='() => SetArticleTab("info")'>Info</button>
+                            <button type="button" class="tab-button @(articleTab == "metrics" ? "active" : null)" @onclick='() => SetArticleTab("metrics")'>Metrics</button>
+                            <button type="button" class="tab-button @(articleTab == "image" ? "active" : null)" @onclick='() => SetArticleTab("image")'>Image</button>
+                            <button type="button" class="tab-button @(articleTab == "barcodes" ? "active" : null)" @onclick='() => SetArticleTab("barcodes")'>Barcodes</button>
                         </div>
                         <section class="workspace-panel">
                             <EditForm Model="articleEditModel" OnValidSubmit="SaveArticleAsync" class="editor-form">
@@ -163,6 +166,83 @@
                                         <span>Description</span>
                                         <InputTextArea @bind-Value="articleEditModel.Description" class="text-area" />
                                     </label>
+                                }
+                                else if (articleTab == "image")
+                                {
+                                    <div class="article-image-section">
+                                        @if (!string.IsNullOrEmpty(imageErrorMessage))
+                                        {
+                                            <div class="error-banner">@imageErrorMessage</div>
+                                        }
+                                        @if (articleImageDataUrl is not null)
+                                        {
+                                            <div class="article-image-container">
+                                                <img src="@articleImageDataUrl" class="article-image-preview" alt="Article image" />
+                                            </div>
+                                        }
+                                        else if (selectedArticle!.HasImage)
+                                        {
+                                            <p class="muted-text">Loading image...</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="muted-text">No image has been uploaded yet.</p>
+                                        }
+                                        <div class="article-image-actions">
+                                            <label class="ghost-button article-image-upload-label @(isUploadingImage ? "disabled" : null)">
+                                                @(isUploadingImage ? "Uploading..." : "Upload Image")
+                                                <InputFile OnChange="UploadArticleImageAsync" accept="image/*" disabled="@isUploadingImage" style="display:none" />
+                                            </label>
+                                            @if (selectedArticle!.HasImage)
+                                            {
+                                                <button type="button" class="ghost-button danger" @onclick="DeleteArticleImageAsync" disabled="@isDeletingImage">
+                                                    @(isDeletingImage ? "Removing..." : "Remove")
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else if (articleTab == "barcodes")
+                                {
+                                    <div class="barcode-section">
+                                        @if (!string.IsNullOrEmpty(barcodeErrorMessage))
+                                        {
+                                            <div class="error-banner">@barcodeErrorMessage</div>
+                                        }
+                                        @if (articleBarcodes is null)
+                                        {
+                                            <p class="muted-text">Loading barcodes...</p>
+                                        }
+                                        else if (articleBarcodes.Count == 0)
+                                        {
+                                            <p class="muted-text">No barcodes added yet.</p>
+                                        }
+                                        else
+                                        {
+                                            <div class="barcode-list">
+                                                @foreach (var barcode in articleBarcodes)
+                                                {
+                                                    <div class="barcode-card">
+                                                        <div class="barcode-format-label">@barcode.Format</div>
+                                                        <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
+                                                        <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@isRemovingBarcode">Remove</button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        <div class="barcode-add-form">
+                                            <input type="text" class="text-field" @bind="newBarcodeCode" placeholder="Barcode code" />
+                                            <select class="select-field" @bind="newBarcodeFormat">
+                                                @foreach (var fmt in Enum.GetValues<Fargo.Sdk.Articles.BarcodeFormat>())
+                                                {
+                                                    <option value="@fmt">@fmt</option>
+                                                }
+                                            </select>
+                                            <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(isAddingBarcode || string.IsNullOrWhiteSpace(newBarcodeCode))">
+                                                @(isAddingBarcode ? "Adding..." : "Add Barcode")
+                                            </button>
+                                        </div>
+                                    </div>
                                 }
                                 else
                                 {
@@ -222,11 +302,14 @@
                                         </div>
                                     </label>
                                 }
-                                <div class="dialog-actions">
-                                    <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
-                                        @(isSavingArticle ? "Saving..." : "Save")
-                                    </button>
-                                </div>
+                                @if (articleTab is "info" or "metrics")
+                                {
+                                    <div class="dialog-actions">
+                                        <button type="submit" class="primary-button" disabled="@(!articleIsDirty || isSavingArticle)">
+                                            @(isSavingArticle ? "Saving..." : "Save")
+                                        </button>
+                                    </div>
+                                }
                             </EditForm>
                         </section>
                     </div>
@@ -587,6 +670,10 @@
     private Fargo.Sdk.Articles.Article? selectedArticle;
     private bool articleIsLoading;
     private bool isSavingArticle;
+    private bool isUploadingImage;
+    private bool isDeletingImage;
+    private string? articleImageDataUrl;
+    private string? imageErrorMessage;
     private ArticleEditForm articleEditModel = new();
     private string? _origArticleName;
     private string? _origArticleDescription;
@@ -596,6 +683,14 @@
     private double? _origArticleLengthZValue;
     private string articleTab = "info";
     private string articleCreateTab = "info";
+
+    // Barcode state
+    private IReadOnlyCollection<Fargo.Sdk.Articles.BarcodeResult>? articleBarcodes;
+    private string? barcodeErrorMessage;
+    private string newBarcodeCode = string.Empty;
+    private Fargo.Sdk.Articles.BarcodeFormat newBarcodeFormat = Fargo.Sdk.Articles.BarcodeFormat.Ean13;
+    private bool isAddingBarcode;
+    private bool isRemovingBarcode;
 
     // Item state
     private Fargo.Sdk.Items.Item? selectedItem;
@@ -634,6 +729,8 @@
             _origArticleLengthYValue = null;
             _origArticleLengthZValue = null;
             articleTab = "info";
+            articleImageDataUrl = null;
+            imageErrorMessage = null;
             _origUserNameid = null;
             _origUserFirstName = null;
             _origUserLastName = null;
@@ -789,6 +886,10 @@
     {
         selectedArticle = null;
         articleEditModel = new ArticleEditForm();
+        articleImageDataUrl = null;
+        imageErrorMessage = null;
+        articleBarcodes = null;
+        barcodeErrorMessage = null;
         articleIsLoading = true;
 
         try
@@ -810,6 +911,11 @@
             _origArticleLengthXValue = selectedArticle.LengthX?.Value;
             _origArticleLengthYValue = selectedArticle.LengthY?.Value;
             _origArticleLengthZValue = selectedArticle.LengthZ?.Value;
+
+            if (selectedArticle.HasImage)
+            {
+                await LoadArticleImageAsync();
+            }
         }
         catch (FargoSdkApiException ex)
         {
@@ -818,6 +924,193 @@
         finally
         {
             articleIsLoading = false;
+        }
+    }
+
+    private async Task LoadArticleImageAsync()
+    {
+        articleImageDataUrl = null;
+        try
+        {
+            var result = await selectedArticle!.GetImageAsync();
+            if (result is not null)
+            {
+                using var ms = new MemoryStream();
+                await result.Value.Stream.CopyToAsync(ms);
+                result.Value.Stream.Dispose();
+                var base64 = Convert.ToBase64String(ms.ToArray());
+                articleImageDataUrl = $"data:{result.Value.ContentType};base64,{base64}";
+            }
+        }
+        catch
+        {
+            // Image preview is best-effort; don't disrupt the rest of the page
+        }
+    }
+
+    private async Task UploadArticleImageAsync(InputFileChangeEventArgs e)
+    {
+        if (selectedArticle is null) return;
+
+        isUploadingImage = true;
+        imageErrorMessage = null;
+
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await selectedArticle.UploadImageAsync(stream, file.ContentType, file.Name);
+            await LoadArticleAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            imageErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to upload image." : ex.Message;
+        }
+        catch
+        {
+            imageErrorMessage = "Failed to upload image.";
+        }
+        finally
+        {
+            isUploadingImage = false;
+        }
+    }
+
+    private async Task DeleteArticleImageAsync()
+    {
+        if (selectedArticle is null) return;
+
+        isDeletingImage = true;
+        imageErrorMessage = null;
+
+        try
+        {
+            await selectedArticle.DeleteImageAsync();
+            articleImageDataUrl = null;
+            selectedArticle = await Engine.Articles.GetAsync(selectedArticle.Guid);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            imageErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove image." : ex.Message;
+        }
+        finally
+        {
+            isDeletingImage = false;
+        }
+    }
+
+    private async Task SetArticleTab(string tab)
+    {
+        articleTab = tab;
+        if (tab == "barcodes" && selectedArticle is not null)
+        {
+            await LoadArticleBarcodesAsync();
+            StateHasChanged();
+            await Task.Yield();
+            await RenderBarcodeCanvasesAsync();
+        }
+        else
+        {
+            articleBarcodes = null;
+            barcodeErrorMessage = null;
+        }
+    }
+
+    private async Task LoadArticleBarcodesAsync()
+    {
+        barcodeErrorMessage = null;
+        try
+        {
+            articleBarcodes = await Engine.Articles.GetBarcodesAsync(selectedArticle!.Guid);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            barcodeErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load barcodes." : ex.Message;
+            articleBarcodes = [];
+        }
+    }
+
+    private async Task RenderBarcodeCanvasesAsync()
+    {
+        if (articleBarcodes is null) return;
+        foreach (var barcode in articleBarcodes)
+        {
+            var canvasId = $"barcode-{barcode.Guid}";
+            var bcid = GetBarcodeBcid(barcode.Format);
+            try
+            {
+                await JS.InvokeVoidAsync("fargoBarcode.render", canvasId, bcid, barcode.Code);
+            }
+            catch
+            {
+                // Best-effort; canvas may not be in DOM yet
+            }
+        }
+    }
+
+    private static string GetBarcodeBcid(Fargo.Sdk.Articles.BarcodeFormat format) => format switch
+    {
+        Fargo.Sdk.Articles.BarcodeFormat.Ean13 => "ean13",
+        Fargo.Sdk.Articles.BarcodeFormat.Ean8 => "ean8",
+        Fargo.Sdk.Articles.BarcodeFormat.UpcA => "upca",
+        Fargo.Sdk.Articles.BarcodeFormat.UpcE => "upce",
+        Fargo.Sdk.Articles.BarcodeFormat.Code128 => "code128",
+        Fargo.Sdk.Articles.BarcodeFormat.Code39 => "code39",
+        Fargo.Sdk.Articles.BarcodeFormat.Itf14 => "itf14",
+        Fargo.Sdk.Articles.BarcodeFormat.Gs1128 => "gs1-128",
+        Fargo.Sdk.Articles.BarcodeFormat.QrCode => "qrcode",
+        Fargo.Sdk.Articles.BarcodeFormat.DataMatrix => "datamatrix",
+        _ => "code128"
+    };
+
+    private async Task AddBarcodeAsync()
+    {
+        if (selectedArticle is null || string.IsNullOrWhiteSpace(newBarcodeCode)) return;
+
+        isAddingBarcode = true;
+        barcodeErrorMessage = null;
+
+        try
+        {
+            await Engine.Articles.AddBarcodeAsync(selectedArticle.Guid, newBarcodeCode.Trim(), newBarcodeFormat);
+            newBarcodeCode = string.Empty;
+            await LoadArticleBarcodesAsync();
+            StateHasChanged();
+            await Task.Yield();
+            await RenderBarcodeCanvasesAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            barcodeErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to add barcode." : ex.Message;
+        }
+        finally
+        {
+            isAddingBarcode = false;
+        }
+    }
+
+    private async Task RemoveBarcodeAsync(Guid barcodeGuid)
+    {
+        if (selectedArticle is null) return;
+
+        isRemovingBarcode = true;
+        barcodeErrorMessage = null;
+
+        try
+        {
+            await Engine.Articles.RemoveBarcodeAsync(selectedArticle.Guid, barcodeGuid);
+            await LoadArticleBarcodesAsync();
+            StateHasChanged();
+            await Task.Yield();
+            await RenderBarcodeCanvasesAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            barcodeErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove barcode." : ex.Message;
+        }
+        finally
+        {
+            isRemovingBarcode = false;
         }
     }
 

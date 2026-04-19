@@ -1,5 +1,3 @@
-using Fargo.Domain.ValueObjects;
-
 namespace Fargo.Domain.Tests.ValueObjects;
 
 public sealed class DescriptionTests

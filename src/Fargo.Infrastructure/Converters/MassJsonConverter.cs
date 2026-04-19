@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainMass = Fargo.Domain.ValueObjects.Mass;
+using DomainMass = Fargo.Domain.Mass;
 
 namespace Fargo.Infrastructure.Converters;
 
@@ -25,10 +25,15 @@ public sealed class MassJsonConverter : JsonConverter<DomainMass>
 
         while (reader.Read())
         {
-            if (reader.TokenType == JsonTokenType.EndObject) break;
+            if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                break;
+            }
 
             if (reader.TokenType != JsonTokenType.PropertyName)
+            {
                 throw new JsonException("Expected property name inside mass object.");
+            }
 
             string propName = reader.GetString()!;
             reader.Read();

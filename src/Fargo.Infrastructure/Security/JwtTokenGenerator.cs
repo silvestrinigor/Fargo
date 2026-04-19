@@ -1,7 +1,7 @@
-using Fargo.Application.Models.AuthModels;
-using Fargo.Application.Security;
-using Fargo.Domain.Entities;
-using Fargo.Domain.ValueObjects;
+using Fargo.Application.Authentication;
+
+using Fargo.Domain.Tokens;
+using Fargo.Domain.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

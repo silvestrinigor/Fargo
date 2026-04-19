@@ -1,10 +1,10 @@
 using Fargo.Api.Helpers;
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.UserCommands;
-using Fargo.Application.Models.UserModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.UserQueries;
-using Fargo.Domain.ValueObjects;
+using Fargo.Application;
+using Fargo.Application.Users;
+
+using Fargo.Domain;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

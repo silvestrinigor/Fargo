@@ -2,28 +2,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Fargo.Infrastructure.Migrations
+namespace Fargo.Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class ArticleImage : Migration
 {
     /// <inheritdoc />
-    public partial class ArticleImage : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string>(
-                name: "ImageKey",
-                table: "Articles",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true);
-        }
+        migrationBuilder.AddColumn<string>(
+            name: "ImageKey",
+            table: "Articles",
+            type: "nvarchar(500)",
+            maxLength: 500,
+            nullable: true);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "ImageKey",
-                table: "Articles");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "ImageKey",
+            table: "Articles");
     }
 }

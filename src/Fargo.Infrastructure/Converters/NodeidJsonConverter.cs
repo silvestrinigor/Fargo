@@ -1,4 +1,4 @@
-using Fargo.Application.Models.TreeModels;
+using Fargo.Application.Tree;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

@@ -18,6 +18,14 @@ public sealed class FargoSession : IDisposable
         engine.Authentication.LoggedIn += (_, _) => OnAuthChanged();
         engine.Authentication.LoggedOut += (_, _) => OnAuthChanged();
         engine.Authentication.Refreshed += (_, _) => OnAuthChanged();
+        engine.Authentication.RefreshFailed += (_, e) =>
+        {
+            if (e.Exception is not FargoSdkConnectionException)
+            {
+                _ = engine.Authentication.LogOutAsync();
+                OnAuthChanged();
+            }
+        };
     }
 
     public bool IsReady { get; private set; }

@@ -1,5 +1,10 @@
-using Fargo.Domain.Entities;
-using Fargo.Domain.ValueObjects;
+using Fargo.Domain;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
+using Fargo.Domain.Items;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.Tokens;
+using Fargo.Domain.Users;
 using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +14,8 @@ namespace Fargo.Infrastructure.Persistence;
 public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
     public DbSet<Article> Articles { get; set; }
+
+    public DbSet<Barcode> Barcodes { get; set; }
 
     public DbSet<Item> Items { get; set; }
 
@@ -69,6 +76,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+
+        modelBuilder.ApplyConfiguration(new BarcodeConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 

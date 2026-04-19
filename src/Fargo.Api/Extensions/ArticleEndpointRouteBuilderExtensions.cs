@@ -1,10 +1,11 @@
 using Fargo.Api.Helpers;
-using Fargo.Application.Commands;
-using Fargo.Application.Commands.ArticleCommands;
-using Fargo.Application.Models.ArticleModels;
-using Fargo.Application.Queries;
-using Fargo.Application.Queries.ArticleQueries;
-using Fargo.Domain.ValueObjects;
+using Fargo.Application;
+using Fargo.Application.Articles;
+
+using Fargo.Domain;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
+using Fargo.Domain.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -85,6 +86,25 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithDescription("Returns the raw image bytes with the appropriate content type.")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{articleGuid:guid}/barcodes", GetArticleBarcodes)
+            .WithName("GetArticleBarcodes")
+            .WithSummary("Gets the barcodes of an article")
+            .WithDescription("Returns all barcodes associated with the specified article.")
+            .Produces<IReadOnlyCollection<BarcodeInformation>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPost("/{articleGuid:guid}/barcodes", AddArticleBarcode)
+            .WithName("AddArticleBarcode")
+            .WithSummary("Adds a barcode to an article")
+            .WithDescription("Creates a new barcode for the article and returns its identifier.")
+            .Produces<Guid>(StatusCodes.Status200OK);
+
+        group.MapDelete("/{articleGuid:guid}/barcodes/{barcodeGuid:guid}", RemoveArticleBarcode)
+            .WithName("RemoveArticleBarcode")
+            .WithSummary("Removes a barcode from an article")
+            .WithDescription("Deletes the specified barcode from the article.")
+            .Produces(StatusCodes.Status204NoContent);
     }
 
     private static async Task<Results<Ok<ArticleInformation>, NotFound>> GetSingleArticle(
@@ -202,5 +222,46 @@ public static class ArticleEndpointRouteBuilderExtension
         }
 
         return TypedResults.Stream(result.Stream, result.ContentType);
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<BarcodeInformation>>, NotFound>> GetArticleBarcodes(
+        Guid articleGuid,
+        IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.Handle(new ArticleBarcodesQuery(articleGuid), cancellationToken);
+
+        if (result is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return TypedResults.Ok(result);
+    }
+
+    private static async Task<Ok<Guid>> AddArticleBarcode(
+        Guid articleGuid,
+        BarcodeAddModel model,
+        ICommandHandler<ArticleAddBarcodeCommand, Guid> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ArticleAddBarcodeCommand(articleGuid, model);
+
+        var guid = await handler.Handle(command, cancellationToken);
+
+        return TypedResults.Ok(guid);
+    }
+
+    private static async Task<NoContent> RemoveArticleBarcode(
+        Guid articleGuid,
+        Guid barcodeGuid,
+        ICommandHandler<ArticleRemoveBarcodeCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ArticleRemoveBarcodeCommand(articleGuid, barcodeGuid);
+
+        await handler.Handle(command, cancellationToken);
+
+        return TypedResults.NoContent();
     }
 }

@@ -135,4 +135,42 @@ public interface IArticleClient
     Task<(Stream Stream, string ContentType)?> GetImageAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all barcodes associated with an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>
+    /// A response containing the collection of <see cref="BarcodeResult"/> values, or a
+    /// <see cref="FargoSdkErrorType.NotFound"/> error if the article does not exist.
+    /// </returns>
+    Task<FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>> GetBarcodesAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a barcode to an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="code">The barcode code string.</param>
+    /// <param name="format">The barcode format (symbology).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A response containing the <see cref="Guid"/> of the newly created barcode.</returns>
+    Task<FargoSdkResponse<Guid>> AddBarcodeAsync(
+        Guid articleGuid,
+        string code,
+        BarcodeFormat format,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a barcode from an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="barcodeGuid">The unique identifier of the barcode to remove.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    Task<FargoSdkResponse<EmptyResult>> RemoveBarcodeAsync(
+        Guid articleGuid,
+        Guid barcodeGuid,
+        CancellationToken cancellationToken = default);
 }

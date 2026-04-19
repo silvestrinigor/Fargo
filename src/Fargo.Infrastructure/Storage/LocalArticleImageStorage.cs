@@ -1,4 +1,4 @@
-using Fargo.Application.Storage;
+using Fargo.Application.Articles;
 using Fargo.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
@@ -19,25 +19,25 @@ public sealed class LocalArticleImageStorage(IOptions<ArticleImageOptions> optio
     private static readonly Dictionary<string, string> _contentTypeToExtension = new(StringComparer.OrdinalIgnoreCase)
     {
         ["image/jpeg"] = ".jpg",
-        ["image/jpg"]  = ".jpg",
-        ["image/png"]  = ".png",
-        ["image/gif"]  = ".gif",
+        ["image/jpg"] = ".jpg",
+        ["image/png"] = ".png",
+        ["image/gif"] = ".gif",
         ["image/webp"] = ".webp",
-        ["image/bmp"]  = ".bmp",
+        ["image/bmp"] = ".bmp",
         ["image/tiff"] = ".tiff",
         ["image/svg+xml"] = ".svg",
     };
 
     private static readonly Dictionary<string, string> _extensionToContentType = new(StringComparer.OrdinalIgnoreCase)
     {
-        [".jpg"]  = "image/jpeg",
+        [".jpg"] = "image/jpeg",
         [".jpeg"] = "image/jpeg",
-        [".png"]  = "image/png",
-        [".gif"]  = "image/gif",
+        [".png"] = "image/png",
+        [".gif"] = "image/gif",
         [".webp"] = "image/webp",
-        [".bmp"]  = "image/bmp",
+        [".bmp"] = "image/bmp",
         [".tiff"] = "image/tiff",
-        [".svg"]  = "image/svg+xml",
+        [".svg"] = "image/svg+xml",
     };
 
     private string BasePath => options.Value.BasePath;

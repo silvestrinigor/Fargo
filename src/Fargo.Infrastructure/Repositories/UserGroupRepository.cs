@@ -1,7 +1,8 @@
-using Fargo.Application.Mappings;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.ValueObjects;
+using Fargo.Application.Partitions;
+using Fargo.Application.UserGroups;
+using Fargo.Domain;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.Users;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,12 @@
-using Fargo.Application.Exceptions;
-using Fargo.Domain.Exceptions;
+using Fargo.Application.Articles;
+using Fargo.Application.Authentication;
+using Fargo.Application.Items;
+using Fargo.Application.Partitions;
+using Fargo.Application.UserGroups;
+using Fargo.Application.Users;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Partitions;
+using Fargo.Domain.Users;
 
 namespace Fargo.Api.Middlewares;
 
@@ -159,6 +166,18 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(UserCannotDeleteParentUserGroupFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "user-group/cannot-delete-parent-group")
+            },
+            {
+                typeof(BarcodeNotFoundFargoApplicationException),
+                new ProblemDetailsDefinition(404, "Barcode not found", "barcode/not-found")
+            },
+            {
+                typeof(BarcodeAlreadyExistsFargoApplicationException),
+                new ProblemDetailsDefinition(409, "Barcode already exists", "barcode/already-exists")
+            },
+            {
+                typeof(ArgumentException),
+                new ProblemDetailsDefinition(400, "Invalid barcode value", "barcode/invalid-value")
             }
         };
 

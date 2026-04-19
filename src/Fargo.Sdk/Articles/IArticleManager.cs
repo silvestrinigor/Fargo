@@ -109,4 +109,42 @@ public interface IArticleManager
     Task<(Stream Stream, string ContentType)?> GetImageAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all barcodes associated with an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A collection of <see cref="BarcodeResult"/> values. Empty if none exist.</returns>
+    /// <exception cref="FargoSdkApiException">Thrown if the article does not exist or on a server error.</exception>
+    Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a barcode to an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="code">The barcode code string.</param>
+    /// <param name="format">The barcode format (symbology).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The <see cref="Guid"/> of the newly created barcode.</returns>
+    /// <exception cref="FargoSdkApiException">Thrown if validation fails, the format already exists, or on a server error.</exception>
+    Task<Guid> AddBarcodeAsync(
+        Guid articleGuid,
+        string code,
+        BarcodeFormat format,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a barcode from an article.
+    /// </summary>
+    /// <param name="articleGuid">The unique identifier of the article.</param>
+    /// <param name="barcodeGuid">The unique identifier of the barcode to remove.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <exception cref="FargoSdkApiException">Thrown if the barcode does not exist or on a server error.</exception>
+    Task RemoveBarcodeAsync(
+        Guid articleGuid,
+        Guid barcodeGuid,
+        CancellationToken cancellationToken = default);
 }

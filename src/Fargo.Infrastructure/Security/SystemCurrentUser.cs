@@ -1,6 +1,5 @@
-using Fargo.Application.Security;
-using Fargo.Domain.Security;
-using Fargo.Domain.Services;
+using Fargo.Application.Authentication;
+using Fargo.Domain.System;
 
 namespace Fargo.Infrastructure.Security;
 

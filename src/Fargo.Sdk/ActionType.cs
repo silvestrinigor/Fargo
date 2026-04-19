@@ -8,37 +8,37 @@ namespace Fargo.Sdk;
 public enum ActionType
 {
     /// <summary>Permission to create articles.</summary>
-    CreateArticle,
+    CreateArticle = 0,
     /// <summary>Permission to delete articles.</summary>
-    DeleteArticle,
+    DeleteArticle = 1,
     /// <summary>Permission to edit articles.</summary>
-    EditArticle,
+    EditArticle = 2,
     /// <summary>Permission to create items.</summary>
-    CreateItem,
+    CreateItem = 3,
     /// <summary>Permission to delete items.</summary>
-    DeleteItem,
+    DeleteItem = 4,
     /// <summary>Permission to edit items.</summary>
-    EditItem,
+    EditItem = 5,
     /// <summary>Permission to create users.</summary>
-    CreateUser,
+    CreateUser = 6,
     /// <summary>Permission to delete users.</summary>
-    DeleteUser,
+    DeleteUser = 7,
     /// <summary>Permission to edit users.</summary>
-    EditUser,
+    EditUser = 8,
     /// <summary>Permission to change another user's password.</summary>
-    ChangeOtherUserPassword,
+    ChangeOtherUserPassword = 9,
     /// <summary>Permission to create user groups.</summary>
-    CreateUserGroup,
+    CreateUserGroup = 10,
     /// <summary>Permission to delete user groups.</summary>
-    DeleteUserGroup,
+    DeleteUserGroup = 11,
     /// <summary>Permission to edit user groups.</summary>
-    EditUserGroup,
+    EditUserGroup = 12,
     /// <summary>Permission to add or remove users from user groups.</summary>
-    ChangeUserGroupMembers,
+    ChangeUserGroupMembers = 13,
     /// <summary>Permission to create partitions.</summary>
-    CreatePartition,
+    CreatePartition = 14,
     /// <summary>Permission to delete partitions.</summary>
-    DeletePartition,
+    DeletePartition = 15,
     /// <summary>Permission to edit partitions.</summary>
-    EditPartition,
+    EditPartition = 16,
 }

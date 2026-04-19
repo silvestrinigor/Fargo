@@ -1,4 +1,4 @@
-using Fargo.Domain.Entities;
+using Fargo.Domain.Partitions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

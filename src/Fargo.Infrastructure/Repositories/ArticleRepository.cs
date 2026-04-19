@@ -1,7 +1,9 @@
-using Fargo.Application.Mappings;
-using Fargo.Domain.Entities;
-using Fargo.Domain.Repositories;
-using Fargo.Domain.ValueObjects;
+using Fargo.Application.Partitions;
+using Fargo.Application.Articles;
+using Fargo.Domain;
+using Fargo.Domain.Articles;
+using Fargo.Domain.Items;
+using Fargo.Domain.Partitions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
     public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
         => await articles
             .Include(a => a.Partitions)
+            .Include(a => a.Barcodes)
             .Where(a => a.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
 
