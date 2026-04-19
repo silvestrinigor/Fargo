@@ -1,0 +1,96 @@
+@page "/settings"
+@rendermode InteractiveServer
+@using Fargo.Sdk.Authentication
+
+@inject IEngine Engine
+@inject FargoSession FargoSession
+@inject NavigationManager Navigation
+
+<PageTitle>Settings | Fargo</PageTitle>
+
+<div class="settings-page">
+    <div class="page-card">
+        <h2>Change password</h2>
+        <p class="muted-text">Enter your current password and choose a new one.</p>
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
+        <EditForm Model="model" OnValidSubmit="HandleSubmitAsync" class="editor-form">
+            <DataAnnotationsValidator />
+
+            <label>
+                <span>Current password</span>
+                <InputText @bind-Value="model.CurrentPassword" Type="password" class="text-field" />
+                <ValidationMessage For="() => model.CurrentPassword" />
+            </label>
+
+            <label>
+                <span>New password</span>
+                <InputText @bind-Value="model.NewPassword" Type="password" class="text-field" />
+                <ValidationMessage For="() => model.NewPassword" />
+            </label>
+
+            <label>
+                <span>Confirm new password</span>
+                <InputText @bind-Value="model.ConfirmPassword" Type="password" class="text-field" />
+                <ValidationMessage For="() => model.ConfirmPassword" />
+            </label>
+
+            <button type="submit" class="primary-button" disabled="@isSubmitting">
+                @(isSubmitting ? "Updating..." : "Update password")
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private readonly ChangePasswordModel model = new();
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task HandleSubmitAsync()
+    {
+        if (isSubmitting) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            await Engine.Authentication.ChangePasswordAsync(model.NewPassword!, model.CurrentPassword!);
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        catch (InvalidCredentialsFargoSdkException)
+        {
+            errorMessage = "Current password is incorrect.";
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed class ChangePasswordModel
+    {
+        [Required(ErrorMessage = "Current password is required.")]
+        public string? CurrentPassword { get; set; }
+
+        [Required(ErrorMessage = "New password is required.")]
+        [MinLength(8, ErrorMessage = "New password must be at least 8 characters.")]
+        public string? NewPassword { get; set; }
+
+        [Required(ErrorMessage = "Please confirm your new password.")]
+        [Compare(nameof(NewPassword), ErrorMessage = "Passwords do not match.")]
+        public string? ConfirmPassword { get; set; }
+    }
+}
