@@ -26,5 +26,6 @@ namespace Fargo.Application.Partitions;
 public sealed record PartitionUpdateModel(
         Name? Name = null,
         Description? Description = null,
-        Guid? ParentPartitionGuid = null
+        Guid? ParentPartitionGuid = null,
+        bool? IsActive = null
         );

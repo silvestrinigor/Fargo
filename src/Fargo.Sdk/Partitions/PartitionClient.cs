@@ -82,11 +82,12 @@ public sealed class PartitionClient : IPartitionClient
         string? name = null,
         string? description = null,
         Guid? parentPartitionGuid = null,
+        bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
             $"/partitions/{partitionGuid}",
-            new { name, description, parentPartitionGuid },
+            new { name, description, parentPartitionGuid, isActive },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

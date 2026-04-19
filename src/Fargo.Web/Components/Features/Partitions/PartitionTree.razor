@@ -18,7 +18,8 @@ else
     <ul class="tree-list">
         @foreach (var node in rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
         {
-            <TreeSidebarNodeView Node="node" SelectedGuid="selectedPartitionGuid" OnToggle="ToggleAsync" OnSelect="Select" />
+            <TreeSidebarNodeView Node="node" SelectedGuid="selectedPartitionGuid" OnToggle="ToggleAsync" OnSelect="Select"
+                                 OnDragStart="StartDrag" OnDrop="DropAsync" />
         }
     </ul>
 }
@@ -28,6 +29,7 @@ else
     private bool isLoading = true;
     private string? errorMessage;
     private Guid? selectedPartitionGuid;
+    private TreeSidebarNode? _dragging;
 
     protected override void OnInitialized()
     {
@@ -127,5 +129,118 @@ else
         }
 
         return null;
+    }
+
+    // ── Drag and drop ────────────────────────────────────────────────────────
+
+    private void StartDrag(TreeSidebarNode node) => _dragging = node;
+
+    private async Task DropAsync(TreeSidebarNode target)
+    {
+        var source = _dragging;
+        _dragging = null;
+
+        if (source is null || source.EntityGuid == target.EntityGuid) return;
+
+        errorMessage = null;
+
+        try
+        {
+            var partition = await Engine.Partitions.GetAsync(source.EntityGuid);
+            var result = await partition.MoveAsync(target.EntityGuid);
+
+            if (!result.IsSuccess)
+                errorMessage = result.Error?.Detail ?? "Failed to move partition.";
+            else
+                NotifyMoved(source.EntityGuid, target.EntityGuid);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to move partition." : ex.Message;
+        }
+    }
+
+    // ── Tree helpers ─────────────────────────────────────────────────────────
+
+    private (List<TreeSidebarNode> list, TreeSidebarNode node)? FindInList(Guid guid, List<TreeSidebarNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            if (node.EntityGuid == guid) return (nodes, node);
+            var found = FindInList(guid, node.Children);
+            if (found is not null) return found;
+        }
+        return null;
+    }
+
+    // ── Public notifications called by Entities.razor ────────────────────────
+
+    public void NotifyUpdated(Guid guid, string name, bool isActive)
+    {
+        var result = FindInList(guid, rootNodes);
+        if (result is { } found)
+        {
+            found.node.Title = name;
+            found.node.IsActive = isActive;
+            StateHasChanged();
+        }
+    }
+
+    public void NotifyCreated(Guid guid, string name, bool isActive, Guid? parentGuid)
+    {
+        var newNode = new TreeSidebarNode
+        {
+            EntityGuid = guid,
+            Title = name,
+            Icon = "partition.svg",
+            IsActive = isActive,
+            HasChildren = false
+        };
+
+        if (parentGuid is null)
+        {
+            rootNodes.Add(newNode);
+        }
+        else
+        {
+            var parentResult = FindInList(parentGuid.Value, rootNodes);
+            if (parentResult is { } found)
+            {
+                if (found.node.ChildrenLoaded)
+                    found.node.Children.Add(newNode);
+                found.node.HasChildren = true;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    public void NotifyDeleted(Guid guid)
+    {
+        var result = FindInList(guid, rootNodes);
+        if (result is { } found)
+        {
+            found.list.Remove(found.node);
+            StateHasChanged();
+        }
+    }
+
+    public void NotifyMoved(Guid guid, Guid newParentGuid)
+    {
+        var sourceResult = FindInList(guid, rootNodes);
+        if (sourceResult is null) return;
+
+        var (sourceList, sourceNode) = sourceResult.Value;
+        sourceList.Remove(sourceNode);
+
+        var targetResult = FindInList(newParentGuid, rootNodes);
+        if (targetResult is { } target)
+        {
+            if (target.node.ChildrenLoaded)
+                target.node.Children.Add(sourceNode);
+            target.node.HasChildren = true;
+        }
+
+        StateHasChanged();
     }
 }

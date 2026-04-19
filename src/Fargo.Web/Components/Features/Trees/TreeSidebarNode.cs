@@ -10,13 +10,13 @@ public sealed class TreeSidebarNode
 {
     public required Guid EntityGuid { get; init; }
 
-    public required string Title { get; init; }
+    public required string Title { get; set; }
 
     public string? Subtitle { get; init; }
 
     public string? Icon { get; init; }
 
-    public bool IsActive { get; init; }
+    public bool IsActive { get; set; }
 
     public bool HasChildren { get; set; }
 

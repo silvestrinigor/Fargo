@@ -742,6 +742,12 @@ label {
     outline-offset: -1px;
 }
 
+.tree-node-row.drag-over {
+    background: rgba(91, 156, 255, 0.15);
+    outline: 1px dashed rgba(91, 156, 255, 0.6);
+    outline-offset: -1px;
+}
+
 .tree-chevron {
     width: 1.1rem;
     height: 1.1rem;
