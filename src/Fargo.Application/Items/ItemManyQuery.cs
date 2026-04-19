@@ -29,7 +29,8 @@ namespace Fargo.Application.Items;
 public sealed record ItemManyQuery(
         Guid? ArticleGuid = null,
         DateTimeOffset? AsOfDateTime = null,
-        Pagination? Pagination = null
+        Pagination? Pagination = null,
+        Guid? PartitionGuid = null
         ) : IQuery<IReadOnlyCollection<ItemInformation>>;
 
 /// <summary>
@@ -118,26 +119,40 @@ public sealed class ItemManyQueryHandler(
 
         if (actor.IsAdmin || actor.IsSystem)
         {
-            var items = await itemRepository.GetManyInfo(
+            if (query.PartitionGuid.HasValue)
+            {
+                return await itemRepository.GetManyInfoInPartitions(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        [query.PartitionGuid.Value],
+                        query.ArticleGuid,
+                        query.AsOfDateTime,
+                        cancellationToken
+                        );
+            }
+
+            return await itemRepository.GetManyInfo(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     query.ArticleGuid,
                     query.AsOfDateTime,
                     cancellationToken
                     );
-
-            return items;
         }
         else
         {
-            var items = await itemRepository.GetManyInfoInPartitions(
+            if (query.PartitionGuid.HasValue && !actor.PartitionAccesses.Contains(query.PartitionGuid.Value))
+                return [];
+
+            var partitions = query.PartitionGuid.HasValue
+                ? (IReadOnlyCollection<Guid>)[query.PartitionGuid.Value]
+                : actor.PartitionAccesses;
+
+            return await itemRepository.GetManyInfoInPartitions(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    actor.PartitionAccesses,
+                    partitions,
                     query.ArticleGuid,
                     query.AsOfDateTime,
                     cancellationToken
                     );
-
-            return items;
         }
     }
 }

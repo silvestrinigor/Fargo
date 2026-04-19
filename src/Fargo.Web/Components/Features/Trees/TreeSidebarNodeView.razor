@@ -1,10 +1,10 @@
 <li>
     <div class="tree-node-row @(SelectedGuid == Node.EntityGuid ? "selected" : null) @(_isDragOver ? "drag-over" : null)"
-         draggable="@(OnDragStart.HasDelegate ? "true" : "false")"
+         draggable="@(OnDragStart.HasDelegate && !Node.IsPartitionNode ? "true" : "false")"
          @ondragstart:stopPropagation="true"
          @ondragstart="@(() => OnDragStart.InvokeAsync(Node))"
-         @ondragover:preventDefault="@OnDrop.HasDelegate"
-         @ondragenter="@(() => { if (OnDrop.HasDelegate) _isDragOver = true; })"
+         @ondragover:preventDefault="@(OnDrop.HasDelegate && Node.IsPartitionNode)"
+         @ondragenter="@(() => { if (OnDrop.HasDelegate && Node.IsPartitionNode) _isDragOver = true; })"
          @ondragleave="@(() => _isDragOver = false)"
          @ondrop:stopPropagation="true"
          @ondrop="HandleDropAsync"

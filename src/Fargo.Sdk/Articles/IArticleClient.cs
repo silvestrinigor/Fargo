@@ -36,6 +36,7 @@ public interface IArticleClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -83,6 +84,18 @@ public interface IArticleClient
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
         Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Adds a partition to the specified article.</summary>
+    Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid articleGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Removes a partition from the specified article.</summary>
+    Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid articleGuid,
+        Guid partitionGuid,
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -33,6 +33,7 @@ public interface IArticleManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -66,6 +66,18 @@ public static class ArticleEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
 
+        group.MapPost("/{articleGuid:guid}/partitions/{partitionGuid:guid}", AddArticlePartition)
+            .WithName("AddArticlePartition")
+            .WithSummary("Adds a partition to an article")
+            .WithDescription("Associates an existing partition with the specified article.")
+            .Produces(StatusCodes.Status204NoContent);
+
+        group.MapDelete("/{articleGuid:guid}/partitions/{partitionGuid:guid}", RemoveArticlePartition)
+            .WithName("RemoveArticlePartition")
+            .WithSummary("Removes a partition from an article")
+            .WithDescription("Removes the association between a partition and the specified article.")
+            .Produces(StatusCodes.Status204NoContent);
+
         group.MapPut("/{articleGuid:guid}/image", UploadArticleImage)
             .WithName("UploadArticleImage")
             .WithSummary("Uploads or replaces the article image")
@@ -124,12 +136,14 @@ public static class ArticleEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOf,
         Page? page,
         Limit? limit,
+        Guid? partitionGuid,
         IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>> handler,
         CancellationToken cancellationToken)
     {
         var query = new ArticleManyQuery(
             temporalAsOf,
-            PaginationHelpers.CreatePagination(page, limit)
+            PaginationHelpers.CreatePagination(page, limit),
+            partitionGuid
         );
 
         var response = await handler.Handle(query, cancellationToken);
@@ -262,6 +276,26 @@ public static class ArticleEndpointRouteBuilderExtension
 
         await handler.Handle(command, cancellationToken);
 
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<NoContent> AddArticlePartition(
+        Guid articleGuid,
+        Guid partitionGuid,
+        ICommandHandler<ArticleAddPartitionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.Handle(new ArticleAddPartitionCommand(articleGuid, partitionGuid), cancellationToken);
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<NoContent> RemoveArticlePartition(
+        Guid articleGuid,
+        Guid partitionGuid,
+        ICommandHandler<ArticleRemovePartitionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.Handle(new ArticleRemovePartitionCommand(articleGuid, partitionGuid), cancellationToken);
         return TypedResults.NoContent();
     }
 }

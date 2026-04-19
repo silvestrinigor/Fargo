@@ -105,13 +105,22 @@ public sealed class Article : IAsyncDisposable
 
     internal void RaiseDeleted() => Deleted?.Invoke(this, new ArticleDeletedEventArgs(Guid));
 
-    /// <summary>
-    /// Gets the partitions that directly contain this article.
-    /// </summary>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <summary>Gets the partitions that directly contain this article.</summary>
     public Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         CancellationToken cancellationToken = default)
         => client.GetPartitionsAsync(Guid, cancellationToken);
+
+    /// <summary>Adds a partition to this article.</summary>
+    public Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+        => client.AddPartitionAsync(Guid, partitionGuid, cancellationToken);
+
+    /// <summary>Removes a partition from this article.</summary>
+    public Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+        => client.RemovePartitionAsync(Guid, partitionGuid, cancellationToken);
 
     /// <summary>
     /// Applies <paramref name="update"/> to this article and persists all changes in a single request.

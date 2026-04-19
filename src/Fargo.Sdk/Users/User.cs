@@ -114,6 +114,18 @@ public sealed class User : IAsyncDisposable
         CancellationToken cancellationToken = default)
         => client.GetPartitionsAsync(Guid, cancellationToken);
 
+    /// <summary>Adds a partition to this user.</summary>
+    public Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+        => client.AddPartitionAsync(Guid, partitionGuid, cancellationToken);
+
+    /// <summary>Removes a partition from this user.</summary>
+    public Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+        => client.RemovePartitionAsync(Guid, partitionGuid, cancellationToken);
+
     /// <summary>Adds this user to a user group.</summary>
     public Task<FargoSdkResponse<EmptyResult>> AddUserGroupAsync(
         Guid userGroupGuid,

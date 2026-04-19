@@ -21,6 +21,7 @@ public interface IItemManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new item as an instance of the specified article.</summary>

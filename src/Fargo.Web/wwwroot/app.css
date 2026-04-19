@@ -236,6 +236,12 @@ label {
     font-size: 0.9rem;
 }
 
+.ghost-button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(91, 156, 255, 0.08);
+}
+
 .danger {
     background: rgba(255, 122, 122, 0.1);
     color: #ffd7d7;
@@ -682,6 +688,11 @@ label {
 
 .section-picker-item.active {
     color: var(--accent);
+}
+
+.section-view-toggle {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid var(--border);
 }
 
 .picker-backdrop {

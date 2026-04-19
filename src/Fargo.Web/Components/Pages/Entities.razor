@@ -34,8 +34,23 @@
             }
         </div>
 
+        @if (ActiveSection != "partitions")
+        {
+            <div class="section-view-toggle">
+                <button type="button"
+                        class="ghost-button small @(_partitionViewEnabled ? "active" : null)"
+                        @onclick="@(() => _partitionViewEnabled = !_partitionViewEnabled)">
+                    Partition view
+                </button>
+            </div>
+        }
+
         <div class="workspace-pane-body">
-            @if (ActiveSection == "articles")
+            @if (_partitionViewEnabled && ActiveSection != "partitions")
+            {
+                <PartitionEntityTree EntitySection="@ActiveSection" NavigationBase="@($"/entities/{ActiveSection}")" />
+            }
+            else if (ActiveSection == "articles")
             {
                 <ArticleTree />
             }
@@ -620,6 +635,8 @@
     };
 
     private bool sectionPickerOpen;
+    private bool _partitionViewEnabled;
+    private string _lastSection = string.Empty;
     private string? errorMessage;
 
     // Computed partition properties
@@ -714,6 +731,12 @@
     {
         sectionPickerOpen = false;
         errorMessage = null;
+
+        if (ActiveSection != _lastSection)
+        {
+            _partitionViewEnabled = false;
+            _lastSection = ActiveSection;
+        }
 
         if (!EntityGuid.HasValue)
         {

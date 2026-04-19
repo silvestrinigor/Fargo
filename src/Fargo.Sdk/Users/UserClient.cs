@@ -36,12 +36,14 @@ public sealed class UserClient : IUserClient
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
-            ("limit", limit?.ToString()));
+            ("limit", limit?.ToString()),
+            ("partitionGuid", partitionGuid?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<UserResult>>(
             $"/users{query}",
@@ -168,6 +170,41 @@ public sealed class UserClient : IUserClient
     {
         var httpResponse = await httpClient.DeleteAsync(
             $"/users/{userGuid}/user-groups/{userGroupGuid}",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
+        Guid userGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.PostJsonAsync(
+            $"/users/{userGuid}/partitions/{partitionGuid}",
+            new { },
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+        }
+
+        return new FargoSdkResponse<EmptyResult>();
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
+        Guid userGuid,
+        Guid partitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        var httpResponse = await httpClient.DeleteAsync(
+            $"/users/{userGuid}/partitions/{partitionGuid}",
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

@@ -20,6 +20,7 @@ public interface IUserManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user and returns it as a live entity.</summary>

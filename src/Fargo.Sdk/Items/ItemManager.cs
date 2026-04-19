@@ -56,9 +56,10 @@ public sealed class ItemManager : IItemManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        Guid? partitionGuid = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await client.GetManyAsync(articleGuid, temporalAsOf, page, limit, cancellationToken);
+        var response = await client.GetManyAsync(articleGuid, temporalAsOf, page, limit, partitionGuid, cancellationToken);
 
         if (!response.IsSuccess)
         {
