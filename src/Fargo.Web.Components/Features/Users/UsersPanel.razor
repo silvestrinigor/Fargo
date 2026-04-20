@@ -65,7 +65,7 @@
               Title="@(_isEditing ? "Edit user" : "Create user")"
               Model="_editor"
               IsBusy="_save.IsBusy"
-              ErrorMessage="_save.ErrorMessage"
+              ErrorMessage="@_save.ErrorMessage"
               OnSubmit="SaveAsync"
               OnCancel="CloseEditor">
     <label>

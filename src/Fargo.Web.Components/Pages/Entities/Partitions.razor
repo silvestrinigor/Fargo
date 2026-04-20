@@ -90,17 +90,13 @@
               Title="New Partition"
               Model="_createForm"
               IsBusy="_create.IsBusy"
-              ErrorMessage="_create.ErrorMessage"
+              ErrorMessage="@_create.ErrorMessage"
               OnSubmit="CreateAsync"
               OnCancel="() => _createOpen = false">
     <label>
         <span>Name</span>
         <InputText @bind-Value="context.Name" class="text-field" />
         <ValidationMessage For="() => context.Name" />
-    </label>
-    <label>
-        <span>Description</span>
-        <InputTextArea @bind-Value="context.Description" class="text-area" />
     </label>
 </EditorDialog>
 
@@ -244,8 +240,7 @@
             var parentGuid = EntityGuid;
             var partition = await Engine.Partitions.CreateAsync(
                 _createForm.Name!,
-                _createForm.Description,
-                parentGuid);
+                parentPartitionGuid: parentGuid);
 
             _tree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
             Navigation.NavigateTo($"/entities/partitions/{partition.Guid}");
@@ -289,6 +284,5 @@
     {
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
-        public string? Description { get; set; }
     }
 }

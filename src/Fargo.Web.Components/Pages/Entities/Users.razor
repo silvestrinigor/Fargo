@@ -104,7 +104,7 @@
               Title="New User"
               Model="_createForm"
               IsBusy="_create.IsBusy"
-              ErrorMessage="_create.ErrorMessage"
+              ErrorMessage="@_create.ErrorMessage"
               OnSubmit="CreateAsync"
               OnCancel="() => _createOpen = false">
     <label>
@@ -116,20 +116,6 @@
         <span>Password</span>
         <input type="password" class="text-field" @bind="context.Password" />
         <ValidationMessage For="() => context.Password" />
-    </label>
-    <div class="editor-form two-columns">
-        <label>
-            <span>First name</span>
-            <InputText @bind-Value="context.FirstName" class="text-field" />
-        </label>
-        <label>
-            <span>Last name</span>
-            <InputText @bind-Value="context.LastName" class="text-field" />
-        </label>
-    </div>
-    <label>
-        <span>Description</span>
-        <InputTextArea @bind-Value="context.Description" class="text-area" />
     </label>
 </EditorDialog>
 
@@ -220,12 +206,7 @@
     {
         var ok = await _create.RunAsync(async () =>
         {
-            var user = await Engine.Users.CreateAsync(
-                _createForm.Nameid!,
-                _createForm.Password!,
-                string.IsNullOrWhiteSpace(_createForm.FirstName) ? null : _createForm.FirstName,
-                string.IsNullOrWhiteSpace(_createForm.LastName) ? null : _createForm.LastName,
-                _createForm.Description);
+            var user = await Engine.Users.CreateAsync(_createForm.Nameid!, _createForm.Password!);
             Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
         }, "Failed to create.");
 
@@ -247,8 +228,5 @@
         public string? Nameid { get; set; }
         [Required(ErrorMessage = "Password is required.")]
         public string? Password { get; set; }
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public string? Description { get; set; }
     }
 }
