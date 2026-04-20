@@ -62,7 +62,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var results = new[] { Fakes.ArticleResult(), Fakes.ArticleResult() };
-        client.GetManyAsync(Arg.Any<DateTimeOffset?>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<CancellationToken>())
+        client.GetManyAsync(Arg.Any<DateTimeOffset?>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>(results));
 
         // Act
@@ -76,7 +76,7 @@ public sealed class ArticleManagerTests
     public async Task GetManyAsync_Should_ReturnEmptyCollection_When_NoArticlesExist()
     {
         // Arrange
-        client.GetManyAsync(Arg.Any<DateTimeOffset?>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<CancellationToken>())
+        client.GetManyAsync(Arg.Any<DateTimeOffset?>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>([]));
 
         // Act
@@ -90,7 +90,7 @@ public sealed class ArticleManagerTests
     public async Task GetManyAsync_Should_ThrowFargoSdkApiException_When_AccessDenied()
     {
         // Arrange
-        client.GetManyAsync(Arg.Any<DateTimeOffset?>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<CancellationToken>())
+        client.GetManyAsync(Arg.Any<DateTimeOffset?>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>(new FargoSdkError(FargoSdkErrorType.Forbidden, "Access denied.")));
 
         // Act / Assert

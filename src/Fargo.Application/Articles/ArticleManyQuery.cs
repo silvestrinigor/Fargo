@@ -25,7 +25,8 @@ namespace Fargo.Application.Articles;
 public sealed record ArticleManyQuery(
         DateTimeOffset? AsOfDateTime = null,
         Pagination? Pagination = null,
-        Guid? PartitionGuid = null
+        Guid? PartitionGuid = null,
+        string? Search = null
         ) : IQuery<IReadOnlyCollection<ArticleInformation>>;
 
 /// <summary>
@@ -119,6 +120,7 @@ public sealed class ArticleManyQueryHandler(
                         query.Pagination ?? Pagination.FirstPage20Items,
                         [query.PartitionGuid.Value],
                         query.AsOfDateTime,
+                        query.Search,
                         cancellationToken
                         );
             }
@@ -126,6 +128,7 @@ public sealed class ArticleManyQueryHandler(
             return await articleRepository.GetManyInfo(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     query.AsOfDateTime,
+                    query.Search,
                     cancellationToken
                     );
         }
@@ -142,6 +145,7 @@ public sealed class ArticleManyQueryHandler(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     partitions,
                     query.AsOfDateTime,
+                    query.Search,
                     cancellationToken
                     );
         }

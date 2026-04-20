@@ -117,11 +117,13 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
     public async Task<IReadOnlyCollection<UserInformation>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         return await users
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Where(user => search == null || EF.Functions.Like(user.Nameid, $"%{search}%"))
             .OrderBy(user => user.Guid)
             .WithPagination(pagination)
             .Select(UserMappings.InformationProjection)
@@ -154,6 +156,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         if (partitionGuids == null || partitionGuids.Count == 0)
@@ -164,6 +167,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
         IQueryable<User> query = users
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Where(user => search == null || EF.Functions.Like(user.Nameid, $"%{search}%"))
             .Where(user => user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
 
         return await query

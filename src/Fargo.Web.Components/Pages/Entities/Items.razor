@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Fargo.Sdk
 @using Fargo.Sdk.Items
+@using Fargo.Sdk.Articles
 @inject IEngine Engine
 @inject NavigationManager Navigation
 
@@ -72,18 +73,33 @@
               ErrorMessage="@(_createError ?? _create.ErrorMessage)"
               OnSubmit="CreateAsync"
               OnCancel="() => _createOpen = false">
-    <label>
-        <span>Article GUID</span>
-        <InputText @bind-Value="context.ArticleGuid" class="text-field" />
-        <ValidationMessage For="() => context.ArticleGuid" />
-    </label>
+    <div class="entity-selection-row">
+        <span class="muted-text">@(_selectedArticleName ?? "No article selected")</span>
+        <button type="button" class="ghost-button" @onclick="() => _pickerOpen = true">Browse...</button>
+    </div>
+    <ValidationMessage For="() => context.ArticleGuid" />
 </EditorDialog>
+
+<EntityPickerDialog TEntity="Article"
+                    IsOpen="_pickerOpen"
+                    Title="Select Article"
+                    Loader="LoadArticlesForPicker"
+                    ColumnHeaders='@(new[] { "Name", "Description" })'
+                    OnSelected="OnArticleSelected"
+                    OnCancel="() => _pickerOpen = false">
+    <RowTemplate Context="article">
+        <td>@article.Name</td>
+        <td>@article.Description</td>
+    </RowTemplate>
+</EntityPickerDialog>
 
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
     private bool _partitionView;
     private bool _createOpen;
+    private bool _pickerOpen;
+    private string? _selectedArticleName;
     private CreateForm _createForm = new();
     private readonly AsyncState _create = new();
     private readonly AsyncState _load = new();
@@ -91,6 +107,16 @@
     private Guid? _loadedGuid;
 
     private async Task<IEnumerable<Item>> LoadItemsAsync() => await Engine.Items.GetManyAsync();
+
+    private async Task<IReadOnlyCollection<Article>> LoadArticlesForPicker(string? search)
+        => await Engine.Articles.GetManyAsync(search: search);
+
+    private void OnArticleSelected(Article article)
+    {
+        _createForm.ArticleGuid = article.Guid.ToString();
+        _selectedArticleName = article.Name;
+        _pickerOpen = false;
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -114,6 +140,7 @@
     private void OpenCreate()
     {
         _createForm = new CreateForm();
+        _selectedArticleName = null;
         _create.Clear();
         _createOpen = true;
     }

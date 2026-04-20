@@ -112,13 +112,15 @@ public static class UserEndpointRouteBuilderExtension
         Page? page,
         Limit? limit,
         Guid? partitionGuid,
+        string? search,
         IQueryHandler<UserManyQuery, IReadOnlyCollection<UserInformation>> handler,
         CancellationToken cancellationToken)
     {
         var query = new UserManyQuery(
             temporalAsOf,
             PaginationHelpers.CreatePagination(page, limit),
-            partitionGuid
+            partitionGuid,
+            search
         );
 
         var response = await handler.Handle(query, cancellationToken);

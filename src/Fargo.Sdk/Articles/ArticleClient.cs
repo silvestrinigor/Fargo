@@ -37,13 +37,15 @@ public sealed class ArticleClient : IArticleClient
         int? page = null,
         int? limit = null,
         Guid? partitionGuid = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("partitionGuid", partitionGuid?.ToString()));
+            ("partitionGuid", partitionGuid?.ToString()),
+            ("search", search));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleResult>>(
             $"/articles{query}",

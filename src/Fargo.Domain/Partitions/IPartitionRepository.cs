@@ -73,6 +73,7 @@ public interface IPartitionRepository
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
         bool rootOnly = false,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 
@@ -113,6 +114,7 @@ public interface IPartitionRepository
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
         bool rootOnly = false,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 

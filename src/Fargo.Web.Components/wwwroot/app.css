@@ -879,6 +879,32 @@ label {
     padding: 1.25rem;
 }
 
+.dialog-card--wide {
+    width: min(90vw, 700px);
+}
+
+.picker-search-bar {
+    margin-bottom: 0.75rem;
+}
+
+.picker-search-bar input {
+    width: 100%;
+}
+
+.picker-row {
+    cursor: pointer;
+}
+
+.picker-row:hover td {
+    background: var(--hover);
+}
+
+.entity-selection-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
 .link-button {
     display: inline-flex;
 }

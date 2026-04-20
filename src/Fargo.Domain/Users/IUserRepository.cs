@@ -105,6 +105,7 @@ public interface IUserRepository
     Task<IReadOnlyCollection<UserInformation>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 
@@ -159,6 +160,7 @@ public interface IUserRepository
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 

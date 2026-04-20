@@ -48,11 +48,13 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
         bool rootOnly = false,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         return await partitions
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Where(partition => search == null || EF.Functions.Like(partition.Name, $"%{search}%"))
             .Where(partition =>
                 !rootOnly || partition.ParentPartitionGuid == null)
             .Where(partition =>
@@ -70,6 +72,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
         bool rootOnly = false,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partitionGuids);
@@ -82,6 +85,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         return await partitions
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Where(partition => search == null || EF.Functions.Like(partition.Name, $"%{search}%"))
             .Where(partition => partitionGuids.Contains(partition.Guid))
             .Where(partition =>
                 !rootOnly || partition.ParentPartitionGuid == null)

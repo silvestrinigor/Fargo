@@ -37,6 +37,7 @@ public sealed class PartitionClient : IPartitionClient
         int? page = null,
         int? limit = null,
         bool? rootOnly = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
@@ -44,7 +45,8 @@ public sealed class PartitionClient : IPartitionClient
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("rootOnly", rootOnly?.ToString().ToLowerInvariant()));
+            ("rootOnly", rootOnly?.ToString().ToLowerInvariant()),
+            ("search", search));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>(
             $"/partitions{query}",
