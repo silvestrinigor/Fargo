@@ -1,7 +1,7 @@
 using Fargo.Sdk;
 using Fargo.Sdk.Authentication;
 
-namespace Fargo.Web.Api;
+namespace Fargo.Web.Components.Session;
 
 /// <summary>
 /// Blazor-scoped reactive wrapper around <see cref="IEngine"/> authentication state.

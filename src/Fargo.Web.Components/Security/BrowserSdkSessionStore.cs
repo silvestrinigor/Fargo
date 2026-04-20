@@ -2,7 +2,7 @@ using Fargo.Sdk.Authentication;
 using Microsoft.JSInterop;
 using System.Text.Json;
 
-namespace Fargo.Web.Security;
+namespace Fargo.Web.Components.Security;
 
 public sealed class BrowserSdkSessionStore(IJSRuntime jsRuntime) : ISessionStore
 {

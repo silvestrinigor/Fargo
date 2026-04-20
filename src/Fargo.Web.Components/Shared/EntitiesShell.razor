@@ -1,0 +1,86 @@
+@* Section picker + workspace-explorer/detail frame used by every /entities/... page. *@
+
+@if (_pickerOpen)
+{
+    <div class="picker-backdrop" @onclick="ClosePicker"></div>
+}
+
+<div class="workspace-surface entities-surface">
+    <aside class="workspace-explorer">
+        <div class="section-picker">
+            <button type="button" class="section-picker-trigger" @onclick="TogglePicker">
+                <span>@ActiveLabel</span>
+                <span class="picker-arrow @(_pickerOpen ? "open" : null)">▾</span>
+            </button>
+            @if (_pickerOpen)
+            {
+                <div class="section-picker-menu">
+                    @foreach (var link in Sections)
+                    {
+                        <a href="@link.Href"
+                           class="section-picker-item @(link.Key == ActiveSection ? "active" : null)">@link.Label</a>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (PartitionViewAvailable)
+        {
+            <div class="section-view-toggle">
+                <button type="button"
+                        class="ghost-button small @(PartitionView ? "active" : null)"
+                        @onclick="TogglePartitionView">
+                    Partition view
+                </button>
+            </div>
+        }
+
+        <div class="workspace-pane-body">
+            @Explorer
+        </div>
+
+        @if (OnNewClick.HasDelegate)
+        {
+            <div class="workspace-pane-footer">
+                <button type="button" class="ghost-button" @onclick="OnNewClick">New @SingularLabel</button>
+            </div>
+        }
+    </aside>
+
+    <section class="workspace-detail">
+        <div class="workspace-detail-body">
+            @Detail
+        </div>
+    </section>
+</div>
+
+@code {
+    private static readonly SectionLink[] Sections =
+    [
+        new("partitions", "Partitions", "/entities/partitions"),
+        new("articles",   "Articles",   "/entities/articles"),
+        new("users",      "Users",      "/entities/users"),
+        new("items",      "Items",      "/entities/items"),
+    ];
+
+    [Parameter, EditorRequired] public string ActiveSection { get; set; } = default!;
+    [Parameter, EditorRequired] public string SingularLabel { get; set; } = default!;
+    [Parameter, EditorRequired] public RenderFragment Explorer { get; set; } = default!;
+    [Parameter, EditorRequired] public RenderFragment Detail { get; set; } = default!;
+    [Parameter] public EventCallback OnNewClick { get; set; }
+    [Parameter] public bool PartitionViewAvailable { get; set; }
+    [Parameter] public bool PartitionView { get; set; }
+    [Parameter] public EventCallback<bool> PartitionViewChanged { get; set; }
+
+    private bool _pickerOpen;
+
+    private string ActiveLabel =>
+        Sections.FirstOrDefault(s => s.Key == ActiveSection).Label ?? ActiveSection;
+
+    private void TogglePicker() => _pickerOpen = !_pickerOpen;
+    private void ClosePicker() => _pickerOpen = false;
+
+    private Task TogglePartitionView() => PartitionViewChanged.InvokeAsync(!PartitionView);
+
+    private readonly record struct SectionLink(string Key, string Label, string Href);
+}

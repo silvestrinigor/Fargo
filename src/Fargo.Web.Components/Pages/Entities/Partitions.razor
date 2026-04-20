@@ -1,0 +1,294 @@
+@page "/entities/partitions"
+@page "/entities/partitions/{EntityGuid:guid}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Partitions
+@inject IEngine Engine
+@inject NavigationManager Navigation
+
+<PageTitle>Fargo · Partitions</PageTitle>
+
+<EntitiesShell ActiveSection="partitions"
+               SingularLabel="Partition"
+               OnNewClick="OpenCreate">
+    <Explorer>
+        <PartitionTree @ref="_tree" />
+    </Explorer>
+    <Detail>
+        @if (!EntityGuid.HasValue)
+        {
+            <div class="detail-empty">
+                <p class="muted-text">Select a partition to inspect its details and edit its description.</p>
+            </div>
+        }
+        else if (_load.IsBusy)
+        {
+            <p class="muted-text">Loading...</p>
+        }
+        else if (!string.IsNullOrWhiteSpace(_load.ErrorMessage))
+        {
+            <div class="error-banner">@_load.ErrorMessage</div>
+        }
+        else if (_partition is null)
+        {
+            <p class="muted-text">Partition could not be loaded.</p>
+        }
+        else
+        {
+            <div class="workspace-stack">
+                <section class="workspace-panel">
+                    <EditForm Model="_edit" OnValidSubmit="SaveAsync" class="editor-form">
+                        <DataAnnotationsValidator />
+                        @if (!string.IsNullOrWhiteSpace(_save.ErrorMessage))
+                        {
+                            <div class="error-banner">@_save.ErrorMessage</div>
+                        }
+                        @if (_isGlobal)
+                        {
+                            <label>
+                                <span>Name</span>
+                                <input type="text" class="text-field" value="@_partition.Name" disabled />
+                            </label>
+                        }
+                        else
+                        {
+                            <label>
+                                <span>Name</span>
+                                <InputText @bind-Value="_edit.Name" class="text-field" />
+                                <ValidationMessage For="() => _edit.Name" />
+                            </label>
+                            <label>
+                                <span>Parent partition</span>
+                                <InputText @bind-Value="_edit.ParentGuid" class="text-field" placeholder="Partition GUID (leave blank for root)" />
+                                <ValidationMessage For="() => _edit.ParentGuid" />
+                            </label>
+                        }
+                        <label>
+                            <span>Description</span>
+                            <InputTextArea @bind-Value="_edit.Description" class="text-area" />
+                        </label>
+                        <label class="checkbox-row">
+                            <InputCheckbox @bind-Value="_edit.IsActive" disabled="@_isGlobal" />
+                            <span>Active</span>
+                        </label>
+                        <div class="dialog-actions">
+                            <button type="button" class="ghost-button danger" @onclick="OpenDelete" disabled="@_save.IsBusy">Delete</button>
+                            <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy)">
+                                @(_save.IsBusy ? "Saving..." : "Save")
+                            </button>
+                        </div>
+                    </EditForm>
+                </section>
+            </div>
+        }
+    </Detail>
+</EntitiesShell>
+
+<EditorDialog TModel="CreateForm"
+              IsOpen="_createOpen"
+              Title="New Partition"
+              Model="_createForm"
+              IsBusy="_create.IsBusy"
+              ErrorMessage="_create.ErrorMessage"
+              OnSubmit="CreateAsync"
+              OnCancel="() => _createOpen = false">
+    <label>
+        <span>Name</span>
+        <InputText @bind-Value="context.Name" class="text-field" />
+        <ValidationMessage For="() => context.Name" />
+    </label>
+    <label>
+        <span>Description</span>
+        <InputTextArea @bind-Value="context.Description" class="text-area" />
+    </label>
+</EditorDialog>
+
+<ConfirmDialog IsOpen="_deleteOpen"
+               Title="Delete partition"
+               ConfirmText="Delete"
+               ConfirmClass="danger"
+               IsBusy="_delete.IsBusy"
+               OnConfirm="DeleteAsync"
+               OnCancel="() => _deleteOpen = false">
+    <p>Are you sure you want to delete <strong>@_partition?.Name</strong>?</p>
+    @if (!string.IsNullOrWhiteSpace(_delete.ErrorMessage))
+    {
+        <div class="error-banner">@_delete.ErrorMessage</div>
+    }
+</ConfirmDialog>
+
+@code {
+    [Parameter] public Guid? EntityGuid { get; set; }
+
+    private PartitionTree? _tree;
+
+    private Partition? _partition;
+    private Guid? _loadedGuid;
+    private EditModel _edit = new();
+    private string? _origName;
+    private string? _origDescription;
+    private string? _origParent;
+    private bool _origIsActive;
+
+    private readonly AsyncState _load = new();
+    private readonly AsyncState _save = new();
+    private readonly AsyncState _delete = new();
+    private readonly AsyncState _create = new();
+
+    private bool _createOpen;
+    private bool _deleteOpen;
+    private CreateForm _createForm = new();
+
+    private bool _isGlobal => _partition?.ParentPartitionGuid is null;
+
+    private bool IsDirty => _partition is not null && (
+        (!_isGlobal && _edit.Name != _origName) ||
+        (_edit.Description ?? "") != (_origDescription ?? "") ||
+        _edit.IsActive != _origIsActive ||
+        (!_isGlobal && (_edit.ParentGuid ?? "") != (_origParent ?? "")));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (EntityGuid != _loadedGuid)
+        {
+            _loadedGuid = EntityGuid;
+            if (EntityGuid.HasValue)
+            {
+                await LoadAsync();
+            }
+            else
+            {
+                _partition = null;
+            }
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _partition = null;
+        _edit = new EditModel();
+        await _load.RunAsync(async () =>
+        {
+            _partition = await Engine.Partitions.GetAsync(EntityGuid!.Value);
+            _edit.Name = _partition.Name;
+            _edit.Description = _partition.Description;
+            _edit.ParentGuid = _partition.ParentPartitionGuid?.ToString();
+            _edit.IsActive = _partition.IsActive;
+            _origName = _partition.Name;
+            _origDescription = _partition.Description;
+            _origParent = _partition.ParentPartitionGuid?.ToString();
+            _origIsActive = _partition.IsActive;
+        }, "Failed to load partition.");
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_partition is null) return;
+
+        await _save.RunAsync(async () =>
+        {
+            Guid? movedToParent = null;
+
+            if (!_isGlobal && (_edit.ParentGuid ?? "") != (_origParent ?? ""))
+            {
+                Guid? newParent = string.IsNullOrWhiteSpace(_edit.ParentGuid)
+                    ? null
+                    : Guid.TryParse(_edit.ParentGuid, out var parsed) ? parsed : null;
+
+                if (newParent is null && !string.IsNullOrWhiteSpace(_edit.ParentGuid))
+                {
+                    throw new InvalidOperationException("Parent partition GUID is not valid.");
+                }
+
+                var moveResult = await _partition.MoveAsync(newParent!.Value);
+                if (!moveResult.IsSuccess)
+                {
+                    throw new InvalidOperationException(moveResult.Error?.Detail ?? "Failed to move partition.");
+                }
+
+                movedToParent = newParent;
+            }
+
+            await _partition.UpdateAsync(p =>
+            {
+                if (!_isGlobal && _edit.Name is not null)
+                    p.Name = _edit.Name;
+                p.Description = _edit.Description ?? string.Empty;
+                p.IsActive = _edit.IsActive;
+            });
+
+            if (movedToParent.HasValue)
+                _tree?.NotifyMoved(EntityGuid!.Value, movedToParent.Value);
+
+            _tree?.NotifyUpdated(
+                EntityGuid!.Value,
+                _edit.Name ?? _partition.Name,
+                _edit.IsActive);
+
+            await LoadAsync();
+        }, "Failed to save.");
+    }
+
+    private void OpenCreate()
+    {
+        _createForm = new CreateForm();
+        _create.Clear();
+        _createOpen = true;
+    }
+
+    private async Task CreateAsync()
+    {
+        var ok = await _create.RunAsync(async () =>
+        {
+            var parentGuid = EntityGuid;
+            var partition = await Engine.Partitions.CreateAsync(
+                _createForm.Name!,
+                _createForm.Description,
+                parentGuid);
+
+            _tree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
+            Navigation.NavigateTo($"/entities/partitions/{partition.Guid}");
+        }, "Failed to create.");
+
+        if (ok) _createOpen = false;
+    }
+
+    private void OpenDelete()
+    {
+        _delete.Clear();
+        _deleteOpen = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (!EntityGuid.HasValue) return;
+
+        var ok = await _delete.RunAsync(async () =>
+        {
+            var deletedGuid = EntityGuid.Value;
+            await Engine.Partitions.DeleteAsync(deletedGuid);
+            _tree?.NotifyDeleted(deletedGuid);
+            Navigation.NavigateTo("/entities/partitions");
+        }, "Failed to delete.");
+
+        if (ok) _deleteOpen = false;
+    }
+
+    private sealed class EditModel
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 100 characters.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? ParentGuid { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    private sealed class CreateForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+}

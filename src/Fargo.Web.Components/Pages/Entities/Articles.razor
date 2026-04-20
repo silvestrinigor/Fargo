@@ -1,0 +1,171 @@
+@page "/entities/articles"
+@page "/entities/articles/{EntityGuid:guid}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Articles
+@inject IEngine Engine
+@inject NavigationManager Navigation
+
+<PageTitle>Fargo · Articles</PageTitle>
+
+<EntitiesShell ActiveSection="articles"
+               SingularLabel="Article"
+               PartitionViewAvailable="true"
+               PartitionView="_partitionView"
+               PartitionViewChanged="v => _partitionView = v"
+               OnNewClick="OpenCreate">
+    <Explorer>
+        @if (_partitionView)
+        {
+            <PartitionEntityTree EntitySection="articles" NavigationBase="/entities/articles" />
+        }
+        else
+        {
+            <EntityTreeView TEntity="Article"
+                            Loader="LoadArticlesAsync"
+                            ToNode="TreeSidebarNode.FromArticle"
+                            NavigationBase="/entities/articles"
+                            ErrorFallback="Failed to load articles." />
+        }
+    </Explorer>
+    <Detail>
+        @if (!EntityGuid.HasValue)
+        {
+            <div class="detail-empty">
+                <p class="muted-text">Select an article to view and edit its details.</p>
+            </div>
+        }
+        else
+        {
+            <ArticleTabs EntityGuid="EntityGuid.Value" />
+        }
+    </Detail>
+</EntitiesShell>
+
+<EditorDialog TModel="CreateForm"
+              IsOpen="_createOpen"
+              Title="New Article"
+              Model="_createForm"
+              IsBusy="_create.IsBusy"
+              ErrorMessage="_create.ErrorMessage"
+              OnSubmit="CreateAsync"
+              OnCancel="() => _createOpen = false">
+    <div class="tab-bar">
+        <button type="button" class="tab-button @(_createTab == "info" ? "active" : null)" @onclick='() => _createTab = "info"'>Info</button>
+        <button type="button" class="tab-button @(_createTab == "metrics" ? "active" : null)" @onclick='() => _createTab = "metrics"'>Metrics</button>
+    </div>
+    @if (_createTab == "info")
+    {
+        <label>
+            <span>Name</span>
+            <InputText @bind-Value="context.Name" class="text-field" />
+            <ValidationMessage For="() => context.Name" />
+        </label>
+        <label>
+            <span>Description</span>
+            <InputTextArea @bind-Value="context.Description" class="text-area" />
+        </label>
+    }
+    else
+    {
+        <label>
+            <span>Mass</span>
+            <div class="metric-input">
+                <InputNumber @bind-Value="context.MassValue" class="text-field" placeholder="optional" />
+                <select @bind="context.MassUnit" class="select-field">
+                    <option value="g">g</option>
+                    <option value="kg">kg</option>
+                    <option value="mg">mg</option>
+                    <option value="lb">lb</option>
+                    <option value="oz">oz</option>
+                </select>
+            </div>
+        </label>
+        <label>
+            <span>LengthX</span>
+            <div class="metric-input">
+                <InputNumber @bind-Value="context.LengthXValue" class="text-field" placeholder="optional" />
+                <select @bind="context.LengthXUnit" class="select-field">
+                    @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                </select>
+            </div>
+        </label>
+        <label>
+            <span>LengthY</span>
+            <div class="metric-input">
+                <InputNumber @bind-Value="context.LengthYValue" class="text-field" placeholder="optional" />
+                <select @bind="context.LengthYUnit" class="select-field">
+                    @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                </select>
+            </div>
+        </label>
+        <label>
+            <span>LengthZ</span>
+            <div class="metric-input">
+                <InputNumber @bind-Value="context.LengthZValue" class="text-field" placeholder="optional" />
+                <select @bind="context.LengthZUnit" class="select-field">
+                    @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                </select>
+            </div>
+        </label>
+    }
+</EditorDialog>
+
+@code {
+    [Parameter] public Guid? EntityGuid { get; set; }
+
+    private static readonly string[] LengthUnits = ["mm", "cm", "m", "km", "in", "ft"];
+
+    private bool _partitionView;
+    private bool _createOpen;
+    private string _createTab = "info";
+    private CreateForm _createForm = new();
+    private readonly AsyncState _create = new();
+
+    private async Task<IEnumerable<Article>> LoadArticlesAsync() => await Engine.Articles.GetManyAsync();
+
+    private void OpenCreate()
+    {
+        _createForm = new CreateForm();
+        _createTab = "info";
+        _create.Clear();
+        _createOpen = true;
+    }
+
+    private async Task CreateAsync()
+    {
+        var ok = await _create.RunAsync(async () =>
+        {
+            var mass = _createForm.MassValue is null ? null : new MassDto(_createForm.MassValue.Value, _createForm.MassUnit);
+            var x = _createForm.LengthXValue is null ? null : new LengthDto(_createForm.LengthXValue.Value, _createForm.LengthXUnit);
+            var y = _createForm.LengthYValue is null ? null : new LengthDto(_createForm.LengthYValue.Value, _createForm.LengthYUnit);
+            var z = _createForm.LengthZValue is null ? null : new LengthDto(_createForm.LengthZValue.Value, _createForm.LengthZUnit);
+            var article = await Engine.Articles.CreateAsync(
+                _createForm.Name!,
+                _createForm.Description,
+                mass: mass,
+                lengthX: x,
+                lengthY: y,
+                lengthZ: z);
+            Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
+        }, "Failed to create.");
+
+        if (ok) _createOpen = false;
+    }
+
+    private sealed class CreateForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public double? MassValue { get; set; }
+        public string MassUnit { get; set; } = "g";
+        public double? LengthXValue { get; set; }
+        public string LengthXUnit { get; set; } = "m";
+        public double? LengthYValue { get; set; }
+        public string LengthYUnit { get; set; } = "m";
+        public double? LengthZValue { get; set; }
+        public string LengthZUnit { get; set; } = "m";
+    }
+}

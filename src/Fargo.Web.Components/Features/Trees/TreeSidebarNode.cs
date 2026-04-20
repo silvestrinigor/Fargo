@@ -36,7 +36,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = p.Guid,
         Title = p.Name,
-        Icon = "partition.svg",
+        Icon = Icons.Partition,
         IsActive = p.IsActive,
         IsPartitionNode = true,
         HasChildren = true
@@ -46,7 +46,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = ug.Guid,
         Title = ug.Nameid,
-        Icon = "user.svg",
+        Icon = Icons.User,
         IsActive = ug.IsActive,
         HasChildren = false
     };
@@ -55,7 +55,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = a.Guid,
         Title = a.Name,
-        Icon = "article.svg",
+        Icon = Icons.Article,
         IsActive = true,
         HasChildren = false
     };
@@ -64,7 +64,7 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = item.Guid,
         Title = articleTitle ?? item.Guid.ToString("N")[..8],
-        Icon = "item.svg",
+        Icon = Icons.Item,
         IsActive = true,
         HasChildren = false
     };
@@ -73,8 +73,17 @@ public sealed class TreeSidebarNode
     {
         EntityGuid = user.Guid,
         Title = user.Nameid,
-        Icon = "user.svg",
+        Icon = Icons.User,
         IsActive = user.IsActive,
         HasChildren = false
     };
+
+    public static class Icons
+    {
+        private const string Base = "_content/Fargo.Web.Components/";
+        public const string Article = Base + "article.svg";
+        public const string Item = Base + "item.svg";
+        public const string Partition = Base + "partition.svg";
+        public const string User = Base + "user.svg";
+    }
 }
