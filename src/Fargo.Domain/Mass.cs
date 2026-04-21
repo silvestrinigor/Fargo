@@ -37,12 +37,6 @@ public readonly struct Mass : IEquatable<Mass>
     private Mass(UnitsNet.Mass mass) => _value = mass;
 
     /// <summary>
-    /// Creates a <see cref="Mass"/> from a value in grams.
-    /// Used primarily by infrastructure converters to reconstruct the value from storage.
-    /// </summary>
-    public static Mass FromGrams(double grams) => new(grams, MassUnit.Gram);
-
-    /// <summary>
     /// Gets the numeric magnitude in the unit originally used to construct this instance.
     /// </summary>
     public double Value => _value.Value;
@@ -51,12 +45,6 @@ public readonly struct Mass : IEquatable<Mass>
     /// Gets the unit of measurement originally used to construct this instance.
     /// </summary>
     public MassUnit Unit => _value.Unit;
-
-    /// <summary>
-    /// Returns the mass value in grams.
-    /// Used by infrastructure converters for database storage.
-    /// </summary>
-    public double Grams => _value.Grams;
 
     /// <summary>
     /// Returns the underlying <see cref="UnitsNet.Mass"/> for unit conversion or arithmetic.

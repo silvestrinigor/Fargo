@@ -37,12 +37,6 @@ public readonly struct Length : IEquatable<Length>
     private Length(UnitsNet.Length length) => _value = length;
 
     /// <summary>
-    /// Creates a <see cref="Length"/> from a value in meters.
-    /// Used primarily by infrastructure converters to reconstruct the value from storage.
-    /// </summary>
-    public static Length FromMeters(double meters) => new(meters, LengthUnit.Meter);
-
-    /// <summary>
     /// Gets the numeric magnitude in the unit originally used to construct this instance.
     /// </summary>
     public double Value => _value.Value;
@@ -51,12 +45,6 @@ public readonly struct Length : IEquatable<Length>
     /// Gets the unit of measurement originally used to construct this instance.
     /// </summary>
     public LengthUnit Unit => _value.Unit;
-
-    /// <summary>
-    /// Returns the length value in meters.
-    /// Used by infrastructure converters for database storage.
-    /// </summary>
-    public double Meters => _value.Meters;
 
     /// <summary>
     /// Returns the underlying <see cref="UnitsNet.Length"/> for unit conversion or arithmetic.
