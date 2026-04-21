@@ -8,32 +8,32 @@
 <div class="workspace-surface entities-surface">
     <aside class="workspace-explorer">
         <div class="section-picker">
-            <button type="button" class="section-picker-trigger" @onclick="TogglePicker">
-                <span>@ActiveLabel</span>
-                <span class="picker-arrow @(_pickerOpen ? "open" : null)">▾</span>
-            </button>
-            @if (_pickerOpen)
+            @if (PartitionViewAvailable)
             {
-                <div class="section-picker-menu">
-                    @foreach (var link in Sections)
-                    {
-                        <a href="@link.Href"
-                           class="section-picker-item @(link.Key == ActiveSection ? "active" : null)">@link.Label</a>
-                    }
-                </div>
-            }
-        </div>
-
-        @if (PartitionViewAvailable)
-        {
-            <div class="section-view-toggle">
                 <button type="button"
-                        class="ghost-button small @(PartitionView ? "active" : null)"
+                        class="partition-view-icon-btn @(PartitionView ? "active" : null)"
+                        title="Partition view"
                         @onclick="TogglePartitionView">
-                    Partition view
+                    <img src="partition.svg" alt="Partition view" />
                 </button>
+            }
+            <div class="section-picker-select">
+                <button type="button" class="section-picker-trigger" @onclick="TogglePicker">
+                    <span>@ActiveLabel</span>
+                    <span class="picker-arrow @(_pickerOpen ? "open" : null)">▾</span>
+                </button>
+                @if (_pickerOpen)
+                {
+                    <div class="section-picker-menu">
+                        @foreach (var link in Sections)
+                        {
+                            <a href="@link.Href"
+                               class="section-picker-item @(link.Key == ActiveSection ? "active" : null)">@link.Label</a>
+                        }
+                    </div>
+                }
             </div>
-        }
+        </div>
 
         <div class="workspace-pane-body">
             @Explorer
