@@ -1,14 +1,12 @@
-using Fargo.Application.System;
 using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
-using Fargo.Application.Users;
-using Fargo.Application.UserGroups;
-
 using Fargo.Application.Persistence;
-
+using Fargo.Application.System;
+using Fargo.Application.UserGroups;
+using Fargo.Application.Users;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;

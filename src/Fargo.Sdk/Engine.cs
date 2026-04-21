@@ -9,7 +9,6 @@ using Fargo.Sdk.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-
 namespace Fargo.Sdk;
 
 /// <summary>
@@ -17,6 +16,7 @@ namespace Fargo.Sdk;
 /// </summary>
 public sealed class Engine : IEngine
 {
+    /// <inheritdoc/>
     public Engine(ILoggerFactory? loggerFactory = null, ISessionStore? sessionStore = null)
     {
         httpClient = new HttpClient();
@@ -40,16 +40,22 @@ public sealed class Engine : IEngine
         Partitions = new PartitionManager(new PartitionClient(fargoHttpClient), hubConnection);
     }
 
+    /// <inheritdoc/>
     public IAuthenticationManager Authentication { get; }
 
+    /// <inheritdoc/>
     public IUserManager Users { get; }
 
+    /// <inheritdoc/>
     public IUserGroupManager UserGroups { get; }
 
+    /// <inheritdoc/>
     public IArticleManager Articles { get; }
 
+    /// <inheritdoc/>
     public IItemManager Items { get; }
 
+    /// <inheritdoc/>
     public IPartitionManager Partitions { get; }
 
     /// <summary>
@@ -60,6 +66,7 @@ public sealed class Engine : IEngine
     /// </summary>
     public void Configure(string server) => fargoHttpClient.SetBaseUrl(server);
 
+    /// <inheritdoc/>
     public async Task LogInAsync(string server, string nameid, string password, CancellationToken cancellationToken = default)
     {
         if (Authentication.IsAuthenticated)
@@ -74,6 +81,7 @@ public sealed class Engine : IEngine
         await hubConnection.ConnectAsync(server, () => Task.FromResult(session.AccessToken), cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task LogOutAsync(CancellationToken cancellationToken = default)
     {
         await hubConnection.DisconnectAsync(cancellationToken);
@@ -81,6 +89,7 @@ public sealed class Engine : IEngine
         await Authentication.LogOutAsync(cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task<bool> RestoreSessionAsync(string server, CancellationToken cancellationToken = default)
     {
         fargoHttpClient.SetBaseUrl(server);
@@ -95,6 +104,7 @@ public sealed class Engine : IEngine
         return restored;
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         Authentication.Dispose();

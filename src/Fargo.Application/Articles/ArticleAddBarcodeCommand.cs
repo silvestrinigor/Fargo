@@ -1,6 +1,6 @@
+using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
-using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
