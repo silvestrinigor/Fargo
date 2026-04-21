@@ -158,17 +158,11 @@
                                 <label class="permission-item">
                                     <input type="checkbox"
                                            checked="@_groupPermissions.Contains(action)"
-                                           @onchange="e => TogglePermission(_groupPermissions, action, (bool)e.Value!)" />
+                                           disabled="@_groupPermSave.IsBusy"
+                                           @onchange="async e => await SetGroupPermissionAsync(action, (bool)e.Value!)" />
                                     <span>@FormatPermission(action)</span>
                                 </label>
                             }
-                        </div>
-                        <div class="dialog-actions">
-                            <button type="button" class="primary-button"
-                                    @onclick="SaveGroupPermissionsAsync"
-                                    disabled="@_groupPermSave.IsBusy">
-                                @(_groupPermSave.IsBusy ? "Saving..." : "Save permissions")
-                            </button>
                         </div>
                     </section>
                 </div>
@@ -300,17 +294,11 @@
                             <label class="permission-item">
                                 <input type="checkbox"
                                        checked="@_userPermissions.Contains(action)"
-                                       @onchange="e => TogglePermission(_userPermissions, action, (bool)e.Value!)" />
+                                       disabled="@_permSave.IsBusy"
+                                       @onchange="async e => await SetUserPermissionAsync(action, (bool)e.Value!)" />
                                 <span>@FormatPermission(action)</span>
                             </label>
                         }
-                    </div>
-                    <div class="dialog-actions">
-                        <button type="button" class="primary-button"
-                                @onclick="SaveUserPermissionsAsync"
-                                disabled="@_permSave.IsBusy">
-                            @(_permSave.IsBusy ? "Saving..." : "Save permissions")
-                        </button>
                     </div>
                 </section>
             </div>
@@ -829,30 +817,36 @@
 
     // ── Permissions ─────────────────────────────────────────────────────────
 
-    private async Task SaveUserPermissionsAsync()
+    private async Task SetUserPermissionAsync(ActionType action, bool enabled)
     {
         if (_user is null) return;
-        var perms = _userPermissions.ToList();
-        await _permSave.RunAsync(async () =>
+        if (enabled) _userPermissions.Add(action);
+        else _userPermissions.Remove(action);
+        var success = await _permSave.RunAsync(async () =>
         {
-            await _user.UpdateAsync(u => u.Permissions = perms);
-        }, "Failed to save permissions.");
+            await _user.SetPermissionAsync(action, enabled);
+        }, "Failed to update permission.");
+        if (!success)
+        {
+            if (enabled) _userPermissions.Remove(action);
+            else _userPermissions.Add(action);
+        }
     }
 
-    private async Task SaveGroupPermissionsAsync()
+    private async Task SetGroupPermissionAsync(ActionType action, bool enabled)
     {
         if (_group is null) return;
-        var perms = _groupPermissions.ToList();
-        await _groupPermSave.RunAsync(async () =>
+        if (enabled) _groupPermissions.Add(action);
+        else _groupPermissions.Remove(action);
+        var success = await _groupPermSave.RunAsync(async () =>
         {
-            await _group.UpdateAsync(g => g.Permissions = perms);
-        }, "Failed to save permissions.");
-    }
-
-    private static void TogglePermission(HashSet<ActionType> set, ActionType action, bool add)
-    {
-        if (add) set.Add(action);
-        else set.Remove(action);
+            await _group.SetPermissionAsync(action, enabled);
+        }, "Failed to update permission.");
+        if (!success)
+        {
+            if (enabled) _groupPermissions.Remove(action);
+            else _groupPermissions.Add(action);
+        }
     }
 
     private static string FormatPermission(ActionType action) =>

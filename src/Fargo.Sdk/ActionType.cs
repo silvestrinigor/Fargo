@@ -41,4 +41,8 @@ public enum ActionType
     DeletePartition = 15,
     /// <summary>Permission to edit partitions.</summary>
     EditPartition = 16,
+    /// <summary>Permission to add barcodes to articles.</summary>
+    AddBarcode = 17,
+    /// <summary>Permission to remove barcodes from articles.</summary>
+    RemoveBarcode = 18,
 }
