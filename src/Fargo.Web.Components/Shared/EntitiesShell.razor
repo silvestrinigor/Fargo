@@ -39,7 +39,11 @@
             @Explorer
         </div>
 
-        @if (OnNewClick.HasDelegate)
+        @if (Footer != null)
+        {
+            <div class="workspace-pane-footer">@Footer</div>
+        }
+        else if (OnNewClick.HasDelegate)
         {
             <div class="workspace-pane-footer">
                 <button type="button" class="ghost-button" @onclick="OnNewClick">New @SingularLabel</button>
@@ -68,6 +72,7 @@
     [Parameter, EditorRequired] public RenderFragment Explorer { get; set; } = default!;
     [Parameter, EditorRequired] public RenderFragment Detail { get; set; } = default!;
     [Parameter] public EventCallback OnNewClick { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
     [Parameter] public bool PartitionViewAvailable { get; set; }
     [Parameter] public bool PartitionView { get; set; }
     [Parameter] public EventCallback<bool> PartitionViewChanged { get; set; }

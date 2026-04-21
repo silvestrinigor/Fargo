@@ -59,11 +59,28 @@
                             <dd>@_item.ArticleGuid</dd>
                         </div>
                     </dl>
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button danger" @onclick="OpenDelete">Delete</button>
+                    </div>
                 </section>
             </div>
         }
     </Detail>
 </EntitiesShell>
+
+<ConfirmDialog IsOpen="_deleteOpen"
+               Title="Delete item"
+               ConfirmText="Delete"
+               ConfirmClass="danger"
+               IsBusy="_delete.IsBusy"
+               OnConfirm="DeleteAsync"
+               OnCancel="() => _deleteOpen = false">
+    <p>Are you sure you want to delete this item?</p>
+    @if (!string.IsNullOrWhiteSpace(_delete.ErrorMessage))
+    {
+        <div class="error-banner">@_delete.ErrorMessage</div>
+    }
+</ConfirmDialog>
 
 <EditorDialog TModel="CreateForm"
               IsOpen="_createOpen"
@@ -98,11 +115,13 @@
 
     private bool _partitionView;
     private bool _createOpen;
+    private bool _deleteOpen;
     private bool _pickerOpen;
     private string? _selectedArticleName;
     private CreateForm _createForm = new();
     private readonly AsyncState _create = new();
     private readonly AsyncState _load = new();
+    private readonly AsyncState _delete = new();
     private Item? _item;
     private Guid? _loadedGuid;
 
@@ -135,6 +154,24 @@
                 _item = null;
             }
         }
+    }
+
+    private void OpenDelete()
+    {
+        _delete.Clear();
+        _deleteOpen = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_item is null) return;
+        var ok = await _delete.RunAsync(async () =>
+        {
+            await Engine.Items.DeleteAsync(_item.Guid);
+            Navigation.NavigateTo("/entities/items");
+        }, "Failed to delete.");
+
+        if (ok) _deleteOpen = false;
     }
 
     private void OpenCreate()

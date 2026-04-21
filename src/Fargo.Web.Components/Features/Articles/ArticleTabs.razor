@@ -4,6 +4,7 @@
 @using Fargo.Sdk.Articles
 @inject IEngine Engine
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 @if (_load.IsBusy)
 {
@@ -168,6 +169,10 @@ else
                 @if (_tab is "info" or "metrics")
                 {
                     <div class="dialog-actions">
+                        @if (_tab == "info")
+                        {
+                            <button type="button" class="ghost-button danger" @onclick="OpenDelete" disabled="@_save.IsBusy">Delete</button>
+                        }
                         <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy)">
                             @(_save.IsBusy ? "Saving..." : "Save")
                         </button>
@@ -178,6 +183,20 @@ else
     </div>
 }
 
+<ConfirmDialog IsOpen="_deleteOpen"
+               Title="Delete article"
+               ConfirmText="Delete"
+               ConfirmClass="danger"
+               IsBusy="_delete.IsBusy"
+               OnConfirm="DeleteAsync"
+               OnCancel="() => _deleteOpen = false">
+    <p>Are you sure you want to delete <strong>@_article?.Name</strong>?</p>
+    @if (!string.IsNullOrWhiteSpace(_delete.ErrorMessage))
+    {
+        <div class="error-banner">@_delete.ErrorMessage</div>
+    }
+</ConfirmDialog>
+
 @code {
     [Parameter, EditorRequired] public Guid EntityGuid { get; set; }
 
@@ -186,6 +205,8 @@ else
     private Article? _article;
     private readonly AsyncState _load = new();
     private readonly AsyncState _save = new();
+    private readonly AsyncState _delete = new();
+    private bool _deleteOpen;
     private string _tab = "info";
     private EditModel _edit = new();
 
@@ -473,6 +494,23 @@ else
         {
             _isRemovingBarcode = false;
         }
+    }
+
+    private void OpenDelete()
+    {
+        _delete.Clear();
+        _deleteOpen = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        var ok = await _delete.RunAsync(async () =>
+        {
+            await Engine.Articles.DeleteAsync(EntityGuid);
+            Navigation.NavigateTo("/entities/articles");
+        }, "Failed to delete.");
+
+        if (ok) _deleteOpen = false;
     }
 
     private void OnMassUnit(ChangeEventArgs e) => _edit.MassUnit = e.Value?.ToString() ?? "g";

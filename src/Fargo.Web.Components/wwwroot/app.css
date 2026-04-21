@@ -214,7 +214,7 @@ label {
 
 .primary-button,
 .link-button {
-    padding: 0.8rem 1rem;
+    padding: 0.75rem 1rem;
     background: var(--accent);
     color: #fff;
 }
@@ -225,7 +225,7 @@ label {
 }
 
 .ghost-button {
-    padding: 0.7rem 0.95rem;
+    padding: 0.75rem 1rem;
     background: rgba(255, 255, 255, 0.02);
     color: var(--text);
     border-color: var(--border);
@@ -479,10 +479,19 @@ label {
 .workspace-heading h1,
 .workspace-pane-header h2,
 .workspace-panel h2,
+.workspace-panel h3,
 .page-card h1,
 .page-card h2,
 .dialog-card h2 {
     margin: 0;
+}
+
+.workspace-panel h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
 }
 
 .workspace-heading p,
@@ -644,7 +653,7 @@ label {
     padding: 0.6rem 0.85rem;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     color: var(--text);
     font-weight: 600;
     cursor: pointer;
@@ -746,7 +755,7 @@ label {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     background: rgba(28, 35, 48, 0.5);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 1rem 1.1rem;
 }
 
@@ -1088,4 +1097,25 @@ label {
 
 .barcode-add-form .select-field {
     flex: 0 1 140px;
+}
+
+.entity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.25rem;
+}
+
+.entity-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.entity-list-item:last-child {
+    border-bottom: none;
 }
