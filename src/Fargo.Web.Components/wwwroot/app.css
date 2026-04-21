@@ -1148,3 +1148,18 @@ label {
     align-items: center;
     gap: 0.4rem;
 }
+
+.permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px 16px;
+    margin-bottom: 12px;
+}
+
+.permission-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}

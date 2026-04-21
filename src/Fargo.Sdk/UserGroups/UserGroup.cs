@@ -21,7 +21,7 @@ public sealed class UserGroup : IAsyncDisposable
         _nameid = nameid;
         _description = description;
         _isActive = isActive;
-        Permissions = permissions;
+        _permissions = permissions;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -69,8 +69,14 @@ public sealed class UserGroup : IAsyncDisposable
 
     internal void RaiseDeleted() => Deleted?.Invoke(this, new UserGroupDeletedEventArgs(Guid));
 
+    private IReadOnlyCollection<ActionType> _permissions;
+
     /// <summary>The permissions assigned to this user group.</summary>
-    public IReadOnlyCollection<ActionType> Permissions { get; }
+    public IReadOnlyCollection<ActionType> Permissions
+    {
+        get => _permissions;
+        set => _permissions = value;
+    }
 
     /// <summary>Gets the partitions that directly contain this user group.</summary>
     public Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
@@ -86,7 +92,7 @@ public sealed class UserGroup : IAsyncDisposable
     public async Task UpdateAsync(Action<UserGroup> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        var result = await client.UpdateAsync(Guid, _nameid, _description, _isActive, null, cancellationToken);
+        var result = await client.UpdateAsync(Guid, _nameid, _description, _isActive, _permissions, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!.Detail);

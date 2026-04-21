@@ -30,7 +30,7 @@ public sealed class User : IAsyncDisposable
         _isActive = isActive;
         DefaultPasswordExpirationPeriod = defaultPasswordExpirationPeriod;
         RequirePasswordChangeAt = requirePasswordChangeAt;
-        Permissions = permissions;
+        _permissions = permissions;
         PartitionAccesses = partitionAccesses;
         this.client = client;
         _onDispose = onDispose;
@@ -103,8 +103,14 @@ public sealed class User : IAsyncDisposable
     /// <summary>The point in time at which the user is required to change their password.</summary>
     public DateTimeOffset RequirePasswordChangeAt { get; }
 
+    private IReadOnlyCollection<ActionType> _permissions;
+
     /// <summary>The permissions assigned directly to this user.</summary>
-    public IReadOnlyCollection<ActionType> Permissions { get; }
+    public IReadOnlyCollection<ActionType> Permissions
+    {
+        get => _permissions;
+        set => _permissions = value;
+    }
 
     /// <summary>The identifiers of partitions this user can access.</summary>
     public IReadOnlyCollection<Guid> PartitionAccesses { get; }
@@ -147,7 +153,7 @@ public sealed class User : IAsyncDisposable
     public async Task UpdateAsync(Action<User> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        var result = await client.UpdateAsync(Guid, _nameid, _firstName, _lastName, _description, null, _isActive, null, null, cancellationToken);
+        var result = await client.UpdateAsync(Guid, _nameid, _firstName, _lastName, _description, null, _isActive, _permissions, null, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!.Detail);

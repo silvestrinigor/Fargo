@@ -145,6 +145,32 @@
                             </button>
                         </div>
                     </section>
+
+                    <section class="workspace-panel">
+                        <h3>Permissions</h3>
+                        @if (!string.IsNullOrWhiteSpace(_groupPermSave.ErrorMessage))
+                        {
+                            <div class="error-banner">@_groupPermSave.ErrorMessage</div>
+                        }
+                        <div class="permissions-grid">
+                            @foreach (var action in Enum.GetValues<ActionType>())
+                            {
+                                <label class="permission-item">
+                                    <input type="checkbox"
+                                           checked="@_groupPermissions.Contains(action)"
+                                           @onchange="e => TogglePermission(_groupPermissions, action, (bool)e.Value!)" />
+                                    <span>@FormatPermission(action)</span>
+                                </label>
+                            }
+                        </div>
+                        <div class="dialog-actions">
+                            <button type="button" class="primary-button"
+                                    @onclick="SaveGroupPermissionsAsync"
+                                    disabled="@_groupPermSave.IsBusy">
+                                @(_groupPermSave.IsBusy ? "Saving..." : "Save permissions")
+                            </button>
+                        </div>
+                    </section>
                 </div>
             }
         }
@@ -258,6 +284,32 @@
                     <div class="dialog-actions">
                         <button type="button" class="ghost-button" @onclick="OpenAddToGroup" disabled="@_groupOp.IsBusy">
                             Add to group
+                        </button>
+                    </div>
+                </section>
+
+                <section class="workspace-panel">
+                    <h3>Permissions</h3>
+                    @if (!string.IsNullOrWhiteSpace(_permSave.ErrorMessage))
+                    {
+                        <div class="error-banner">@_permSave.ErrorMessage</div>
+                    }
+                    <div class="permissions-grid">
+                        @foreach (var action in Enum.GetValues<ActionType>())
+                        {
+                            <label class="permission-item">
+                                <input type="checkbox"
+                                       checked="@_userPermissions.Contains(action)"
+                                       @onchange="e => TogglePermission(_userPermissions, action, (bool)e.Value!)" />
+                                <span>@FormatPermission(action)</span>
+                            </label>
+                        }
+                    </div>
+                    <div class="dialog-actions">
+                        <button type="button" class="primary-button"
+                                @onclick="SaveUserPermissionsAsync"
+                                disabled="@_permSave.IsBusy">
+                            @(_permSave.IsBusy ? "Saving..." : "Save permissions")
                         </button>
                     </div>
                 </section>
@@ -412,6 +464,12 @@
     private readonly AsyncState _groupOp = new();
     private bool _addToGroupOpen;
 
+    // ── Permissions ─────────────────────────────────────────────────────────
+    private HashSet<ActionType> _userPermissions = [];
+    private readonly AsyncState _permSave = new();
+    private HashSet<ActionType> _groupPermissions = [];
+    private readonly AsyncState _groupPermSave = new();
+
     private bool IsDirty => _user is not null && (
         _edit.Nameid != _origNameid ||
         (_edit.FirstName ?? "") != (_origFirstName ?? "") ||
@@ -509,6 +567,7 @@
             _groupEdit.Description = _group.Description;
             _origGroupNameid = _group.Nameid;
             _origGroupDescription = _group.Description;
+            _groupPermissions = _group.Permissions.ToHashSet();
         }, "Failed to load user group.");
         await LoadGroupMembersAsync();
     }
@@ -653,6 +712,7 @@
             _origFirstName = _user.FirstName;
             _origLastName = _user.LastName;
             _origDescription = _user.Description;
+            _userPermissions = _user.Permissions.ToHashSet();
         }, "Failed to load user.");
         await LoadGroupsForUserAsync();
     }
@@ -766,6 +826,37 @@
         }, "Failed to remove from group.");
         await LoadTreeAsync();
     }
+
+    // ── Permissions ─────────────────────────────────────────────────────────
+
+    private async Task SaveUserPermissionsAsync()
+    {
+        if (_user is null) return;
+        var perms = _userPermissions.ToList();
+        await _permSave.RunAsync(async () =>
+        {
+            await _user.UpdateAsync(u => u.Permissions = perms);
+        }, "Failed to save permissions.");
+    }
+
+    private async Task SaveGroupPermissionsAsync()
+    {
+        if (_group is null) return;
+        var perms = _groupPermissions.ToList();
+        await _groupPermSave.RunAsync(async () =>
+        {
+            await _group.UpdateAsync(g => g.Permissions = perms);
+        }, "Failed to save permissions.");
+    }
+
+    private static void TogglePermission(HashSet<ActionType> set, ActionType action, bool add)
+    {
+        if (add) set.Add(action);
+        else set.Remove(action);
+    }
+
+    private static string FormatPermission(ActionType action) =>
+        System.Text.RegularExpressions.Regex.Replace(action.ToString(), "(?<=[a-z])(?=[A-Z])", " ");
 
     // ── Forms ────────────────────────────────────────────────────────────────
 
