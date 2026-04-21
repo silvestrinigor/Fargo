@@ -38,6 +38,7 @@ public sealed class UserClient : IUserClient
         int? limit = null,
         Guid? partitionGuid = null,
         string? search = null,
+        bool? noPartition = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
@@ -45,7 +46,8 @@ public sealed class UserClient : IUserClient
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
             ("partitionGuid", partitionGuid?.ToString()),
-            ("search", search));
+            ("search", search),
+            ("noPartition", noPartition?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<UserResult>>(
             $"/users{query}",

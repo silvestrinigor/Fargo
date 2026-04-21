@@ -110,6 +110,17 @@ public interface IUserRepository
     );
 
     /// <summary>
+    /// Gets a paginated collection of user information projections
+    /// for users that do not belong to any partition.
+    /// </summary>
+    Task<IReadOnlyCollection<UserInformation>> GetManyInfoWithNoPartition(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Gets lightweight information about a user by its unique identifier,
     /// only if the user belongs to at least one of the specified partitions.
     /// </summary>

@@ -38,6 +38,7 @@ public sealed class ItemClient : IItemClient
         int? page = null,
         int? limit = null,
         Guid? partitionGuid = null,
+        bool? noPartition = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoSdkHttpClient.BuildQuery(
@@ -45,7 +46,8 @@ public sealed class ItemClient : IItemClient
             ("temporalAsOf", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("partitionGuid", partitionGuid?.ToString()));
+            ("partitionGuid", partitionGuid?.ToString()),
+            ("noPartition", noPartition?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ItemResult>>(
             $"/items{query}",

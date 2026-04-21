@@ -22,6 +22,7 @@ public interface IUserManager
         int? limit = null,
         Guid? partitionGuid = null,
         string? search = null,
+        bool? noPartition = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user and returns it as a live entity.</summary>

@@ -95,6 +95,23 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoWithNoPartition(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(a => !a.Partitions.Any())
+            .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
+            .OrderBy(a => a.Guid)
+            .WithPagination(pagination)
+            .Select(ArticleMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,

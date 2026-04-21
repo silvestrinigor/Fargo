@@ -80,6 +80,17 @@ public interface IArticleRepository
             );
 
     /// <summary>
+    /// Gets a paginated collection of article information projections
+    /// for articles that do not belong to any partition.
+    /// </summary>
+    Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoWithNoPartition(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Gets a paginated collection of article information projections,
     /// filtered to articles that belong to at least one of the specified partitions.
     /// </summary>

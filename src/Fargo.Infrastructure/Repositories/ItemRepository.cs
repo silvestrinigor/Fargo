@@ -114,6 +114,21 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<ItemInformation>> GetManyInfoWithNoPartition(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(i => !i.Partitions.Any())
+            .OrderBy(i => i.Guid)
+            .WithPagination(pagination)
+            .Select(ItemMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ItemInformation?> GetInfoByGuidInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,

@@ -26,7 +26,8 @@ public sealed record ArticleManyQuery(
         DateTimeOffset? AsOfDateTime = null,
         Pagination? Pagination = null,
         Guid? PartitionGuid = null,
-        string? Search = null
+        string? Search = null,
+        bool? NoPartition = null
         ) : IQuery<IReadOnlyCollection<ArticleInformation>>;
 
 /// <summary>
@@ -114,6 +115,16 @@ public sealed class ArticleManyQueryHandler(
 
         if (actor.IsAdmin || actor.IsSystem)
         {
+            if (query.NoPartition == true)
+            {
+                return await articleRepository.GetManyInfoWithNoPartition(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        query.AsOfDateTime,
+                        query.Search,
+                        cancellationToken
+                        );
+            }
+
             if (query.PartitionGuid.HasValue)
             {
                 return await articleRepository.GetManyInfoInPartitions(
@@ -134,6 +145,16 @@ public sealed class ArticleManyQueryHandler(
         }
         else
         {
+            if (query.NoPartition == true)
+            {
+                return await articleRepository.GetManyInfoWithNoPartition(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        query.AsOfDateTime,
+                        query.Search,
+                        cancellationToken
+                        );
+            }
+
             if (query.PartitionGuid.HasValue && !actor.PartitionAccesses.Contains(query.PartitionGuid.Value))
                 return [];
 

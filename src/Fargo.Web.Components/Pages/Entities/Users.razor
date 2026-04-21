@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Fargo.Sdk
 @using Fargo.Sdk.Users
+@using Fargo.Sdk.UserGroups
 @inject IEngine Engine
 @inject NavigationManager Navigation
 
@@ -13,27 +14,170 @@
                SingularLabel="User"
                PartitionViewAvailable="true"
                PartitionView="_partitionView"
-               PartitionViewChanged="v => _partitionView = v"
-               OnNewClick="OpenCreate">
+               PartitionViewChanged="v => _partitionView = v">
     <Explorer>
         @if (_partitionView)
         {
             <PartitionEntityTree EntitySection="users" NavigationBase="/entities/users" />
         }
+        else if (_treeState.IsBusy)
+        {
+            <div class="muted-text">Loading...</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_treeState.ErrorMessage))
+        {
+            <div class="error-banner">@_treeState.ErrorMessage</div>
+        }
+        else if (_treeNodes.Count == 0)
+        {
+            <div class="muted-text">No users found.</div>
+        }
         else
         {
-            <EntityTreeView TEntity="User"
-                            Loader="LoadUsersAsync"
-                            ToNode="TreeSidebarNode.FromUser"
-                            NavigationBase="/entities/users"
-                            ErrorFallback="Failed to load users." />
+            <ul class="tree-list">
+                @foreach (var node in _treeNodes.OrderBy(n => n.Title, StringComparer.OrdinalIgnoreCase))
+                {
+                    <TreeSidebarNodeView Node="node"
+                                        SelectedGuid="@SelectedTreeGuid"
+                                        OnToggle="n => { n.IsExpanded = !n.IsExpanded; return Task.CompletedTask; }"
+                                        OnSelect="SelectNode" />
+                }
+            </ul>
         }
     </Explorer>
+    <Footer>
+        <button type="button" class="ghost-button" @onclick="OpenCreateUser">New User</button>
+        <button type="button" class="ghost-button" @onclick="OpenCreateGroup">New User Group</button>
+    </Footer>
     <Detail>
-        @if (!EntityGuid.HasValue)
+        @if (_selectedGroupGuid.HasValue)
+        {
+            @if (_groupLoad.IsBusy)
+            {
+                <p class="muted-text">Loading...</p>
+            }
+            else if (!string.IsNullOrWhiteSpace(_groupLoad.ErrorMessage))
+            {
+                <div class="error-banner">@_groupLoad.ErrorMessage</div>
+            }
+            else if (_group is null)
+            {
+                <p class="muted-text">User group could not be loaded.</p>
+            }
+            else
+            {
+                <div class="workspace-stack">
+                    <section class="workspace-panel">
+                        <dl class="detail-list detail-list--inline">
+                            <div>
+                                <dt>Status</dt>
+                                <dd>@(_group.IsActive ? "Active" : "Inactive")</dd>
+                            </div>
+                        </dl>
+                        @if (!string.IsNullOrWhiteSpace(_groupToggle.ErrorMessage))
+                        {
+                            <div class="error-banner">@_groupToggle.ErrorMessage</div>
+                        }
+                        <EditForm Model="_groupEdit" OnValidSubmit="SaveGroupAsync" class="editor-form">
+                            <DataAnnotationsValidator />
+                            @if (!string.IsNullOrWhiteSpace(_groupSave.ErrorMessage))
+                            {
+                                <div class="error-banner">@_groupSave.ErrorMessage</div>
+                            }
+                            <label>
+                                <span>NameId</span>
+                                <InputText @bind-Value="_groupEdit.Nameid" class="text-field" />
+                                <ValidationMessage For="() => _groupEdit.Nameid" />
+                            </label>
+                            <label>
+                                <span>Description</span>
+                                <InputTextArea @bind-Value="_groupEdit.Description" class="text-area" />
+                            </label>
+                            <div class="dialog-actions">
+                                <button type="button" class="ghost-button danger" @onclick="OpenDeleteGroup" disabled="@(_groupSave.IsBusy || _groupToggle.IsBusy)">Delete</button>
+                                <button type="button" class="ghost-button" @onclick="ToggleGroupActiveAsync" disabled="@(_groupSave.IsBusy || _groupToggle.IsBusy)">
+                                    @(_groupToggle.IsBusy ? "..." : (_group.IsActive ? "Deactivate" : "Activate"))
+                                </button>
+                                <button type="submit" class="primary-button" disabled="@(!IsGroupDirty || _groupSave.IsBusy || _groupToggle.IsBusy)">
+                                    @(_groupSave.IsBusy ? "Saving..." : "Save")
+                                </button>
+                            </div>
+                        </EditForm>
+                    </section>
+
+                    <section class="workspace-panel">
+                        <h3>Members</h3>
+                        @if (_membersLoad.IsBusy)
+                        {
+                            <p class="muted-text">Loading members...</p>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_membersLoad.ErrorMessage))
+                        {
+                            <div class="error-banner">@_membersLoad.ErrorMessage</div>
+                        }
+                        else if (_groupMembers.Count == 0)
+                        {
+                            <p class="muted-text">No members yet.</p>
+                        }
+                        else
+                        {
+                            <ul class="entity-list">
+                                @foreach (var u in _groupMembers.OrderBy(u => u.Nameid, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    <li class="entity-list-item">
+                                        <span>@u.Nameid</span>
+                                        <button type="button" class="ghost-button danger"
+                                                @onclick="() => RemoveMemberAsync(u)"
+                                                disabled="@_memberOp.IsBusy">
+                                            Remove
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(_memberOp.ErrorMessage))
+                        {
+                            <div class="error-banner">@_memberOp.ErrorMessage</div>
+                        }
+                        <div class="dialog-actions">
+                            <button type="button" class="ghost-button" @onclick="OpenAddMember" disabled="@_memberOp.IsBusy">
+                                Add member
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="workspace-panel">
+                        <h3>Permissions</h3>
+                        @if (!string.IsNullOrWhiteSpace(_groupPermSave.ErrorMessage))
+                        {
+                            <div class="error-banner">@_groupPermSave.ErrorMessage</div>
+                        }
+                        <div class="permissions-grid">
+                            @foreach (var action in Enum.GetValues<ActionType>())
+                            {
+                                <label class="permission-item">
+                                    <input type="checkbox"
+                                           checked="@_groupPermissions.Contains(action)"
+                                           @onchange="e => TogglePermission(_groupPermissions, action, (bool)e.Value!)" />
+                                    <span>@FormatPermission(action)</span>
+                                </label>
+                            }
+                        </div>
+                        <div class="dialog-actions">
+                            <button type="button" class="primary-button"
+                                    @onclick="SaveGroupPermissionsAsync"
+                                    disabled="@_groupPermSave.IsBusy">
+                                @(_groupPermSave.IsBusy ? "Saving..." : "Save permissions")
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            }
+        }
+        else if (!EntityGuid.HasValue)
         {
             <div class="detail-empty">
-                <p class="muted-text">Select a user to view and edit their details.</p>
+                <p class="muted-text">Select a user or user group to view details.</p>
             </div>
         }
         else if (_load.IsBusy)
@@ -62,6 +206,10 @@
                             <dd>@_user.PartitionAccesses.Count</dd>
                         </div>
                     </dl>
+                    @if (!string.IsNullOrWhiteSpace(_toggle.ErrorMessage))
+                    {
+                        <div class="error-banner">@_toggle.ErrorMessage</div>
+                    }
                     <EditForm Model="_edit" OnValidSubmit="SaveAsync" class="editor-form">
                         <DataAnnotationsValidator />
                         @if (!string.IsNullOrWhiteSpace(_save.ErrorMessage))
@@ -88,25 +236,168 @@
                             <InputTextArea @bind-Value="_edit.Description" class="text-area" />
                         </label>
                         <div class="dialog-actions">
-                            <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy)">
+                            <button type="button" class="ghost-button danger" @onclick="OpenDelete" disabled="@(_save.IsBusy || _toggle.IsBusy)">Delete</button>
+                            <button type="button" class="ghost-button" @onclick="ToggleActiveAsync" disabled="@(_save.IsBusy || _toggle.IsBusy)">
+                                @(_toggle.IsBusy ? "..." : (_user.IsActive ? "Deactivate" : "Activate"))
+                            </button>
+                            <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy || _toggle.IsBusy)">
                                 @(_save.IsBusy ? "Saving..." : "Save")
                             </button>
                         </div>
                     </EditForm>
+                </section>
+
+                <section class="workspace-panel">
+                    <h3>Groups</h3>
+                    @if (_groupsLoad.IsBusy)
+                    {
+                        <p class="muted-text">Loading groups...</p>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_groupsLoad.ErrorMessage))
+                    {
+                        <div class="error-banner">@_groupsLoad.ErrorMessage</div>
+                    }
+                    else if (_userGroups.Count == 0)
+                    {
+                        <p class="muted-text">Not a member of any group.</p>
+                    }
+                    else
+                    {
+                        <ul class="entity-list">
+                            @foreach (var g in _userGroups.OrderBy(g => g.Nameid, StringComparer.OrdinalIgnoreCase))
+                            {
+                                <li class="entity-list-item">
+                                    <span>@g.Nameid</span>
+                                    <button type="button" class="ghost-button danger"
+                                            @onclick="() => RemoveFromGroupAsync(g)"
+                                            disabled="@_groupOp.IsBusy">
+                                        Remove
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_groupOp.ErrorMessage))
+                    {
+                        <div class="error-banner">@_groupOp.ErrorMessage</div>
+                    }
+                    <div class="dialog-actions">
+                        <button type="button" class="ghost-button" @onclick="OpenAddToGroup" disabled="@_groupOp.IsBusy">
+                            Add to group
+                        </button>
+                    </div>
+                </section>
+
+                <section class="workspace-panel">
+                    <h3>Permissions</h3>
+                    @if (!string.IsNullOrWhiteSpace(_permSave.ErrorMessage))
+                    {
+                        <div class="error-banner">@_permSave.ErrorMessage</div>
+                    }
+                    <div class="permissions-grid">
+                        @foreach (var action in Enum.GetValues<ActionType>())
+                        {
+                            <label class="permission-item">
+                                <input type="checkbox"
+                                       checked="@_userPermissions.Contains(action)"
+                                       @onchange="e => TogglePermission(_userPermissions, action, (bool)e.Value!)" />
+                                <span>@FormatPermission(action)</span>
+                            </label>
+                        }
+                    </div>
+                    <div class="dialog-actions">
+                        <button type="button" class="primary-button"
+                                @onclick="SaveUserPermissionsAsync"
+                                disabled="@_permSave.IsBusy">
+                            @(_permSave.IsBusy ? "Saving..." : "Save permissions")
+                        </button>
+                    </div>
                 </section>
             </div>
         }
     </Detail>
 </EntitiesShell>
 
-<EditorDialog TModel="CreateForm"
-              IsOpen="_createOpen"
+@* User group dialogs *@
+<ConfirmDialog IsOpen="_deleteGroupOpen"
+               Title="Delete user group"
+               ConfirmText="Delete"
+               ConfirmClass="danger"
+               IsBusy="_groupDelete.IsBusy"
+               OnConfirm="DeleteGroupAsync"
+               OnCancel="() => _deleteGroupOpen = false">
+    <p>Are you sure you want to delete <strong>@_group?.Nameid</strong>?</p>
+    @if (!string.IsNullOrWhiteSpace(_groupDelete.ErrorMessage))
+    {
+        <div class="error-banner">@_groupDelete.ErrorMessage</div>
+    }
+</ConfirmDialog>
+
+<EditorDialog TModel="CreateGroupForm"
+              IsOpen="_createGroupOpen"
+              Title="New User Group"
+              Model="_createGroupForm"
+              IsBusy="_createGroup.IsBusy"
+              ErrorMessage="@_createGroup.ErrorMessage"
+              OnSubmit="CreateGroupAsync"
+              OnCancel="() => _createGroupOpen = false">
+    <label>
+        <span>NameId</span>
+        <InputText @bind-Value="context.Nameid" class="text-field" />
+        <ValidationMessage For="() => context.Nameid" />
+    </label>
+</EditorDialog>
+
+<EntityPickerDialog TEntity="User"
+                    IsOpen="_addMemberOpen"
+                    Title="Add member"
+                    Loader="s => Engine.Users.GetManyAsync(search: s)"
+                    ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
+                    OnSelected="AddMemberAsync"
+                    OnCancel="() => _addMemberOpen = false">
+    <RowTemplate>
+        <td>@context.Nameid</td>
+        <td>@context.FirstName</td>
+        <td>@context.LastName</td>
+    </RowTemplate>
+</EntityPickerDialog>
+
+@* User dialogs *@
+<EntityPickerDialog TEntity="UserGroup"
+                    IsOpen="_addToGroupOpen"
+                    Title="Add to user group"
+                    Loader="s => Engine.UserGroups.GetManyAsync()"
+                    ColumnHeaders="@(new[] { "NameId", "Description" })"
+                    OnSelected="AddToGroupAsync"
+                    OnCancel="() => _addToGroupOpen = false">
+    <RowTemplate>
+        <td>@context.Nameid</td>
+        <td>@context.Description</td>
+    </RowTemplate>
+</EntityPickerDialog>
+
+<ConfirmDialog IsOpen="_deleteOpen"
+               Title="Delete user"
+               ConfirmText="Delete"
+               ConfirmClass="danger"
+               IsBusy="_delete.IsBusy"
+               OnConfirm="DeleteAsync"
+               OnCancel="() => _deleteOpen = false">
+    <p>Are you sure you want to delete <strong>@_user?.Nameid</strong>?</p>
+    @if (!string.IsNullOrWhiteSpace(_delete.ErrorMessage))
+    {
+        <div class="error-banner">@_delete.ErrorMessage</div>
+    }
+</ConfirmDialog>
+
+<EditorDialog TModel="CreateUserForm"
+              IsOpen="_createUserOpen"
               Title="New User"
-              Model="_createForm"
-              IsBusy="_create.IsBusy"
-              ErrorMessage="@_create.ErrorMessage"
-              OnSubmit="CreateAsync"
-              OnCancel="() => _createOpen = false">
+              Model="_createUserForm"
+              IsBusy="_createUser.IsBusy"
+              ErrorMessage="@_createUser.ErrorMessage"
+              OnSubmit="CreateUserAsync"
+              OnCancel="() => _createUserOpen = false">
     <label>
         <span>NameId</span>
         <InputText @bind-Value="context.Nameid" class="text-field" />
@@ -122,22 +413,62 @@
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
+    // ── Tree ────────────────────────────────────────────────────────────────
     private bool _partitionView;
-    private bool _createOpen;
-    private CreateForm _createForm = new();
-    private readonly AsyncState _create = new();
-    private readonly AsyncState _load = new();
-    private readonly AsyncState _save = new();
+    private readonly AsyncState _treeState = new();
+    private readonly List<TreeSidebarNode> _treeNodes = [];
+    private Guid? _selectedGroupGuid;
 
+    private Guid? SelectedTreeGuid => _selectedGroupGuid ?? EntityGuid;
+
+    // ── User group detail ───────────────────────────────────────────────────
+    private UserGroup? _group;
+    private GroupEditForm_ _groupEdit = new();
+    private string? _origGroupNameid;
+    private string? _origGroupDescription;
+    private readonly AsyncState _groupLoad = new();
+    private readonly AsyncState _groupSave = new();
+    private readonly AsyncState _groupToggle = new();
+    private readonly AsyncState _groupDelete = new();
+    private bool _deleteGroupOpen;
+    private bool _createGroupOpen;
+    private CreateGroupForm _createGroupForm = new();
+    private readonly AsyncState _createGroup = new();
+
+    // ── Group members ───────────────────────────────────────────────────────
+    private readonly List<User> _groupMembers = [];
+    private readonly AsyncState _membersLoad = new();
+    private readonly AsyncState _memberOp = new();
+    private bool _addMemberOpen;
+
+    // ── User detail ─────────────────────────────────────────────────────────
     private User? _user;
     private Guid? _loadedGuid;
-    private EditForm_ _edit = new();
+    private UserEditForm_ _edit = new();
     private string? _origNameid;
     private string? _origFirstName;
     private string? _origLastName;
     private string? _origDescription;
+    private readonly AsyncState _load = new();
+    private readonly AsyncState _save = new();
+    private readonly AsyncState _delete = new();
+    private readonly AsyncState _toggle = new();
+    private bool _deleteOpen;
+    private bool _createUserOpen;
+    private CreateUserForm _createUserForm = new();
+    private readonly AsyncState _createUser = new();
 
-    private async Task<IEnumerable<User>> LoadUsersAsync() => await Engine.Users.GetManyAsync();
+    // ── User groups on user detail ──────────────────────────────────────────
+    private readonly List<UserGroup> _userGroups = [];
+    private readonly AsyncState _groupsLoad = new();
+    private readonly AsyncState _groupOp = new();
+    private bool _addToGroupOpen;
+
+    // ── Permissions ─────────────────────────────────────────────────────────
+    private HashSet<ActionType> _userPermissions = [];
+    private readonly AsyncState _permSave = new();
+    private HashSet<ActionType> _groupPermissions = [];
+    private readonly AsyncState _groupPermSave = new();
 
     private bool IsDirty => _user is not null && (
         _edit.Nameid != _origNameid ||
@@ -145,26 +476,231 @@
         (_edit.LastName ?? "") != (_origLastName ?? "") ||
         (_edit.Description ?? "") != (_origDescription ?? ""));
 
+    private bool IsGroupDirty => _group is not null && (
+        _groupEdit.Nameid != _origGroupNameid ||
+        (_groupEdit.Description ?? "") != (_origGroupDescription ?? ""));
+
+    // ── Lifecycle ───────────────────────────────────────────────────────────
+
+    protected override void OnInitialized() => _ = LoadTreeAsync();
+
     protected override async Task OnParametersSetAsync()
     {
         if (EntityGuid != _loadedGuid)
         {
             _loadedGuid = EntityGuid;
+            _selectedGroupGuid = null;
             if (EntityGuid.HasValue)
-            {
-                await LoadAsync();
-            }
+                await LoadUserAsync();
             else
-            {
                 _user = null;
-            }
         }
     }
 
-    private async Task LoadAsync()
+    // ── Tree ────────────────────────────────────────────────────────────────
+
+    private async Task LoadTreeAsync()
+    {
+        await _treeState.RunAsync(async () =>
+        {
+            var groups = await Engine.UserGroups.GetManyAsync();
+            var users = await Engine.Users.GetManyAsync();
+
+            var membershipTasks = users.Select(async u =>
+            {
+                var ug = await Engine.UserGroups.GetManyAsync(userGuid: u.Guid);
+                return (User: u, GroupGuids: ug.Select(g => g.Guid).ToHashSet());
+            });
+            var memberships = await Task.WhenAll(membershipTasks);
+
+            var groupMemberMap = memberships
+                .SelectMany(m => m.GroupGuids.Select(g => (GroupGuid: g, m.User)))
+                .GroupBy(x => x.GroupGuid)
+                .ToDictionary(x => x.Key, x => x.Select(y => y.User).ToList());
+
+            _treeNodes.Clear();
+
+            foreach (var g in groups)
+            {
+                var node = TreeSidebarNode.FromUserGroup(g);
+                node.HasChildren = true;
+                node.ChildrenLoaded = true;
+                if (groupMemberMap.TryGetValue(g.Guid, out var members))
+                    node.Children.AddRange(members.OrderBy(u => u.Nameid, StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
+                _treeNodes.Add(node);
+            }
+
+            foreach (var (user, groupGuids) in memberships.Where(m => m.GroupGuids.Count == 0))
+                _treeNodes.Add(TreeSidebarNode.FromUser(user));
+
+        }, "Failed to load users.");
+        StateHasChanged();
+    }
+
+    private void SelectNode(TreeSidebarNode node)
+    {
+        if (node.HasChildren)
+        {
+            node.IsExpanded = !node.IsExpanded;
+            _selectedGroupGuid = node.EntityGuid;
+            _loadedGuid = null;
+            _user = null;
+            Navigation.NavigateTo("/entities/users");
+            _ = LoadGroupDetailAsync(node.EntityGuid);
+            return;
+        }
+        _selectedGroupGuid = null;
+        Navigation.NavigateTo($"/entities/users/{node.EntityGuid}");
+    }
+
+    // ── User group detail ───────────────────────────────────────────────────
+
+    private async Task LoadGroupDetailAsync(Guid groupGuid)
+    {
+        _group = null;
+        _groupEdit = new GroupEditForm_();
+        _groupMembers.Clear();
+        await _groupLoad.RunAsync(async () =>
+        {
+            _group = await Engine.UserGroups.GetAsync(groupGuid);
+            _groupEdit.Nameid = _group.Nameid;
+            _groupEdit.Description = _group.Description;
+            _origGroupNameid = _group.Nameid;
+            _origGroupDescription = _group.Description;
+            _groupPermissions = _group.Permissions.ToHashSet();
+        }, "Failed to load user group.");
+        await LoadGroupMembersAsync();
+    }
+
+    private async Task LoadGroupMembersAsync()
+    {
+        if (_group is null) return;
+        _groupMembers.Clear();
+        var groupGuid = _group.Guid;
+        await _membersLoad.RunAsync(async () =>
+        {
+            var allUsers = await Engine.Users.GetManyAsync();
+            var tasks = allUsers.Select(async u =>
+            {
+                var ug = await Engine.UserGroups.GetManyAsync(userGuid: u.Guid);
+                return (User: u, IsMember: ug.Any(g => g.Guid == groupGuid));
+            });
+            var results = await Task.WhenAll(tasks);
+            _groupMembers.AddRange(results.Where(r => r.IsMember).Select(r => r.User));
+        }, "Failed to load members.");
+    }
+
+    private async Task SaveGroupAsync()
+    {
+        if (_group is null) return;
+        await _groupSave.RunAsync(async () =>
+        {
+            await _group.UpdateAsync(g =>
+            {
+                g.Nameid = _groupEdit.Nameid!;
+                g.Description = _groupEdit.Description ?? string.Empty;
+            });
+            await LoadGroupDetailAsync(_group.Guid);
+        }, "Failed to save.");
+        await LoadTreeAsync();
+    }
+
+    private void OpenDeleteGroup()
+    {
+        _groupDelete.Clear();
+        _deleteGroupOpen = true;
+    }
+
+    private async Task DeleteGroupAsync()
+    {
+        if (_group is null) return;
+        var ok = await _groupDelete.RunAsync(async () =>
+        {
+            await Engine.UserGroups.DeleteAsync(_group.Guid);
+            _selectedGroupGuid = null;
+            _group = null;
+        }, "Failed to delete.");
+        if (ok)
+        {
+            _deleteGroupOpen = false;
+            await LoadTreeAsync();
+        }
+    }
+
+    private async Task ToggleGroupActiveAsync()
+    {
+        if (_group is null) return;
+        var target = !_group.IsActive;
+        await _groupToggle.RunAsync(async () =>
+        {
+            await _group.UpdateAsync(g => g.IsActive = target);
+            await LoadGroupDetailAsync(_group.Guid);
+        }, "Failed to update status.");
+    }
+
+    private void OpenCreateGroup()
+    {
+        _createGroupForm = new CreateGroupForm();
+        _createGroup.Clear();
+        _createGroupOpen = true;
+    }
+
+    private async Task CreateGroupAsync()
+    {
+        var ok = await _createGroup.RunAsync(async () =>
+        {
+            var group = await Engine.UserGroups.CreateAsync(_createGroupForm.Nameid!);
+            _createGroupOpen = false;
+            _selectedGroupGuid = group.Guid;
+            _loadedGuid = null;
+            _user = null;
+            Navigation.NavigateTo("/entities/users");
+            await LoadGroupDetailAsync(group.Guid);
+            await LoadTreeAsync();
+        }, "Failed to create.");
+        if (ok) _createGroupOpen = false;
+    }
+
+    private void OpenAddMember()
+    {
+        _memberOp.Clear();
+        _addMemberOpen = true;
+    }
+
+    private async Task AddMemberAsync(User user)
+    {
+        _addMemberOpen = false;
+        if (_group is null) return;
+        await _memberOp.RunAsync(async () =>
+        {
+            var result = await user.AddUserGroupAsync(_group.Guid);
+            if (!result.IsSuccess)
+                throw new Exception(result.Error?.Detail ?? "Failed to add member.");
+            await LoadGroupMembersAsync();
+        }, "Failed to add member.");
+        await LoadTreeAsync();
+    }
+
+    private async Task RemoveMemberAsync(User user)
+    {
+        if (_group is null) return;
+        await _memberOp.RunAsync(async () =>
+        {
+            var result = await user.RemoveUserGroupAsync(_group.Guid);
+            if (!result.IsSuccess)
+                throw new Exception(result.Error?.Detail ?? "Failed to remove member.");
+            await LoadGroupMembersAsync();
+        }, "Failed to remove member.");
+        await LoadTreeAsync();
+    }
+
+    // ── User detail ─────────────────────────────────────────────────────────
+
+    private async Task LoadUserAsync()
     {
         _user = null;
-        _edit = new EditForm_();
+        _edit = new UserEditForm_();
+        _userGroups.Clear();
         await _load.RunAsync(async () =>
         {
             _user = await Engine.Users.GetAsync(EntityGuid!.Value);
@@ -176,7 +712,20 @@
             _origFirstName = _user.FirstName;
             _origLastName = _user.LastName;
             _origDescription = _user.Description;
+            _userPermissions = _user.Permissions.ToHashSet();
         }, "Failed to load user.");
+        await LoadGroupsForUserAsync();
+    }
+
+    private async Task LoadGroupsForUserAsync()
+    {
+        if (_user is null) return;
+        _userGroups.Clear();
+        await _groupsLoad.RunAsync(async () =>
+        {
+            var groups = await Engine.UserGroups.GetManyAsync(userGuid: _user.Guid);
+            _userGroups.AddRange(groups);
+        }, "Failed to load groups.");
     }
 
     private async Task SaveAsync()
@@ -191,29 +740,127 @@
                 u.LastName = string.IsNullOrWhiteSpace(_edit.LastName) ? null : _edit.LastName;
                 u.Description = _edit.Description ?? string.Empty;
             });
-            await LoadAsync();
+            await LoadUserAsync();
         }, "Failed to save.");
+        await LoadTreeAsync();
     }
 
-    private void OpenCreate()
+    private void OpenDelete()
     {
-        _createForm = new CreateForm();
-        _create.Clear();
-        _createOpen = true;
+        _delete.Clear();
+        _deleteOpen = true;
     }
 
-    private async Task CreateAsync()
+    private async Task DeleteAsync()
     {
-        var ok = await _create.RunAsync(async () =>
+        if (_user is null) return;
+        var ok = await _delete.RunAsync(async () =>
         {
-            var user = await Engine.Users.CreateAsync(_createForm.Nameid!, _createForm.Password!);
+            await Engine.Users.DeleteAsync(_user.Guid);
+            Navigation.NavigateTo("/entities/users");
+        }, "Failed to delete.");
+        if (ok)
+        {
+            _deleteOpen = false;
+            await LoadTreeAsync();
+        }
+    }
+
+    private async Task ToggleActiveAsync()
+    {
+        if (_user is null) return;
+        var target = !_user.IsActive;
+        await _toggle.RunAsync(async () =>
+        {
+            await _user.UpdateAsync(u => u.IsActive = target);
+            await LoadUserAsync();
+        }, "Failed to update status.");
+    }
+
+    private void OpenCreateUser()
+    {
+        _createUserForm = new CreateUserForm();
+        _createUser.Clear();
+        _createUserOpen = true;
+    }
+
+    private async Task CreateUserAsync()
+    {
+        var ok = await _createUser.RunAsync(async () =>
+        {
+            var user = await Engine.Users.CreateAsync(_createUserForm.Nameid!, _createUserForm.Password!);
             Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
         }, "Failed to create.");
-
-        if (ok) _createOpen = false;
+        if (ok) _createUserOpen = false;
     }
 
-    private sealed class EditForm_
+    private void OpenAddToGroup()
+    {
+        _groupOp.Clear();
+        _addToGroupOpen = true;
+    }
+
+    private async Task AddToGroupAsync(UserGroup group)
+    {
+        _addToGroupOpen = false;
+        if (_user is null) return;
+        await _groupOp.RunAsync(async () =>
+        {
+            var result = await _user.AddUserGroupAsync(group.Guid);
+            if (!result.IsSuccess)
+                throw new Exception(result.Error?.Detail ?? "Failed to add to group.");
+            await LoadGroupsForUserAsync();
+        }, "Failed to add to group.");
+        await LoadTreeAsync();
+    }
+
+    private async Task RemoveFromGroupAsync(UserGroup group)
+    {
+        if (_user is null) return;
+        await _groupOp.RunAsync(async () =>
+        {
+            var result = await _user.RemoveUserGroupAsync(group.Guid);
+            if (!result.IsSuccess)
+                throw new Exception(result.Error?.Detail ?? "Failed to remove from group.");
+            await LoadGroupsForUserAsync();
+        }, "Failed to remove from group.");
+        await LoadTreeAsync();
+    }
+
+    // ── Permissions ─────────────────────────────────────────────────────────
+
+    private async Task SaveUserPermissionsAsync()
+    {
+        if (_user is null) return;
+        var perms = _userPermissions.ToList();
+        await _permSave.RunAsync(async () =>
+        {
+            await _user.UpdateAsync(u => u.Permissions = perms);
+        }, "Failed to save permissions.");
+    }
+
+    private async Task SaveGroupPermissionsAsync()
+    {
+        if (_group is null) return;
+        var perms = _groupPermissions.ToList();
+        await _groupPermSave.RunAsync(async () =>
+        {
+            await _group.UpdateAsync(g => g.Permissions = perms);
+        }, "Failed to save permissions.");
+    }
+
+    private static void TogglePermission(HashSet<ActionType> set, ActionType action, bool add)
+    {
+        if (add) set.Add(action);
+        else set.Remove(action);
+    }
+
+    private static string FormatPermission(ActionType action) =>
+        System.Text.RegularExpressions.Regex.Replace(action.ToString(), "(?<=[a-z])(?=[A-Z])", " ");
+
+    // ── Forms ────────────────────────────────────────────────────────────────
+
+    private sealed class UserEditForm_
     {
         [Required(ErrorMessage = "NameId is required.")]
         public string? Nameid { get; set; }
@@ -222,11 +869,24 @@
         public string? Description { get; set; }
     }
 
-    private sealed class CreateForm
+    private sealed class CreateUserForm
     {
         [Required(ErrorMessage = "NameId is required.")]
         public string? Nameid { get; set; }
         [Required(ErrorMessage = "Password is required.")]
         public string? Password { get; set; }
+    }
+
+    private sealed class GroupEditForm_
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+        public string? Description { get; set; }
+    }
+
+    private sealed class CreateGroupForm
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
     }
 }
