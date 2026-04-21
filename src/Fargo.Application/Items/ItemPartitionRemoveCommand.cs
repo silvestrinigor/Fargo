@@ -1,5 +1,5 @@
-using Fargo.Application.Persistence;
 using Fargo.Application.Authentication;
+using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Items;
 

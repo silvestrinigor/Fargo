@@ -1,6 +1,5 @@
-using Fargo.Application.Tree;
 using Fargo.Application;
-
+using Fargo.Application.Tree;
 using Fargo.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 

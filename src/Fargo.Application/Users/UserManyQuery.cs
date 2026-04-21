@@ -156,7 +156,9 @@ public sealed class UserManyQueryHandler(
             }
 
             if (query.PartitionGuid.HasValue && !actor.PartitionAccesses.Contains(query.PartitionGuid.Value))
+            {
                 return [];
+            }
 
             var partitions = query.PartitionGuid.HasValue
                 ? (IReadOnlyCollection<Guid>)[query.PartitionGuid.Value]

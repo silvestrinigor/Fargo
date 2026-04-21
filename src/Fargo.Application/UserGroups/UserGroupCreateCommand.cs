@@ -1,7 +1,7 @@
-using Fargo.Application.Partitions;
-using Fargo.Application.Events;
-using Fargo.Application.Persistence;
 using Fargo.Application.Authentication;
+using Fargo.Application.Events;
+using Fargo.Application.Partitions;
+using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;

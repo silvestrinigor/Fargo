@@ -1,5 +1,5 @@
-using Fargo.Application.Users;
 using Fargo.Application.Persistence;
+using Fargo.Application.Users;
 using Fargo.Domain.Users;
 
 namespace Fargo.Application.Authentication;
