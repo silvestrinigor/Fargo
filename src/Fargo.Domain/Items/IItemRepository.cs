@@ -73,6 +73,16 @@ public interface IItemRepository
     );
 
     /// <summary>
+    /// Gets a paginated collection of item information projections
+    /// for items that do not belong to any partition.
+    /// </summary>
+    Task<IReadOnlyCollection<ItemInformation>> GetManyInfoWithNoPartition(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Gets lightweight information about an item by its unique identifier,
     /// only if the item belongs to at least one of the specified partitions.
     /// </summary>

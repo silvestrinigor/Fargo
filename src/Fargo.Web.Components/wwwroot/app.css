@@ -1119,3 +1119,32 @@ label {
 .entity-list-item:last-child {
     border-bottom: none;
 }
+
+.section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.tree-icon-sm {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+    vertical-align: middle;
+}
+
+.entity-row-name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}

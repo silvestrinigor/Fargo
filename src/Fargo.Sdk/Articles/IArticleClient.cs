@@ -38,6 +38,7 @@ public interface IArticleClient
         int? limit = null,
         Guid? partitionGuid = null,
         string? search = null,
+        bool? noPartition = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

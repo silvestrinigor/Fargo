@@ -43,6 +43,7 @@ public interface IItemClient
         int? page = null,
         int? limit = null,
         Guid? partitionGuid = null,
+        bool? noPartition = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

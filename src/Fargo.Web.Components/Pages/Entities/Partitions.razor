@@ -4,6 +4,9 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Fargo.Sdk
 @using Fargo.Sdk.Partitions
+@using Fargo.Sdk.Articles
+@using Fargo.Sdk.Items
+@using Fargo.Sdk.Users
 @inject IEngine Engine
 @inject NavigationManager Navigation
 
@@ -11,9 +14,19 @@
 
 <EntitiesShell ActiveSection="partitions"
                SingularLabel="Partition"
+               PartitionViewAvailable="true"
+               PartitionView="_entityView"
+               PartitionViewChanged="v => _entityView = v"
                OnNewClick="OpenCreate">
     <Explorer>
-        <PartitionTree @ref="_tree" />
+        @if (_entityView)
+        {
+            <PartitionAllEntitiesTree @ref="_allEntitiesTree" />
+        }
+        else
+        {
+            <PartitionTree @ref="_tree" />
+        }
     </Explorer>
     <Detail>
         @if (!EntityGuid.HasValue)
@@ -80,6 +93,77 @@
                         </div>
                     </EditForm>
                 </section>
+
+                <section class="workspace-panel">
+                    <div class="editor-form">
+                        <div class="section-header">
+                            <span class="section-title">Entities in this partition</span>
+                            <div class="section-actions">
+                                <button type="button" class="ghost-button" @onclick="() => _addArticleOpen = true">+ Add Article</button>
+                                <button type="button" class="ghost-button" @onclick="() => _addItemOpen = true">+ Add Item</button>
+                                <button type="button" class="ghost-button" @onclick="() => _addUserOpen = true">+ Add User</button>
+                            </div>
+                        </div>
+
+                        @if (_entityListLoading)
+                        {
+                            <p class="muted-text">Loading entities...</p>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_entityListError))
+                        {
+                            <div class="error-banner">@_entityListError</div>
+                        }
+                        else if (_entityItems.Count == 0)
+                        {
+                            <p class="muted-text">No entities in this partition.</p>
+                        }
+                        else
+                        {
+                            var pageItems = _entityItems
+                                .Skip((_entityPage - 1) * _entityPageSize)
+                                .Take(_entityPageSize)
+                                .ToList();
+
+                            <div class="data-table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in pageItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <span class="entity-row-name">
+                                                        <img src="@row.Icon" alt="@row.TypeLabel" class="tree-icon-sm" />
+                                                        @row.Title
+                                                    </span>
+                                                </td>
+                                                <td class="muted-text">@row.TypeLabel</td>
+                                                <td>
+                                                    <button type="button" class="ghost-button danger" @onclick="() => RemoveEntityAsync(row)">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (_entityTotalPages > 1)
+                            {
+                                <div class="pagination-bar">
+                                    <button type="button" class="ghost-button" disabled="@(_entityPage <= 1)" @onclick="() => _entityPage--">&#8592;</button>
+                                    <span class="muted-text">@_entityPage / @_entityTotalPages</span>
+                                    <button type="button" class="ghost-button" disabled="@(_entityPage >= _entityTotalPages)" @onclick="() => _entityPage++">&#8594;</button>
+                                </div>
+                            }
+                        }
+                    </div>
+                </section>
             </div>
         }
     </Detail>
@@ -114,10 +198,49 @@
     }
 </ConfirmDialog>
 
+<EntityPickerDialog TEntity="Article"
+                    IsOpen="_addArticleOpen"
+                    Title="Add Article"
+                    Loader="s => Engine.Articles.GetManyAsync(search: s)"
+                    ColumnHeaders='["Name"]'
+                    OnSelected="AddArticleAsync"
+                    OnCancel="() => _addArticleOpen = false">
+    <RowTemplate Context="a">
+        <td>@a.Name</td>
+    </RowTemplate>
+</EntityPickerDialog>
+
+<EntityPickerDialog TEntity="Item"
+                    IsOpen="_addItemOpen"
+                    Title="Add Item"
+                    Loader="async _ => (IReadOnlyCollection<Item>)await Engine.Items.GetManyAsync()"
+                    ColumnHeaders='["Item", "Article"]'
+                    OnSelected="AddItemAsync"
+                    OnCancel="() => _addItemOpen = false">
+    <RowTemplate Context="i">
+        <td>@i.Guid.ToString("N")[..8]</td>
+        <td>@i.ArticleGuid.ToString("N")[..8]</td>
+    </RowTemplate>
+</EntityPickerDialog>
+
+<EntityPickerDialog TEntity="User"
+                    IsOpen="_addUserOpen"
+                    Title="Add User"
+                    Loader="s => Engine.Users.GetManyAsync(search: s)"
+                    ColumnHeaders='["Name"]'
+                    OnSelected="AddUserAsync"
+                    OnCancel="() => _addUserOpen = false">
+    <RowTemplate Context="u">
+        <td>@u.Nameid</td>
+    </RowTemplate>
+</EntityPickerDialog>
+
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
     private PartitionTree? _tree;
+    private PartitionAllEntitiesTree? _allEntitiesTree;
+    private bool _entityView;
 
     private Partition? _partition;
     private Guid? _loadedGuid;
@@ -135,6 +258,19 @@
     private bool _createOpen;
     private bool _deleteOpen;
     private CreateForm _createForm = new();
+
+    // ── Entity list state ────────────────────────────────────────────────────
+
+    private readonly List<PartitionEntityRow> _entityItems = [];
+    private bool _entityListLoading;
+    private string? _entityListError;
+    private int _entityPage = 1;
+    private const int _entityPageSize = 20;
+    private int _entityTotalPages => (int)Math.Ceiling(_entityItems.Count / (double)_entityPageSize);
+
+    private bool _addArticleOpen;
+    private bool _addItemOpen;
+    private bool _addUserOpen;
 
     private bool _isGlobal => _partition?.ParentPartitionGuid is null;
 
@@ -156,6 +292,7 @@
             else
             {
                 _partition = null;
+                _entityItems.Clear();
             }
         }
     }
@@ -164,6 +301,9 @@
     {
         _partition = null;
         _edit = new EditModel();
+        _entityItems.Clear();
+        _entityPage = 1;
+
         await _load.RunAsync(async () =>
         {
             _partition = await Engine.Partitions.GetAsync(EntityGuid!.Value);
@@ -176,6 +316,166 @@
             _origParent = _partition.ParentPartitionGuid?.ToString();
             _origIsActive = _partition.IsActive;
         }, "Failed to load partition.");
+
+        if (_partition is not null)
+            await LoadEntityListAsync(EntityGuid!.Value);
+    }
+
+    private async Task LoadEntityListAsync(Guid partitionGuid)
+    {
+        _entityListLoading = true;
+        _entityListError = null;
+        _entityItems.Clear();
+        _entityPage = 1;
+        StateHasChanged();
+
+        try
+        {
+            var articles = await Engine.Articles.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var items = await Engine.Items.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var users = await Engine.Users.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+
+            _entityItems.AddRange(articles.Select(a => new PartitionEntityRow(
+                a.Guid, a.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article)));
+            _entityItems.AddRange(items.Select(i => new PartitionEntityRow(
+                i.Guid, i.Guid.ToString("N")[..8], "item", TreeSidebarNode.Icons.Item, EntityType.Item)));
+            _entityItems.AddRange(users.Select(u => new PartitionEntityRow(
+                u.Guid, u.Nameid, "user", TreeSidebarNode.Icons.User, EntityType.User)));
+
+            _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _entityListError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load entities." : ex.Message;
+        }
+        finally
+        {
+            _entityListLoading = false;
+        }
+    }
+
+    private async Task RemoveEntityAsync(PartitionEntityRow row)
+    {
+        if (!EntityGuid.HasValue) return;
+
+        try
+        {
+            FargoSdkResponse<EmptyResult> result;
+
+            switch (row.Type)
+            {
+                case EntityType.Article:
+                    var article = await Engine.Articles.GetAsync(row.EntityGuid);
+                    result = await article.RemovePartitionAsync(EntityGuid.Value);
+                    break;
+                case EntityType.Item:
+                    var item = await Engine.Items.GetAsync(row.EntityGuid);
+                    result = await item.RemovePartitionAsync(EntityGuid.Value);
+                    break;
+                case EntityType.User:
+                    var user = await Engine.Users.GetAsync(row.EntityGuid);
+                    result = await user.RemovePartitionAsync(EntityGuid.Value);
+                    break;
+                default:
+                    return;
+            }
+
+            if (result.IsSuccess)
+            {
+                _entityItems.Remove(row);
+                if (_entityPage > _entityTotalPages && _entityPage > 1)
+                    _entityPage--;
+            }
+            else
+            {
+                _entityListError = result.Error?.Detail ?? "Failed to remove entity.";
+            }
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _entityListError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove entity." : ex.Message;
+        }
+    }
+
+    private async Task AddArticleAsync(Article article)
+    {
+        _addArticleOpen = false;
+        if (!EntityGuid.HasValue) return;
+
+        try
+        {
+            var result = await article.AddPartitionAsync(EntityGuid.Value);
+            if (result.IsSuccess)
+            {
+                if (!_entityItems.Any(r => r.EntityGuid == article.Guid))
+                {
+                    _entityItems.Add(new PartitionEntityRow(article.Guid, article.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article));
+                    _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            else
+            {
+                _entityListError = result.Error?.Detail ?? "Failed to add article.";
+            }
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _entityListError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to add article." : ex.Message;
+        }
+    }
+
+    private async Task AddItemAsync(Item item)
+    {
+        _addItemOpen = false;
+        if (!EntityGuid.HasValue) return;
+
+        try
+        {
+            var result = await item.AddPartitionAsync(EntityGuid.Value);
+            if (result.IsSuccess)
+            {
+                if (!_entityItems.Any(r => r.EntityGuid == item.Guid))
+                {
+                    _entityItems.Add(new PartitionEntityRow(item.Guid, item.Guid.ToString("N")[..8], "item", TreeSidebarNode.Icons.Item, EntityType.Item));
+                    _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            else
+            {
+                _entityListError = result.Error?.Detail ?? "Failed to add item.";
+            }
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _entityListError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to add item." : ex.Message;
+        }
+    }
+
+    private async Task AddUserAsync(User user)
+    {
+        _addUserOpen = false;
+        if (!EntityGuid.HasValue) return;
+
+        try
+        {
+            var result = await user.AddPartitionAsync(EntityGuid.Value);
+            if (result.IsSuccess)
+            {
+                if (!_entityItems.Any(r => r.EntityGuid == user.Guid))
+                {
+                    _entityItems.Add(new PartitionEntityRow(user.Guid, user.Nameid, "user", TreeSidebarNode.Icons.User, EntityType.User));
+                    _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            else
+            {
+                _entityListError = result.Error?.Detail ?? "Failed to add user.";
+            }
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _entityListError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to add user." : ex.Message;
+        }
     }
 
     private async Task SaveAsync()
@@ -215,12 +515,13 @@
             });
 
             if (movedToParent.HasValue)
+            {
                 _tree?.NotifyMoved(EntityGuid!.Value, movedToParent.Value);
+                _allEntitiesTree?.NotifyMoved(EntityGuid!.Value, movedToParent.Value);
+            }
 
-            _tree?.NotifyUpdated(
-                EntityGuid!.Value,
-                _edit.Name ?? _partition.Name,
-                _edit.IsActive);
+            _tree?.NotifyUpdated(EntityGuid!.Value, _edit.Name ?? _partition.Name, _edit.IsActive);
+            _allEntitiesTree?.NotifyUpdated(EntityGuid!.Value, _edit.Name ?? _partition.Name, _edit.IsActive);
 
             await LoadAsync();
         }, "Failed to save.");
@@ -243,6 +544,7 @@
                 parentPartitionGuid: parentGuid);
 
             _tree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
+            _allEntitiesTree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
             Navigation.NavigateTo($"/entities/partitions/{partition.Guid}");
         }, "Failed to create.");
 
@@ -264,11 +566,16 @@
             var deletedGuid = EntityGuid.Value;
             await Engine.Partitions.DeleteAsync(deletedGuid);
             _tree?.NotifyDeleted(deletedGuid);
+            _allEntitiesTree?.NotifyDeleted(deletedGuid);
             Navigation.NavigateTo("/entities/partitions");
         }, "Failed to delete.");
 
         if (ok) _deleteOpen = false;
     }
+
+    private enum EntityType { Article, Item, User }
+
+    private sealed record PartitionEntityRow(Guid EntityGuid, string Title, string TypeLabel, string Icon, EntityType Type);
 
     private sealed class EditModel
     {

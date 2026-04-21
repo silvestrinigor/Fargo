@@ -130,6 +130,23 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfoWithNoPartition(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await users
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(u => !u.Partitions.Any())
+            .Where(u => search == null || EF.Functions.Like(u.Nameid, $"%{search}%"))
+            .OrderBy(u => u.Guid)
+            .WithPagination(pagination)
+            .Select(UserMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<UserInformation?> GetInfoByGuidInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,

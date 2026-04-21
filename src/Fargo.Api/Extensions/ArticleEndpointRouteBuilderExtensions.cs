@@ -138,6 +138,7 @@ public static class ArticleEndpointRouteBuilderExtension
         Limit? limit,
         Guid? partitionGuid,
         string? search,
+        bool? noPartition,
         IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>> handler,
         CancellationToken cancellationToken)
     {
@@ -145,7 +146,8 @@ public static class ArticleEndpointRouteBuilderExtension
             temporalAsOf,
             PaginationHelpers.CreatePagination(page, limit),
             partitionGuid,
-            search
+            search,
+            noPartition
         );
 
         var response = await handler.Handle(query, cancellationToken);

@@ -30,7 +30,8 @@ public sealed record ItemManyQuery(
         Guid? ArticleGuid = null,
         DateTimeOffset? AsOfDateTime = null,
         Pagination? Pagination = null,
-        Guid? PartitionGuid = null
+        Guid? PartitionGuid = null,
+        bool? NoPartition = null
         ) : IQuery<IReadOnlyCollection<ItemInformation>>;
 
 /// <summary>
@@ -119,6 +120,15 @@ public sealed class ItemManyQueryHandler(
 
         if (actor.IsAdmin || actor.IsSystem)
         {
+            if (query.NoPartition == true)
+            {
+                return await itemRepository.GetManyInfoWithNoPartition(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        query.AsOfDateTime,
+                        cancellationToken
+                        );
+            }
+
             if (query.PartitionGuid.HasValue)
             {
                 return await itemRepository.GetManyInfoInPartitions(
@@ -139,6 +149,15 @@ public sealed class ItemManyQueryHandler(
         }
         else
         {
+            if (query.NoPartition == true)
+            {
+                return await itemRepository.GetManyInfoWithNoPartition(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        query.AsOfDateTime,
+                        cancellationToken
+                        );
+            }
+
             if (query.PartitionGuid.HasValue && !actor.PartitionAccesses.Contains(query.PartitionGuid.Value))
                 return [];
 
