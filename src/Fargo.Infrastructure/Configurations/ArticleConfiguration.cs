@@ -20,19 +20,23 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(x => x.EditedByGuid);
 
         builder.Property(x => x.Mass)
-            .HasConversion<MassDoubleConverter>()
+            .HasConversion<MassStringConverter>()
+            .HasMaxLength(50)
             .IsRequired(false);
 
         builder.Property(x => x.LengthX)
-            .HasConversion<LengthDoubleConverter>()
+            .HasConversion<LengthStringConverter>()
+            .HasMaxLength(50)
             .IsRequired(false);
 
         builder.Property(x => x.LengthY)
-            .HasConversion<LengthDoubleConverter>()
+            .HasConversion<LengthStringConverter>()
+            .HasMaxLength(50)
             .IsRequired(false);
 
         builder.Property(x => x.LengthZ)
-            .HasConversion<LengthDoubleConverter>()
+            .HasConversion<LengthStringConverter>()
+            .HasMaxLength(50)
             .IsRequired(false);
 
         builder.Property(x => x.ImageKey)
