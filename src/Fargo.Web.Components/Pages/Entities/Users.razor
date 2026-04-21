@@ -10,10 +10,7 @@
 
 <PageTitle>Fargo · Users</PageTitle>
 
-<EntitiesShell ActiveSection="users"
-               SingularLabel="User"
-               PartitionViewAvailable="true"
-               PartitionView="_partitionView"
+<EntitiesShell ActiveSection="users" SingularLabel="User" PartitionViewAvailable="true" PartitionView="_partitionView"
                PartitionViewChanged="v => _partitionView = v">
     <Explorer>
         @if (_partitionView)
@@ -37,10 +34,8 @@
             <ul class="tree-list">
                 @foreach (var node in _treeNodes.OrderBy(n => n.Title, StringComparer.OrdinalIgnoreCase))
                 {
-                    <TreeSidebarNodeView Node="node"
-                                        SelectedGuid="@SelectedTreeGuid"
-                                        OnToggle="n => { n.IsExpanded = !n.IsExpanded; return Task.CompletedTask; }"
-                                        OnSelect="SelectNode" />
+                    <TreeSidebarNodeView Node="node" SelectedGuid="@SelectedTreeGuid"
+                                         OnToggle="n => { n.IsExpanded = !n.IsExpanded; return Task.CompletedTask; }" OnSelect="SelectNode" />
                 }
             </ul>
         }
@@ -94,11 +89,14 @@
                                 <InputTextArea @bind-Value="_groupEdit.Description" class="text-area" />
                             </label>
                             <div class="dialog-actions">
-                                <button type="button" class="ghost-button danger" @onclick="OpenDeleteGroup" disabled="@(_groupSave.IsBusy || _groupToggle.IsBusy)">Delete</button>
-                                <button type="button" class="ghost-button" @onclick="ToggleGroupActiveAsync" disabled="@(_groupSave.IsBusy || _groupToggle.IsBusy)">
+                                <button type="button" class="ghost-button danger" @onclick="OpenDeleteGroup"
+                                        disabled="@(_groupSave.IsBusy || _groupToggle.IsBusy)">Delete</button>
+                                <button type="button" class="ghost-button" @onclick="ToggleGroupActiveAsync"
+                                        disabled="@(_groupSave.IsBusy || _groupToggle.IsBusy)">
                                     @(_groupToggle.IsBusy ? "..." : (_group.IsActive ? "Deactivate" : "Activate"))
                                 </button>
-                                <button type="submit" class="primary-button" disabled="@(!IsGroupDirty || _groupSave.IsBusy || _groupToggle.IsBusy)">
+                                <button type="submit" class="primary-button"
+                                        disabled="@(!IsGroupDirty || _groupSave.IsBusy || _groupToggle.IsBusy)">
                                     @(_groupSave.IsBusy ? "Saving..." : "Save")
                                 </button>
                             </div>
@@ -126,8 +124,7 @@
                                 {
                                     <li class="entity-list-item">
                                         <span>@u.Nameid</span>
-                                        <button type="button" class="ghost-button danger"
-                                                @onclick="() => RemoveMemberAsync(u)"
+                                        <button type="button" class="ghost-button danger" @onclick="() => RemoveMemberAsync(u)"
                                                 disabled="@_memberOp.IsBusy">
                                             Remove
                                         </button>
@@ -156,13 +153,17 @@
                             @foreach (var action in Enum.GetValues<ActionType>())
                             {
                                 <label class="permission-item">
-                                    <input type="checkbox"
-                                           checked="@_groupPermissions.Contains(action)"
-                                           disabled="@_groupPermSave.IsBusy"
-                                           @onchange="async e => await SetGroupPermissionAsync(action, (bool)e.Value!)" />
+                                    <input type="checkbox" checked="@_groupPermissions.Contains(action)"
+                                           @onchange="e => TogglePermission(_groupPermissions, action, (bool)e.Value!)" />
                                     <span>@FormatPermission(action)</span>
                                 </label>
                             }
+                        </div>
+                        <div class="dialog-actions">
+                            <button type="button" class="primary-button" @onclick="SaveGroupPermissionsAsync"
+                                    disabled="@_groupPermSave.IsBusy">
+                                @(_groupPermSave.IsBusy ? "Saving..." : "Save permissions")
+                            </button>
                         </div>
                     </section>
                 </div>
@@ -230,11 +231,14 @@
                             <InputTextArea @bind-Value="_edit.Description" class="text-area" />
                         </label>
                         <div class="dialog-actions">
-                            <button type="button" class="ghost-button danger" @onclick="OpenDelete" disabled="@(_save.IsBusy || _toggle.IsBusy)">Delete</button>
-                            <button type="button" class="ghost-button" @onclick="ToggleActiveAsync" disabled="@(_save.IsBusy || _toggle.IsBusy)">
+                            <button type="button" class="ghost-button danger" @onclick="OpenDelete"
+                                    disabled="@(_save.IsBusy || _toggle.IsBusy)">Delete</button>
+                            <button type="button" class="ghost-button" @onclick="ToggleActiveAsync"
+                                    disabled="@(_save.IsBusy || _toggle.IsBusy)">
                                 @(_toggle.IsBusy ? "..." : (_user.IsActive ? "Deactivate" : "Activate"))
                             </button>
-                            <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy || _toggle.IsBusy)">
+                            <button type="submit" class="primary-button"
+                                    disabled="@(!IsDirty || _save.IsBusy || _toggle.IsBusy)">
                                 @(_save.IsBusy ? "Saving..." : "Save")
                             </button>
                         </div>
@@ -262,8 +266,7 @@
                             {
                                 <li class="entity-list-item">
                                     <span>@g.Nameid</span>
-                                    <button type="button" class="ghost-button danger"
-                                            @onclick="() => RemoveFromGroupAsync(g)"
+                                    <button type="button" class="ghost-button danger" @onclick="() => RemoveFromGroupAsync(g)"
                                             disabled="@_groupOp.IsBusy">
                                         Remove
                                     </button>
@@ -292,13 +295,17 @@
                         @foreach (var action in Enum.GetValues<ActionType>())
                         {
                             <label class="permission-item">
-                                <input type="checkbox"
-                                       checked="@_userPermissions.Contains(action)"
-                                       disabled="@_permSave.IsBusy"
-                                       @onchange="async e => await SetUserPermissionAsync(action, (bool)e.Value!)" />
+                                <input type="checkbox" checked="@_userPermissions.Contains(action)"
+                                       @onchange="e => TogglePermission(_userPermissions, action, (bool)e.Value!)" />
                                 <span>@FormatPermission(action)</span>
                             </label>
                         }
+                    </div>
+                    <div class="dialog-actions">
+                        <button type="button" class="primary-button" @onclick="SaveUserPermissionsAsync"
+                                disabled="@_permSave.IsBusy">
+                            @(_permSave.IsBusy ? "Saving..." : "Save permissions")
+                        </button>
                     </div>
                 </section>
             </div>
@@ -307,13 +314,8 @@
 </EntitiesShell>
 
 @* User group dialogs *@
-<ConfirmDialog IsOpen="_deleteGroupOpen"
-               Title="Delete user group"
-               ConfirmText="Delete"
-               ConfirmClass="danger"
-               IsBusy="_groupDelete.IsBusy"
-               OnConfirm="DeleteGroupAsync"
-               OnCancel="() => _deleteGroupOpen = false">
+<ConfirmDialog IsOpen="_deleteGroupOpen" Title="Delete user group" ConfirmText="Delete" ConfirmClass="danger"
+               IsBusy="_groupDelete.IsBusy" OnConfirm="DeleteGroupAsync" OnCancel="() => _deleteGroupOpen = false">
     <p>Are you sure you want to delete <strong>@_group?.Nameid</strong>?</p>
     @if (!string.IsNullOrWhiteSpace(_groupDelete.ErrorMessage))
     {
@@ -321,13 +323,8 @@
     }
 </ConfirmDialog>
 
-<EditorDialog TModel="CreateGroupForm"
-              IsOpen="_createGroupOpen"
-              Title="New User Group"
-              Model="_createGroupForm"
-              IsBusy="_createGroup.IsBusy"
-              ErrorMessage="@_createGroup.ErrorMessage"
-              OnSubmit="CreateGroupAsync"
+<EditorDialog TModel="CreateGroupForm" IsOpen="_createGroupOpen" Title="New User Group" Model="_createGroupForm"
+              IsBusy="_createGroup.IsBusy" ErrorMessage="@_createGroup.ErrorMessage" OnSubmit="CreateGroupAsync"
               OnCancel="() => _createGroupOpen = false">
     <label>
         <span>NameId</span>
@@ -336,13 +333,9 @@
     </label>
 </EditorDialog>
 
-<EntityPickerDialog TEntity="User"
-                    IsOpen="_addMemberOpen"
-                    Title="Add member"
-                    Loader="s => Engine.Users.GetManyAsync(search: s)"
-                    ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
-                    OnSelected="AddMemberAsync"
-                    OnCancel="() => _addMemberOpen = false">
+<EntityPickerDialog TEntity="User" IsOpen="_addMemberOpen" Title="Add member"
+                    Loader="s => Engine.Users.GetManyAsync(search: s)" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
+                    OnSelected="AddMemberAsync" OnCancel="() => _addMemberOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
         <td>@context.FirstName</td>
@@ -351,26 +344,17 @@
 </EntityPickerDialog>
 
 @* User dialogs *@
-<EntityPickerDialog TEntity="UserGroup"
-                    IsOpen="_addToGroupOpen"
-                    Title="Add to user group"
-                    Loader="s => Engine.UserGroups.GetManyAsync()"
-                    ColumnHeaders="@(new[] { "NameId", "Description" })"
-                    OnSelected="AddToGroupAsync"
-                    OnCancel="() => _addToGroupOpen = false">
+<EntityPickerDialog TEntity="UserGroup" IsOpen="_addToGroupOpen" Title="Add to user group"
+                    Loader="s => Engine.UserGroups.GetManyAsync()" ColumnHeaders="@(new[] { "NameId", "Description" })"
+                    OnSelected="AddToGroupAsync" OnCancel="() => _addToGroupOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
         <td>@context.Description</td>
     </RowTemplate>
 </EntityPickerDialog>
 
-<ConfirmDialog IsOpen="_deleteOpen"
-               Title="Delete user"
-               ConfirmText="Delete"
-               ConfirmClass="danger"
-               IsBusy="_delete.IsBusy"
-               OnConfirm="DeleteAsync"
-               OnCancel="() => _deleteOpen = false">
+<ConfirmDialog IsOpen="_deleteOpen" Title="Delete user" ConfirmText="Delete" ConfirmClass="danger"
+               IsBusy="_delete.IsBusy" OnConfirm="DeleteAsync" OnCancel="() => _deleteOpen = false">
     <p>Are you sure you want to delete <strong>@_user?.Nameid</strong>?</p>
     @if (!string.IsNullOrWhiteSpace(_delete.ErrorMessage))
     {
@@ -378,13 +362,8 @@
     }
 </ConfirmDialog>
 
-<EditorDialog TModel="CreateUserForm"
-              IsOpen="_createUserOpen"
-              Title="New User"
-              Model="_createUserForm"
-              IsBusy="_createUser.IsBusy"
-              ErrorMessage="@_createUser.ErrorMessage"
-              OnSubmit="CreateUserAsync"
+<EditorDialog TModel="CreateUserForm" IsOpen="_createUserOpen" Title="New User" Model="_createUserForm"
+              IsBusy="_createUser.IsBusy" ErrorMessage="@_createUser.ErrorMessage" OnSubmit="CreateUserAsync"
               OnCancel="() => _createUserOpen = false">
     <label>
         <span>NameId</span>
@@ -514,7 +493,8 @@
                 node.HasChildren = true;
                 node.ChildrenLoaded = true;
                 if (groupMemberMap.TryGetValue(g.Guid, out var members))
-                    node.Children.AddRange(members.OrderBy(u => u.Nameid, StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
+                    node.Children.AddRange(members.OrderBy(u => u.Nameid,
+StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
                 _treeNodes.Add(node);
             }
 
@@ -817,36 +797,30 @@
 
     // ── Permissions ─────────────────────────────────────────────────────────
 
-    private async Task SetUserPermissionAsync(ActionType action, bool enabled)
+    private async Task SaveUserPermissionsAsync()
     {
         if (_user is null) return;
-        if (enabled) _userPermissions.Add(action);
-        else _userPermissions.Remove(action);
-        var success = await _permSave.RunAsync(async () =>
+        var perms = _userPermissions.ToList();
+        await _permSave.RunAsync(async () =>
         {
-            await _user.SetPermissionAsync(action, enabled);
-        }, "Failed to update permission.");
-        if (!success)
-        {
-            if (enabled) _userPermissions.Remove(action);
-            else _userPermissions.Add(action);
-        }
+            await _user.UpdateAsync(u => u.Permissions = perms);
+        }, "Failed to save permissions.");
     }
 
-    private async Task SetGroupPermissionAsync(ActionType action, bool enabled)
+    private async Task SaveGroupPermissionsAsync()
     {
         if (_group is null) return;
-        if (enabled) _groupPermissions.Add(action);
-        else _groupPermissions.Remove(action);
-        var success = await _groupPermSave.RunAsync(async () =>
+        var perms = _groupPermissions.ToList();
+        await _groupPermSave.RunAsync(async () =>
         {
-            await _group.SetPermissionAsync(action, enabled);
-        }, "Failed to update permission.");
-        if (!success)
-        {
-            if (enabled) _groupPermissions.Remove(action);
-            else _groupPermissions.Add(action);
-        }
+            await _group.UpdateAsync(g => g.Permissions = perms);
+        }, "Failed to save permissions.");
+    }
+
+    private static void TogglePermission(HashSet<ActionType> set, ActionType action, bool add)
+    {
+        if (add) set.Add(action);
+        else set.Remove(action);
     }
 
     private static string FormatPermission(ActionType action) =>
