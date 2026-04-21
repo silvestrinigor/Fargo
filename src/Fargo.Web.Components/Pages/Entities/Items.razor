@@ -1,0 +1,173 @@
+@page "/entities/items"
+@page "/entities/items/{EntityGuid:guid}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Items
+@using Fargo.Sdk.Articles
+@inject IEngine Engine
+@inject NavigationManager Navigation
+
+<PageTitle>Fargo · Items</PageTitle>
+
+<EntitiesShell ActiveSection="items"
+               SingularLabel="Item"
+               PartitionViewAvailable="true"
+               PartitionView="_partitionView"
+               PartitionViewChanged="v => _partitionView = v"
+               OnNewClick="OpenCreate">
+    <Explorer>
+        @if (_partitionView)
+        {
+            <PartitionEntityTree EntitySection="items" NavigationBase="/entities/items" />
+        }
+        else
+        {
+            <EntityTreeView TEntity="Item"
+                            Loader="LoadItemsAsync"
+                            ToNode="@(i => TreeSidebarNode.FromItem(i))"
+                            NavigationBase="/entities/items"
+                            ErrorFallback="Failed to load items." />
+        }
+    </Explorer>
+    <Detail>
+        @if (!EntityGuid.HasValue)
+        {
+            <div class="detail-empty">
+                <p class="muted-text">Select an item to view its details.</p>
+            </div>
+        }
+        else if (_load.IsBusy)
+        {
+            <p class="muted-text">Loading...</p>
+        }
+        else if (!string.IsNullOrWhiteSpace(_load.ErrorMessage))
+        {
+            <div class="error-banner">@_load.ErrorMessage</div>
+        }
+        else if (_item is null)
+        {
+            <p class="muted-text">Item could not be loaded.</p>
+        }
+        else
+        {
+            <div class="workspace-stack">
+                <section class="workspace-panel">
+                    <dl class="detail-list detail-list--inline">
+                        <div>
+                            <dt>Article</dt>
+                            <dd>@_item.ArticleGuid</dd>
+                        </div>
+                    </dl>
+                </section>
+            </div>
+        }
+    </Detail>
+</EntitiesShell>
+
+<EditorDialog TModel="CreateForm"
+              IsOpen="_createOpen"
+              Title="New Item"
+              Model="_createForm"
+              IsBusy="_create.IsBusy"
+              ErrorMessage="@(_createError ?? _create.ErrorMessage)"
+              OnSubmit="CreateAsync"
+              OnCancel="() => _createOpen = false">
+    <div class="entity-selection-row">
+        <span class="muted-text">@(_selectedArticleName ?? "No article selected")</span>
+        <button type="button" class="ghost-button" @onclick="() => _pickerOpen = true">Browse...</button>
+    </div>
+    <ValidationMessage For="() => context.ArticleGuid" />
+</EditorDialog>
+
+<EntityPickerDialog TEntity="Article"
+                    IsOpen="_pickerOpen"
+                    Title="Select Article"
+                    Loader="LoadArticlesForPicker"
+                    ColumnHeaders='@(new[] { "Name", "Description" })'
+                    OnSelected="OnArticleSelected"
+                    OnCancel="() => _pickerOpen = false">
+    <RowTemplate Context="article">
+        <td>@article.Name</td>
+        <td>@article.Description</td>
+    </RowTemplate>
+</EntityPickerDialog>
+
+@code {
+    [Parameter] public Guid? EntityGuid { get; set; }
+
+    private bool _partitionView;
+    private bool _createOpen;
+    private bool _pickerOpen;
+    private string? _selectedArticleName;
+    private CreateForm _createForm = new();
+    private readonly AsyncState _create = new();
+    private readonly AsyncState _load = new();
+    private Item? _item;
+    private Guid? _loadedGuid;
+
+    private async Task<IEnumerable<Item>> LoadItemsAsync() => await Engine.Items.GetManyAsync();
+
+    private async Task<IReadOnlyCollection<Article>> LoadArticlesForPicker(string? search)
+        => await Engine.Articles.GetManyAsync(search: search);
+
+    private void OnArticleSelected(Article article)
+    {
+        _createForm.ArticleGuid = article.Guid.ToString();
+        _selectedArticleName = article.Name;
+        _pickerOpen = false;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (EntityGuid != _loadedGuid)
+        {
+            _loadedGuid = EntityGuid;
+            if (EntityGuid.HasValue)
+            {
+                await _load.RunAsync(async () =>
+                {
+                    _item = await Engine.Items.GetAsync(EntityGuid.Value);
+                }, "Failed to load item.");
+            }
+            else
+            {
+                _item = null;
+            }
+        }
+    }
+
+    private void OpenCreate()
+    {
+        _createForm = new CreateForm();
+        _selectedArticleName = null;
+        _create.Clear();
+        _createOpen = true;
+    }
+
+    private async Task CreateAsync()
+    {
+        if (!Guid.TryParse(_createForm.ArticleGuid, out var articleGuid))
+        {
+            _createError = "Invalid article GUID.";
+            return;
+        }
+        _createError = null;
+
+        var ok = await _create.RunAsync(async () =>
+        {
+            var item = await Engine.Items.CreateAsync(articleGuid);
+            Navigation.NavigateTo($"/entities/items/{item.Guid}", forceLoad: true);
+        }, "Failed to create.");
+
+        if (ok) _createOpen = false;
+    }
+
+    private string? _createError;
+
+    private sealed class CreateForm
+    {
+        [Required(ErrorMessage = "Article GUID is required.")]
+        public string? ArticleGuid { get; set; }
+    }
+}

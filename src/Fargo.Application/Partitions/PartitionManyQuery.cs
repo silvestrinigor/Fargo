@@ -31,7 +31,8 @@ public sealed record PartitionManyQuery(
         Guid? ParentPartitionGuid = null,
         DateTimeOffset? AsOfDateTime = null,
         Pagination? Pagination = null,
-        bool RootOnly = false
+        bool RootOnly = false,
+        string? Search = null
         ) : IQuery<IReadOnlyCollection<PartitionInformation>>;
 
 /// <summary>
@@ -129,6 +130,7 @@ public sealed class PartitionManyQueryHandler(
                     query.ParentPartitionGuid,
                     query.AsOfDateTime,
                     query.RootOnly,
+                    query.Search,
                     cancellationToken
                     );
 
@@ -142,6 +144,7 @@ public sealed class PartitionManyQueryHandler(
                     query.ParentPartitionGuid,
                     query.AsOfDateTime,
                     query.RootOnly,
+                    query.Search,
                     cancellationToken
                     );
 

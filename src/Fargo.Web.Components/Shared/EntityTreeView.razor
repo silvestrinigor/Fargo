@@ -1,0 +1,98 @@
+@typeparam TEntity
+@inject NavigationManager Navigation
+
+@if (!string.IsNullOrWhiteSpace(_state.ErrorMessage))
+{
+    <div class="error-banner">@_state.ErrorMessage</div>
+}
+else if (_state.IsBusy)
+{
+    <div class="muted-text">@LoadingText</div>
+}
+else if (_nodes.Count == 0)
+{
+    <div class="muted-text">@EmptyText</div>
+}
+else
+{
+    <ul class="tree-list">
+        @foreach (var node in _nodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
+        {
+            <TreeSidebarNodeView Node="node"
+                                 SelectedGuid="_selectedGuid"
+                                 OnToggle="ToggleAsync"
+                                 OnSelect="Select" />
+        }
+    </ul>
+}
+
+@code {
+    [Parameter, EditorRequired] public Func<Task<IEnumerable<TEntity>>> Loader { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TEntity, TreeSidebarNode> ToNode { get; set; } = default!;
+    [Parameter, EditorRequired] public string NavigationBase { get; set; } = default!;
+    [Parameter] public string LoadingText { get; set; } = "Loading...";
+    [Parameter] public string EmptyText { get; set; } = "No entries available.";
+    [Parameter] public string ErrorFallback { get; set; } = "Failed to load.";
+
+    private readonly List<TreeSidebarNode> _nodes = [];
+    private readonly AsyncState _state = new();
+    private Guid? _selectedGuid;
+
+    protected override void OnInitialized()
+    {
+        _selectedGuid = ReadSelectedGuid();
+        _ = LoadAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _selectedGuid = ReadSelectedGuid();
+    }
+
+    private async Task LoadAsync()
+    {
+        await _state.RunAsync(async () =>
+        {
+            var items = await Loader();
+            _nodes.Clear();
+            _nodes.AddRange(items.Select(ToNode));
+        }, ErrorFallback);
+        StateHasChanged();
+    }
+
+    private Task ToggleAsync(TreeSidebarNode node)
+    {
+        node.IsExpanded = !node.IsExpanded;
+        return Task.CompletedTask;
+    }
+
+    private void Select(TreeSidebarNode node)
+    {
+        _selectedGuid = node.EntityGuid;
+        Navigation.NavigateTo($"{NavigationBase.TrimEnd('/')}/{node.EntityGuid}");
+    }
+
+    private Guid? ReadSelectedGuid()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var baseSegments = NavigationBase
+            .Trim('/')
+            .Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var parts = relative.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length < baseSegments.Length + 1)
+        {
+            return null;
+        }
+
+        for (var i = 0; i < baseSegments.Length; i++)
+        {
+            if (!parts[i].Equals(baseSegments[i], StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+        }
+
+        return Guid.TryParse(parts[baseSegments.Length], out var guid) ? guid : null;
+    }
+}

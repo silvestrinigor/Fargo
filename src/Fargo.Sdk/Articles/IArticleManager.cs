@@ -34,6 +34,7 @@ public interface IArticleManager
         int? page = null,
         int? limit = null,
         Guid? partitionGuid = null,
+        string? search = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

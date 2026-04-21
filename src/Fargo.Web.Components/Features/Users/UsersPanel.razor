@@ -1,0 +1,250 @@
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Users
+@inject IEngine Engine
+
+<div class="page-card">
+    <div class="section-header">
+        <h1>Users</h1>
+        <button type="button" class="primary-button" @onclick="OpenCreate">New user</button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_load.ErrorMessage))
+    {
+        <div class="error-banner">@_load.ErrorMessage</div>
+    }
+
+    @if (_load.IsBusy)
+    {
+        <p class="muted-text">Loading users...</p>
+    }
+    else if (_users.Count == 0)
+    {
+        <p class="muted-text">No users found for the current filter.</p>
+    }
+    else
+    {
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>NameId</th>
+                        <th>First name</th>
+                        <th>Last name</th>
+                        <th>Description</th>
+                        <th>Partitions</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in _users)
+                    {
+                        <tr>
+                            <td>@user.Nameid</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.Description</td>
+                            <td>@user.PartitionAccesses.Count</td>
+                            <td>@(user.IsActive ? "Active" : "Inactive")</td>
+                            <td class="action-cell">
+                                <button type="button" class="ghost-button small" @onclick="() => OpenEdit(user)">Edit</button>
+                                <button type="button" class="ghost-button small danger" @onclick="() => OpenDelete(user)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<EditorDialog TModel="EditorModel"
+              IsOpen="_editorOpen"
+              Title="@(_isEditing ? "Edit user" : "Create user")"
+              Model="_editor"
+              IsBusy="_save.IsBusy"
+              ErrorMessage="@_save.ErrorMessage"
+              OnSubmit="SaveAsync"
+              OnCancel="CloseEditor">
+    <label>
+        <span>NameId</span>
+        <InputText @bind-Value="context.Nameid" class="text-field" />
+        <ValidationMessage For="() => context.Nameid" />
+    </label>
+
+    <div class="toolbar-grid two-columns">
+        <label>
+            <span>First name</span>
+            <InputText @bind-Value="context.FirstName" class="text-field" />
+        </label>
+        <label>
+            <span>Last name</span>
+            <InputText @bind-Value="context.LastName" class="text-field" />
+        </label>
+    </div>
+
+    <label>
+        <span>Description</span>
+        <InputTextArea @bind-Value="context.Description" class="text-area" />
+    </label>
+
+    @if (!_isEditing)
+    {
+        <label>
+            <span>Password</span>
+            <InputText @bind-Value="context.Password" Type="password" class="text-field" />
+            <ValidationMessage For="() => context.Password" />
+        </label>
+    }
+</EditorDialog>
+
+<ConfirmDialog IsOpen="_pendingDelete is not null"
+               Title="Delete user"
+               ConfirmText="Delete"
+               ConfirmClass="danger"
+               IsBusy="_delete.IsBusy"
+               OnConfirm="DeleteAsync"
+               OnCancel="CloseDelete">
+    <p>Are you sure you want to delete <strong>@_pendingDelete?.Nameid</strong>?</p>
+    @if (!string.IsNullOrWhiteSpace(_delete.ErrorMessage))
+    {
+        <div class="error-banner">@_delete.ErrorMessage</div>
+    }
+</ConfirmDialog>
+
+@code {
+    private readonly List<User> _users = [];
+    private readonly AsyncState _load = new();
+    private readonly AsyncState _save = new();
+    private readonly AsyncState _delete = new();
+
+    private bool _editorOpen;
+    private bool _isEditing;
+    private Guid? _editingUserGuid;
+    private User? _pendingDelete;
+    private EditorModel _editor = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        await _load.RunAsync(async () =>
+        {
+            _users.Clear();
+            _users.AddRange(await Engine.Users.GetManyAsync());
+        }, "Failed to load users.");
+    }
+
+    private void OpenCreate()
+    {
+        _isEditing = false;
+        _editingUserGuid = null;
+        _editor = new EditorModel();
+        _save.Clear();
+        _editorOpen = true;
+    }
+
+    private void OpenEdit(User user)
+    {
+        _isEditing = true;
+        _editingUserGuid = user.Guid;
+        _editor = new EditorModel
+        {
+            Nameid = user.Nameid,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Description = user.Description
+        };
+        _save.Clear();
+        _editorOpen = true;
+    }
+
+    private void CloseEditor()
+    {
+        if (!_save.IsBusy)
+        {
+            _editorOpen = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        var ok = await _save.RunAsync(async () =>
+        {
+            if (_isEditing && _editingUserGuid.HasValue)
+            {
+                var user = _users.FirstOrDefault(u => u.Guid == _editingUserGuid.Value);
+                if (user is not null)
+                {
+                    await user.UpdateAsync(u =>
+                    {
+                        u.Nameid = _editor.Nameid!;
+                        u.FirstName = string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName;
+                        u.LastName = string.IsNullOrWhiteSpace(_editor.LastName) ? null : _editor.LastName;
+                        u.Description = _editor.Description ?? string.Empty;
+                    });
+                }
+            }
+            else
+            {
+                await Engine.Users.CreateAsync(
+                    _editor.Nameid!,
+                    _editor.Password!,
+                    string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName,
+                    string.IsNullOrWhiteSpace(_editor.LastName) ? null : _editor.LastName,
+                    string.IsNullOrWhiteSpace(_editor.Description) ? null : _editor.Description);
+            }
+
+            await LoadUsersAsync();
+        }, "Failed to save user.");
+
+        if (ok) _editorOpen = false;
+    }
+
+    private void OpenDelete(User user)
+    {
+        _pendingDelete = user;
+        _delete.Clear();
+    }
+
+    private void CloseDelete()
+    {
+        if (!_delete.IsBusy)
+        {
+            _pendingDelete = null;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (_pendingDelete is null) return;
+
+        var ok = await _delete.RunAsync(async () =>
+        {
+            await Engine.Users.DeleteAsync(_pendingDelete.Guid);
+            await LoadUsersAsync();
+        }, "Failed to delete user.");
+
+        if (ok) _pendingDelete = null;
+    }
+
+    private sealed class EditorModel
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+
+        public string? FirstName { get; set; }
+
+        public string? LastName { get; set; }
+
+        public string? Description { get; set; }
+
+        [Required(ErrorMessage = "Password is required when creating a user.")]
+        public string? Password { get; set; }
+    }
+}

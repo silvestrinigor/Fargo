@@ -1,0 +1,94 @@
+@page "/entities/articles"
+@page "/entities/articles/{EntityGuid:guid}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Articles
+@inject IEngine Engine
+@inject NavigationManager Navigation
+
+<PageTitle>Fargo · Articles</PageTitle>
+
+<EntitiesShell ActiveSection="articles"
+               SingularLabel="Article"
+               PartitionViewAvailable="true"
+               PartitionView="_partitionView"
+               PartitionViewChanged="v => _partitionView = v"
+               OnNewClick="OpenCreate">
+    <Explorer>
+        @if (_partitionView)
+        {
+            <PartitionEntityTree EntitySection="articles" NavigationBase="/entities/articles" />
+        }
+        else
+        {
+            <EntityTreeView TEntity="Article"
+                            Loader="LoadArticlesAsync"
+                            ToNode="TreeSidebarNode.FromArticle"
+                            NavigationBase="/entities/articles"
+                            ErrorFallback="Failed to load articles." />
+        }
+    </Explorer>
+    <Detail>
+        @if (!EntityGuid.HasValue)
+        {
+            <div class="detail-empty">
+                <p class="muted-text">Select an article to view and edit its details.</p>
+            </div>
+        }
+        else
+        {
+            <ArticleTabs EntityGuid="EntityGuid.Value" />
+        }
+    </Detail>
+</EntitiesShell>
+
+<EditorDialog TModel="CreateForm"
+              IsOpen="_createOpen"
+              Title="New Article"
+              Model="_createForm"
+              IsBusy="_create.IsBusy"
+              ErrorMessage="@_create.ErrorMessage"
+              OnSubmit="CreateAsync"
+              OnCancel="() => _createOpen = false">
+    <label>
+        <span>Name</span>
+        <InputText @bind-Value="context.Name" class="text-field" />
+        <ValidationMessage For="() => context.Name" />
+    </label>
+</EditorDialog>
+
+@code {
+    [Parameter] public Guid? EntityGuid { get; set; }
+
+    private bool _partitionView;
+    private bool _createOpen;
+    private CreateForm _createForm = new();
+    private readonly AsyncState _create = new();
+
+    private async Task<IEnumerable<Article>> LoadArticlesAsync() => await Engine.Articles.GetManyAsync();
+
+    private void OpenCreate()
+    {
+        _createForm = new CreateForm();
+        _create.Clear();
+        _createOpen = true;
+    }
+
+    private async Task CreateAsync()
+    {
+        var ok = await _create.RunAsync(async () =>
+        {
+            var article = await Engine.Articles.CreateAsync(_createForm.Name!);
+            Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
+        }, "Failed to create.");
+
+        if (ok) _createOpen = false;
+    }
+
+    private sealed class CreateForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+    }
+}

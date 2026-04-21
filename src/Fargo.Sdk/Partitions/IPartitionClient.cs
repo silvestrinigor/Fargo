@@ -41,6 +41,7 @@ public interface IPartitionClient
         int? page = null,
         int? limit = null,
         bool? rootOnly = null,
+        string? search = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

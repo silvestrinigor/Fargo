@@ -1,0 +1,28 @@
+@if (IsOpen)
+{
+    <div class="overlay">
+        <section class="dialog-card">
+            <h2>@Title</h2>
+            @ChildContent
+            <div class="dialog-actions">
+                <button type="button" class="ghost-button" @onclick="OnCancel" disabled="@IsBusy">@CancelText</button>
+                <button type="button" class="primary-button @ConfirmClass" @onclick="OnConfirm" disabled="@IsBusy">
+                    @(IsBusy ? BusyText : ConfirmText)
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public string Title { get; set; } = "Confirm";
+    [Parameter] public string ConfirmText { get; set; } = "Confirm";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public string BusyText { get; set; } = "Working...";
+    [Parameter] public string ConfirmClass { get; set; } = "";
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

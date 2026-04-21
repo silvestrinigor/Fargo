@@ -76,6 +76,7 @@ public static class PartitionEndpointRouteBuilderExtension
         Page? page,
         Limit? limit,
         bool? rootOnly,
+        string? search,
         IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>> handler,
         CancellationToken cancellationToken)
     {
@@ -83,7 +84,8 @@ public static class PartitionEndpointRouteBuilderExtension
             parentPartitionGuid,
             temporalAsOf,
             PaginationHelpers.CreatePagination(page, limit),
-            rootOnly ?? false
+            rootOnly ?? false,
+            search
         );
 
         var response = await handler.Handle(query, cancellationToken);

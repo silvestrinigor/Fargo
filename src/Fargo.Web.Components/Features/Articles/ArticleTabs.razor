@@ -1,0 +1,497 @@
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Articles
+@inject IEngine Engine
+@inject IJSRuntime JS
+
+@if (_load.IsBusy)
+{
+    <p class="muted-text">Loading...</p>
+}
+else if (!string.IsNullOrWhiteSpace(_load.ErrorMessage))
+{
+    <div class="error-banner">@_load.ErrorMessage</div>
+}
+else if (_article is null)
+{
+    <p class="muted-text">Article could not be loaded.</p>
+}
+else
+{
+    <div class="workspace-stack">
+        <div class="tab-bar">
+            <button type="button" class="tab-button @(_tab == "info" ? "active" : null)" @onclick='() => SetTab("info")'>Info</button>
+            <button type="button" class="tab-button @(_tab == "metrics" ? "active" : null)" @onclick='() => SetTab("metrics")'>Metrics</button>
+            <button type="button" class="tab-button @(_tab == "image" ? "active" : null)" @onclick='() => SetTab("image")'>Image</button>
+            <button type="button" class="tab-button @(_tab == "barcodes" ? "active" : null)" @onclick='() => SetTab("barcodes")'>Barcodes</button>
+        </div>
+        <section class="workspace-panel">
+            <EditForm Model="_edit" OnValidSubmit="SaveAsync" class="editor-form">
+                <DataAnnotationsValidator />
+                @if (!string.IsNullOrWhiteSpace(_save.ErrorMessage))
+                {
+                    <div class="error-banner">@_save.ErrorMessage</div>
+                }
+                @if (_tab == "info")
+                {
+                    <label>
+                        <span>Name</span>
+                        <InputText @bind-Value="_edit.Name" class="text-field" />
+                        <ValidationMessage For="() => _edit.Name" />
+                    </label>
+                    <label>
+                        <span>Description</span>
+                        <InputTextArea @bind-Value="_edit.Description" class="text-area" />
+                    </label>
+                }
+                else if (_tab == "image")
+                {
+                    <div class="article-image-section">
+                        @if (!string.IsNullOrEmpty(_imageError))
+                        {
+                            <div class="error-banner">@_imageError</div>
+                        }
+                        @if (_imageDataUrl is not null)
+                        {
+                            <div class="article-image-container">
+                                <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
+                            </div>
+                        }
+                        else if (_article!.HasImage)
+                        {
+                            <p class="muted-text">Loading image...</p>
+                        }
+                        else
+                        {
+                            <p class="muted-text">No image has been uploaded yet.</p>
+                        }
+                        <div class="article-image-actions">
+                            <label class="ghost-button article-image-upload-label @(_isUploading ? "disabled" : null)">
+                                @(_isUploading ? "Uploading..." : "Upload Image")
+                                <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
+                            </label>
+                            @if (_article!.HasImage)
+                            {
+                                <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
+                                    @(_isDeletingImage ? "Removing..." : "Remove")
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+                else if (_tab == "barcodes")
+                {
+                    <div class="barcode-section">
+                        @if (!string.IsNullOrEmpty(_barcodeError))
+                        {
+                            <div class="error-banner">@_barcodeError</div>
+                        }
+                        @if (_barcodes is null)
+                        {
+                            <p class="muted-text">Loading barcodes...</p>
+                        }
+                        else if (_barcodes.Count == 0)
+                        {
+                            <p class="muted-text">No barcodes added yet.</p>
+                        }
+                        else
+                        {
+                            <div class="barcode-list">
+                                @foreach (var barcode in _barcodes)
+                                {
+                                    <div class="barcode-card">
+                                        <div class="barcode-format-label">@barcode.Format</div>
+                                        <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
+                                        <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@_isRemovingBarcode">Remove</button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <div class="barcode-add-form">
+                            <input type="text" class="text-field" @bind="_newBarcodeCode" placeholder="Barcode code" />
+                            <select class="select-field" @bind="_newBarcodeFormat">
+                                @foreach (var fmt in Enum.GetValues<BarcodeFormat>())
+                                {
+                                    <option value="@fmt">@fmt</option>
+                                }
+                            </select>
+                            <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
+                                @(_isAddingBarcode ? "Adding..." : "Add Barcode")
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <label>
+                        <span>Mass</span>
+                        <div class="metric-input">
+                            <InputNumber @bind-Value="_edit.MassValue" class="text-field" placeholder="optional" />
+                            <select value="@_edit.MassUnit" @onchange="OnMassUnit" class="select-field">
+                                <option value="g">g</option>
+                                <option value="kg">kg</option>
+                                <option value="mg">mg</option>
+                                <option value="lb">lb</option>
+                                <option value="oz">oz</option>
+                            </select>
+                        </div>
+                    </label>
+                    <label>
+                        <span>LengthX</span>
+                        <div class="metric-input">
+                            <InputNumber @bind-Value="_edit.LengthXValue" class="text-field" placeholder="optional" />
+                            <select value="@_edit.LengthXUnit" @onchange="OnLengthXUnit" class="select-field">
+                                @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                            </select>
+                        </div>
+                    </label>
+                    <label>
+                        <span>LengthY</span>
+                        <div class="metric-input">
+                            <InputNumber @bind-Value="_edit.LengthYValue" class="text-field" placeholder="optional" />
+                            <select value="@_edit.LengthYUnit" @onchange="OnLengthYUnit" class="select-field">
+                                @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                            </select>
+                        </div>
+                    </label>
+                    <label>
+                        <span>LengthZ</span>
+                        <div class="metric-input">
+                            <InputNumber @bind-Value="_edit.LengthZValue" class="text-field" placeholder="optional" />
+                            <select value="@_edit.LengthZUnit" @onchange="OnLengthZUnit" class="select-field">
+                                @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                            </select>
+                        </div>
+                    </label>
+                }
+                @if (_tab is "info" or "metrics")
+                {
+                    <div class="dialog-actions">
+                        <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy)">
+                            @(_save.IsBusy ? "Saving..." : "Save")
+                        </button>
+                    </div>
+                }
+            </EditForm>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Guid EntityGuid { get; set; }
+
+    private static readonly string[] LengthUnits = ["mm", "cm", "m", "km", "in", "ft"];
+
+    private Article? _article;
+    private readonly AsyncState _load = new();
+    private readonly AsyncState _save = new();
+    private string _tab = "info";
+    private EditModel _edit = new();
+
+    private string? _imageDataUrl;
+    private string? _imageError;
+    private bool _isUploading;
+    private bool _isDeletingImage;
+
+    private IReadOnlyCollection<BarcodeResult>? _barcodes;
+    private string? _barcodeError;
+    private string _newBarcodeCode = string.Empty;
+    private BarcodeFormat _newBarcodeFormat = BarcodeFormat.Ean13;
+    private bool _isAddingBarcode;
+    private bool _isRemovingBarcode;
+
+    private string? _origName;
+    private string? _origDescription;
+    private double? _origMass;
+    private double? _origX;
+    private double? _origY;
+    private double? _origZ;
+
+    private Guid? _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loaded != EntityGuid)
+        {
+            _loaded = EntityGuid;
+            _tab = "info";
+            await LoadAsync();
+        }
+    }
+
+    private bool IsDirty => _article is not null && (
+        _edit.Name != _origName ||
+        (_edit.Description ?? "") != (_origDescription ?? "") ||
+        _edit.MassValue != _origMass ||
+        _edit.MassUnit != (_article.Mass?.Unit ?? "g") ||
+        _edit.LengthXValue != _origX ||
+        _edit.LengthXUnit != (_article.LengthX?.Unit ?? "m") ||
+        _edit.LengthYValue != _origY ||
+        _edit.LengthYUnit != (_article.LengthY?.Unit ?? "m") ||
+        _edit.LengthZValue != _origZ ||
+        _edit.LengthZUnit != (_article.LengthZ?.Unit ?? "m"));
+
+    private async Task LoadAsync()
+    {
+        _article = null;
+        _edit = new EditModel();
+        _imageDataUrl = null;
+        _imageError = null;
+        _barcodes = null;
+        _barcodeError = null;
+
+        await _load.RunAsync(async () =>
+        {
+            _article = await Engine.Articles.GetAsync(EntityGuid);
+            _edit.Name = _article.Name;
+            _edit.Description = _article.Description;
+            _edit.MassValue = _article.Mass?.Value;
+            _edit.MassUnit = _article.Mass?.Unit ?? "g";
+            _edit.LengthXValue = _article.LengthX?.Value;
+            _edit.LengthXUnit = _article.LengthX?.Unit ?? "m";
+            _edit.LengthYValue = _article.LengthY?.Value;
+            _edit.LengthYUnit = _article.LengthY?.Unit ?? "m";
+            _edit.LengthZValue = _article.LengthZ?.Value;
+            _edit.LengthZUnit = _article.LengthZ?.Unit ?? "m";
+            _origName = _article.Name;
+            _origDescription = _article.Description;
+            _origMass = _article.Mass?.Value;
+            _origX = _article.LengthX?.Value;
+            _origY = _article.LengthY?.Value;
+            _origZ = _article.LengthZ?.Value;
+
+            if (_article.HasImage)
+            {
+                await LoadImageAsync();
+            }
+        }, "Failed to load article.");
+        StateHasChanged();
+    }
+
+    private async Task LoadImageAsync()
+    {
+        _imageDataUrl = null;
+        try
+        {
+            var result = await _article!.GetImageAsync();
+            if (result is not null)
+            {
+                using var ms = new MemoryStream();
+                await result.Value.Stream.CopyToAsync(ms);
+                result.Value.Stream.Dispose();
+                var base64 = Convert.ToBase64String(ms.ToArray());
+                _imageDataUrl = $"data:{result.Value.ContentType};base64,{base64}";
+            }
+        }
+        catch
+        {
+            // best-effort preview
+        }
+    }
+
+    private async Task SetTab(string tab)
+    {
+        _tab = tab;
+        if (tab == "barcodes" && _article is not null)
+        {
+            await LoadBarcodesAsync();
+            StateHasChanged();
+            await Task.Yield();
+            await RenderBarcodeCanvasesAsync();
+        }
+        else
+        {
+            _barcodes = null;
+            _barcodeError = null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_article is null) return;
+
+        await _save.RunAsync(async () =>
+        {
+            var mass = _edit.MassValue is null ? null : new MassDto(_edit.MassValue.Value, _edit.MassUnit);
+            var x = _edit.LengthXValue is null ? null : new LengthDto(_edit.LengthXValue.Value, _edit.LengthXUnit);
+            var y = _edit.LengthYValue is null ? null : new LengthDto(_edit.LengthYValue.Value, _edit.LengthYUnit);
+            var z = _edit.LengthZValue is null ? null : new LengthDto(_edit.LengthZValue.Value, _edit.LengthZUnit);
+            await _article.UpdateAsync(a =>
+            {
+                a.Name = _edit.Name!;
+                a.Description = _edit.Description ?? string.Empty;
+                a.Mass = mass;
+                a.LengthX = x;
+                a.LengthY = y;
+                a.LengthZ = z;
+            });
+            await LoadAsync();
+        }, "Failed to save.");
+    }
+
+    private async Task UploadImageAsync(InputFileChangeEventArgs e)
+    {
+        if (_article is null) return;
+
+        _isUploading = true;
+        _imageError = null;
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await _article.UploadImageAsync(stream, file.ContentType, file.Name);
+            await LoadAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _imageError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to upload image." : ex.Message;
+        }
+        catch
+        {
+            _imageError = "Failed to upload image.";
+        }
+        finally
+        {
+            _isUploading = false;
+        }
+    }
+
+    private async Task DeleteImageAsync()
+    {
+        if (_article is null) return;
+
+        _isDeletingImage = true;
+        _imageError = null;
+        try
+        {
+            await _article.DeleteImageAsync();
+            _imageDataUrl = null;
+            _article = await Engine.Articles.GetAsync(_article.Guid);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _imageError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove image." : ex.Message;
+        }
+        finally
+        {
+            _isDeletingImage = false;
+        }
+    }
+
+    private async Task LoadBarcodesAsync()
+    {
+        _barcodeError = null;
+        try
+        {
+            _barcodes = await Engine.Articles.GetBarcodesAsync(_article!.Guid);
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _barcodeError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load barcodes." : ex.Message;
+            _barcodes = [];
+        }
+    }
+
+    private async Task RenderBarcodeCanvasesAsync()
+    {
+        if (_barcodes is null) return;
+        foreach (var barcode in _barcodes)
+        {
+            var canvasId = $"barcode-{barcode.Guid}";
+            var bcid = GetBcid(barcode.Format);
+            try
+            {
+                await JS.InvokeVoidAsync("fargoBarcode.render", canvasId, bcid, barcode.Code);
+            }
+            catch
+            {
+                // best-effort
+            }
+        }
+    }
+
+    private static string GetBcid(BarcodeFormat format) => format switch
+    {
+        BarcodeFormat.Ean13 => "ean13",
+        BarcodeFormat.Ean8 => "ean8",
+        BarcodeFormat.UpcA => "upca",
+        BarcodeFormat.UpcE => "upce",
+        BarcodeFormat.Code128 => "code128",
+        BarcodeFormat.Code39 => "code39",
+        BarcodeFormat.Itf14 => "itf14",
+        BarcodeFormat.Gs1128 => "gs1-128",
+        BarcodeFormat.QrCode => "qrcode",
+        BarcodeFormat.DataMatrix => "datamatrix",
+        _ => "code128"
+    };
+
+    private async Task AddBarcodeAsync()
+    {
+        if (_article is null || string.IsNullOrWhiteSpace(_newBarcodeCode)) return;
+
+        _isAddingBarcode = true;
+        _barcodeError = null;
+        try
+        {
+            await Engine.Articles.AddBarcodeAsync(_article.Guid, _newBarcodeCode.Trim(), _newBarcodeFormat);
+            _newBarcodeCode = string.Empty;
+            await LoadBarcodesAsync();
+            StateHasChanged();
+            await Task.Yield();
+            await RenderBarcodeCanvasesAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _barcodeError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to add barcode." : ex.Message;
+        }
+        finally
+        {
+            _isAddingBarcode = false;
+        }
+    }
+
+    private async Task RemoveBarcodeAsync(Guid barcodeGuid)
+    {
+        if (_article is null) return;
+
+        _isRemovingBarcode = true;
+        _barcodeError = null;
+        try
+        {
+            await Engine.Articles.RemoveBarcodeAsync(_article.Guid, barcodeGuid);
+            await LoadBarcodesAsync();
+            StateHasChanged();
+            await Task.Yield();
+            await RenderBarcodeCanvasesAsync();
+        }
+        catch (FargoSdkApiException ex)
+        {
+            _barcodeError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove barcode." : ex.Message;
+        }
+        finally
+        {
+            _isRemovingBarcode = false;
+        }
+    }
+
+    private void OnMassUnit(ChangeEventArgs e) => _edit.MassUnit = e.Value?.ToString() ?? "g";
+    private void OnLengthXUnit(ChangeEventArgs e) => _edit.LengthXUnit = e.Value?.ToString() ?? "m";
+    private void OnLengthYUnit(ChangeEventArgs e) => _edit.LengthYUnit = e.Value?.ToString() ?? "m";
+    private void OnLengthZUnit(ChangeEventArgs e) => _edit.LengthZUnit = e.Value?.ToString() ?? "m";
+
+    private sealed class EditModel
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public double? MassValue { get; set; }
+        public string MassUnit { get; set; } = "g";
+        public double? LengthXValue { get; set; }
+        public string LengthXUnit { get; set; } = "m";
+        public double? LengthYValue { get; set; }
+        public string LengthYUnit { get; set; } = "m";
+        public double? LengthZValue { get; set; }
+        public string LengthZUnit { get; set; } = "m";
+    }
+}

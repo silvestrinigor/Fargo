@@ -1,8 +1,8 @@
 using Fargo.Sdk;
 using Fargo.ServiceDefaults;
-using Fargo.Web.Api;
-using Fargo.Web.Components;
-using Fargo.Web.Security;
+using Fargo.Web;
+using Fargo.Web.Components.Security;
+using Fargo.Web.Components.Session;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +53,7 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(typeof(Fargo.Web.Components.Layout.MainLayout).Assembly);
 
 app.Run();

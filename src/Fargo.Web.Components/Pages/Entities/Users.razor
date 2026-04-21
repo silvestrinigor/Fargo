@@ -1,0 +1,232 @@
+@page "/entities/users"
+@page "/entities/users/{EntityGuid:guid}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Users
+@inject IEngine Engine
+@inject NavigationManager Navigation
+
+<PageTitle>Fargo · Users</PageTitle>
+
+<EntitiesShell ActiveSection="users"
+               SingularLabel="User"
+               PartitionViewAvailable="true"
+               PartitionView="_partitionView"
+               PartitionViewChanged="v => _partitionView = v"
+               OnNewClick="OpenCreate">
+    <Explorer>
+        @if (_partitionView)
+        {
+            <PartitionEntityTree EntitySection="users" NavigationBase="/entities/users" />
+        }
+        else
+        {
+            <EntityTreeView TEntity="User"
+                            Loader="LoadUsersAsync"
+                            ToNode="TreeSidebarNode.FromUser"
+                            NavigationBase="/entities/users"
+                            ErrorFallback="Failed to load users." />
+        }
+    </Explorer>
+    <Detail>
+        @if (!EntityGuid.HasValue)
+        {
+            <div class="detail-empty">
+                <p class="muted-text">Select a user to view and edit their details.</p>
+            </div>
+        }
+        else if (_load.IsBusy)
+        {
+            <p class="muted-text">Loading...</p>
+        }
+        else if (!string.IsNullOrWhiteSpace(_load.ErrorMessage))
+        {
+            <div class="error-banner">@_load.ErrorMessage</div>
+        }
+        else if (_user is null)
+        {
+            <p class="muted-text">User could not be loaded.</p>
+        }
+        else
+        {
+            <div class="workspace-stack">
+                <section class="workspace-panel">
+                    <dl class="detail-list detail-list--inline">
+                        <div>
+                            <dt>Status</dt>
+                            <dd>@(_user.IsActive ? "Active" : "Inactive")</dd>
+                        </div>
+                        <div>
+                            <dt>Partitions</dt>
+                            <dd>@_user.PartitionAccesses.Count</dd>
+                        </div>
+                    </dl>
+                    <EditForm Model="_edit" OnValidSubmit="SaveAsync" class="editor-form">
+                        <DataAnnotationsValidator />
+                        @if (!string.IsNullOrWhiteSpace(_save.ErrorMessage))
+                        {
+                            <div class="error-banner">@_save.ErrorMessage</div>
+                        }
+                        <label>
+                            <span>NameId</span>
+                            <InputText @bind-Value="_edit.Nameid" class="text-field" />
+                            <ValidationMessage For="() => _edit.Nameid" />
+                        </label>
+                        <div class="editor-form two-columns">
+                            <label>
+                                <span>First name</span>
+                                <InputText @bind-Value="_edit.FirstName" class="text-field" />
+                            </label>
+                            <label>
+                                <span>Last name</span>
+                                <InputText @bind-Value="_edit.LastName" class="text-field" />
+                            </label>
+                        </div>
+                        <label>
+                            <span>Description</span>
+                            <InputTextArea @bind-Value="_edit.Description" class="text-area" />
+                        </label>
+                        <div class="dialog-actions">
+                            <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy)">
+                                @(_save.IsBusy ? "Saving..." : "Save")
+                            </button>
+                        </div>
+                    </EditForm>
+                </section>
+            </div>
+        }
+    </Detail>
+</EntitiesShell>
+
+<EditorDialog TModel="CreateForm"
+              IsOpen="_createOpen"
+              Title="New User"
+              Model="_createForm"
+              IsBusy="_create.IsBusy"
+              ErrorMessage="@_create.ErrorMessage"
+              OnSubmit="CreateAsync"
+              OnCancel="() => _createOpen = false">
+    <label>
+        <span>NameId</span>
+        <InputText @bind-Value="context.Nameid" class="text-field" />
+        <ValidationMessage For="() => context.Nameid" />
+    </label>
+    <label>
+        <span>Password</span>
+        <input type="password" class="text-field" @bind="context.Password" />
+        <ValidationMessage For="() => context.Password" />
+    </label>
+</EditorDialog>
+
+@code {
+    [Parameter] public Guid? EntityGuid { get; set; }
+
+    private bool _partitionView;
+    private bool _createOpen;
+    private CreateForm _createForm = new();
+    private readonly AsyncState _create = new();
+    private readonly AsyncState _load = new();
+    private readonly AsyncState _save = new();
+
+    private User? _user;
+    private Guid? _loadedGuid;
+    private EditForm_ _edit = new();
+    private string? _origNameid;
+    private string? _origFirstName;
+    private string? _origLastName;
+    private string? _origDescription;
+
+    private async Task<IEnumerable<User>> LoadUsersAsync() => await Engine.Users.GetManyAsync();
+
+    private bool IsDirty => _user is not null && (
+        _edit.Nameid != _origNameid ||
+        (_edit.FirstName ?? "") != (_origFirstName ?? "") ||
+        (_edit.LastName ?? "") != (_origLastName ?? "") ||
+        (_edit.Description ?? "") != (_origDescription ?? ""));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (EntityGuid != _loadedGuid)
+        {
+            _loadedGuid = EntityGuid;
+            if (EntityGuid.HasValue)
+            {
+                await LoadAsync();
+            }
+            else
+            {
+                _user = null;
+            }
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _user = null;
+        _edit = new EditForm_();
+        await _load.RunAsync(async () =>
+        {
+            _user = await Engine.Users.GetAsync(EntityGuid!.Value);
+            _edit.Nameid = _user.Nameid;
+            _edit.FirstName = _user.FirstName;
+            _edit.LastName = _user.LastName;
+            _edit.Description = _user.Description;
+            _origNameid = _user.Nameid;
+            _origFirstName = _user.FirstName;
+            _origLastName = _user.LastName;
+            _origDescription = _user.Description;
+        }, "Failed to load user.");
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_user is null) return;
+        await _save.RunAsync(async () =>
+        {
+            await _user.UpdateAsync(u =>
+            {
+                u.Nameid = _edit.Nameid!;
+                u.FirstName = string.IsNullOrWhiteSpace(_edit.FirstName) ? null : _edit.FirstName;
+                u.LastName = string.IsNullOrWhiteSpace(_edit.LastName) ? null : _edit.LastName;
+                u.Description = _edit.Description ?? string.Empty;
+            });
+            await LoadAsync();
+        }, "Failed to save.");
+    }
+
+    private void OpenCreate()
+    {
+        _createForm = new CreateForm();
+        _create.Clear();
+        _createOpen = true;
+    }
+
+    private async Task CreateAsync()
+    {
+        var ok = await _create.RunAsync(async () =>
+        {
+            var user = await Engine.Users.CreateAsync(_createForm.Nameid!, _createForm.Password!);
+            Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
+        }, "Failed to create.");
+
+        if (ok) _createOpen = false;
+    }
+
+    private sealed class EditForm_
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Description { get; set; }
+    }
+
+    private sealed class CreateForm
+    {
+        [Required(ErrorMessage = "NameId is required.")]
+        public string? Nameid { get; set; }
+        [Required(ErrorMessage = "Password is required.")]
+        public string? Password { get; set; }
+    }
+}

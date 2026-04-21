@@ -56,9 +56,10 @@ public sealed class UserManager : IUserManager
         int? page = null,
         int? limit = null,
         Guid? partitionGuid = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await client.GetManyAsync(temporalAsOf, page, limit, partitionGuid, cancellationToken);
+        var response = await client.GetManyAsync(temporalAsOf, page, limit, partitionGuid, search, cancellationToken);
 
         if (!response.IsSuccess)
         {

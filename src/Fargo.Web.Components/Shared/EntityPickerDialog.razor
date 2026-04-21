@@ -1,0 +1,123 @@
+@typeparam TEntity
+
+@if (IsOpen)
+{
+    <div class="overlay" @onclick="HandleBackdropClick">
+        <div class="dialog-card dialog-card--wide" @onclick:stopPropagation="true">
+            <h2>@Title</h2>
+
+            <div class="picker-search-bar">
+                <input type="text" class="text-field" placeholder="@SearchPlaceholder"
+                       value="@_search"
+                       @oninput="OnSearchInput" />
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_state.ErrorMessage))
+            {
+                <div class="error-banner">@_state.ErrorMessage</div>
+            }
+            else if (_state.IsBusy)
+            {
+                <p class="muted-text">Loading...</p>
+            }
+            else if (_results.Count == 0)
+            {
+                <p class="muted-text">@EmptyText</p>
+            }
+            else
+            {
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                @foreach (var header in ColumnHeaders)
+                                {
+                                    <th>@header</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in _results)
+                            {
+                                <tr class="picker-row" @onclick="() => SelectItem(item)">
+                                    @RowTemplate(item)
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="dialog-actions">
+                <button type="button" class="ghost-button" @onclick="Cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public string Title { get; set; } = "Select";
+    [Parameter] public required Func<string?, Task<IReadOnlyCollection<TEntity>>> Loader { get; set; }
+    [Parameter] public IReadOnlyList<string> ColumnHeaders { get; set; } = [];
+    [Parameter] public required RenderFragment<TEntity> RowTemplate { get; set; }
+    [Parameter] public EventCallback<TEntity> OnSelected { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public string SearchPlaceholder { get; set; } = "Search...";
+    [Parameter] public string EmptyText { get; set; } = "No results found.";
+
+    private readonly AsyncState _state = new();
+    private readonly List<TEntity> _results = [];
+    private string? _search;
+    private bool _wasOpen;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && !_wasOpen)
+        {
+            _search = null;
+            await LoadAsync(null);
+        }
+        _wasOpen = IsOpen;
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        _search = e.Value?.ToString();
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var cts = _cts;
+        try
+        {
+            await Task.Delay(300, cts.Token);
+            await LoadAsync(_search);
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task LoadAsync(string? search)
+    {
+        await _state.RunAsync(async () =>
+        {
+            var data = await Loader(search);
+            _results.Clear();
+            _results.AddRange(data);
+        }, "Failed to load.");
+    }
+
+    private async Task SelectItem(TEntity item)
+    {
+        await OnSelected.InvokeAsync(item);
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task HandleBackdropClick()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

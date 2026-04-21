@@ -64,6 +64,7 @@ public interface IArticleRepository
     Task<IReadOnlyCollection<ArticleInformation>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 
@@ -86,6 +87,7 @@ public interface IArticleRepository
             Pagination pagination,
             IReadOnlyCollection<Guid> partitionGuids,
             DateTimeOffset? asOfDateTime = null,
+            string? search = null,
             CancellationToken cancellationToken = default
             );
 
