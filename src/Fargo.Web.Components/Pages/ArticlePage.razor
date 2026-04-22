@@ -1,0 +1,64 @@
+@page "/articles/{ArticleGuid:guid}"
+@rendermode InteractiveServer
+@using Fargo.Sdk.Articles
+@inject NavigationManager Navigation
+
+<PageTitle>Fargo · Article</PageTitle>
+
+<div class="article-page">
+    <div class="article-page-header page-card">
+        <div class="article-page-breadcrumb">
+            <a href="/entities/articles/@ArticleGuid">← Articles</a>
+        </div>
+        <div class="article-page-guid muted-text">@ArticleGuid</div>
+    </div>
+
+    <div class="page-card temporal-bar">
+        <label>
+            <span>View as of</span>
+            <input type="datetime-local" @bind="_asOfInput" class="text-field" />
+        </label>
+        <button type="button" class="primary-button" @onclick="ApplyTemporal">Apply</button>
+        @if (_asOf.HasValue)
+        {
+            <button type="button" class="ghost-button" @onclick="ClearTemporal">Live</button>
+        }
+    </div>
+
+    @if (_asOf.HasValue)
+    {
+        <div class="temporal-banner">
+            Viewing historical snapshot as of @_asOf.Value.ToLocalTime().ToString("g")
+        </div>
+    }
+
+    <ArticleTabs EntityGuid="ArticleGuid" TemporalAsOf="_asOf" />
+</div>
+
+@code {
+    [Parameter] public Guid ArticleGuid { get; set; }
+    [SupplyParameterFromQuery(Name = "asOf")] public string? AsOfQuery { get; set; }
+
+    private DateTimeOffset? _asOf;
+    private DateTime _asOfInput;
+
+    protected override void OnParametersSet()
+    {
+        _asOf = DateTimeOffset.TryParse(AsOfQuery, null,
+            System.Globalization.DateTimeStyles.RoundtripKind, out var parsed)
+            ? parsed : null;
+
+        _asOfInput = _asOf?.ToLocalTime().DateTime ?? DateTime.Now;
+    }
+
+    private void ApplyTemporal()
+    {
+        var iso = _asOfInput.ToUniversalTime().ToString("O");
+        Navigation.NavigateTo($"/articles/{ArticleGuid}?asOf={Uri.EscapeDataString(iso)}");
+    }
+
+    private void ClearTemporal()
+    {
+        Navigation.NavigateTo($"/articles/{ArticleGuid}");
+    }
+}
