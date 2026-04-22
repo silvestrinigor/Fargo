@@ -21,12 +21,7 @@ else if (_article is null)
 else
 {
     <div class="workspace-stack">
-        <div class="tab-bar">
-            <button type="button" class="tab-button @(_tab == "info" ? "active" : null)" @onclick='() => SetTab("info")'>Info</button>
-            <button type="button" class="tab-button @(_tab == "metrics" ? "active" : null)" @onclick='() => SetTab("metrics")'>Metrics</button>
-            <button type="button" class="tab-button @(_tab == "image" ? "active" : null)" @onclick='() => SetTab("image")'>Image</button>
-            <button type="button" class="tab-button @(_tab == "barcodes" ? "active" : null)" @onclick='() => SetTab("barcodes")'>Barcodes</button>
-        </div>
+
         <section class="workspace-panel">
             <EditForm Model="_edit" OnValidSubmit="SaveAsync" class="@("editor-form" + (IsReadOnly ? " readonly-form" : ""))">
                 <DataAnnotationsValidator />
@@ -34,160 +29,73 @@ else
                 {
                     <div class="error-banner">@_save.ErrorMessage</div>
                 }
-                @if (_tab == "info")
-                {
-                    <label>
-                        <span>Name</span>
-                        <InputText @bind-Value="_edit.Name" class="text-field" disabled="@IsReadOnly" />
-                        <ValidationMessage For="() => _edit.Name" />
-                    </label>
-                    <label>
-                        <span>Description</span>
-                        <InputTextArea @bind-Value="_edit.Description" class="text-area" disabled="@IsReadOnly" />
-                    </label>
-                    <dl class="detail-list detail-list--inline">
-                        <div>
-                            <dt>Last edited by</dt>
-                            <dd><EditedByLabel EditedByGuid="_article!.EditedByGuid" /></dd>
-                        </div>
-                    </dl>
-                }
-                else if (_tab == "image")
-                {
-                    <div class="article-image-section">
-                        @if (!string.IsNullOrEmpty(_imageError))
-                        {
-                            <div class="error-banner">@_imageError</div>
-                        }
-                        @if (_imageDataUrl is not null)
-                        {
-                            <div class="article-image-container">
-                                <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
-                            </div>
-                        }
-                        else if (_article!.HasImage)
-                        {
-                            <p class="muted-text">Loading image...</p>
-                        }
-                        else
-                        {
-                            <p class="muted-text">No image has been uploaded yet.</p>
-                        }
-                        @if (!IsReadOnly)
-                        {
-                            <div class="article-image-actions">
-                                <label class="ghost-button article-image-upload-label @(_isUploading ? "disabled" : null)">
-                                    @(_isUploading ? "Uploading..." : "Upload Image")
-                                    <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
-                                </label>
-                                @if (_article!.HasImage)
-                                {
-                                    <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
-                                        @(_isDeletingImage ? "Removing..." : "Remove")
-                                    </button>
-                                }
-                            </div>
-                        }
+
+                <h3>Info</h3>
+
+                <label>
+                    <span>Name</span>
+                    <InputText @bind-Value="_edit.Name" class="text-field" disabled="@IsReadOnly" />
+                    <ValidationMessage For="() => _edit.Name" />
+                </label>
+                <label>
+                    <span>Description</span>
+                    <InputTextArea @bind-Value="_edit.Description" class="text-area" disabled="@IsReadOnly" />
+                </label>
+
+                <h3>Metrics</h3>
+
+                <label>
+                    <span>Mass</span>
+                    <div class="metric-input">
+                        <InputNumber @bind-Value="_edit.MassValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
+                        <select value="@_edit.MassUnit" @onchange="OnMassUnit" class="select-field" disabled="@IsReadOnly">
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="mg">mg</option>
+                            <option value="lb">lb</option>
+                            <option value="oz">oz</option>
+                        </select>
                     </div>
-                }
-                else if (_tab == "barcodes")
-                {
-                    <div class="barcode-section">
-                        @if (!string.IsNullOrEmpty(_barcodeError))
-                        {
-                            <div class="error-banner">@_barcodeError</div>
-                        }
-                        @if (_barcodes is null)
-                        {
-                            <p class="muted-text">Loading barcodes...</p>
-                        }
-                        else if (_barcodes.Count == 0)
-                        {
-                            <p class="muted-text">No barcodes added yet.</p>
-                        }
-                        else
-                        {
-                            <div class="barcode-list">
-                                @foreach (var barcode in _barcodes)
-                                {
-                                    <div class="barcode-card">
-                                        <div class="barcode-format-label">@barcode.Format</div>
-                                        <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
-                                        @if (!IsReadOnly)
-                                        {
-                                            <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@_isRemovingBarcode">Remove</button>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        }
-                        @if (!IsReadOnly)
-                        {
-                            <div class="barcode-add-form">
-                                <input type="text" class="text-field" @bind="_newBarcodeCode" placeholder="Barcode code" />
-                                <select class="select-field" @bind="_newBarcodeFormat">
-                                    @foreach (var fmt in Enum.GetValues<BarcodeFormat>())
-                                    {
-                                        <option value="@fmt">@fmt</option>
-                                    }
-                                </select>
-                                <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
-                                    @(_isAddingBarcode ? "Adding..." : "Add Barcode")
-                                </button>
-                            </div>
-                        }
+                </label>
+                <label>
+                    <span>Length X</span>
+                    <div class="metric-input">
+                        <InputNumber @bind-Value="_edit.LengthXValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
+                        <select value="@_edit.LengthXUnit" @onchange="OnLengthXUnit" class="select-field" disabled="@IsReadOnly">
+                            @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                        </select>
                     </div>
-                }
-                else
-                {
-                    <label>
-                        <span>Mass</span>
-                        <div class="metric-input">
-                            <InputNumber @bind-Value="_edit.MassValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
-                            <select value="@_edit.MassUnit" @onchange="OnMassUnit" class="select-field" disabled="@IsReadOnly">
-                                <option value="g">g</option>
-                                <option value="kg">kg</option>
-                                <option value="mg">mg</option>
-                                <option value="lb">lb</option>
-                                <option value="oz">oz</option>
-                            </select>
-                        </div>
-                    </label>
-                    <label>
-                        <span>LengthX</span>
-                        <div class="metric-input">
-                            <InputNumber @bind-Value="_edit.LengthXValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
-                            <select value="@_edit.LengthXUnit" @onchange="OnLengthXUnit" class="select-field" disabled="@IsReadOnly">
-                                @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
-                            </select>
-                        </div>
-                    </label>
-                    <label>
-                        <span>LengthY</span>
-                        <div class="metric-input">
-                            <InputNumber @bind-Value="_edit.LengthYValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
-                            <select value="@_edit.LengthYUnit" @onchange="OnLengthYUnit" class="select-field" disabled="@IsReadOnly">
-                                @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
-                            </select>
-                        </div>
-                    </label>
-                    <label>
-                        <span>LengthZ</span>
-                        <div class="metric-input">
-                            <InputNumber @bind-Value="_edit.LengthZValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
-                            <select value="@_edit.LengthZUnit" @onchange="OnLengthZUnit" class="select-field" disabled="@IsReadOnly">
-                                @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
-                            </select>
-                        </div>
-                    </label>
-                }
-                @if (_tab is "info" or "metrics" && !IsReadOnly)
+                </label>
+                <label>
+                    <span>Length Y</span>
+                    <div class="metric-input">
+                        <InputNumber @bind-Value="_edit.LengthYValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
+                        <select value="@_edit.LengthYUnit" @onchange="OnLengthYUnit" class="select-field" disabled="@IsReadOnly">
+                            @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                        </select>
+                    </div>
+                </label>
+                <label>
+                    <span>Length Z</span>
+                    <div class="metric-input">
+                        <InputNumber @bind-Value="_edit.LengthZValue" class="text-field" placeholder="optional" disabled="@IsReadOnly" />
+                        <select value="@_edit.LengthZUnit" @onchange="OnLengthZUnit" class="select-field" disabled="@IsReadOnly">
+                            @foreach (var u in LengthUnits) { <option value="@u">@u</option> }
+                        </select>
+                    </div>
+                </label>
+
+                <dl class="detail-list detail-list--inline">
+                    <div>
+                        <dt>Last edited by</dt>
+                        <dd><EditedByLabel EditedByGuid="_article!.EditedByGuid" /></dd>
+                    </div>
+                </dl>
+
+                @if (!IsReadOnly)
                 {
                     <div class="dialog-actions">
-                        @if (_tab == "info")
-                        {
-                            <button type="button" class="ghost-button danger" @onclick="OpenDelete" disabled="@_save.IsBusy">Delete</button>
-                        }
+                        <button type="button" class="ghost-button danger" @onclick="OpenDelete" disabled="@_save.IsBusy">Delete</button>
                         <button type="submit" class="primary-button" disabled="@(!IsDirty || _save.IsBusy)">
                             @(_save.IsBusy ? "Saving..." : "Save")
                         </button>
@@ -195,6 +103,95 @@ else
                 }
             </EditForm>
         </section>
+
+        <section class="workspace-panel">
+            <h3>Image</h3>
+            <div class="article-image-section">
+                @if (!string.IsNullOrEmpty(_imageError))
+                {
+                    <div class="error-banner">@_imageError</div>
+                }
+                @if (_imageDataUrl is not null)
+                {
+                    <div class="article-image-container">
+                        <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
+                    </div>
+                }
+                else if (_article!.HasImage)
+                {
+                    <p class="muted-text">Loading image...</p>
+                }
+                else
+                {
+                    <p class="muted-text">No image has been uploaded yet.</p>
+                }
+                @if (!IsReadOnly)
+                {
+                    <div class="article-image-actions">
+                        <label class="ghost-button article-image-upload-label @(_isUploading ? "disabled" : null)">
+                            @(_isUploading ? "Uploading..." : "Upload Image")
+                            <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
+                        </label>
+                        @if (_article!.HasImage)
+                        {
+                            <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
+                                @(_isDeletingImage ? "Removing..." : "Remove")
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="workspace-panel">
+            <h3>Barcodes</h3>
+            <div class="barcode-section">
+                @if (!string.IsNullOrEmpty(_barcodeError))
+                {
+                    <div class="error-banner">@_barcodeError</div>
+                }
+                @if (_barcodes is null)
+                {
+                    <p class="muted-text">Loading barcodes...</p>
+                }
+                else if (_barcodes.Count == 0)
+                {
+                    <p class="muted-text">No barcodes added yet.</p>
+                }
+                else
+                {
+                    <div class="barcode-list">
+                        @foreach (var barcode in _barcodes)
+                        {
+                            <div class="barcode-card">
+                                <div class="barcode-format-label">@barcode.Format</div>
+                                <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
+                                @if (!IsReadOnly)
+                                {
+                                    <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@_isRemovingBarcode">Remove</button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                @if (!IsReadOnly)
+                {
+                    <div class="barcode-add-form">
+                        <input type="text" class="text-field" @bind="_newBarcodeCode" placeholder="Barcode code" />
+                        <select class="select-field" @bind="_newBarcodeFormat">
+                            @foreach (var fmt in Enum.GetValues<BarcodeFormat>())
+                            {
+                                <option value="@fmt">@fmt</option>
+                            }
+                        </select>
+                        <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
+                            @(_isAddingBarcode ? "Adding..." : "Add Barcode")
+                        </button>
+                    </div>
+                }
+            </div>
+        </section>
+
     </div>
 }
 
@@ -223,7 +220,6 @@ else
     private readonly AsyncState _save = new();
     private readonly AsyncState _delete = new();
     private bool _deleteOpen;
-    private string _tab = "info";
     private EditModel _edit = new();
 
     private string? _imageDataUrl;
@@ -237,6 +233,7 @@ else
     private BarcodeFormat _newBarcodeFormat = BarcodeFormat.Ean13;
     private bool _isAddingBarcode;
     private bool _isRemovingBarcode;
+    private bool _barcodesNeedRender;
 
     private string? _origName;
     private string? _origDescription;
@@ -256,8 +253,16 @@ else
         {
             _loadedGuid = EntityGuid;
             _loadedTemporal = TemporalAsOf;
-            _tab = "info";
             await LoadAsync();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_barcodesNeedRender)
+        {
+            _barcodesNeedRender = false;
+            await RenderBarcodeCanvasesAsync();
         }
     }
 
@@ -306,7 +311,10 @@ else
             {
                 await LoadImageAsync();
             }
+
+            await LoadBarcodesAsync();
         }, "Failed to load article.");
+
         StateHasChanged();
     }
 
@@ -328,23 +336,6 @@ else
         catch
         {
             // best-effort preview
-        }
-    }
-
-    private async Task SetTab(string tab)
-    {
-        _tab = tab;
-        if (tab == "barcodes" && _article is not null)
-        {
-            await LoadBarcodesAsync();
-            StateHasChanged();
-            await Task.Yield();
-            await RenderBarcodeCanvasesAsync();
-        }
-        else
-        {
-            _barcodes = null;
-            _barcodeError = null;
         }
     }
 
@@ -426,6 +417,8 @@ else
         try
         {
             _barcodes = await Engine.Articles.GetBarcodesAsync(_article!.Guid);
+            if (_barcodes.Count > 0)
+                _barcodesNeedRender = true;
         }
         catch (FargoSdkApiException ex)
         {
