@@ -23,6 +23,97 @@ else
     <div class="workspace-stack">
 
         <section class="workspace-panel">
+            <div class="article-media-row">
+
+                <div class="article-media-image-col">
+                    @if (!string.IsNullOrEmpty(_imageError))
+                    {
+                        <div class="error-banner">@_imageError</div>
+                    }
+                    @if (_imageDataUrl is not null)
+                    {
+                        <div class="article-image-container">
+                            <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
+                        </div>
+                    }
+                    else if (_article!.HasImage)
+                    {
+                        <p class="muted-text">Loading image...</p>
+                    }
+                    else
+                    {
+                        <div class="article-image-container article-image-container--empty"></div>
+                    }
+                    @if (!IsReadOnly)
+                    {
+                        <div class="article-image-actions">
+                            <label class="ghost-button article-image-upload-label @(_isUploading ? "disabled" : null)">
+                                @(_isUploading ? "Uploading..." : "Upload")
+                                <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
+                            </label>
+                            @if (_article!.HasImage)
+                            {
+                                <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
+                                    @(_isDeletingImage ? "Removing..." : "Remove")
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="article-media-barcodes-col">
+                    <h3>Barcodes</h3>
+                    <div class="barcode-section">
+                        @if (!string.IsNullOrEmpty(_barcodeError))
+                        {
+                            <div class="error-banner">@_barcodeError</div>
+                        }
+                        @if (_barcodes is null)
+                        {
+                            <p class="muted-text">Loading barcodes...</p>
+                        }
+                        else if (_barcodes.Count == 0)
+                        {
+                            <p class="muted-text">No barcodes added yet.</p>
+                        }
+                        else
+                        {
+                            <div class="barcode-list">
+                                @foreach (var barcode in _barcodes)
+                                {
+                                    <div class="barcode-card">
+                                        <div class="barcode-format-label">@barcode.Format</div>
+                                        <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
+                                        @if (!IsReadOnly)
+                                        {
+                                            <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@_isRemovingBarcode">Remove</button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if (!IsReadOnly)
+                        {
+                            <div class="barcode-add-form">
+                                <input type="text" class="text-field" @bind="_newBarcodeCode" placeholder="Barcode code" />
+                                <select class="select-field" @bind="_newBarcodeFormat">
+                                    @foreach (var fmt in Enum.GetValues<BarcodeFormat>())
+                                    {
+                                        <option value="@fmt">@fmt</option>
+                                    }
+                                </select>
+                                <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
+                                    @(_isAddingBarcode ? "Adding..." : "Add Barcode")
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="workspace-panel">
             <EditForm Model="_edit" OnValidSubmit="SaveAsync" class="@("editor-form" + (IsReadOnly ? " readonly-form" : ""))">
                 <DataAnnotationsValidator />
                 @if (!string.IsNullOrWhiteSpace(_save.ErrorMessage))
@@ -102,94 +193,6 @@ else
                     </div>
                 }
             </EditForm>
-        </section>
-
-        <section class="workspace-panel">
-            <h3>Image</h3>
-            <div class="article-image-section">
-                @if (!string.IsNullOrEmpty(_imageError))
-                {
-                    <div class="error-banner">@_imageError</div>
-                }
-                @if (_imageDataUrl is not null)
-                {
-                    <div class="article-image-container">
-                        <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
-                    </div>
-                }
-                else if (_article!.HasImage)
-                {
-                    <p class="muted-text">Loading image...</p>
-                }
-                else
-                {
-                    <p class="muted-text">No image has been uploaded yet.</p>
-                }
-                @if (!IsReadOnly)
-                {
-                    <div class="article-image-actions">
-                        <label class="ghost-button article-image-upload-label @(_isUploading ? "disabled" : null)">
-                            @(_isUploading ? "Uploading..." : "Upload Image")
-                            <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
-                        </label>
-                        @if (_article!.HasImage)
-                        {
-                            <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
-                                @(_isDeletingImage ? "Removing..." : "Remove")
-                            </button>
-                        }
-                    </div>
-                }
-            </div>
-        </section>
-
-        <section class="workspace-panel">
-            <h3>Barcodes</h3>
-            <div class="barcode-section">
-                @if (!string.IsNullOrEmpty(_barcodeError))
-                {
-                    <div class="error-banner">@_barcodeError</div>
-                }
-                @if (_barcodes is null)
-                {
-                    <p class="muted-text">Loading barcodes...</p>
-                }
-                else if (_barcodes.Count == 0)
-                {
-                    <p class="muted-text">No barcodes added yet.</p>
-                }
-                else
-                {
-                    <div class="barcode-list">
-                        @foreach (var barcode in _barcodes)
-                        {
-                            <div class="barcode-card">
-                                <div class="barcode-format-label">@barcode.Format</div>
-                                <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
-                                @if (!IsReadOnly)
-                                {
-                                    <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@_isRemovingBarcode">Remove</button>
-                                }
-                            </div>
-                        }
-                    </div>
-                }
-                @if (!IsReadOnly)
-                {
-                    <div class="barcode-add-form">
-                        <input type="text" class="text-field" @bind="_newBarcodeCode" placeholder="Barcode code" />
-                        <select class="select-field" @bind="_newBarcodeFormat">
-                            @foreach (var fmt in Enum.GetValues<BarcodeFormat>())
-                            {
-                                <option value="@fmt">@fmt</option>
-                            }
-                        </select>
-                        <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
-                            @(_isAddingBarcode ? "Adding..." : "Add Barcode")
-                        </button>
-                    </div>
-                }
-            </div>
         </section>
 
     </div>
