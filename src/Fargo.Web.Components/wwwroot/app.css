@@ -1009,20 +1009,21 @@ label {
 }
 
 .article-image-container {
-    width: 135px;
-    height: 135px;
-    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: var(--panel-2);
     border: 1px solid var(--border);
     border-radius: 6px;
-    overflow: hidden;
+    padding: 0.75rem;
+    min-height: 120px;
 }
 
 .article-image-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 4px;
 }
 
 .article-image-actions {
@@ -1096,28 +1097,6 @@ label {
 
 .barcode-add-form .select-field {
     flex: 0 1 140px;
-}
-
-/* Article media row: image + barcodes side by side */
-.article-media-row {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-}
-
-.article-media-image-col {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex-shrink: 0;
-}
-
-.article-media-barcodes-col {
-    flex: 1 1 0;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
 }
 
 .entity-list {
