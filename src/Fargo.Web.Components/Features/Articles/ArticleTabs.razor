@@ -45,6 +45,12 @@ else
                         <span>Description</span>
                         <InputTextArea @bind-Value="_edit.Description" class="text-area" disabled="@IsReadOnly" />
                     </label>
+                    <dl class="detail-list detail-list--inline">
+                        <div>
+                            <dt>Last edited by</dt>
+                            <dd><EditedByLabel EditedByGuid="_article!.EditedByGuid" /></dd>
+                        </div>
+                    </dl>
                 }
                 else if (_tab == "image")
                 {

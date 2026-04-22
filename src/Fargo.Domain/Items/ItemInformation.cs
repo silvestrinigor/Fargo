@@ -16,5 +16,6 @@ namespace Fargo.Domain.Items;
 /// </param>
 public sealed record ItemInformation(
     Guid Guid,
-    Guid ArticleGuid
+    Guid ArticleGuid,
+    Guid? EditedByGuid = null
 );

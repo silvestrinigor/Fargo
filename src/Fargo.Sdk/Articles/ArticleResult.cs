@@ -14,5 +14,6 @@ public sealed record ArticleResult(
     LengthDto? LengthX = null,
     LengthDto? LengthY = null,
     LengthDto? LengthZ = null,
-    bool HasImage = false
+    bool HasImage = false,
+    Guid? EditedByGuid = null
 );

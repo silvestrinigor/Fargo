@@ -132,7 +132,8 @@ public sealed class UserManager : IUserManager
             r.Permissions.Select(p => p.Action).ToList(),
             r.PartitionAccesses,
             client,
-            MakeDisposeCallback(r.Guid));
+            MakeDisposeCallback(r.Guid),
+            r.EditedByGuid);
         _tracked[user.Guid] = user;
         await hub.InvokeAsync("SubscribeToEntityAsync", user.Guid);
         return user;

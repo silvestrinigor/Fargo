@@ -41,5 +41,6 @@ public sealed record ArticleInformation(
     Length? LengthX = null,
     Length? LengthY = null,
     Length? LengthZ = null,
-    bool HasImage = false
+    bool HasImage = false,
+    Guid? EditedByGuid = null
 );

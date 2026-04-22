@@ -30,5 +30,6 @@ public sealed record PartitionInformation(
     Name Name,
     Description Description,
     Guid? ParentPartitionGuid,
-    bool IsActive
+    bool IsActive,
+    Guid? EditedByGuid = null
 );

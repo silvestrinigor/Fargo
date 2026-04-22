@@ -1,0 +1,52 @@
+@using Fargo.Sdk
+@using Fargo.Sdk.Users
+@inject IEngine Engine
+
+@if (EditedByGuid is null)
+{
+    <span class="muted-text">—</span>
+}
+else if (_loading)
+{
+    <span class="muted-text">Loading...</span>
+}
+else if (_nameid is not null)
+{
+    <span>@_nameid</span>
+}
+else
+{
+    <span class="muted-text" title="@EditedByGuid">@EditedByGuid.Value.ToString("N")[..8]…</span>
+}
+
+@code {
+    [Parameter, EditorRequired] public Guid? EditedByGuid { get; set; }
+
+    private bool _loading;
+    private string? _nameid;
+    private Guid? _loadedGuid;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedGuid == EditedByGuid) return;
+        _loadedGuid = EditedByGuid;
+        _nameid = null;
+
+        if (EditedByGuid is null) return;
+
+        _loading = true;
+        try
+        {
+            var user = await Engine.Users.GetAsync(EditedByGuid.Value);
+            _nameid = user.Nameid;
+        }
+        catch
+        {
+            // user not accessible — fall back to short GUID display
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -123,7 +123,8 @@ public sealed class PartitionManager : IPartitionManager
             r.ParentPartitionGuid,
             r.IsActive,
             client,
-            MakeDisposeCallback(r.Guid));
+            MakeDisposeCallback(r.Guid),
+            r.EditedByGuid);
         _tracked[partition.Guid] = partition;
         await hub.InvokeAsync("SubscribeToEntityAsync", partition.Guid);
         return partition;

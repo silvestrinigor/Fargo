@@ -49,5 +49,6 @@ public sealed record UserInformation(
     DateTimeOffset RequirePasswordChangeAt,
     bool IsActive,
     IReadOnlyCollection<Permission> Permissions,
-    IReadOnlyCollection<Guid> PartitionAccesses
+    IReadOnlyCollection<Guid> PartitionAccesses,
+    Guid? EditedByGuid = null
 );

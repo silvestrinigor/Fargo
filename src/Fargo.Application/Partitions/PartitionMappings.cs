@@ -53,7 +53,8 @@ public static class PartitionMappings
             p.Name,
             p.Description,
             p.ParentPartitionGuid,
-            p.IsActive
+            p.IsActive,
+            p.EditedByGuid
         );
 
     /// <summary>
@@ -82,7 +83,8 @@ public static class PartitionMappings
             p.Name,
             p.Description,
             p.ParentPartitionGuid,
-            p.IsActive
+            p.IsActive,
+            p.EditedByGuid
         );
     }
 }

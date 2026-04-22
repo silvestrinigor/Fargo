@@ -16,5 +16,6 @@ public sealed record PartitionResult(
     string Name,
     string Description,
     Guid? ParentPartitionGuid,
-    bool IsActive
+    bool IsActive,
+    Guid? EditedByGuid = null
 );
