@@ -198,8 +198,8 @@ public static class FargoProblemDetailsRegistry
     /// exception type; otherwise, <see langword="false"/>.
     /// </returns>
     public static bool TryGetDefinition(
-            Type exceptionType,
-            out ProblemDetailsDefinition definition)
+        Type exceptionType,
+        out ProblemDetailsDefinition definition)
     {
         return map.TryGetValue(exceptionType, out definition!);
     }

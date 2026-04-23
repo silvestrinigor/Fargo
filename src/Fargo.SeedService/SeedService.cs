@@ -22,9 +22,9 @@ namespace Fargo.SeedService;
 /// </para>
 /// </remarks>
 public sealed class SeedService(
-        IServiceProvider serviceProvider,
-        IHostApplicationLifetime hostApplicationLifetime
-        ) : BackgroundService
+    IServiceProvider serviceProvider,
+    IHostApplicationLifetime hostApplicationLifetime
+    ) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing seed operations.
@@ -60,8 +60,8 @@ public sealed class SeedService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var activity = activitySource.StartActivity(
-                "Seeding database", ActivityKind.Client
-                );
+            "Seeding database", ActivityKind.Client
+        );
 
         try
         {
