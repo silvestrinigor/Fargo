@@ -7,7 +7,7 @@ namespace Fargo.Api.Middlewares;
 /// <param name="Title">The problem title.</param>
 /// <param name="Type">The machine-readable problem type.</param>
 public sealed record ProblemDetailsDefinition(
-        int StatusCode,
-        string Title,
-        string Type
-        );
+    int StatusCode,
+    string Title,
+    string Type
+);

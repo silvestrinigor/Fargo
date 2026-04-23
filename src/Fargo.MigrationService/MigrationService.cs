@@ -17,9 +17,9 @@ namespace Fargo.MigrationService;
 /// </para>
 /// </remarks>
 public sealed class MigrationService(
-        IServiceProvider serviceProvider,
-        IHostApplicationLifetime hostApplicationLifetime
-        ) : BackgroundService
+    IServiceProvider serviceProvider,
+    IHostApplicationLifetime hostApplicationLifetime
+    ) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing migration operations.
@@ -57,8 +57,8 @@ public sealed class MigrationService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var activity = activitySource.StartActivity(
-                "Migrating database", ActivityKind.Client
-                );
+            "Migrating database", ActivityKind.Client
+        );
 
         try
         {
@@ -94,9 +94,8 @@ public sealed class MigrationService(
     /// so transient failures can be retried according to the configured provider behavior.
     /// </remarks>
     private static async Task RunMigrationAsync(
-            FargoDbContext dbContext,
-            CancellationToken cancellationToken
-            )
+        FargoDbContext dbContext,
+        CancellationToken cancellationToken)
     {
         var strategy = dbContext.Database.CreateExecutionStrategy();
 

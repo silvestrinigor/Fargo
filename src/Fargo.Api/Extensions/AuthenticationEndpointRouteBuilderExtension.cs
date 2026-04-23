@@ -1,6 +1,5 @@
 using Fargo.Application;
 using Fargo.Application.Authentication;
-
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
