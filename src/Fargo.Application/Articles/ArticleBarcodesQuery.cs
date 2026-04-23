@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Articles;
@@ -18,7 +17,7 @@ public sealed record ArticleBarcodesQuery(
 /// </summary>
 public sealed class ArticleBarcodesQueryHandler(
     ActorService actorService,
-    IArticleRepository articleRepository,
+    IArticleQueryRepository articleRepository,
     IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser
     ) : IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>

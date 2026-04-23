@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Users;
 
 namespace Fargo.Application.UserGroups;
 
@@ -73,7 +72,7 @@ public sealed record UserGroupSingleQuery(
 /// </remarks>
 public sealed class UserGroupSingleQueryHandler(
         ActorService actorService,
-    IUserGroupRepository userGroupRepository,
+    IUserGroupQueryRepository userGroupRepository,
     ICurrentUser currentUser
 ) : IQueryHandler<UserGroupSingleQuery, UserGroupInformation?>
 {

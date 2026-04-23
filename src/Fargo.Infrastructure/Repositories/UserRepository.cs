@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public sealed class UserRepository(FargoDbContext context) : IUserRepository
+public sealed class UserRepository(FargoDbContext context) : IUserRepository, IUserQueryRepository
 {
     private readonly DbSet<User> users = context.Users;
 

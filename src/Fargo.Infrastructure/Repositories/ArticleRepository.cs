@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public class ArticleRepository(FargoDbContext context) : IArticleRepository
+public class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
     private readonly DbSet<Article> articles = context.Articles;
 

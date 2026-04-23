@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Items;
 
 namespace Fargo.Application.Items;
 
@@ -73,7 +72,7 @@ public sealed record ItemSingleQuery(
 /// </remarks>
 public sealed class ItemSingleQueryHandler(
         ActorService actorService,
-        IItemRepository itemRepository,
+        IItemQueryRepository itemRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<ItemSingleQuery, ItemInformation?>
 {

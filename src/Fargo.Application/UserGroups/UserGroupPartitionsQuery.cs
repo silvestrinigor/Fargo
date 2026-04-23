@@ -1,7 +1,6 @@
 using Fargo.Application.Authentication;
+using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.Users;
 
 namespace Fargo.Application.UserGroups;
 
@@ -16,7 +15,7 @@ public sealed record UserGroupPartitionsQuery(Guid UserGroupGuid) : IQuery<IRead
 /// </summary>
 public sealed class UserGroupPartitionsQueryHandler(
     ActorService actorService,
-    IUserGroupRepository userGroupRepository,
+    IUserGroupQueryRepository userGroupRepository,
     ICurrentUser currentUser
 ) : IQueryHandler<UserGroupPartitionsQuery, IReadOnlyCollection<PartitionInformation>?>
 {

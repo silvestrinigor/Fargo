@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
 
 namespace Fargo.Application.Articles;
 
@@ -74,7 +73,7 @@ public sealed record ArticleManyQuery(
 /// </remarks>
 public sealed class ArticleManyQueryHandler(
         ActorService actorService,
-        IArticleRepository articleRepository,
+        IArticleQueryRepository articleRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>
 {
