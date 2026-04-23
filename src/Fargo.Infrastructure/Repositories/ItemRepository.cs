@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public sealed class ItemRepository(FargoDbContext context) : IItemRepository
+public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
     private readonly DbSet<Item> items = context.Items;
 

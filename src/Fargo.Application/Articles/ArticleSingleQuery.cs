@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
 
 namespace Fargo.Application.Articles;
 
@@ -73,7 +72,7 @@ public sealed record ArticleSingleQuery(
 /// </remarks>
 public sealed class ArticleSingleQueryHandler(
         ActorService actorService,
-        IArticleRepository articleRepository,
+        IArticleQueryRepository articleRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<ArticleSingleQuery, ArticleInformation?>
 {

@@ -108,12 +108,17 @@ public static class ServiceCollectionExtensions
         private void AddRepositories()
         {
             services.AddScoped<IArticleRepository, ArticleRepository>();
+            services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IBarcodeRepository, BarcodeRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
+            services.AddScoped<IItemQueryRepository, ItemRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserQueryRepository, UserRepository>();
             services.AddScoped<IUserGroupRepository, UserGroupRepository>();
+            services.AddScoped<IUserGroupQueryRepository, UserGroupRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IPartitionRepository, PartitionRepository>();
+            services.AddScoped<IPartitionQueryRepository, PartitionRepository>();
         }
 
         private void AddHandlers()
