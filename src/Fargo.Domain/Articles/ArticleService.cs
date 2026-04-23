@@ -8,9 +8,7 @@ namespace Fargo.Domain.Articles;
 /// coordination with repositories or other domain services, such as deletion
 /// constraints and partition-based visibility rules.
 /// </remarks>
-public class ArticleService(
-        IArticleRepository articleRepository
-        )
+public class ArticleService(IArticleRepository articleRepository)
 {
     /// <summary>
     /// Deletes the specified <paramref name="article"/> when domain rules allow it.
@@ -29,11 +27,9 @@ public class ArticleService(
     /// </exception>
     /// <remarks>
     /// An article cannot be deleted while there are existing
-    /// <see cref="Item"/> instances associated with it.
+    /// <see cref="Items.Item"/> instances associated with it.
     /// </remarks>
-    public async Task DeleteArticle(
-            Article article,
-            CancellationToken cancellationToken = default)
+    public async Task DeleteArticle(Article article, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(article);
 

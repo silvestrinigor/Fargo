@@ -33,6 +33,10 @@ namespace Fargo.Domain.Articles;
 /// <param name="HasImage">
 /// Indicates whether the article has an image stored.
 /// </param>
+/// <param name="EditedByGuid">
+/// The unique identifier of the actor who last edited the article,
+/// or <see langword="null"/> if not provided.
+/// </param>
 public sealed record ArticleInformation(
     Guid Guid,
     Name Name,
