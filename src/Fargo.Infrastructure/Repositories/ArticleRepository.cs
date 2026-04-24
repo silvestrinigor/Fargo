@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public class ArticleRepository(FargoDbContext context) : IArticleRepository
+public class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
     private readonly DbSet<Article> articles = context.Articles;
 
@@ -131,6 +131,41 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository
         return await query
             .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
             .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .OrderBy(article => article.Guid)
+            .WithPagination(pagination)
+            .Select(ArticleMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<ArticleInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(article => article.Guid == entityGuid)
+            .Where(article => !article.Partitions.Any()
+                || article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(ArticleMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await articles
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
+            .Where(article => !article.Partitions.Any()
+                || article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
             .Select(ArticleMappings.InformationProjection)

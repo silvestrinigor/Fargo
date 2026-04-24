@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepository
+public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepository, IPartitionQueryRepository
 {
     private readonly DbSet<Partition> partitions = context.Partitions;
 

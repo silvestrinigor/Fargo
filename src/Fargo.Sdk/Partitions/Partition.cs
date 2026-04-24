@@ -14,13 +14,15 @@ public sealed class Partition : IAsyncDisposable
         Guid? parentPartitionGuid,
         bool isActive,
         IPartitionClient client,
-        Func<ValueTask>? onDispose = null)
+        Func<ValueTask>? onDispose = null,
+        Guid? editedByGuid = null)
     {
         Guid = guid;
         _name = name;
         _description = description;
         ParentPartitionGuid = parentPartitionGuid;
         _isActive = isActive;
+        EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -30,6 +32,9 @@ public sealed class Partition : IAsyncDisposable
 
     /// <summary>The unique identifier of the partition.</summary>
     public Guid Guid { get; }
+
+    /// <summary>The GUID of the user who last edited this partition, or <see langword="null"/> if never edited.</summary>
+    public Guid? EditedByGuid { get; }
 
     private string _name;
     private bool _nameChanged;

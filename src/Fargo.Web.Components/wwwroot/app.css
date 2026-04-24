@@ -1163,3 +1163,55 @@ label {
     font-size: 0.875rem;
     cursor: pointer;
 }
+
+.article-page {
+    padding: 2rem;
+    display: grid;
+    gap: 1rem;
+    max-width: 640px;
+    margin-inline: auto;
+    width: 100%;
+}
+
+.article-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.article-page-breadcrumb a {
+    color: var(--text-muted, #888);
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.article-page-breadcrumb a:hover {
+    color: var(--text);
+}
+
+.article-page-guid {
+    font-family: monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+}
+
+.temporal-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.temporal-bar label {
+    flex: 1;
+    min-width: 200px;
+}
+
+.temporal-banner {
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    background: rgba(255, 190, 60, 0.08);
+    border: 1px solid rgba(255, 190, 60, 0.3);
+    color: #ffd580;
+    font-size: 0.875rem;
+}

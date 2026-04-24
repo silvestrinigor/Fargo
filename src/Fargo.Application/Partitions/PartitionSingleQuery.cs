@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Partitions;
 
@@ -72,7 +71,7 @@ public sealed record PartitionSingleQuery(
 /// </remarks>
 public sealed class PartitionSingleQueryHandler(
         ActorService actorService,
-        IPartitionRepository partitionRepository,
+        IPartitionQueryRepository partitionRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<PartitionSingleQuery, PartitionInformation?>
 {

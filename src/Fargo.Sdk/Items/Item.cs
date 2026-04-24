@@ -8,10 +8,11 @@ namespace Fargo.Sdk.Items;
 /// </summary>
 public sealed class Item : IAsyncDisposable
 {
-    internal Item(Guid guid, Guid articleGuid, IItemClient client, Func<ValueTask>? onDispose = null)
+    internal Item(Guid guid, Guid articleGuid, IItemClient client, Func<ValueTask>? onDispose = null, Guid? editedByGuid = null)
     {
         Guid = guid;
         ArticleGuid = articleGuid;
+        EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -24,6 +25,9 @@ public sealed class Item : IAsyncDisposable
 
     /// <summary>The unique identifier of the article this item is an instance of.</summary>
     public Guid ArticleGuid { get; }
+
+    /// <summary>The GUID of the user who last edited this item, or <see langword="null"/> if never edited.</summary>
+    public Guid? EditedByGuid { get; }
 
     /// <summary>Raised when this item is updated by any authenticated client.</summary>
     public event EventHandler<ItemUpdatedEventArgs>? Updated;

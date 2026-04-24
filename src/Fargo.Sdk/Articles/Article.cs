@@ -9,7 +9,7 @@ namespace Fargo.Sdk.Articles;
 public sealed class Article : IAsyncDisposable
 {
     internal Article(Guid guid, string name, string description, MassDto? mass, IArticleClient client, Func<ValueTask>? onDispose = null,
-        LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null, bool hasImage = false)
+        LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null, bool hasImage = false, Guid? editedByGuid = null)
     {
         Guid = guid;
         _name = name;
@@ -19,6 +19,7 @@ public sealed class Article : IAsyncDisposable
         _lengthY = lengthY;
         _lengthZ = lengthZ;
         _hasImage = hasImage;
+        EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
     }
@@ -28,6 +29,9 @@ public sealed class Article : IAsyncDisposable
 
     /// <summary>The unique identifier of the article.</summary>
     public Guid Guid { get; }
+
+    /// <summary>The GUID of the user who last edited this article, or <see langword="null"/> if never edited.</summary>
+    public Guid? EditedByGuid { get; }
 
     private string _name;
 

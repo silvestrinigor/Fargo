@@ -17,8 +17,8 @@ namespace Fargo.Domain.Items;
 ///
 /// Although the item is related to an article, access to the item is not
 /// determined by the article's partitions. Instead, a user may access the item
-/// only if they have access to at least one partition associated directly
-/// with the item, subject to additional authorization rules.
+/// if the item has no partition (public), or if they have access to at least
+/// one partition associated directly with the item.
 /// </remarks>
 public class Item : ModifiedEntity, IPartitionedEntity
 {

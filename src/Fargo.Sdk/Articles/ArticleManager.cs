@@ -200,7 +200,7 @@ public sealed class ArticleManager : IArticleManager
 
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, r.Mass, client, MakeDisposeCallback(r.Guid), r.LengthX, r.LengthY, r.LengthZ, r.HasImage);
+        var article = new Article(r.Guid, r.Name, r.Description, r.Mass, client, MakeDisposeCallback(r.Guid), r.LengthX, r.LengthY, r.LengthZ, r.HasImage, r.EditedByGuid);
         _tracked[article.Guid] = article;
         await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
         return article;

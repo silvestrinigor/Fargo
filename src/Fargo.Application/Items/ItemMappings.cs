@@ -46,7 +46,8 @@ public static class ItemMappings
     public static readonly Expression<Func<Item, ItemInformation>> InformationProjection =
         i => new ItemInformation(
             i.Guid,
-            i.ArticleGuid
+            i.ArticleGuid,
+            i.EditedByGuid
         );
 
     /// <summary>
@@ -72,7 +73,8 @@ public static class ItemMappings
 
         return new ItemInformation(
             i.Guid,
-            i.ArticleGuid
+            i.ArticleGuid,
+            i.EditedByGuid
         );
     }
 }

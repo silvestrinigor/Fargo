@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public sealed class ItemRepository(FargoDbContext context) : IItemRepository
+public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
     private readonly DbSet<Item> items = context.Items;
 
@@ -146,7 +146,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
 
         return await query
             .Where(item => item.Guid == entityGuid)
-            .Where(item => item.Article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Where(item => item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
             .Select(ItemMappings.InformationProjection)
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -166,7 +166,48 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
         IQueryable<Item> query = items
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Where(item => item.Article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+            .Where(item => item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+
+        if (articleGuid.HasValue)
+        {
+            query = query.Where(item => item.Article.Guid == articleGuid.Value);
+        }
+
+        return await query
+            .OrderBy(item => item.Guid)
+            .WithPagination(pagination)
+            .Select(ItemMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<ItemInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(item => item.Guid == entityGuid)
+            .Where(item => !item.Partitions.Any()
+                || item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(ItemMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<ItemInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Item> query = items
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(item => !item.Partitions.Any()
+                || item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
 
         if (articleGuid.HasValue)
         {
@@ -195,7 +236,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository
         IQueryable<Item> query = items
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Where(item => item.Article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+            .Where(item => item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
 
         if (articleGuid.HasValue)
         {

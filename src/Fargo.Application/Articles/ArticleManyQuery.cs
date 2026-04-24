@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
 
 namespace Fargo.Application.Articles;
 
@@ -48,8 +47,8 @@ public sealed record ArticleManyQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access articles that belong to at least one
-/// partition they have access to.
+/// Regular actors can access articles that belong to at least one
+/// partition they have access to, or articles with no partition (public).
 /// </para>
 ///
 /// <para>
@@ -74,7 +73,7 @@ public sealed record ArticleManyQuery(
 /// </remarks>
 public sealed class ArticleManyQueryHandler(
         ActorService actorService,
-        IArticleRepository articleRepository,
+        IArticleQueryRepository articleRepository,
         ICurrentUser currentUser
         ) : IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>
 {
@@ -160,13 +159,20 @@ public sealed class ArticleManyQueryHandler(
                 return [];
             }
 
-            var partitions = query.PartitionGuid.HasValue
-                ? (IReadOnlyCollection<Guid>)[query.PartitionGuid.Value]
-                : actor.PartitionAccesses;
+            if (query.PartitionGuid.HasValue)
+            {
+                return await articleRepository.GetManyInfoInPartitions(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        [query.PartitionGuid.Value],
+                        query.AsOfDateTime,
+                        query.Search,
+                        cancellationToken
+                        );
+            }
 
-            return await articleRepository.GetManyInfoInPartitions(
+            return await articleRepository.GetManyInfoInPartitionsOrPublic(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    partitions,
+                    actor.PartitionAccesses,
                     query.AsOfDateTime,
                     query.Search,
                     cancellationToken

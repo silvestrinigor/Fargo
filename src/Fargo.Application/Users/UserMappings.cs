@@ -71,7 +71,8 @@ public static class UserMappings
             u.RequirePasswordChangeAt,
             u.IsActive,
             u.Permissions.Select(p => new Permission(p.Guid, p.Action)).ToList(),
-            u.PartitionAccesses.Select(p => p.Guid).ToList()
+            u.PartitionAccesses.Select(p => p.Guid).ToList(),
+            u.EditedByGuid
         );
 
     /// <summary>
@@ -111,7 +112,8 @@ public static class UserMappings
             u.RequirePasswordChangeAt,
             u.IsActive,
             [.. u.Permissions.Select(p => new Permission(p.Guid, p.Action))],
-            [.. u.PartitionAccesses.Select(p => p.Guid)]
+            [.. u.PartitionAccesses.Select(p => p.Guid)],
+            u.EditedByGuid
         );
     }
 }

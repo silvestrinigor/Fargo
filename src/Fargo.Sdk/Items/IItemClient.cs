@@ -52,7 +52,8 @@ public interface IItemClient
     /// <param name="articleGuid">The unique identifier of the article this item is an instance of.</param>
     /// <param name="firstPartition">
     /// The partition to associate with the item on creation.
-    /// When <see langword="null"/>, the global partition is used.
+    /// When <see langword="null"/>, the item is created without a partition
+    /// and is publicly accessible to all authenticated users.
     /// </param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A response containing the <see cref="Guid"/> of the newly created item.</returns>

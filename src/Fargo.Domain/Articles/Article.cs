@@ -45,19 +45,6 @@ public class Article : ModifiedEntity, IPartitionedEntity
     } = Description.Empty;
 
     /// <summary>
-    /// Gets the partitions associated with the article.
-    /// </summary>
-    /// <remarks>
-    /// These partitions define the partition scope of the article and are
-    /// used in partition-based access evaluation.
-    /// </remarks>
-    public PartitionCollection Partitions
-    {
-        get;
-        init;
-    } = [];
-
-    /// <summary>
     /// Gets or sets the physical mass of the article.
     /// </summary>
     public Mass? Mass { get; set; }
@@ -77,10 +64,6 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// </summary>
     public Length? LengthZ { get; set; }
 
-    /// <summary>
-    /// Gets the barcodes associated with the article.
-    /// </summary>
-    public BarcodeCollection Barcodes { get; init; } = [];
 
     // TODO: I think insted of storing a string key, should create a table in the database for that that will contain the image information and how to get the image.
     /// <summary>
@@ -90,6 +73,24 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// allowing transparent migration between local disk, S3, or other backends.
     /// </summary>
     public string? ImageKey { get; set; }
+
+    /// <summary>
+    /// Gets the barcodes associated with the article.
+    /// </summary>
+    public BarcodeCollection Barcodes { get; init; } = [];
+
+    /// <summary>
+    /// Gets the partitions associated with the article.
+    /// </summary>
+    /// <remarks>
+    /// These partitions define the partition scope of the article and are
+    /// used in partition-based access evaluation.
+    /// </remarks>
+    public PartitionCollection Partitions
+    {
+        get;
+        init;
+    } = [];
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

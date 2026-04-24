@@ -1,7 +1,6 @@
 using Fargo.Application.Authentication;
+using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Articles;
 
@@ -16,7 +15,7 @@ public sealed record ArticlePartitionsQuery(Guid ArticleGuid) : IQuery<IReadOnly
 /// </summary>
 public sealed class ArticlePartitionsQueryHandler(
     ActorService actorService,
-    IArticleRepository articleRepository,
+    IArticleQueryRepository articleRepository,
     ICurrentUser currentUser
 ) : IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?>
 {

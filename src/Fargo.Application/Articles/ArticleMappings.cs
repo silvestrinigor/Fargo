@@ -52,7 +52,8 @@ public static class ArticleMappings
             a.LengthX,
             a.LengthY,
             a.LengthZ,
-            a.ImageKey != null
+            a.ImageKey != null,
+            a.EditedByGuid
         );
 
     /// <summary>
@@ -84,7 +85,8 @@ public static class ArticleMappings
             a.LengthX,
             a.LengthY,
             a.LengthZ,
-            a.ImageKey != null
+            a.ImageKey != null,
+            a.EditedByGuid
         );
     }
 }

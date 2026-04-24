@@ -7,5 +7,6 @@ namespace Fargo.Sdk.Items;
 /// <param name="ArticleGuid">The unique identifier of the article this item is an instance of.</param>
 public sealed record ItemResult(
     Guid Guid,
-    Guid ArticleGuid
+    Guid ArticleGuid,
+    Guid? EditedByGuid = null
 );

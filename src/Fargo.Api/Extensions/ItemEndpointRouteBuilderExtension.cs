@@ -1,10 +1,8 @@
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Items;
-
+using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

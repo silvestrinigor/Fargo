@@ -31,8 +31,7 @@ public sealed record UserGroupCreateCommand(
 /// <list type="bullet">
 /// <item><description>Resolving and authorizing the current actor</description></item>
 /// <item><description>Validating permission to create user groups</description></item>
-/// <item><description>Resolving the target partition (or falling back to global)</description></item>
-/// <item><description>Validating access to the target partition</description></item>
+/// <item><description>Resolving and validating access to the target partition, when provided</description></item>
 /// <item><description>Applying domain validation rules via <see cref="UserGroupService"/></description></item>
 /// <item><description>Assigning permissions to the group</description></item>
 /// <item><description>Persisting the new user group</description></item>
@@ -41,10 +40,11 @@ public sealed record UserGroupCreateCommand(
 /// Partition behavior:
 /// <list type="bullet">
 /// <item><description>
-/// If <c>FirstPartition</c> is not provided, the group is assigned to the global partition
+/// If <c>FirstPartition</c> is not provided, the group is created without any partition
+/// and is publicly accessible to all authenticated actors
 /// </description></item>
 /// <item><description>
-/// The actor must have access to the selected partition
+/// When <c>FirstPartition</c> is provided, the actor must have access to the selected partition
 /// </description></item>
 /// </list>
 ///
@@ -84,18 +84,18 @@ public sealed class UserGroupCreateCommandHandler(
     /// Thrown when the current user cannot be resolved or is not authorized.
     /// </exception>
     /// <exception cref="PartitionNotFoundFargoApplicationException">
-    /// Thrown when the specified or resolved partition does not exist.
+    /// Thrown when the specified partition does not exist.
+    /// Only applicable when <c>firstPartition</c> is provided.
     /// </exception>
     /// <exception cref="UserNotAuthorizedFargoApplicationException">
-    /// Thrown when the user does not have permission to create items.
+    /// Thrown when the user does not have permission to create user groups.
     /// </exception>
     /// <remarks>
     /// Execution flow:
     /// <list type="number">
     /// <item><description>Resolve the current actor</description></item>
     /// <item><description>Validate <see cref="ActionType.CreateUserGroup"/> permission</description></item>
-    /// <item><description>Resolve the target partition (or fallback to global)</description></item>
-    /// <item><description>Validate partition access</description></item>
+    /// <item><description>Resolve and validate access to the target partition, when provided</description></item>
     /// <item><description>Create the user group entity</description></item>
     /// <item><description>Validate domain rules via <see cref="UserGroupService"/></description></item>
     /// <item><description>Assign permissions to the group</description></item>
@@ -111,11 +111,14 @@ public sealed class UserGroupCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
-        var partitionGuid = command.UserGroup.FirstPartition ?? PartitionService.GlobalPartitionGuid;
+        Partition? partition = null;
 
-        var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+        if (command.UserGroup.FirstPartition.HasValue)
+        {
+            partition = await partitionRepository.GetFoundByGuid(command.UserGroup.FirstPartition.Value, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+        }
 
         var nameid = ValidateNameid(command.UserGroup.Nameid);
 
@@ -125,7 +128,10 @@ public sealed class UserGroupCreateCommandHandler(
             Description = command.UserGroup.Description ?? Description.Empty
         };
 
-        userGroup.Partitions.Add(partition);
+        if (partition is not null)
+        {
+            userGroup.Partitions.Add(partition);
+        }
 
         await userGroupService.ValidateUserGroupCreate(userGroup, cancellationToken);
 
@@ -138,7 +144,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserGroupCreated(userGroup.Guid, userGroup.Nameid, [partition.Guid], cancellationToken);
+        await eventPublisher.PublishUserGroupCreated(userGroup.Guid, userGroup.Nameid, partition is null ? [] : [partition.Guid], cancellationToken);
 
         return userGroup.Guid;
     }

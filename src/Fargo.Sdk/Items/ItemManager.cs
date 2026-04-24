@@ -108,7 +108,7 @@ public sealed class ItemManager : IItemManager
 
     private async Task<Item> ToEntityAsync(ItemResult r)
     {
-        var item = new Item(r.Guid, r.ArticleGuid, client, MakeDisposeCallback(r.Guid));
+        var item = new Item(r.Guid, r.ArticleGuid, client, MakeDisposeCallback(r.Guid), r.EditedByGuid);
         _tracked[item.Guid] = item;
         await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
         return item;

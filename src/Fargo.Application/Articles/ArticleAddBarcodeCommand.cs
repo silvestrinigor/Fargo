@@ -38,7 +38,10 @@ public sealed class ArticleAddBarcodeCommandHandler(
     /// <exception cref="UnauthorizedAccessFargoApplicationException">
     /// Thrown when the current actor is not authenticated or inactive.
     /// </exception>
-    /// <exception cref="UserNotAuthorizedFargoApplicationException">
+    /// <exception cref="Partitions.PartitionedEntityAccessDeniedFargoApplicationException">
+    /// Thrown when the actor does not have access to the partition containing the article.
+    /// </exception>
+    /// <exception cref="Users.UserNotAuthorizedFargoApplicationException">
     /// Thrown when the actor does not have <see cref="ActionType.AddBarcode"/> permission.
     /// </exception>
     /// <exception cref="ArticleNotFoundFargoApplicationException">
@@ -52,8 +55,7 @@ public sealed class ArticleAddBarcodeCommandHandler(
     /// </exception>
     public async Task<Guid> Handle(
         ArticleAddBarcodeCommand command,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -61,8 +63,9 @@ public sealed class ArticleAddBarcodeCommandHandler(
 
         actor.ValidateHasPermission(ActionType.AddBarcode);
 
-        // TODO: need to validate if user has access to the article
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
 
         if (article.Barcodes.Any(b => b.Format == command.Barcode.Format))
         {

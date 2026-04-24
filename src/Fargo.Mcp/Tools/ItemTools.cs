@@ -50,7 +50,7 @@ public sealed class ItemTools(IEngine engine)
     [McpServerTool(Name = "create_item"), Description("Creates a new item as an instance of the specified article.")]
     public async Task<string> CreateItem(
         [Description("The GUID of the article this item is an instance of.")] string articleGuid,
-        [Description("GUID of the partition to associate with the item. Omit to use the global partition.")] string? partitionGuid = null)
+        [Description("GUID of the partition to associate with the item. Omit to create a public item with no partition.")] string? partitionGuid = null)
     {
         try
         {

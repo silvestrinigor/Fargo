@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Articles;
@@ -18,7 +17,7 @@ public sealed record ArticleBarcodesQuery(
 /// </summary>
 public sealed class ArticleBarcodesQueryHandler(
     ActorService actorService,
-    IArticleRepository articleRepository,
+    IArticleQueryRepository articleRepository,
     IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser
     ) : IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>
@@ -37,8 +36,7 @@ public sealed class ArticleBarcodesQueryHandler(
     /// </exception>
     public async Task<IReadOnlyCollection<BarcodeInformation>?> Handle(
         ArticleBarcodesQuery query,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
 
@@ -46,13 +44,14 @@ public sealed class ArticleBarcodesQueryHandler(
 
         bool articleExists;
 
+        // TODO: Implement in the repository a function that returns if the article exists insted of return all the information.
         if (actor.IsAdmin || actor.IsSystem)
         {
             articleExists = await articleRepository.GetInfoByGuid(query.ArticleGuid, null, cancellationToken) is not null;
         }
         else
         {
-            articleExists = await articleRepository.GetInfoByGuidInPartitions(
+            articleExists = await articleRepository.GetInfoByGuidPublicOrInPartitions(
                 query.ArticleGuid,
                 actor.PartitionAccesses,
                 null,
@@ -66,8 +65,7 @@ public sealed class ArticleBarcodesQueryHandler(
 
         var barcodes = await barcodeRepository.GetByArticleGuid(query.ArticleGuid, cancellationToken);
 
-        return barcodes
-            .Select(b => new BarcodeInformation(b.Guid, b.ArticleGuid, b.Code, b.Format))
-            .ToList();
+        // TODO: Implement a BarcodeMapping like ArticleMapping.
+        return [.. barcodes.Select(b => new BarcodeInformation(b.Guid, b.ArticleGuid, b.Code, b.Format))];
     }
 }

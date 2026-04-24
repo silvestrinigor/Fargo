@@ -20,8 +20,8 @@ namespace Fargo.Application.Articles;
 /// respecting authorization and partition-based access rules.
 /// </remarks>
 public sealed record ArticleCreateCommand(
-        ArticleCreateModel Article
-        ) : ICommand<Guid>;
+    ArticleCreateModel Article
+    ) : ICommand<Guid>;
 
 /// <summary>
 /// Handles <see cref="ArticleCreateCommand"/>.
@@ -30,21 +30,21 @@ public sealed record ArticleCreateCommand(
 /// This handler is responsible for:
 /// <list type="bullet">
 /// <item><description>Validating the current user's authorization.</description></item>
-/// <item><description>Ensuring the target partition exists and is accessible.</description></item>
-/// <item><description>Enforcing that every article belongs to at least one partition.</description></item>
+/// <item><description>Ensuring the target partition exists and is accessible, when provided.</description></item>
+/// <item><description>Creating the article with an optional initial partition assignment.</description></item>
 /// </list>
 ///
-/// The article is always associated with a valid partition to guarantee
-/// proper data isolation and access control within the system.
+/// When no partition is specified, the article is created without any partition and is
+/// publicly accessible to all authenticated actors.
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
-        ActorService actorService,
-        IArticleRepository articleRepository,
-        IPartitionRepository partitionRepository,
-        ICurrentUser currentUser,
-        IUnitOfWork unitOfWork,
-        IFargoEventPublisher eventPublisher
-        ) : ICommandHandler<ArticleCreateCommand, Guid>
+    ActorService actorService,
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    ICurrentUser currentUser,
+    IUnitOfWork unitOfWork,
+    IFargoEventPublisher eventPublisher
+    ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     /// <summary>
     /// Executes the command to create a new article.
@@ -61,21 +61,22 @@ public sealed class ArticleCreateCommandHandler(
     /// <exception cref="UnauthorizedAccessFargoApplicationException">
     /// Thrown when the current user is not authenticated or inactive.
     /// </exception>
-    /// <exception cref="UserNotAuthorizedFargoApplicationException">
+    /// <exception cref="Users.UserNotAuthorizedFargoApplicationException">
     /// Thrown when the user does not have permission to create articles.
     /// </exception>
     /// <exception cref="PartitionNotFoundFargoApplicationException">
     /// Thrown when the specified partition does not exist.
+    /// Only applicable when <c>firstPartition</c> is provided.
     /// </exception>
     /// <exception cref="PartitionAccessDeniedFargoApplicationException">
     /// Thrown when the current user does not have access to the specified partition.
+    /// Only applicable when <c>firstPartition</c> is provided.
     /// </exception>
     /// <remarks>
-    /// The article is created in the specified partition. If no partition is
-    /// explicitly provided, the global partition is used as a fallback.
-    ///
-    /// This ensures that every article is always associated with at least one
-    /// partition, enforcing partition-based isolation and access control.
+    /// When <c>firstPartition</c> is provided, the article is created in that partition
+    /// and the actor must have access to it. When <c>firstPartition</c> is
+    /// <see langword="null"/>, the article is created without any partition and is
+    /// publicly accessible to all authenticated actors.
     /// </remarks>
     public async Task<Guid> Handle(
             ArticleCreateCommand command,
@@ -86,11 +87,14 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var partitionGuid = command.Article.FirstPartition ?? PartitionService.GlobalPartitionGuid;
+        Partition? partition = null;
 
-        var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+        if (command.Article.FirstPartition.HasValue)
+        {
+            partition = await partitionRepository.GetFoundByGuid(command.Article.FirstPartition.Value, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+        }
 
         var article = new Article
         {
@@ -102,13 +106,16 @@ public sealed class ArticleCreateCommandHandler(
             LengthZ = command.Article.LengthZ
         };
 
-        article.Partitions.Add(partition);
+        if (partition is not null)
+        {
+            article.Partitions.Add(partition);
+        }
 
         articleRepository.Add(article);
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishArticleCreated(article.Guid, [partition.Guid], cancellationToken);
+        await eventPublisher.PublishArticleCreated(article.Guid, partition is null ? [] : [partition.Guid], cancellationToken);
 
         return article.Guid;
     }

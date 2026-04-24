@@ -25,6 +25,7 @@ public sealed record ArticleImageQuery(
 public sealed class ArticleImageQueryHandler(
         ActorService actorService,
         IArticleRepository articleRepository,
+        IArticleQueryRepository articleQueryRepository,
         IArticleImageStorage imageStorage,
         ICurrentUser currentUser
         ) : IQueryHandler<ArticleImageQuery, ArticleImageResult?>
@@ -55,11 +56,11 @@ public sealed class ArticleImageQueryHandler(
 
         if (actor.IsAdmin || actor.IsSystem)
         {
-            info = await articleRepository.GetInfoByGuid(query.ArticleGuid, null, cancellationToken);
+            info = await articleQueryRepository.GetInfoByGuid(query.ArticleGuid, null, cancellationToken);
         }
         else
         {
-            info = await articleRepository.GetInfoByGuidInPartitions(
+            info = await articleQueryRepository.GetInfoByGuidInPartitions(
                 query.ArticleGuid,
                 actor.PartitionAccesses,
                 null,

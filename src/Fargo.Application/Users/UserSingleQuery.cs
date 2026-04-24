@@ -1,6 +1,5 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Users;
 
 namespace Fargo.Application.Users;
 
@@ -43,8 +42,8 @@ public sealed record UserSingleQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access the user if it belongs to at least one
-/// partition they have access to.
+/// Regular actors can access the user if it belongs to at least one
+/// partition they have access to, or if the user has no partition (public).
 /// </para>
 ///
 /// <para>
@@ -73,7 +72,7 @@ public sealed record UserSingleQuery(
 /// </remarks>
 public sealed class UserSingleQueryHandler(
         ActorService actorService,
-    IUserRepository userRepository,
+    IUserQueryRepository userRepository,
     ICurrentUser currentUser
 ) : IQueryHandler<UserSingleQuery, UserInformation?>
 {
@@ -125,7 +124,7 @@ public sealed class UserSingleQueryHandler(
         }
         else
         {
-            var user = await userRepository.GetInfoByGuidInPartitions(
+            var user = await userRepository.GetInfoByGuidPublicOrInPartitions(
                     query.UserGuid,
                     actor.PartitionAccesses,
                     query.AsOfDateTime,

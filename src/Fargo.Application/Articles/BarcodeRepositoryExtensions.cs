@@ -21,8 +21,7 @@ public static class BarcodeRepositoryExtensions
         /// </exception>
         public async Task<Barcode> GetFoundByGuid(
             Guid barcodeGuid,
-            CancellationToken cancellationToken = default
-        )
+            CancellationToken cancellationToken = default)
         {
             var barcode = await repository.GetByGuid(barcodeGuid, cancellationToken)
                 ?? throw new BarcodeNotFoundFargoApplicationException(barcodeGuid);

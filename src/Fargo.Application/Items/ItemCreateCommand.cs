@@ -41,10 +41,11 @@ public sealed record ItemCreateCommand(
 /// Partition behavior:
 /// <list type="bullet">
 /// <item><description>
-/// If <c>FirstPartition</c> is not provided, the item is assigned to the global partition
+/// If <c>FirstPartition</c> is not provided, the item is created without any partition
+/// and is publicly accessible to all authenticated actors
 /// </description></item>
 /// <item><description>
-/// The actor must have access to the selected partition
+/// When <c>FirstPartition</c> is provided, the actor must have access to the selected partition
 /// </description></item>
 /// </list>
 /// </remarks>
@@ -81,8 +82,7 @@ public sealed class ItemCreateCommandHandler(
     /// <list type="number">
     /// <item><description>Resolve the current actor</description></item>
     /// <item><description>Validate <see cref="ActionType.CreateItem"/> permission</description></item>
-    /// <item><description>Resolve the target partition (or fallback to global)</description></item>
-    /// <item><description>Validate partition access</description></item>
+    /// <item><description>Resolve and validate access to the target partition, when provided</description></item>
     /// <item><description>Resolve the associated article</description></item>
     /// <item><description>Create and persist the item</description></item>
     /// </list>
@@ -96,11 +96,14 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateItem);
 
-        var partitionGuid = command.Item.FirstPartition ?? PartitionService.GlobalPartitionGuid;
+        Partition? partition = null;
 
-        var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+        if (command.Item.FirstPartition.HasValue)
+        {
+            partition = await partitionRepository.GetFoundByGuid(command.Item.FirstPartition.Value, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+        }
 
         var article = await articleRepository.GetFoundByGuid(command.Item.ArticleGuid, cancellationToken);
 
@@ -109,13 +112,16 @@ public sealed class ItemCreateCommandHandler(
             Article = article
         };
 
-        item.Partitions.Add(partition);
+        if (partition is not null)
+        {
+            item.Partitions.Add(partition);
+        }
 
         itemRepository.Add(item);
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishItemCreated(item.Guid, article.Guid, [partition.Guid], cancellationToken);
+        await eventPublisher.PublishItemCreated(item.Guid, article.Guid, partition is null ? [] : [partition.Guid], cancellationToken);
 
         return item.Guid;
     }

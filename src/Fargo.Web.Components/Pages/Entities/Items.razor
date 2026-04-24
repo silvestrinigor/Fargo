@@ -58,6 +58,10 @@
                             <dt>Article</dt>
                             <dd>@_item.ArticleGuid</dd>
                         </div>
+                        <div>
+                            <dt>Last edited by</dt>
+                            <dd><EditedByLabel EditedByGuid="_item.EditedByGuid" /></dd>
+                        </div>
                     </dl>
                     <div class="dialog-actions">
                         <button type="button" class="ghost-button danger" @onclick="OpenDelete">Delete</button>

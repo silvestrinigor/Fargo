@@ -58,7 +58,8 @@ public interface IUserClient
     /// </param>
     /// <param name="firstPartition">
     /// The partition to associate with the user on creation.
-    /// When <see langword="null"/>, the global partition is used.
+    /// When <see langword="null"/>, the user is created without a partition
+    /// and is publicly accessible to all authenticated users.
     /// </param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A response containing the <see cref="Guid"/> of the newly created user.</returns>
