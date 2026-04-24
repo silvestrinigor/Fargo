@@ -36,8 +36,7 @@ public sealed class ArticleBarcodesQueryHandler(
     /// </exception>
     public async Task<IReadOnlyCollection<BarcodeInformation>?> Handle(
         ArticleBarcodesQuery query,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
 
@@ -45,6 +44,7 @@ public sealed class ArticleBarcodesQueryHandler(
 
         bool articleExists;
 
+        // TODO: Implement in the repository a function that returns if the article exists insted of return all the information.
         if (actor.IsAdmin || actor.IsSystem)
         {
             articleExists = await articleRepository.GetInfoByGuid(query.ArticleGuid, null, cancellationToken) is not null;
@@ -65,8 +65,7 @@ public sealed class ArticleBarcodesQueryHandler(
 
         var barcodes = await barcodeRepository.GetByArticleGuid(query.ArticleGuid, cancellationToken);
 
-        return barcodes
-            .Select(b => new BarcodeInformation(b.Guid, b.ArticleGuid, b.Code, b.Format))
-            .ToList();
+        // TODO: Implement a BarcodeMapping like ArticleMapping.
+        return [.. barcodes.Select(b => new BarcodeInformation(b.Guid, b.ArticleGuid, b.Code, b.Format))];
     }
 }

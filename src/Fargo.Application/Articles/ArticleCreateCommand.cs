@@ -20,8 +20,8 @@ namespace Fargo.Application.Articles;
 /// respecting authorization and partition-based access rules.
 /// </remarks>
 public sealed record ArticleCreateCommand(
-        ArticleCreateModel Article
-        ) : ICommand<Guid>;
+    ArticleCreateModel Article
+    ) : ICommand<Guid>;
 
 /// <summary>
 /// Handles <see cref="ArticleCreateCommand"/>.
@@ -38,13 +38,13 @@ public sealed record ArticleCreateCommand(
 /// proper data isolation and access control within the system.
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
-        ActorService actorService,
-        IArticleRepository articleRepository,
-        IPartitionRepository partitionRepository,
-        ICurrentUser currentUser,
-        IUnitOfWork unitOfWork,
-        IFargoEventPublisher eventPublisher
-        ) : ICommandHandler<ArticleCreateCommand, Guid>
+    ActorService actorService,
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    ICurrentUser currentUser,
+    IUnitOfWork unitOfWork,
+    IFargoEventPublisher eventPublisher
+    ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     /// <summary>
     /// Executes the command to create a new article.
@@ -61,7 +61,7 @@ public sealed class ArticleCreateCommandHandler(
     /// <exception cref="UnauthorizedAccessFargoApplicationException">
     /// Thrown when the current user is not authenticated or inactive.
     /// </exception>
-    /// <exception cref="UserNotAuthorizedFargoApplicationException">
+    /// <exception cref="Users.UserNotAuthorizedFargoApplicationException">
     /// Thrown when the user does not have permission to create articles.
     /// </exception>
     /// <exception cref="PartitionNotFoundFargoApplicationException">
