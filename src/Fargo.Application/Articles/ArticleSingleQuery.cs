@@ -42,8 +42,8 @@ public sealed record ArticleSingleQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access the article if it belongs to at least one
-/// partition they have access to.
+/// Regular actors can access the article if it belongs to at least one
+/// partition they have access to, or if the article has no partition (public).
 /// </para>
 ///
 /// <para>
@@ -97,8 +97,8 @@ public sealed class ArticleSingleQueryHandler(
     /// If the actor has administrative or system privileges, the article is retrieved
     /// without partition filtering.
     ///
-    /// Otherwise, the article is only returned if it belongs to at least one
-    /// partition accessible to the actor.
+    /// Otherwise, the article is returned if it belongs to at least one
+    /// partition accessible to the actor, or if the article has no partition (public).
     /// </remarks>
     public async Task<ArticleInformation?> Handle(
             ArticleSingleQuery query,
@@ -120,7 +120,7 @@ public sealed class ArticleSingleQueryHandler(
         }
         else
         {
-            var article = await articleRepository.GetInfoByGuidInPartitions(
+            var article = await articleRepository.GetInfoByGuidPublicOrInPartitions(
                     query.ArticleGuid,
                     actor.PartitionAccesses,
                     query.AsOfDateTime,

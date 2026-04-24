@@ -271,8 +271,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// </summary>
     /// <remarks>
     /// Partitions define logical boundaries in the system.
-    /// A user can only access entities that belong to at least one partition
-    /// to which the user has been granted access.
+    /// A user can access entities that have no partition (public), or that
+    /// belong to at least one partition to which the user has been granted access.
     /// </remarks>
     public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses
     {

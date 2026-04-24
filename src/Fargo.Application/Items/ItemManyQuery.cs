@@ -51,8 +51,8 @@ public sealed record ItemManyQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access items that belong to at least one
-/// partition they have access to.
+/// Regular actors can access items that belong to at least one
+/// partition they have access to, or items with no partition (public).
 /// </para>
 ///
 /// <para>
@@ -162,13 +162,20 @@ public sealed class ItemManyQueryHandler(
                 return [];
             }
 
-            var partitions = query.PartitionGuid.HasValue
-                ? (IReadOnlyCollection<Guid>)[query.PartitionGuid.Value]
-                : actor.PartitionAccesses;
+            if (query.PartitionGuid.HasValue)
+            {
+                return await itemRepository.GetManyInfoInPartitions(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        [query.PartitionGuid.Value],
+                        query.ArticleGuid,
+                        query.AsOfDateTime,
+                        cancellationToken
+                        );
+            }
 
-            return await itemRepository.GetManyInfoInPartitions(
+            return await itemRepository.GetManyInfoInPartitionsOrPublic(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    partitions,
+                    actor.PartitionAccesses,
                     query.ArticleGuid,
                     query.AsOfDateTime,
                     cancellationToken

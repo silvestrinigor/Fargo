@@ -51,7 +51,7 @@ public sealed class ArticleBarcodesQueryHandler(
         }
         else
         {
-            articleExists = await articleRepository.GetInfoByGuidInPartitions(
+            articleExists = await articleRepository.GetInfoByGuidPublicOrInPartitions(
                 query.ArticleGuid,
                 actor.PartitionAccesses,
                 null,

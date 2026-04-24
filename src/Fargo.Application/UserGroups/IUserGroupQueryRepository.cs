@@ -33,6 +33,21 @@ public interface IUserGroupQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<UserGroupInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<IReadOnlyCollection<UserGroupInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? userGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
     Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? partitionFilter = null,

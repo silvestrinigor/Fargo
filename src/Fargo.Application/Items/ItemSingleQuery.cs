@@ -42,8 +42,8 @@ public sealed record ItemSingleQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access the item if it belongs to at least one
-/// partition they have access to.
+/// Regular actors can access the item if it belongs to at least one
+/// partition they have access to, or if the item has no partition (public).
 /// </para>
 ///
 /// <para>
@@ -121,7 +121,7 @@ public sealed class ItemSingleQueryHandler(
         }
         else
         {
-            var itemInformation = await itemRepository.GetInfoByGuidInPartitions(
+            var itemInformation = await itemRepository.GetInfoByGuidPublicOrInPartitions(
                     query.ItemGuid,
                     actor.PartitionAccesses,
                     query.AsOfDateTime,

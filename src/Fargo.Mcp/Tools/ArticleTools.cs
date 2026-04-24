@@ -49,7 +49,7 @@ public sealed class ArticleTools(IEngine engine)
     public async Task<string> CreateArticle(
         [Description("The display name of the article.")] string name,
         [Description("An optional description.")] string? description = null,
-        [Description("GUID of the partition to associate with the article. Omit to use the global partition.")] string? partitionGuid = null,
+        [Description("GUID of the partition to associate with the article. Omit to create a public article with no partition.")] string? partitionGuid = null,
         [Description("Mass value of the article. Omit if unknown.")] double? massValue = null,
         [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g",
         [Description("LengthX dimension value of the article. Omit if unknown.")] double? lengthXValue = null,

@@ -39,6 +39,21 @@ public interface IItemQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<ItemInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<IReadOnlyCollection<ItemInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? articleGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
     Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? partitionFilter = null,

@@ -40,6 +40,21 @@ public interface IUserQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<UserInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default
+    );
+
     Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? partitionFilter = null,

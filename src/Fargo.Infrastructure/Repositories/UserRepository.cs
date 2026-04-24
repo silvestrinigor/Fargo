@@ -194,6 +194,41 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<UserInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await users
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(user => user.Guid == entityGuid)
+            .Where(user => !user.Partitions.Any()
+                || user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(UserMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await users
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(user => search == null || EF.Functions.Like(user.Nameid, $"%{search}%"))
+            .Where(user => !user.Partitions.Any()
+                || user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .OrderBy(user => user.Guid)
+            .WithPagination(pagination)
+            .Select(UserMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<Guid>> GetManyGuids(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,

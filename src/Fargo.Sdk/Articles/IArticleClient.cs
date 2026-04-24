@@ -48,7 +48,8 @@ public interface IArticleClient
     /// <param name="description">An optional description.</param>
     /// <param name="firstPartition">
     /// The partition to associate with the article on creation.
-    /// When <see langword="null"/>, the global partition is used.
+    /// When <see langword="null"/>, the article is created without a partition
+    /// and is publicly accessible to all authenticated users.
     /// </param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A response containing the <see cref="Guid"/> of the newly created article.</returns>

@@ -49,8 +49,8 @@ public sealed record UserGroupManyQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access user groups that belong to at least one
-/// partition they have access to.
+/// Regular actors can access user groups that belong to at least one
+/// partition they have access to, or user groups with no partition (public).
 /// </para>
 ///
 /// <para>
@@ -128,7 +128,7 @@ public sealed class UserGroupManyQueryHandler(
         }
         else
         {
-            var userGroups = await userGroupRepository.GetManyInfoInPartitions(
+            var userGroups = await userGroupRepository.GetManyInfoInPartitionsOrPublic(
                     query.Pagination ?? Pagination.FirstPage20Items,
                     actor.PartitionAccesses,
                     query.UserGuid,

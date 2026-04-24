@@ -54,7 +54,8 @@ public interface IUserGroupClient
     /// </param>
     /// <param name="firstPartition">
     /// The partition to associate with the group on creation.
-    /// When <see langword="null"/>, the global partition is used.
+    /// When <see langword="null"/>, the group is created without a partition
+    /// and is publicly accessible to all authenticated users.
     /// </param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A response containing the <see cref="Guid"/> of the newly created user group.</returns>

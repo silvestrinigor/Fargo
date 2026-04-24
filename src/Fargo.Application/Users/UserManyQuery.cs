@@ -47,8 +47,8 @@ public sealed record UserManyQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access users that belong to at least one
-/// partition they have access to.
+/// Regular actors can access users that belong to at least one
+/// partition they have access to, or users with no partition (public).
 /// </para>
 ///
 /// <para>
@@ -159,13 +159,20 @@ public sealed class UserManyQueryHandler(
                 return [];
             }
 
-            var partitions = query.PartitionGuid.HasValue
-                ? (IReadOnlyCollection<Guid>)[query.PartitionGuid.Value]
-                : actor.PartitionAccesses;
+            if (query.PartitionGuid.HasValue)
+            {
+                return await userRepository.GetManyInfoInPartitions(
+                        query.Pagination ?? Pagination.FirstPage20Items,
+                        [query.PartitionGuid.Value],
+                        query.AsOfDateTime,
+                        query.Search,
+                        cancellationToken
+                        );
+            }
 
-            return await userRepository.GetManyInfoInPartitions(
+            return await userRepository.GetManyInfoInPartitionsOrPublic(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    partitions,
+                    actor.PartitionAccesses,
                     query.AsOfDateTime,
                     query.Search,
                     cancellationToken

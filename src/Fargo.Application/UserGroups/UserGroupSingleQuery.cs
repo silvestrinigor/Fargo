@@ -42,8 +42,8 @@ public sealed record UserGroupSingleQuery(
 /// </para>
 ///
 /// <para>
-/// Regular actors can only access the user group if it belongs to at least one
-/// partition they have access to.
+/// Regular actors can access the user group if it belongs to at least one
+/// partition they have access to, or if the user group has no partition (public).
 /// </para>
 ///
 /// <para>
@@ -124,7 +124,7 @@ public sealed class UserGroupSingleQueryHandler(
         }
         else
         {
-            var userGroup = await userGroupRepository.GetInfoByGuidInPartitions(
+            var userGroup = await userGroupRepository.GetInfoByGuidPublicOrInPartitions(
                     query.UserGroupGuid,
                     actor.PartitionAccesses,
                     query.AsOfDateTime,

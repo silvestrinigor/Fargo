@@ -191,6 +191,48 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<UserGroupInformation?> GetInfoByGuidPublicOrInPartitions(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await userGroups
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(userGroup => userGroup.Guid == entityGuid)
+            .Where(userGroup => !userGroup.Partitions.Any()
+                || userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
+            .Select(UserGroupMappings.InformationProjection)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<UserGroupInformation>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        Guid? userGuid = null,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<UserGroup> query = userGroups
+            .TemporalAsOfIfProvided(asOfDateTime)
+            .AsNoTracking()
+            .Where(userGroup => !userGroup.Partitions.Any()
+                || userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+
+        if (userGuid.HasValue)
+        {
+            query = query.Where(userGroup =>
+                userGroup.Users.Any(user => user.Guid == userGuid.Value));
+        }
+
+        return await query
+            .OrderBy(userGroup => userGroup.Guid)
+            .WithPagination(pagination)
+            .Select(UserGroupMappings.InformationProjection)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,

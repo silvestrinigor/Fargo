@@ -41,10 +41,11 @@ public sealed record UserCreateCommand(
 /// Partition behavior:
 /// <list type="bullet">
 /// <item><description>
-/// If <c>FirstPartition</c> is not provided, the user is assigned to the global partition
+/// If <c>FirstPartition</c> is not provided, the user is created without any partition
+/// and is publicly accessible to all authenticated actors
 /// </description></item>
 /// <item><description>
-/// The actor must have access to the selected partition
+/// When <c>FirstPartition</c> is provided, the actor must have access to the selected partition
 /// </description></item>
 /// </list>
 ///
@@ -76,7 +77,8 @@ public sealed class UserCreateCommandHandler(
     /// Thrown when the current user cannot be resolved or is not authorized.
     /// </exception>
     /// <exception cref="PartitionNotFoundFargoApplicationException">
-    /// Thrown when the specified or resolved partition does not exist.
+    /// Thrown when the specified partition does not exist.
+    /// Only applicable when <c>firstPartition</c> is provided.
     /// </exception>
     /// <exception cref="UserNotAuthorizedFargoApplicationException">
     /// Thrown when the user does not have permission to create items.
@@ -86,8 +88,7 @@ public sealed class UserCreateCommandHandler(
     /// <list type="number">
     /// <item><description>Resolve the current actor</description></item>
     /// <item><description>Validate <see cref="ActionType.CreateUser"/> permission</description></item>
-    /// <item><description>Resolve the target partition (or fallback to global)</description></item>
-    /// <item><description>Validate partition access</description></item>
+    /// <item><description>Resolve and validate access to the target partition, when provided</description></item>
     /// <item><description>Hash the user password</description></item>
     /// <item><description>Create the user entity</description></item>
     /// <item><description>Apply password policies (expiration and required change)</description></item>
@@ -105,11 +106,14 @@ public sealed class UserCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateUser);
 
-        var partitionGuid = command.User.FirstPartition ?? PartitionService.GlobalPartitionGuid;
+        Partition? partition = null;
 
-        var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+        if (command.User.FirstPartition.HasValue)
+        {
+            partition = await partitionRepository.GetFoundByGuid(command.User.FirstPartition.Value, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+        }
 
         var nameid = ValidateNameid(command.User.Nameid);
 
@@ -126,7 +130,10 @@ public sealed class UserCreateCommandHandler(
             PasswordHash = userPasswordHash
         };
 
-        user.Partitions.Add(partition);
+        if (partition is not null)
+        {
+            user.Partitions.Add(partition);
+        }
 
         if (command.User.DefaultPasswordExpirationTimeSpan is not null)
         {
@@ -147,7 +154,7 @@ public sealed class UserCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        await eventPublisher.PublishUserCreated(user.Guid, user.Nameid, [partition.Guid], cancellationToken);
+        await eventPublisher.PublishUserCreated(user.Guid, user.Nameid, partition is null ? [] : [partition.Guid], cancellationToken);
 
         return user.Guid;
     }

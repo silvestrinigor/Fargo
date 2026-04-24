@@ -108,20 +108,27 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="partitioned">The partitioned entity to evaluate.</param>
     /// <returns>
-    /// <c>true</c> if the actor is a system or administrative actor, or if at least one
-    /// partition of the entity is accessible; otherwise, <c>false</c>.
+    /// <c>true</c> if the actor is a system or administrative actor, if the entity has no
+    /// partitions (public), or if at least one partition of the entity is accessible;
+    /// otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
     /// Evaluation order:
     /// <list type="number">
     /// <item><description>System actors have unrestricted access</description></item>
     /// <item><description>Administrative actors have unrestricted access</description></item>
+    /// <item><description>Entities with no partitions are public and accessible to all authenticated actors</description></item>
     /// <item><description>Otherwise, checks intersection with <see cref="PartitionAccesses"/></description></item>
     /// </list>
     /// </remarks>
     public bool HasAccess(IPartitionedEntity partitioned)
     {
         if (IsSystem || IsAdmin)
+        {
+            return true;
+        }
+
+        if (partitioned.Partitions.Count == 0)
         {
             return true;
         }
