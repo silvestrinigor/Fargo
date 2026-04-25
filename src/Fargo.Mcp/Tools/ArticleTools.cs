@@ -95,22 +95,34 @@ public sealed class ArticleTools(IArticleManager articles)
             await article.UpdateAsync(a =>
             {
                 if (name is not null)
+                {
                     a.Name = name;
+                }
 
                 if (description is not null)
+                {
                     a.Description = description;
+                }
 
                 if (massValue is not null)
+                {
                     a.Mass = new MassDto(massValue.Value, massUnit);
+                }
 
                 if (lengthXValue is not null)
+                {
                     a.LengthX = new LengthDto(lengthXValue.Value, lengthXUnit);
+                }
 
                 if (lengthYValue is not null)
+                {
                     a.LengthY = new LengthDto(lengthYValue.Value, lengthYUnit);
+                }
 
                 if (lengthZValue is not null)
+                {
                     a.LengthZ = new LengthDto(lengthZValue.Value, lengthZUnit);
+                }
             });
             return "Article updated successfully.";
         }

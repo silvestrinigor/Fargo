@@ -1,4 +1,3 @@
-using Fargo.Sdk;
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Events;
 using Fargo.Sdk.Extensions;

@@ -1,7 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
-using Fargo.Domain.ApiClients;
 
 namespace Fargo.Application.ApiClients;
 

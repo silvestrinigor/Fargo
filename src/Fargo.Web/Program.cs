@@ -1,4 +1,3 @@
-using Fargo.Sdk;
 using Fargo.Sdk.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web;

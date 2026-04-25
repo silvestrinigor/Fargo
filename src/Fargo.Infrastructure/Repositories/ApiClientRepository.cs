@@ -40,10 +40,14 @@ public sealed class ApiClientRepository(FargoDbContext context) : IApiClientRepo
         IQueryable<ApiClient> query = clients.AsNoTracking();
 
         if (search is not null)
+        {
             query = query.Where(c => EF.Functions.Like(c.Name, $"%{search}%"));
+        }
 
         if (pagination is not null)
+        {
             query = query.OrderBy(c => c.Guid).WithPagination(pagination.Value);
+        }
 
         return await query
             .Select(ApiClientMappings.InformationProjection)

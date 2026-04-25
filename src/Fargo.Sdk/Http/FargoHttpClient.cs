@@ -308,6 +308,8 @@ public sealed class FargoHttpClient : IFargoHttpClient
 
         httpClient.DefaultRequestHeaders.Remove("X-Api-Key");
         if (!string.IsNullOrEmpty(options.ApiKey))
+        {
             httpClient.DefaultRequestHeaders.Add("X-Api-Key", options.ApiKey);
+        }
     }
 }

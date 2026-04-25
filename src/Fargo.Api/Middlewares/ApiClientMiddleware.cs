@@ -17,7 +17,9 @@ public sealed class ApiClientMiddleware(RequestDelegate next, IOptions<ApiClient
             var guid = await repo.FindActiveGuidByKeyHash(hash, context.RequestAborted);
 
             if (guid.HasValue)
+            {
                 context.Items["ApiClientGuid"] = guid.Value;
+            }
         }
 
         if (options.Value.EnforceApiClient

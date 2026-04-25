@@ -1,7 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
-using Fargo.Domain.ApiClients;
 
 namespace Fargo.Application.ApiClients;
 
@@ -32,13 +31,19 @@ public sealed class ApiClientUpdateCommandHandler(
         var client = await apiClientRepository.GetFoundByGuid(command.Guid, cancellationToken);
 
         if (command.Name is not null)
+        {
             client.Name = new(command.Name);
+        }
 
         if (command.Description is not null)
+        {
             client.Description = new(command.Description);
+        }
 
         if (command.IsActive.HasValue)
+        {
             client.IsActive = command.IsActive.Value;
+        }
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

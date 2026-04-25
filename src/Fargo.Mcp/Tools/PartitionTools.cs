@@ -77,10 +77,14 @@ public sealed class PartitionTools(IPartitionManager partitions)
             await partition.UpdateAsync(p =>
             {
                 if (name is not null)
+                {
                     p.Name = name;
+                }
 
                 if (description is not null)
+                {
                     p.Description = description;
+                }
             });
             return "Partition updated successfully.";
         }
