@@ -2,6 +2,7 @@ using Fargo.Application;
 using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
+using Fargo.Application.Events;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Persistence;
@@ -44,6 +45,7 @@ public static class ServiceCollectionExtensions
             AddImageStorage(services, configuration);
 
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<ICurrentApiClient, CurrentApiClient>();
 
             return services;
         }
@@ -108,6 +110,8 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
+            services.AddScoped<IEventQueryRepository, EventRepository>();
+
             services.AddScoped<IApiClientRepository, ApiClientRepository>();
             services.AddScoped<IApiClientQueryRepository, ApiClientRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
@@ -193,6 +197,8 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionInformation?>, PartitionSingleQueryHandler>();
             services.AddScoped<IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>>, PartitionManyQueryHandler>();
+
+            services.AddScoped<IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>>, EventManyQueryHandler>();
         }
 
         private void AddDomainServices()

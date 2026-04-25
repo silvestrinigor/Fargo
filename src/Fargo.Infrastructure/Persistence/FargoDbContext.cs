@@ -2,6 +2,7 @@ using Fargo.Domain;
 using Fargo.Domain.ApiClients;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
+using Fargo.Domain.Events;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
@@ -14,6 +15,8 @@ namespace Fargo.Infrastructure.Persistence;
 
 public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
+    public DbSet<Event> Events { get; set; }
+
     public DbSet<ApiClient> ApiClients { get; set; }
 
     public DbSet<Article> Articles { get; set; }
@@ -78,6 +81,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new EventConfiguration());
+
         modelBuilder.ApplyConfiguration(new ApiClientConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
