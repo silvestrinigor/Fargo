@@ -1,4 +1,5 @@
 using Fargo.Sdk;
+using Fargo.Sdk.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web;
 using Fargo.Web.Components.Security;
@@ -16,25 +17,14 @@ builder.Services
 builder.Services.AddFluentUIComponents();
 builder.Services.AddAuthorizationCore();
 
-builder.Services.AddScoped<BrowserSdkSessionStore>();
-builder.Services.AddScoped<IEngine>(sp =>
-{
-    // Aspire AppHost sets services__apiservice__http__0 to the actual resolved address
-    // (e.g. http://localhost:PORT in local dev, http://apiservice in containers).
-    // Reading it directly bypasses IHttpClientFactory service discovery and avoids
-    // storing a factory-managed HttpClient long-term (lifetime/recycling issues).
-    var apiUrl = sp.GetRequiredService<IConfiguration>()["services:apiservice:http:0"]
-                 ?? "http://apiservice";
+// Aspire AppHost sets services__apiservice__http__0 to the actual resolved address
+// (e.g. http://localhost:PORT in local dev, http://apiservice in containers).
+var apiUrl = builder.Configuration["services:apiservice:http:0"] ?? "http://apiservice";
 
-    var engine = new Engine(
-        sp.GetService<ILoggerFactory>(),
-        sp.GetRequiredService<BrowserSdkSessionStore>()
-    );
+builder.Services.AddFargoSdk(o => o.Server = apiUrl)
+    .WithHubLifetime()
+    .WithSessionStore<BrowserSdkSessionStore>();
 
-    engine.Configure(apiUrl);
-
-    return engine;
-});
 builder.Services.AddScoped<FargoSession>();
 
 var app = builder.Build();

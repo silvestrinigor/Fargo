@@ -2,9 +2,8 @@
 @page "/entities/articles/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk
 @using Fargo.Sdk.Articles
-@inject IEngine Engine
+@inject IArticleManager ArticleManager
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Articles</PageTitle>
@@ -66,7 +65,7 @@
     private CreateForm _createForm = new();
     private readonly AsyncState _create = new();
 
-    private async Task<IEnumerable<Article>> LoadArticlesAsync() => await Engine.Articles.GetManyAsync();
+    private async Task<IEnumerable<Article>> LoadArticlesAsync() => await ArticleManager.GetManyAsync();
 
     private void OpenCreate()
     {
@@ -79,7 +78,7 @@
     {
         var ok = await _create.RunAsync(async () =>
         {
-            var article = await Engine.Articles.CreateAsync(_createForm.Name!);
+            var article = await ArticleManager.CreateAsync(_createForm.Name!);
             Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
         }, "Failed to create.");
 

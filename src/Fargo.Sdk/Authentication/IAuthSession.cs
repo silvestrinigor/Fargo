@@ -21,6 +21,9 @@ public interface IAuthSession
     /// <summary>Gets a value indicating whether the session holds a valid token.</summary>
     bool IsAuthenticated { get; }
 
+    /// <summary>Gets a value indicating whether the current access token has passed its expiry time.</summary>
+    bool IsExpired { get; }
+
     /// <summary>Gets a value indicating whether the authenticated user has administrative privileges.</summary>
     bool IsAdmin { get; }
 

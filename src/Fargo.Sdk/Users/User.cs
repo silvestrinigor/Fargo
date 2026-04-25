@@ -19,7 +19,7 @@ public sealed class User : IAsyncDisposable
         bool isActive,
         IReadOnlyCollection<ActionType> permissions,
         IReadOnlyCollection<Guid> partitionAccesses,
-        IUserClient client,
+        IUserHttpClient client,
         Func<ValueTask>? onDispose = null,
         Guid? editedByGuid = null)
     {
@@ -38,7 +38,7 @@ public sealed class User : IAsyncDisposable
         _onDispose = onDispose;
     }
 
-    private readonly IUserClient client;
+    private readonly IUserHttpClient client;
     private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the user.</summary>

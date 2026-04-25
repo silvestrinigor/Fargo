@@ -1,8 +1,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk
 @using Fargo.Sdk.Users
-@inject IEngine Engine
+@inject IUserManager Users
 
 <div class="page-card">
     <div class="section-header">
@@ -138,7 +137,7 @@
         await _load.RunAsync(async () =>
         {
             _users.Clear();
-            _users.AddRange(await Engine.Users.GetManyAsync());
+            _users.AddRange(await Users.GetManyAsync());
         }, "Failed to load users.");
     }
 
@@ -194,7 +193,7 @@
             }
             else
             {
-                await Engine.Users.CreateAsync(
+                await Users.CreateAsync(
                     _editor.Nameid!,
                     _editor.Password!,
                     string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName,
@@ -228,7 +227,7 @@
 
         var ok = await _delete.RunAsync(async () =>
         {
-            await Engine.Users.DeleteAsync(_pendingDelete.Guid);
+            await Users.DeleteAsync(_pendingDelete.Guid);
             await LoadUsersAsync();
         }, "Failed to delete user.");
 

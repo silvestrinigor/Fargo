@@ -1,4 +1,7 @@
 using Fargo.Sdk;
+using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Events;
+using Fargo.Sdk.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,16 +13,22 @@ var nameid = Environment.GetEnvironmentVariable("FARGO_NAMEID")
 var password = Environment.GetEnvironmentVariable("FARGO_PASSWORD")
     ?? throw new InvalidOperationException("FARGO_PASSWORD environment variable is required.");
 
-var engine = new Engine();
-await engine.LogInAsync(server, nameid, password);
-
 var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Warning);
 
-builder.Services.AddSingleton<IEngine>(engine);
+builder.Services.AddFargoSdk(o => o.Server = server, ServiceLifetime.Singleton);
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
     .WithToolsFromAssembly();
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+
+var auth = app.Services.GetRequiredService<IAuthenticationService>();
+await auth.LogInAsync(nameid, password);
+
+var session = app.Services.GetRequiredService<IAuthSession>();
+var hub = app.Services.GetRequiredService<IFargoEventHub>();
+await hub.ConnectAsync(server, () => Task.FromResult(session.AccessToken));
+
+await app.RunAsync();

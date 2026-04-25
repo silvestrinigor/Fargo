@@ -61,7 +61,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         ScheduleRefresh();
 
-        logger.LogLoggedIn(nameid);
+        AuthenticationServiceLog.LogLoggedIn(logger, nameid);
 
         LoggedIn?.Invoke(this, new LoggedInEventArgs(nameid));
 
@@ -95,7 +95,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
             await sessionStore.ClearAsync(cancellationToken);
         }
 
-        logger.LogLoggedOut(nameid!);
+        AuthenticationServiceLog.LogLoggedOut(logger, nameid!);
 
         LoggedOut?.Invoke(this, new LoggedOutEventArgs(nameid!));
     }
@@ -123,7 +123,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         ScheduleRefresh();
 
-        logger.LogRefreshed(session.Nameid!);
+        AuthenticationServiceLog.LogRefreshed(logger, session.Nameid!);
 
         Refreshed?.Invoke(this, new RefreshedEventArgs(session.Nameid!));
 
@@ -144,7 +144,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
             ThrowAuthError(result.Error!);
         }
 
-        logger.LogPasswordChanged(session.Nameid!);
+        AuthenticationServiceLog.LogPasswordChanged(logger, session.Nameid!);
 
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
     }

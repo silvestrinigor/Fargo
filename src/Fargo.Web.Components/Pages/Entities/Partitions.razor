@@ -2,12 +2,14 @@
 @page "/entities/partitions/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk
 @using Fargo.Sdk.Partitions
 @using Fargo.Sdk.Articles
 @using Fargo.Sdk.Items
 @using Fargo.Sdk.Users
-@inject IEngine Engine
+@inject IPartitionManager PartitionManager
+@inject IArticleManager Articles
+@inject IItemManager Items
+@inject IUserManager Users
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Partitions</PageTitle>
@@ -207,7 +209,7 @@
 <EntityPickerDialog TEntity="Article"
                     IsOpen="_addArticleOpen"
                     Title="Add Article"
-                    Loader="s => Engine.Articles.GetManyAsync(search: s)"
+                    Loader="s => Articles.GetManyAsync(search: s)"
                     ColumnHeaders='["Name"]'
                     OnSelected="AddArticleAsync"
                     OnCancel="() => _addArticleOpen = false">
@@ -219,7 +221,7 @@
 <EntityPickerDialog TEntity="Item"
                     IsOpen="_addItemOpen"
                     Title="Add Item"
-                    Loader="async _ => (IReadOnlyCollection<Item>)await Engine.Items.GetManyAsync()"
+                    Loader="async _ => (IReadOnlyCollection<Item>)await Items.GetManyAsync()"
                     ColumnHeaders='["Item", "Article"]'
                     OnSelected="AddItemAsync"
                     OnCancel="() => _addItemOpen = false">
@@ -232,7 +234,7 @@
 <EntityPickerDialog TEntity="User"
                     IsOpen="_addUserOpen"
                     Title="Add User"
-                    Loader="s => Engine.Users.GetManyAsync(search: s)"
+                    Loader="s => Users.GetManyAsync(search: s)"
                     ColumnHeaders='["Name"]'
                     OnSelected="AddUserAsync"
                     OnCancel="() => _addUserOpen = false">
@@ -312,7 +314,7 @@
 
         await _load.RunAsync(async () =>
         {
-            _partition = await Engine.Partitions.GetAsync(EntityGuid!.Value);
+            _partition = await PartitionManager.GetAsync(EntityGuid!.Value);
             _edit.Name = _partition.Name;
             _edit.Description = _partition.Description;
             _edit.ParentGuid = _partition.ParentPartitionGuid?.ToString();
@@ -337,9 +339,9 @@
 
         try
         {
-            var articles = await Engine.Articles.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
-            var items = await Engine.Items.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
-            var users = await Engine.Users.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var articles = await Articles.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var items = await Items.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var users = await Users.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
 
             _entityItems.AddRange(articles.Select(a => new PartitionEntityRow(
                 a.Guid, a.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article)));
@@ -371,15 +373,15 @@
             switch (row.Type)
             {
                 case EntityType.Article:
-                    var article = await Engine.Articles.GetAsync(row.EntityGuid);
+                    var article = await Articles.GetAsync(row.EntityGuid);
                     result = await article.RemovePartitionAsync(EntityGuid.Value);
                     break;
                 case EntityType.Item:
-                    var item = await Engine.Items.GetAsync(row.EntityGuid);
+                    var item = await Items.GetAsync(row.EntityGuid);
                     result = await item.RemovePartitionAsync(EntityGuid.Value);
                     break;
                 case EntityType.User:
-                    var user = await Engine.Users.GetAsync(row.EntityGuid);
+                    var user = await Users.GetAsync(row.EntityGuid);
                     result = await user.RemovePartitionAsync(EntityGuid.Value);
                     break;
                 default:
@@ -545,7 +547,7 @@
         var ok = await _create.RunAsync(async () =>
         {
             var parentGuid = EntityGuid;
-            var partition = await Engine.Partitions.CreateAsync(
+            var partition = await PartitionManager.CreateAsync(
                 _createForm.Name!,
                 parentPartitionGuid: parentGuid);
 
@@ -570,7 +572,7 @@
         var ok = await _delete.RunAsync(async () =>
         {
             var deletedGuid = EntityGuid.Value;
-            await Engine.Partitions.DeleteAsync(deletedGuid);
+            await PartitionManager.DeleteAsync(deletedGuid);
             _tree?.NotifyDeleted(deletedGuid);
             _allEntitiesTree?.NotifyDeleted(deletedGuid);
             Navigation.NavigateTo("/entities/partitions");

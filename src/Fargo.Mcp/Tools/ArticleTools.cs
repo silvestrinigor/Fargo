@@ -1,4 +1,4 @@
-using Fargo.Sdk;
+using Fargo.Sdk.Articles;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class ArticleTools(IEngine engine)
+public sealed class ArticleTools(IArticleManager articles)
 {
     [McpServerTool(Name = "list_articles"), Description("Lists all articles accessible to the current user.")]
     public async Task<string> ListArticles(
@@ -15,14 +15,14 @@ public sealed class ArticleTools(IEngine engine)
     {
         try
         {
-            var articles = await engine.Articles.GetManyAsync(page: page, limit: limit);
-            var results = articles.Select(a => new { a.Guid, a.Name, a.Description }).ToList();
-            foreach (var a in articles)
+            var result = await articles.GetManyAsync(page: page, limit: limit);
+            var list = result.Select(a => new { a.Guid, a.Name, a.Description }).ToList();
+            foreach (var a in result)
             {
                 await a.DisposeAsync();
             }
 
-            return JsonSerializer.Serialize(results);
+            return JsonSerializer.Serialize(list);
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public sealed class ArticleTools(IEngine engine)
     {
         try
         {
-            await using var article = await engine.Articles.GetAsync(Guid.Parse(articleGuid));
+            await using var article = await articles.GetAsync(Guid.Parse(articleGuid));
             return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Mass, article.LengthX, article.LengthY, article.LengthZ });
         }
         catch (Exception ex)
@@ -62,11 +62,11 @@ public sealed class ArticleTools(IEngine engine)
         try
         {
             Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-            var mass = massValue is null ? null : new Fargo.Sdk.Articles.MassDto(massValue.Value, massUnit);
-            var lengthX = lengthXValue is null ? null : new Fargo.Sdk.Articles.LengthDto(lengthXValue.Value, lengthXUnit);
-            var lengthY = lengthYValue is null ? null : new Fargo.Sdk.Articles.LengthDto(lengthYValue.Value, lengthYUnit);
-            var lengthZ = lengthZValue is null ? null : new Fargo.Sdk.Articles.LengthDto(lengthZValue.Value, lengthZUnit);
-            await using var article = await engine.Articles.CreateAsync(name, description, firstPartition, mass, lengthX, lengthY, lengthZ);
+            var mass = massValue is null ? null : new MassDto(massValue.Value, massUnit);
+            var lengthX = lengthXValue is null ? null : new LengthDto(lengthXValue.Value, lengthXUnit);
+            var lengthY = lengthYValue is null ? null : new LengthDto(lengthYValue.Value, lengthYUnit);
+            var lengthZ = lengthZValue is null ? null : new LengthDto(lengthZValue.Value, lengthZUnit);
+            await using var article = await articles.CreateAsync(name, description, firstPartition, mass, lengthX, lengthY, lengthZ);
             return $"Created article with GUID: {article.Guid}";
         }
         catch (Exception ex)
@@ -91,38 +91,26 @@ public sealed class ArticleTools(IEngine engine)
     {
         try
         {
-            await using var article = await engine.Articles.GetAsync(Guid.Parse(articleGuid));
+            await using var article = await articles.GetAsync(Guid.Parse(articleGuid));
             await article.UpdateAsync(a =>
             {
                 if (name is not null)
-                {
                     a.Name = name;
-                }
 
                 if (description is not null)
-                {
                     a.Description = description;
-                }
 
                 if (massValue is not null)
-                {
-                    a.Mass = new Fargo.Sdk.Articles.MassDto(massValue.Value, massUnit);
-                }
+                    a.Mass = new MassDto(massValue.Value, massUnit);
 
                 if (lengthXValue is not null)
-                {
-                    a.LengthX = new Fargo.Sdk.Articles.LengthDto(lengthXValue.Value, lengthXUnit);
-                }
+                    a.LengthX = new LengthDto(lengthXValue.Value, lengthXUnit);
 
                 if (lengthYValue is not null)
-                {
-                    a.LengthY = new Fargo.Sdk.Articles.LengthDto(lengthYValue.Value, lengthYUnit);
-                }
+                    a.LengthY = new LengthDto(lengthYValue.Value, lengthYUnit);
 
                 if (lengthZValue is not null)
-                {
-                    a.LengthZ = new Fargo.Sdk.Articles.LengthDto(lengthZValue.Value, lengthZUnit);
-                }
+                    a.LengthZ = new LengthDto(lengthZValue.Value, lengthZUnit);
             });
             return "Article updated successfully.";
         }
@@ -138,7 +126,7 @@ public sealed class ArticleTools(IEngine engine)
     {
         try
         {
-            await engine.Articles.DeleteAsync(Guid.Parse(articleGuid));
+            await articles.DeleteAsync(Guid.Parse(articleGuid));
             return "Article deleted successfully.";
         }
         catch (Exception ex)

@@ -1,4 +1,4 @@
-using Fargo.Sdk;
+using Fargo.Sdk.Users;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class UserTools(IEngine engine)
+public sealed class UserTools(IUserManager users)
 {
     [McpServerTool(Name = "list_users"), Description("Lists users accessible to the current user.")]
     public async Task<string> ListUsers(
@@ -15,8 +15,8 @@ public sealed class UserTools(IEngine engine)
     {
         try
         {
-            var users = await engine.Users.GetManyAsync(page: page, limit: limit);
-            var results = users.Select(u => new
+            var result = await users.GetManyAsync(page: page, limit: limit);
+            var list = result.Select(u => new
             {
                 u.Guid,
                 u.Nameid,
@@ -26,12 +26,12 @@ public sealed class UserTools(IEngine engine)
                 u.IsActive,
                 u.PartitionAccesses
             }).ToList();
-            foreach (var u in users)
+            foreach (var u in result)
             {
                 await u.DisposeAsync();
             }
 
-            return JsonSerializer.Serialize(results);
+            return JsonSerializer.Serialize(list);
         }
         catch (Exception ex)
         {
@@ -45,7 +45,7 @@ public sealed class UserTools(IEngine engine)
     {
         try
         {
-            await using var user = await engine.Users.GetAsync(Guid.Parse(userGuid));
+            await using var user = await users.GetAsync(Guid.Parse(userGuid));
             return JsonSerializer.Serialize(new
             {
                 user.Guid,

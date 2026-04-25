@@ -1,8 +1,8 @@
 @page "/settings"
 @rendermode InteractiveServer
-@using Fargo.Sdk.Authentication
+@using System.ComponentModel.DataAnnotations
 
-@inject IEngine Engine
+@inject IAuthenticationService Auth
 @inject FargoSession FargoSession
 @inject NavigationManager Navigation
 
@@ -59,7 +59,7 @@
 
         try
         {
-            await Engine.Authentication.ChangePasswordAsync(model.NewPassword!, model.CurrentPassword!);
+            await Auth.ChangePasswordAsync(model.NewPassword!, model.CurrentPassword!);
             Navigation.NavigateTo("/login", forceLoad: true);
         }
         catch (InvalidCredentialsFargoSdkException)

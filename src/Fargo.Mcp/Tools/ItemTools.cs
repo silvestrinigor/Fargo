@@ -1,4 +1,4 @@
-using Fargo.Sdk;
+using Fargo.Sdk.Items;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class ItemTools(IEngine engine)
+public sealed class ItemTools(IItemManager items)
 {
     [McpServerTool(Name = "list_items"), Description("Lists items accessible to the current user. Optionally filter by article GUID.")]
     public async Task<string> ListItems(
@@ -17,14 +17,14 @@ public sealed class ItemTools(IEngine engine)
         try
         {
             Guid? articleGuidParsed = articleGuid is not null ? Guid.Parse(articleGuid) : null;
-            var items = await engine.Items.GetManyAsync(articleGuid: articleGuidParsed, page: page, limit: limit);
-            var results = items.Select(i => new { i.Guid, i.ArticleGuid }).ToList();
-            foreach (var i in items)
+            var result = await items.GetManyAsync(articleGuid: articleGuidParsed, page: page, limit: limit);
+            var list = result.Select(i => new { i.Guid, i.ArticleGuid }).ToList();
+            foreach (var i in result)
             {
                 await i.DisposeAsync();
             }
 
-            return JsonSerializer.Serialize(results);
+            return JsonSerializer.Serialize(list);
         }
         catch (Exception ex)
         {
@@ -38,7 +38,7 @@ public sealed class ItemTools(IEngine engine)
     {
         try
         {
-            await using var item = await engine.Items.GetAsync(Guid.Parse(itemGuid));
+            await using var item = await items.GetAsync(Guid.Parse(itemGuid));
             return JsonSerializer.Serialize(new { item.Guid, item.ArticleGuid });
         }
         catch (Exception ex)
@@ -55,7 +55,7 @@ public sealed class ItemTools(IEngine engine)
         try
         {
             Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-            await using var item = await engine.Items.CreateAsync(Guid.Parse(articleGuid), firstPartition);
+            await using var item = await items.CreateAsync(Guid.Parse(articleGuid), firstPartition);
             return $"Created item with GUID: {item.Guid}";
         }
         catch (Exception ex)
@@ -70,7 +70,7 @@ public sealed class ItemTools(IEngine engine)
     {
         try
         {
-            await engine.Items.DeleteAsync(Guid.Parse(itemGuid));
+            await items.DeleteAsync(Guid.Parse(itemGuid));
             return "Item deleted successfully.";
         }
         catch (Exception ex)

@@ -1,0 +1,42 @@
+namespace Fargo.Sdk.Articles;
+
+/// <summary>Default implementation of <see cref="IArticleImageService"/>.</summary>
+public sealed class ArticleImageService : IArticleImageService
+{
+    public ArticleImageService(IArticleHttpClient client)
+    {
+        this.client = client;
+    }
+
+    private readonly IArticleHttpClient client;
+
+    public async Task UploadImageAsync(
+        Guid articleGuid,
+        Stream stream,
+        string contentType,
+        string fileName = "image",
+        CancellationToken cancellationToken = default)
+    {
+        var response = await client.UploadImageAsync(articleGuid, stream, contentType, fileName, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            throw new FargoSdkApiException(response.Error!.Detail);
+        }
+    }
+
+    public async Task DeleteImageAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+    {
+        var response = await client.DeleteImageAsync(articleGuid, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            throw new FargoSdkApiException(response.Error!.Detail);
+        }
+    }
+
+    public Task<(Stream Stream, string ContentType)?> GetImageAsync(
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+        => client.GetImageAsync(articleGuid, cancellationToken);
+}

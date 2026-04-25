@@ -1,40 +1,29 @@
-using Fargo.Sdk;
 using Fargo.Sdk.Authentication;
 
 namespace Fargo.Web.Components.Session;
 
 /// <summary>
-/// Blazor-scoped reactive wrapper around <see cref="IEngine"/> authentication state.
+/// Blazor-scoped reactive wrapper around <see cref="IAuthenticationService"/> state.
 /// Exposes <see cref="IsReady"/> and <see cref="Changed"/> so components can react to
 /// login, logout, and token refresh without polling.
 /// </summary>
 public sealed class FargoSession : IDisposable
 {
-    private readonly IEngine engine;
-
-    public FargoSession(IEngine engine)
+    public FargoSession(IAuthenticationService auth)
     {
-        this.engine = engine;
-        engine.Authentication.LoggedIn += (_, _) => OnAuthChanged();
-        engine.Authentication.LoggedOut += (_, _) => OnAuthChanged();
-        engine.Authentication.Refreshed += (_, _) => OnAuthChanged();
-        engine.Authentication.RefreshFailed += (_, e) =>
-        {
-            if (e.Exception is not FargoSdkConnectionException)
-            {
-                _ = engine.Authentication.LogOutAsync();
-                OnAuthChanged();
-            }
-        };
+        Authentication = auth;
+        auth.LoggedIn += (_, _) => OnAuthChanged();
+        auth.LoggedOut += (_, _) => OnAuthChanged();
+        auth.Refreshed += (_, _) => OnAuthChanged();
     }
 
     public bool IsReady { get; private set; }
 
-    public bool IsAuthenticated => engine.Authentication.IsAuthenticated;
+    public bool IsAuthenticated => Authentication.IsAuthenticated;
 
-    public IAuthSession Session => engine.Authentication.Session;
+    public IAuthSession Session => Authentication.Session;
 
-    public IAuthenticationManager Authentication => engine.Authentication;
+    public IAuthenticationService Authentication { get; }
 
     /// <summary>Fires whenever authentication state changes or <see cref="MarkReady"/> is called.</summary>
     public event Action? Changed;
@@ -49,11 +38,7 @@ public sealed class FargoSession : IDisposable
         Changed?.Invoke();
     }
 
-    public void Dispose()
-    {
-        // Lambda subscriptions above are intentionally not unsubscribed individually;
-        // the engine is scoped and disposed alongside this instance.
-    }
+    public void Dispose() { }
 
     private void OnAuthChanged() => Changed?.Invoke();
 }

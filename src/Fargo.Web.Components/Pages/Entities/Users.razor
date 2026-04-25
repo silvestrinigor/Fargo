@@ -2,10 +2,10 @@
 @page "/entities/users/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk
 @using Fargo.Sdk.Users
 @using Fargo.Sdk.UserGroups
-@inject IEngine Engine
+@inject IUserManager UserManager
+@inject IUserGroupManager UserGroupManager
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Users</PageTitle>
@@ -334,7 +334,7 @@
 </EditorDialog>
 
 <EntityPickerDialog TEntity="User" IsOpen="_addMemberOpen" Title="Add member"
-                    Loader="s => Engine.Users.GetManyAsync(search: s)" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
+                    Loader="s => UserManager.GetManyAsync(search: s)" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
                     OnSelected="AddMemberAsync" OnCancel="() => _addMemberOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
@@ -345,7 +345,7 @@
 
 @* User dialogs *@
 <EntityPickerDialog TEntity="UserGroup" IsOpen="_addToGroupOpen" Title="Add to user group"
-                    Loader="s => Engine.UserGroups.GetManyAsync()" ColumnHeaders="@(new[] { "NameId", "Description" })"
+                    Loader="s => UserGroupManager.GetManyAsync()" ColumnHeaders="@(new[] { "NameId", "Description" })"
                     OnSelected="AddToGroupAsync" OnCancel="() => _addToGroupOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
@@ -470,12 +470,12 @@
     {
         await _treeState.RunAsync(async () =>
         {
-            var groups = await Engine.UserGroups.GetManyAsync();
-            var users = await Engine.Users.GetManyAsync();
+            var groups = await UserGroupManager.GetManyAsync();
+            var users = await UserManager.GetManyAsync();
 
             var membershipTasks = users.Select(async u =>
             {
-                var ug = await Engine.UserGroups.GetManyAsync(userGuid: u.Guid);
+                var ug = await UserGroupManager.GetManyAsync(userGuid: u.Guid);
                 return (User: u, GroupGuids: ug.Select(g => g.Guid).ToHashSet());
             });
             var memberships = await Task.WhenAll(membershipTasks);
@@ -530,7 +530,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _groupMembers.Clear();
         await _groupLoad.RunAsync(async () =>
         {
-            _group = await Engine.UserGroups.GetAsync(groupGuid);
+            _group = await UserGroupManager.GetAsync(groupGuid);
             _groupEdit.Nameid = _group.Nameid;
             _groupEdit.Description = _group.Description;
             _origGroupNameid = _group.Nameid;
@@ -547,10 +547,10 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         var groupGuid = _group.Guid;
         await _membersLoad.RunAsync(async () =>
         {
-            var allUsers = await Engine.Users.GetManyAsync();
+            var allUsers = await UserManager.GetManyAsync();
             var tasks = allUsers.Select(async u =>
             {
-                var ug = await Engine.UserGroups.GetManyAsync(userGuid: u.Guid);
+                var ug = await UserGroupManager.GetManyAsync(userGuid: u.Guid);
                 return (User: u, IsMember: ug.Any(g => g.Guid == groupGuid));
             });
             var results = await Task.WhenAll(tasks);
@@ -584,7 +584,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         if (_group is null) return;
         var ok = await _groupDelete.RunAsync(async () =>
         {
-            await Engine.UserGroups.DeleteAsync(_group.Guid);
+            await UserGroupManager.DeleteAsync(_group.Guid);
             _selectedGroupGuid = null;
             _group = null;
         }, "Failed to delete.");
@@ -617,7 +617,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
     {
         var ok = await _createGroup.RunAsync(async () =>
         {
-            var group = await Engine.UserGroups.CreateAsync(_createGroupForm.Nameid!);
+            var group = await UserGroupManager.CreateAsync(_createGroupForm.Nameid!);
             _createGroupOpen = false;
             _selectedGroupGuid = group.Guid;
             _loadedGuid = null;
@@ -671,7 +671,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _userGroups.Clear();
         await _load.RunAsync(async () =>
         {
-            _user = await Engine.Users.GetAsync(EntityGuid!.Value);
+            _user = await UserManager.GetAsync(EntityGuid!.Value);
             _edit.Nameid = _user.Nameid;
             _edit.FirstName = _user.FirstName;
             _edit.LastName = _user.LastName;
@@ -691,7 +691,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _userGroups.Clear();
         await _groupsLoad.RunAsync(async () =>
         {
-            var groups = await Engine.UserGroups.GetManyAsync(userGuid: _user.Guid);
+            var groups = await UserGroupManager.GetManyAsync(userGuid: _user.Guid);
             _userGroups.AddRange(groups);
         }, "Failed to load groups.");
     }
@@ -724,7 +724,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         if (_user is null) return;
         var ok = await _delete.RunAsync(async () =>
         {
-            await Engine.Users.DeleteAsync(_user.Guid);
+            await UserManager.DeleteAsync(_user.Guid);
             Navigation.NavigateTo("/entities/users");
         }, "Failed to delete.");
         if (ok)
@@ -756,7 +756,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
     {
         var ok = await _createUser.RunAsync(async () =>
         {
-            var user = await Engine.Users.CreateAsync(_createUserForm.Nameid!, _createUserForm.Password!);
+            var user = await UserManager.CreateAsync(_createUserForm.Nameid!, _createUserForm.Password!);
             Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
         }, "Failed to create.");
         if (ok) _createUserOpen = false;

@@ -1,4 +1,11 @@
-@inject IEngine Engine
+@using Fargo.Sdk.Partitions
+@using Fargo.Sdk.Articles
+@using Fargo.Sdk.Items
+@using Fargo.Sdk.Users
+@inject IPartitionManager Partitions
+@inject IArticleManager Articles
+@inject IItemManager Items
+@inject IUserManager Users
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(_errorMessage))
@@ -55,7 +62,7 @@ else
 
         try
         {
-            var roots = await Engine.Partitions.GetManyAsync(rootOnly: true);
+            var roots = await Partitions.GetManyAsync(rootOnly: true);
             _rootNodes.Clear();
             _rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }
@@ -82,7 +89,7 @@ else
 
         try
         {
-            var childPartitions = await Engine.Partitions.GetManyAsync(node.EntityGuid);
+            var childPartitions = await Partitions.GetManyAsync(node.EntityGuid);
             var entityNodes = await LoadEntityNodesForPartitionAsync(node.EntityGuid);
 
             node.Children.Clear();
@@ -110,8 +117,8 @@ else
         {
             case "articles":
             {
-                var articles = await Engine.Articles.GetManyAsync(partitionGuid: partitionGuid);
-                return articles.Select(a =>
+                var articleList = await Articles.GetManyAsync(partitionGuid: partitionGuid);
+                return articleList.Select(a =>
                 {
                     var n = TreeSidebarNode.FromArticle(a);
                     n.ContextPartitionGuid = partitionGuid;
@@ -120,8 +127,8 @@ else
             }
             case "items":
             {
-                var items = await Engine.Items.GetManyAsync(partitionGuid: partitionGuid);
-                return items.Select(i =>
+                var itemList = await Items.GetManyAsync(partitionGuid: partitionGuid);
+                return itemList.Select(i =>
                 {
                     var n = TreeSidebarNode.FromItem(i);
                     n.ContextPartitionGuid = partitionGuid;
@@ -130,8 +137,8 @@ else
             }
             case "users":
             {
-                var users = await Engine.Users.GetManyAsync(partitionGuid: partitionGuid);
-                return users.Select(u =>
+                var userList = await Users.GetManyAsync(partitionGuid: partitionGuid);
+                return userList.Select(u =>
                 {
                     var n = TreeSidebarNode.FromUser(u);
                     n.ContextPartitionGuid = partitionGuid;
@@ -190,19 +197,19 @@ else
             switch (EntitySection)
             {
                 case "articles":
-                    var article = await Engine.Articles.GetAsync(source.EntityGuid);
+                    var article = await Articles.GetAsync(source.EntityGuid);
                     addResult = await article.AddPartitionAsync(target.EntityGuid);
                     if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
                         removeResult = await article.RemovePartitionAsync(source.ContextPartitionGuid.Value);
                     break;
                 case "items":
-                    var item = await Engine.Items.GetAsync(source.EntityGuid);
+                    var item = await Items.GetAsync(source.EntityGuid);
                     addResult = await item.AddPartitionAsync(target.EntityGuid);
                     if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
                         removeResult = await item.RemovePartitionAsync(source.ContextPartitionGuid.Value);
                     break;
                 case "users":
-                    var user = await Engine.Users.GetAsync(source.EntityGuid);
+                    var user = await Users.GetAsync(source.EntityGuid);
                     addResult = await user.AddPartitionAsync(target.EntityGuid);
                     if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
                         removeResult = await user.RemovePartitionAsync(source.ContextPartitionGuid.Value);

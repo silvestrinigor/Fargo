@@ -1,4 +1,4 @@
-using Fargo.Sdk;
+using Fargo.Sdk.Partitions;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class PartitionTools(IEngine engine)
+public sealed class PartitionTools(IPartitionManager partitions)
 {
     [McpServerTool(Name = "list_partitions"), Description("Lists partitions. Omit parentPartitionGuid to list root partitions; provide it to list direct children.")]
     public async Task<string> ListPartitions(
@@ -15,16 +15,16 @@ public sealed class PartitionTools(IEngine engine)
         try
         {
             Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
-            var partitions = await engine.Partitions.GetManyAsync(
+            var result = await partitions.GetManyAsync(
                 parentPartitionGuid: parentGuid,
                 rootOnly: parentGuid is null ? true : null);
-            var results = partitions.Select(p => new { p.Guid, p.Name, p.Description, p.ParentPartitionGuid, p.IsActive }).ToList();
-            foreach (var p in partitions)
+            var list = result.Select(p => new { p.Guid, p.Name, p.Description, p.ParentPartitionGuid, p.IsActive }).ToList();
+            foreach (var p in result)
             {
                 await p.DisposeAsync();
             }
 
-            return JsonSerializer.Serialize(results);
+            return JsonSerializer.Serialize(list);
         }
         catch (Exception ex)
         {
@@ -38,7 +38,7 @@ public sealed class PartitionTools(IEngine engine)
     {
         try
         {
-            await using var partition = await engine.Partitions.GetAsync(Guid.Parse(partitionGuid));
+            await using var partition = await partitions.GetAsync(Guid.Parse(partitionGuid));
             return JsonSerializer.Serialize(new { partition.Guid, partition.Name, partition.Description, partition.ParentPartitionGuid, partition.IsActive });
         }
         catch (Exception ex)
@@ -56,7 +56,7 @@ public sealed class PartitionTools(IEngine engine)
         try
         {
             Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
-            await using var partition = await engine.Partitions.CreateAsync(name, description, parentGuid);
+            await using var partition = await partitions.CreateAsync(name, description, parentGuid);
             return $"Created partition with GUID: {partition.Guid}";
         }
         catch (Exception ex)
@@ -73,18 +73,14 @@ public sealed class PartitionTools(IEngine engine)
     {
         try
         {
-            await using var partition = await engine.Partitions.GetAsync(Guid.Parse(partitionGuid));
+            await using var partition = await partitions.GetAsync(Guid.Parse(partitionGuid));
             await partition.UpdateAsync(p =>
             {
                 if (name is not null)
-                {
                     p.Name = name;
-                }
 
                 if (description is not null)
-                {
                     p.Description = description;
-                }
             });
             return "Partition updated successfully.";
         }
@@ -100,7 +96,7 @@ public sealed class PartitionTools(IEngine engine)
     {
         try
         {
-            await engine.Partitions.DeleteAsync(Guid.Parse(partitionGuid));
+            await partitions.DeleteAsync(Guid.Parse(partitionGuid));
             return "Partition deleted successfully.";
         }
         catch (Exception ex)

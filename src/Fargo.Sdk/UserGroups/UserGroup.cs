@@ -14,7 +14,7 @@ public sealed class UserGroup : IAsyncDisposable
         string description,
         bool isActive,
         IReadOnlyCollection<ActionType> permissions,
-        IUserGroupClient client,
+        IUserGroupHttpClient client,
         Func<ValueTask>? onDispose = null)
     {
         Guid = guid;
@@ -26,7 +26,7 @@ public sealed class UserGroup : IAsyncDisposable
         _onDispose = onDispose;
     }
 
-    private readonly IUserGroupClient client;
+    private readonly IUserGroupHttpClient client;
     private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the user group.</summary>

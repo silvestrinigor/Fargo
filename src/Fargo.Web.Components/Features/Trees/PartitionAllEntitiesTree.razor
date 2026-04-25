@@ -1,4 +1,11 @@
-@inject IEngine Engine
+@using Fargo.Sdk.Partitions
+@using Fargo.Sdk.Articles
+@using Fargo.Sdk.Items
+@using Fargo.Sdk.Users
+@inject IPartitionManager Partitions
+@inject IArticleManager Articles
+@inject IItemManager Items
+@inject IUserManager Users
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(_errorMessage))
@@ -49,10 +56,10 @@ else
 
         try
         {
-            var rootPartitions = await Engine.Partitions.GetManyAsync(rootOnly: true);
-            var unpartitionedArticles = await Engine.Articles.GetManyAsync(noPartition: true, limit: 200);
-            var unpartitionedItems = await Engine.Items.GetManyAsync(noPartition: true, limit: 200);
-            var unpartitionedUsers = await Engine.Users.GetManyAsync(noPartition: true, limit: 200);
+            var rootPartitions = await Partitions.GetManyAsync(rootOnly: true);
+            var unpartitionedArticles = await Articles.GetManyAsync(noPartition: true, limit: 200);
+            var unpartitionedItems = await Items.GetManyAsync(noPartition: true, limit: 200);
+            var unpartitionedUsers = await Users.GetManyAsync(noPartition: true, limit: 200);
 
             _rootNodes.Clear();
             _rootNodes.AddRange(rootPartitions.Select(TreeSidebarNode.FromPartition));
@@ -83,10 +90,10 @@ else
 
         try
         {
-            var childPartitions = await Engine.Partitions.GetManyAsync(node.EntityGuid);
-            var articles = await Engine.Articles.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
-            var items = await Engine.Items.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
-            var users = await Engine.Users.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
+            var childPartitions = await Partitions.GetManyAsync(node.EntityGuid);
+            var articles = await Articles.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
+            var items = await Items.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
+            var users = await Users.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
 
             node.Children.Clear();
             node.Children.AddRange(childPartitions.Select(TreeSidebarNode.FromPartition));
@@ -186,21 +193,21 @@ else
 
             if (source.Icon == TreeSidebarNode.Icons.Article)
             {
-                var article = await Engine.Articles.GetAsync(source.EntityGuid);
+                var article = await Articles.GetAsync(source.EntityGuid);
                 addResult = await article.AddPartitionAsync(target.EntityGuid);
                 if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
                     removeResult = await article.RemovePartitionAsync(source.ContextPartitionGuid.Value);
             }
             else if (source.Icon == TreeSidebarNode.Icons.Item)
             {
-                var item = await Engine.Items.GetAsync(source.EntityGuid);
+                var item = await Items.GetAsync(source.EntityGuid);
                 addResult = await item.AddPartitionAsync(target.EntityGuid);
                 if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
                     removeResult = await item.RemovePartitionAsync(source.ContextPartitionGuid.Value);
             }
             else if (source.Icon == TreeSidebarNode.Icons.User)
             {
-                var user = await Engine.Users.GetAsync(source.EntityGuid);
+                var user = await Users.GetAsync(source.EntityGuid);
                 addResult = await user.AddPartitionAsync(target.EntityGuid);
                 if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
                     removeResult = await user.RemovePartitionAsync(source.ContextPartitionGuid.Value);
