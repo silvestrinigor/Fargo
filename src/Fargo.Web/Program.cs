@@ -21,7 +21,11 @@ builder.Services.AddAuthorizationCore();
 // (e.g. http://localhost:PORT in local dev, http://apiservice in containers).
 var apiUrl = builder.Configuration["services:apiservice:http:0"] ?? "http://apiservice";
 
-builder.Services.AddFargoSdk(o => o.Server = apiUrl)
+builder.Services.AddFargoSdk(o =>
+    {
+        o.Server = apiUrl;
+        o.ApiKey = builder.Configuration["Fargo:ApiKey"];
+    })
     .WithHubLifetime()
     .WithSessionStore<BrowserSdkSessionStore>();
 

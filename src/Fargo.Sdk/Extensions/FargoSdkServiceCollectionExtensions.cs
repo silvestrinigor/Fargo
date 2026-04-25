@@ -1,3 +1,4 @@
+using Fargo.Sdk.ApiClients;
 using Fargo.Sdk.Articles;
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Events;
@@ -110,6 +111,12 @@ public static class FargoSdkServiceCollectionExtensions
         Add<IUserGroupService, UserGroupService>();
         Add<IUserGroupEventSource, UserGroupEventSource>();
         Add<IUserGroupManager, UserGroupManager>();
+
+        // ApiClients
+        Add<IApiClientHttpClient, ApiClientHttpClient>();
+        Add<IApiClientService, ApiClientService>();
+        Add<IApiClientEventSource, ApiClientEventSource>();
+        Add<IApiClientManager, ApiClientManager>();
 
         return new FargoSdkBuilder(services);
     }

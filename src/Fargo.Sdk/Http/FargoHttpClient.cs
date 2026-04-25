@@ -305,5 +305,9 @@ public sealed class FargoHttpClient : IFargoHttpClient
         httpClient.DefaultRequestHeaders.Authorization = session.IsAuthenticated
             ? new AuthenticationHeaderValue("Bearer", session.AccessToken)
             : null;
+
+        httpClient.DefaultRequestHeaders.Remove("X-Api-Key");
+        if (!string.IsNullOrEmpty(options.ApiKey))
+            httpClient.DefaultRequestHeaders.Add("X-Api-Key", options.ApiKey);
     }
 }

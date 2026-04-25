@@ -1,3 +1,4 @@
+using Fargo.Api;
 using Fargo.Api.Extensions;
 using Fargo.Api.Hubs;
 using Fargo.Api.Middlewares;
@@ -30,6 +31,8 @@ builder.Services.AddFargoInfrastructure(builder.Configuration);
 
 builder.Services.AddFargoAuthentication(builder.Configuration);
 
+builder.Services.Configure<ApiClientOptions>(builder.Configuration.GetSection(ApiClientOptions.SectionName));
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -37,6 +40,8 @@ var app = builder.Build();
 app.UseResponseCompression();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
+
+app.UseMiddleware<ApiClientMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -46,6 +51,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapFargoApiClient();
 
 app.MapFargoArticle();
 

@@ -1,4 +1,5 @@
 using Fargo.Application;
+using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;
@@ -107,6 +108,8 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
+            services.AddScoped<IApiClientRepository, ApiClientRepository>();
+            services.AddScoped<IApiClientQueryRepository, ApiClientRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IBarcodeRepository, BarcodeRepository>();
@@ -124,6 +127,12 @@ public static class ServiceCollectionExtensions
         private void AddHandlers()
         {
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
+
+            services.AddScoped<ICommandHandler<ApiClientCreateCommand, ApiClientCreatedResult>, ApiClientCreateCommandHandler>();
+            services.AddScoped<ICommandHandler<ApiClientUpdateCommand>, ApiClientUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<ApiClientDeleteCommand>, ApiClientDeleteCommandHandler>();
+            services.AddScoped<IQueryHandler<ApiClientSingleQuery, ApiClientInformation?>, ApiClientSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<ApiClientManyQuery, IReadOnlyCollection<ApiClientInformation>>, ApiClientManyQueryHandler>();
 
             services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
             services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();

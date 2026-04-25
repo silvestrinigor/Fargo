@@ -1,0 +1,56 @@
+using Fargo.Sdk.Http;
+
+namespace Fargo.Sdk.ApiClients;
+
+/// <summary>Default implementation of <see cref="IApiClientHttpClient"/>.</summary>
+public sealed class ApiClientHttpClient : IApiClientHttpClient
+{
+    public ApiClientHttpClient(IFargoHttpClient httpClient)
+    {
+        this.httpClient = httpClient;
+    }
+
+    private readonly IFargoHttpClient httpClient;
+
+    public async Task<FargoSdkResponse<ApiClientResult>> GetAsync(Guid apiClientGuid, CancellationToken cancellationToken = default)
+    {
+        var r = await httpClient.GetAsync<ApiClientResult>($"/api-clients/{apiClientGuid}", cancellationToken);
+        return r.IsSuccess ? new(r.Data!) : new(MapError(r.Problem));
+    }
+
+    public async Task<FargoSdkResponse<IReadOnlyCollection<ApiClientResult>>> GetManyAsync(int? page = null, int? limit = null, string? search = null, CancellationToken cancellationToken = default)
+    {
+        var query = FargoHttpClient.BuildQuery(
+            ("page", page?.ToString()),
+            ("limit", limit?.ToString()),
+            ("search", search));
+        var r = await httpClient.GetAsync<IReadOnlyCollection<ApiClientResult>>($"/api-clients{query}", cancellationToken);
+        return r.IsSuccess ? new(r.Data ?? []) : new(MapError(r.Problem));
+    }
+
+    public async Task<FargoSdkResponse<ApiClientCreatedResult>> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default)
+    {
+        var r = await httpClient.PostFromJsonAsync<object, ApiClientCreatedResult>("/api-clients", new { name, description }, cancellationToken);
+        return r.IsSuccess ? new(r.Data!) : new(MapError(r.Problem));
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid apiClientGuid, string? name, string? description, bool? isActive, CancellationToken cancellationToken = default)
+    {
+        var r = await httpClient.PatchJsonAsync("/api-clients/" + apiClientGuid, new { name, description, isActive }, cancellationToken);
+        return r.IsSuccess ? new(new EmptyResult()) : new(MapError(r.Problem));
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> DeleteAsync(Guid apiClientGuid, CancellationToken cancellationToken = default)
+    {
+        var r = await httpClient.DeleteAsync($"/api-clients/{apiClientGuid}", cancellationToken);
+        return r.IsSuccess ? new(new EmptyResult()) : new(MapError(r.Problem));
+    }
+
+    private static FargoSdkError MapError(FargoProblemDetails? problem) =>
+        problem?.Type switch
+        {
+            "api-client/not-found" => new FargoSdkError(FargoSdkErrorType.NotFound, problem.Detail ?? "API client not found."),
+            "user/forbidden" or "entity/access-denied" => new FargoSdkError(FargoSdkErrorType.Forbidden, problem?.Detail ?? "Access denied."),
+            _ => new FargoSdkError(FargoSdkErrorType.Undefined, problem?.Detail ?? "An unexpected error occurred.")
+        };
+}

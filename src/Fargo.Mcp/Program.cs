@@ -12,11 +12,16 @@ var nameid = Environment.GetEnvironmentVariable("FARGO_NAMEID")
     ?? throw new InvalidOperationException("FARGO_NAMEID environment variable is required.");
 var password = Environment.GetEnvironmentVariable("FARGO_PASSWORD")
     ?? throw new InvalidOperationException("FARGO_PASSWORD environment variable is required.");
+var apiKey = Environment.GetEnvironmentVariable("FARGO_API_KEY");
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Warning);
 
-builder.Services.AddFargoSdk(o => o.Server = server, ServiceLifetime.Singleton);
+builder.Services.AddFargoSdk(o =>
+    {
+        o.Server = server;
+        o.ApiKey = apiKey;
+    }, ServiceLifetime.Singleton);
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
