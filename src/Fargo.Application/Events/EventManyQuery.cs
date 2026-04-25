@@ -10,7 +10,6 @@ public sealed record EventManyQuery(
     EntityType? EntityType = null,
     EventType? EventType = null,
     Guid? ActorGuid = null,
-    Guid? ApiClientGuid = null,
     DateTimeOffset? From = null,
     DateTimeOffset? To = null,
     Pagination? Pagination = null
@@ -35,7 +34,6 @@ public sealed class EventManyQueryHandler(
             query.EntityType,
             query.EventType,
             query.ActorGuid,
-            query.ApiClientGuid,
             query.From,
             query.To,
             query.Pagination,

@@ -9,6 +9,5 @@ public sealed record EventInformation(
     EntityType EntityType,
     Guid EntityGuid,
     Guid ActorGuid,
-    Guid ApiClientGuid,
     DateTimeOffset OccurredAt
 );

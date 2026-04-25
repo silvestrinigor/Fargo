@@ -15,9 +15,6 @@ public sealed class Event : Entity
     /// <summary>Gets the type of the entity involved in the event.</summary>
     public EntityType EntityType { get; init; }
 
-    /// <summary>Gets the unique identifier of the API client through which the action was performed.</summary>
-    public Guid ApiClientGuid { get; init; }
-
     /// <summary>Gets the point in time when the event occurred.</summary>
     public DateTimeOffset OccurredAt { get; init; } = DateTimeOffset.UtcNow;
 

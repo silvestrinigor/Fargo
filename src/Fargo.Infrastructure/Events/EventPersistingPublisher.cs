@@ -15,7 +15,6 @@ public sealed class EventPersistingPublisher(
     IFargoEventPublisher inner,
     FargoDbContext db,
     ICurrentUser currentUser,
-    ICurrentApiClient currentApiClient,
     ILogger<EventPersistingPublisher> logger
 ) : IFargoEventPublisher
 {
@@ -119,7 +118,6 @@ public sealed class EventPersistingPublisher(
                 EntityType = entityType,
                 EntityGuid = entityGuid,
                 ActorGuid = currentUser.UserGuid,
-                ApiClientGuid = currentApiClient.ApiClientGuid,
             });
 
             await db.SaveChangesAsync(ct);

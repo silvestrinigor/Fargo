@@ -45,7 +45,6 @@ public static class ServiceCollectionExtensions
             AddImageStorage(services, configuration);
 
             services.AddScoped<ICurrentUser, CurrentUser>();
-            services.AddScoped<ICurrentApiClient, CurrentApiClient>();
 
             return services;
         }

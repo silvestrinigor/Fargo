@@ -13,7 +13,6 @@ public sealed class EventRepository(FargoDbContext context) : IEventQueryReposit
         EntityType? entityType,
         EventType? eventType,
         Guid? actorGuid,
-        Guid? apiClientGuid,
         DateTimeOffset? from,
         DateTimeOffset? to,
         Pagination? pagination,
@@ -33,9 +32,6 @@ public sealed class EventRepository(FargoDbContext context) : IEventQueryReposit
         if (actorGuid.HasValue)
             query = query.Where(e => e.ActorGuid == actorGuid.Value);
 
-        if (apiClientGuid.HasValue)
-            query = query.Where(e => e.ApiClientGuid == apiClientGuid.Value);
-
         if (from.HasValue)
             query = query.Where(e => e.OccurredAt >= from.Value);
 
@@ -54,7 +50,6 @@ public sealed class EventRepository(FargoDbContext context) : IEventQueryReposit
                 e.EntityType,
                 e.EntityGuid,
                 e.ActorGuid,
-                e.ApiClientGuid,
                 e.OccurredAt))
             .ToListAsync(cancellationToken);
     }

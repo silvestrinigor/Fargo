@@ -15,7 +15,6 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.HasIndex(x => x.EntityGuid);
         builder.HasIndex(x => x.EntityType);
         builder.HasIndex(x => x.ActorGuid);
-        builder.HasIndex(x => x.ApiClientGuid);
         builder.HasIndex(x => x.OccurredAt);
         builder.HasIndex(x => new { x.EntityGuid, x.OccurredAt });
     }

@@ -29,7 +29,6 @@ public static class EventEndpointRouteBuilderExtension
         EntityType? entityType,
         EventType? eventType,
         Guid? actorGuid,
-        Guid? apiClientGuid,
         DateTimeOffset? from,
         DateTimeOffset? to,
         Page? page,
@@ -41,7 +40,6 @@ public static class EventEndpointRouteBuilderExtension
             EntityType: entityType,
             EventType: eventType,
             ActorGuid: actorGuid,
-            ApiClientGuid: apiClientGuid,
             From: from,
             To: to,
             Pagination: PaginationHelpers.CreatePagination(page, limit));

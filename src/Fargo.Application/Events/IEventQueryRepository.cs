@@ -12,7 +12,6 @@ public interface IEventQueryRepository
         EntityType? entityType,
         EventType? eventType,
         Guid? actorGuid,
-        Guid? apiClientGuid,
         DateTimeOffset? from,
         DateTimeOffset? to,
         Pagination? pagination,

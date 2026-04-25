@@ -18,7 +18,6 @@ builder.Services.AddScoped<IFargoEventPublisher>(sp => new EventPersistingPublis
     sp.GetRequiredKeyedService<IFargoEventPublisher>("signalr"),
     sp.GetRequiredService<FargoDbContext>(),
     sp.GetRequiredService<ICurrentUser>(),
-    sp.GetRequiredService<ICurrentApiClient>(),
     sp.GetRequiredService<ILogger<EventPersistingPublisher>>()
 ));
 
