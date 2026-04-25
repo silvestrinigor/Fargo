@@ -4,8 +4,6 @@ using Fargo.Domain.Users;
 
 namespace Fargo.Domain.Partitions;
 
-// TODO: the Global partition is a application logic. The domain should be able to handle cenarios that the global partition dont exist.
-// TODO: When the entity is not in any partition means that the entity is public.
 /// <summary>
 /// Represents a partition used to isolate and scope access to domain entities.
 /// </summary>
@@ -33,11 +31,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// The name identifies the partition and must satisfy the validation
     /// rules defined by <see cref="Name"/>.
     /// </remarks>
-    public required Name Name
-    {
-        get;
-        set;
-    }
+    public required Name Name { get; set; }
 
     /// <summary>
     /// Gets or sets the description of the partition.
@@ -47,11 +41,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// purpose or scope of the partition. If not explicitly defined,
     /// it defaults to <see cref="Description.Empty"/>.
     /// </remarks>
-    public Description Description
-    {
-        get;
-        set;
-    } = Description.Empty;
+    public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the partition is active.
@@ -60,11 +50,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// Inactive partitions should not be considered available for new access
     /// assignments or operational use, depending on application rules.
     /// </remarks>
-    public bool IsActive
-    {
-        get;
-        set;
-    } = true;
+    public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Gets the unique identifier of the parent partition, if any.
@@ -73,11 +59,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// A <see langword="null"/> value indicates that the current partition
     /// is a root partition in the hierarchy.
     /// </remarks>
-    public Guid? ParentPartitionGuid
-    {
-        get;
-        private set;
-    }
+    public Guid? ParentPartitionGuid { get; private set; }
 
     /// <summary>
     /// Gets the parent partition of the current partition, if any.
