@@ -5,6 +5,7 @@ namespace Fargo.Sdk.Authentication;
 /// <summary>Default implementation of <see cref="IAuthenticationHttpClient"/>.</summary>
 public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
 {
+    /// <summary>Initializes a new instance.</summary>
     public AuthenticationHttpClient(IFargoHttpClient httpClient)
     {
         this.httpClient = httpClient;
@@ -12,6 +13,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
 
     private readonly IFargoHttpClient httpClient;
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<AuthResult>> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, AuthResult>(
@@ -27,6 +29,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
         return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<AuthResult>> Refresh(string refreshToken, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, AuthResult>(
@@ -42,6 +45,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
         return new FargoSdkResponse<AuthResult>(httpResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> LogOutAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostJsonAsync(
@@ -57,6 +61,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync(

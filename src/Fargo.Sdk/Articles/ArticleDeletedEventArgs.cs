@@ -1,7 +1,7 @@
 namespace Fargo.Sdk.Articles;
 
 /// <summary>
-/// Provides data for the <see cref="IArticleManager.Deleted"/> event.
+/// Provides data for the <see cref="Article.Deleted"/> event.
 /// </summary>
 public sealed class ArticleDeletedEventArgs(Guid guid) : EventArgs
 {

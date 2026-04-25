@@ -5,6 +5,7 @@ namespace Fargo.Sdk.Partitions;
 /// <summary>Default implementation of <see cref="IPartitionHttpClient"/>.</summary>
 public sealed class PartitionHttpClient : IPartitionHttpClient
 {
+    /// <summary>Initializes a new instance.</summary>
     public PartitionHttpClient(IFargoHttpClient httpClient)
     {
         this.httpClient = httpClient;
@@ -12,6 +13,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
 
     private readonly IFargoHttpClient httpClient;
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<PartitionResult>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
@@ -25,6 +27,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
         return new FargoSdkResponse<PartitionResult>(httpResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
@@ -45,6 +48,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
         return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(string name, string? description = null, Guid? parentPartitionGuid = null, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
@@ -60,6 +64,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
         return new FargoSdkResponse<Guid>(httpResponse.Data);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, string? name = null, string? description = null, Guid? parentPartitionGuid = null, bool? isActive = null, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
@@ -75,6 +80,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> DeleteAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.DeleteAsync($"/partitions/{partitionGuid}", cancellationToken);

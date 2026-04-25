@@ -6,7 +6,7 @@ namespace Fargo.Domain.Partitions;
 /// </summary>
 /// <remarks>
 /// This service encapsulates logic for retrieving partitions while enforcing
-/// access rules based on the effective partition access of a <see cref="User"/>.
+/// access rules based on the effective partition access of a <see cref="Fargo.Domain.Users.User"/>.
 ///
 /// Effective access may be granted either:
 /// <list type="bullet">
@@ -14,7 +14,7 @@ namespace Fargo.Domain.Partitions;
 /// <description>directly to the user</description>
 /// </item>
 /// <item>
-/// <description>indirectly through one of the user's <see cref="UserGroup"/> memberships</description>
+/// <description>indirectly through one of the user's <see cref="Fargo.Domain.Users.UserGroup"/> memberships</description>
 /// </item>
 /// </list>
 ///

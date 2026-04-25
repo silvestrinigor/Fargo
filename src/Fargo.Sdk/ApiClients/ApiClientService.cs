@@ -5,6 +5,9 @@ namespace Fargo.Sdk.ApiClients;
 /// <summary>Default implementation of <see cref="IApiClientService"/>.</summary>
 public sealed class ApiClientService : IApiClientService
 {
+    /// <summary>Initializes a new instance, subscribing to hub events for updates and deletions.</summary>
+    /// <param name="client">The HTTP client for API client endpoints.</param>
+    /// <param name="hub">The event hub used to receive real-time notifications.</param>
     public ApiClientService(IApiClientHttpClient client, IFargoEventHub hub)
     {
         this.client = client;
@@ -25,6 +28,7 @@ public sealed class ApiClientService : IApiClientService
     private readonly Dictionary<Guid, ApiClient> tracked = new();
     private readonly IApiClientHttpClient client;
 
+    /// <inheritdoc />
     public async Task<ApiClient> GetAsync(Guid apiClientGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.GetAsync(apiClientGuid, cancellationToken);
@@ -32,6 +36,7 @@ public sealed class ApiClientService : IApiClientService
         return ToEntity(response.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<ApiClient>> GetManyAsync(int? page = null, int? limit = null, string? search = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetManyAsync(page, limit, search, cancellationToken);
@@ -39,6 +44,7 @@ public sealed class ApiClientService : IApiClientService
         return response.Data!.Select(ToEntity).ToList();
     }
 
+    /// <inheritdoc />
     public async Task<(ApiClient Client, string PlainKey)> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default)
     {
         var response = await client.CreateAsync(name, description, cancellationToken);
@@ -53,6 +59,7 @@ public sealed class ApiClientService : IApiClientService
         return (entity, r.PlainKey);
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Guid apiClientGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteAsync(apiClientGuid, cancellationToken);

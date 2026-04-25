@@ -5,6 +5,7 @@ namespace Fargo.Sdk.Items;
 /// <summary>Default implementation of <see cref="IItemService"/>.</summary>
 public sealed class ItemService : IItemService
 {
+    /// <summary>Initializes a new instance.</summary>
     public ItemService(IItemHttpClient client, IFargoEventHub hub)
     {
         this.client = client;
@@ -32,6 +33,7 @@ public sealed class ItemService : IItemService
     private readonly IItemHttpClient client;
     private readonly IFargoEventHub hub;
 
+    /// <inheritdoc />
     public async Task<Item> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetAsync(itemGuid, temporalAsOf, cancellationToken);
@@ -44,6 +46,7 @@ public sealed class ItemService : IItemService
         return await ToEntityAsync(response.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<Item>> GetManyAsync(Guid? articleGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, bool? noPartition = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetManyAsync(articleGuid, temporalAsOf, page, limit, partitionGuid, noPartition, cancellationToken);
@@ -62,6 +65,7 @@ public sealed class ItemService : IItemService
         return entities;
     }
 
+    /// <inheritdoc />
     public async Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default)
     {
         var response = await client.CreateAsync(articleGuid, firstPartition, cancellationToken);
@@ -77,6 +81,7 @@ public sealed class ItemService : IItemService
         return item;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Guid itemGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteAsync(itemGuid, cancellationToken);

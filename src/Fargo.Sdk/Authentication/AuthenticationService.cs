@@ -8,6 +8,7 @@ namespace Fargo.Sdk.Authentication;
 /// </summary>
 public sealed class AuthenticationService : IAuthenticationService
 {
+    /// <summary>Initializes a new instance.</summary>
     public AuthenticationService(
         IAuthenticationHttpClient client,
         AuthSession session,
@@ -25,15 +26,20 @@ public sealed class AuthenticationService : IAuthenticationService
     private readonly ILogger logger;
     private readonly ISessionStore? sessionStore;
 
+    /// <inheritdoc />
     public event EventHandler<LoggedInEventArgs>? LoggedIn;
+    /// <inheritdoc />
     public event EventHandler<LoggedOutEventArgs>? LoggedOut;
+    /// <inheritdoc />
     public event EventHandler<RefreshedEventArgs>? Refreshed;
+    /// <inheritdoc />
     public event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
 
     public IAuthSession Session => session;
     public bool IsAuthenticated => session.IsAuthenticated;
     public bool IsExpired => session.IsExpired;
 
+    /// <inheritdoc />
     public async Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
         if (IsAuthenticated)
@@ -61,6 +67,7 @@ public sealed class AuthenticationService : IAuthenticationService
         return result.Data;
     }
 
+    /// <inheritdoc />
     public async Task LogOutAsync(CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
@@ -90,6 +97,7 @@ public sealed class AuthenticationService : IAuthenticationService
         LoggedOut?.Invoke(this, new LoggedOutEventArgs(nameid!));
     }
 
+    /// <inheritdoc />
     public async Task<AuthResult> RefreshAsync(CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
@@ -117,6 +125,7 @@ public sealed class AuthenticationService : IAuthenticationService
         return result.Data;
     }
 
+    /// <inheritdoc />
     public async Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
@@ -135,6 +144,7 @@ public sealed class AuthenticationService : IAuthenticationService
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
     }
 
+    /// <inheritdoc />
     public async Task<bool> RestoreAsync(CancellationToken cancellationToken = default)
     {
         if (sessionStore is null)

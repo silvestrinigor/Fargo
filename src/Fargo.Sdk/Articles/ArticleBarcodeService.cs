@@ -3,6 +3,7 @@ namespace Fargo.Sdk.Articles;
 /// <summary>Default implementation of <see cref="IArticleBarcodeService"/>.</summary>
 public sealed class ArticleBarcodeService : IArticleBarcodeService
 {
+    /// <summary>Initializes a new instance.</summary>
     public ArticleBarcodeService(IArticleHttpClient client)
     {
         this.client = client;
@@ -10,6 +11,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
 
     private readonly IArticleHttpClient client;
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
@@ -24,6 +26,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
         return response.Data ?? [];
     }
 
+    /// <inheritdoc />
     public async Task<Guid> AddBarcodeAsync(
         Guid articleGuid,
         string code,
@@ -40,6 +43,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
         return response.Data;
     }
 
+    /// <inheritdoc />
     public async Task RemoveBarcodeAsync(
         Guid articleGuid,
         Guid barcodeGuid,

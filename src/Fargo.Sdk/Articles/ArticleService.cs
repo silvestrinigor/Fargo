@@ -8,6 +8,7 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class ArticleService : IArticleService
 {
+    /// <summary>Initializes a new instance.</summary>
     public ArticleService(IArticleHttpClient client, IFargoEventHub hub)
     {
         this.client = client;
@@ -35,6 +36,7 @@ public sealed class ArticleService : IArticleService
     private readonly IArticleHttpClient client;
     private readonly IFargoEventHub hub;
 
+    /// <inheritdoc />
     public async Task<Article> GetAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
@@ -50,6 +52,7 @@ public sealed class ArticleService : IArticleService
         return await ToEntityAsync(response.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<Article>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
@@ -75,6 +78,7 @@ public sealed class ArticleService : IArticleService
         return entities;
     }
 
+    /// <inheritdoc />
     public async Task<Article> CreateAsync(
         string name,
         string? description = null,
@@ -98,6 +102,7 @@ public sealed class ArticleService : IArticleService
         return article;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Guid articleGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteAsync(articleGuid, cancellationToken);

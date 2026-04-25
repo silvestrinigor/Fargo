@@ -5,6 +5,7 @@ namespace Fargo.Sdk.Users;
 /// <summary>Default implementation of <see cref="IUserService"/>.</summary>
 public sealed class UserService : IUserService
 {
+    /// <summary>Initializes a new instance.</summary>
     public UserService(IUserHttpClient client, IFargoEventHub hub)
     {
         this.client = client;
@@ -32,6 +33,7 @@ public sealed class UserService : IUserService
     private readonly IUserHttpClient client;
     private readonly IFargoEventHub hub;
 
+    /// <inheritdoc />
     public async Task<User> GetAsync(Guid userGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetAsync(userGuid, temporalAsOf, cancellationToken);
@@ -44,6 +46,7 @@ public sealed class UserService : IUserService
         return await ToEntityAsync(response.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<User>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, string? search = null, bool? noPartition = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetManyAsync(temporalAsOf, page, limit, partitionGuid, search, noPartition, cancellationToken);
@@ -62,6 +65,7 @@ public sealed class UserService : IUserService
         return entities;
     }
 
+    /// <inheritdoc />
     public async Task<User> CreateAsync(string nameid, string password, string? firstName = null, string? lastName = null, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, Guid? firstPartition = null, CancellationToken cancellationToken = default)
     {
         var createResponse = await client.CreateAsync(nameid, password, firstName, lastName, description, permissions, defaultPasswordExpirationPeriod, firstPartition, cancellationToken);
@@ -81,6 +85,7 @@ public sealed class UserService : IUserService
         return await ToEntityAsync(getResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Guid userGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteAsync(userGuid, cancellationToken);

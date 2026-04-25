@@ -5,6 +5,7 @@ namespace Fargo.Sdk.Partitions;
 /// <summary>Default implementation of <see cref="IPartitionService"/>.</summary>
 public sealed class PartitionService : IPartitionService
 {
+    /// <summary>Initializes a new instance.</summary>
     public PartitionService(IPartitionHttpClient client, IFargoEventHub hub)
     {
         this.client = client;
@@ -32,6 +33,7 @@ public sealed class PartitionService : IPartitionService
     private readonly IPartitionHttpClient client;
     private readonly IFargoEventHub hub;
 
+    /// <inheritdoc />
     public async Task<Partition> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetAsync(partitionGuid, temporalAsOf, cancellationToken);
@@ -44,6 +46,7 @@ public sealed class PartitionService : IPartitionService
         return await ToEntityAsync(response.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<Partition>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetManyAsync(parentPartitionGuid, temporalAsOf, page, limit, rootOnly, search, cancellationToken);
@@ -62,6 +65,7 @@ public sealed class PartitionService : IPartitionService
         return entities;
     }
 
+    /// <inheritdoc />
     public async Task<Partition> CreateAsync(string name, string? description = null, Guid? parentPartitionGuid = null, CancellationToken cancellationToken = default)
     {
         var response = await client.CreateAsync(name, description, parentPartitionGuid, cancellationToken);
@@ -77,6 +81,7 @@ public sealed class PartitionService : IPartitionService
         return partition;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteAsync(partitionGuid, cancellationToken);

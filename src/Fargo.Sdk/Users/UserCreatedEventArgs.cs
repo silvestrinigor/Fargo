@@ -1,6 +1,6 @@
 namespace Fargo.Sdk.Users;
 
-/// <summary>Provides data for the <see cref="IUserManager.Created"/> event.</summary>
+/// <summary>Provides data for the <see cref="IUserEventSource.Created"/> event.</summary>
 public sealed class UserCreatedEventArgs(Guid guid, string nameid) : EventArgs
 {
     /// <summary>Gets the unique identifier of the created user.</summary>

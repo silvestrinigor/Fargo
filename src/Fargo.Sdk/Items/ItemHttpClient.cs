@@ -6,6 +6,8 @@ namespace Fargo.Sdk.Items;
 /// <summary>Default implementation of <see cref="IItemHttpClient"/>.</summary>
 public sealed class ItemHttpClient : IItemHttpClient
 {
+    /// <summary>Initializes a new instance with the given HTTP client.</summary>
+    /// <param name="httpClient">The Fargo HTTP client used to make requests.</param>
     public ItemHttpClient(IFargoHttpClient httpClient)
     {
         this.httpClient = httpClient;
@@ -13,6 +15,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
     private readonly IFargoHttpClient httpClient;
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<ItemResult>> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
@@ -26,6 +29,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<ItemResult>(httpResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<ItemResult>>> GetManyAsync(Guid? articleGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, bool? noPartition = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
@@ -46,6 +50,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<IReadOnlyCollection<ItemResult>>(httpResponse.Data ?? []);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
@@ -61,6 +66,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<Guid>(httpResponse.Data);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync($"/items/{itemGuid}", new { }, cancellationToken);
@@ -73,6 +79,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> DeleteAsync(Guid itemGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.DeleteAsync($"/items/{itemGuid}", cancellationToken);
@@ -85,6 +92,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(Guid itemGuid, Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostJsonAsync($"/items/{itemGuid}/partitions/{partitionGuid}", new { }, cancellationToken);
@@ -97,6 +105,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(Guid itemGuid, Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.DeleteAsync($"/items/{itemGuid}/partitions/{partitionGuid}", cancellationToken);
@@ -109,6 +118,7 @@ public sealed class ItemHttpClient : IItemHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(Guid itemGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>($"/items/{itemGuid}/partitions", cancellationToken);

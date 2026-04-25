@@ -3,6 +3,7 @@ namespace Fargo.Sdk.Articles;
 /// <summary>Default implementation of <see cref="IArticleImageService"/>.</summary>
 public sealed class ArticleImageService : IArticleImageService
 {
+    /// <summary>Initializes a new instance.</summary>
     public ArticleImageService(IArticleHttpClient client)
     {
         this.client = client;
@@ -10,6 +11,7 @@ public sealed class ArticleImageService : IArticleImageService
 
     private readonly IArticleHttpClient client;
 
+    /// <inheritdoc />
     public async Task UploadImageAsync(
         Guid articleGuid,
         Stream stream,
@@ -25,6 +27,7 @@ public sealed class ArticleImageService : IArticleImageService
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteImageAsync(Guid articleGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteImageAsync(articleGuid, cancellationToken);
@@ -35,6 +38,7 @@ public sealed class ArticleImageService : IArticleImageService
         }
     }
 
+    /// <inheritdoc />
     public Task<(Stream Stream, string ContentType)?> GetImageAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)

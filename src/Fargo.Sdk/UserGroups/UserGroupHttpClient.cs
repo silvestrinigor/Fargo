@@ -6,6 +6,7 @@ namespace Fargo.Sdk.UserGroups;
 /// <summary>Default implementation of <see cref="IUserGroupHttpClient"/>.</summary>
 public sealed class UserGroupHttpClient : IUserGroupHttpClient
 {
+    /// <summary>Initializes a new instance.</summary>
     public UserGroupHttpClient(IFargoHttpClient httpClient)
     {
         this.httpClient = httpClient;
@@ -13,6 +14,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
 
     private readonly IFargoHttpClient httpClient;
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<UserGroupResult>> GetAsync(Guid userGroupGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
@@ -26,6 +28,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
         return new FargoSdkResponse<UserGroupResult>(httpResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<UserGroupResult>>> GetManyAsync(Guid? userGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
@@ -44,6 +47,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
         return new FargoSdkResponse<IReadOnlyCollection<UserGroupResult>>(httpResponse.Data ?? []);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(string nameid, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, Guid? firstPartition = null, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
@@ -68,6 +72,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
         return new FargoSdkResponse<Guid>(httpResponse.Data);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGroupGuid, string? nameid = null, string? description = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
@@ -83,6 +88,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> DeleteAsync(Guid userGroupGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.DeleteAsync($"/user-groups/{userGroupGuid}", cancellationToken);
@@ -95,6 +101,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(Guid userGroupGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>($"/user-groups/{userGroupGuid}/partitions", cancellationToken);

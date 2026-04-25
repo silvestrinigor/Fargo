@@ -5,6 +5,7 @@ namespace Fargo.Sdk.UserGroups;
 /// <summary>Default implementation of <see cref="IUserGroupService"/>.</summary>
 public sealed class UserGroupService : IUserGroupService
 {
+    /// <summary>Initializes a new instance.</summary>
     public UserGroupService(IUserGroupHttpClient client, IFargoEventHub hub)
     {
         this.client = client;
@@ -32,6 +33,7 @@ public sealed class UserGroupService : IUserGroupService
     private readonly IUserGroupHttpClient client;
     private readonly IFargoEventHub hub;
 
+    /// <inheritdoc />
     public async Task<UserGroup> GetAsync(Guid userGroupGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetAsync(userGroupGuid, temporalAsOf, cancellationToken);
@@ -44,6 +46,7 @@ public sealed class UserGroupService : IUserGroupService
         return await ToEntityAsync(response.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<UserGroup>> GetManyAsync(Guid? userGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, CancellationToken cancellationToken = default)
     {
         var response = await client.GetManyAsync(userGuid, temporalAsOf, page, limit, cancellationToken);
@@ -62,6 +65,7 @@ public sealed class UserGroupService : IUserGroupService
         return entities;
     }
 
+    /// <inheritdoc />
     public async Task<UserGroup> CreateAsync(string nameid, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, Guid? firstPartition = null, CancellationToken cancellationToken = default)
     {
         var response = await client.CreateAsync(nameid, description, permissions, firstPartition, cancellationToken);
@@ -77,6 +81,7 @@ public sealed class UserGroupService : IUserGroupService
         return userGroup;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Guid userGroupGuid, CancellationToken cancellationToken = default)
     {
         var response = await client.DeleteAsync(userGroupGuid, cancellationToken);
