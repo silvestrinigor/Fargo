@@ -16,7 +16,7 @@ internal sealed class FargoHubConnection : IAsyncDisposable
         }
 
         connection = new HubConnectionBuilder()
-            .WithUrl(serverUrl.TrimEnd('/') + "/events", opts =>
+            .WithUrl(serverUrl.TrimEnd('/') + "/hub/events", opts =>
             {
                 opts.AccessTokenProvider = tokenProvider;
             })

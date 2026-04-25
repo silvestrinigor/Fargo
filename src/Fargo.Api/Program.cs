@@ -82,6 +82,6 @@ app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();
 
-app.MapHub<FargoEventHub>("/events");
+app.MapHub<FargoEventHub>("/hub/events");
 
 app.Run();

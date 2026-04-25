@@ -12,7 +12,7 @@ public static class EventEndpointRouteBuilderExtension
     public static void MapFargoEvent(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/api/events")
+            .MapGroup("/events")
             .RequireAuthorization()
             .WithTags("Events");
 
