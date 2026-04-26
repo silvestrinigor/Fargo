@@ -19,24 +19,26 @@ public sealed class Engine : IDisposable
 {
     public Engine(ILoggerFactory? loggerFactory = null, ISessionStore? sessionStore = null)
     {
-        _options = new FargoSdkOptions();
-        _httpClient = new System.Net.Http.HttpClient();
-        _authSession = new AuthSession();
+        options = new FargoSdkOptions();
+
+        httpClient = new HttpClient();
+
+        authSession = new AuthSession();
 
         // Break circular dependency: FargoHttpClient → IAuthenticationService → AuthenticationHttpClient → IFargoHttpClient
         AuthenticationService? authService = null;
         var lazyAuth = new Lazy<IAuthenticationService>(() => authService!);
 
         var fargoHttp = new FargoHttpClient(
-            _httpClient,
-            _authSession,
+            httpClient,
+            authSession,
             lazyAuth,
             (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<FargoHttpClient>(),
-            _options);
+            options);
 
         authService = new AuthenticationService(
             new AuthenticationHttpClient(fargoHttp),
-            _authSession,
+            authSession,
             (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<AuthenticationService>(),
             sessionStore);
 
@@ -87,10 +89,10 @@ public sealed class Engine : IDisposable
             await Authentication.LogOutAsync(cancellationToken);
         }
 
-        _options.Server = server;
+        options.Server = server;
 
         await Authentication.LogInAsync(nameid, password, cancellationToken);
-        await _hub.ConnectAsync(server, () => Task.FromResult(_authSession.AccessToken), cancellationToken);
+        await _hub.ConnectAsync(server, () => Task.FromResult(authSession.AccessToken), cancellationToken);
     }
 
     /// <summary>Disconnects the event hub and logs out.</summary>
@@ -106,13 +108,13 @@ public sealed class Engine : IDisposable
     /// </summary>
     public async Task<bool> RestoreSessionAsync(string server, CancellationToken cancellationToken = default)
     {
-        _options.Server = server;
+        options.Server = server;
 
         var restored = await Authentication.RestoreAsync(cancellationToken);
 
         if (restored)
         {
-            await _hub.ConnectAsync(server, () => Task.FromResult(_authSession.AccessToken), cancellationToken);
+            await _hub.ConnectAsync(server, () => Task.FromResult(authSession.AccessToken), cancellationToken);
         }
 
         return restored;
@@ -121,11 +123,11 @@ public sealed class Engine : IDisposable
     public void Dispose()
     {
         _ = _hub.DisposeAsync();
-        _httpClient.Dispose();
+        httpClient.Dispose();
     }
 
-    private readonly FargoSdkOptions _options;
-    private readonly AuthSession _authSession;
+    private readonly FargoSdkOptions options;
+    private readonly AuthSession authSession;
     private readonly FargoEventHub _hub;
-    private readonly System.Net.Http.HttpClient _httpClient;
+    private readonly HttpClient httpClient;
 }

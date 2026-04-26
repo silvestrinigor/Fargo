@@ -51,7 +51,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<TResponse>(
                 IsSuccess: false,
                 Data: default,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -87,7 +87,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<TResponse>(
                 IsSuccess: false,
                 Data: default,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -114,7 +114,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -137,7 +137,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -160,7 +160,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -183,7 +183,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -216,7 +216,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
             return new FargoSdkHttpResponse<EmptyResult>(
                 IsSuccess: false,
                 Data: null,
-                Problem: await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct),
+                Problem: await ReadProblemAsync(response.Content, JsonOptions, ct),
                 StatusCode: response.StatusCode);
         }
 
@@ -242,7 +242,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
 
         if (!response.IsSuccessStatusCode)
         {
-            var problem = await response.Content.ReadFromJsonAsync<FargoProblemDetails>(JsonOptions, ct);
+            var problem = await ReadProblemAsync(response.Content, JsonOptions, ct);
             response.Dispose();
             throw new FargoSdkApiException(problem?.Detail ?? "An unexpected error occurred.");
         }
@@ -293,6 +293,12 @@ public sealed class FargoHttpClient : IFargoHttpClient
         {
             throw new FargoSdkConnectionException("The request timed out.", ex);
         }
+    }
+
+    private static async Task<FargoProblemDetails?> ReadProblemAsync(HttpContent content, JsonSerializerOptions options, CancellationToken ct)
+    {
+        var json = await content.ReadAsStringAsync(ct);
+        return string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<FargoProblemDetails>(json, options);
     }
 
     private string ResolveUrl(string path) =>
