@@ -56,6 +56,11 @@ public sealed class ItemUpdateCommandHandler(
 
         actor.ValidateHasAccess(item);
 
+        if (command.Item.ProductionDate is not null)
+        {
+            item.ProductionDate = command.Item.ProductionDate;
+        }
+
         await unitOfWork.SaveChanges(cancellationToken);
 
         await eventPublisher.PublishItemUpdated(item.Guid, cancellationToken);

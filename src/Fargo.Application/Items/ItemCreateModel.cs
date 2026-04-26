@@ -12,6 +12,11 @@ namespace Fargo.Application.Items;
 /// Optional identifier of the first partition to associate with the item
 /// during creation.
 /// </param>
+/// <param name="ProductionDate">
+/// Optional production date. When <see langword="null"/>, the production date is unknown.
+/// Pass <see cref="DateTimeOffset.UtcNow"/> to record the creation timestamp as the
+/// production date.
+/// </param>
 /// <remarks>
 /// An item represents a concrete instance of an <c>Article</c>.
 ///
@@ -24,5 +29,6 @@ namespace Fargo.Application.Items;
 /// </remarks>
 public record ItemCreateModel(
         Guid ArticleGuid,
-        Guid? FirstPartition = null
+        Guid? FirstPartition = null,
+        DateTimeOffset? ProductionDate = null
         );

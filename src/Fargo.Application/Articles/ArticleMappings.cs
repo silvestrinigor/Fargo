@@ -48,10 +48,8 @@ public static class ArticleMappings
             a.Guid,
             a.Name,
             a.Description,
-            a.Mass,
-            a.LengthX,
-            a.LengthY,
-            a.LengthZ,
+            a.Metrics,
+            a.ShelfLife,
             a.ImageKey != null,
             a.EditedByGuid
         );
@@ -81,10 +79,8 @@ public static class ArticleMappings
             a.Guid,
             a.Name,
             a.Description,
-            a.Mass,
-            a.LengthX,
-            a.LengthY,
-            a.LengthZ,
+            a.Metrics,
+            a.ShelfLife,
             a.ImageKey != null,
             a.EditedByGuid
         );

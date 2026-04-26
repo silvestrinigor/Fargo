@@ -60,15 +60,18 @@ public interface IItemClient
     Task<FargoSdkResponse<Guid>> CreateAsync(
         Guid articleGuid,
         Guid? firstPartition = null,
+        DateTimeOffset? productionDate = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates an existing item.
     /// </summary>
     /// <param name="itemGuid">The unique identifier of the item to update.</param>
+    /// <param name="productionDate">The new production date, or <see langword="null"/> to leave unchanged.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid itemGuid,
+        DateTimeOffset? productionDate = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

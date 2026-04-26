@@ -24,9 +24,10 @@ public interface IItemService
     /// <summary>Creates a new item for the specified article and returns it as a live entity.</summary>
     /// <param name="articleGuid">The article this item is an instance of.</param>
     /// <param name="firstPartition">An optional initial partition to assign.</param>
+    /// <param name="productionDate">An optional production date.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <exception cref="FargoSdkApiException">Thrown on a server or access error.</exception>
-    Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default);
+    Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an item by its unique identifier.</summary>
     /// <param name="itemGuid">The unique identifier of the item to delete.</param>

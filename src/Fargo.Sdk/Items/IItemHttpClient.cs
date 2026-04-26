@@ -24,13 +24,15 @@ public interface IItemHttpClient
     /// <summary>Creates a new item for the specified article and returns its assigned identifier.</summary>
     /// <param name="articleGuid">The article this item is an instance of.</param>
     /// <param name="firstPartition">An optional initial partition to assign.</param>
+    /// <param name="productionDate">An optional production date.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default);
 
-    /// <summary>Updates an existing item (triggers updated-at timestamp).</summary>
+    /// <summary>Updates an existing item.</summary>
     /// <param name="itemGuid">The unique identifier of the item to update.</param>
+    /// <param name="productionDate">The new production date, or <see langword="null"/> to leave unchanged.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an item by its unique identifier.</summary>
     /// <param name="itemGuid">The unique identifier of the item to delete.</param>

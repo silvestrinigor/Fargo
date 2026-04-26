@@ -5,11 +5,20 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations;
 
+/// <summary>
+/// Entity Framework Core configuration for <see cref="Article"/>.
+/// </summary>
 public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 {
+    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Article> builder)
     {
-        builder.ToTable(t => t.IsTemporal());
+        builder.ToTable("Articles", t => t.IsTemporal(ttb =>
+        {
+            ttb.UseHistoryTable("ArticlesHistory");
+            ttb.HasPeriodStart("PeriodStart").HasColumnName("PeriodStart");
+            ttb.HasPeriodEnd("PeriodEnd").HasColumnName("PeriodEnd");
+        }));
 
         builder.HasKey(x => x.Guid);
 
@@ -19,24 +28,46 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(x => x.EditedByGuid);
 
-        builder.Property(x => x.Mass)
-            .HasConversion<MassStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
+        builder.OwnsOne(x => x.Metrics, m =>
+        {
+            m.ToTable("Articles", t => t.IsTemporal(ttb =>
+            {
+                ttb.UseHistoryTable("ArticlesHistory");
+                ttb.HasPeriodStart("PeriodStart").HasColumnName("PeriodStart");
+                ttb.HasPeriodEnd("PeriodEnd").HasColumnName("PeriodEnd");
+            }));
 
-        builder.Property(x => x.LengthX)
-            .HasConversion<LengthStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
+            m.Property(x => x.Mass)
+                .HasConversion<MassStringConverter>()
+                .HasMaxLength(50)
+                .HasColumnName("Mass")
+                .IsRequired(false);
 
-        builder.Property(x => x.LengthY)
-            .HasConversion<LengthStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
+            m.Property(x => x.LengthX)
+                .HasConversion<LengthStringConverter>()
+                .HasMaxLength(50)
+                .HasColumnName("LengthX")
+                .IsRequired(false);
 
-        builder.Property(x => x.LengthZ)
-            .HasConversion<LengthStringConverter>()
-            .HasMaxLength(50)
+            m.Property(x => x.LengthY)
+                .HasConversion<LengthStringConverter>()
+                .HasMaxLength(50)
+                .HasColumnName("LengthY")
+                .IsRequired(false);
+
+            m.Property(x => x.LengthZ)
+                .HasConversion<LengthStringConverter>()
+                .HasMaxLength(50)
+                .HasColumnName("LengthZ")
+                .IsRequired(false);
+
+            m.WithOwner();
+        });
+
+        builder.Property(x => x.ShelfLife)
+            .HasConversion(
+                x => x.HasValue ? (long?)x.Value.Ticks : null,
+                x => x.HasValue ? (TimeSpan?)TimeSpan.FromTicks(x.Value) : null)
             .IsRequired(false);
 
         builder.Property(x => x.ImageKey)

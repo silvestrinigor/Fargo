@@ -47,6 +47,7 @@ public static class ItemMappings
         i => new ItemInformation(
             i.Guid,
             i.ArticleGuid,
+            i.ProductionDate,
             i.EditedByGuid
         );
 
@@ -74,6 +75,7 @@ public static class ItemMappings
         return new ItemInformation(
             i.Guid,
             i.ArticleGuid,
+            i.ProductionDate,
             i.EditedByGuid
         );
     }

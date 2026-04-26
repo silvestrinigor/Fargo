@@ -3,6 +3,7 @@ using Fargo.Sdk.Partitions;
 
 namespace Fargo.Sdk.Articles;
 
+/// <summary>HTTP implementation of <see cref="IArticleClient"/>.</summary>
 public sealed class ArticleClient : IArticleClient
 {
     internal ArticleClient(IFargoSdkHttpClient httpClient)
@@ -12,6 +13,7 @@ public sealed class ArticleClient : IArticleClient
 
     private readonly IFargoSdkHttpClient httpClient;
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<ArticleResult>> GetAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
@@ -32,6 +34,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<ArticleResult>(httpResponse.Data!);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<ArticleResult>>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
@@ -61,14 +64,13 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>(httpResponse.Data ?? []);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
@@ -80,10 +82,14 @@ public sealed class ArticleClient : IArticleClient
                     name,
                     description,
                     firstPartition,
-                    mass,
-                    lengthX,
-                    lengthY,
-                    lengthZ
+                    metrics = metrics == null ? null : new
+                    {
+                        mass = metrics.Mass,
+                        lengthX = metrics.LengthX,
+                        lengthY = metrics.LengthY,
+                        lengthZ = metrics.LengthZ
+                    },
+                    shelfLife
                 }
             },
             cancellationToken);
@@ -96,19 +102,30 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<Guid>(httpResponse.Data);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid articleGuid,
         string? name = null,
         string? description = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
             $"/articles/{articleGuid}",
-            new { name, description, mass, lengthX, lengthY, lengthZ },
+            new
+            {
+                name,
+                description,
+                metrics = metrics == null ? null : new
+                {
+                    mass = metrics.Mass,
+                    lengthX = metrics.LengthX,
+                    lengthY = metrics.LengthY,
+                    lengthZ = metrics.LengthZ
+                },
+                shelfLife
+            },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -119,6 +136,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
@@ -135,6 +153,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
         Guid articleGuid,
         Guid partitionGuid,
@@ -153,6 +172,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
         Guid articleGuid,
         Guid partitionGuid,
@@ -170,6 +190,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
@@ -186,6 +207,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UploadImageAsync(
         Guid articleGuid,
         Stream stream,
@@ -208,6 +230,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> DeleteImageAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
@@ -224,11 +247,13 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
+    /// <inheritdoc />
     public Task<(Stream Stream, string ContentType)?> GetImageAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
         => httpClient.GetStreamAsync($"/articles/{articleGuid}/image", cancellationToken);
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
@@ -245,6 +270,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(httpResponse.Data ?? []);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> AddBarcodeAsync(
         Guid articleGuid,
         string code,
@@ -264,6 +290,7 @@ public sealed class ArticleClient : IArticleClient
         return new FargoSdkResponse<Guid>(httpResponse.Data);
     }
 
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> RemoveBarcodeAsync(
         Guid articleGuid,
         Guid barcodeGuid,

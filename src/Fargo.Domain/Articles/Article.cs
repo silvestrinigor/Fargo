@@ -37,24 +37,17 @@ public class Article : ModifiedEntity, IPartitionedEntity
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets or sets the physical mass of the article.
+    /// Gets or sets the physical measurements of the article, including mass, dimensions, and
+    /// computed density.
     /// </summary>
-    public Mass? Mass { get; set; }
+    public ArticleMetrics Metrics { get; set; } = new();
 
     /// <summary>
-    /// Gets or sets the X dimension of the article.
+    /// Gets or sets the shelf life of the article.
+    /// When <see langword="null"/>, no shelf life constraint is defined.
+    /// Persisted as <c>bigint</c> (ticks) in the database.
     /// </summary>
-    public Length? LengthX { get; set; }
-
-    /// <summary>
-    /// Gets or sets the Y dimension of the article.
-    /// </summary>
-    public Length? LengthY { get; set; }
-
-    /// <summary>
-    /// Gets or sets the Z dimension of the article.
-    /// </summary>
-    public Length? LengthZ { get; set; }
+    public TimeSpan? ShelfLife { get; set; }
 
     // TODO: I think insted of storing a string key, should create a table in the database for that that will contain the image information and how to get the image.
     /// <summary>

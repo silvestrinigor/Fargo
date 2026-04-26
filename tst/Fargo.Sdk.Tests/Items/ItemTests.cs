@@ -8,12 +8,13 @@ public sealed class ItemTests
 {
     private static readonly Guid ItemGuid = Guid.NewGuid();
     private static readonly Guid ArticleGuid = Guid.NewGuid();
+    private static readonly DateTimeOffset ProductionDate = new DateTimeOffset(2026, 1, 15, 0, 0, 0, TimeSpan.Zero);
     private readonly IItemHttpClient client = Substitute.For<IItemHttpClient>();
     private readonly Item sut;
 
     public ItemTests()
     {
-        sut = new Item(ItemGuid, ArticleGuid, client);
+        sut = new Item(ItemGuid, ArticleGuid, client, productionDate: ProductionDate);
     }
 
     // --- Property getters ---
@@ -28,6 +29,19 @@ public sealed class ItemTests
     public void ArticleGuid_Should_ReturnArticleGuidPassedAtConstruction()
     {
         Assert.Equal(ArticleGuid, sut.ArticleGuid);
+    }
+
+    [Fact]
+    public void ProductionDate_Should_ReturnProductionDatePassedAtConstruction()
+    {
+        Assert.Equal(ProductionDate, sut.ProductionDate);
+    }
+
+    [Fact]
+    public void ProductionDate_Should_BeNull_When_NotProvided()
+    {
+        var item = new Item(ItemGuid, ArticleGuid, client);
+        Assert.Null(item.ProductionDate);
     }
 
     // --- Updated event ---

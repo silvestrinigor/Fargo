@@ -100,10 +100,14 @@ public sealed class ArticleCreateCommandHandler(
         {
             Name = command.Article.Name,
             Description = command.Article.Description ?? Description.Empty,
-            Mass = command.Article.Mass,
-            LengthX = command.Article.LengthX,
-            LengthY = command.Article.LengthY,
-            LengthZ = command.Article.LengthZ
+            ShelfLife = command.Article.ShelfLife,
+            Metrics =
+            {
+                Mass = command.Article.Metrics?.Mass,
+                LengthX = command.Article.Metrics?.LengthX,
+                LengthY = command.Article.Metrics?.LengthY,
+                LengthZ = command.Article.Metrics?.LengthZ,
+            }
         };
 
         if (partition is not null)

@@ -109,7 +109,8 @@ public sealed class ItemCreateCommandHandler(
 
         var item = new Item
         {
-            Article = article
+            Article = article,
+            ProductionDate = command.Item.ProductionDate
         };
 
         if (partition is not null)

@@ -18,6 +18,13 @@ namespace Fargo.Application.Articles;
 /// Optional identifier of the first partition to associate with the article
 /// during creation.
 /// </param>
+/// <param name="Metrics">
+/// Optional physical measurements (mass and dimensions). When <see langword="null"/>, the
+/// article is created without measurement data.
+/// </param>
+/// <param name="ShelfLife">
+/// Optional shelf life. When <see langword="null"/>, no shelf life constraint is set.
+/// </param>
 /// <remarks>
 /// Articles are partitioned entities and may belong to multiple partitions.
 /// When <paramref name="FirstPartition"/> is provided, the created article
@@ -27,7 +34,5 @@ public record ArticleCreateModel(
     Name Name,
     Description? Description = null,
     Guid? FirstPartition = null,
-    Mass? Mass = null,
-    Length? LengthX = null,
-    Length? LengthY = null,
-    Length? LengthZ = null);
+    ArticleMetricsModel? Metrics = null,
+    TimeSpan? ShelfLife = null);

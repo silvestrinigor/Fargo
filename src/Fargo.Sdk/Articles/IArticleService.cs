@@ -29,10 +29,8 @@ public interface IArticleService
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an article. The article must have no associated items.</summary>

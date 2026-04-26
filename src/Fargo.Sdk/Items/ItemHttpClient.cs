@@ -51,11 +51,11 @@ public sealed class ItemHttpClient : IItemHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
             "/items",
-            new { item = new { articleGuid, firstPartition } },
+            new { item = new { articleGuid, firstPartition, productionDate } },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -67,9 +67,9 @@ public sealed class ItemHttpClient : IItemHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync($"/items/{itemGuid}", new { }, cancellationToken);
+        var httpResponse = await httpClient.PatchJsonAsync($"/items/{itemGuid}", new { productionDate }, cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {

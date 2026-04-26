@@ -39,12 +39,10 @@ public sealed class ArticleManager(
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
-        => service.CreateAsync(name, description, firstPartition, mass, lengthX, lengthY, lengthZ, cancellationToken);
+        => service.CreateAsync(name, description, firstPartition, metrics, shelfLife, cancellationToken);
 
     /// <inheritdoc />
     public Task DeleteAsync(Guid articleGuid, CancellationToken cancellationToken = default)

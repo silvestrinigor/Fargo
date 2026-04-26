@@ -65,15 +65,29 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
             "/articles",
-            new { article = new { name, description, firstPartition, mass, lengthX, lengthY, lengthZ } },
+            new
+            {
+                article = new
+                {
+                    name,
+                    description,
+                    firstPartition,
+                    metrics = metrics == null ? null : new
+                    {
+                        mass = metrics.Mass,
+                        lengthX = metrics.LengthX,
+                        lengthY = metrics.LengthY,
+                        lengthZ = metrics.LengthZ
+                    },
+                    shelfLife
+                }
+            },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -89,15 +103,25 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         Guid articleGuid,
         string? name = null,
         string? description = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
             $"/articles/{articleGuid}",
-            new { name, description, mass, lengthX, lengthY, lengthZ },
+            new
+            {
+                name,
+                description,
+                metrics = metrics == null ? null : new
+                {
+                    mass = metrics.Mass,
+                    lengthX = metrics.LengthX,
+                    lengthY = metrics.LengthY,
+                    lengthZ = metrics.LengthZ
+                },
+                shelfLife
+            },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
