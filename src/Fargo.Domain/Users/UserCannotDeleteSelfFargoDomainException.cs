@@ -10,7 +10,7 @@ namespace Fargo.Domain.Users;
 /// The identifier of the user that attempted to delete themselves.
 /// </param>
 public sealed class UserCannotDeleteSelfFargoDomainException(Guid userGuid)
-            : FargoDomainException($"User '{userGuid}' cannot delete their own account.")
+    : FargoDomainException($"User '{userGuid}' cannot delete their own account.")
 {
     /// <summary>
     /// Gets the identifier of the user that attempted to delete themselves.

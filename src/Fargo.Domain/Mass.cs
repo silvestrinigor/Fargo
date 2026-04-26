@@ -11,7 +11,7 @@ namespace Fargo.Domain;
 /// </summary>
 public readonly struct Mass : IEquatable<Mass>
 {
-    private readonly UnitsNet.Mass _value;
+    private readonly UnitsNet.Mass value;
 
     /// <summary>
     /// Initializes a new instance of <see cref="Mass"/>.
@@ -31,37 +31,37 @@ public readonly struct Mass : IEquatable<Mass>
                 "Mass cannot be negative.");
         }
 
-        _value = UnitsNet.Mass.From(value, unit);
+        this.value = UnitsNet.Mass.From(value, unit);
     }
 
-    private Mass(UnitsNet.Mass mass) => _value = mass;
+    private Mass(UnitsNet.Mass mass) => value = mass;
 
     /// <summary>
     /// Gets the numeric magnitude in the unit originally used to construct this instance.
     /// </summary>
-    public double Value => _value.Value;
+    public double Value => value.Value;
 
     /// <summary>
     /// Gets the unit of measurement originally used to construct this instance.
     /// </summary>
-    public MassUnit Unit => _value.Unit;
+    public MassUnit Unit => value.Unit;
 
     /// <summary>
     /// Returns the underlying <see cref="UnitsNet.Mass"/> for unit conversion or arithmetic.
     /// </summary>
-    public UnitsNet.Mass ToUnitsNet() => _value;
+    public UnitsNet.Mass ToUnitsNet() => value;
 
     /// <inheritdoc />
-    public bool Equals(Mass other) => _value.Equals(other._value, UnitsNet.Mass.Zero);
+    public bool Equals(Mass other) => value.Equals(other.value, UnitsNet.Mass.Zero);
 
     /// <inheritdoc />
     public override bool Equals(object? obj) => obj is Mass other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => _value.GetHashCode();
+    public override int GetHashCode() => value.GetHashCode();
 
     /// <summary>Returns a string representation including value and unit abbreviation.</summary>
-    public override string ToString() => _value.ToString();
+    public override string ToString() => value.ToString();
 
     /// <summary>Determines whether two <see cref="Mass"/> instances represent equal physical quantities.</summary>
     public static bool operator ==(Mass left, Mass right) => left.Equals(right);
@@ -72,7 +72,7 @@ public readonly struct Mass : IEquatable<Mass>
     /// <summary>
     /// Implicitly converts a <see cref="Mass"/> to the underlying <see cref="UnitsNet.Mass"/>.
     /// </summary>
-    public static implicit operator UnitsNet.Mass(Mass mass) => mass._value;
+    public static implicit operator UnitsNet.Mass(Mass mass) => mass.value;
 
     /// <summary>
     /// Explicitly converts a <see cref="UnitsNet.Mass"/> to a <see cref="Mass"/> domain value object.

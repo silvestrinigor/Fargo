@@ -13,12 +13,8 @@ namespace Fargo.Domain.Users;
 public sealed class UserGroupInactiveFargoDomainException(Guid userGroupGuid)
     : FargoDomainException($"The user group '{userGroupGuid}' is inactive.")
 {
-
     /// <summary>
     /// Gets the unique identifier of the inactive user group.
     /// </summary>
-    public Guid UserGroupGuid
-    {
-        get;
-    } = userGroupGuid;
+    public Guid UserGroupGuid { get; } = userGroupGuid;
 }

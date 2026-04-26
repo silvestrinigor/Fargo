@@ -22,11 +22,7 @@ public class UserGroupPartitionAccess : Entity, IModifiedEntityMember, IPartitio
     /// <summary>
     /// Gets the unique identifier of the user group associated with this access entry.
     /// </summary>
-    public Guid UserGroupGuid
-    {
-        get;
-        private set;
-    }
+    public Guid UserGroupGuid { get; private set; }
 
     /// <summary>
     /// Gets or sets the user group that owns this partition access.
@@ -48,11 +44,7 @@ public class UserGroupPartitionAccess : Entity, IModifiedEntityMember, IPartitio
     /// <summary>
     /// Gets the unique identifier of the partition associated with this access entry.
     /// </summary>
-    public Guid PartitionGuid
-    {
-        get;
-        private set;
-    }
+    public Guid PartitionGuid { get; private set; }
 
     /// <summary>
     /// Gets or sets the partition to which the user group has access.

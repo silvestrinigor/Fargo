@@ -17,9 +17,8 @@ public interface IRefreshTokenRepository
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
     Task<RefreshToken?> GetByGuid(
-            Guid entityGuid,
-            CancellationToken cancellationToken = default
-            );
+        Guid entityGuid,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a refresh token by its hashed token value.
@@ -30,9 +29,8 @@ public interface IRefreshTokenRepository
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
     Task<RefreshToken?> GetByTokenHash(
-            TokenHash tokenHash,
-            CancellationToken cancellationToken = default
-            );
+        TokenHash tokenHash,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new refresh token to the persistence context.

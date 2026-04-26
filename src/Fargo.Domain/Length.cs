@@ -11,7 +11,7 @@ namespace Fargo.Domain;
 /// </summary>
 public readonly struct Length : IEquatable<Length>
 {
-    private readonly UnitsNet.Length _value;
+    private readonly UnitsNet.Length value;
 
     /// <summary>
     /// Initializes a new instance of <see cref="Length"/>.
@@ -31,37 +31,37 @@ public readonly struct Length : IEquatable<Length>
                 "Length cannot be negative.");
         }
 
-        _value = UnitsNet.Length.From(value, unit);
+        this.value = UnitsNet.Length.From(value, unit);
     }
 
-    private Length(UnitsNet.Length length) => _value = length;
+    private Length(UnitsNet.Length length) => value = length;
 
     /// <summary>
     /// Gets the numeric magnitude in the unit originally used to construct this instance.
     /// </summary>
-    public double Value => _value.Value;
+    public double Value => value.Value;
 
     /// <summary>
     /// Gets the unit of measurement originally used to construct this instance.
     /// </summary>
-    public LengthUnit Unit => _value.Unit;
+    public LengthUnit Unit => value.Unit;
 
     /// <summary>
     /// Returns the underlying <see cref="UnitsNet.Length"/> for unit conversion or arithmetic.
     /// </summary>
-    public UnitsNet.Length ToUnitsNet() => _value;
+    public UnitsNet.Length ToUnitsNet() => value;
 
     /// <inheritdoc />
-    public bool Equals(Length other) => _value.Equals(other._value, UnitsNet.Length.Zero);
+    public bool Equals(Length other) => value.Equals(other.value, UnitsNet.Length.Zero);
 
     /// <inheritdoc />
     public override bool Equals(object? obj) => obj is Length other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => _value.GetHashCode();
+    public override int GetHashCode() => value.GetHashCode();
 
     /// <summary>Returns a string representation including value and unit abbreviation.</summary>
-    public override string ToString() => _value.ToString();
+    public override string ToString() => value.ToString();
 
     /// <summary>Determines whether two <see cref="Length"/> instances represent equal physical quantities.</summary>
     public static bool operator ==(Length left, Length right) => left.Equals(right);
@@ -72,7 +72,7 @@ public readonly struct Length : IEquatable<Length>
     /// <summary>
     /// Implicitly converts a <see cref="Length"/> to the underlying <see cref="UnitsNet.Length"/>.
     /// </summary>
-    public static implicit operator UnitsNet.Length(Length length) => length._value;
+    public static implicit operator UnitsNet.Length(Length length) => length.value;
 
     /// <summary>
     /// Explicitly converts a <see cref="UnitsNet.Length"/> to a <see cref="Length"/> domain value object.
