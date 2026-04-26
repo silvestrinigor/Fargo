@@ -45,4 +45,10 @@ public enum ActionType
     AddBarcode = 17,
     /// <summary>Permission to remove barcodes from articles.</summary>
     RemoveBarcode = 18,
+    /// <summary>Permission to create API clients.</summary>
+    CreateApiClient = 19,
+    /// <summary>Permission to delete API clients.</summary>
+    DeleteApiClient = 20,
+    /// <summary>Permission to edit API clients.</summary>
+    EditApiClient = 21,
 }
