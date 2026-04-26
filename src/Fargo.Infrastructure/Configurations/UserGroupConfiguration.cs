@@ -12,7 +12,7 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.HasKey(x => x.Guid);
 
-        builder.HasAlternateKey(x => x.Nameid);
+        builder.HasIndex(x => x.Nameid).IsUnique();
 
         builder.Property(x => x.Guid).ValueGeneratedNever();
 
