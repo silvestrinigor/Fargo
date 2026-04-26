@@ -23,6 +23,8 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.Property(x => x.EditedByGuid);
 
+        builder.Property(x => x.ProductionDate).IsRequired(false);
+
         builder.HasMany(i => i.Partitions).WithMany(p => p.ItemMembers);
     }
 }

@@ -51,6 +51,12 @@ public class Item : ModifiedEntity, IPartitionedEntity
     }
 
     /// <summary>
+    /// Gets or sets the date on which this item was produced.
+    /// When <see langword="null"/>, the production date is unknown.
+    /// </summary>
+    public DateTimeOffset? ProductionDate { get; set; }
+
+    /// <summary>
     /// Gets the partitions associated with the item.
     /// </summary>
     /// <remarks>

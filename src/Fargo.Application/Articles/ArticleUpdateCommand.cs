@@ -66,24 +66,32 @@ public sealed class ArticleUpdateCommandHandler(
             article.Description = command.Article.Description.Value;
         }
 
-        if (command.Article.Mass is not null)
+        if (command.Article.Metrics is not null)
         {
-            article.Mass = command.Article.Mass;
+            if (command.Article.Metrics.Mass is not null)
+            {
+                article.Metrics.Mass = command.Article.Metrics.Mass;
+            }
+
+            if (command.Article.Metrics.LengthX is not null)
+            {
+                article.Metrics.LengthX = command.Article.Metrics.LengthX;
+            }
+
+            if (command.Article.Metrics.LengthY is not null)
+            {
+                article.Metrics.LengthY = command.Article.Metrics.LengthY;
+            }
+
+            if (command.Article.Metrics.LengthZ is not null)
+            {
+                article.Metrics.LengthZ = command.Article.Metrics.LengthZ;
+            }
         }
 
-        if (command.Article.LengthX is not null)
+        if (command.Article.ShelfLife is not null)
         {
-            article.LengthX = command.Article.LengthX;
-        }
-
-        if (command.Article.LengthY is not null)
-        {
-            article.LengthY = command.Article.LengthY;
-        }
-
-        if (command.Article.LengthZ is not null)
-        {
-            article.LengthZ = command.Article.LengthZ;
+            article.ShelfLife = command.Article.ShelfLife;
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

@@ -57,10 +57,8 @@ public interface IArticleClient
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -69,15 +67,15 @@ public interface IArticleClient
     /// <param name="articleGuid">The unique identifier of the article to update.</param>
     /// <param name="name">The new name, or <see langword="null"/> to leave unchanged.</param>
     /// <param name="description">The new description, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="metrics">Updated physical measurements, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="shelfLife">The new shelf life, or <see langword="null"/> to leave unchanged.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid articleGuid,
         string? name = null,
         string? description = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

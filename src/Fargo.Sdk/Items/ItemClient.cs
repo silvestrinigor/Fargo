@@ -64,6 +64,7 @@ public sealed class ItemClient : IItemClient
     public async Task<FargoSdkResponse<Guid>> CreateAsync(
         Guid articleGuid,
         Guid? firstPartition = null,
+        DateTimeOffset? productionDate = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
@@ -73,7 +74,8 @@ public sealed class ItemClient : IItemClient
                 item = new
                 {
                     articleGuid,
-                    firstPartition
+                    firstPartition,
+                    productionDate
                 }
             },
             cancellationToken);
@@ -88,11 +90,12 @@ public sealed class ItemClient : IItemClient
 
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid itemGuid,
+        DateTimeOffset? productionDate = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PatchJsonAsync(
             $"/items/{itemGuid}",
-            new { },
+            new { productionDate },
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

@@ -30,6 +30,19 @@ public sealed class ItemServiceTests
     }
 
     [Fact]
+    public async Task GetAsync_Should_MapProductionDate_When_ProductionDateIsPresent()
+    {
+        var productionDate = new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero);
+        var result = Fakes.ItemResultWithProductionDate(productionDate);
+        client.GetAsync(result.Guid, Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ItemResult>(result));
+
+        var item = await sut.GetAsync(result.Guid);
+
+        Assert.Equal(productionDate, item.ProductionDate);
+    }
+
+    [Fact]
     public async Task GetAsync_Should_ThrowFargoSdkApiException_When_ItemNotFound()
     {
         client.GetAsync(Arg.Any<Guid>(), Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
@@ -88,7 +101,7 @@ public sealed class ItemServiceTests
     {
         var guid = Guid.NewGuid();
         var articleGuid = Guid.NewGuid();
-        client.CreateAsync(articleGuid, Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(articleGuid, Arg.Any<Guid?>(), Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         var item = await sut.CreateAsync(articleGuid);
@@ -98,9 +111,23 @@ public sealed class ItemServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_Should_PassProductionDate_When_Provided()
+    {
+        var guid = Guid.NewGuid();
+        var articleGuid = Guid.NewGuid();
+        var productionDate = new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero);
+        client.CreateAsync(articleGuid, Arg.Any<Guid?>(), productionDate, Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<Guid>(guid));
+
+        var item = await sut.CreateAsync(articleGuid, productionDate: productionDate);
+
+        Assert.Equal(productionDate, item.ProductionDate);
+    }
+
+    [Fact]
     public async Task CreateAsync_Should_ThrowFargoSdkApiException_When_CreationFails()
     {
-        client.CreateAsync(Arg.Any<Guid>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<Guid>(), Arg.Any<Guid?>(), Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(new FargoSdkError(FargoSdkErrorType.NotFound, "Article not found.")));
 
         await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.CreateAsync(Guid.NewGuid()));
@@ -172,7 +199,7 @@ public sealed class ItemServiceTests
     {
         var guid = Guid.NewGuid();
         var articleGuid = Guid.NewGuid();
-        client.CreateAsync(articleGuid, Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(articleGuid, Arg.Any<Guid?>(), Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         var item = await sut.CreateAsync(articleGuid);
@@ -189,5 +216,8 @@ public sealed class ItemServiceTests
     private static class Fakes
     {
         public static ItemResult ItemResult() => new(Guid.NewGuid(), Guid.NewGuid());
+
+        public static ItemResult ItemResultWithProductionDate(DateTimeOffset productionDate) =>
+            new(Guid.NewGuid(), Guid.NewGuid(), productionDate);
     }
 }

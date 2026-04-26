@@ -12,10 +12,10 @@ public sealed class ArticleTests
 
     public ArticleTests()
     {
-        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
-        sut = new Article(ArticleGuid, "Original Name", "Original Description", (MassDto?)null, client, null);
+        sut = new Article(ArticleGuid, "Original Name", "Original Description", client);
     }
 
     // --- UpdateAsync ---
@@ -27,7 +27,7 @@ public sealed class ArticleTests
         await sut.UpdateAsync(x => x.Name = "New Name");
 
         // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class ArticleTests
         });
 
         // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -63,11 +63,38 @@ public sealed class ArticleTests
     public async Task UpdateAsync_Should_ThrowFargoSdkApiException_When_UpdateFails()
     {
         // Arrange
-        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         // Act / Assert
         await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.UpdateAsync(x => x.Name = string.Empty));
+    }
+
+    // --- Metrics property ---
+
+    [Fact]
+    public void Metrics_Getter_Should_ReturnUpdatedValue_After_Set()
+    {
+        // Arrange
+        var metrics = new ArticleMetricsDto { Mass = new MassDto(5, "kg") };
+
+        // Act
+        sut.Metrics = metrics;
+
+        // Assert
+        Assert.Equal(metrics, sut.Metrics);
+    }
+
+    // --- ShelfLife property ---
+
+    [Fact]
+    public void ShelfLife_Getter_Should_ReturnUpdatedValue_After_Set()
+    {
+        // Act
+        sut.ShelfLife = TimeSpan.FromDays(30);
+
+        // Assert
+        Assert.Equal(TimeSpan.FromDays(30), sut.ShelfLife);
     }
 
     // --- Name / Description getters ---

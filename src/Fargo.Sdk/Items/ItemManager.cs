@@ -19,8 +19,8 @@ public sealed class ItemManager(IItemService service, IItemEventSource eventSour
         => service.GetManyAsync(articleGuid, temporalAsOf, page, limit, partitionGuid, noPartition, cancellationToken);
 
     /// <inheritdoc />
-    public Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default)
-        => service.CreateAsync(articleGuid, firstPartition, cancellationToken);
+    public Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
+        => service.CreateAsync(articleGuid, firstPartition, productionDate, cancellationToken);
 
     /// <inheritdoc />
     public Task DeleteAsync(Guid itemGuid, CancellationToken cancellationToken = default)

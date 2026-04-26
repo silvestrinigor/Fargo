@@ -8,16 +8,22 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class Article : IAsyncDisposable
 {
-    internal Article(Guid guid, string name, string description, MassDto? mass, IArticleHttpClient client, Func<ValueTask>? onDispose = null,
-        LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null, bool hasImage = false, Guid? editedByGuid = null)
+    internal Article(
+        Guid guid,
+        string name,
+        string description,
+        IArticleHttpClient client,
+        Func<ValueTask>? onDispose = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
+        bool hasImage = false,
+        Guid? editedByGuid = null)
     {
         Guid = guid;
         _name = name;
         _description = description;
-        _mass = mass;
-        _lengthX = lengthX;
-        _lengthY = lengthY;
-        _lengthZ = lengthZ;
+        _metrics = metrics;
+        _shelfLife = shelfLife;
         _hasImage = hasImage;
         EditedByGuid = editedByGuid;
         this.client = client;
@@ -51,43 +57,27 @@ public sealed class Article : IAsyncDisposable
         set => _description = value;
     }
 
-    private MassDto? _mass;
+    private ArticleMetricsDto? _metrics;
 
     /// <summary>
-    /// The physical mass of the article.
-    /// The value and unit are preserved as returned by the API; no unit conversion is performed.
+    /// The physical measurements of the article (mass, dimensions, computed density).
+    /// <see langword="null"/> when no measurements have been set.
     /// </summary>
-    public MassDto? Mass
+    public ArticleMetricsDto? Metrics
     {
-        get => _mass;
-        set => _mass = value;
+        get => _metrics;
+        set => _metrics = value;
     }
 
-    private LengthDto? _lengthX;
+    private TimeSpan? _shelfLife;
 
-    /// <summary>The X dimension of the article.</summary>
-    public LengthDto? LengthX
+    /// <summary>
+    /// The shelf life of the article, or <see langword="null"/> if no shelf life is defined.
+    /// </summary>
+    public TimeSpan? ShelfLife
     {
-        get => _lengthX;
-        set => _lengthX = value;
-    }
-
-    private LengthDto? _lengthY;
-
-    /// <summary>The Y dimension of the article.</summary>
-    public LengthDto? LengthY
-    {
-        get => _lengthY;
-        set => _lengthY = value;
-    }
-
-    private LengthDto? _lengthZ;
-
-    /// <summary>The Z dimension of the article.</summary>
-    public LengthDto? LengthZ
-    {
-        get => _lengthZ;
-        set => _lengthZ = value;
+        get => _shelfLife;
+        set => _shelfLife = value;
     }
 
     private bool _hasImage;
@@ -135,7 +125,7 @@ public sealed class Article : IAsyncDisposable
     public async Task UpdateAsync(Action<Article> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        var result = await client.UpdateAsync(Guid, _name, _description, _mass, _lengthX, _lengthY, _lengthZ, cancellationToken);
+        var result = await client.UpdateAsync(Guid, _name, _description, _metrics, _shelfLife, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!.Detail);

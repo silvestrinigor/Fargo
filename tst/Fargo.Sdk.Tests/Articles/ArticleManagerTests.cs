@@ -55,6 +55,39 @@ public sealed class ArticleManagerTests
         await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.GetAsync(Guid.NewGuid()));
     }
 
+    // --- GetAsync — metrics and shelf life mapping ---
+
+    [Fact]
+    public async Task GetAsync_Should_MapMetrics_When_MetricsArePresent()
+    {
+        // Arrange
+        var result = Fakes.ArticleResultWithMetrics();
+        client.GetAsync(result.Guid, Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ArticleResult>(result));
+
+        // Act
+        var article = await sut.GetAsync(result.Guid);
+
+        // Assert
+        Assert.NotNull(article.Metrics);
+        Assert.Equal(result.Metrics!.Mass?.Value, article.Metrics.Mass?.Value);
+    }
+
+    [Fact]
+    public async Task GetAsync_Should_MapShelfLife_When_ShelfLifeIsPresent()
+    {
+        // Arrange
+        var result = Fakes.ArticleResultWithShelfLife(TimeSpan.FromDays(30));
+        client.GetAsync(result.Guid, Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ArticleResult>(result));
+
+        // Act
+        var article = await sut.GetAsync(result.Guid);
+
+        // Assert
+        Assert.Equal(TimeSpan.FromDays(30), article.ShelfLife);
+    }
+
     // --- GetManyAsync ---
 
     [Fact]
@@ -104,7 +137,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         // Act
@@ -121,7 +154,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         // Act
@@ -135,7 +168,7 @@ public sealed class ArticleManagerTests
     public async Task CreateAsync_Should_ThrowFargoSdkApiException_When_CreationFails()
     {
         // Arrange
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         // Act / Assert
@@ -219,7 +252,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         var article = await sut.CreateAsync("My Article");
@@ -239,5 +272,12 @@ public sealed class ArticleManagerTests
     {
         public static ArticleResult ArticleResult() =>
             new(Guid.NewGuid(), "Test Article", "A test description");
+
+        public static ArticleResult ArticleResultWithMetrics() =>
+            new(Guid.NewGuid(), "Test Article", "A test description",
+                Metrics: new ArticleMetricsDto { Mass = new MassDto(10, "kg") });
+
+        public static ArticleResult ArticleResultWithShelfLife(TimeSpan shelfLife) =>
+            new(Guid.NewGuid(), "Test Article", "A test description", ShelfLife: shelfLife);
     }
 }

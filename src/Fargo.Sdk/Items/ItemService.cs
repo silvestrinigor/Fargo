@@ -66,16 +66,16 @@ public sealed class ItemService : IItemService
     }
 
     /// <inheritdoc />
-    public async Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, CancellationToken cancellationToken = default)
+    public async Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
     {
-        var response = await client.CreateAsync(articleGuid, firstPartition, cancellationToken);
+        var response = await client.CreateAsync(articleGuid, firstPartition, productionDate, cancellationToken);
 
         if (!response.IsSuccess)
         {
             ThrowError(response.Error!);
         }
 
-        var item = new Item(response.Data, articleGuid, client, MakeDisposeCallback(response.Data));
+        var item = new Item(response.Data, articleGuid, client, MakeDisposeCallback(response.Data), productionDate);
         tracked[item.Guid] = item;
         await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
         return item;
@@ -94,7 +94,7 @@ public sealed class ItemService : IItemService
 
     private async Task<Item> ToEntityAsync(ItemResult r)
     {
-        var item = new Item(r.Guid, r.ArticleGuid, client, MakeDisposeCallback(r.Guid), r.EditedByGuid);
+        var item = new Item(r.Guid, r.ArticleGuid, client, MakeDisposeCallback(r.Guid), r.ProductionDate, r.EditedByGuid);
         tracked[item.Guid] = item;
         await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
         return item;

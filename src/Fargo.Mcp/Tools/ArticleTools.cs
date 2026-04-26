@@ -37,7 +37,7 @@ public sealed class ArticleTools(IArticleManager articles)
         try
         {
             await using var article = await articles.GetAsync(Guid.Parse(articleGuid));
-            return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Mass, article.LengthX, article.LengthY, article.LengthZ });
+            return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Metrics, article.ShelfLife });
         }
         catch (Exception ex)
         {
@@ -62,11 +62,14 @@ public sealed class ArticleTools(IArticleManager articles)
         try
         {
             Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-            var mass = massValue is null ? null : new MassDto(massValue.Value, massUnit);
-            var lengthX = lengthXValue is null ? null : new LengthDto(lengthXValue.Value, lengthXUnit);
-            var lengthY = lengthYValue is null ? null : new LengthDto(lengthYValue.Value, lengthYUnit);
-            var lengthZ = lengthZValue is null ? null : new LengthDto(lengthZValue.Value, lengthZUnit);
-            await using var article = await articles.CreateAsync(name, description, firstPartition, mass, lengthX, lengthY, lengthZ);
+            var metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? null : new ArticleMetricsDto
+            {
+                Mass = massValue is null ? null : new MassDto(massValue.Value, massUnit),
+                LengthX = lengthXValue is null ? null : new LengthDto(lengthXValue.Value, lengthXUnit),
+                LengthY = lengthYValue is null ? null : new LengthDto(lengthYValue.Value, lengthYUnit),
+                LengthZ = lengthZValue is null ? null : new LengthDto(lengthZValue.Value, lengthZUnit),
+            };
+            await using var article = await articles.CreateAsync(name, description, firstPartition, metrics);
             return $"Created article with GUID: {article.Guid}";
         }
         catch (Exception ex)
@@ -104,24 +107,15 @@ public sealed class ArticleTools(IArticleManager articles)
                     a.Description = description;
                 }
 
-                if (massValue is not null)
+                if (massValue is not null || lengthXValue is not null || lengthYValue is not null || lengthZValue is not null)
                 {
-                    a.Mass = new MassDto(massValue.Value, massUnit);
-                }
-
-                if (lengthXValue is not null)
-                {
-                    a.LengthX = new LengthDto(lengthXValue.Value, lengthXUnit);
-                }
-
-                if (lengthYValue is not null)
-                {
-                    a.LengthY = new LengthDto(lengthYValue.Value, lengthYUnit);
-                }
-
-                if (lengthZValue is not null)
-                {
-                    a.LengthZ = new LengthDto(lengthZValue.Value, lengthZUnit);
+                    a.Metrics = new ArticleMetricsDto
+                    {
+                        Mass = massValue is null ? a.Metrics?.Mass : new MassDto(massValue.Value, massUnit),
+                        LengthX = lengthXValue is null ? a.Metrics?.LengthX : new LengthDto(lengthXValue.Value, lengthXUnit),
+                        LengthY = lengthYValue is null ? a.Metrics?.LengthY : new LengthDto(lengthYValue.Value, lengthYUnit),
+                        LengthZ = lengthZValue is null ? a.Metrics?.LengthZ : new LengthDto(lengthZValue.Value, lengthZUnit),
+                    };
                 }
             });
             return "Article updated successfully.";

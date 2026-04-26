@@ -35,38 +35,30 @@ public interface IArticleHttpClient
     /// <param name="name">The article name.</param>
     /// <param name="description">An optional description.</param>
     /// <param name="firstPartition">An optional initial partition to assign.</param>
-    /// <param name="mass">Optional mass specification.</param>
-    /// <param name="lengthX">Optional length along the X axis.</param>
-    /// <param name="lengthY">Optional length along the Y axis.</param>
-    /// <param name="lengthZ">Optional length along the Z axis.</param>
+    /// <param name="metrics">Optional physical measurements (mass and dimensions).</param>
+    /// <param name="shelfLife">Optional shelf life.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoSdkResponse<Guid>> CreateAsync(
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Updates the properties of an existing article.</summary>
     /// <param name="articleGuid">The unique identifier of the article to update.</param>
     /// <param name="name">The new name, or <see langword="null"/> to leave unchanged.</param>
     /// <param name="description">The new description, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="mass">The new mass, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="lengthX">The new X length, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="lengthY">The new Y length, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="lengthZ">The new Z length, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="metrics">Updated physical measurements, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="shelfLife">The new shelf life, or <see langword="null"/> to leave unchanged.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid articleGuid,
         string? name = null,
         string? description = null,
-        MassDto? mass = null,
-        LengthDto? lengthX = null,
-        LengthDto? lengthY = null,
-        LengthDto? lengthZ = null,
+        ArticleMetricsDto? metrics = null,
+        TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an article by its unique identifier.</summary>
