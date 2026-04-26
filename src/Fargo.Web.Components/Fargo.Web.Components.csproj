@@ -7,6 +7,17 @@
     <RootNamespace>Fargo.Web.Components</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>Fargo.Web.Components</PackageId>
+    <Description>Reusable Blazor components for the Fargo inventory and resource management system. Provides pages and UI components for Articles, Items, Partitions, Users, and UserGroups, built on top of Fargo.Sdk and Microsoft Fluent UI.</Description>
+    <PackageTags>fargo;inventory;blazor;components;fluent-ui;dotnet</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
   <ItemGroup>
     <SupportedPlatform Include="browser" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
