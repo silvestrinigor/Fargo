@@ -8,10 +8,10 @@ namespace Fargo.Domain;
 /// different initiators uniformly. An actor can be:
 /// <list type="bullet">
 /// <item>
-/// <description>A real authenticated user (<see cref="UserActor"/>)</description>
+/// <description>A real authenticated user (<see cref="Fargo.Domain.Users.UserActor"/>)</description>
 /// </item>
 /// <item>
-/// <description>The system itself (<see cref="SystemActor"/>)</description>
+/// <description>The system itself (<see cref="Fargo.Domain.System.SystemActor"/>)</description>
 /// </item>
 /// </list>
 ///

@@ -4,12 +4,11 @@ namespace Fargo.Domain.Partitions;
 /// Exception thrown when a partition hierarchy would become circular.
 /// </summary>
 public sealed class PartitionCircularHierarchyFargoDomainException(
-        Guid parentPartitionGuid,
-        Guid memberPartitionGuid
-        ) : FargoDomainException(
-            $"Partition '{memberPartitionGuid}' cannot be assigned to parent " +
-            $"'{parentPartitionGuid}' because this would create a circular hierarchy."
-            )
+    Guid parentPartitionGuid,
+    Guid memberPartitionGuid
+    ) : FargoDomainException(
+        $"Partition '{memberPartitionGuid}' cannot be assigned to parent " +
+        $"'{parentPartitionGuid}' because this would create a circular hierarchy.")
 {
     /// <summary>
     /// Gets the identifier of the candidate parent partition.

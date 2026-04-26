@@ -28,11 +28,7 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// <remarks>
     /// This value is synchronized with <see cref="Article"/> when the item is initialized.
     /// </remarks>
-    public Guid ArticleGuid
-    {
-        get;
-        private init;
-    }
+    public Guid ArticleGuid { get; private init; }
 
     /// <summary>
     /// Gets the article associated with this item.
@@ -61,11 +57,7 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// These partitions define the partition scope of the item and are used
     /// in partition-based access evaluation.
     /// </remarks>
-    public PartitionCollection Partitions
-    {
-        get;
-        init;
-    } = [];
+    public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

@@ -8,7 +8,7 @@ namespace Fargo.Sdk.Items;
 /// </summary>
 public sealed class Item : IAsyncDisposable
 {
-    internal Item(Guid guid, Guid articleGuid, IItemClient client, Func<ValueTask>? onDispose = null, Guid? editedByGuid = null)
+    internal Item(Guid guid, Guid articleGuid, IItemHttpClient client, Func<ValueTask>? onDispose = null, Guid? editedByGuid = null)
     {
         Guid = guid;
         ArticleGuid = articleGuid;
@@ -17,7 +17,7 @@ public sealed class Item : IAsyncDisposable
         _onDispose = onDispose;
     }
 
-    private readonly IItemClient client;
+    private readonly IItemHttpClient client;
     private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the item.</summary>

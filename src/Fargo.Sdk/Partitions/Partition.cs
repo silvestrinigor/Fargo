@@ -13,7 +13,7 @@ public sealed class Partition : IAsyncDisposable
         string description,
         Guid? parentPartitionGuid,
         bool isActive,
-        IPartitionClient client,
+        IPartitionHttpClient client,
         Func<ValueTask>? onDispose = null,
         Guid? editedByGuid = null)
     {
@@ -27,7 +27,7 @@ public sealed class Partition : IAsyncDisposable
         _onDispose = onDispose;
     }
 
-    private readonly IPartitionClient client;
+    private readonly IPartitionHttpClient client;
     private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the partition.</summary>

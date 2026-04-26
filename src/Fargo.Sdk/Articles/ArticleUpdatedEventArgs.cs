@@ -1,7 +1,7 @@
 namespace Fargo.Sdk.Articles;
 
 /// <summary>
-/// Provides data for the <see cref="IArticleManager.Updated"/> event.
+/// Provides data for the <see cref="Article.Updated"/> event.
 /// </summary>
 public sealed class ArticleUpdatedEventArgs(Guid guid) : EventArgs
 {

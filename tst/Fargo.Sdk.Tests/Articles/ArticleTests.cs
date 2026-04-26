@@ -7,7 +7,7 @@ namespace Fargo.Sdk.Tests.Articles;
 public sealed class ArticleTests
 {
     private static readonly Guid ArticleGuid = Guid.NewGuid();
-    private readonly IArticleClient client = Substitute.For<IArticleClient>();
+    private readonly IArticleHttpClient client = Substitute.For<IArticleHttpClient>();
     private readonly Article sut;
 
     public ArticleTests()
@@ -15,7 +15,7 @@ public sealed class ArticleTests
         client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<MassDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<LengthDto?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
-        sut = new Article(ArticleGuid, "Original Name", "Original Description", (MassDto?)null, client);
+        sut = new Article(ArticleGuid, "Original Name", "Original Description", (MassDto?)null, client, null);
     }
 
     // --- UpdateAsync ---

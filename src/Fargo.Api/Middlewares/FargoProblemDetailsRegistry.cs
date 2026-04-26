@@ -1,3 +1,4 @@
+using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;
@@ -166,6 +167,10 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(UserCannotDeleteParentUserGroupFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "user-group/cannot-delete-parent-group")
+            },
+            {
+                typeof(ApiClientNotFoundFargoApplicationException),
+                new ProblemDetailsDefinition(404, "API client not found", "api-client/not-found")
             },
             {
                 typeof(BarcodeNotFoundFargoApplicationException),

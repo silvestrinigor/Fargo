@@ -58,6 +58,61 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
+            modelBuilder.Entity("Fargo.Domain.ApiClients.ApiClient", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("EditedByGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("KeyHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
+                    b.HasKey("Guid");
+
+                    b.HasIndex("KeyHash")
+                        .IsUnique();
+
+                    b.ToTable("ApiClients", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                            {
+                                ttb.UseHistoryTable("ApiClientsHistory");
+                                ttb
+                                    .HasPeriodStart("PeriodStart")
+                                    .HasColumnName("PeriodStart");
+                                ttb
+                                    .HasPeriodEnd("PeriodEnd")
+                                    .HasColumnName("PeriodEnd");
+                            }));
+                });
+
             modelBuilder.Entity("Fargo.Domain.Articles.Article", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -169,6 +224,42 @@ namespace Fargo.Infrastructure.Migrations
                                     .HasPeriodEnd("PeriodEnd")
                                     .HasColumnName("PeriodEnd");
                             }));
+                });
+
+            modelBuilder.Entity("Fargo.Domain.Events.Event", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EntityGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("EntityType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Guid");
+
+                    b.HasIndex("ActorGuid");
+
+                    b.HasIndex("EntityGuid");
+
+                    b.HasIndex("EntityType");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.HasIndex("EntityGuid", "OccurredAt");
+
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Domain.Items.Item", b =>

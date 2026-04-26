@@ -6,12 +6,12 @@ namespace Fargo.Sdk.Tests.Articles;
 
 public sealed class ArticleManagerTests
 {
-    private readonly IArticleClient client = Substitute.For<IArticleClient>();
-    private readonly ArticleManager sut;
+    private readonly IArticleHttpClient client = Substitute.For<IArticleHttpClient>();
+    private readonly ArticleService sut;
 
     public ArticleManagerTests()
     {
-        sut = new ArticleManager(client, new FargoHubConnection());
+        sut = new ArticleService(client, Substitute.For<IFargoEventHub>());
     }
 
     // --- GetAsync ---

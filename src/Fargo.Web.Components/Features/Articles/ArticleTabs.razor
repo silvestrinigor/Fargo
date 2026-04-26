@@ -1,8 +1,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk
 @using Fargo.Sdk.Articles
-@inject IEngine Engine
+@inject IArticleManager Articles
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
@@ -289,7 +288,7 @@ else
 
         await _load.RunAsync(async () =>
         {
-            _article = await Engine.Articles.GetAsync(EntityGuid, TemporalAsOf);
+            _article = await Articles.GetAsync(EntityGuid, TemporalAsOf);
             _edit.Name = _article.Name;
             _edit.Description = _article.Description;
             _edit.MassValue = _article.Mass?.Value;
@@ -399,7 +398,7 @@ else
         {
             await _article.DeleteImageAsync();
             _imageDataUrl = null;
-            _article = await Engine.Articles.GetAsync(_article.Guid);
+            _article = await Articles.GetAsync(_article.Guid);
         }
         catch (FargoSdkApiException ex)
         {
@@ -416,7 +415,7 @@ else
         _barcodeError = null;
         try
         {
-            _barcodes = await Engine.Articles.GetBarcodesAsync(_article!.Guid);
+            _barcodes = await Articles.GetBarcodesAsync(_article!.Guid);
             if (_barcodes.Count > 0)
                 _barcodesNeedRender = true;
         }
@@ -468,7 +467,7 @@ else
         _barcodeError = null;
         try
         {
-            await Engine.Articles.AddBarcodeAsync(_article.Guid, _newBarcodeCode.Trim(), _newBarcodeFormat);
+            await Articles.AddBarcodeAsync(_article.Guid, _newBarcodeCode.Trim(), _newBarcodeFormat);
             _newBarcodeCode = string.Empty;
             await LoadBarcodesAsync();
             StateHasChanged();
@@ -493,7 +492,7 @@ else
         _barcodeError = null;
         try
         {
-            await Engine.Articles.RemoveBarcodeAsync(_article.Guid, barcodeGuid);
+            await Articles.RemoveBarcodeAsync(_article.Guid, barcodeGuid);
             await LoadBarcodesAsync();
             StateHasChanged();
             await Task.Yield();
@@ -519,7 +518,7 @@ else
     {
         var ok = await _delete.RunAsync(async () =>
         {
-            await Engine.Articles.DeleteAsync(EntityGuid);
+            await Articles.DeleteAsync(EntityGuid);
             Navigation.NavigateTo("/entities/articles");
         }, "Failed to delete.");
 

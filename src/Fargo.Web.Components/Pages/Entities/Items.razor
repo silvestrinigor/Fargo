@@ -2,10 +2,10 @@
 @page "/entities/items/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk
 @using Fargo.Sdk.Items
 @using Fargo.Sdk.Articles
-@inject IEngine Engine
+@inject IItemManager ItemManager
+@inject IArticleManager ArticleManager
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Items</PageTitle>
@@ -129,10 +129,10 @@
     private Item? _item;
     private Guid? _loadedGuid;
 
-    private async Task<IEnumerable<Item>> LoadItemsAsync() => await Engine.Items.GetManyAsync();
+    private async Task<IEnumerable<Item>> LoadItemsAsync() => await ItemManager.GetManyAsync();
 
     private async Task<IReadOnlyCollection<Article>> LoadArticlesForPicker(string? search)
-        => await Engine.Articles.GetManyAsync(search: search);
+        => await ArticleManager.GetManyAsync(search: search);
 
     private void OnArticleSelected(Article article)
     {
@@ -150,7 +150,7 @@
             {
                 await _load.RunAsync(async () =>
                 {
-                    _item = await Engine.Items.GetAsync(EntityGuid.Value);
+                    _item = await ItemManager.GetAsync(EntityGuid.Value);
                 }, "Failed to load item.");
             }
             else
@@ -171,7 +171,7 @@
         if (_item is null) return;
         var ok = await _delete.RunAsync(async () =>
         {
-            await Engine.Items.DeleteAsync(_item.Guid);
+            await ItemManager.DeleteAsync(_item.Guid);
             Navigation.NavigateTo("/entities/items");
         }, "Failed to delete.");
 
@@ -197,7 +197,7 @@
 
         var ok = await _create.RunAsync(async () =>
         {
-            var item = await Engine.Items.CreateAsync(articleGuid);
+            var item = await ItemManager.CreateAsync(articleGuid);
             Navigation.NavigateTo($"/entities/items/{item.Guid}", forceLoad: true);
         }, "Failed to create.");
 

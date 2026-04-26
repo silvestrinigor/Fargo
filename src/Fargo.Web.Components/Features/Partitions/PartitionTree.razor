@@ -1,4 +1,5 @@
-@inject IEngine Engine
+@using Fargo.Sdk.Partitions
+@inject IPartitionManager Partitions
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -55,7 +56,7 @@ else
 
         try
         {
-            var roots = await Engine.Partitions.GetManyAsync(rootOnly: true);
+            var roots = await Partitions.GetManyAsync(rootOnly: true);
             rootNodes.Clear();
             rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }
@@ -85,7 +86,7 @@ else
 
         try
         {
-            var children = await Engine.Partitions.GetManyAsync(node.EntityGuid);
+            var children = await Partitions.GetManyAsync(node.EntityGuid);
             node.Children.Clear();
             node.Children.AddRange(children.Select(TreeSidebarNode.FromPartition));
             node.ChildrenLoaded = true;
@@ -146,7 +147,7 @@ else
 
         try
         {
-            var partition = await Engine.Partitions.GetAsync(source.EntityGuid);
+            var partition = await Partitions.GetAsync(source.EntityGuid);
             var result = await partition.MoveAsync(target.EntityGuid);
 
             if (!result.IsSuccess)

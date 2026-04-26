@@ -1,7 +1,7 @@
 namespace Fargo.Domain.Users;
 
 /// <summary>
-/// Exception thrown when attempting to create a <see cref="Entities.UserGroup"/>
+/// Exception thrown when attempting to create a <see cref="Fargo.Domain.Users.UserGroup"/>
 /// with a <see cref="Nameid"/> that already exists in the system.
 /// </summary>
 public sealed class UserGroupNameidAlreadyExistsDomainException(

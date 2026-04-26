@@ -8,7 +8,7 @@ namespace Fargo.Sdk.Articles;
 /// </summary>
 public sealed class Article : IAsyncDisposable
 {
-    internal Article(Guid guid, string name, string description, MassDto? mass, IArticleClient client, Func<ValueTask>? onDispose = null,
+    internal Article(Guid guid, string name, string description, MassDto? mass, IArticleHttpClient client, Func<ValueTask>? onDispose = null,
         LengthDto? lengthX = null, LengthDto? lengthY = null, LengthDto? lengthZ = null, bool hasImage = false, Guid? editedByGuid = null)
     {
         Guid = guid;
@@ -24,7 +24,7 @@ public sealed class Article : IAsyncDisposable
         _onDispose = onDispose;
     }
 
-    private readonly IArticleClient client;
+    private readonly IArticleHttpClient client;
     private readonly Func<ValueTask>? _onDispose;
 
     /// <summary>The unique identifier of the article.</summary>

@@ -9,7 +9,7 @@ namespace Fargo.Domain;
 /// The <see cref="Actor"/> class defines common authorization behavior shared by all actor types,
 /// including permission and partition access evaluation.
 ///
-/// Concrete implementations (e.g., <see cref="UserActor"/> and <see cref="SystemActor"/>)
+/// Concrete implementations (e.g., <see cref="Fargo.Domain.Users.UserActor"/> and <see cref="Fargo.Domain.System.SystemActor"/>)
 /// are responsible for supplying identity and access data.
 ///
 /// Authorization rules follow a hierarchical model:

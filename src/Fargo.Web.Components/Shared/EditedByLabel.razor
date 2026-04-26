@@ -1,6 +1,5 @@
-@using Fargo.Sdk
 @using Fargo.Sdk.Users
-@inject IEngine Engine
+@inject IUserService Users
 
 @if (EditedByGuid is null)
 {
@@ -37,7 +36,7 @@ else
         _loading = true;
         try
         {
-            var user = await Engine.Users.GetAsync(EditedByGuid.Value);
+            var user = await Users.GetAsync(EditedByGuid.Value);
             _nameid = user.Nameid;
         }
         catch

@@ -1,15 +1,25 @@
+using Fargo.Api;
 using Fargo.Api.Extensions;
 using Fargo.Api.Hubs;
 using Fargo.Api.Middlewares;
+using Fargo.Application.Authentication;
 using Fargo.Application.Events;
+using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Extensions;
+using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
-builder.Services.AddScoped<IFargoEventPublisher, SignalREventPublisher>();
+builder.Services.AddKeyedScoped<IFargoEventPublisher, SignalREventPublisher>("signalr");
+builder.Services.AddScoped<IFargoEventPublisher>(sp => new EventPersistingPublisher(
+    sp.GetRequiredKeyedService<IFargoEventPublisher>("signalr"),
+    sp.GetRequiredService<FargoDbContext>(),
+    sp.GetRequiredService<ICurrentUser>(),
+    sp.GetRequiredService<ILogger<EventPersistingPublisher>>()
+));
 
 builder.Services.AddResponseCompression(opts =>
 {
@@ -30,6 +40,8 @@ builder.Services.AddFargoInfrastructure(builder.Configuration);
 
 builder.Services.AddFargoAuthentication(builder.Configuration);
 
+builder.Services.Configure<ApiClientOptions>(builder.Configuration.GetSection(ApiClientOptions.SectionName));
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -37,6 +49,8 @@ var app = builder.Build();
 app.UseResponseCompression();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
+
+app.UseMiddleware<ApiClientMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -46,6 +60,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapFargoApiClient();
 
 app.MapFargoArticle();
 
@@ -57,12 +73,14 @@ app.MapFargoUserGroup();
 
 app.MapFargoPartition();
 
+app.MapFargoEvent();
+
 app.MapFargoTree();
 
 app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();
 
-app.MapHub<FargoEventHub>("/events");
+app.MapHub<FargoEventHub>("/hub/events");
 
 app.Run();

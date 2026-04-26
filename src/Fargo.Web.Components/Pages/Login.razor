@@ -2,10 +2,8 @@
 @layout LoginLayout
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
-@using Fargo.Sdk
-@using Fargo.Sdk.Authentication
 @using Fargo.Web.Components.Security
-@inject IEngine Engine
+@inject IAuthenticationService Auth
 @inject BrowserSdkSessionStore SessionStore
 @inject FargoSession FargoSession
 @inject NavigationManager Navigation
@@ -63,7 +61,7 @@
 
         try
         {
-            var restored = await Engine.Authentication.RestoreAsync();
+            var restored = await Auth.RestoreAsync();
 
             if (restored)
             {
@@ -89,7 +87,7 @@
         try
         {
             SessionStore.RememberMe = model.RememberMe;
-            await Engine.Authentication.LogInAsync(model.Nameid!, model.Password!);
+            await Auth.LogInAsync(model.Nameid!, model.Password!);
             Navigation.NavigateTo("/entities", replace: true);
         }
         catch (InvalidCredentialsFargoSdkException)

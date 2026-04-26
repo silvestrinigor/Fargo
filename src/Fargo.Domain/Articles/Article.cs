@@ -25,11 +25,7 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// The name identifies the article in the domain and must satisfy
     /// the validation rules defined by <see cref="Name"/>.
     /// </remarks>
-    public required Name Name
-    {
-        get;
-        set;
-    }
+    public required Name Name { get; set; }
 
     /// <summary>
     /// Gets or sets the description of the article.
@@ -38,11 +34,7 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// If no description is explicitly provided, the value defaults to
     /// <see cref="Description.Empty"/>.
     /// </remarks>
-    public Description Description
-    {
-        get;
-        set;
-    } = Description.Empty;
+    public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
     /// Gets or sets the physical mass of the article.
@@ -63,7 +55,6 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// Gets or sets the Z dimension of the article.
     /// </summary>
     public Length? LengthZ { get; set; }
-
 
     // TODO: I think insted of storing a string key, should create a table in the database for that that will contain the image information and how to get the image.
     /// <summary>
@@ -86,11 +77,7 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// These partitions define the partition scope of the article and are
     /// used in partition-based access evaluation.
     /// </remarks>
-    public PartitionCollection Partitions
-    {
-        get;
-        init;
-    } = [];
+    public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

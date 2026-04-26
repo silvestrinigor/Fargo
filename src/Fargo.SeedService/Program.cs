@@ -9,6 +9,8 @@ builder.AddServiceDefaults();
 
 builder.Services.AddFargoDefaultAdmin(builder.Configuration);
 
+builder.Services.AddFargoApiClientSeed(builder.Configuration, builder.Environment.IsDevelopment());
+
 builder.Services.AddFargoSeedInfrastructure(builder.Configuration);
 
 builder.Services.AddHostedService<SeedService>();

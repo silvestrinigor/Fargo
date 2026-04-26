@@ -4,6 +4,7 @@ namespace Fargo.Sdk.Authentication;
 
 public sealed class AuthenticationManager : IAuthenticationManager
 {
+    /// <summary>Initializes a new instance.</summary>
     public AuthenticationManager(IAuthenticationClient client, AuthSession session, ILogger logger, ISessionStore? sessionStore = null)
     {
         this.client = client;
@@ -22,14 +23,19 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     private CancellationTokenSource? refreshCts;
 
+    /// <inheritdoc />
     public event EventHandler<LoggedInEventArgs>? LoggedIn;
 
+    /// <inheritdoc />
     public event EventHandler<LoggedOutEventArgs>? LoggedOut;
 
+    /// <inheritdoc />
     public event EventHandler<RefreshedEventArgs>? Refreshed;
 
+    /// <inheritdoc />
     public event EventHandler<RefreshFailedEventArgs>? RefreshFailed;
 
+    /// <inheritdoc />
     public event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
 
     public IAuthSession Session => session;
@@ -38,6 +44,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
     public bool IsExpired => session.IsExpired;
 
+    /// <inheritdoc />
     public async Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
         if (IsAuthenticated)
@@ -61,13 +68,14 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         ScheduleRefresh();
 
-        logger.LogLoggedIn(nameid);
+        AuthenticationServiceLog.LogLoggedIn(logger, nameid);
 
         LoggedIn?.Invoke(this, new LoggedInEventArgs(nameid));
 
         return result.Data;
     }
 
+    /// <inheritdoc />
     public async Task LogOutAsync(CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
@@ -95,11 +103,12 @@ public sealed class AuthenticationManager : IAuthenticationManager
             await sessionStore.ClearAsync(cancellationToken);
         }
 
-        logger.LogLoggedOut(nameid!);
+        AuthenticationServiceLog.LogLoggedOut(logger, nameid!);
 
         LoggedOut?.Invoke(this, new LoggedOutEventArgs(nameid!));
     }
 
+    /// <inheritdoc />
     public async Task<AuthResult> RefreshAsync(CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
@@ -123,13 +132,14 @@ public sealed class AuthenticationManager : IAuthenticationManager
 
         ScheduleRefresh();
 
-        logger.LogRefreshed(session.Nameid!);
+        AuthenticationServiceLog.LogRefreshed(logger, session.Nameid!);
 
         Refreshed?.Invoke(this, new RefreshedEventArgs(session.Nameid!));
 
         return result.Data;
     }
 
+    /// <inheritdoc />
     public async Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
@@ -144,11 +154,12 @@ public sealed class AuthenticationManager : IAuthenticationManager
             ThrowAuthError(result.Error!);
         }
 
-        logger.LogPasswordChanged(session.Nameid!);
+        AuthenticationServiceLog.LogPasswordChanged(logger, session.Nameid!);
 
         PasswordChanged?.Invoke(this, new PasswordChangedEventArgs(session.Nameid!));
     }
 
+    /// <inheritdoc />
     public async Task<bool> RestoreAsync(CancellationToken cancellationToken = default)
     {
         if (sessionStore is null)
@@ -177,6 +188,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
         return true;
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         CancelRefresh();

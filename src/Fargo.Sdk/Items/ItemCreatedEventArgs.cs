@@ -1,6 +1,6 @@
 namespace Fargo.Sdk.Items;
 
-/// <summary>Provides data for the <see cref="IItemManager.Created"/> event.</summary>
+/// <summary>Provides data for the <see cref="IItemEventSource.Created"/> event.</summary>
 public sealed class ItemCreatedEventArgs(Guid guid, Guid articleGuid) : EventArgs
 {
     /// <summary>Gets the unique identifier of the created item.</summary>

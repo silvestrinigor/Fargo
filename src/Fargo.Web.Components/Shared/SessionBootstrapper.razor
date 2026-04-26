@@ -1,5 +1,8 @@
-@using Fargo.Sdk
-@inject IEngine Engine
+@using Fargo.Sdk.Events
+@inject IAuthenticationService Auth
+@inject IFargoEventHub Hub
+@inject FargoSdkOptions Options
+@inject FargoHubLifetimeService HubLifetime
 @inject FargoSession FargoSession
 
 @code {
@@ -16,7 +19,11 @@
 
         try
         {
-            await Engine.Authentication.RestoreAsync();
+            var restored = await Auth.RestoreAsync();
+            if (restored)
+            {
+                _ = Hub.ConnectAsync(Options.Server, () => Task.FromResult(Auth.Session.AccessToken));
+            }
             FargoSession.MarkReady();
         }
         catch (InvalidOperationException)
