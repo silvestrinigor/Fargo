@@ -13,7 +13,7 @@ namespace Fargo.Domain.Users;
 /// The unique identifier of the user group that the user attempted to delete.
 /// </param>
 public sealed class UserCannotDeleteParentUserGroupFargoDomainException(Guid userGroupGuid)
-            : FargoDomainException($"The user cannot delete the user group '{userGroupGuid}' because they belong to it.")
+    : FargoDomainException($"The user cannot delete the user group '{userGroupGuid}' because they belong to it.")
 {
     /// <summary>
     /// Gets the unique identifier of the user group that cannot be deleted.

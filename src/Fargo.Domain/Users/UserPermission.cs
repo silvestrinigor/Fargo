@@ -24,11 +24,7 @@ public class UserPermission : Entity, IModifiedEntityMember, IPermission
     /// It is automatically synchronized when the <see cref="User"/> property
     /// is assigned.
     /// </remarks>
-    public Guid UserGuid
-    {
-        get;
-        private set;
-    }
+    public Guid UserGuid { get; private set; }
 
     /// <summary>
     /// Gets the user associated with this permission.
@@ -57,11 +53,7 @@ public class UserPermission : Entity, IModifiedEntityMember, IPermission
     /// Each permission grants the associated user the ability to perform
     /// the specified <see cref="ActionType"/>.
     /// </remarks>
-    public required ActionType Action
-    {
-        get;
-        init;
-    }
+    public required ActionType Action { get; init; }
 
     /// <summary>
     /// Gets the parent audited entity whose audit metadata must be updated

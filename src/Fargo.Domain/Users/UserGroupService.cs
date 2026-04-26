@@ -5,8 +5,7 @@ namespace Fargo.Domain.Users;
 /// related to <see cref="UserGroup"/> entities.
 /// </summary>
 public class UserGroupService(
-        IUserGroupRepository userGroupRepository
-        )
+    IUserGroupRepository userGroupRepository)
 {
     /// <summary>
     /// Gets the predefined unique identifier representing
@@ -37,9 +36,8 @@ public class UserGroupService(
     /// <see cref="UserGroup.Nameid"/> already exists.
     /// </exception>
     public async Task ValidateUserGroupCreate(
-            UserGroup userGroup,
-            CancellationToken cancellationToken = default
-            )
+        UserGroup userGroup,
+        CancellationToken cancellationToken = default)
     {
         var alreadyExistsWithName =
             await userGroupRepository.ExistsByNameid(

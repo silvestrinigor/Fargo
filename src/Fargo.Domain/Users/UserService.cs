@@ -8,8 +8,7 @@ namespace Fargo.Domain.Users;
 /// validation, and self-protection rules.
 /// </remarks>
 public class UserService(
-        IUserRepository userRepository
-        )
+    IUserRepository userRepository)
 {
     /// <summary>
     /// The predefined unique identifier string representing
@@ -49,9 +48,8 @@ public class UserService(
     /// within the system.
     /// </remarks>
     public async Task ValidateUserCreate(
-            User user,
-            CancellationToken cancellationToken = default
-            )
+        User user,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(user);
 

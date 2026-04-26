@@ -13,9 +13,8 @@ namespace Fargo.Domain;
 /// effective partition access based on direct assignments and group memberships.
 /// </remarks>
 public class ActorService(
-        IUserRepository userRepository,
-        IPartitionRepository partitionRepository
-        )
+    IUserRepository userRepository,
+    IPartitionRepository partitionRepository)
 {
     /// <summary>
     /// Retrieves an <see cref="Actor"/> instance based on its unique identifier.

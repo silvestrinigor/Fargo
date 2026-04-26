@@ -25,11 +25,7 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// This value identifies the group in the system and must satisfy
     /// the validation rules defined by <see cref="Nameid"/>.
     /// </remarks>
-    public required Nameid Nameid
-    {
-        get;
-        set;
-    }
+    public required Nameid Nameid { get; set; }
 
     /// <summary>
     /// Gets or sets the textual description associated with the user group.
@@ -38,11 +34,7 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// Provides additional contextual information about the group.
     /// Defaults to <see cref="Description.Empty"/> when not specified.
     /// </remarks>
-    public Description Description
-    {
-        get;
-        set;
-    } = Description.Empty;
+    public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the user group is active.
@@ -51,11 +43,7 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// Inactive groups should not be considered during permission evaluation
     /// or operational use, depending on application rules.
     /// </remarks>
-    public bool IsActive
-    {
-        get;
-        set;
-    } = true;
+    public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned to the user group.
@@ -119,11 +107,7 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// These partitions define the partition scope of the group and are used
     /// for partition-based access evaluation.
     /// </remarks>
-    public PartitionCollection Partitions
-    {
-        get;
-        init;
-    } = [];
+    public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

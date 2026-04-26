@@ -23,7 +23,7 @@ namespace Fargo.Domain.Partitions;
 /// partitions. Access does not flow from child to parent.
 /// </remarks>
 public class PartitionService(
-        IPartitionRepository partitionRepository)
+    IPartitionRepository partitionRepository)
 {
     /// <summary>
     /// The predefined unique identifier string representing
@@ -94,9 +94,9 @@ public class PartitionService(
     /// Thrown when assigning the parent would create a circular hierarchy.
     /// </exception>
     public async Task SetParentPartition(
-            Partition parentPartition,
-            Partition memberPartition,
-            CancellationToken cancellationToken = default)
+        Partition parentPartition,
+        Partition memberPartition,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(parentPartition);
         ArgumentNullException.ThrowIfNull(memberPartition);
@@ -127,9 +127,9 @@ public class PartitionService(
     }
 
     private async Task<bool> CreatesCircularHierarchy(
-            Partition candidateParentPartition,
-            Guid memberPartitionGuid,
-            CancellationToken cancellationToken)
+        Partition candidateParentPartition,
+        Guid memberPartitionGuid,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(candidateParentPartition);
 

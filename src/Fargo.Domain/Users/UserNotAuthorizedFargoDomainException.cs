@@ -5,10 +5,10 @@ namespace Fargo.Domain.Users;
 /// for which they do not have permission.
 /// </summary>
 public sealed class UserNotAuthorizedFargoDomainException(
-        Guid userGuid,
-        ActionType actionType
-        ) : FargoDomainException(
-            $"User '{userGuid}' is not authorized to perform action '{actionType}'.")
+    Guid userGuid,
+    ActionType actionType
+    ) : FargoDomainException(
+        $"User '{userGuid}' is not authorized to perform action '{actionType}'.")
 {
     /// <summary>
     /// Gets the identifier of the user that attempted the action.

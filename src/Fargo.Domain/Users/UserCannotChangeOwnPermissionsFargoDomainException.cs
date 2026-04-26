@@ -10,7 +10,7 @@ namespace Fargo.Domain.Users;
 /// The identifier of the user who attempted to change their own permissions.
 /// </param>
 public sealed class UserCannotChangeOwnPermissionsFargoDomainException(Guid userGuid)
-            : FargoDomainException($"User '{userGuid}' cannot change their own permissions.")
+    : FargoDomainException($"User '{userGuid}' cannot change their own permissions.")
 {
     /// <summary>
     /// Gets the identifier of the user who attempted to change their own permissions.

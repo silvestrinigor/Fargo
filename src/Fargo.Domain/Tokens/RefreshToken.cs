@@ -25,11 +25,7 @@ public sealed class RefreshToken : Entity
     /// <summary>
     /// Gets the unique identifier of the user associated with this refresh token.
     /// </summary>
-    public required Guid UserGuid
-    {
-        get;
-        init;
-    }
+    public required Guid UserGuid { get; init; }
 
     /// <summary>
     /// Gets the hashed value of the refresh token.
@@ -37,11 +33,7 @@ public sealed class RefreshToken : Entity
     /// The raw token should never be stored in the database. Only the hash
     /// is persisted for security purposes.
     /// </summary>
-    public required TokenHash TokenHash
-    {
-        get;
-        init;
-    }
+    public required TokenHash TokenHash { get; init; }
 
     /// <summary>
     /// Gets the date and time when the refresh token expires.
@@ -62,11 +54,7 @@ public sealed class RefreshToken : Entity
     /// is replaced by a new one and this property stores the hash
     /// of the replacement token.
     /// </summary>
-    public TokenHash? ReplacedByTokenHash
-    {
-        get;
-        init;
-    } = null;
+    public TokenHash? ReplacedByTokenHash { get; init; } = null;
 
     /// <summary>
     /// Gets a value indicating whether the refresh token is expired.

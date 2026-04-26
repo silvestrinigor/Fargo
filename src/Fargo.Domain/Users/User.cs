@@ -190,11 +190,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// <remarks>
     /// This property represents the user's current activation status.
     /// </remarks>
-    public bool IsActive
-    {
-        get;
-        set;
-    } = true;
+    public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
@@ -260,11 +256,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// - Direct permissions and partition access
     /// - Permissions and partition access inherited from groups
     /// </remarks>
-    public UserGroupCollection UserGroups
-    {
-        get;
-        init;
-    } = [];
+    public UserGroupCollection UserGroups { get; init; } = [];
 
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
@@ -341,11 +333,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// To determine which partitions the user can access, see
     /// <see cref="PartitionAccesses"/> and <see cref="UserGroups"/>.
     /// </remarks>
-    public PartitionCollection Partitions
-    {
-        get;
-        init;
-    } = [];
+    public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

@@ -8,10 +8,33 @@ namespace Fargo.Domain.Events;
 /// </summary>
 public enum EntityType
 {
+    /// <summary>
+    /// Represents an article entity.
+    /// </summary>
     Article = 0,
+
+    /// <summary>
+    /// Represents an item entity.
+    /// </summary>
     Item = 1,
+
+    /// <summary>
+    /// Represents a user entity.
+    /// </summary>
     User = 2,
+
+    /// <summary>
+    /// Represents a user group entity.
+    /// </summary>
     UserGroup = 3,
+
+    /// <summary>
+    /// Represents a partition entity.
+    /// </summary>
     Partition = 4,
+
+    /// <summary>
+    /// Represents an API client entity.
+    /// </summary>
     ApiClient = 5,
 }
