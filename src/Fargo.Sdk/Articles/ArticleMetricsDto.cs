@@ -1,3 +1,6 @@
+using UnitsNet;
+using UnitsNet.Units;
+
 namespace Fargo.Sdk.Articles;
 
 /// <summary>
@@ -20,9 +23,9 @@ public sealed class ArticleMetricsDto
     public LengthDto? LengthZ { get; init; }
 
     /// <summary>
-    /// Gets the volumetric density in kg/m³, computed from <see cref="Mass"/> and the three
-    /// length dimensions. Returns <see langword="null"/> when any measurement is absent or any
-    /// dimension is zero.
+    /// Gets the volumetric density computed from <see cref="Mass"/> and the three length dimensions,
+    /// expressed in the natural unit for the given mass and length unit combination.
+    /// Returns <see langword="null"/> when any measurement is absent or any dimension is zero or negative.
     /// </summary>
     public DensityDto? Density => ComputeDensity(Mass, LengthX, LengthY, LengthZ);
 
@@ -33,12 +36,39 @@ public sealed class ArticleMetricsDto
             return null;
         }
 
-        var massKg = UnitsNet.Mass.Parse($"{m.Value} {m.Unit}").Kilograms;
-        var xM = UnitsNet.Length.Parse($"{x.Value} {x.Unit}").Meters;
-        var yM = UnitsNet.Length.Parse($"{y.Value} {y.Unit}").Meters;
-        var zM = UnitsNet.Length.Parse($"{z.Value} {z.Unit}").Meters;
-        var vol = xM * yM * zM;
+        var massUnit = UnitParser.Default.Parse<MassUnit>(m.Unit);
+        var lxUnit = UnitParser.Default.Parse<LengthUnit>(x.Unit);
+        var lyUnit = UnitParser.Default.Parse<LengthUnit>(y.Unit);
+        var lzUnit = UnitParser.Default.Parse<LengthUnit>(z.Unit);
 
-        return vol > 0 ? new DensityDto(massKg / vol, "kg/m³") : null;
+        var mass = UnitsNet.Mass.From(m.Value, massUnit);
+        var lx = UnitsNet.Length.From(x.Value, lxUnit);
+        var ly = UnitsNet.Length.From(y.Value, lyUnit);
+        var lz = UnitsNet.Length.From(z.Value, lzUnit);
+
+        if (lx.Meters <= 0 || ly.Meters <= 0 || lz.Meters <= 0)
+        {
+            return null;
+        }
+
+        var densityKgPerM3 = mass.Kilograms / (lx.Meters * ly.Meters * lz.Meters);
+        var naturalUnit = GetNaturalUnit(massUnit, lxUnit);
+        var density = UnitsNet.Density.FromKilogramsPerCubicMeter(densityKgPerM3).ToUnit(naturalUnit);
+
+        return new DensityDto(density.Value, UnitsNet.Density.GetAbbreviation(naturalUnit));
     }
+
+    private static DensityUnit GetNaturalUnit(MassUnit massUnit, LengthUnit lengthUnit)
+        => (massUnit, lengthUnit) switch
+        {
+            (MassUnit.Kilogram, LengthUnit.Meter) => DensityUnit.KilogramPerCubicMeter,
+            (MassUnit.Kilogram, LengthUnit.Centimeter) => DensityUnit.KilogramPerCubicCentimeter,
+            (MassUnit.Kilogram, LengthUnit.Millimeter) => DensityUnit.KilogramPerCubicMillimeter,
+            (MassUnit.Gram, LengthUnit.Meter) => DensityUnit.GramPerCubicMeter,
+            (MassUnit.Gram, LengthUnit.Centimeter) => DensityUnit.GramPerCubicCentimeter,
+            (MassUnit.Gram, LengthUnit.Millimeter) => DensityUnit.GramPerCubicMillimeter,
+            (MassUnit.Pound, LengthUnit.Foot) => DensityUnit.PoundPerCubicFoot,
+            (MassUnit.Pound, LengthUnit.Inch) => DensityUnit.PoundPerCubicInch,
+            _ => DensityUnit.KilogramPerCubicMeter
+        };
 }

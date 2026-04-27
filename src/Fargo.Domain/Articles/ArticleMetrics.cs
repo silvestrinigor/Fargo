@@ -1,3 +1,5 @@
+using UnitsNet.Units;
+
 namespace Fargo.Domain.Articles;
 
 /// <summary>
@@ -23,16 +25,46 @@ public sealed class ArticleMetrics
     public Length? LengthZ { get; set; }
 
     /// <summary>
-    /// Gets the volumetric density in kg/m³, computed from <see cref="Mass"/> and the three
-    /// length dimensions. Returns <see langword="null"/> when any measurement is absent or any
-    /// dimension is zero.
+    /// Gets the volumetric density computed from <see cref="Mass"/> and the three length dimensions,
+    /// expressed in the natural unit for the given mass and length unit combination.
+    /// Returns <see langword="null"/> when any measurement is absent or any dimension is zero or negative.
     /// </summary>
-    public double? Density => (Mass, LengthX, LengthY, LengthZ) switch
+    public Density? Density
     {
-        ({ } m, { } x, { } y, { } z)
-            when x.ToUnitsNet().Meters > 0 && y.ToUnitsNet().Meters > 0 && z.ToUnitsNet().Meters > 0
-            => m.ToUnitsNet().Kilograms
-               / (x.ToUnitsNet().Meters * y.ToUnitsNet().Meters * z.ToUnitsNet().Meters),
-        _ => null
-    };
+        get
+        {
+            if (Mass is not { } m || LengthX is not { } x || LengthY is not { } y || LengthZ is not { } z)
+            {
+                return null;
+            }
+
+            var xNet = x.ToUnitsNet();
+            var yNet = y.ToUnitsNet();
+            var zNet = z.ToUnitsNet();
+
+            if (xNet.Meters <= 0 || yNet.Meters <= 0 || zNet.Meters <= 0)
+            {
+                return null;
+            }
+
+            var densityKgPerM3 = m.ToUnitsNet().Kilograms / (xNet.Meters * yNet.Meters * zNet.Meters);
+            var naturalUnit = GetNaturalUnit(m.Unit, x.Unit);
+            var converted = UnitsNet.Density.FromKilogramsPerCubicMeter(densityKgPerM3).ToUnit(naturalUnit);
+            return (Density)converted;
+        }
+    }
+
+    private static DensityUnit GetNaturalUnit(MassUnit massUnit, LengthUnit lengthUnit)
+        => (massUnit, lengthUnit) switch
+        {
+            (MassUnit.Kilogram, LengthUnit.Meter) => DensityUnit.KilogramPerCubicMeter,
+            (MassUnit.Kilogram, LengthUnit.Centimeter) => DensityUnit.KilogramPerCubicCentimeter,
+            (MassUnit.Kilogram, LengthUnit.Millimeter) => DensityUnit.KilogramPerCubicMillimeter,
+            (MassUnit.Gram, LengthUnit.Meter) => DensityUnit.GramPerCubicMeter,
+            (MassUnit.Gram, LengthUnit.Centimeter) => DensityUnit.GramPerCubicCentimeter,
+            (MassUnit.Gram, LengthUnit.Millimeter) => DensityUnit.GramPerCubicMillimeter,
+            (MassUnit.Pound, LengthUnit.Foot) => DensityUnit.PoundPerCubicFoot,
+            (MassUnit.Pound, LengthUnit.Inch) => DensityUnit.PoundPerCubicInch,
+            _ => DensityUnit.KilogramPerCubicMeter
+        };
 }
