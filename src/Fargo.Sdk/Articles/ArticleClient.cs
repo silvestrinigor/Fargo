@@ -69,7 +69,7 @@ public sealed class ArticleClient : IArticleClient
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
@@ -82,12 +82,12 @@ public sealed class ArticleClient : IArticleClient
                     name,
                     description,
                     firstPartition,
-                    metrics = metrics == null ? null : new
+                    metrics = metrics == null ? null : (object)new
                     {
-                        mass = metrics.Mass,
-                        lengthX = metrics.LengthX,
-                        lengthY = metrics.LengthY,
-                        lengthZ = metrics.LengthZ
+                        mass = metrics.Mass == null ? null : (object)new { value = metrics.Mass.Value, unit = metrics.Mass.ToAbbreviation() },
+                        lengthX = metrics.LengthX == null ? null : (object)new { value = metrics.LengthX.Value, unit = metrics.LengthX.ToAbbreviation() },
+                        lengthY = metrics.LengthY == null ? null : (object)new { value = metrics.LengthY.Value, unit = metrics.LengthY.ToAbbreviation() },
+                        lengthZ = metrics.LengthZ == null ? null : (object)new { value = metrics.LengthZ.Value, unit = metrics.LengthZ.ToAbbreviation() }
                     },
                     shelfLife
                 }
@@ -107,7 +107,7 @@ public sealed class ArticleClient : IArticleClient
         Guid articleGuid,
         string? name = null,
         string? description = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
@@ -117,12 +117,12 @@ public sealed class ArticleClient : IArticleClient
             {
                 name,
                 description,
-                metrics = metrics == null ? null : new
+                metrics = metrics == null ? null : (object)new
                 {
-                    mass = metrics.Mass,
-                    lengthX = metrics.LengthX,
-                    lengthY = metrics.LengthY,
-                    lengthZ = metrics.LengthZ
+                    mass = metrics.Mass == null ? null : (object)new { value = metrics.Mass.Value, unit = metrics.Mass.ToAbbreviation() },
+                    lengthX = metrics.LengthX == null ? null : (object)new { value = metrics.LengthX.Value, unit = metrics.LengthX.ToAbbreviation() },
+                    lengthY = metrics.LengthY == null ? null : (object)new { value = metrics.LengthY.Value, unit = metrics.LengthY.ToAbbreviation() },
+                    lengthZ = metrics.LengthZ == null ? null : (object)new { value = metrics.LengthZ.Value, unit = metrics.LengthZ.ToAbbreviation() }
                 },
                 shelfLife
             },

@@ -14,7 +14,7 @@ public sealed class Article : IAsyncDisposable
         string description,
         IArticleHttpClient client,
         Func<ValueTask>? onDispose = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         bool hasImage = false,
         Guid? editedByGuid = null)
@@ -57,13 +57,13 @@ public sealed class Article : IAsyncDisposable
         set => _description = value;
     }
 
-    private ArticleMetricsDto? _metrics;
+    private ArticleMetrics? _metrics;
 
     /// <summary>
     /// The physical measurements of the article (mass, dimensions, computed density).
     /// <see langword="null"/> when no measurements have been set.
     /// </summary>
-    public ArticleMetricsDto? Metrics
+    public ArticleMetrics? Metrics
     {
         get => _metrics;
         set => _metrics = value;

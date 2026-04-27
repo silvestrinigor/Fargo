@@ -1,3 +1,4 @@
+using Fargo.Sdk.Articles;
 using Fargo.Sdk.Authentication;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
@@ -8,7 +9,10 @@ namespace Fargo.Sdk.Http;
 
 public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
 {
-    private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Web;
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerOptions.Web)
+    {
+        Converters = { new MassJsonConverter(), new LengthJsonConverter(), new DensityJsonConverter() }
+    };
 
     private readonly HttpClient httpClient;
 

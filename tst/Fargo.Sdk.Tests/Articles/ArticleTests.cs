@@ -12,7 +12,7 @@ public sealed class ArticleTests
 
     public ArticleTests()
     {
-        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>());
 
         sut = new Article(ArticleGuid, "Original Name", "Original Description", client);
@@ -27,7 +27,7 @@ public sealed class ArticleTests
         await sut.UpdateAsync(x => x.Name = "New Name");
 
         // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "Original Description", Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class ArticleTests
         });
 
         // Assert
-        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>());
+        await client.Received(1).UpdateAsync(ArticleGuid, "New Name", "New Description", Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public sealed class ArticleTests
     public async Task UpdateAsync_Should_ThrowFargoSdkApiException_When_UpdateFails()
     {
         // Arrange
-        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+        client.UpdateAsync(Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<EmptyResult>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         // Act / Assert
@@ -76,7 +76,7 @@ public sealed class ArticleTests
     public void Metrics_Getter_Should_ReturnUpdatedValue_After_Set()
     {
         // Arrange
-        var metrics = new ArticleMetricsDto { Mass = new MassDto(5, "kg") };
+        var metrics = new ArticleMetrics { Mass = new Mass(5, MassUnit.Kilogram) };
 
         // Act
         sut.Metrics = metrics;

@@ -39,7 +39,7 @@ public sealed class ArticleManager(
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
         => service.CreateAsync(name, description, firstPartition, metrics, shelfLife, cancellationToken);

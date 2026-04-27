@@ -83,7 +83,7 @@ public sealed class ArticleService : IArticleService
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {

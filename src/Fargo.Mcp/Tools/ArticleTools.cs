@@ -62,12 +62,12 @@ public sealed class ArticleTools(IArticleManager articles)
         try
         {
             Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-            var metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? null : new ArticleMetricsDto
+            var metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? null : new ArticleMetrics
             {
-                Mass = massValue is null ? null : new MassDto(massValue.Value, massUnit),
-                LengthX = lengthXValue is null ? null : new LengthDto(lengthXValue.Value, lengthXUnit),
-                LengthY = lengthYValue is null ? null : new LengthDto(lengthYValue.Value, lengthYUnit),
-                LengthZ = lengthZValue is null ? null : new LengthDto(lengthZValue.Value, lengthZUnit),
+                Mass = massValue is null ? null : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
+                LengthX = lengthXValue is null ? null : new Length(lengthXValue.Value, Length.ParseUnit(lengthXUnit)),
+                LengthY = lengthYValue is null ? null : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
+                LengthZ = lengthZValue is null ? null : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
             };
             await using var article = await articles.CreateAsync(name, description, firstPartition, metrics);
             return $"Created article with GUID: {article.Guid}";
@@ -109,12 +109,12 @@ public sealed class ArticleTools(IArticleManager articles)
 
                 if (massValue is not null || lengthXValue is not null || lengthYValue is not null || lengthZValue is not null)
                 {
-                    a.Metrics = new ArticleMetricsDto
+                    a.Metrics = new ArticleMetrics
                     {
-                        Mass = massValue is null ? a.Metrics?.Mass : new MassDto(massValue.Value, massUnit),
-                        LengthX = lengthXValue is null ? a.Metrics?.LengthX : new LengthDto(lengthXValue.Value, lengthXUnit),
-                        LengthY = lengthYValue is null ? a.Metrics?.LengthY : new LengthDto(lengthYValue.Value, lengthYUnit),
-                        LengthZ = lengthZValue is null ? a.Metrics?.LengthZ : new LengthDto(lengthZValue.Value, lengthZUnit),
+                        Mass = massValue is null ? a.Metrics?.Mass : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
+                        LengthX = lengthXValue is null ? a.Metrics?.LengthX : new Length(lengthXValue.Value, Length.ParseUnit(lengthXUnit)),
+                        LengthY = lengthYValue is null ? a.Metrics?.LengthY : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
+                        LengthZ = lengthZValue is null ? a.Metrics?.LengthZ : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
                     };
                 }
             });
