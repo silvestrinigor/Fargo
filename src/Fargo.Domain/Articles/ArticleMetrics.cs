@@ -1,3 +1,4 @@
+using UnitsNet;
 using UnitsNet.Units;
 
 namespace Fargo.Domain.Articles;
@@ -6,23 +7,68 @@ namespace Fargo.Domain.Articles;
 /// Groups the physical measurement properties of an <see cref="Article"/>.
 /// </summary>
 /// <remarks>
-/// Stored as an owned entity in the <c>Articles</c> table (same columns as before the refactor).
+/// Stored as an owned entity in the <c>Articles</c> table.
 /// <see cref="Density"/> is a computed property derived from <see cref="Mass"/> and the three
 /// length dimensions; it is never persisted.
 /// </remarks>
 public sealed class ArticleMetrics
 {
+    private Mass? _mass;
+    private Length? _lengthX;
+    private Length? _lengthY;
+    private Length? _lengthZ;
+
     /// <summary>Gets or sets the physical mass of the article.</summary>
-    public Mass? Mass { get; set; }
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is negative.</exception>
+    public Mass? Mass
+    {
+        get => _mass;
+        set
+        {
+            if (value.HasValue && value.Value.Value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value), "Mass cannot be negative.");
+            _mass = value;
+        }
+    }
 
     /// <summary>Gets or sets the X dimension of the article.</summary>
-    public Length? LengthX { get; set; }
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is negative.</exception>
+    public Length? LengthX
+    {
+        get => _lengthX;
+        set
+        {
+            if (value.HasValue && value.Value.Value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value), "Length cannot be negative.");
+            _lengthX = value;
+        }
+    }
 
     /// <summary>Gets or sets the Y dimension of the article.</summary>
-    public Length? LengthY { get; set; }
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is negative.</exception>
+    public Length? LengthY
+    {
+        get => _lengthY;
+        set
+        {
+            if (value.HasValue && value.Value.Value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value), "Length cannot be negative.");
+            _lengthY = value;
+        }
+    }
 
     /// <summary>Gets or sets the Z dimension of the article.</summary>
-    public Length? LengthZ { get; set; }
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is negative.</exception>
+    public Length? LengthZ
+    {
+        get => _lengthZ;
+        set
+        {
+            if (value.HasValue && value.Value.Value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value), "Length cannot be negative.");
+            _lengthZ = value;
+        }
+    }
 
     /// <summary>
     /// Gets the volumetric density computed from <see cref="Mass"/> and the three length dimensions,
@@ -33,24 +79,15 @@ public sealed class ArticleMetrics
     {
         get
         {
-            if (Mass is not { } m || LengthX is not { } x || LengthY is not { } y || LengthZ is not { } z)
-            {
+            if (_mass is not { } m || _lengthX is not { } x || _lengthY is not { } y || _lengthZ is not { } z)
                 return null;
-            }
 
-            var xNet = x.ToUnitsNet();
-            var yNet = y.ToUnitsNet();
-            var zNet = z.ToUnitsNet();
-
-            if (xNet.Meters <= 0 || yNet.Meters <= 0 || zNet.Meters <= 0)
-            {
+            if (x.Meters <= 0 || y.Meters <= 0 || z.Meters <= 0)
                 return null;
-            }
 
-            var densityKgPerM3 = m.ToUnitsNet().Kilograms / (xNet.Meters * yNet.Meters * zNet.Meters);
+            var densityKgPerM3 = m.Kilograms / (x.Meters * y.Meters * z.Meters);
             var naturalUnit = GetNaturalUnit(m.Unit, x.Unit);
-            var converted = UnitsNet.Density.FromKilogramsPerCubicMeter(densityKgPerM3).ToUnit(naturalUnit);
-            return (Density)converted;
+            return UnitsNet.Density.FromKilogramsPerCubicMeter(densityKgPerM3).ToUnit(naturalUnit);
         }
     }
 

@@ -2,18 +2,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainLength = Fargo.Domain.Length;
 
 namespace Fargo.Infrastructure.Converters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="DomainLength"/> as <c>{ "value": number, "unit": string }</c>.
+/// Serializes and deserializes <see cref="Length"/> as <c>{ "value": number, "unit": string }</c>.
 /// Reads any UnitsNet length unit abbreviation (e.g. "mm", "cm", "m", "km", "in", "ft").
-/// Writes the value and unit exactly as stored in the domain object — no unit conversion on output.
+/// Writes the value and unit exactly as stored — no unit conversion on output.
 /// </summary>
-public sealed class LengthJsonConverter : JsonConverter<DomainLength>
+public sealed class LengthJsonConverter : JsonConverter<Length>
 {
-    public override DomainLength Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Length Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
         {
@@ -58,14 +57,14 @@ public sealed class LengthJsonConverter : JsonConverter<DomainLength>
             }
         }
 
-        return new DomainLength(value, unit);
+        return Length.From(value, unit);
     }
 
-    public override void Write(Utf8JsonWriter writer, DomainLength value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Length value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);
-        writer.WriteString("unit", UnitsNet.Length.GetAbbreviation(value.Unit));
+        writer.WriteString("unit", Length.GetAbbreviation(value.Unit));
         writer.WriteEndObject();
     }
 }
