@@ -1,5 +1,6 @@
 namespace Fargo.Domain;
 
+// TODO: Move to a new project Fargo.Types to remove the duplicated code in the sdk.
 /// <summary>
 /// Represents the set of actions that can be authorized in the system.
 ///
