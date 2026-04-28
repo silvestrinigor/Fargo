@@ -137,7 +137,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         // Act
@@ -154,7 +154,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         // Act
@@ -168,7 +168,7 @@ public sealed class ArticleManagerTests
     public async Task CreateAsync_Should_ThrowFargoSdkApiException_When_CreationFails()
     {
         // Arrange
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         // Act / Assert
@@ -252,7 +252,7 @@ public sealed class ArticleManagerTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetricsDto?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+        client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<ArticleMetrics?>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkResponse<Guid>(guid));
 
         var article = await sut.CreateAsync("My Article");
@@ -275,7 +275,7 @@ public sealed class ArticleManagerTests
 
         public static ArticleResult ArticleResultWithMetrics() =>
             new(Guid.NewGuid(), "Test Article", "A test description",
-                Metrics: new ArticleMetricsDto { Mass = new MassDto(10, "kg") });
+                Metrics: new ArticleMetrics { Mass = new Mass(10, MassUnit.Kilogram) });
 
         public static ArticleResult ArticleResultWithShelfLife(TimeSpan shelfLife) =>
             new(Guid.NewGuid(), "Test Article", "A test description", ShelfLife: shelfLife);

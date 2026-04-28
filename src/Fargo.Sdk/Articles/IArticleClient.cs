@@ -57,7 +57,7 @@ public interface IArticleClient
         string name,
         string? description = null,
         Guid? firstPartition = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 
@@ -74,7 +74,7 @@ public interface IArticleClient
         Guid articleGuid,
         string? name = null,
         string? description = null,
-        ArticleMetricsDto? metrics = null,
+        ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default);
 

@@ -14,7 +14,7 @@ public sealed record ArticleResult(
     Guid Guid,
     string Name,
     string Description,
-    ArticleMetricsDto? Metrics = null,
+    ArticleMetrics? Metrics = null,
     TimeSpan? ShelfLife = null,
     bool HasImage = false,
     Guid? EditedByGuid = null

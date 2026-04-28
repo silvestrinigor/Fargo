@@ -1,10 +1,10 @@
-using Fargo.Domain;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Globalization;
+using UnitsNet;
 
 namespace Fargo.Infrastructure.Converters;
 
 public sealed class LengthStringConverter()
     : ValueConverter<Length, string>(
-        l => l.ToUnitsNet().ToString("G17", CultureInfo.InvariantCulture),
-        s => (Length)UnitsNet.Length.Parse(s, CultureInfo.InvariantCulture));
+        l => l.ToString("G17", CultureInfo.InvariantCulture),
+        s => Length.Parse(s, CultureInfo.InvariantCulture));

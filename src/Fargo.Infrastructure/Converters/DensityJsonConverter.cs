@@ -6,21 +6,22 @@ using UnitsNet.Units;
 namespace Fargo.Infrastructure.Converters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="Mass"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet mass unit abbreviation (e.g. "g", "kg", "mg", "lb", "oz").
+/// Serializes and deserializes <see cref="Density"/> as <c>{ "value": number, "unit": string }</c>.
+/// Reads any UnitsNet density unit abbreviation (e.g. "kg/m³", "g/cm³", "lb/ft³").
 /// Writes the value and unit exactly as stored — no unit conversion on output.
 /// </summary>
-public sealed class MassJsonConverter : JsonConverter<Mass>
+public sealed class DensityJsonConverter : JsonConverter<Density>
 {
-    public override Mass Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    /// <inheritdoc />
+    public override Density Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
         {
-            throw new JsonException("Mass must be an object with 'value' (number) and 'unit' (string) fields.");
+            throw new JsonException("Density must be an object with 'value' (number) and 'unit' (string) fields.");
         }
 
         double value = 0;
-        MassUnit unit = MassUnit.Gram;
+        DensityUnit unit = DensityUnit.KilogramPerCubicMeter;
 
         while (reader.Read())
         {
@@ -31,7 +32,7 @@ public sealed class MassJsonConverter : JsonConverter<Mass>
 
             if (reader.TokenType != JsonTokenType.PropertyName)
             {
-                throw new JsonException("Expected property name inside mass object.");
+                throw new JsonException("Expected property name inside density object.");
             }
 
             string propName = reader.GetString()!;
@@ -44,27 +45,28 @@ public sealed class MassJsonConverter : JsonConverter<Mass>
                     break;
                 case "unit":
                     string unitStr = reader.GetString()
-                        ?? throw new JsonException("Mass 'unit' must be a string.");
+                        ?? throw new JsonException("Density 'unit' must be a string.");
                     try
                     {
-                        unit = UnitParser.Default.Parse<MassUnit>(unitStr);
+                        unit = UnitParser.Default.Parse<DensityUnit>(unitStr);
                     }
                     catch (Exception ex)
                     {
-                        throw new JsonException($"Unknown mass unit '{unitStr}'.", ex);
+                        throw new JsonException($"Unknown density unit '{unitStr}'.", ex);
                     }
                     break;
             }
         }
 
-        return Mass.From(value, unit);
+        return Density.From(value, unit);
     }
 
-    public override void Write(Utf8JsonWriter writer, Mass value, JsonSerializerOptions options)
+    /// <inheritdoc />
+    public override void Write(Utf8JsonWriter writer, Density value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);
-        writer.WriteString("unit", Mass.GetAbbreviation(value.Unit));
+        writer.WriteString("unit", Density.GetAbbreviation(value.Unit));
         writer.WriteEndObject();
     }
 }

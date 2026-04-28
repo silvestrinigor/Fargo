@@ -269,13 +269,13 @@ else
         _edit.Name != _origName ||
         (_edit.Description ?? "") != (_origDescription ?? "") ||
         _edit.MassValue != _origMass ||
-        _edit.MassUnit != (_article.Metrics?.Mass?.Unit ?? "g") ||
+        _edit.MassUnit != (_article.Metrics?.Mass is null ? "g" : _article.Metrics.Mass.ToAbbreviation()) ||
         _edit.LengthXValue != _origX ||
-        _edit.LengthXUnit != (_article.Metrics?.LengthX?.Unit ?? "m") ||
+        _edit.LengthXUnit != (_article.Metrics?.LengthX is null ? "m" : _article.Metrics.LengthX.ToAbbreviation()) ||
         _edit.LengthYValue != _origY ||
-        _edit.LengthYUnit != (_article.Metrics?.LengthY?.Unit ?? "m") ||
+        _edit.LengthYUnit != (_article.Metrics?.LengthY is null ? "m" : _article.Metrics.LengthY.ToAbbreviation()) ||
         _edit.LengthZValue != _origZ ||
-        _edit.LengthZUnit != (_article.Metrics?.LengthZ?.Unit ?? "m"));
+        _edit.LengthZUnit != (_article.Metrics?.LengthZ is null ? "m" : _article.Metrics.LengthZ.ToAbbreviation()));
 
     private async Task LoadAsync()
     {
@@ -292,13 +292,13 @@ else
             _edit.Name = _article.Name;
             _edit.Description = _article.Description;
             _edit.MassValue = _article.Metrics?.Mass?.Value;
-            _edit.MassUnit = _article.Metrics?.Mass?.Unit ?? "g";
+            _edit.MassUnit = _article.Metrics?.Mass is null ? "g" : _article.Metrics.Mass.ToAbbreviation();
             _edit.LengthXValue = _article.Metrics?.LengthX?.Value;
-            _edit.LengthXUnit = _article.Metrics?.LengthX?.Unit ?? "m";
+            _edit.LengthXUnit = _article.Metrics?.LengthX is null ? "m" : _article.Metrics.LengthX.ToAbbreviation();
             _edit.LengthYValue = _article.Metrics?.LengthY?.Value;
-            _edit.LengthYUnit = _article.Metrics?.LengthY?.Unit ?? "m";
+            _edit.LengthYUnit = _article.Metrics?.LengthY is null ? "m" : _article.Metrics.LengthY.ToAbbreviation();
             _edit.LengthZValue = _article.Metrics?.LengthZ?.Value;
-            _edit.LengthZUnit = _article.Metrics?.LengthZ?.Unit ?? "m";
+            _edit.LengthZUnit = _article.Metrics?.LengthZ is null ? "m" : _article.Metrics.LengthZ.ToAbbreviation();
             _origName = _article.Name;
             _origDescription = _article.Description;
             _origMass = _article.Metrics?.Mass?.Value;
@@ -344,12 +344,12 @@ else
 
         await _save.RunAsync(async () =>
         {
-            var metrics = new ArticleMetricsDto
+            var metrics = new ArticleMetrics
             {
-                Mass = _edit.MassValue is null ? null : new MassDto(_edit.MassValue.Value, _edit.MassUnit),
-                LengthX = _edit.LengthXValue is null ? null : new LengthDto(_edit.LengthXValue.Value, _edit.LengthXUnit),
-                LengthY = _edit.LengthYValue is null ? null : new LengthDto(_edit.LengthYValue.Value, _edit.LengthYUnit),
-                LengthZ = _edit.LengthZValue is null ? null : new LengthDto(_edit.LengthZValue.Value, _edit.LengthZUnit),
+                Mass = _edit.MassValue is null ? null : new Mass(_edit.MassValue.Value, Mass.ParseUnit(_edit.MassUnit)),
+                LengthX = _edit.LengthXValue is null ? null : new Length(_edit.LengthXValue.Value, Length.ParseUnit(_edit.LengthXUnit)),
+                LengthY = _edit.LengthYValue is null ? null : new Length(_edit.LengthYValue.Value, Length.ParseUnit(_edit.LengthYUnit)),
+                LengthZ = _edit.LengthZValue is null ? null : new Length(_edit.LengthZValue.Value, Length.ParseUnit(_edit.LengthZUnit)),
             };
             await _article.UpdateAsync(a =>
             {

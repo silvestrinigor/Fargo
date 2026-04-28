@@ -1,17 +1,16 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using UnitsNet;
-using UnitsNet.Units;
 
-namespace Fargo.Infrastructure.Converters;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>
 /// Serializes and deserializes <see cref="Mass"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet mass unit abbreviation (e.g. "g", "kg", "mg", "lb", "oz").
-/// Writes the value and unit exactly as stored — no unit conversion on output.
+/// Reads mass unit abbreviations (e.g. "g", "kg", "mg", "lb", "oz").
+/// Writes the value and unit abbreviation — no unit conversion on output.
 /// </summary>
-public sealed class MassJsonConverter : JsonConverter<Mass>
+internal sealed class MassJsonConverter : JsonConverter<Mass>
 {
+    /// <inheritdoc />
     public override Mass Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
@@ -47,9 +46,9 @@ public sealed class MassJsonConverter : JsonConverter<Mass>
                         ?? throw new JsonException("Mass 'unit' must be a string.");
                     try
                     {
-                        unit = UnitParser.Default.Parse<MassUnit>(unitStr);
+                        unit = Mass.ParseUnit(unitStr);
                     }
-                    catch (Exception ex)
+                    catch (ArgumentException ex)
                     {
                         throw new JsonException($"Unknown mass unit '{unitStr}'.", ex);
                     }
@@ -57,14 +56,15 @@ public sealed class MassJsonConverter : JsonConverter<Mass>
             }
         }
 
-        return Mass.From(value, unit);
+        return new Mass(value, unit);
     }
 
+    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Mass value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);
-        writer.WriteString("unit", Mass.GetAbbreviation(value.Unit));
+        writer.WriteString("unit", value.ToAbbreviation());
         writer.WriteEndObject();
     }
 }
