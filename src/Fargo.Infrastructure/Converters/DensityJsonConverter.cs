@@ -2,19 +2,18 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainDensity = Fargo.Domain.Density;
 
 namespace Fargo.Infrastructure.Converters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="DomainDensity"/> as <c>{ "value": number, "unit": string }</c>.
+/// Serializes and deserializes <see cref="Density"/> as <c>{ "value": number, "unit": string }</c>.
 /// Reads any UnitsNet density unit abbreviation (e.g. "kg/m³", "g/cm³", "lb/ft³").
-/// Writes the value and unit exactly as stored in the domain object — no unit conversion on output.
+/// Writes the value and unit exactly as stored — no unit conversion on output.
 /// </summary>
-public sealed class DensityJsonConverter : JsonConverter<DomainDensity>
+public sealed class DensityJsonConverter : JsonConverter<Density>
 {
     /// <inheritdoc />
-    public override DomainDensity Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Density Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
         {
@@ -59,11 +58,11 @@ public sealed class DensityJsonConverter : JsonConverter<DomainDensity>
             }
         }
 
-        return new DomainDensity(value, unit);
+        return Density.From(value, unit);
     }
 
     /// <inheritdoc />
-    public override void Write(Utf8JsonWriter writer, DomainDensity value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Density value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);

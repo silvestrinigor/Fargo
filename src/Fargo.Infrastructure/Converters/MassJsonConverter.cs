@@ -2,18 +2,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
-using DomainMass = Fargo.Domain.Mass;
 
 namespace Fargo.Infrastructure.Converters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="DomainMass"/> as <c>{ "value": number, "unit": string }</c>.
+/// Serializes and deserializes <see cref="Mass"/> as <c>{ "value": number, "unit": string }</c>.
 /// Reads any UnitsNet mass unit abbreviation (e.g. "g", "kg", "mg", "lb", "oz").
-/// Writes the value and unit exactly as stored in the domain object — no unit conversion on output.
+/// Writes the value and unit exactly as stored — no unit conversion on output.
 /// </summary>
-public sealed class MassJsonConverter : JsonConverter<DomainMass>
+public sealed class MassJsonConverter : JsonConverter<Mass>
 {
-    public override DomainMass Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Mass Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
         {
@@ -58,14 +57,14 @@ public sealed class MassJsonConverter : JsonConverter<DomainMass>
             }
         }
 
-        return new DomainMass(value, unit);
+        return Mass.From(value, unit);
     }
 
-    public override void Write(Utf8JsonWriter writer, DomainMass value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Mass value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);
-        writer.WriteString("unit", UnitsNet.Mass.GetAbbreviation(value.Unit));
+        writer.WriteString("unit", Mass.GetAbbreviation(value.Unit));
         writer.WriteEndObject();
     }
 }

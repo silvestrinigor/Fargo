@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
+        <PackageReference Include="UnitsNet" Version="5.75.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,4 @@
-using Fargo.Domain;
+using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
