@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Barcodes;
 
+// TODO: Move to a new project Fargo.Types to remove the duplicated code in the sdk.
 /// <summary>
 /// Represents the barcode format (symbology) of a barcode.
 /// </summary>

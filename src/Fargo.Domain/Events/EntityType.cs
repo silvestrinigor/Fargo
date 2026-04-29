@@ -1,5 +1,6 @@
 namespace Fargo.Domain.Events;
 
+// TODO: Move to a new project Fargo.Types to remove the duplicated code in the sdk.
 /// <summary>
 /// Represents the type of entity involved in an event.
 /// Stored as an integer in the database.

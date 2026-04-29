@@ -9,6 +9,7 @@ public class ApiClient : ModifiedEntity
     /// <summary>Optional description of the client application.</summary>
     public Description Description { get; set; } = Description.Empty;
 
+    // TODO: Create a KeyHash struct insted of use string.
     /// <summary>SHA-256 hex hash of the raw API key.</summary>
     public required string KeyHash { get; set; }
 
