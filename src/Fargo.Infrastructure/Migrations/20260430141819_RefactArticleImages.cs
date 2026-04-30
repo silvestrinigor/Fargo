@@ -1,22 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Fargo.Infrastructure.Migrations
+namespace Fargo.Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class RefactArticleImages : Migration
 {
     /// <inheritdoc />
-    public partial class RefactArticleImages : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
 
-        }
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
 
-        }
     }
 }
