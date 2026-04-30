@@ -1,8 +1,10 @@
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.ApiClients;
+using Fargo.Sdk.Contracts;
 using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
+using ApiClientCreatedResultContract = Fargo.Sdk.Contracts.ApiClients.ApiClientCreatedResult;
 
 namespace Fargo.Api.Extensions;
 
@@ -30,7 +32,7 @@ public static class ApiClientEndpointRouteBuilderExtension
         group.MapPost("/", CreateApiClient)
             .WithName("CreateApiClient")
             .WithSummary("Creates a new API client and returns its key (shown once)")
-            .Produces<ApiClientCreatedResult>(StatusCodes.Status200OK);
+            .Produces<ApiClientCreatedResultContract>(StatusCodes.Status200OK);
 
         group.MapPatch("/{apiClientGuid:guid}", UpdateApiClient)
             .WithName("UpdateApiClient")
@@ -68,13 +70,13 @@ public static class ApiClientEndpointRouteBuilderExtension
         return TypedResultsHelpers.HandleQueryResult(result);
     }
 
-    private static async Task<Ok<ApiClientCreatedResult>> CreateApiClient(
+    private static async Task<Ok<ApiClientCreatedResultContract>> CreateApiClient(
         ApiClientCreateCommand command,
         ICommandHandler<ApiClientCreateCommand, ApiClientCreatedResult> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(command, cancellationToken);
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<Results<NoContent, NotFound>> UpdateApiClient(
