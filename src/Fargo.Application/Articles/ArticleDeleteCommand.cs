@@ -3,6 +3,7 @@ using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Events;
 
 namespace Fargo.Application.Articles;
 
@@ -26,6 +27,7 @@ public sealed class ArticleDeleteCommandHandler(
         IArticleImageStorage imageStorage,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ArticleDeleteCommand>
 {
@@ -58,8 +60,8 @@ public sealed class ArticleDeleteCommandHandler(
             await imageStorage.DeleteAsync(article.ImageKey, cancellationToken);
         }
 
+        await eventRecorder.Record(EventType.ArticleDeleted, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishArticleDeleted(article.Guid, cancellationToken);
     }
 }

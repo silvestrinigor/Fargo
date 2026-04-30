@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Items;
 
 namespace Fargo.Application.Items;
@@ -28,6 +29,7 @@ public sealed class ItemUpdateCommandHandler(
         IItemRepository itemRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ItemUpdateCommand>
 {
@@ -61,8 +63,8 @@ public sealed class ItemUpdateCommandHandler(
             item.ProductionDate = command.Item.ProductionDate;
         }
 
+        await eventRecorder.Record(EventType.ItemUpdated, EntityType.Item, item.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishItemUpdated(item.Guid, cancellationToken);
     }
 }

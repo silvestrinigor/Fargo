@@ -4,6 +4,7 @@ using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
+using Fargo.Domain.Events;
 
 namespace Fargo.Application.Articles;
 
@@ -26,6 +27,7 @@ public sealed class ArticleAddBarcodeCommandHandler(
     IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork,
+    IEventRecorder eventRecorder,
     IFargoEventPublisher eventPublisher
     ) : ICommandHandler<ArticleAddBarcodeCommand, Guid>
 {
@@ -82,8 +84,8 @@ public sealed class ArticleAddBarcodeCommandHandler(
 
         barcodeRepository.Add(barcode);
 
+        await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);
 
         return barcode.Guid;

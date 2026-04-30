@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Users;
 
 namespace Fargo.Application.Users;
@@ -24,6 +25,7 @@ public sealed class UserDeleteCommandHandler(
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserDeleteCommand>
 {
@@ -54,8 +56,8 @@ public sealed class UserDeleteCommandHandler(
 
         userRepository.Remove(user);
 
+        await eventRecorder.Record(EventType.UserDeleted, EntityType.User, user.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishUserDeleted(user.Guid, cancellationToken);
     }
 }

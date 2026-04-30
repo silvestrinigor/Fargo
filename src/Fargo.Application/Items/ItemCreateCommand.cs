@@ -5,6 +5,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Events;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 
@@ -56,6 +57,7 @@ public sealed class ItemCreateCommandHandler(
         IPartitionRepository partitionRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ItemCreateCommand, Guid>
 {
@@ -120,8 +122,8 @@ public sealed class ItemCreateCommandHandler(
 
         itemRepository.Add(item);
 
+        await eventRecorder.Record(EventType.ItemCreated, EntityType.Item, item.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishItemCreated(item.Guid, article.Guid, partition is null ? [] : [partition.Guid], cancellationToken);
 
         return item.Guid;

@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Partitions;
@@ -30,6 +31,7 @@ public sealed class PartitionDeleteCommandHandler(
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
         IUnitOfWork unitOfWork,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<PartitionDeleteCommand>
 {
@@ -72,8 +74,8 @@ public sealed class PartitionDeleteCommandHandler(
 
         partitionService.DeletePartition(partition);
 
+        await eventRecorder.Record(EventType.PartitionDeleted, EntityType.Partition, partition.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishPartitionDeleted(partition.Guid, cancellationToken);
     }
 }

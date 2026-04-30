@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Users;
 
 namespace Fargo.Application.UserGroups;
@@ -28,6 +29,7 @@ public sealed class UserGroupUpdateCommandHandler(
         IUserGroupRepository userGroupRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserGroupUpdateCommand>
 {
@@ -97,8 +99,8 @@ public sealed class UserGroupUpdateCommandHandler(
             userGroup.IsActive = command.UserGroup.IsActive.Value;
         }
 
+        await eventRecorder.Record(EventType.UserGroupUpdated, EntityType.UserGroup, userGroup.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishUserGroupUpdated(userGroup.Guid, cancellationToken);
     }
 

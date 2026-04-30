@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Users;
 
 namespace Fargo.Application.UserGroups;
@@ -25,6 +26,7 @@ public sealed class UserGroupDeleteCommandHandler(
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserGroupDeleteCommand>
 {
@@ -61,8 +63,8 @@ public sealed class UserGroupDeleteCommandHandler(
 
         userGroupRepository.Remove(userGroup);
 
+        await eventRecorder.Record(EventType.UserGroupDeleted, EntityType.UserGroup, userGroup.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishUserGroupDeleted(userGroup.Guid, cancellationToken);
     }
 }

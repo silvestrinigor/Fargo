@@ -4,6 +4,7 @@ using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
+using Fargo.Domain.Events;
 
 namespace Fargo.Application.Articles;
 
@@ -26,6 +27,7 @@ public sealed class ArticleRemoveBarcodeCommandHandler(
     IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork,
+    IEventRecorder eventRecorder,
     IFargoEventPublisher eventPublisher
     ) : ICommandHandler<ArticleRemoveBarcodeCommand>
 {
@@ -69,8 +71,8 @@ public sealed class ArticleRemoveBarcodeCommandHandler(
 
         barcodeRepository.Remove(barcode);
 
+        await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, command.ArticleGuid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishArticleUpdated(command.ArticleGuid, cancellationToken);
     }
 }
