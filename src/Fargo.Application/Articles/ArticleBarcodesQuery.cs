@@ -1,5 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
+using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Articles;
@@ -17,8 +18,7 @@ public sealed record ArticleBarcodesQuery(
 /// </summary>
 public sealed class ArticleBarcodesQueryHandler(
     ActorService actorService,
-    IArticleQueryRepository articleRepository,
-    IBarcodeRepository barcodeRepository,
+    IArticleRepository articleRepository,
     ICurrentUser currentUser
     ) : IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>
 {
@@ -42,29 +42,24 @@ public sealed class ArticleBarcodesQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        bool articleExists;
+        var article = await articleRepository.GetByGuid(query.ArticleGuid, cancellationToken);
 
-        // TODO: Implement in the repository a function that returns if the article exists insted of return all the information.
-        if (actor.IsAdmin || actor.IsSystem)
-        {
-            articleExists = await articleRepository.GetInfoByGuid(query.ArticleGuid, null, cancellationToken) is not null;
-        }
-        else
-        {
-            articleExists = await articleRepository.GetInfoByGuidPublicOrInPartitions(
-                query.ArticleGuid,
-                actor.PartitionAccesses,
-                null,
-                cancellationToken) is not null;
-        }
-
-        if (!articleExists)
+        if (article is null)
         {
             return null;
         }
 
-        var barcodes = await barcodeRepository.GetByArticleGuid(query.ArticleGuid, cancellationToken);
+        if (!actor.IsAdmin && !actor.IsSystem)
+        {
+            var hasAccess = !article.Partitions.Any()
+                || article.Partitions.Any(p => actor.PartitionAccesses.Contains(p.Guid));
 
-        return ArticleBarcodes.From(barcodes);
+            if (!hasAccess)
+            {
+                return null;
+            }
+        }
+
+        return article.Barcodes;
     }
 }

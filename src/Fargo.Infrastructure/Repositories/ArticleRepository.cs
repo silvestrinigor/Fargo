@@ -26,7 +26,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
     public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
         => await articles
             .Include(a => a.Partitions)
-            .Include(a => a.BarcodeCollection)
+            .WithBarcodes()
             .Where(a => a.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -38,7 +38,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var article = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Include(a => a.BarcodeCollection)
+            .WithBarcodes()
             .Where(article => article.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -54,7 +54,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var result = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Include(a => a.BarcodeCollection)
+            .WithBarcodes()
             .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
@@ -93,7 +93,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
             .AsNoTracking();
 
         var article = await query
-            .Include(article => article.BarcodeCollection)
+            .WithBarcodes()
             .Where(article => article.Guid == entityGuid)
             .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
             .FirstOrDefaultAsync(cancellationToken);
@@ -110,7 +110,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var result = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Include(a => a.BarcodeCollection)
+            .WithBarcodes()
             .Where(a => !a.Partitions.Any())
             .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
             .OrderBy(a => a.Guid)
@@ -137,7 +137,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
             .AsNoTracking();
 
         var result = await query
-            .Include(article => article.BarcodeCollection)
+            .WithBarcodes()
             .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
             .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
             .OrderBy(article => article.Guid)
@@ -156,7 +156,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var article = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Include(article => article.BarcodeCollection)
+            .WithBarcodes()
             .Where(article => article.Guid == entityGuid)
             .Where(article => !article.Partitions.Any()
                 || article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
@@ -175,7 +175,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var result = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
-            .Include(article => article.BarcodeCollection)
+            .WithBarcodes()
             .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
             .Where(article => !article.Partitions.Any()
                 || article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
@@ -233,4 +233,20 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
             .Select(article => article.Guid)
             .ToListAsync(cancellationToken);
     }
+}
+
+file static class ArticleQueryExtensions
+{
+    internal static IQueryable<Article> WithBarcodes(this IQueryable<Article> query) =>
+        query
+            .Include("Barcodes.Ean13Data")
+            .Include("Barcodes.Ean8Data")
+            .Include("Barcodes.UpcAData")
+            .Include("Barcodes.UpcEData")
+            .Include("Barcodes.Code128Data")
+            .Include("Barcodes.Code39Data")
+            .Include("Barcodes.Itf14Data")
+            .Include("Barcodes.Gs1128Data")
+            .Include("Barcodes.QrCodeData")
+            .Include("Barcodes.DataMatrixData");
 }

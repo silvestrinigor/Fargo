@@ -211,6 +211,18 @@ public sealed class Article : IAsyncDisposable
         return _barcodes;
     }
 
+    /// <summary>Replaces this article's barcode state on the server.</summary>
+    public async Task UpdateBarcodesAsync(ArticleBarcodes barcodes, CancellationToken cancellationToken = default)
+    {
+        var result = await client.UpdateBarcodesAsync(Guid, barcodes, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new FargoSdkApiException(result.Error!);
+        }
+
+        _barcodes = barcodes;
+    }
+
     /// <inheritdoc/>
     public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;
 }

@@ -271,33 +271,14 @@ public sealed class ArticleClient : IArticleClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> AddBarcodeAsync(
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateBarcodesAsync(
         Guid articleGuid,
-        string code,
-        BarcodeFormat format,
+        ArticleBarcodes barcodes,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
+        var httpResponse = await httpClient.PutJsonAsync(
             $"/articles/{articleGuid}/barcodes",
-            new { code, format },
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<Guid>(httpResponse.Data);
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> RemoveBarcodeAsync(
-        Guid articleGuid,
-        Guid barcodeGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.DeleteAsync(
-            $"/articles/{articleGuid}/barcodes/{barcodeGuid}",
+            barcodes,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

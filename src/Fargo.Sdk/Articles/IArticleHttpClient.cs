@@ -127,23 +127,12 @@ public interface IArticleHttpClient
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 
-    /// <summary>Adds a barcode to an article and returns its assigned identifier.</summary>
+    /// <summary>Replaces all barcodes associated with an article.</summary>
     /// <param name="articleGuid">The unique identifier of the article.</param>
-    /// <param name="code">The barcode value string.</param>
-    /// <param name="format">The barcode symbology format.</param>
+    /// <param name="barcodes">The desired barcode state.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> AddBarcodeAsync(
+    Task<FargoSdkResponse<EmptyResult>> UpdateBarcodesAsync(
         Guid articleGuid,
-        string code,
-        BarcodeFormat format,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>Removes a barcode from an article.</summary>
-    /// <param name="articleGuid">The unique identifier of the article.</param>
-    /// <param name="barcodeGuid">The unique identifier of the barcode to remove.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> RemoveBarcodeAsync(
-        Guid articleGuid,
-        Guid barcodeGuid,
+        ArticleBarcodes barcodes,
         CancellationToken cancellationToken = default);
 }

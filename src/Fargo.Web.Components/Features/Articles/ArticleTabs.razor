@@ -167,7 +167,7 @@ else
                                 <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
                                 @if (!IsReadOnly)
                                 {
-                                    <button type="button" class="ghost-button danger" @onclick="() => RemoveBarcodeAsync(barcode.Guid)" disabled="@_isRemovingBarcode">Remove</button>
+                                    <button type="button" class="ghost-button danger" @onclick="() => ClearBarcodeAsync(barcode.Format)" disabled="@_isRemovingBarcode">Remove</button>
                                 }
                             </div>
                         }
@@ -183,7 +183,7 @@ else
                                 <option value="@fmt">@fmt</option>
                             }
                         </select>
-                        <button type="button" class="primary-button" @onclick="AddBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
+                        <button type="button" class="primary-button" @onclick="UpsertBarcodeAsync" disabled="@(_isAddingBarcode || string.IsNullOrWhiteSpace(_newBarcodeCode))">
                             @(_isAddingBarcode ? "Adding..." : "Add Barcode")
                         </button>
                     </div>
@@ -459,7 +459,7 @@ else
         _ => "code128"
     };
 
-    private async Task AddBarcodeAsync()
+    private async Task UpsertBarcodeAsync()
     {
         if (_article is null || string.IsNullOrWhiteSpace(_newBarcodeCode)) return;
 
@@ -467,7 +467,8 @@ else
         _barcodeError = null;
         try
         {
-            await Articles.AddBarcodeAsync(_article.Guid, _newBarcodeCode.Trim(), _newBarcodeFormat);
+            var updated = SetBarcode(_barcodes ?? new ArticleBarcodes(), _newBarcodeFormat, _newBarcodeCode.Trim());
+            await Articles.UpdateBarcodesAsync(_article.Guid, updated);
             _newBarcodeCode = string.Empty;
             await LoadBarcodesAsync();
             StateHasChanged();
@@ -484,7 +485,7 @@ else
         }
     }
 
-    private async Task RemoveBarcodeAsync(Guid barcodeGuid)
+    private async Task ClearBarcodeAsync(BarcodeFormat barcodeFormat)
     {
         if (_article is null) return;
 
@@ -492,7 +493,8 @@ else
         _barcodeError = null;
         try
         {
-            await Articles.RemoveBarcodeAsync(_article.Guid, barcodeGuid);
+            var updated = RemoveBarcode(_barcodes ?? new ArticleBarcodes(), barcodeFormat);
+            await Articles.UpdateBarcodesAsync(_article.Guid, updated);
             await LoadBarcodesAsync();
             StateHasChanged();
             await Task.Yield();
@@ -507,6 +509,36 @@ else
             _isRemovingBarcode = false;
         }
     }
+
+    private static ArticleBarcodes SetBarcode(ArticleBarcodes barcodes, BarcodeFormat format, string code) => format switch
+    {
+        BarcodeFormat.Ean13 => barcodes with { Ean13 = new Ean13(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.Ean8 => barcodes with { Ean8 = new Ean8(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.UpcA => barcodes with { UpcA = new UpcA(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.UpcE => barcodes with { UpcE = new UpcE(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.Code128 => barcodes with { Code128 = new Code128(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.Code39 => barcodes with { Code39 = new Code39(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.Itf14 => barcodes with { Itf14 = new Itf14(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.Gs1128 => barcodes with { Gs1128 = new Gs1128(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.QrCode => barcodes with { QrCode = new QrCode(Guid.Empty, Guid.Empty, code) },
+        BarcodeFormat.DataMatrix => barcodes with { DataMatrix = new DataMatrix(Guid.Empty, Guid.Empty, code) },
+        _ => barcodes
+    };
+
+    private static ArticleBarcodes RemoveBarcode(ArticleBarcodes barcodes, BarcodeFormat format) => format switch
+    {
+        BarcodeFormat.Ean13 => barcodes with { Ean13 = null },
+        BarcodeFormat.Ean8 => barcodes with { Ean8 = null },
+        BarcodeFormat.UpcA => barcodes with { UpcA = null },
+        BarcodeFormat.UpcE => barcodes with { UpcE = null },
+        BarcodeFormat.Code128 => barcodes with { Code128 = null },
+        BarcodeFormat.Code39 => barcodes with { Code39 = null },
+        BarcodeFormat.Itf14 => barcodes with { Itf14 = null },
+        BarcodeFormat.Gs1128 => barcodes with { Gs1128 = null },
+        BarcodeFormat.QrCode => barcodes with { QrCode = null },
+        BarcodeFormat.DataMatrix => barcodes with { DataMatrix = null },
+        _ => barcodes
+    };
 
     private void OpenDelete()
     {

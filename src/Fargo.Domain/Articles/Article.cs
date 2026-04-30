@@ -57,13 +57,18 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// <summary>
     /// Gets the barcodes associated with the article.
     /// </summary>
-    public ArticleBarcodes Barcodes => new(this, BarcodeCollection);
+    public ArticleBarcodes Barcodes { get; private set; } = new();
 
     /// <summary>
-    /// Gets the persistence collection backing <see cref="Barcodes"/>.
-    /// Domain logic should use <see cref="Barcodes"/> instead.
+    /// Replaces all barcodes associated with the article.
     /// </summary>
-    public BarcodeCollection BarcodeCollection { get; init; } = [];
+    /// <param name="barcodes">The desired barcode state.</param>
+    public void ReplaceBarcodes(ArticleBarcodes barcodes)
+    {
+        ArgumentNullException.ThrowIfNull(barcodes);
+
+        Barcodes.ReplaceWith(barcodes);
+    }
 
     /// <summary>
     /// Gets the partitions associated with the article.

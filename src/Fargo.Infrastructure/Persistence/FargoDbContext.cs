@@ -1,7 +1,6 @@
 using Fargo.Domain;
 using Fargo.Domain.ApiClients;
 using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
 using Fargo.Domain.Events;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
@@ -20,8 +19,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<ApiClient> ApiClients { get; set; }
 
     public DbSet<Article> Articles { get; set; }
-
-    public DbSet<Barcode> Barcodes { get; set; }
 
     public DbSet<Item> Items { get; set; }
 
@@ -86,8 +83,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new ApiClientConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
-
-        modelBuilder.ApplyConfiguration(new BarcodeConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 

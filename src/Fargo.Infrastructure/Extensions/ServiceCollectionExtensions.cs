@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
+using Fargo.Domain.Barcodes;
 using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Items;
@@ -11,7 +12,6 @@ using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
@@ -116,7 +116,6 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IApiClientQueryRepository, ApiClientRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
-            services.AddScoped<IBarcodeRepository, BarcodeRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IItemQueryRepository, ItemRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -150,8 +149,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleRemovePartitionCommand>, ArticleRemovePartitionCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleImageUploadCommand>, ArticleImageUploadCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleImageDeleteCommand>, ArticleImageDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleAddBarcodeCommand, Guid>, ArticleAddBarcodeCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleRemoveBarcodeCommand>, ArticleRemoveBarcodeCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleUpdateBarcodesCommand>, ArticleUpdateBarcodesCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();

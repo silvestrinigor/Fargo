@@ -27,29 +27,12 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
     }
 
     /// <inheritdoc />
-    public async Task<Guid> AddBarcodeAsync(
+    public async Task UpdateBarcodesAsync(
         Guid articleGuid,
-        string code,
-        BarcodeFormat format,
+        ArticleBarcodes barcodes,
         CancellationToken cancellationToken = default)
     {
-        var response = await client.AddBarcodeAsync(articleGuid, code, format, cancellationToken);
-
-        if (!response.IsSuccess)
-        {
-            throw new FargoSdkApiException(response.Error!);
-        }
-
-        return response.Data;
-    }
-
-    /// <inheritdoc />
-    public async Task RemoveBarcodeAsync(
-        Guid articleGuid,
-        Guid barcodeGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var response = await client.RemoveBarcodeAsync(articleGuid, barcodeGuid, cancellationToken);
+        var response = await client.UpdateBarcodesAsync(articleGuid, barcodes, cancellationToken);
 
         if (!response.IsSuccess)
         {

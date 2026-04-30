@@ -104,16 +104,10 @@ public static class ArticleEndpointRouteBuilderExtension
             .Produces<ArticleBarcodes>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPost("/{articleGuid:guid}/barcodes", AddArticleBarcode)
-            .WithName("AddArticleBarcode")
-            .WithSummary("Adds a barcode to an article")
-            .WithDescription("Creates a new barcode for the article and returns its identifier.")
-            .Produces<Guid>(StatusCodes.Status200OK);
-
-        group.MapDelete("/{articleGuid:guid}/barcodes/{barcodeGuid:guid}", RemoveArticleBarcode)
-            .WithName("RemoveArticleBarcode")
-            .WithSummary("Removes a barcode from an article")
-            .WithDescription("Deletes the specified barcode from the article.")
+        group.MapPut("/{articleGuid:guid}/barcodes", UpdateArticleBarcodes)
+            .WithName("UpdateArticleBarcodes")
+            .WithSummary("Updates the barcodes of an article")
+            .WithDescription("Replaces all barcodes associated with the specified article.")
             .Produces(StatusCodes.Status204NoContent);
     }
 
@@ -255,26 +249,13 @@ public static class ArticleEndpointRouteBuilderExtension
         return TypedResults.Ok(result);
     }
 
-    private static async Task<Ok<Guid>> AddArticleBarcode(
+    private static async Task<NoContent> UpdateArticleBarcodes(
         Guid articleGuid,
-        BarcodeAddModel model,
-        ICommandHandler<ArticleAddBarcodeCommand, Guid> handler,
+        ArticleBarcodes barcodes,
+        ICommandHandler<ArticleUpdateBarcodesCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ArticleAddBarcodeCommand(articleGuid, model);
-
-        var guid = await handler.Handle(command, cancellationToken);
-
-        return TypedResults.Ok(guid);
-    }
-
-    private static async Task<NoContent> RemoveArticleBarcode(
-        Guid articleGuid,
-        Guid barcodeGuid,
-        ICommandHandler<ArticleRemoveBarcodeCommand> handler,
-        CancellationToken cancellationToken)
-    {
-        var command = new ArticleRemoveBarcodeCommand(articleGuid, barcodeGuid);
+        var command = new ArticleUpdateBarcodesCommand(articleGuid, barcodes);
 
         await handler.Handle(command, cancellationToken);
 

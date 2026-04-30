@@ -17,8 +17,8 @@ public sealed class ArticleBarcodesTests
 
         // Assert
         Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
-        Assert.Single(article.BarcodeCollection);
-        Assert.Equal(BarcodeFormat.Ean13, article.BarcodeCollection[0].Format);
+        var value = Assert.Single(article.Barcodes.AsValues());
+        Assert.Equal(BarcodeFormat.Ean13, value.Format);
     }
 
     [Fact]
@@ -33,38 +33,57 @@ public sealed class ArticleBarcodesTests
 
         // Assert
         Assert.Null(article.Barcodes.UpcA);
-        Assert.Empty(article.BarcodeCollection);
+        Assert.Empty(article.Barcodes.AsValues());
     }
 
     [Fact]
-    public void Set_Should_ReplaceExistingBarcodeForSameFormat()
+    public void Setting_Should_ReplaceExistingBarcodeForSameFormat()
     {
         // Arrange
         var article = CreateArticle();
         article.Barcodes.Ean8 = new Ean8("12345670");
 
         // Act
-        article.Barcodes.Set(BarcodeValue.Ean8("12345671"));
+        article.Barcodes.Ean8 = new Ean8("12345671");
 
         // Assert
         Assert.Equal("12345671", article.Barcodes.Ean8?.Code);
-        Assert.Single(article.BarcodeCollection);
+        Assert.Single(article.Barcodes.AsValues());
     }
 
     [Fact]
-    public void Remove_Should_RemoveBarcodeByGuid()
+    public void SettingToNull_Should_RemoveBarcode()
     {
         // Arrange
         var article = CreateArticle();
-        var barcode = article.Barcodes.Set(BarcodeValue.Code128("ABC-123"));
+        article.Barcodes.Code128 = new Code128("ABC-123");
 
         // Act
-        var removed = article.Barcodes.Remove(barcode.Guid);
+        article.Barcodes.Code128 = null;
 
         // Assert
-        Assert.True(removed);
         Assert.Null(article.Barcodes.Code128);
-        Assert.Empty(article.BarcodeCollection);
+        Assert.Empty(article.Barcodes.AsValues());
+    }
+
+    [Fact]
+    public void Article_Should_ReplaceBarcodes()
+    {
+        // Arrange
+        var article = CreateArticle();
+        var barcodes = new ArticleBarcodes
+        {
+            Ean13 = new Ean13("1234567890123"),
+            UpcA = new UpcA("123456789012")
+        };
+
+        // Act
+        article.ReplaceBarcodes(barcodes);
+
+        // Assert
+        Assert.Equal(2, article.Barcodes.AsValues().Count());
+        Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
+        Assert.Equal("123456789012", article.Barcodes.UpcA?.Code);
     }
 
     private static Article CreateArticle() => new()
