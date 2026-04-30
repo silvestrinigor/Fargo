@@ -127,6 +127,47 @@ public sealed class ArticleTests
         Assert.Equal(ArticleGuid, sut.Guid);
     }
 
+    // --- Barcodes property ---
+
+    [Fact]
+    public void Barcodes_Should_ReturnTypedBarcodeSlots()
+    {
+        // Arrange
+        var barcodeGuid = Guid.NewGuid();
+        var barcodes = new ArticleBarcodes
+        {
+            Ean13 = new Ean13(barcodeGuid, ArticleGuid, "1234567890123")
+        };
+
+        var article = new Article(ArticleGuid, "Name", "Description", client, barcodes: barcodes);
+
+        // Assert
+        Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
+        Assert.Null(article.Barcodes.UpcA);
+    }
+
+    [Fact]
+    public async Task GetBarcodesAsync_Should_UpdateLocalBarcodeSlots()
+    {
+        // Arrange
+        var barcodeGuid = Guid.NewGuid();
+        var barcodes = new ArticleBarcodes
+        {
+            UpcA = new UpcA(barcodeGuid, ArticleGuid, "123456789012")
+        };
+
+        client.GetBarcodesAsync(ArticleGuid, Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ArticleBarcodes>(barcodes));
+
+        // Act
+        var result = await sut.GetBarcodesAsync();
+
+        // Assert
+        Assert.Equal("123456789012", result.UpcA?.Code);
+        Assert.Equal("123456789012", sut.Barcodes.UpcA?.Code);
+        Assert.Null(sut.Barcodes.Ean13);
+    }
+
     // --- Updated event ---
 
     [Fact]

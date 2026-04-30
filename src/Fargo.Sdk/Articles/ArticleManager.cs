@@ -68,7 +68,7 @@ public sealed class ArticleManager(
         => imageService.GetImageAsync(articleGuid, cancellationToken);
 
     /// <inheritdoc />
-    public Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
+    public Task<ArticleBarcodes> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
         => barcodeService.GetBarcodesAsync(articleGuid, cancellationToken);

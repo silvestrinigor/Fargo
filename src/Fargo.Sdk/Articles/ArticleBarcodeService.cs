@@ -12,7 +12,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
     private readonly IArticleHttpClient client;
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
+    public async Task<ArticleBarcodes> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
     {
@@ -23,7 +23,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
             throw new FargoSdkApiException(response.Error!);
         }
 
-        return response.Data ?? [];
+        return response.Data ?? new ArticleBarcodes();
     }
 
     /// <inheritdoc />

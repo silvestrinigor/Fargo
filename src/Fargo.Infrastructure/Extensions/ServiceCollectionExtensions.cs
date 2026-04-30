@@ -181,7 +181,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>, ArticleManyQueryHandler>();
             services.AddScoped<IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, ArticlePartitionsQueryHandler>();
             services.AddScoped<IQueryHandler<ArticleImageQuery, ArticleImageResult?>, ArticleImageQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>, ArticleBarcodesQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>, ArticleBarcodesQueryHandler>();
 
             services.AddScoped<IQueryHandler<ItemSingleQuery, ItemInformation?>, ItemSingleQueryHandler>();
             services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>, ItemManyQueryHandler>();

@@ -10,7 +10,7 @@ namespace Fargo.Application.Articles;
 /// <param name="ArticleGuid">The unique identifier of the article.</param>
 public sealed record ArticleBarcodesQuery(
     Guid ArticleGuid
-    ) : IQuery<IReadOnlyCollection<BarcodeInformation>?>;
+    ) : IQuery<ArticleBarcodes?>;
 
 /// <summary>
 /// Handles <see cref="ArticleBarcodesQuery"/>.
@@ -20,7 +20,7 @@ public sealed class ArticleBarcodesQueryHandler(
     IArticleQueryRepository articleRepository,
     IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser
-    ) : IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>
+    ) : IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>
 {
     /// <summary>
     /// Executes the query to retrieve all barcodes for an article.
@@ -28,13 +28,13 @@ public sealed class ArticleBarcodesQueryHandler(
     /// <param name="query">The query containing the article identifier.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>
-    /// A collection of <see cref="BarcodeInformation"/> records, or <see langword="null"/>
+    /// An <see cref="ArticleBarcodes"/> value, or <see langword="null"/>
     /// if the article does not exist or is not accessible.
     /// </returns>
     /// <exception cref="UnauthorizedAccessFargoApplicationException">
     /// Thrown when the current actor is not authenticated or inactive.
     /// </exception>
-    public async Task<IReadOnlyCollection<BarcodeInformation>?> Handle(
+    public async Task<ArticleBarcodes?> Handle(
         ArticleBarcodesQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -65,7 +65,6 @@ public sealed class ArticleBarcodesQueryHandler(
 
         var barcodes = await barcodeRepository.GetByArticleGuid(query.ArticleGuid, cancellationToken);
 
-        // TODO: Implement a BarcodeMapping like ArticleMapping.
-        return [.. barcodes.Select(b => new BarcodeInformation(b.Guid, b.ArticleGuid, b.Code, b.Format))];
+        return ArticleBarcodes.From(barcodes);
     }
 }

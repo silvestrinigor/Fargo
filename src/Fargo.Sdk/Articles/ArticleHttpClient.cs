@@ -246,20 +246,20 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         => httpClient.GetStreamAsync($"/articles/{articleGuid}/image", cancellationToken);
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>> GetBarcodesAsync(
+    public async Task<FargoSdkResponse<ArticleBarcodes>> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<BarcodeResult>>(
+        var httpResponse = await httpClient.GetAsync<ArticleBarcodes>(
             $"/articles/{articleGuid}/barcodes",
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<ArticleBarcodes>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(httpResponse.Data ?? []);
+        return new FargoSdkResponse<ArticleBarcodes>(httpResponse.Data ?? new ArticleBarcodes());
     }
 
     /// <inheritdoc />

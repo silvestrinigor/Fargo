@@ -19,7 +19,8 @@ public sealed record ArticleResult
         TimeSpan? ShelfLife = null,
         bool HasImage = false,
         Guid? EditedByGuid = null,
-        ArticleImages? Images = null)
+        ArticleImages? Images = null,
+        ArticleBarcodes? Barcodes = null)
     {
         this.Guid = Guid;
         this.Name = Name;
@@ -27,6 +28,7 @@ public sealed record ArticleResult
         this.Metrics = Metrics;
         this.ShelfLife = ShelfLife;
         this.Images = Images ?? new ArticleImages(HasImage);
+        this.Barcodes = Barcodes ?? new ArticleBarcodes();
         this.EditedByGuid = EditedByGuid;
     }
 
@@ -47,6 +49,9 @@ public sealed record ArticleResult
 
     /// <summary>Image state for the article.</summary>
     public ArticleImages Images { get; init; } = new();
+
+    /// <summary>Barcode state for the article, grouped by barcode format.</summary>
+    public ArticleBarcodes Barcodes { get; init; } = new();
 
     /// <summary>Whether the article has a stored image.</summary>
     public bool HasImage

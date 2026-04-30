@@ -57,7 +57,13 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// <summary>
     /// Gets the barcodes associated with the article.
     /// </summary>
-    public BarcodeCollection Barcodes { get; init; } = [];
+    public ArticleBarcodes Barcodes => new(this, BarcodeCollection);
+
+    /// <summary>
+    /// Gets the persistence collection backing <see cref="Barcodes"/>.
+    /// Domain logic should use <see cref="Barcodes"/> instead.
+    /// </summary>
+    public BarcodeCollection BarcodeCollection { get; init; } = [];
 
     /// <summary>
     /// Gets the partitions associated with the article.

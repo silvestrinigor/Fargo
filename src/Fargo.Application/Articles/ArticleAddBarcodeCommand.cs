@@ -24,7 +24,6 @@ public sealed record ArticleAddBarcodeCommand(
 public sealed class ArticleAddBarcodeCommandHandler(
     ActorService actorService,
     IArticleRepository articleRepository,
-    IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork,
     IEventRecorder eventRecorder,
@@ -69,20 +68,13 @@ public sealed class ArticleAddBarcodeCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        if (article.Barcodes.Any(b => b.Format == command.Barcode.Format))
+        if (article.Barcodes.Contains(command.Barcode.Format))
         {
             throw new BarcodeAlreadyExistsFargoApplicationException(command.ArticleGuid, command.Barcode.Format);
         }
 
         var value = new BarcodeValue(command.Barcode.Code, command.Barcode.Format);
-
-        var barcode = new Barcode
-        {
-            Value = value,
-            Article = article
-        };
-
-        barcodeRepository.Add(barcode);
+        var barcode = article.Barcodes.Set(value);
 
         await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);

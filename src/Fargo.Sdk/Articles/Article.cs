@@ -17,6 +17,7 @@ public sealed class Article : IAsyncDisposable
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
         ArticleImages? images = null,
+        ArticleBarcodes? barcodes = null,
         Guid? editedByGuid = null)
     {
         Guid = guid;
@@ -25,6 +26,7 @@ public sealed class Article : IAsyncDisposable
         _metrics = metrics;
         _shelfLife = shelfLife;
         _images = images ?? new ArticleImages();
+        _barcodes = barcodes ?? new ArticleBarcodes();
         EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
@@ -94,6 +96,15 @@ public sealed class Article : IAsyncDisposable
     {
         get => _images.HasImage;
         internal set => _images = new ArticleImages(value);
+    }
+
+    private ArticleBarcodes _barcodes;
+
+    /// <summary>Gets barcode state for this article, grouped by barcode format.</summary>
+    public ArticleBarcodes Barcodes
+    {
+        get => _barcodes;
+        internal set => _barcodes = value ?? new ArticleBarcodes();
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -186,6 +197,19 @@ public sealed class Article : IAsyncDisposable
     /// </returns>
     public Task<(Stream Stream, string ContentType)?> GetImageAsync(CancellationToken cancellationToken = default)
         => client.GetImageAsync(Guid, cancellationToken);
+
+    /// <summary>Refreshes this article's barcode state from the server.</summary>
+    public async Task<ArticleBarcodes> GetBarcodesAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetBarcodesAsync(Guid, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new FargoSdkApiException(result.Error!);
+        }
+
+        _barcodes = result.Data ?? new ArticleBarcodes();
+        return _barcodes;
+    }
 
     /// <inheritdoc/>
     public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;

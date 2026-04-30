@@ -30,6 +30,8 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Ignore("ImageKey");
 
+        builder.Ignore(x => x.Barcodes);
+
         builder.OwnsOne(x => x.Metrics, m =>
         {
             m.ToTable("Articles", t => t.IsTemporal(ttb =>

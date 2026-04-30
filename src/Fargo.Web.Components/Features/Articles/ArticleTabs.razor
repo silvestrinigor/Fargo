@@ -153,14 +153,14 @@ else
                 {
                     <p class="muted-text">Loading barcodes...</p>
                 }
-                else if (_barcodes.Count == 0)
+                else if (_barcodes.IsEmpty)
                 {
                     <p class="muted-text">No barcodes added yet.</p>
                 }
                 else
                 {
                     <div class="barcode-list">
-                        @foreach (var barcode in _barcodes)
+                        @foreach (var barcode in _barcodes.AsResults())
                         {
                             <div class="barcode-card">
                                 <div class="barcode-format-label">@barcode.Format</div>
@@ -226,7 +226,7 @@ else
     private bool _isUploading;
     private bool _isDeletingImage;
 
-    private IReadOnlyCollection<BarcodeResult>? _barcodes;
+    private ArticleBarcodes? _barcodes;
     private string? _barcodeError;
     private string _newBarcodeCode = string.Empty;
     private BarcodeFormat _newBarcodeFormat = BarcodeFormat.Ean13;
@@ -416,20 +416,20 @@ else
         try
         {
             _barcodes = await Articles.GetBarcodesAsync(_article!.Guid);
-            if (_barcodes.Count > 0)
+            if (!_barcodes.IsEmpty)
                 _barcodesNeedRender = true;
         }
         catch (FargoSdkApiException ex)
         {
             _barcodeError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load barcodes." : ex.Message;
-            _barcodes = [];
+            _barcodes = new ArticleBarcodes();
         }
     }
 
     private async Task RenderBarcodeCanvasesAsync()
     {
         if (_barcodes is null) return;
-        foreach (var barcode in _barcodes)
+        foreach (var barcode in _barcodes.AsResults())
         {
             var canvasId = $"barcode-{barcode.Guid}";
             var bcid = GetBcid(barcode.Format);

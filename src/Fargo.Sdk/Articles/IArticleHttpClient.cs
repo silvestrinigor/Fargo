@@ -120,10 +120,10 @@ public interface IArticleHttpClient
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 
-    /// <summary>Returns all barcodes associated with an article.</summary>
+    /// <summary>Returns all barcodes associated with an article, grouped by format.</summary>
     /// <param name="articleGuid">The unique identifier of the article.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>> GetBarcodesAsync(
+    Task<FargoSdkResponse<ArticleBarcodes>> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 

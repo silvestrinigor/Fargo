@@ -3,6 +3,7 @@ using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
+using Fargo.Domain.Barcodes;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -100,7 +101,7 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticleBarcodes")
             .WithSummary("Gets the barcodes of an article")
             .WithDescription("Returns all barcodes associated with the specified article.")
-            .Produces<IReadOnlyCollection<BarcodeInformation>>(StatusCodes.Status200OK)
+            .Produces<ArticleBarcodes>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/{articleGuid:guid}/barcodes", AddArticleBarcode)
@@ -239,9 +240,9 @@ public static class ArticleEndpointRouteBuilderExtension
         return TypedResults.Stream(result.Stream, result.ContentType);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<BarcodeInformation>>, NotFound>> GetArticleBarcodes(
+    private static async Task<Results<Ok<ArticleBarcodes>, NotFound>> GetArticleBarcodes(
         Guid articleGuid,
-        IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?> handler,
+        IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new ArticleBarcodesQuery(articleGuid), cancellationToken);

@@ -52,7 +52,8 @@ public static class ArticleMappings
             a.ShelfLife,
             a.Images.HasImage,
             a.EditedByGuid,
-            new ArticleImages(a.Images.HasImage)
+            new ArticleImages(a.Images.HasImage),
+            null
         );
 
     /// <summary>
@@ -84,7 +85,8 @@ public static class ArticleMappings
             a.ShelfLife,
             a.Images.HasImage,
             a.EditedByGuid,
-            new ArticleImages(a.Images.HasImage)
+            new ArticleImages(a.Images.HasImage),
+            a.Barcodes
         );
     }
 }

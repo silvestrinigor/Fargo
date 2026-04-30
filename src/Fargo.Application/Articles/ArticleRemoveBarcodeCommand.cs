@@ -24,7 +24,6 @@ public sealed record ArticleRemoveBarcodeCommand(
 public sealed class ArticleRemoveBarcodeCommandHandler(
     ActorService actorService,
     IArticleRepository articleRepository,
-    IBarcodeRepository barcodeRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork,
     IEventRecorder eventRecorder,
@@ -59,17 +58,14 @@ public sealed class ArticleRemoveBarcodeCommandHandler(
 
         actor.ValidateHasPermission(ActionType.RemoveBarcode);
 
-        // Ensure the article exists and is accessible.
-        await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        var barcode = await barcodeRepository.GetFoundByGuid(command.BarcodeGuid, cancellationToken);
+        actor.ValidateHasAccess(article);
 
-        if (barcode.ArticleGuid != command.ArticleGuid)
+        if (!article.Barcodes.Remove(command.BarcodeGuid))
         {
             throw new BarcodeNotFoundFargoApplicationException(command.BarcodeGuid);
         }
-
-        barcodeRepository.Remove(barcode);
 
         await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, command.ArticleGuid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);

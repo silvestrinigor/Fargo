@@ -5,7 +5,7 @@ public interface IArticleBarcodeService
 {
     /// <summary>Gets all barcodes associated with an article.</summary>
     /// <exception cref="FargoSdkApiException">Thrown if the article does not exist or on a server error.</exception>
-    Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
+    Task<ArticleBarcodes> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 

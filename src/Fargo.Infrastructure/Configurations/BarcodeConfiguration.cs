@@ -22,7 +22,7 @@ public class BarcodeConfiguration : IEntityTypeConfiguration<Barcode>
 
         builder
             .HasOne(b => b.Article)
-            .WithMany(a => a.Barcodes)
+            .WithMany(a => a.BarcodeCollection)
             .HasForeignKey(b => b.ArticleGuid)
             .OnDelete(DeleteBehavior.Cascade);
 

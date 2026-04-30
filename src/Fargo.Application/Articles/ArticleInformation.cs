@@ -1,5 +1,6 @@
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Articles;
 
@@ -17,7 +18,8 @@ public sealed record ArticleInformation
         TimeSpan? ShelfLife = null,
         bool HasImage = false,
         Guid? EditedByGuid = null,
-        ArticleImages? Images = null)
+        ArticleImages? Images = null,
+        ArticleBarcodes? Barcodes = null)
     {
         this.Guid = Guid;
         this.Name = Name;
@@ -25,6 +27,7 @@ public sealed record ArticleInformation
         this.Metrics = Metrics;
         this.ShelfLife = ShelfLife;
         this.Images = Images ?? new ArticleImages(HasImage);
+        this.Barcodes = Barcodes ?? new ArticleBarcodes();
         this.EditedByGuid = EditedByGuid;
     }
 
@@ -45,6 +48,9 @@ public sealed record ArticleInformation
 
     /// <summary>Image state for the article.</summary>
     public ArticleImages Images { get; init; }
+
+    /// <summary>Barcode state for the article, grouped by barcode format.</summary>
+    public ArticleBarcodes Barcodes { get; init; }
 
     /// <summary>Whether the article has a stored image.</summary>
     public bool HasImage
