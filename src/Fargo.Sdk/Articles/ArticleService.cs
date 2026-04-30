@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Fargo.Sdk.Events;
 
 namespace Fargo.Sdk.Articles;
@@ -32,7 +33,7 @@ public sealed class ArticleService : IArticleService
         this.hub = hub;
     }
 
-    private readonly Dictionary<Guid, Article> tracked = new();
+    private readonly ConcurrentDictionary<Guid, Article> tracked = new();
     private readonly IArticleHttpClient client;
     private readonly IFargoEventHub hub;
 
@@ -95,9 +96,7 @@ public sealed class ArticleService : IArticleService
         }
 
         var article = new Article(response.Data, name, description ?? string.Empty, client, MakeDisposeCallback(response.Data), metrics, shelfLife);
-        tracked[article.Guid] = article;
-        await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
-        return article;
+        return await TrackAsync(article);
     }
 
     /// <inheritdoc />
@@ -114,16 +113,26 @@ public sealed class ArticleService : IArticleService
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
         var article = new Article(r.Guid, r.Name, r.Description, client, MakeDisposeCallback(r.Guid), r.Metrics, r.ShelfLife, r.HasImage, r.EditedByGuid);
-        tracked[article.Guid] = article;
-        await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
-        return article;
+        return await TrackAsync(article);
     }
 
     private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
     {
-        tracked.Remove(guid);
+        tracked.TryRemove(guid, out _);
         await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
     };
+
+    private async Task<Article> TrackAsync(Article article)
+    {
+        var trackedArticle = tracked.GetOrAdd(article.Guid, article);
+
+        if (ReferenceEquals(trackedArticle, article))
+        {
+            await hub.InvokeAsync("SubscribeToEntityAsync", article.Guid);
+        }
+
+        return trackedArticle;
+    }
 
     private static void ThrowError(FargoSdkError error) =>
         throw new FargoSdkApiException(error.Detail);

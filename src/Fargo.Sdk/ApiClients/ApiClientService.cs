@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Fargo.Sdk.Events;
 
 namespace Fargo.Sdk.ApiClients;
@@ -29,7 +30,7 @@ public sealed class ApiClientService : IApiClientService
         });
     }
 
-    private readonly Dictionary<Guid, ApiClient> tracked = new();
+    private readonly ConcurrentDictionary<Guid, ApiClient> tracked = new();
     private readonly IApiClientHttpClient client;
 
     /// <inheritdoc />
@@ -68,11 +69,10 @@ public sealed class ApiClientService : IApiClientService
         var r = response.Data!;
         var entity = new ApiClient(r.Guid, name, description ?? string.Empty, true, client, () =>
         {
-            tracked.Remove(r.Guid);
+            tracked.TryRemove(r.Guid, out _);
             return ValueTask.CompletedTask;
         });
-        tracked[r.Guid] = entity;
-        return (entity, r.PlainKey);
+        return (tracked.GetOrAdd(r.Guid, entity), r.PlainKey);
     }
 
     /// <inheritdoc />
@@ -84,7 +84,7 @@ public sealed class ApiClientService : IApiClientService
             ThrowError(response.Error!);
         }
 
-        tracked.Remove(apiClientGuid);
+        tracked.TryRemove(apiClientGuid, out _);
     }
 
     private ApiClient ToEntity(ApiClientResult r)
@@ -96,12 +96,11 @@ public sealed class ApiClientService : IApiClientService
 
         var entity = new ApiClient(r.Guid, r.Name, r.Description, r.IsActive, client, () =>
         {
-            tracked.Remove(r.Guid);
+            tracked.TryRemove(r.Guid, out _);
             return ValueTask.CompletedTask;
         }, r.EditedByGuid);
 
-        tracked[r.Guid] = entity;
-        return entity;
+        return tracked.GetOrAdd(r.Guid, entity);
     }
 
     private static void ThrowError(FargoSdkError error) =>
