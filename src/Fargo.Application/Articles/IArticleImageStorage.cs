@@ -22,7 +22,7 @@ public interface IArticleImageStorage
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>
     /// A provider-agnostic key that uniquely identifies the stored image.
-    /// This value should be saved to <see cref="Fargo.Domain.Articles.Article.ImageKey"/>.
+    /// This value should be saved to <see cref="Fargo.Domain.Articles.Article.Images"/>.
     /// </returns>
     Task<string> SaveAsync(
         Guid articleGuid,

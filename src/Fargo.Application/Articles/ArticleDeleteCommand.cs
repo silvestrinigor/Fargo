@@ -54,7 +54,7 @@ public sealed class ArticleDeleteCommandHandler(
         actor.ValidateHasAccess(article);
 
         await articleService.DeleteArticle(article, cancellationToken);
-        var imageKey = article.ImageKey;
+        var imageKey = article.Images.ImageKey;
 
         await eventRecorder.Record(EventType.ArticleDeleted, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);

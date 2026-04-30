@@ -50,8 +50,9 @@ public static class ArticleMappings
             a.Description,
             a.Metrics,
             a.ShelfLife,
-            a.ImageKey != null,
-            a.EditedByGuid
+            a.Images.HasImage,
+            a.EditedByGuid,
+            new ArticleImages(a.Images.HasImage)
         );
 
     /// <summary>
@@ -81,8 +82,9 @@ public static class ArticleMappings
             a.Description,
             a.Metrics,
             a.ShelfLife,
-            a.ImageKey != null,
-            a.EditedByGuid
+            a.Images.HasImage,
+            a.EditedByGuid,
+            new ArticleImages(a.Images.HasImage)
         );
     }
 }

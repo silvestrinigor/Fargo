@@ -48,14 +48,14 @@ public sealed class ArticleImageDeleteCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        if (article.ImageKey is null)
+        if (article.Images.ImageKey is null)
         {
             return;
         }
 
-        var imageKey = article.ImageKey;
+        var imageKey = article.Images.ImageKey;
 
-        article.ImageKey = null;
+        article.Images.ImageKey = null;
 
         await unitOfWork.SaveChanges(cancellationToken);
 

@@ -67,20 +67,20 @@ public sealed class ArticleImageQueryHandler(
                 cancellationToken);
         }
 
-        if (info is null || !info.HasImage)
+        if (info is null || !info.Images.HasImage)
         {
             return null;
         }
 
-        // Fetch the full entity to get ImageKey (projection does not expose it for security).
+        // Fetch the full entity to get the storage key (projection does not expose it for security).
         var article = await articleRepository.GetByGuid(query.ArticleGuid, cancellationToken);
 
-        if (article?.ImageKey is null)
+        if (article?.Images.ImageKey is null)
         {
             return null;
         }
 
-        var imageData = await imageStorage.GetAsync(article.ImageKey, cancellationToken);
+        var imageData = await imageStorage.GetAsync(article.Images.ImageKey, cancellationToken);
 
         if (imageData is null)
         {

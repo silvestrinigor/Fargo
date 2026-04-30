@@ -16,7 +16,7 @@ public sealed class Article : IAsyncDisposable
         Func<ValueTask>? onDispose = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
-        bool hasImage = false,
+        ArticleImages? images = null,
         Guid? editedByGuid = null)
     {
         Guid = guid;
@@ -24,7 +24,7 @@ public sealed class Article : IAsyncDisposable
         _description = description;
         _metrics = metrics;
         _shelfLife = shelfLife;
-        _hasImage = hasImage;
+        _images = images ?? new ArticleImages();
         EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
@@ -80,13 +80,20 @@ public sealed class Article : IAsyncDisposable
         set => _shelfLife = value;
     }
 
-    private bool _hasImage;
+    private ArticleImages _images;
+
+    /// <summary>Gets image state for this article.</summary>
+    public ArticleImages Images
+    {
+        get => _images;
+        internal set => _images = value ?? new ArticleImages();
+    }
 
     /// <summary>Indicates whether this article has an image stored on the server.</summary>
     public bool HasImage
     {
-        get => _hasImage;
-        internal set => _hasImage = value;
+        get => _images.HasImage;
+        internal set => _images = new ArticleImages(value);
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -151,7 +158,7 @@ public sealed class Article : IAsyncDisposable
         {
             throw new FargoSdkApiException(result.Error!);
         }
-        _hasImage = true;
+        _images = new ArticleImages(true);
     }
 
     /// <summary>
@@ -166,7 +173,7 @@ public sealed class Article : IAsyncDisposable
         {
             throw new FargoSdkApiException(result.Error!);
         }
-        _hasImage = false;
+        _images = new ArticleImages(false);
     }
 
     /// <summary>

@@ -116,7 +116,7 @@ else
                         <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
                     </div>
                 }
-                else if (_article!.HasImage)
+                else if (_article!.Images.HasImage)
                 {
                     <p class="muted-text">Loading image...</p>
                 }
@@ -131,7 +131,7 @@ else
                             @(_isUploading ? "Uploading..." : "Upload Image")
                             <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
                         </label>
-                        @if (_article!.HasImage)
+                        @if (_article!.Images.HasImage)
                         {
                             <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
                                 @(_isDeletingImage ? "Removing..." : "Remove")
@@ -306,7 +306,7 @@ else
             _origY = _article.Metrics?.LengthY?.Value;
             _origZ = _article.Metrics?.LengthZ?.Value;
 
-            if (_article.HasImage)
+            if (_article.Images.HasImage)
             {
                 await LoadImageAsync();
             }

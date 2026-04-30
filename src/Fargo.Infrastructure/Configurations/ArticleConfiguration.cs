@@ -28,6 +28,8 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(x => x.EditedByGuid);
 
+        builder.Ignore("ImageKey");
+
         builder.OwnsOne(x => x.Metrics, m =>
         {
             m.ToTable("Articles", t => t.IsTemporal(ttb =>
@@ -70,9 +72,24 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 x => x.HasValue ? (TimeSpan?)TimeSpan.FromTicks(x.Value) : null)
             .IsRequired(false);
 
-        builder.Property(x => x.ImageKey)
-            .HasMaxLength(500)
-            .IsRequired(false);
+        builder.OwnsOne(x => x.Images, i =>
+        {
+            i.ToTable("Articles", t => t.IsTemporal(ttb =>
+            {
+                ttb.UseHistoryTable("ArticlesHistory");
+                ttb.HasPeriodStart("PeriodStart").HasColumnName("PeriodStart");
+                ttb.HasPeriodEnd("PeriodEnd").HasColumnName("PeriodEnd");
+            }));
+
+            i.Property(x => x.ImageKey)
+                .HasMaxLength(500)
+                .HasColumnName("ImageKey")
+                .IsRequired(false);
+
+            i.WithOwner();
+        });
+
+        builder.Navigation(x => x.Images).IsRequired();
 
         builder.HasMany(a => a.Partitions).WithMany(p => p.ArticleMembers);
     }

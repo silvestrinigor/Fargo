@@ -52,14 +52,14 @@ public sealed class ArticleImageUploadCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        var previousImageKey = article.ImageKey;
+        var previousImageKey = article.Images.ImageKey;
         var newImageKey = await imageStorage.SaveAsync(
             command.ArticleGuid,
             command.ImageStream,
             command.ContentType,
             cancellationToken);
 
-        article.ImageKey = newImageKey;
+        article.Images.ImageKey = newImageKey;
 
         try
         {
@@ -69,7 +69,7 @@ public sealed class ArticleImageUploadCommandHandler(
         {
             await imageStorage.DeleteAsync(newImageKey, cancellationToken);
 
-            article.ImageKey = previousImageKey;
+            article.Images.ImageKey = previousImageKey;
 
             throw;
         }

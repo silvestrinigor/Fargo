@@ -1,5 +1,6 @@
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fargo.Domain.Articles;
 
@@ -49,14 +50,21 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// </summary>
     public TimeSpan? ShelfLife { get; set; }
 
-    // TODO: I think insted of storing a string key, should create a table in the database for that that will contain the image information and how to get the image.
+    /// <summary>
+    /// Gets or sets the image metadata for the article.
+    /// </summary>
+    public ArticleImages Images { get; set; } = new();
+
     /// <summary>
     /// Gets or sets the storage key of the article's image.
-    /// When <see langword="null"/>, the article has no image.
-    /// The format of this key is determined by the configured storage provider,
-    /// allowing transparent migration between local disk, S3, or other backends.
     /// </summary>
-    public string? ImageKey { get; set; }
+    [NotMapped]
+    [Obsolete("Use Images.ImageKey instead.")]
+    public string? ImageKey
+    {
+        get => Images.ImageKey;
+        set => Images.ImageKey = value;
+    }
 
     /// <summary>
     /// Gets the barcodes associated with the article.

@@ -112,7 +112,7 @@ public sealed class ArticleService : IArticleService
 
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, client, MakeDisposeCallback(r.Guid), r.Metrics, r.ShelfLife, r.HasImage, r.EditedByGuid);
+        var article = new Article(r.Guid, r.Name, r.Description, client, MakeDisposeCallback(r.Guid), r.Metrics, r.ShelfLife, r.Images, r.EditedByGuid);
         return await TrackAsync(article);
     }
 
