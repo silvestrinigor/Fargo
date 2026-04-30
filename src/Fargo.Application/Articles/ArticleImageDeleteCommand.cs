@@ -53,10 +53,12 @@ public sealed class ArticleImageDeleteCommandHandler(
             return;
         }
 
-        await imageStorage.DeleteAsync(article.ImageKey, cancellationToken);
+        var imageKey = article.ImageKey;
 
         article.ImageKey = null;
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        await imageStorage.DeleteAsync(imageKey, cancellationToken);
     }
 }

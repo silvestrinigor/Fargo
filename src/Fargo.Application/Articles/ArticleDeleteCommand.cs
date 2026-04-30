@@ -54,14 +54,16 @@ public sealed class ArticleDeleteCommandHandler(
         actor.ValidateHasAccess(article);
 
         await articleService.DeleteArticle(article, cancellationToken);
-
-        if (article.ImageKey is not null)
-        {
-            await imageStorage.DeleteAsync(article.ImageKey, cancellationToken);
-        }
+        var imageKey = article.ImageKey;
 
         await eventRecorder.Record(EventType.ArticleDeleted, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
+
+        if (imageKey is not null)
+        {
+            await imageStorage.DeleteAsync(imageKey, cancellationToken);
+        }
+
         await eventPublisher.PublishArticleDeleted(article.Guid, cancellationToken);
     }
 }

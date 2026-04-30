@@ -6,11 +6,11 @@ namespace Fargo.Infrastructure.Storage;
 
 /// <summary>
 /// Local file system implementation of <see cref="IArticleImageStorage"/>.
-/// Images are stored under <c>{BasePath}/articles/{articleGuid}.{ext}</c>.
+/// Images are stored under <c>{BasePath}/articles/{articleGuid}/{imageGuid}.{ext}</c>.
 /// </summary>
 /// <remarks>
 /// The storage key (persisted in the database) is the path relative to <c>BasePath</c>,
-/// for example <c>articles/3fa85f64-5717-4562-b3fc-2c963f66afa6.jpg</c>.
+/// for example <c>articles/3fa85f64-5717-4562-b3fc-2c963f66afa6/8f4d0d3d-4c49-4d23-bc1b-f8f3dc87f8df.jpg</c>.
 /// This key format is kept provider-agnostic so the same value can be used
 /// as an S3 object key or a MinIO key when migrating storage backends.
 /// </remarks>
@@ -50,7 +50,7 @@ public sealed class LocalArticleImageStorage(IOptions<ArticleImageOptions> optio
         CancellationToken cancellationToken = default)
     {
         var ext = _contentTypeToExtension.TryGetValue(contentType, out var mapped) ? mapped : ".bin";
-        var key = $"articles/{articleGuid}{ext}";
+        var key = $"articles/{articleGuid}/{Guid.NewGuid()}{ext}";
         var fullPath = GetFullPath(key);
 
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
