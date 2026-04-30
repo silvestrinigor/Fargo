@@ -172,29 +172,5 @@ public sealed class UserHttpClient : IUserHttpClient
         return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem)
-    {
-        var type = problem?.Type switch
-        {
-            "user/not-found" => FargoSdkErrorType.NotFound,
-            "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
-            "user/forbidden"
-                or "user/inactive"
-                or "partition/access-denied"
-                or "entity/access-denied" => FargoSdkErrorType.Forbidden,
-            "user/nameid-already-exists" => FargoSdkErrorType.Conflict,
-            "auth/weak-password"
-                or "user/invalid-nameid"
-                or "request/invalid"
-                or "user/cannot-delete-self"
-                or "user/cannot-delete-main-admin"
-                or "user/cannot-change-own-permissions"
-                or "user/cannot-change-main-admin-permissions" => FargoSdkErrorType.InvalidInput,
-            _ => FargoSdkErrorType.Undefined
-        };
-
-        var detail = problem?.Detail ?? "An unexpected error occurred.";
-
-        return new FargoSdkError(type, detail);
-    }
+    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
 }

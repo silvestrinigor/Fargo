@@ -20,7 +20,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
 
         if (!response.IsSuccess)
         {
-            throw new FargoSdkApiException(response.Error!.Detail);
+            throw new FargoSdkApiException(response.Error!);
         }
 
         return response.Data ?? [];
@@ -37,7 +37,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
 
         if (!response.IsSuccess)
         {
-            throw new FargoSdkApiException(response.Error!.Detail);
+            throw new FargoSdkApiException(response.Error!);
         }
 
         return response.Data;
@@ -53,7 +53,7 @@ public sealed class ArticleBarcodeService : IArticleBarcodeService
 
         if (!response.IsSuccess)
         {
-            throw new FargoSdkApiException(response.Error!.Detail);
+            throw new FargoSdkApiException(response.Error!);
         }
     }
 }

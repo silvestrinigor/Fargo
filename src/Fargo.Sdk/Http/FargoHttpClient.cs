@@ -248,7 +248,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
         {
             var problem = await ReadProblemAsync(response.Content, JsonOptions, ct);
             response.Dispose();
-            throw new FargoSdkApiException(problem?.Detail ?? "An unexpected error occurred.");
+            throw new FargoSdkApiException(FargoSdkProblemMapper.Map(problem));
         }
 
         var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";

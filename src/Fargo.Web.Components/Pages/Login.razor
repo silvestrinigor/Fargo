@@ -52,28 +52,6 @@
     private bool isSubmitting;
     private string? errorMessage;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender || FargoSession.IsAuthenticated)
-        {
-            return;
-        }
-
-        try
-        {
-            var restored = await Auth.RestoreAsync();
-
-            if (restored)
-            {
-                Navigation.NavigateTo("/entities", replace: true);
-            }
-        }
-        catch
-        {
-            FargoSession.MarkReady();
-        }
-    }
-
     private async Task HandleLoginAsync()
     {
         if (isSubmitting)

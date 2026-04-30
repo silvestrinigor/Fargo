@@ -95,7 +95,7 @@ public sealed class UserGroup : IAsyncDisposable
         var result = await client.UpdateAsync(Guid, _nameid, _description, _isActive, _permissions, cancellationToken);
         if (!result.IsSuccess)
         {
-            throw new FargoSdkApiException(result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!);
         }
     }
 

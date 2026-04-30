@@ -114,26 +114,5 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
         return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem)
-    {
-        var type = problem?.Type switch
-        {
-            "user-group/not-found" => FargoSdkErrorType.NotFound,
-            "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
-            "user/forbidden"
-                or "user-group/inactive"
-                or "partition/access-denied"
-                or "entity/access-denied" => FargoSdkErrorType.Forbidden,
-            "user-group/nameid-already-exists" => FargoSdkErrorType.Conflict,
-            "user/invalid-nameid"
-                or "request/invalid"
-                or "user-group/cannot-delete-default-admins"
-                or "user-group/cannot-delete-parent-group" => FargoSdkErrorType.InvalidInput,
-            _ => FargoSdkErrorType.Undefined
-        };
-
-        var detail = problem?.Detail ?? "An unexpected error occurred.";
-
-        return new FargoSdkError(type, detail);
-    }
+    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
 }

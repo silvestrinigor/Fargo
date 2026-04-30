@@ -179,6 +179,6 @@ public sealed class AuthenticationService : IAuthenticationService
         {
             FargoSdkErrorType.InvalidCredentials => (FargoSdkException)new InvalidCredentialsFargoSdkException(error.Detail),
             FargoSdkErrorType.PasswordChangeRequired => new PasswordChangeRequiredFargoSdkException(error.Detail),
-            _ => new FargoSdkApiException(error.Detail)
+            _ => new FargoSdkApiException(error)
         };
 }

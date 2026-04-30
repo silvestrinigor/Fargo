@@ -17,7 +17,7 @@ public sealed class AsyncState
             await action();
             return true;
         }
-        catch (FargoSdkApiException ex)
+        catch (FargoSdkException ex)
         {
             ErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? fallbackError : ex.Message;
             return false;

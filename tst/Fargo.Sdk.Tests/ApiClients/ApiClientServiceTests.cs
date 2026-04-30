@@ -47,6 +47,27 @@ public sealed class ApiClientServiceTests
         await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.GetAsync(Guid.NewGuid()));
     }
 
+    [Fact]
+    public async Task GetAsync_Should_PreserveProblemMetadata_When_ApiCallFails()
+    {
+        client.GetAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkResponse<ApiClientResult>(new FargoSdkError(
+                FargoSdkErrorType.Forbidden,
+                "Access denied to API client.",
+                "Forbidden",
+                "entity/access-denied",
+                403,
+                "/api-clients/test")));
+
+        var ex = await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.GetAsync(Guid.NewGuid()));
+
+        Assert.Equal(FargoSdkErrorType.Forbidden, ex.ErrorType);
+        Assert.Equal("Forbidden", ex.Title);
+        Assert.Equal("entity/access-denied", ex.ProblemType);
+        Assert.Equal(403, ex.StatusCode);
+        Assert.Equal("/api-clients/test", ex.Instance);
+    }
+
     // --- GetManyAsync ---
 
     [Fact]

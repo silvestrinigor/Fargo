@@ -116,5 +116,5 @@ public sealed class PartitionService : IPartitionService
     }
 
     private static void ThrowError(FargoSdkError error) =>
-        throw new FargoSdkApiException(error.Detail);
+        throw new FargoSdkApiException(error);
 }
