@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Sdk.Contracts.Authentication;
 
 /// <summary>
 /// The token and permission data returned by the server after a successful authentication

@@ -3,6 +3,7 @@ using Fargo.Application.Events;
 using Fargo.Application.Partitions;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 
@@ -64,6 +65,7 @@ public sealed class UserCreateCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
         IPasswordHasher passwordHasher,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<UserCreateCommand, Guid>
 {
@@ -152,8 +154,8 @@ public sealed class UserCreateCommandHandler(
 
         userRepository.Add(user);
 
+        await eventRecorder.Record(EventType.UserCreated, EntityType.User, user.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishUserCreated(user.Guid, user.Nameid, partition is null ? [] : [partition.Guid], cancellationToken);
 
         return user.Guid;

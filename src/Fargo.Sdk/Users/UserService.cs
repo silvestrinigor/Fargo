@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Fargo.Sdk.Events;
 
 namespace Fargo.Sdk.Users;
@@ -29,7 +30,7 @@ public sealed class UserService : IUserService
         this.hub = hub;
     }
 
-    private readonly Dictionary<Guid, User> tracked = new();
+    private readonly ConcurrentDictionary<Guid, User> tracked = new();
     private readonly IUserHttpClient client;
     private readonly IFargoEventHub hub;
 
@@ -99,17 +100,27 @@ public sealed class UserService : IUserService
     private async Task<User> ToEntityAsync(UserResult r)
     {
         var user = new User(r.Guid, r.Nameid, r.FirstName, r.LastName, r.Description, r.DefaultPasswordExpirationPeriod, r.RequirePasswordChangeAt, r.IsActive, r.Permissions.Select(p => p.Action).ToList(), r.PartitionAccesses, client, MakeDisposeCallback(r.Guid), r.EditedByGuid);
-        tracked[user.Guid] = user;
-        await hub.InvokeAsync("SubscribeToEntityAsync", user.Guid);
-        return user;
+        return await TrackAsync(user);
     }
 
     private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
     {
-        tracked.Remove(guid);
+        tracked.TryRemove(guid, out _);
         await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
     };
 
+    private async Task<User> TrackAsync(User user)
+    {
+        var trackedUser = tracked.GetOrAdd(user.Guid, user);
+
+        if (ReferenceEquals(trackedUser, user))
+        {
+            await hub.InvokeAsync("SubscribeToEntityAsync", user.Guid);
+        }
+
+        return trackedUser;
+    }
+
     private static void ThrowError(FargoSdkError error) =>
-        throw new FargoSdkApiException(error.Detail);
+        throw new FargoSdkApiException(error);
 }

@@ -52,18 +52,31 @@ public sealed class ArticleImageUploadCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        // If the article already has an image, delete the old one before storing the new one.
-        if (article.ImageKey is not null)
-        {
-            await imageStorage.DeleteAsync(article.ImageKey, cancellationToken);
-        }
-
-        article.ImageKey = await imageStorage.SaveAsync(
+        var previousImageKey = article.ImageKey;
+        var newImageKey = await imageStorage.SaveAsync(
             command.ArticleGuid,
             command.ImageStream,
             command.ContentType,
             cancellationToken);
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        article.ImageKey = newImageKey;
+
+        try
+        {
+            await unitOfWork.SaveChanges(cancellationToken);
+        }
+        catch
+        {
+            await imageStorage.DeleteAsync(newImageKey, cancellationToken);
+
+            article.ImageKey = previousImageKey;
+
+            throw;
+        }
+
+        if (previousImageKey is not null && previousImageKey != newImageKey)
+        {
+            await imageStorage.DeleteAsync(previousImageKey, cancellationToken);
+        }
     }
 }

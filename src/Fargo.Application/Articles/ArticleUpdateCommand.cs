@@ -3,6 +3,7 @@ using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Events;
 
 namespace Fargo.Application.Articles;
 
@@ -28,6 +29,7 @@ public sealed class ArticleUpdateCommandHandler(
         IArticleRepository articleRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<ArticleUpdateCommand>
 {
@@ -94,8 +96,8 @@ public sealed class ArticleUpdateCommandHandler(
             article.ShelfLife = command.Article.ShelfLife;
         }
 
+        await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);
     }
 }

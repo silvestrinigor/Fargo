@@ -93,23 +93,5 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem)
-    {
-        var type = problem?.Type switch
-        {
-            "partition/not-found" => FargoSdkErrorType.NotFound,
-            "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
-            "user/forbidden"
-                or "partition/access-denied" => FargoSdkErrorType.Forbidden,
-            "request/invalid"
-                or "partition/circular-hierarchy"
-                or "partition/cannot-be-own-parent"
-                or "partition/cannot-delete-global" => FargoSdkErrorType.InvalidInput,
-            _ => FargoSdkErrorType.Undefined
-        };
-
-        var detail = problem?.Detail ?? "An unexpected error occurred.";
-
-        return new FargoSdkError(type, detail);
-    }
+    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
 }

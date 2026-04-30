@@ -1,6 +1,7 @@
 using Fargo.Application.ApiClients;
 using Fargo.Domain.ApiClients;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Api.Middlewares;
 
@@ -27,6 +28,17 @@ public sealed class ApiClientMiddleware(RequestDelegate next, IOptions<ApiClient
             && !context.Request.Path.StartsWithSegments(AuthenticationPath))
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/problem+json";
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Detail = "A valid API key is required for this request.",
+                Type = "auth/unauthorized",
+                Instance = context.Request.Path
+            };
+            problemDetails.Extensions["traceId"] = context.TraceIdentifier;
+            await context.Response.WriteAsJsonAsync(problemDetails);
             return;
         }
 

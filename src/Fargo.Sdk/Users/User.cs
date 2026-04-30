@@ -161,7 +161,7 @@ public sealed class User : IAsyncDisposable
         var result = await client.UpdateAsync(Guid, _nameid, _firstName, _lastName, _description, null, _isActive, _permissions, null, cancellationToken);
         if (!result.IsSuccess)
         {
-            throw new FargoSdkApiException(result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!);
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Fargo.Sdk.Events;
 
 namespace Fargo.Sdk.Partitions;
@@ -29,7 +30,7 @@ public sealed class PartitionService : IPartitionService
         this.hub = hub;
     }
 
-    private readonly Dictionary<Guid, Partition> tracked = new();
+    private readonly ConcurrentDictionary<Guid, Partition> tracked = new();
     private readonly IPartitionHttpClient client;
     private readonly IFargoEventHub hub;
 
@@ -76,9 +77,7 @@ public sealed class PartitionService : IPartitionService
         }
 
         var partition = new Partition(response.Data, name, description ?? string.Empty, parentPartitionGuid, true, client, MakeDisposeCallback(response.Data));
-        tracked[partition.Guid] = partition;
-        await hub.InvokeAsync("SubscribeToEntityAsync", partition.Guid);
-        return partition;
+        return await TrackAsync(partition);
     }
 
     /// <inheritdoc />
@@ -95,17 +94,27 @@ public sealed class PartitionService : IPartitionService
     private async Task<Partition> ToEntityAsync(PartitionResult r)
     {
         var partition = new Partition(r.Guid, r.Name, r.Description, r.ParentPartitionGuid, r.IsActive, client, MakeDisposeCallback(r.Guid), r.EditedByGuid);
-        tracked[partition.Guid] = partition;
-        await hub.InvokeAsync("SubscribeToEntityAsync", partition.Guid);
-        return partition;
+        return await TrackAsync(partition);
     }
 
     private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
     {
-        tracked.Remove(guid);
+        tracked.TryRemove(guid, out _);
         await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
     };
 
+    private async Task<Partition> TrackAsync(Partition partition)
+    {
+        var trackedPartition = tracked.GetOrAdd(partition.Guid, partition);
+
+        if (ReferenceEquals(trackedPartition, partition))
+        {
+            await hub.InvokeAsync("SubscribeToEntityAsync", partition.Guid);
+        }
+
+        return trackedPartition;
+    }
+
     private static void ThrowError(FargoSdkError error) =>
-        throw new FargoSdkApiException(error.Detail);
+        throw new FargoSdkApiException(error);
 }

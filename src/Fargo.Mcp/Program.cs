@@ -1,5 +1,4 @@
 using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Events;
 using Fargo.Sdk.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,9 +29,5 @@ var app = builder.Build();
 
 var auth = app.Services.GetRequiredService<IAuthenticationService>();
 await auth.LogInAsync(nameid, password);
-
-var session = app.Services.GetRequiredService<IAuthSession>();
-var hub = app.Services.GetRequiredService<IFargoEventHub>();
-await hub.ConnectAsync(server, () => Task.FromResult(session.AccessToken));
 
 await app.RunAsync();

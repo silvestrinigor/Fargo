@@ -23,7 +23,7 @@ public sealed class ArticleImageService : IArticleImageService
 
         if (!response.IsSuccess)
         {
-            throw new FargoSdkApiException(response.Error!.Detail);
+            throw new FargoSdkApiException(response.Error!);
         }
     }
 
@@ -34,7 +34,7 @@ public sealed class ArticleImageService : IArticleImageService
 
         if (!response.IsSuccess)
         {
-            throw new FargoSdkApiException(response.Error!.Detail);
+            throw new FargoSdkApiException(response.Error!);
         }
     }
 

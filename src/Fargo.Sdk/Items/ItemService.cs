@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Fargo.Sdk.Events;
 
 namespace Fargo.Sdk.Items;
@@ -29,7 +30,7 @@ public sealed class ItemService : IItemService
         this.hub = hub;
     }
 
-    private readonly Dictionary<Guid, Item> tracked = new();
+    private readonly ConcurrentDictionary<Guid, Item> tracked = new();
     private readonly IItemHttpClient client;
     private readonly IFargoEventHub hub;
 
@@ -76,9 +77,7 @@ public sealed class ItemService : IItemService
         }
 
         var item = new Item(response.Data, articleGuid, client, MakeDisposeCallback(response.Data), productionDate);
-        tracked[item.Guid] = item;
-        await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
-        return item;
+        return await TrackAsync(item);
     }
 
     /// <inheritdoc />
@@ -95,17 +94,27 @@ public sealed class ItemService : IItemService
     private async Task<Item> ToEntityAsync(ItemResult r)
     {
         var item = new Item(r.Guid, r.ArticleGuid, client, MakeDisposeCallback(r.Guid), r.ProductionDate, r.EditedByGuid);
-        tracked[item.Guid] = item;
-        await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
-        return item;
+        return await TrackAsync(item);
     }
 
     private Func<ValueTask> MakeDisposeCallback(Guid guid) => async () =>
     {
-        tracked.Remove(guid);
+        tracked.TryRemove(guid, out _);
         await hub.InvokeAsync("UnsubscribeFromEntityAsync", guid);
     };
 
+    private async Task<Item> TrackAsync(Item item)
+    {
+        var trackedItem = tracked.GetOrAdd(item.Guid, item);
+
+        if (ReferenceEquals(trackedItem, item))
+        {
+            await hub.InvokeAsync("SubscribeToEntityAsync", item.Guid);
+        }
+
+        return trackedItem;
+    }
+
     private static void ThrowError(FargoSdkError error) =>
-        throw new FargoSdkApiException(error.Detail);
+        throw new FargoSdkApiException(error);
 }

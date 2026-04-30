@@ -71,19 +71,5 @@ public sealed class AuthenticationClient : IAuthenticationClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem)
-    {
-        var type = problem?.Type switch
-        {
-            "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
-            "auth/invalid-credentials" => FargoSdkErrorType.InvalidCredentials,
-            "auth/invalid-password" => FargoSdkErrorType.InvalidCredentials,
-            "auth/password-change-required" => FargoSdkErrorType.PasswordChangeRequired,
-            _ => FargoSdkErrorType.Undefined
-        };
-
-        var detail = problem?.Detail ?? "An unexpected error occurred.";
-
-        return new FargoSdkError(type, detail);
-    }
+    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
 }

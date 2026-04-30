@@ -118,23 +118,43 @@ public static class FargoSdkServiceCollectionExtensions
         Add<IApiClientEventSource, ApiClientEventSource>();
         Add<IApiClientManager, ApiClientManager>();
 
-        return new FargoSdkBuilder(services);
+        services.Add(ServiceDescriptor.Describe(
+            typeof(Engine),
+            sp => new Engine(
+                sp.GetRequiredService<FargoSdkOptions>(),
+                sp.GetRequiredService<IAuthenticationService>(),
+                sp.GetRequiredService<IArticleManager>(),
+                sp.GetRequiredService<IUserManager>(),
+                sp.GetRequiredService<IItemManager>(),
+                sp.GetRequiredService<IPartitionManager>(),
+                sp.GetRequiredService<IUserGroupManager>(),
+                sp.GetRequiredService<IFargoEventHub>()),
+            lifetime));
+        services.Add(ServiceDescriptor.Describe(
+            typeof(IEngine),
+            sp => sp.GetRequiredService<Engine>(),
+            lifetime));
+
+        return new FargoSdkBuilder(services, lifetime);
     }
 
-    private sealed class FargoSdkBuilder(IServiceCollection services) : IFargoSdkBuilder
+    private sealed class FargoSdkBuilder(IServiceCollection services, ServiceLifetime lifetime) : IFargoSdkBuilder
     {
         public IServiceCollection Services => services;
 
         public IFargoSdkBuilder WithHubLifetime()
         {
-            services.AddScoped<FargoHubLifetimeService>();
+            services.Add(ServiceDescriptor.Describe(typeof(FargoHubLifetimeService), typeof(FargoHubLifetimeService), lifetime));
             return this;
         }
 
         public IFargoSdkBuilder WithSessionStore<TStore>() where TStore : class, ISessionStore
         {
-            services.TryAddScoped<TStore>();
-            services.AddScoped<ISessionStore>(sp => sp.GetRequiredService<TStore>());
+            services.TryAdd(ServiceDescriptor.Describe(typeof(TStore), typeof(TStore), lifetime));
+            services.Add(ServiceDescriptor.Describe(
+                typeof(ISessionStore),
+                sp => sp.GetRequiredService<TStore>(),
+                lifetime));
             return this;
         }
     }

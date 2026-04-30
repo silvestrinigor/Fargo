@@ -1,6 +1,8 @@
 using Fargo.Application;
 using Fargo.Application.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Fargo.Sdk.Contracts;
+using AuthResultContract = Fargo.Sdk.Contracts.Authentication.AuthResult;
 
 namespace Fargo.Api.Extensions;
 
@@ -23,7 +25,7 @@ public static class AuthenticationEndpointRouteBuilderExtension
             .WithName("Login")
             .WithSummary("Authenticates a user")
             .WithDescription("Validates user credentials and returns an access token and refresh token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces<AuthResultContract>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPost("/logout", Logout)
@@ -37,7 +39,7 @@ public static class AuthenticationEndpointRouteBuilderExtension
             .WithName("RefreshToken")
             .WithSummary("Refreshes the access token")
             .WithDescription("Uses a valid refresh token to generate a new access token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces<AuthResultContract>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/password", ChangePassword)
@@ -50,14 +52,14 @@ public static class AuthenticationEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status401Unauthorized);
     }
 
-    private static async Task<Ok<AuthResult>> Login(
+    private static async Task<Ok<AuthResultContract>> Login(
         LoginCommand command,
         ICommandHandler<LoginCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(command, cancellationToken);
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<Ok> Logout(
@@ -70,14 +72,14 @@ public static class AuthenticationEndpointRouteBuilderExtension
         return TypedResults.Ok();
     }
 
-    private static async Task<Ok<AuthResult>> Refresh(
+    private static async Task<Ok<AuthResultContract>> Refresh(
         RefreshCommand command,
         ICommandHandler<RefreshCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(command, cancellationToken);
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<NoContent> ChangePassword(

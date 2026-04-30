@@ -16,6 +16,7 @@ public sealed class FargoHubLifetimeService : IDisposable
 
         auth.LoggedIn += OnLoggedIn;
         auth.LoggedOut += OnLoggedOut;
+        auth.Restored += OnRestored;
     }
 
     private readonly IAuthenticationService auth;
@@ -26,9 +27,13 @@ public sealed class FargoHubLifetimeService : IDisposable
     {
         auth.LoggedIn -= OnLoggedIn;
         auth.LoggedOut -= OnLoggedOut;
+        auth.Restored -= OnRestored;
     }
 
     private void OnLoggedIn(object? sender, LoggedInEventArgs e)
+        => _ = hub.ConnectAsync(options.Server, () => Task.FromResult(auth.Session.AccessToken));
+
+    private void OnRestored(object? sender, SessionRestoredEventArgs e)
         => _ = hub.ConnectAsync(options.Server, () => Task.FromResult(auth.Session.AccessToken));
 
     private void OnLoggedOut(object? sender, LoggedOutEventArgs e)

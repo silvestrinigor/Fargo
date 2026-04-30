@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Partitions;
@@ -69,6 +70,7 @@ public sealed class PartitionCreateCommandHandler(
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
         IUnitOfWork unitOfWork,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
@@ -131,8 +133,8 @@ public sealed class PartitionCreateCommandHandler(
 
         partitionRepository.Add(partition);
 
+        await eventRecorder.Record(EventType.PartitionCreated, EntityType.Partition, partition.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishPartitionCreated(partition.Guid, [parentPartition.Guid], cancellationToken);
 
         return partition.Guid;

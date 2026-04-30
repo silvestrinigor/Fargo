@@ -120,7 +120,7 @@ public sealed class Partition : IAsyncDisposable
         var result = await client.UpdateAsync(Guid, nameToSend, _description, null, isActiveToSend, cancellationToken);
         if (!result.IsSuccess)
         {
-            throw new FargoSdkApiException(result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!);
         }
     }
 

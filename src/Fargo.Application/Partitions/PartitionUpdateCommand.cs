@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
+using Fargo.Domain.Events;
 using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Partitions;
@@ -76,6 +77,7 @@ public sealed class PartitionUpdateCommandHandler(
         IPartitionRepository partitionRepository,
         ICurrentUser currentUser,
         IUnitOfWork unitOfWork,
+        IEventRecorder eventRecorder,
         IFargoEventPublisher eventPublisher
         ) : ICommandHandler<PartitionUpdateCommand>
 {
@@ -162,8 +164,8 @@ public sealed class PartitionUpdateCommandHandler(
             partition.IsActive = command.Partition.IsActive.Value;
         }
 
+        await eventRecorder.Record(EventType.PartitionUpdated, EntityType.Partition, partition.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
         await eventPublisher.PublishPartitionUpdated(partition.Guid, cancellationToken);
     }
 }

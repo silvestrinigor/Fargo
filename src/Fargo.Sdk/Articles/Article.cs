@@ -128,7 +128,7 @@ public sealed class Article : IAsyncDisposable
         var result = await client.UpdateAsync(Guid, _name, _description, _metrics, _shelfLife, cancellationToken);
         if (!result.IsSuccess)
         {
-            throw new FargoSdkApiException(result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!);
         }
     }
 
@@ -149,7 +149,7 @@ public sealed class Article : IAsyncDisposable
         var result = await client.UploadImageAsync(Guid, stream, contentType, fileName, cancellationToken);
         if (!result.IsSuccess)
         {
-            throw new FargoSdkApiException(result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!);
         }
         _hasImage = true;
     }
@@ -164,7 +164,7 @@ public sealed class Article : IAsyncDisposable
         var result = await client.DeleteImageAsync(Guid, cancellationToken);
         if (!result.IsSuccess)
         {
-            throw new FargoSdkApiException(result.Error!.Detail);
+            throw new FargoSdkApiException(result.Error!);
         }
         _hasImage = false;
     }

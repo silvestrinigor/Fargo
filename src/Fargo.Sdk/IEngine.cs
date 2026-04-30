@@ -14,7 +14,7 @@ namespace Fargo.Sdk;
 public interface IEngine : IDisposable
 {
     /// <summary>Gets the manager responsible for authentication operations.</summary>
-    IAuthenticationManager Authentication { get; }
+    IAuthenticationService Authentication { get; }
 
     /// <summary>Gets the manager for user operations.</summary>
     IUserManager Users { get; }
@@ -35,7 +35,7 @@ public interface IEngine : IDisposable
     /// Configures the server URL without performing any authentication.
     /// Use this in hosted scenarios where the server address is known upfront
     /// (e.g. read from configuration) and authentication is managed separately
-    /// via <see cref="IAuthenticationManager"/>.
+    /// via <see cref="IAuthenticationService"/>.
     /// </summary>
     void Configure(string server);
 

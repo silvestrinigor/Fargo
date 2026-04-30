@@ -19,6 +19,7 @@ using Fargo.Domain.Users;
 using Fargo.Infrastructure.Options;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
+using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Security;
 using Fargo.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -219,6 +220,7 @@ public static class ServiceCollectionExtensions
 
         private void AddPersistence()
         {
+            services.AddScoped<IEventRecorder, DbEventRecorder>();
             services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
         }
 

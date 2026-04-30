@@ -11,8 +11,17 @@ namespace Fargo.Api.Middlewares;
 ///
 /// Unknown exceptions are mapped to a generic <c>500 Internal Server Error</c> response.
 /// </remarks>
-public sealed class FargoExceptionMiddleware(RequestDelegate next)
+public sealed class FargoExceptionMiddleware
 {
+    public FargoExceptionMiddleware(RequestDelegate next, IHostEnvironment environment)
+    {
+        this.next = next;
+        this.environment = environment;
+    }
+
+    private readonly RequestDelegate next;
+    private readonly IHostEnvironment environment;
+
     /// <summary>
     /// Processes the current HTTP request and handles exceptions thrown by downstream middleware.
     /// </summary>
@@ -34,7 +43,7 @@ public sealed class FargoExceptionMiddleware(RequestDelegate next)
     /// </summary>
     /// <param name="context">The current HTTP request context.</param>
     /// <param name="exception">The exception to handle.</param>
-    private static async Task HandleExceptionAsync(
+    private async Task HandleExceptionAsync(
         HttpContext context,
         Exception exception)
     {
@@ -45,7 +54,8 @@ public sealed class FargoExceptionMiddleware(RequestDelegate next)
                 definition.StatusCode,
                 definition.Title,
                 exception.Message,
-                definition.Type);
+                definition.Type,
+                context.TraceIdentifier);
 
             return;
         }
@@ -54,8 +64,9 @@ public sealed class FargoExceptionMiddleware(RequestDelegate next)
             context,
             500,
             "Internal server error",
-            "An unexpected error occurred.",
-            "server/internal-error");
+            environment.IsDevelopment() ? exception.Message : "An unexpected error occurred.",
+            "server/internal-error",
+            context.TraceIdentifier);
     }
 
     /// <summary>
@@ -71,7 +82,8 @@ public sealed class FargoExceptionMiddleware(RequestDelegate next)
         int statusCode,
         string title,
         string detail,
-        string type)
+        string type,
+        string traceId)
     {
         if (context.Response.HasStarted)
         {
@@ -90,6 +102,7 @@ public sealed class FargoExceptionMiddleware(RequestDelegate next)
             Type = type,
             Instance = context.Request.Path
         };
+        problemDetails.Extensions["traceId"] = traceId;
 
         await context.Response.WriteAsJsonAsync(problemDetails);
     }

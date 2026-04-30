@@ -31,6 +31,8 @@ public sealed class AuthenticationService : IAuthenticationService
     /// <inheritdoc />
     public event EventHandler<LoggedOutEventArgs>? LoggedOut;
     /// <inheritdoc />
+    public event EventHandler<SessionRestoredEventArgs>? Restored;
+    /// <inheritdoc />
     public event EventHandler<RefreshedEventArgs>? Refreshed;
     /// <inheritdoc />
     public event EventHandler<PasswordChangedEventArgs>? PasswordChanged;
@@ -77,12 +79,10 @@ public sealed class AuthenticationService : IAuthenticationService
 
         var refreshToken = session.RefreshToken;
 
-        if (refreshToken is null)
+        if (refreshToken is not null)
         {
-            return;
+            await client.LogOutAsync(refreshToken, cancellationToken);
         }
-
-        await client.LogOutAsync(refreshToken, cancellationToken);
 
         var nameid = session.Nameid;
 
@@ -166,6 +166,8 @@ public sealed class AuthenticationService : IAuthenticationService
             await RefreshAsync(cancellationToken);
         }
 
+        Restored?.Invoke(this, new SessionRestoredEventArgs(stored.Nameid));
+
         return true;
     }
 
@@ -177,6 +179,6 @@ public sealed class AuthenticationService : IAuthenticationService
         {
             FargoSdkErrorType.InvalidCredentials => (FargoSdkException)new InvalidCredentialsFargoSdkException(error.Detail),
             FargoSdkErrorType.PasswordChangeRequired => new PasswordChangeRequiredFargoSdkException(error.Detail),
-            _ => new FargoSdkApiException(error.Detail)
+            _ => new FargoSdkApiException(error)
         };
 }

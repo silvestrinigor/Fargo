@@ -53,11 +53,5 @@ public sealed class ApiClientHttpClient : IApiClientHttpClient
         return r.IsSuccess ? new(new EmptyResult()) : new(MapError(r.Problem));
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) =>
-        problem?.Type switch
-        {
-            "api-client/not-found" => new FargoSdkError(FargoSdkErrorType.NotFound, problem.Detail ?? "API client not found."),
-            "user/forbidden" or "entity/access-denied" => new FargoSdkError(FargoSdkErrorType.Forbidden, problem?.Detail ?? "Access denied."),
-            _ => new FargoSdkError(FargoSdkErrorType.Undefined, problem?.Detail ?? "An unexpected error occurred.")
-        };
+    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
 }

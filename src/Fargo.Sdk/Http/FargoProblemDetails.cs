@@ -14,4 +14,6 @@ public sealed class FargoProblemDetails
     public int? Status { get; init; }
 
     public string? Instance { get; init; }
+
+    public string? TraceId { get; init; }
 }

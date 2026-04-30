@@ -300,25 +300,5 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem)
-    {
-        var type = problem?.Type switch
-        {
-            "article/not-found"
-                or "barcode/not-found" => FargoSdkErrorType.NotFound,
-            "auth/unauthorized" => FargoSdkErrorType.UnauthorizedAccess,
-            "user/forbidden"
-                or "partition/access-denied"
-                or "entity/access-denied" => FargoSdkErrorType.Forbidden,
-            "request/invalid"
-                or "article/delete-with-items"
-                or "barcode/invalid-value" => FargoSdkErrorType.InvalidInput,
-            "barcode/already-exists" => FargoSdkErrorType.Conflict,
-            _ => FargoSdkErrorType.Undefined
-        };
-
-        var detail = problem?.Detail ?? "An unexpected error occurred.";
-
-        return new FargoSdkError(type, detail);
-    }
+    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
 }

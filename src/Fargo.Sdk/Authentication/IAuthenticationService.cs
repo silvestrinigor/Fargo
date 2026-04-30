@@ -11,6 +11,9 @@ public interface IAuthenticationService
     /// <summary>Raised when the user logs out.</summary>
     event EventHandler<LoggedOutEventArgs>? LoggedOut;
 
+    /// <summary>Raised when a previously saved session is restored.</summary>
+    event EventHandler<SessionRestoredEventArgs>? Restored;
+
     /// <summary>Raised when the authentication token is successfully refreshed.</summary>
     event EventHandler<RefreshedEventArgs>? Refreshed;
 

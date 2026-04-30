@@ -15,7 +15,7 @@ namespace Fargo.Sdk;
 /// Manual composition root for non-DI scenarios (scripts, MCP, desktop apps).
 /// Create one instance per application and dispose it on shutdown.
 /// </summary>
-public sealed class Engine : IDisposable
+public sealed class Engine : IEngine
 {
     public Engine(ILoggerFactory? loggerFactory = null, ISessionStore? sessionStore = null)
     {
@@ -23,7 +23,8 @@ public sealed class Engine : IDisposable
 
         httpClient = new HttpClient();
 
-        authSession = new AuthSession();
+        var authSession = new AuthSession();
+        this.authSession = authSession;
 
         // Break circular dependency: FargoHttpClient → IAuthenticationService → AuthenticationHttpClient → IFargoHttpClient
         AuthenticationService? authService = null;
@@ -72,6 +73,30 @@ public sealed class Engine : IDisposable
         var userGroupService = new UserGroupService(userGroupHttpClient, _hub);
         var userGroupEventSource = new UserGroupEventSource(_hub);
         UserGroups = new UserGroupManager(userGroupService, userGroupEventSource);
+
+        SubscribeHubLifecycle();
+    }
+
+    internal Engine(
+        FargoSdkOptions options,
+        IAuthenticationService authentication,
+        IArticleManager articles,
+        IUserManager users,
+        IItemManager items,
+        IPartitionManager partitions,
+        IUserGroupManager userGroups,
+        IFargoEventHub hub)
+    {
+        this.options = options;
+        Authentication = authentication;
+        Articles = articles;
+        Users = users;
+        Items = items;
+        Partitions = partitions;
+        UserGroups = userGroups;
+        _hub = hub;
+        authSession = authentication.Session;
+        SubscribeHubLifecycle();
     }
 
     public IAuthenticationService Authentication { get; }
@@ -81,24 +106,19 @@ public sealed class Engine : IDisposable
     public IPartitionManager Partitions { get; }
     public IUserGroupManager UserGroups { get; }
 
-    /// <summary>Logs in and connects the event hub.</summary>
+    public void Configure(string server)
+        => options.Server = server;
+
+    /// <summary>Logs in using the configured server.</summary>
     public async Task LogInAsync(string server, string nameid, string password, CancellationToken cancellationToken = default)
     {
-        if (Authentication.IsAuthenticated)
-        {
-            await Authentication.LogOutAsync(cancellationToken);
-        }
-
-        options.Server = server;
-
+        Configure(server);
         await Authentication.LogInAsync(nameid, password, cancellationToken);
-        await _hub.ConnectAsync(server, () => Task.FromResult(authSession.AccessToken), cancellationToken);
     }
 
-    /// <summary>Disconnects the event hub and logs out.</summary>
+    /// <summary>Logs out and lets the hub lifecycle subscription disconnect the event hub.</summary>
     public async Task LogOutAsync(CancellationToken cancellationToken = default)
     {
-        await _hub.DisconnectAsync(cancellationToken);
         await Authentication.LogOutAsync(cancellationToken);
     }
 
@@ -108,26 +128,37 @@ public sealed class Engine : IDisposable
     /// </summary>
     public async Task<bool> RestoreSessionAsync(string server, CancellationToken cancellationToken = default)
     {
-        options.Server = server;
-
-        var restored = await Authentication.RestoreAsync(cancellationToken);
-
-        if (restored)
-        {
-            await _hub.ConnectAsync(server, () => Task.FromResult(authSession.AccessToken), cancellationToken);
-        }
-
-        return restored;
+        Configure(server);
+        return await Authentication.RestoreAsync(cancellationToken);
     }
 
     public void Dispose()
     {
-        _ = _hub.DisposeAsync();
-        httpClient.Dispose();
+        Authentication.LoggedIn -= OnLoggedIn;
+        Authentication.LoggedOut -= OnLoggedOut;
+        Authentication.Restored -= OnRestored;
+        _hub.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        httpClient?.Dispose();
     }
 
+    private void SubscribeHubLifecycle()
+    {
+        Authentication.LoggedIn += OnLoggedIn;
+        Authentication.LoggedOut += OnLoggedOut;
+        Authentication.Restored += OnRestored;
+    }
+
+    private void OnLoggedIn(object? sender, LoggedInEventArgs e)
+        => _ = _hub.ConnectAsync(options.Server, () => Task.FromResult(authSession.AccessToken));
+
+    private void OnRestored(object? sender, SessionRestoredEventArgs e)
+        => _ = _hub.ConnectAsync(options.Server, () => Task.FromResult(authSession.AccessToken));
+
+    private void OnLoggedOut(object? sender, LoggedOutEventArgs e)
+        => _ = _hub.DisconnectAsync();
+
     private readonly FargoSdkOptions options;
-    private readonly AuthSession authSession;
-    private readonly FargoEventHub _hub;
-    private readonly HttpClient httpClient;
+    private readonly IAuthSession authSession;
+    private readonly IFargoEventHub _hub;
+    private readonly HttpClient? httpClient;
 }
