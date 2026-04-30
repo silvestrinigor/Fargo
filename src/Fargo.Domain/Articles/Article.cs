@@ -1,6 +1,5 @@
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fargo.Domain.Articles;
 
