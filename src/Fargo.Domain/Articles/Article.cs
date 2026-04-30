@@ -56,17 +56,6 @@ public class Article : ModifiedEntity, IPartitionedEntity
     public ArticleImages Images { get; set; } = new();
 
     /// <summary>
-    /// Gets or sets the storage key of the article's image.
-    /// </summary>
-    [NotMapped]
-    [Obsolete("Use Images.ImageKey instead.")]
-    public string? ImageKey
-    {
-        get => Images.ImageKey;
-        set => Images.ImageKey = value;
-    }
-
-    /// <summary>
     /// Gets the barcodes associated with the article.
     /// </summary>
     public BarcodeCollection Barcodes { get; init; } = [];
