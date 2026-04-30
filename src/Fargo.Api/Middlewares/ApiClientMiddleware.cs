@@ -1,7 +1,7 @@
 using Fargo.Application.ApiClients;
 using Fargo.Domain.ApiClients;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Fargo.Api.Middlewares;
 
