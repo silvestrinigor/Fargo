@@ -1,9 +1,9 @@
 using Fargo.Api.Contracts;
-using Fargo.Sdk.Contracts.ApiClients;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.ApiClients;
 using Fargo.Domain;
+using Fargo.Sdk.Contracts.ApiClients;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

@@ -1,10 +1,10 @@
 using Fargo.Api.Contracts;
-using ContractEvents = Fargo.Sdk.Contracts.Events;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Events;
 using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
+using ContractEvents = Fargo.Sdk.Contracts.Events;
 
 namespace Fargo.Api.Extensions;
 

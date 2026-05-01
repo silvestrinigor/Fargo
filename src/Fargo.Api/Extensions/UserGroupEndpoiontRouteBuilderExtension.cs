@@ -1,11 +1,11 @@
 using Fargo.Api.Contracts;
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.UserGroups;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Domain;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
