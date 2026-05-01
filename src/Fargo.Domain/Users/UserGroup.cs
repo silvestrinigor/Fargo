@@ -45,6 +45,8 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// </remarks>
     public bool IsActive { get; set; } = true;
 
+    #region Permission
+
     /// <summary>
     /// Gets the read-only collection of permissions assigned to the user group.
     /// </summary>
@@ -100,6 +102,10 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
         userGroupPermissions.Remove(userGroupPermission);
     }
 
+    #endregion Permission
+
+    #region Partition
+
     /// <summary>
     /// Gets the partitions associated with the user group.
     /// </summary>
@@ -111,22 +117,6 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
-
-    /// <summary>
-    /// Gets the read-only collection of users associated with the user group.
-    /// </summary>
-    /// <remarks>
-    /// Represents users that belong to the group.
-    /// This collection is intended for navigation and persistence purposes.
-    /// Membership changes should be controlled through explicit domain behaviors.
-    /// </remarks>
-    public IReadOnlyCollection<User> Users
-    {
-        get => users;
-        init => users = [.. value];
-    }
-
-    private readonly List<User> users = [];
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
@@ -184,4 +174,26 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
 
         partitionAccesses.Remove(userGroupPartition);
     }
+
+    #endregion Partition
+
+    #region User
+
+    /// <summary>
+    /// Gets the read-only collection of users associated with the user group.
+    /// </summary>
+    /// <remarks>
+    /// Represents users that belong to the group.
+    /// This collection is intended for navigation and persistence purposes.
+    /// Membership changes should be controlled through explicit domain behaviors.
+    /// </remarks>
+    public IReadOnlyCollection<User> Users
+    {
+        get => users;
+        init => users = [.. value];
+    }
+
+    private readonly List<User> users = [];
+
+    #endregion User
 }

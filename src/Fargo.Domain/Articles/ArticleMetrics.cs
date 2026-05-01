@@ -7,10 +7,7 @@ namespace Fargo.Domain.Articles;
 /// </summary>
 public sealed class ArticleMetrics
 {
-    /// <summary>
-    /// Gets or sets the physical mass of the article.
-    /// </summary>
-    public Mass? Mass { get; set; }
+    #region Length
 
     /// <summary>
     /// Gets or sets the X dimension of the article.
@@ -26,6 +23,13 @@ public sealed class ArticleMetrics
     /// Gets or sets the Z dimension of the article.
     /// </summary>
     public Length? LengthZ { get; set; }
+
+    #endregion Length
+
+    /// <summary>
+    /// Gets or sets the physical mass of the article.
+    /// </summary>
+    public Mass? Mass { get; set; }
 
     /// <summary>
     /// Gets the volume of the article.

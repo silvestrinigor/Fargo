@@ -71,6 +71,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         set;
     } = Description.Empty;
 
+    #region Password
+
     /// <summary>
     /// Gets or sets the hashed password of the user.
     ///
@@ -178,6 +180,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
     }
 
+    #endregion Password
+
     /// <summary>
     /// Gets a value indicating whether the user is active.
     ///
@@ -191,6 +195,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// This property represents the user's current activation status.
     /// </remarks>
     public bool IsActive { get; set; } = true;
+
+    #region Permission
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
@@ -245,6 +251,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         permissions.Remove(userPermission);
     }
 
+    #endregion Permission
+
     /// <summary>
     /// Gets the collection of groups the user belongs to.
     /// </summary>
@@ -257,6 +265,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// - Permissions and partition access inherited from groups
     /// </remarks>
     public UserGroupCollection UserGroups { get; init; } = [];
+
+    #region Partition
 
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
@@ -337,4 +347,6 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+
+    #endregion Partition
 }

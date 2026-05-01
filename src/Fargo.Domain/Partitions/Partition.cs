@@ -52,6 +52,8 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// </remarks>
     public bool IsActive { get; set; } = true;
 
+    #region ParentPartition
+
     /// <summary>
     /// Gets the unique identifier of the parent partition, if any.
     /// </summary>
@@ -91,6 +93,11 @@ public class Partition : ModifiedEntity, IPartitionEntity
         }
     }
 
+    #endregion ParentPartition
+
+    #region ChildPartition
+
+    // TODO: I Think should be called child partitions insted of partition members because this is related only with the hierarchical child partitions, not all partitions inside.
     /// <summary>
     /// Gets the child partitions that belong to the current partition.
     /// </summary>
@@ -109,6 +116,10 @@ public class Partition : ModifiedEntity, IPartitionEntity
 
     private readonly List<Partition> partitionMembers = [];
 
+    #endregion ChildPartition
+
+    #region Article
+
     /// <summary>
     /// Gets the articles associated with the current partition.
     /// </summary>
@@ -126,6 +137,10 @@ public class Partition : ModifiedEntity, IPartitionEntity
 
     private readonly List<Article> articleMembers = [];
 
+    #endregion Article
+
+    #region Item
+
     /// <summary>
     /// Gets the items associated with the current partition.
     /// </summary>
@@ -140,6 +155,10 @@ public class Partition : ModifiedEntity, IPartitionEntity
     }
 
     private readonly List<Item> itemMembers = [];
+
+    #endregion Item
+
+    #region User
 
     /// <summary>
     /// Gets the users associated with the current partition.
@@ -158,6 +177,10 @@ public class Partition : ModifiedEntity, IPartitionEntity
 
     private readonly List<User> userMembers = [];
 
+    #endregion User
+
+    #region UserGroup
+
     /// <summary>
     /// Gets the user groups associated with the current partition.
     /// </summary>
@@ -172,4 +195,6 @@ public class Partition : ModifiedEntity, IPartitionEntity
     }
 
     private readonly List<UserGroup> userGroupMembers = [];
+
+    #endregion UserGroup
 }
