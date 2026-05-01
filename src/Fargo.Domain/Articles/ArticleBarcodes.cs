@@ -72,5 +72,4 @@ public sealed class ArticleBarcodes
         Ean13 is null && Ean8 is null && UpcA is null && UpcE is null &&
         Code128 is null && Code39 is null && Itf14 is null && Gs1128 is null &&
         QrCode is null && DataMatrix is null;
-
 }

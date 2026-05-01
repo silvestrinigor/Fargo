@@ -1,3 +1,4 @@
+using Fargo.Domain.Articles;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,7 @@ namespace Fargo.Infrastructure.Tests.Persistence;
 public sealed class FargoDbContextModelTests
 {
     [Fact]
-    public void Model_Should_MapEan13ToArticleEan13Table()
+    public void Model_Should_MapBarcodesToArticlesTable()
     {
         var options = new DbContextOptionsBuilder<FargoDbContext>()
             .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FargoModelTests;Trusted_Connection=True;")
@@ -14,9 +15,10 @@ public sealed class FargoDbContextModelTests
 
         using var context = new FargoDbContext(options);
 
-        var ean13Type = context.Model.FindEntityType(typeof(Ean13Data));
+        var barcodesType = context.Model.FindEntityType(typeof(ArticleBarcodes));
 
-        Assert.NotNull(ean13Type);
-        Assert.Equal("ArticleEan13", ean13Type.GetTableName());
+        Assert.NotNull(barcodesType);
+        Assert.Equal("Articles", barcodesType.GetTableName());
+        Assert.NotNull(barcodesType.FindProperty(nameof(ArticleBarcodes.Ean13)));
     }
 }
