@@ -189,7 +189,7 @@ internal static class ContractMappings
 
     public static EntityTreeNodeDto ToContract(this EntityTreeNode node)
         => new(
-            new NodeIdDto((TreeNodeType)(int)node.TreeNodeType, node.EntityGuid),
+            new NodeIdDto((Fargo.Sdk.Contracts.Tree.TreeNodeType)(int)node.TreeNodeType, node.EntityGuid),
             node.Title,
             node.Subtitle,
             node.HasChildren,
