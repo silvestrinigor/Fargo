@@ -3,7 +3,7 @@ namespace Fargo.Domain.ApiClients;
 /// <summary>
 /// Represents an external application that authenticates via an API key.
 /// </summary>
-public class ApiClient : ModifiedEntity
+public class ApiClient : ModifiedEntity, IActivable
 {
     /// <summary>
     /// Display name of the client application.
@@ -21,8 +21,22 @@ public class ApiClient : ModifiedEntity
     /// </summary>
     public required string KeyHash { get; set; }
 
+    #region Active
+
     /// <summary>
-    /// Whether this client's key is currently accepted.
+    /// Gets a value indicating whether the client application is active.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the client application.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the client application.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
 }

@@ -16,7 +16,7 @@ namespace Fargo.Domain.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser
+public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
     /// <summary>
     /// Gets or sets the unique NAMEID (username) of the user.
@@ -70,6 +70,25 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         get;
         set;
     } = Description.Empty;
+
+    #region Active
+
+    /// <summary>
+    /// Gets a value indicating whether the user is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the user.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the user.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
 
     #region Password
 
@@ -181,20 +200,6 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     }
 
     #endregion Password
-
-    /// <summary>
-    /// Gets a value indicating whether the user is active.
-    ///
-    /// An active user is allowed to authenticate and interact with the system,
-    /// subject to any additional authorization or security rules.
-    ///
-    /// An inactive user is considered disabled and may be prevented from
-    /// signing in or performing operations, depending on application policies.
-    /// </summary>
-    /// <remarks>
-    /// This property represents the user's current activation status.
-    /// </remarks>
-    public bool IsActive { get; set; } = true;
 
     #region Permission
 

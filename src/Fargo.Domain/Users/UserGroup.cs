@@ -16,7 +16,7 @@ namespace Fargo.Domain.Users;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser
+public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
     /// <summary>
     /// Gets or sets the unique NAMEID of the user group.
@@ -36,14 +36,24 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// </remarks>
     public Description Description { get; set; } = Description.Empty;
 
+    #region Active
+
     /// <summary>
-    /// Gets or sets a value indicating whether the user group is active.
+    /// Gets a value indicating whether the user group is active.
     /// </summary>
-    /// <remarks>
-    /// Inactive groups should not be considered during permission evaluation
-    /// or operational use, depending on application rules.
-    /// </remarks>
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the user group.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the user group.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
 
     #region Permission
 

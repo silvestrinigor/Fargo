@@ -15,7 +15,7 @@ namespace Fargo.Domain.Articles;
 /// if they have access to at least one of its partitions, subject to any
 /// additional authorization rules.
 /// </remarks>
-public class Article : ModifiedEntity, IPartitionedEntity
+public class Article : ModifiedEntity, IPartitionedEntity, IActivable
 {
     /// <summary>
     /// Gets or sets the name of the article.
@@ -57,6 +57,25 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// Gets the barcodes associated with the article.
     /// </summary>
     public ArticleBarcodes Barcodes { get; private set; } = new();
+
+    #region Active
+
+    /// <summary>
+    /// Gets a value indicating whether the article is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the article.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the article.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
 
     #region Partition
 
