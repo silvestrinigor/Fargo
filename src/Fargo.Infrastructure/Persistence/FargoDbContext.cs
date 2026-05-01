@@ -1,6 +1,6 @@
 using Fargo.Domain;
-using Fargo.Domain.ClientApplications;
 using Fargo.Domain.Articles;
+using Fargo.Domain.ClientApplications;
 using Fargo.Domain.Events;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;

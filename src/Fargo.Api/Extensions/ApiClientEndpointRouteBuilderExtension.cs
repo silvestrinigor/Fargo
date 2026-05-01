@@ -1,10 +1,10 @@
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.ApiClients;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.ApiClients;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
-using ApiClientCreatedResultContract = Fargo.Sdk.Contracts.ApiClients.ApiClientCreatedResult;
 
 namespace Fargo.Api.Extensions;
 
@@ -20,19 +20,19 @@ public static class ApiClientEndpointRouteBuilderExtension
         group.MapGet("/", GetManyApiClients)
             .WithName("GetApiClients")
             .WithSummary("Gets all API clients")
-            .Produces<IReadOnlyCollection<ApiClientInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ApiClientDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/{apiClientGuid:guid}", GetSingleApiClient)
             .WithName("GetApiClient")
             .WithSummary("Gets a single API client")
-            .Produces<ApiClientInformation>(StatusCodes.Status200OK)
+            .Produces<ApiClientDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateApiClient)
             .WithName("CreateApiClient")
             .WithSummary("Creates a new API client and returns its key (shown once)")
-            .Produces<ApiClientCreatedResultContract>(StatusCodes.Status200OK);
+            .Produces<ApiClientCreatedDto>(StatusCodes.Status200OK);
 
         group.MapPatch("/{apiClientGuid:guid}", UpdateApiClient)
             .WithName("UpdateApiClient")
@@ -47,7 +47,7 @@ public static class ApiClientEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ApiClientInformation>>, NoContent>> GetManyApiClients(
+    private static async Task<Results<Ok<IReadOnlyCollection<ApiClientDto>>, NoContent>> GetManyApiClients(
         IQueryHandler<ApiClientManyQuery, IReadOnlyCollection<ApiClientInformation>> handler,
         Page? page,
         Limit? limit,
@@ -58,35 +58,39 @@ public static class ApiClientEndpointRouteBuilderExtension
             Pagination: PaginationHelpers.CreatePagination(page, limit),
             Search: search);
         var result = await handler.Handle(query, cancellationToken);
-        return TypedResultsHelpers.HandleCollectionQueryResult(result);
+        if (result.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<ApiClientDto>>(result.Select(x => x.ToContract()).ToArray());
     }
 
-    private static async Task<Results<Ok<ApiClientInformation>, NotFound>> GetSingleApiClient(
+    private static async Task<Results<Ok<ApiClientDto>, NotFound>> GetSingleApiClient(
         Guid apiClientGuid,
         IQueryHandler<ApiClientSingleQuery, ApiClientInformation?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new ApiClientSingleQuery(apiClientGuid), cancellationToken);
-        return TypedResultsHelpers.HandleQueryResult(result);
+        return result is null ? TypedResults.NotFound() : TypedResults.Ok(result.ToContract());
     }
 
-    private static async Task<Ok<ApiClientCreatedResultContract>> CreateApiClient(
-        ApiClientCreateCommand command,
+    private static async Task<Ok<ApiClientCreatedDto>> CreateApiClient(
+        ApiClientCreateRequest request,
         ICommandHandler<ApiClientCreateCommand, ApiClientCreatedResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.Handle(command, cancellationToken);
+        var result = await handler.Handle(request.ToCommand(), cancellationToken);
         return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<Results<NoContent, NotFound>> UpdateApiClient(
         Guid apiClientGuid,
-        ApiClientUpdateModel model,
+        ApiClientUpdateRequest request,
         ICommandHandler<ApiClientUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ApiClientUpdateCommand(apiClientGuid, model.Name, model.Description, model.IsActive);
-        await handler.Handle(command, cancellationToken);
+        await handler.Handle(request.ToCommand(apiClientGuid), cancellationToken);
         return TypedResults.NoContent();
     }
 
@@ -98,6 +102,4 @@ public static class ApiClientEndpointRouteBuilderExtension
         await handler.Handle(new ApiClientDeleteCommand(apiClientGuid), cancellationToken);
         return TypedResults.NoContent();
     }
-
-    private sealed record ApiClientUpdateModel(string? Name, string? Description, bool? IsActive);
 }

@@ -30,13 +30,13 @@ public interface IAuthenticationService
     bool IsExpired { get; }
 
     /// <summary>Authenticates the user with the provided credentials.</summary>
-    Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default);
+    Task<AuthDto> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default);
 
     /// <summary>Ends the current authenticated session.</summary>
     Task LogOutAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Refreshes the current authentication token.</summary>
-    Task<AuthResult> RefreshAsync(CancellationToken cancellationToken = default);
+    Task<AuthDto> RefreshAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Changes the authenticated user's password.</summary>
     Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default);

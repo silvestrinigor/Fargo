@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Articles;
+using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Sdk.Http;
 using Fargo.Sdk.Partitions;
 
@@ -22,7 +24,7 @@ public sealed class ArticleClient : IArticleClient
         var query = FargoSdkHttpClient.BuildQuery(
             ("temporalAsOf", temporalAsOf?.ToString("O")));
 
-        var httpResponse = await httpClient.GetAsync<ArticleResult>(
+        var httpResponse = await httpClient.GetAsync<ArticleDto>(
             $"/articles/{articleGuid}{query}",
             cancellationToken);
 
@@ -31,7 +33,7 @@ public sealed class ArticleClient : IArticleClient
             return new FargoSdkResponse<ArticleResult>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<ArticleResult>(httpResponse.Data!);
+        return new FargoSdkResponse<ArticleResult>(httpResponse.Data!.ToSdk());
     }
 
     /// <inheritdoc />
@@ -52,7 +54,7 @@ public sealed class ArticleClient : IArticleClient
             ("search", search),
             ("noPartition", noPartition?.ToString()));
 
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleResult>>(
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleDto>>(
             $"/articles{query}",
             cancellationToken);
 
@@ -61,7 +63,7 @@ public sealed class ArticleClient : IArticleClient
             return new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>(httpResponse.Data ?? []);
+        return new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>((httpResponse.Data ?? []).ToSdk());
     }
 
     /// <inheritdoc />
@@ -73,25 +75,9 @@ public sealed class ArticleClient : IArticleClient
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateRequest, Guid>(
             "/articles",
-            new
-            {
-                article = new
-                {
-                    name,
-                    description,
-                    firstPartition,
-                    metrics = metrics == null ? null : (object)new
-                    {
-                        mass = metrics.Mass == null ? null : (object)new { value = metrics.Mass.Value, unit = metrics.Mass.ToAbbreviation() },
-                        lengthX = metrics.LengthX == null ? null : (object)new { value = metrics.LengthX.Value, unit = metrics.LengthX.ToAbbreviation() },
-                        lengthY = metrics.LengthY == null ? null : (object)new { value = metrics.LengthY.Value, unit = metrics.LengthY.ToAbbreviation() },
-                        lengthZ = metrics.LengthZ == null ? null : (object)new { value = metrics.LengthZ.Value, unit = metrics.LengthZ.ToAbbreviation() }
-                    },
-                    shelfLife
-                }
-            },
+            ContractMappings.ToArticleCreateRequest(name, description, firstPartition, metrics, shelfLife),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -111,21 +97,9 @@ public sealed class ArticleClient : IArticleClient
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync(
+        var httpResponse = await httpClient.PatchJsonAsync<ArticleUpdateRequest>(
             $"/articles/{articleGuid}",
-            new
-            {
-                name,
-                description,
-                metrics = metrics == null ? null : (object)new
-                {
-                    mass = metrics.Mass == null ? null : (object)new { value = metrics.Mass.Value, unit = metrics.Mass.ToAbbreviation() },
-                    lengthX = metrics.LengthX == null ? null : (object)new { value = metrics.LengthX.Value, unit = metrics.LengthX.ToAbbreviation() },
-                    lengthY = metrics.LengthY == null ? null : (object)new { value = metrics.LengthY.Value, unit = metrics.LengthY.ToAbbreviation() },
-                    lengthZ = metrics.LengthZ == null ? null : (object)new { value = metrics.LengthZ.Value, unit = metrics.LengthZ.ToAbbreviation() }
-                },
-                shelfLife
-            },
+            ContractMappings.ToArticleUpdateRequest(name, description, metrics, shelfLife),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -195,7 +169,7 @@ public sealed class ArticleClient : IArticleClient
         Guid articleGuid,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>(
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionDto>>(
             $"/articles/{articleGuid}/partitions",
             cancellationToken);
 
@@ -204,7 +178,7 @@ public sealed class ArticleClient : IArticleClient
             return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
+        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>((httpResponse.Data ?? []).ToSdk());
     }
 
     /// <inheritdoc />
@@ -258,7 +232,7 @@ public sealed class ArticleClient : IArticleClient
         Guid articleGuid,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.GetAsync<ArticleBarcodes>(
+        var httpResponse = await httpClient.GetAsync<ArticleBarcodesDto>(
             $"/articles/{articleGuid}/barcodes",
             cancellationToken);
 
@@ -267,7 +241,7 @@ public sealed class ArticleClient : IArticleClient
             return new FargoSdkResponse<ArticleBarcodes>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<ArticleBarcodes>(httpResponse.Data ?? new ArticleBarcodes());
+        return new FargoSdkResponse<ArticleBarcodes>(httpResponse.Data.ToSdk());
     }
 
     /// <inheritdoc />
@@ -278,7 +252,7 @@ public sealed class ArticleClient : IArticleClient
     {
         var httpResponse = await httpClient.PutJsonAsync(
             $"/articles/{articleGuid}/barcodes",
-            barcodes,
+            barcodes.ToContract(),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

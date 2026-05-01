@@ -22,8 +22,8 @@ public sealed class PartitionClientTests
     {
         var partitionResult = Fakes.PartitionResult();
         httpClient
-            .GetAsync<PartitionResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<PartitionResult>(true, partitionResult, null, HttpStatusCode.OK));
+            .GetAsync<Fargo.Sdk.Contracts.Partitions.PartitionDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Partitions.PartitionDto>(true, partitionResult, null, HttpStatusCode.OK));
 
         var result = await sut.GetAsync(partitionResult.Guid);
 
@@ -36,8 +36,8 @@ public sealed class PartitionClientTests
     public async Task GetAsync_Should_ReturnNotFound_When_ProblemTypeIsPartitionNotFound()
     {
         httpClient
-            .GetAsync<PartitionResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<PartitionResult>(false, null, Fakes.Problem("partition/not-found"), HttpStatusCode.NotFound));
+            .GetAsync<Fargo.Sdk.Contracts.Partitions.PartitionDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Partitions.PartitionDto>(false, null, Fakes.Problem("partition/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -49,8 +49,8 @@ public sealed class PartitionClientTests
     public async Task GetAsync_Should_ReturnUnauthorizedAccess_When_ProblemTypeIsUnauthorized()
     {
         httpClient
-            .GetAsync<PartitionResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<PartitionResult>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
+            .GetAsync<Fargo.Sdk.Contracts.Partitions.PartitionDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Partitions.PartitionDto>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -62,8 +62,8 @@ public sealed class PartitionClientTests
     public async Task GetAsync_Should_ReturnForbidden_When_ProblemTypeIsUserForbidden()
     {
         httpClient
-            .GetAsync<PartitionResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<PartitionResult>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
+            .GetAsync<Fargo.Sdk.Contracts.Partitions.PartitionDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Partitions.PartitionDto>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -75,8 +75,8 @@ public sealed class PartitionClientTests
     public async Task GetAsync_Should_ReturnFallbackDetail_When_ProblemDetailsIsNull()
     {
         httpClient
-            .GetAsync<PartitionResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<PartitionResult>(false, null, null, HttpStatusCode.InternalServerError));
+            .GetAsync<Fargo.Sdk.Contracts.Partitions.PartitionDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Partitions.PartitionDto>(false, null, null, HttpStatusCode.InternalServerError));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -90,10 +90,10 @@ public sealed class PartitionClientTests
     [Fact]
     public async Task GetManyAsync_Should_ReturnPartitions_When_HttpResponseIsSuccess()
     {
-        IReadOnlyCollection<PartitionResult> partitions = [Fakes.PartitionResult(), Fakes.PartitionResult()];
+        IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto> partitions = [Fakes.PartitionResult(), Fakes.PartitionResult()];
         httpClient
-            .GetAsync<IReadOnlyCollection<PartitionResult>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<PartitionResult>>(true, partitions, null, HttpStatusCode.OK));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(true, partitions, null, HttpStatusCode.OK));
 
         var result = await sut.GetManyAsync();
 
@@ -105,8 +105,8 @@ public sealed class PartitionClientTests
     public async Task GetManyAsync_Should_ReturnEmptyCollection_When_DataIsNull()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<PartitionResult>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<PartitionResult>>(true, null, null, HttpStatusCode.NoContent));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.GetManyAsync();
 
@@ -118,8 +118,8 @@ public sealed class PartitionClientTests
     public async Task GetManyAsync_Should_ReturnForbidden_When_PartitionAccessDenied()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<PartitionResult>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<PartitionResult>>(false, null, Fakes.Problem("partition/access-denied"), HttpStatusCode.Forbidden));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(false, null, Fakes.Problem("partition/access-denied"), HttpStatusCode.Forbidden));
 
         var result = await sut.GetManyAsync();
 
@@ -134,7 +134,7 @@ public sealed class PartitionClientTests
     {
         var guid = Guid.NewGuid();
         httpClient
-            .PostFromJsonAsync<object, Guid>(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(true, guid, null, HttpStatusCode.Created));
 
         var result = await sut.CreateAsync("My Partition");
@@ -147,7 +147,7 @@ public sealed class PartitionClientTests
     public async Task CreateAsync_Should_ReturnInvalidInput_When_ProblemTypeIsRequestInvalid()
     {
         httpClient
-            .PostFromJsonAsync<object, Guid>(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("request/invalid"), HttpStatusCode.BadRequest));
 
         var result = await sut.CreateAsync(string.Empty);
@@ -162,7 +162,7 @@ public sealed class PartitionClientTests
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
         httpClient
-            .PatchJsonAsync(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PatchJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name");
@@ -174,7 +174,7 @@ public sealed class PartitionClientTests
     public async Task UpdateAsync_Should_ReturnNotFound_When_PartitionDoesNotExist()
     {
         httpClient
-            .PatchJsonAsync(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PatchJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("partition/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name");
@@ -187,7 +187,7 @@ public sealed class PartitionClientTests
     public async Task UpdateAsync_Should_ReturnInvalidInput_When_CircularHierarchy()
     {
         httpClient
-            .PatchJsonAsync(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PatchJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("partition/circular-hierarchy"), HttpStatusCode.UnprocessableEntity));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), null, null, Guid.NewGuid());
@@ -225,7 +225,7 @@ public sealed class PartitionClientTests
 
     private static class Fakes
     {
-        public static PartitionResult PartitionResult() =>
+        public static Fargo.Sdk.Contracts.Partitions.PartitionDto PartitionResult() =>
             new(Guid.NewGuid(), "Test Partition", "A test partition", null, true);
 
         public static FargoProblemDetails Problem(string type, string detail = "An error occurred.") =>

@@ -35,8 +35,8 @@ public interface IAuthenticationManager : IDisposable
     /// <param name="nameid">The user's name identifier.</param>
     /// <param name="password">The user's password.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>An <see cref="AuthResult"/> indicating the outcome of the login attempt.</returns>
-    Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default);
+    /// <returns>An <see cref="AuthDto"/> indicating the outcome of the login attempt.</returns>
+    Task<AuthDto> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ends the current authenticated session.
@@ -48,8 +48,8 @@ public interface IAuthenticationManager : IDisposable
     /// Refreshes the current authentication token.
     /// </summary>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>An <see cref="AuthResult"/> indicating the outcome of the refresh attempt.</returns>
-    Task<AuthResult> RefreshAsync(CancellationToken cancellationToken = default);
+    /// <returns>An <see cref="AuthDto"/> indicating the outcome of the refresh attempt.</returns>
+    Task<AuthDto> RefreshAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Changes the authenticated user's password.

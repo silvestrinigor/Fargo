@@ -110,7 +110,7 @@ public sealed class ApiClientServiceTests
         var guid = Guid.NewGuid();
         const string plainKey = "test-plain-key";
         client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<ApiClientCreatedResult>(new ApiClientCreatedResult(guid, plainKey)));
+            .Returns(new FargoSdkResponse<ApiClientCreatedDto>(new ApiClientCreatedDto(guid, plainKey)));
 
         var (apiClient, key) = await sut.CreateAsync("test-client", "A description");
 
@@ -123,7 +123,7 @@ public sealed class ApiClientServiceTests
     public async Task CreateAsync_Should_ThrowFargoSdkApiException_When_CreationFails()
     {
         client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<ApiClientCreatedResult>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
+            .Returns(new FargoSdkResponse<ApiClientCreatedDto>(new FargoSdkError(FargoSdkErrorType.InvalidInput, "Name is required.")));
 
         await Assert.ThrowsAsync<FargoSdkApiException>(() => sut.CreateAsync(string.Empty));
     }
@@ -194,7 +194,7 @@ public sealed class ApiClientServiceTests
     {
         var guid = Guid.NewGuid();
         client.CreateAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<ApiClientCreatedResult>(new ApiClientCreatedResult(guid, "key")));
+            .Returns(new FargoSdkResponse<ApiClientCreatedDto>(new ApiClientCreatedDto(guid, "key")));
 
         var (apiClient, _) = await sut.CreateAsync("test-client");
 

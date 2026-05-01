@@ -22,9 +22,9 @@ public sealed class AuthenticationManagerTests
     public async Task LogInAsync_Should_SetSession_When_CredentialsAreValid()
     {
         // Arrange
-        var authResult = Fakes.AuthResult();
+        var authResult = Fakes.AuthDto();
         client.LogInAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(authResult));
+            .Returns(new FargoSdkResponse<AuthDto>(authResult));
 
         // Act
         await sut.LogInAsync("user1", "password");
@@ -39,7 +39,7 @@ public sealed class AuthenticationManagerTests
     {
         // Arrange
         client.LogInAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
+            .Returns(new FargoSdkResponse<AuthDto>(Fakes.AuthDto()));
 
         // Act
         await sut.LogInAsync("user1", "password");
@@ -53,7 +53,7 @@ public sealed class AuthenticationManagerTests
     {
         // Arrange
         client.LogInAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
+            .Returns(new FargoSdkResponse<AuthDto>(Fakes.AuthDto()));
 
         LoggedInEventArgs? raisedArgs = null;
         sut.LoggedIn += (_, args) => raisedArgs = args;
@@ -71,7 +71,7 @@ public sealed class AuthenticationManagerTests
     {
         // Arrange
         client.LogInAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(new FargoSdkError(FargoSdkErrorType.InvalidCredentials, "Invalid password.")));
+            .Returns(new FargoSdkResponse<AuthDto>(new FargoSdkError(FargoSdkErrorType.InvalidCredentials, "Invalid password.")));
 
         // Act / Assert
         await Assert.ThrowsAsync<InvalidCredentialsFargoSdkException>(() =>
@@ -83,7 +83,7 @@ public sealed class AuthenticationManagerTests
     {
         // Arrange
         client.LogInAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(new FargoSdkError(FargoSdkErrorType.PasswordChangeRequired, "Password change required.")));
+            .Returns(new FargoSdkResponse<AuthDto>(new FargoSdkError(FargoSdkErrorType.PasswordChangeRequired, "Password change required.")));
 
         // Act / Assert
         await Assert.ThrowsAsync<PasswordChangeRequiredFargoSdkException>(() =>
@@ -100,7 +100,7 @@ public sealed class AuthenticationManagerTests
             .Returns(new FargoSdkResponse<EmptyResult>());
 
         client.LogInAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
+            .Returns(new FargoSdkResponse<AuthDto>(Fakes.AuthDto()));
 
         // Act
         await sut.LogInAsync("new-user", "password");
@@ -186,9 +186,9 @@ public sealed class AuthenticationManagerTests
         // Arrange
         session.SetTokens("user1", "old-access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
-        var newResult = new AuthResult("new-access", "new-refresh", DateTimeOffset.UtcNow.AddHours(2), false, [], []);
+        var newResult = new AuthDto("new-access", "new-refresh", DateTimeOffset.UtcNow.AddHours(2), false, [], []);
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(newResult));
+            .Returns(new FargoSdkResponse<AuthDto>(newResult));
 
         // Act
         await sut.RefreshAsync();
@@ -204,7 +204,7 @@ public sealed class AuthenticationManagerTests
         // Arrange
         session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
+            .Returns(new FargoSdkResponse<AuthDto>(Fakes.AuthDto()));
 
         // Act
         await sut.RefreshAsync();
@@ -219,7 +219,7 @@ public sealed class AuthenticationManagerTests
         // Arrange
         session.SetTokens("user1", "access", "refresh", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
+            .Returns(new FargoSdkResponse<AuthDto>(Fakes.AuthDto()));
 
         RefreshedEventArgs? raisedArgs = null;
         sut.Refreshed += (_, args) => raisedArgs = args;
@@ -326,7 +326,7 @@ public sealed class AuthenticationManagerTests
         store.LoadAsync(Arg.Any<CancellationToken>()).Returns(stored);
 
         client.Refresh(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkResponse<AuthResult>(Fakes.AuthResult()));
+            .Returns(new FargoSdkResponse<AuthDto>(Fakes.AuthDto()));
 
         // Act
         await sut.RestoreAsync();
@@ -337,7 +337,7 @@ public sealed class AuthenticationManagerTests
 
     private static class Fakes
     {
-        public static AuthResult AuthResult() =>
+        public static AuthDto AuthDto() =>
             new("access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
     }
 }

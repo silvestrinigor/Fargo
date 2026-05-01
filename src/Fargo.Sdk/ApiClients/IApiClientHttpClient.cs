@@ -19,7 +19,7 @@ public interface IApiClientHttpClient
     /// <param name="name">The display name for the new API client.</param>
     /// <param name="description">An optional description.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<ApiClientCreatedResult>> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<ApiClientCreatedDto>> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default);
 
     /// <summary>Updates the properties of an existing API client.</summary>
     /// <param name="apiClientGuid">The unique identifier of the API client to update.</param>

@@ -22,8 +22,8 @@ public sealed class ApiClientClientTests
     {
         var apiClientResult = Fakes.ApiClientResult();
         httpClient
-            .GetAsync<ApiClientResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientResult>(true, apiClientResult, null, HttpStatusCode.OK));
+            .GetAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(true, apiClientResult, null, HttpStatusCode.OK));
 
         var result = await sut.GetAsync(apiClientResult.Guid);
 
@@ -36,8 +36,8 @@ public sealed class ApiClientClientTests
     public async Task GetAsync_Should_ReturnNotFound_When_ProblemTypeIsApiClientNotFound()
     {
         httpClient
-            .GetAsync<ApiClientResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientResult>(false, null, Fakes.Problem("api-client/not-found"), HttpStatusCode.NotFound));
+            .GetAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(false, null, Fakes.Problem("api-client/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -49,8 +49,8 @@ public sealed class ApiClientClientTests
     public async Task GetAsync_Should_ReturnForbidden_When_ProblemTypeIsUserForbidden()
     {
         httpClient
-            .GetAsync<ApiClientResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientResult>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
+            .GetAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -62,8 +62,8 @@ public sealed class ApiClientClientTests
     public async Task GetAsync_Should_ReturnUndefined_When_ProblemTypeIsUnknown()
     {
         httpClient
-            .GetAsync<ApiClientResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientResult>(false, null, Fakes.Problem("server/internal-error"), HttpStatusCode.InternalServerError));
+            .GetAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(false, null, Fakes.Problem("server/internal-error"), HttpStatusCode.InternalServerError));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -75,8 +75,8 @@ public sealed class ApiClientClientTests
     public async Task GetAsync_Should_ReturnFallbackDetail_When_ProblemDetailsIsNull()
     {
         httpClient
-            .GetAsync<ApiClientResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientResult>(false, null, null, HttpStatusCode.InternalServerError));
+            .GetAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>(false, null, null, HttpStatusCode.InternalServerError));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -90,10 +90,10 @@ public sealed class ApiClientClientTests
     [Fact]
     public async Task GetManyAsync_Should_ReturnApiClients_When_HttpResponseIsSuccess()
     {
-        IReadOnlyCollection<ApiClientResult> clients = [Fakes.ApiClientResult(), Fakes.ApiClientResult()];
+        IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto> clients = [Fakes.ApiClientResult(), Fakes.ApiClientResult()];
         httpClient
-            .GetAsync<IReadOnlyCollection<ApiClientResult>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<ApiClientResult>>(true, clients, null, HttpStatusCode.OK));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>>(true, clients, null, HttpStatusCode.OK));
 
         var result = await sut.GetManyAsync();
 
@@ -105,8 +105,8 @@ public sealed class ApiClientClientTests
     public async Task GetManyAsync_Should_ReturnEmptyCollection_When_DataIsNull()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<ApiClientResult>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<ApiClientResult>>(true, null, null, HttpStatusCode.NoContent));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.GetManyAsync();
 
@@ -118,8 +118,8 @@ public sealed class ApiClientClientTests
     public async Task GetManyAsync_Should_ReturnForbidden_When_AccessDenied()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<ApiClientResult>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<ApiClientResult>>(false, null, Fakes.Problem("entity/access-denied"), HttpStatusCode.Forbidden));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.ApiClients.ApiClientDto>>(false, null, Fakes.Problem("entity/access-denied"), HttpStatusCode.Forbidden));
 
         var result = await sut.GetManyAsync();
 
@@ -135,8 +135,8 @@ public sealed class ApiClientClientTests
         var guid = Guid.NewGuid();
         const string plainKey = "test-plain-key";
         httpClient
-            .PostFromJsonAsync<object, ApiClientCreatedResult>(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientCreatedResult>(true, new ApiClientCreatedResult(guid, plainKey), null, HttpStatusCode.Created));
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientCreateRequest, ApiClientCreatedDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.ApiClients.ApiClientCreateRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<ApiClientCreatedDto>(true, new ApiClientCreatedDto(guid, plainKey), null, HttpStatusCode.Created));
 
         var result = await sut.CreateAsync("test-client");
 
@@ -149,8 +149,8 @@ public sealed class ApiClientClientTests
     public async Task CreateAsync_Should_ReturnForbidden_When_AccessDenied()
     {
         httpClient
-            .PostFromJsonAsync<object, ApiClientCreatedResult>(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<ApiClientCreatedResult>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientCreateRequest, ApiClientCreatedDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.ApiClients.ApiClientCreateRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<ApiClientCreatedDto>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
 
         var result = await sut.CreateAsync("test-client");
 
@@ -164,7 +164,7 @@ public sealed class ApiClientClientTests
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
         httpClient
-            .PatchJsonAsync(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PatchJsonAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.ApiClients.ApiClientUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name", null, null);
@@ -176,7 +176,7 @@ public sealed class ApiClientClientTests
     public async Task UpdateAsync_Should_ReturnNotFound_When_ApiClientDoesNotExist()
     {
         httpClient
-            .PatchJsonAsync(Arg.Any<string>(), Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .PatchJsonAsync<Fargo.Sdk.Contracts.ApiClients.ApiClientUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.ApiClients.ApiClientUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("api-client/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name", null, null);
@@ -214,7 +214,7 @@ public sealed class ApiClientClientTests
 
     private static class Fakes
     {
-        public static ApiClientResult ApiClientResult() =>
+        public static Fargo.Sdk.Contracts.ApiClients.ApiClientDto ApiClientResult() =>
             new(Guid.NewGuid(), "test-client", "A test description", true);
 
         public static FargoProblemDetails Problem(string type, string detail = "An error occurred.") =>
