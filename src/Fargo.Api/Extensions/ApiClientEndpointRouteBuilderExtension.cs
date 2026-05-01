@@ -57,13 +57,16 @@ public static class ApiClientEndpointRouteBuilderExtension
         var query = new ApiClientManyQuery(
             Pagination: PaginationHelpers.CreatePagination(page, limit),
             Search: search);
+
         var result = await handler.Handle(query, cancellationToken);
+
         if (result.Count == 0)
         {
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok<IReadOnlyCollection<ApiClientDto>>(result.Select(x => x.ToContract()).ToArray());
+        return TypedResults.Ok<IReadOnlyCollection<ApiClientDto>>(
+            [.. result.Select(x => x.ToContract())]);
     }
 
     private static async Task<Results<Ok<ApiClientDto>, NotFound>> GetSingleApiClient(
