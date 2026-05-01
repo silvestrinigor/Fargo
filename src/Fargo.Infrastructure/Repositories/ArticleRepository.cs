@@ -2,6 +2,7 @@ using Fargo.Application.Articles;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Infrastructure.Extensions;
@@ -186,6 +187,64 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         return [.. result.Select(a => a.ToInformation())];
     }
 
+    public async Task<(BarcodeFormat Format, string Code)?> FindConflictingBarcode(
+        ArticleBarcodes barcodes,
+        Guid excludeArticleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        if (barcodes.Ean13 is { } ean13 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Ean13 == ean13, cancellationToken))
+        {
+            return (BarcodeFormat.Ean13, ean13.Code);
+        }
+
+        if (barcodes.Ean8 is { } ean8 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Ean8 == ean8, cancellationToken))
+        {
+            return (BarcodeFormat.Ean8, ean8.Code);
+        }
+
+        if (barcodes.UpcA is { } upcA && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.UpcA == upcA, cancellationToken))
+        {
+            return (BarcodeFormat.UpcA, upcA.Code);
+        }
+
+        if (barcodes.UpcE is { } upcE && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.UpcE == upcE, cancellationToken))
+        {
+            return (BarcodeFormat.UpcE, upcE.Code);
+        }
+
+        if (barcodes.Code128 is { } code128 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Code128 == code128, cancellationToken))
+        {
+            return (BarcodeFormat.Code128, code128.Code);
+        }
+
+        if (barcodes.Code39 is { } code39 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Code39 == code39, cancellationToken))
+        {
+            return (BarcodeFormat.Code39, code39.Code);
+        }
+
+        if (barcodes.Itf14 is { } itf14 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Itf14 == itf14, cancellationToken))
+        {
+            return (BarcodeFormat.Itf14, itf14.Code);
+        }
+
+        if (barcodes.Gs1128 is { } gs1128 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Gs1128 == gs1128, cancellationToken))
+        {
+            return (BarcodeFormat.Gs1128, gs1128.Code);
+        }
+
+        if (barcodes.QrCode is { } qrCode && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.QrCode == qrCode, cancellationToken))
+        {
+            return (BarcodeFormat.QrCode, qrCode.Code);
+        }
+
+        if (barcodes.DataMatrix is { } dataMatrix && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.DataMatrix == dataMatrix, cancellationToken))
+        {
+            return (BarcodeFormat.DataMatrix, dataMatrix.Code);
+        }
+
+        return null;
+    }
+
     public async Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? partitionFilter = null,
@@ -237,16 +296,6 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
 
 file static class ArticleQueryExtensions
 {
-    internal static IQueryable<Article> WithBarcodes(this IQueryable<Article> query) =>
-        query
-            .Include("Barcodes.Ean13Data")
-            .Include("Barcodes.Ean8Data")
-            .Include("Barcodes.UpcAData")
-            .Include("Barcodes.UpcEData")
-            .Include("Barcodes.Code128Data")
-            .Include("Barcodes.Code39Data")
-            .Include("Barcodes.Itf14Data")
-            .Include("Barcodes.Gs1128Data")
-            .Include("Barcodes.QrCodeData")
-            .Include("Barcodes.DataMatrixData");
+    // Barcodes are columns on the Articles table — no separate Include needed.
+    internal static IQueryable<Article> WithBarcodes(this IQueryable<Article> query) => query;
 }

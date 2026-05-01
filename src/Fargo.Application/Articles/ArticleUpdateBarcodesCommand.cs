@@ -23,6 +23,7 @@ public sealed record ArticleUpdateBarcodesCommand(
 public sealed class ArticleUpdateBarcodesCommandHandler(
     ActorService actorService,
     IArticleRepository articleRepository,
+    IArticleQueryRepository articleQueryRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork,
     IEventRecorder eventRecorder,
@@ -48,6 +49,12 @@ public sealed class ArticleUpdateBarcodesCommandHandler(
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
         actor.ValidateHasAccess(article);
+
+        var conflict = await articleQueryRepository.FindConflictingBarcode(command.Barcodes, command.ArticleGuid, cancellationToken);
+        if (conflict is { } c)
+        {
+            throw new ArticleBarcodeAlreadyInUseFargoApplicationException(c.Format, c.Code);
+        }
 
         article.Barcodes.Ean13 = command.Barcodes.Ean13;
         article.Barcodes.Ean8 = command.Barcodes.Ean8;

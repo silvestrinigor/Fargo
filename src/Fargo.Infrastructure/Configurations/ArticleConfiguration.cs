@@ -102,6 +102,17 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                     v => v.HasValue ? v.Value.Code : null,
                     v => v != null ? new DataMatrix(v) : null))
                 .HasMaxLength(2335);
+
+            barcodes.HasIndex(x => x.Ean13).IsUnique().HasFilter("[Barcodes_Ean13] IS NOT NULL");
+            barcodes.HasIndex(x => x.Ean8).IsUnique().HasFilter("[Barcodes_Ean8] IS NOT NULL");
+            barcodes.HasIndex(x => x.UpcA).IsUnique().HasFilter("[Barcodes_UpcA] IS NOT NULL");
+            barcodes.HasIndex(x => x.UpcE).IsUnique().HasFilter("[Barcodes_UpcE] IS NOT NULL");
+            barcodes.HasIndex(x => x.Code128).IsUnique().HasFilter("[Barcodes_Code128] IS NOT NULL");
+            barcodes.HasIndex(x => x.Code39).IsUnique().HasFilter("[Barcodes_Code39] IS NOT NULL");
+            barcodes.HasIndex(x => x.Itf14).IsUnique().HasFilter("[Barcodes_Itf14] IS NOT NULL");
+            barcodes.HasIndex(x => x.Gs1128).IsUnique().HasFilter("[Barcodes_Gs1128] IS NOT NULL");
+            barcodes.HasIndex(x => x.QrCode).IsUnique().HasFilter("[Barcodes_QrCode] IS NOT NULL");
+            barcodes.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("[Barcodes_DataMatrix] IS NOT NULL");
         });
 
         builder.OwnsOne(x => x.Metrics, m =>
