@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Provides barcode management for articles.</summary>
 public interface IArticleBarcodeService

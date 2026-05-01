@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Provides image upload, deletion, and retrieval for articles.</summary>
 public interface IArticleImageService

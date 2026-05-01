@@ -1,9 +1,9 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.ApiClients;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.ApiClients;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts.ApiClients;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -76,7 +76,7 @@ public static class ApiClientEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<ApiClientCreatedDto>> CreateApiClient(
-        ApiClientCreateRequest request,
+        ApiClientCreateDto request,
         ICommandHandler<ApiClientCreateCommand, ApiClientCreatedResult> handler,
         CancellationToken cancellationToken)
     {
@@ -86,7 +86,7 @@ public static class ApiClientEndpointRouteBuilderExtension
 
     private static async Task<Results<NoContent, NotFound>> UpdateApiClient(
         Guid apiClientGuid,
-        ApiClientUpdateRequest request,
+        ApiClientUpdateDto request,
         ICommandHandler<ApiClientUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

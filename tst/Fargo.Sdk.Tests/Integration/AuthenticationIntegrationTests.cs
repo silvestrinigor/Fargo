@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Sdk.Tests.Integration;
+namespace Fargo.Api.Tests.Integration;
 
 /// <summary>
 /// Integration tests that require a running Fargo API.

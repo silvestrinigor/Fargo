@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Tests;
+namespace Fargo.Api.Tests;
 
 public sealed class ActionTypeTests
 {

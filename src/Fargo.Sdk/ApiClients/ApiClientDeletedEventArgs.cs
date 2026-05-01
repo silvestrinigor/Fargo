@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Provides data for the <see cref="ApiClient.Deleted"/> event.</summary>
 public sealed class ApiClientDeletedEventArgs(Guid guid) : EventArgs

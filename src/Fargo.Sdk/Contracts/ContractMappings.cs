@@ -1,10 +1,17 @@
-using Fargo.Sdk.Contracts.ApiClients;
-using Fargo.Sdk.Contracts.Articles;
-using Fargo.Sdk.Contracts.Items;
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.Permissions;
-using Fargo.Sdk.Contracts.UserGroups;
-using Fargo.Sdk.Contracts.Users;
+using Fargo.Api;
+using Fargo.Api.Contracts.ApiClients;
+using Fargo.Api.Contracts.Articles;
+using Fargo.Api.Contracts.Items;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Contracts.Permissions;
+using Fargo.Api.Contracts.UserGroups;
+using Fargo.Api.Contracts.Users;
+using ApiClients = Fargo.Api.ApiClients;
+using Articles = Fargo.Api.Articles;
+using Items = Fargo.Api.Items;
+using Partitions = Fargo.Api.Partitions;
+using UserGroups = Fargo.Api.UserGroups;
+using Users = Fargo.Api.Users;
 
 namespace Fargo.Sdk;
 
@@ -16,10 +23,10 @@ internal static class ContractMappings
     public static IReadOnlyCollection<ApiClients.ApiClientResult> ToSdk(this IReadOnlyCollection<ApiClientDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
 
-    public static ApiClientCreateRequest ToApiClientCreateRequest(string name, string? description)
+    public static ApiClientCreateDto ToApiClientCreateDto(string name, string? description)
         => new(name, description);
 
-    public static ApiClientUpdateRequest ToApiClientUpdateRequest(string? name, string? description, bool? isActive)
+    public static ApiClientUpdateDto ToApiClientUpdateDto(string? name, string? description, bool? isActive)
         => new(name, description, isActive);
 
     public static Articles.ArticleResult ToSdk(this ArticleDto contract)
@@ -37,15 +44,15 @@ internal static class ContractMappings
     public static IReadOnlyCollection<Articles.ArticleResult> ToSdk(this IReadOnlyCollection<ArticleDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
 
-    public static ArticleCreateRequest ToArticleCreateRequest(
+    public static ArticleCreateDto ToArticleCreateDto(
         string name,
         string? description,
         Guid? firstPartition,
         Articles.ArticleMetrics? metrics,
         TimeSpan? shelfLife)
-        => new(new ArticleCreateDto(name, description, firstPartition, metrics.ToContract(), shelfLife));
+        => new(name, description, firstPartition, metrics.ToContract(), shelfLife);
 
-    public static ArticleUpdateRequest ToArticleUpdateRequest(
+    public static ArticleUpdateDto ToArticleUpdateDto(
         string? name,
         string? description,
         Articles.ArticleMetrics? metrics,
@@ -58,10 +65,10 @@ internal static class ContractMappings
     public static IReadOnlyCollection<Items.ItemResult> ToSdk(this IReadOnlyCollection<ItemDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
 
-    public static ItemCreateRequest ToItemCreateRequest(Guid articleGuid, Guid? firstPartition, DateTimeOffset? productionDate)
-        => new(new ItemCreateDto(articleGuid, firstPartition, productionDate));
+    public static ItemCreateDto ToItemCreateDto(Guid articleGuid, Guid? firstPartition, DateTimeOffset? productionDate)
+        => new(articleGuid, firstPartition, productionDate);
 
-    public static ItemUpdateRequest ToItemUpdateRequest(DateTimeOffset? productionDate)
+    public static ItemUpdateDto ToItemUpdateDto(DateTimeOffset? productionDate)
         => new(productionDate);
 
     public static Partitions.PartitionResult ToSdk(this PartitionDto contract)
@@ -76,13 +83,13 @@ internal static class ContractMappings
     public static IReadOnlyCollection<Partitions.PartitionResult> ToSdk(this IReadOnlyCollection<PartitionDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
 
-    public static PartitionCreateRequest ToPartitionCreateRequest(
+    public static PartitionCreateDto ToPartitionCreateDto(
         string name,
         string? description,
         Guid? parentPartitionGuid)
         => new(name, description, parentPartitionGuid);
 
-    public static PartitionUpdateRequest ToPartitionUpdateRequest(
+    public static PartitionUpdateDto ToPartitionUpdateDto(
         string? name,
         string? description,
         Guid? parentPartitionGuid,
@@ -106,7 +113,7 @@ internal static class ContractMappings
     public static IReadOnlyCollection<Users.UserResult> ToSdk(this IReadOnlyCollection<UserDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
 
-    public static UserCreateRequest ToUserCreateRequest(
+    public static UserCreateDto ToUserCreateDto(
         string nameid,
         string password,
         string? firstName,
@@ -115,17 +122,17 @@ internal static class ContractMappings
         IReadOnlyCollection<ActionType>? permissions,
         TimeSpan? defaultPasswordExpirationPeriod,
         Guid? firstPartition)
-        => new(new UserCreateDto(
+        => new(
             nameid,
             password,
             firstName,
             lastName,
             description,
-            permissions.ToPermissionUpdateRequests(),
+            permissions.ToPermissionUpdateDtos(),
             defaultPasswordExpirationPeriod,
-            firstPartition));
+            firstPartition);
 
-    public static UserUpdateRequest ToUserUpdateRequest(
+    public static UserUpdateDto ToUserUpdateDto(
         string? nameid,
         string? firstName,
         string? lastName,
@@ -141,7 +148,7 @@ internal static class ContractMappings
             description,
             password,
             isActive,
-            permissions.ToPermissionUpdateRequests(),
+            permissions.ToPermissionUpdateDtos(),
             defaultPasswordExpirationPeriod);
 
     public static UserGroups.UserGroupResult ToSdk(this UserGroupDto contract)
@@ -155,26 +162,26 @@ internal static class ContractMappings
     public static IReadOnlyCollection<UserGroups.UserGroupResult> ToSdk(this IReadOnlyCollection<UserGroupDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
 
-    public static UserGroupCreateRequest ToUserGroupCreateRequest(
+    public static UserGroupCreateDto ToUserGroupCreateDto(
         string nameid,
         string? description,
         IReadOnlyCollection<ActionType>? permissions,
         Guid? firstPartition)
-        => new(new UserGroupCreateDto(nameid, description, permissions.ToPermissionUpdateRequests(), firstPartition));
+        => new(nameid, description, permissions.ToPermissionUpdateDtos(), firstPartition);
 
-    public static UserGroupUpdateRequest ToUserGroupUpdateRequest(
+    public static UserGroupUpdateDto ToUserGroupUpdateDto(
         string? nameid,
         string? description,
         bool? isActive,
         IReadOnlyCollection<ActionType>? permissions)
-        => new(nameid, description, isActive, permissions.ToPermissionUpdateRequests());
+        => new(nameid, description, isActive, permissions.ToPermissionUpdateDtos());
 
     private static PermissionResult ToSdk(this PermissionDto contract)
         => new(contract.Guid, contract.Action);
 
-    private static IReadOnlyCollection<PermissionUpdateRequest>? ToPermissionUpdateRequests(
+    private static IReadOnlyCollection<PermissionUpdateDto>? ToPermissionUpdateDtos(
         this IReadOnlyCollection<ActionType>? permissions)
-        => permissions?.Select(static action => new PermissionUpdateRequest(action)).ToArray();
+        => permissions?.Select(static action => new PermissionUpdateDto(action)).ToArray();
 
     private static ArticleMetricsDto? ToContract(this Articles.ArticleMetrics? metrics)
         => metrics is null
@@ -198,31 +205,31 @@ internal static class ContractMappings
 
     public static ArticleBarcodesDto ToContract(this Articles.ArticleBarcodes barcodes)
         => new(
-            barcodes.Ean13 is null ? null : new BarcodeValueDto(barcodes.Ean13.Value.Code),
-            barcodes.Ean8 is null ? null : new BarcodeValueDto(barcodes.Ean8.Value.Code),
-            barcodes.UpcA is null ? null : new BarcodeValueDto(barcodes.UpcA.Value.Code),
-            barcodes.UpcE is null ? null : new BarcodeValueDto(barcodes.UpcE.Value.Code),
-            barcodes.Code128 is null ? null : new BarcodeValueDto(barcodes.Code128.Value.Code),
-            barcodes.Code39 is null ? null : new BarcodeValueDto(barcodes.Code39.Value.Code),
-            barcodes.Itf14 is null ? null : new BarcodeValueDto(barcodes.Itf14.Value.Code),
-            barcodes.Gs1128 is null ? null : new BarcodeValueDto(barcodes.Gs1128.Value.Code),
-            barcodes.QrCode is null ? null : new BarcodeValueDto(barcodes.QrCode.Value.Code),
-            barcodes.DataMatrix is null ? null : new BarcodeValueDto(barcodes.DataMatrix.Value.Code));
+            barcodes.Ean13 is null ? null : barcodes.Ean13.Value.Code,
+            barcodes.Ean8 is null ? null : barcodes.Ean8.Value.Code,
+            barcodes.UpcA is null ? null : barcodes.UpcA.Value.Code,
+            barcodes.UpcE is null ? null : barcodes.UpcE.Value.Code,
+            barcodes.Code128 is null ? null : barcodes.Code128.Value.Code,
+            barcodes.Code39 is null ? null : barcodes.Code39.Value.Code,
+            barcodes.Itf14 is null ? null : barcodes.Itf14.Value.Code,
+            barcodes.Gs1128 is null ? null : barcodes.Gs1128.Value.Code,
+            barcodes.QrCode is null ? null : barcodes.QrCode.Value.Code,
+            barcodes.DataMatrix is null ? null : barcodes.DataMatrix.Value.Code);
 
     public static Articles.ArticleBarcodes ToSdk(this ArticleBarcodesDto? contract)
         => contract is null
             ? new Articles.ArticleBarcodes()
             : new Articles.ArticleBarcodes
             {
-                Ean13 = contract.Ean13 is null ? null : new Articles.Ean13(Guid.Empty, Guid.Empty, contract.Ean13.Code),
-                Ean8 = contract.Ean8 is null ? null : new Articles.Ean8(Guid.Empty, Guid.Empty, contract.Ean8.Code),
-                UpcA = contract.UpcA is null ? null : new Articles.UpcA(Guid.Empty, Guid.Empty, contract.UpcA.Code),
-                UpcE = contract.UpcE is null ? null : new Articles.UpcE(Guid.Empty, Guid.Empty, contract.UpcE.Code),
-                Code128 = contract.Code128 is null ? null : new Articles.Code128(Guid.Empty, Guid.Empty, contract.Code128.Code),
-                Code39 = contract.Code39 is null ? null : new Articles.Code39(Guid.Empty, Guid.Empty, contract.Code39.Code),
-                Itf14 = contract.Itf14 is null ? null : new Articles.Itf14(Guid.Empty, Guid.Empty, contract.Itf14.Code),
-                Gs1128 = contract.Gs1128 is null ? null : new Articles.Gs1128(Guid.Empty, Guid.Empty, contract.Gs1128.Code),
-                QrCode = contract.QrCode is null ? null : new Articles.QrCode(Guid.Empty, Guid.Empty, contract.QrCode.Code),
-                DataMatrix = contract.DataMatrix is null ? null : new Articles.DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix.Code),
+                Ean13 = contract.Ean13 is null ? null : new Articles.Ean13(Guid.Empty, Guid.Empty, contract.Ean13),
+                Ean8 = contract.Ean8 is null ? null : new Articles.Ean8(Guid.Empty, Guid.Empty, contract.Ean8),
+                UpcA = contract.UpcA is null ? null : new Articles.UpcA(Guid.Empty, Guid.Empty, contract.UpcA),
+                UpcE = contract.UpcE is null ? null : new Articles.UpcE(Guid.Empty, Guid.Empty, contract.UpcE),
+                Code128 = contract.Code128 is null ? null : new Articles.Code128(Guid.Empty, Guid.Empty, contract.Code128),
+                Code39 = contract.Code39 is null ? null : new Articles.Code39(Guid.Empty, Guid.Empty, contract.Code39),
+                Itf14 = contract.Itf14 is null ? null : new Articles.Itf14(Guid.Empty, Guid.Empty, contract.Itf14),
+                Gs1128 = contract.Gs1128 is null ? null : new Articles.Gs1128(Guid.Empty, Guid.Empty, contract.Gs1128),
+                QrCode = contract.QrCode is null ? null : new Articles.QrCode(Guid.Empty, Guid.Empty, contract.QrCode),
+                DataMatrix = contract.DataMatrix is null ? null : new Articles.DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix),
             };
 }

@@ -1,6 +1,6 @@
-using Fargo.Sdk.Authentication;
+using Fargo.Api.Authentication;
 
-namespace Fargo.Sdk.Tests.Authentication;
+namespace Fargo.Api.Tests.Authentication;
 
 public sealed class AuthSessionTests
 {

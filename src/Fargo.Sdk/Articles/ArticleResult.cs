@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Represents an article returned by the API.

@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Broadcasts the hub <c>OnArticleCreated</c> event as a typed .NET event.</summary>
 public interface IArticleEventSource

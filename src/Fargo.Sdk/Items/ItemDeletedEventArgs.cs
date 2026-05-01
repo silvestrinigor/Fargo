@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Provides data for the <see cref="Item.Deleted"/> event.</summary>
 public sealed class ItemDeletedEventArgs(Guid guid) : EventArgs

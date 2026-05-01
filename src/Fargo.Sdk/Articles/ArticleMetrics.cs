@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Groups the physical measurement properties of an article as returned by the API.

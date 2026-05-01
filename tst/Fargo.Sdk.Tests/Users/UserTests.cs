@@ -1,8 +1,8 @@
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.Users;
+using Fargo.Api.Partitions;
+using Fargo.Api.Users;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Users;
+namespace Fargo.Api.Tests.Users;
 
 public sealed class UserTests
 {

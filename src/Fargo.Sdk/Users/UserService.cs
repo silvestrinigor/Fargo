@@ -1,7 +1,7 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 using System.Collections.Concurrent;
 
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Default implementation of <see cref="IUserService"/>.</summary>
 public sealed class UserService : IUserService

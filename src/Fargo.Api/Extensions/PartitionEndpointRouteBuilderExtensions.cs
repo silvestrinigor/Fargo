@@ -1,9 +1,9 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.Partitions;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -99,7 +99,7 @@ public static class PartitionEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreatePartition(
-        PartitionCreateRequest request,
+        PartitionCreateDto request,
         ICommandHandler<PartitionCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
@@ -110,7 +110,7 @@ public static class PartitionEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdatePartition(
         Guid partitionGuid,
-        PartitionUpdateRequest request,
+        PartitionUpdateDto request,
         ICommandHandler<PartitionUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

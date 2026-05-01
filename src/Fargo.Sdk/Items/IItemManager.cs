@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>
 /// Combined item interface: CRUD and Created events.

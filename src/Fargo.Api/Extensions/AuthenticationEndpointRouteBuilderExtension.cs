@@ -1,7 +1,7 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.Authentication;
 using Fargo.Application;
 using Fargo.Application.Authentication;
-using Fargo.Sdk.Contracts.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -53,7 +53,7 @@ public static class AuthenticationEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<AuthDto>> Login(
-        LoginRequest request,
+        LoginDto request,
         ICommandHandler<LoginCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
@@ -63,27 +63,27 @@ public static class AuthenticationEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok> Logout(
-        LogoutRequest request,
+        RefreshDto request,
         ICommandHandler<LogoutCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(request.ToCommand(), cancellationToken);
+        await handler.Handle(request.ToLogoutCommand(), cancellationToken);
 
         return TypedResults.Ok();
     }
 
     private static async Task<Ok<AuthDto>> Refresh(
-        RefreshRequest request,
+        RefreshDto request,
         ICommandHandler<RefreshCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.Handle(request.ToCommand(), cancellationToken);
+        var result = await handler.Handle(request.ToRefreshCommand(), cancellationToken);
 
         return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<NoContent> ChangePassword(
-        PasswordChangeRequest request,
+        PasswordUpdateDto request,
         ICommandHandler<PasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {

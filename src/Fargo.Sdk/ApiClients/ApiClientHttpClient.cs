@@ -1,7 +1,8 @@
-using Fargo.Sdk.Contracts.ApiClients;
-using Fargo.Sdk.Http;
+using Fargo.Api.Contracts.ApiClients;
+using Fargo.Api.Http;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Default implementation of <see cref="IApiClientHttpClient"/>.</summary>
 public sealed class ApiClientHttpClient : IApiClientHttpClient
@@ -36,9 +37,9 @@ public sealed class ApiClientHttpClient : IApiClientHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<ApiClientCreatedDto>> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default)
     {
-        var r = await httpClient.PostFromJsonAsync<ApiClientCreateRequest, ApiClientCreatedDto>(
+        var r = await httpClient.PostFromJsonAsync<ApiClientCreateDto, ApiClientCreatedDto>(
             "/api-clients",
-            ContractMappings.ToApiClientCreateRequest(name, description),
+            ContractMappings.ToApiClientCreateDto(name, description),
             cancellationToken);
         return r.IsSuccess ? new(r.Data!) : new(MapError(r.Problem));
     }
@@ -46,9 +47,9 @@ public sealed class ApiClientHttpClient : IApiClientHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid apiClientGuid, string? name, string? description, bool? isActive, CancellationToken cancellationToken = default)
     {
-        var r = await httpClient.PatchJsonAsync<ApiClientUpdateRequest>(
+        var r = await httpClient.PatchJsonAsync<ApiClientUpdateDto>(
             "/api-clients/" + apiClientGuid,
-            ContractMappings.ToApiClientUpdateRequest(name, description, isActive),
+            ContractMappings.ToApiClientUpdateDto(name, description, isActive),
             cancellationToken);
         return r.IsSuccess ? new(new EmptyResult()) : new(MapError(r.Problem));
     }

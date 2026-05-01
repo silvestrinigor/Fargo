@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Represents a volumetric density value computed by the SDK.

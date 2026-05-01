@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>
 /// Thrown by <see cref="IAuthenticationManager"/> when the server rejects the

@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>Provides data for the <see cref="IPartitionEventSource.Created"/> event.</summary>
 public sealed class PartitionCreatedEventArgs(Guid guid) : EventArgs

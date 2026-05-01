@@ -1,6 +1,6 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Provides operations for managing articles.

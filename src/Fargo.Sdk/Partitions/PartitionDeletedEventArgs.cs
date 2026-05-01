@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>Provides data for the <see cref="Partition.Deleted"/> event.</summary>
 public sealed class PartitionDeletedEventArgs(Guid guid) : EventArgs

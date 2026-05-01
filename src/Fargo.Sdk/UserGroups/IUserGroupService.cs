@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>Provides CRUD operations for user groups and routes hub Updated/Deleted events to tracked entities.</summary>
 public interface IUserGroupService

@@ -1,7 +1,7 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 using System.Collections.Concurrent;
 
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Default implementation of <see cref="IArticleService"/>. Tracks live entities and routes

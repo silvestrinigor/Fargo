@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>Delegate façade that implements <see cref="IPartitionManager"/> by composing the focused services.</summary>
 public sealed class PartitionManager(IPartitionService service, IPartitionEventSource eventSource) : IPartitionManager

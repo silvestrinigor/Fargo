@@ -1,6 +1,6 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>
 /// Provides operations for managing user groups.

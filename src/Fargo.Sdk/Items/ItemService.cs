@@ -1,7 +1,7 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 using System.Collections.Concurrent;
 
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Default implementation of <see cref="IItemService"/>.</summary>
 public sealed class ItemService : IItemService

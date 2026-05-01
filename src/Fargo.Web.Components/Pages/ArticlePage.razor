@@ -1,6 +1,9 @@
 @page "/articles/{ArticleGuid:guid}"
 @rendermode InteractiveServer
-@using Fargo.Sdk.Articles
+@using Fargo.Api
+@using Fargo.Api.Articles
+@using Fargo.Api.Authentication
+@using Fargo.Api.Contracts
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Article</PageTitle>

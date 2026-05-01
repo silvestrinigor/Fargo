@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>Provides data for the <see cref="IUserGroupEventSource.Created"/> event.</summary>
 public sealed class UserGroupCreatedEventArgs(Guid guid, string nameid) : EventArgs

@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>Delegate façade that implements <see cref="IUserGroupManager"/> by composing the focused services.</summary>
 public sealed class UserGroupManager(IUserGroupService service, IUserGroupEventSource eventSource) : IUserGroupManager

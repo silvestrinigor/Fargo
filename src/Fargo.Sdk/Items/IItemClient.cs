@@ -1,6 +1,6 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>
 /// Provides operations for managing items.

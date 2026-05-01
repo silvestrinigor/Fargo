@@ -1,11 +1,11 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Authentication;
+using Fargo.Api.Articles;
+using Fargo.Api.Authentication;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Fargo.Sdk.Http;
+namespace Fargo.Api.Http;
 
 public sealed class FargoSdkHttpClient : IFargoSdkHttpClient
 {

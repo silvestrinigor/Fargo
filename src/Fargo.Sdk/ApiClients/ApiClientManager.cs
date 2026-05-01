@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Delegate façade that combines all API client responsibilities.</summary>
 public sealed class ApiClientManager(IApiClientService service, IApiClientEventSource eventSource) : IApiClientManager

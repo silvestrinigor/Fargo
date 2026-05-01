@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Provides CRUD operations for users and routes hub Updated/Deleted events to tracked entities.</summary>
 public interface IUserService

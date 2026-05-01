@@ -1,7 +1,7 @@
-using Fargo.Sdk.Contracts.Authentication;
-using Fargo.Sdk.Http;
+using Fargo.Api.Contracts.Authentication;
+using Fargo.Api.Http;
 
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 public sealed class AuthenticationClient : IAuthenticationClient
 {
@@ -14,9 +14,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
 
     public async Task<FargoSdkResponse<AuthDto>> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<LoginRequest, AuthDto>(
+        var httpResponse = await httpClient.PostFromJsonAsync<LoginDto, AuthDto>(
             "/authentication/login",
-            new LoginRequest(nameid, password),
+            new LoginDto(nameid, password),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -29,9 +29,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
 
     public async Task<FargoSdkResponse<AuthDto>> Refresh(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<RefreshRequest, AuthDto>(
+        var httpResponse = await httpClient.PostFromJsonAsync<RefreshDto, AuthDto>(
             "/authentication/refresh",
-            new RefreshRequest(refreshToken),
+            new RefreshDto(refreshToken),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -44,9 +44,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
 
     public async Task<FargoSdkResponse<EmptyResult>> LogOutAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostJsonAsync<LogoutRequest>(
+        var httpResponse = await httpClient.PostJsonAsync<RefreshDto>(
             "/authentication/logout",
-            new LogoutRequest(refreshToken),
+            new RefreshDto(refreshToken),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -59,9 +59,9 @@ public sealed class AuthenticationClient : IAuthenticationClient
 
     public async Task<FargoSdkResponse<EmptyResult>> ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PutJsonAsync<PasswordChangeRequest>(
+        var httpResponse = await httpClient.PutJsonAsync<PasswordUpdateDto>(
             "/authentication/password",
-            new PasswordChangeRequest(new PasswordUpdateRequest(newPassword, currentPassword)),
+            new PasswordUpdateDto(newPassword, currentPassword),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

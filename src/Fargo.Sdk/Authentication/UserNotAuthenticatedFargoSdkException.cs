@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>
 /// Thrown when an operation that requires an active session is called

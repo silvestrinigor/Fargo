@@ -1,8 +1,8 @@
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Items;
+using Fargo.Api.Partitions;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Items;
+namespace Fargo.Api.Tests.Items;
 
 public sealed class ItemTests
 {

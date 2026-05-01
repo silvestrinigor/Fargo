@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Http;
+namespace Fargo.Api.Http;
 
 /// <summary>Low-level HTTP transport for the Fargo API. Handles auth headers and error mapping.</summary>
 public interface IFargoHttpClient

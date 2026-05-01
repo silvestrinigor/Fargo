@@ -1,11 +1,11 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Contracts.Users;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Partitions;
 using Fargo.Application.Users;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -137,7 +137,7 @@ public static class UserEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUser(
-        UserCreateRequest request,
+        UserCreateDto request,
         ICommandHandler<UserCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
@@ -148,7 +148,7 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUser(
         Guid userGuid,
-        UserUpdateRequest request,
+        UserUpdateDto request,
         ICommandHandler<UserUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

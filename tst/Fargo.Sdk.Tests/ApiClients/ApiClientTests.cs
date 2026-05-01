@@ -1,7 +1,7 @@
-using Fargo.Sdk.ApiClients;
+using Fargo.Api.ApiClients;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.ApiClients;
+namespace Fargo.Api.Tests.ApiClients;
 
 public sealed class ApiClientTests
 {

@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Default implementation of <see cref="IArticleBarcodeService"/>.</summary>
 public sealed class ArticleBarcodeService : IArticleBarcodeService

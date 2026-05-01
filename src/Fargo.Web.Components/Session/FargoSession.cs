@@ -1,4 +1,4 @@
-using Fargo.Sdk.Authentication;
+using Fargo.Api.Authentication;
 
 namespace Fargo.Web.Components.Session;
 

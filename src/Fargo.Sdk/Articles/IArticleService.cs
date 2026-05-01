@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Provides CRUD operations for articles and routes hub Updated/Deleted events to tracked entities.

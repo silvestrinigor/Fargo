@@ -1,4 +1,4 @@
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 /// <summary>
 /// Base class for exceptions thrown when the API returns a domain error.

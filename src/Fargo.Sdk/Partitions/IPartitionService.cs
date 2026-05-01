@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>Provides CRUD operations for partitions and routes hub Updated/Deleted events to tracked entities.</summary>
 public interface IPartitionService

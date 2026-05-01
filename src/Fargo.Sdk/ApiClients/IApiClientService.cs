@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Provides CRUD operations for API clients and routes hub events to tracked entities.</summary>
 public interface IApiClientService

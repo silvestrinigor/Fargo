@@ -1,7 +1,7 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 using System.Collections.Concurrent;
 
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>Default implementation of <see cref="IPartitionService"/>.</summary>
 public sealed class PartitionService : IPartitionService

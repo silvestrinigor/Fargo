@@ -1,7 +1,7 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 using System.Collections.Concurrent;
 
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>Default implementation of <see cref="IUserGroupService"/>.</summary>
 public sealed class UserGroupService : IUserGroupService

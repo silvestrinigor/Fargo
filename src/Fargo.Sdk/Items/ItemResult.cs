@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>
 /// Represents an item returned by the API.

@@ -1,6 +1,6 @@
-using Fargo.Sdk.Articles;
+using Fargo.Api.Articles;
 
-namespace Fargo.Sdk.Tests.Articles;
+namespace Fargo.Api.Tests.Articles;
 
 public sealed class ArticleMetricsTests
 {

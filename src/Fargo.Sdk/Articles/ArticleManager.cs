@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Delegate façade that implements <see cref="IArticleManager"/> by composing the focused services.

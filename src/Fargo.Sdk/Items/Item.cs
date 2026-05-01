@@ -1,6 +1,6 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>
 /// Represents a live item entity — a concrete instance of an <see cref="ArticleResult"/>.

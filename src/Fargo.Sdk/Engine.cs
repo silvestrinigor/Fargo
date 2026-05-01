@@ -1,15 +1,15 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Events;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.UserGroups;
-using Fargo.Sdk.Users;
+using Fargo.Api.Articles;
+using Fargo.Api.Authentication;
+using Fargo.Api.Events;
+using Fargo.Api.Http;
+using Fargo.Api.Items;
+using Fargo.Api.Partitions;
+using Fargo.Api.UserGroups;
+using Fargo.Api.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 /// <summary>
 /// Manual composition root for non-DI scenarios (scripts, MCP, desktop apps).

@@ -1,8 +1,8 @@
-using Fargo.Sdk.Authentication;
+using Fargo.Api.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Authentication;
+namespace Fargo.Api.Tests.Authentication;
 
 public sealed class AuthenticationServiceTests
 {

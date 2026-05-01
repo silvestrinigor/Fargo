@@ -1,4 +1,4 @@
-using Fargo.Sdk;
+using Fargo.Api;
 
 namespace Fargo.Web.Components.Shared;
 

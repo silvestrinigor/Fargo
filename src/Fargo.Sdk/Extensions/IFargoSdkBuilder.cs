@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Fargo.Sdk.Extensions;
+namespace Fargo.Api.Extensions;
 
 /// <summary>Builder returned by <see cref="FargoSdkServiceCollectionExtensions.AddFargoSdk"/> for optional configuration.</summary>
 public interface IFargoSdkBuilder

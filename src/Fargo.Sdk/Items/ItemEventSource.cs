@@ -1,6 +1,6 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Default implementation of <see cref="IItemEventSource"/>.</summary>
 public sealed class ItemEventSource : IItemEventSource

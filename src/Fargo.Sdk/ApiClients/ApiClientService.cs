@@ -1,7 +1,7 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 using System.Collections.Concurrent;
 
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Default implementation of <see cref="IApiClientService"/>.</summary>
 public sealed class ApiClientService : IApiClientService

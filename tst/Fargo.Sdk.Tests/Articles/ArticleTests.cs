@@ -1,8 +1,8 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Articles;
+using Fargo.Api.Partitions;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Articles;
+namespace Fargo.Api.Tests.Articles;
 
 public sealed class ArticleTests
 {

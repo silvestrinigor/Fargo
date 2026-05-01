@@ -1,4 +1,4 @@
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 /// <summary>
 /// Configuration options for the Fargo SDK. Set <see cref="Server"/> before making any requests.

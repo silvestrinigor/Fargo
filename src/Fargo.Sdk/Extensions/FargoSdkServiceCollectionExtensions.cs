@@ -1,17 +1,17 @@
-using Fargo.Sdk.ApiClients;
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Events;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.UserGroups;
-using Fargo.Sdk.Users;
+using Fargo.Api.ApiClients;
+using Fargo.Api.Articles;
+using Fargo.Api.Authentication;
+using Fargo.Api.Events;
+using Fargo.Api.Http;
+using Fargo.Api.Items;
+using Fargo.Api.Partitions;
+using Fargo.Api.UserGroups;
+using Fargo.Api.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Sdk.Extensions;
+namespace Fargo.Api.Extensions;
 
 /// <summary>
 /// Extension methods to register the Fargo SDK services in a DI container.

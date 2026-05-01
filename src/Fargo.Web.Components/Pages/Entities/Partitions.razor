@@ -1,11 +1,14 @@
 @page "/entities/partitions"
 @page "/entities/partitions/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
+@using Fargo.Api
+@using Fargo.Api.Articles
+@using Fargo.Api.Authentication
+@using Fargo.Api.Contracts
+@using Fargo.Api.Items
+@using Fargo.Api.Partitions
+@using Fargo.Api.Users
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk.Partitions
-@using Fargo.Sdk.Articles
-@using Fargo.Sdk.Items
-@using Fargo.Sdk.Users
 @inject IPartitionManager PartitionManager
 @inject IArticleManager Articles
 @inject IItemManager Items

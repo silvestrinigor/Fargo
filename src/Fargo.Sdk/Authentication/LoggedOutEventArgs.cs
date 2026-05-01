@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>
 /// Provides data for the <see cref="IAuthenticationManager.LoggedOut"/> event.

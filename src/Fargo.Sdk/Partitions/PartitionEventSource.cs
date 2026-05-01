@@ -1,6 +1,6 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>Default implementation of <see cref="IPartitionEventSource"/>.</summary>
 public sealed class PartitionEventSource : IPartitionEventSource

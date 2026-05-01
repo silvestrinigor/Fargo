@@ -1,8 +1,8 @@
-using Fargo.Sdk.ApiClients;
-using Fargo.Sdk.Events;
+using Fargo.Api.ApiClients;
+using Fargo.Api.Events;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.ApiClients;
+namespace Fargo.Api.Tests.ApiClients;
 
 public sealed class ApiClientServiceTests
 {

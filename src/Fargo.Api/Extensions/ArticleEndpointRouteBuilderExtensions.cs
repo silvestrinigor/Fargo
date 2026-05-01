@@ -1,11 +1,11 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.Articles;
+using Fargo.Api.Contracts.Partitions;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts.Articles;
-using Fargo.Sdk.Contracts.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -155,7 +155,7 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateArticle(
-        ArticleCreateRequest request,
+        ArticleCreateDto request,
         ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
@@ -166,7 +166,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticleUpdateRequest request,
+        ArticleUpdateDto request,
         ICommandHandler<ArticleUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

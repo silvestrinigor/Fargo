@@ -1,4 +1,4 @@
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 /// <summary>
 /// Represents the result of an SDK operation.

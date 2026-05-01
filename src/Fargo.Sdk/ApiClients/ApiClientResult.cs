@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Represents an API client returned by the API.</summary>
 public sealed record ApiClientResult(

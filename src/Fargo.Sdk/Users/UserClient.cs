@@ -1,9 +1,10 @@
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.Users;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Contracts.Users;
+using Fargo.Api.Http;
+using Fargo.Api.Partitions;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 public sealed class UserClient : IUserClient
 {
@@ -74,9 +75,9 @@ public sealed class UserClient : IUserClient
         Guid? firstPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<UserCreateRequest, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<UserCreateDto, Guid>(
             "/users",
-            ContractMappings.ToUserCreateRequest(
+            ContractMappings.ToUserCreateDto(
                 nameid,
                 password,
                 firstName,
@@ -107,9 +108,9 @@ public sealed class UserClient : IUserClient
         TimeSpan? defaultPasswordExpirationPeriod = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<UserUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<UserUpdateDto>(
             $"/users/{userGuid}",
-            ContractMappings.ToUserUpdateRequest(
+            ContractMappings.ToUserUpdateDto(
                 nameid,
                 firstName,
                 lastName,

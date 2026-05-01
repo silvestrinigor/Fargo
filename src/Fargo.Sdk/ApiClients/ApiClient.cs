@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Represents a live API client entity.</summary>
 public sealed class ApiClient : IAsyncDisposable

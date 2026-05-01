@@ -1,8 +1,8 @@
-using Fargo.Sdk.Events;
-using Fargo.Sdk.Items;
+using Fargo.Api.Events;
+using Fargo.Api.Items;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Items;
+namespace Fargo.Api.Tests.Items;
 
 public sealed class ItemServiceTests
 {

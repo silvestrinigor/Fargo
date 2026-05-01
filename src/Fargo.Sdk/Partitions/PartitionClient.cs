@@ -1,7 +1,8 @@
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Http;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Http;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 public sealed class PartitionClient : IPartitionClient
 {
@@ -67,9 +68,9 @@ public sealed class PartitionClient : IPartitionClient
         Guid? parentPartitionGuid = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<PartitionCreateRequest, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<PartitionCreateDto, Guid>(
             "/partitions",
-            ContractMappings.ToPartitionCreateRequest(name, description, parentPartitionGuid),
+            ContractMappings.ToPartitionCreateDto(name, description, parentPartitionGuid),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -88,9 +89,9 @@ public sealed class PartitionClient : IPartitionClient
         bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<PartitionUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<PartitionUpdateDto>(
             $"/partitions/{partitionGuid}",
-            ContractMappings.ToPartitionUpdateRequest(name, description, parentPartitionGuid, isActive),
+            ContractMappings.ToPartitionUpdateDto(name, description, parentPartitionGuid, isActive),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

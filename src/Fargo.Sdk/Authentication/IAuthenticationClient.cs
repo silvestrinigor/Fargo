@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>High-level authentication client interface for managing user sessions.</summary>
 public interface IAuthenticationClient

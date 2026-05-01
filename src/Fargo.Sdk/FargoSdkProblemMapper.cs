@@ -1,6 +1,6 @@
-using Fargo.Sdk.Http;
+using Fargo.Api.Http;
 
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 internal static class FargoSdkProblemMapper
 {

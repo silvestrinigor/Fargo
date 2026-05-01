@@ -1,4 +1,4 @@
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 /// <summary>
 /// Represents the absence of a response body.

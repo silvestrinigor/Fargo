@@ -1,9 +1,10 @@
-using Fargo.Sdk.Contracts.Articles;
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Contracts.Articles;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Http;
+using Fargo.Api.Partitions;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Default implementation of <see cref="IArticleHttpClient"/>.</summary>
 public sealed class ArticleHttpClient : IArticleHttpClient
@@ -71,9 +72,9 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateRequest, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateDto, Guid>(
             "/articles",
-            ContractMappings.ToArticleCreateRequest(name, description, firstPartition, metrics, shelfLife),
+            ContractMappings.ToArticleCreateDto(name, description, firstPartition, metrics, shelfLife),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -93,9 +94,9 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         TimeSpan? shelfLife = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<ArticleUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<ArticleUpdateDto>(
             $"/articles/{articleGuid}",
-            ContractMappings.ToArticleUpdateRequest(name, description, metrics, shelfLife),
+            ContractMappings.ToArticleUpdateDto(name, description, metrics, shelfLife),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

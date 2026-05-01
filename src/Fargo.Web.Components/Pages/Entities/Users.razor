@@ -1,9 +1,12 @@
 @page "/entities/users"
 @page "/entities/users/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
+@using Fargo.Api
+@using Fargo.Api.Authentication
+@using Fargo.Api.Contracts
+@using Fargo.Api.UserGroups
+@using Fargo.Api.Users
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk.Users
-@using Fargo.Sdk.UserGroups
 @inject IUserManager UserManager
 @inject IUserGroupManager UserGroupManager
 @inject NavigationManager Navigation

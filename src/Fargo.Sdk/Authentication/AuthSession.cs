@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 public sealed class AuthSession : IAuthSession
 {

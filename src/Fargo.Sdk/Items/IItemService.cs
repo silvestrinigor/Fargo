@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Provides CRUD operations for items and routes hub Updated/Deleted events to tracked entities.</summary>
 public interface IItemService

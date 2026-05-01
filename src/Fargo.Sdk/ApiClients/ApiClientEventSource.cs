@@ -1,6 +1,6 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Default implementation of <see cref="IApiClientEventSource"/>.</summary>
 public sealed class ApiClientEventSource : IApiClientEventSource

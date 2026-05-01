@@ -1,9 +1,10 @@
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.Users;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Contracts.Users;
+using Fargo.Api.Http;
+using Fargo.Api.Partitions;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Default implementation of <see cref="IUserHttpClient"/>.</summary>
 public sealed class UserHttpClient : IUserHttpClient
@@ -54,9 +55,9 @@ public sealed class UserHttpClient : IUserHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(string nameid, string password, string? firstName = null, string? lastName = null, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, Guid? firstPartition = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<UserCreateRequest, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<UserCreateDto, Guid>(
             "/users",
-            ContractMappings.ToUserCreateRequest(
+            ContractMappings.ToUserCreateDto(
                 nameid,
                 password,
                 firstName,
@@ -78,9 +79,9 @@ public sealed class UserHttpClient : IUserHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGuid, string? nameid = null, string? firstName = null, string? lastName = null, string? description = null, string? password = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<UserUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<UserUpdateDto>(
             $"/users/{userGuid}",
-            ContractMappings.ToUserUpdateRequest(
+            ContractMappings.ToUserUpdateDto(
                 nameid,
                 firstName,
                 lastName,

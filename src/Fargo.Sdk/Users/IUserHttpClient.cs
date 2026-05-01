@@ -1,6 +1,6 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Low-level HTTP transport for user endpoints.</summary>
 public interface IUserHttpClient

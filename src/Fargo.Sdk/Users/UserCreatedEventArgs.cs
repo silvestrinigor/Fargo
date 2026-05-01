@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Provides data for the <see cref="IUserEventSource.Created"/> event.</summary>
 public sealed class UserCreatedEventArgs(Guid guid, string nameid) : EventArgs

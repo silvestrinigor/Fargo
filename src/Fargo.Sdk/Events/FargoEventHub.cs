@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace Fargo.Sdk.Events;
+namespace Fargo.Api.Events;
 
 /// <summary>
 /// Default implementation of <see cref="IFargoEventHub"/>. Register event handlers before

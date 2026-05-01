@@ -1,6 +1,6 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Low-level HTTP transport for item endpoints.</summary>
 public interface IItemHttpClient

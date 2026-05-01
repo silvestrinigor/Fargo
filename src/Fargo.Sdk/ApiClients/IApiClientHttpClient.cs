@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Low-level HTTP transport for API client endpoints.</summary>
 public interface IApiClientHttpClient

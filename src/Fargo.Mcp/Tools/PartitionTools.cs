@@ -1,4 +1,4 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Partitions;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;

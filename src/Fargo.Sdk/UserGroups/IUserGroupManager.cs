@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>
 /// Combined user group interface: CRUD and Created events.

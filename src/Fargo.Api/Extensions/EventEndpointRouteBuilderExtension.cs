@@ -4,7 +4,7 @@ using Fargo.Application;
 using Fargo.Application.Events;
 using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
-using ContractEvents = Fargo.Sdk.Contracts.Events;
+using ContractEvents = Fargo.Api.Contracts.Events;
 
 namespace Fargo.Api.Extensions;
 
@@ -27,7 +27,7 @@ public static class EventEndpointRouteBuilderExtension
     private static async Task<Results<Ok<IReadOnlyCollection<ContractEvents.EventDto>>, NoContent>> GetManyEvents(
         IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>> handler,
         Guid? entityGuid,
-        ContractEvents.EntityType? entityType,
+        EntityType? entityType,
         ContractEvents.EventType? eventType,
         Guid? actorGuid,
         DateTimeOffset? from,

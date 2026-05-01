@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Events;
+namespace Fargo.Api.Events;
 
 /// <summary>
 /// Manages a real-time SignalR event hub connection. Subscribe to events before calling

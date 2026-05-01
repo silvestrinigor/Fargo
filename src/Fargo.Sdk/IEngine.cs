@@ -1,12 +1,12 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.UserGroups;
-using Fargo.Sdk.Users;
+using Fargo.Api.Articles;
+using Fargo.Api.Authentication;
+using Fargo.Api.Items;
+using Fargo.Api.Partitions;
+using Fargo.Api.UserGroups;
+using Fargo.Api.Users;
 
 
-namespace Fargo.Sdk;
+namespace Fargo.Api;
 
 /// <summary>
 /// Represents the main entry point for interacting with the Fargo SDK.

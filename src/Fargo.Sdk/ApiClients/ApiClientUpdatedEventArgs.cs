@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.ApiClients;
+namespace Fargo.Api.ApiClients;
 
 /// <summary>Provides data for the <see cref="ApiClient.Updated"/> event.</summary>
 public sealed class ApiClientUpdatedEventArgs(Guid guid) : EventArgs

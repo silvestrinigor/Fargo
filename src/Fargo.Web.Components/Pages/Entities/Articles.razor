@@ -1,8 +1,11 @@
 @page "/entities/articles"
 @page "/entities/articles/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
+@using Fargo.Api
+@using Fargo.Api.Articles
+@using Fargo.Api.Authentication
+@using Fargo.Api.Contracts
 @using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk.Articles
 @inject IArticleManager ArticleManager
 @inject NavigationManager Navigation
 

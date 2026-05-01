@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Broadcasts the hub <c>OnItemCreated</c> event as a typed .NET event.</summary>
 public interface IItemEventSource

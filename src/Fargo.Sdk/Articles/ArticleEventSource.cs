@@ -1,6 +1,6 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Default implementation of <see cref="IArticleEventSource"/>.</summary>
 public sealed class ArticleEventSource : IArticleEventSource

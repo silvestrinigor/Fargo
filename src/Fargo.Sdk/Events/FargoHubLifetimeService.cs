@@ -1,6 +1,6 @@
-using Fargo.Sdk.Authentication;
+using Fargo.Api.Authentication;
 
-namespace Fargo.Sdk.Events;
+namespace Fargo.Api.Events;
 
 /// <summary>
 /// Optional service that automatically connects the hub after login and disconnects on logout.

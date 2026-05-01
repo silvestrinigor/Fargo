@@ -1,6 +1,6 @@
-using Fargo.Sdk.Events;
+using Fargo.Api.Events;
 
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Default implementation of <see cref="IUserEventSource"/>.</summary>
 public sealed class UserEventSource : IUserEventSource

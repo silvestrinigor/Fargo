@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Delegate façade that implements <see cref="IItemManager"/> by composing the focused services.</summary>
 public sealed class ItemManager(IItemService service, IItemEventSource eventSource) : IItemManager

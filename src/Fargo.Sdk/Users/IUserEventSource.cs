@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Broadcasts the hub <c>OnUserCreated</c> event as a typed .NET event.</summary>
 public interface IUserEventSource

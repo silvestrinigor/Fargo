@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>Default implementation of <see cref="IArticleImageService"/>.</summary>
 public sealed class ArticleImageService : IArticleImageService

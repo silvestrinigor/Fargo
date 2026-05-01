@@ -1,11 +1,11 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Contracts.UserGroups;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -107,7 +107,7 @@ public static class UserGroupEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUserGroup(
-        UserGroupCreateRequest request,
+        UserGroupCreateDto request,
         ICommandHandler<UserGroupCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
@@ -118,7 +118,7 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUserGroup(
         Guid userGroupGuid,
-        UserGroupUpdateRequest request,
+        UserGroupUpdateDto request,
         ICommandHandler<UserGroupUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

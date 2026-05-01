@@ -1,9 +1,9 @@
-using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Events;
+using Fargo.Api.Authentication;
+using Fargo.Api.Events;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Events;
+namespace Fargo.Api.Tests.Events;
 
 public sealed class FargoHubLifetimeServiceTests
 {

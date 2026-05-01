@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>Low-level HTTP transport for authentication endpoints.</summary>
 public interface IAuthenticationHttpClient

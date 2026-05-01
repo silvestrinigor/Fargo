@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Sdk.Http;
+namespace Fargo.Api.Http;
 
 internal static class FargoSdkHttpClientLog
 {

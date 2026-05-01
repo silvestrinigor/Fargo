@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Partitions;
+namespace Fargo.Api.Partitions;
 
 /// <summary>
 /// Represents a live partition entity. Call <see cref="UpdateAsync"/> to persist property changes.

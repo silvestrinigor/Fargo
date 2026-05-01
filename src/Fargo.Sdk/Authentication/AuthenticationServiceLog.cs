@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 internal static class AuthenticationServiceLog
 {

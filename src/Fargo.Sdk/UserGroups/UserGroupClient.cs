@@ -1,9 +1,10 @@
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Contracts.UserGroups;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Contracts.UserGroups;
+using Fargo.Api.Http;
+using Fargo.Api.Partitions;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 public sealed class UserGroupClient : IUserGroupClient
 {
@@ -66,9 +67,9 @@ public sealed class UserGroupClient : IUserGroupClient
         Guid? firstPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<UserGroupCreateRequest, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<UserGroupCreateDto, Guid>(
             "/user-groups",
-            ContractMappings.ToUserGroupCreateRequest(nameid, description, permissions, firstPartition),
+            ContractMappings.ToUserGroupCreateDto(nameid, description, permissions, firstPartition),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -87,9 +88,9 @@ public sealed class UserGroupClient : IUserGroupClient
         IReadOnlyCollection<ActionType>? permissions = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<UserGroupUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<UserGroupUpdateDto>(
             $"/user-groups/{userGroupGuid}",
-            ContractMappings.ToUserGroupUpdateRequest(nameid, description, isActive, permissions),
+            ContractMappings.ToUserGroupUpdateDto(nameid, description, isActive, permissions),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

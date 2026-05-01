@@ -1,8 +1,8 @@
-using Fargo.Sdk.Events;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Events;
+using Fargo.Api.Partitions;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Partitions;
+namespace Fargo.Api.Tests.Partitions;
 
 public sealed class PartitionServiceTests
 {

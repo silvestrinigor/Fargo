@@ -1,8 +1,8 @@
-using Fargo.Sdk.Events;
-using Fargo.Sdk.UserGroups;
+using Fargo.Api.Events;
+using Fargo.Api.UserGroups;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.UserGroups;
+namespace Fargo.Api.Tests.UserGroups;
 
 public sealed class UserGroupServiceTests
 {

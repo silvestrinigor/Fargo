@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>
 /// Manages user authentication lifecycle, including login, logout, token refresh, and password changes.

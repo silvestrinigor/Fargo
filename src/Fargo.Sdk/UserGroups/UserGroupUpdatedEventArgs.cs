@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.UserGroups;
+namespace Fargo.Api.UserGroups;
 
 /// <summary>Provides data for the <see cref="UserGroup.Updated"/> event.</summary>
 public sealed class UserGroupUpdatedEventArgs(Guid guid) : EventArgs

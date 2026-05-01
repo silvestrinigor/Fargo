@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>
 /// Defines a persistence mechanism for storing and retrieving authentication sessions.

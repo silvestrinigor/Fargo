@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 /// <summary>Provides data for the <see cref="IItemEventSource.Created"/> event.</summary>
 public sealed class ItemCreatedEventArgs(Guid guid, Guid articleGuid) : EventArgs

@@ -1,8 +1,8 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Events;
+using Fargo.Api.Articles;
+using Fargo.Api.Events;
 using NSubstitute;
 
-namespace Fargo.Sdk.Tests.Articles;
+namespace Fargo.Api.Tests.Articles;
 
 public sealed class ArticleManagerTests
 {

@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Authentication;
+namespace Fargo.Api.Authentication;
 
 /// <summary>
 /// A serialisable snapshot of an authentication session, used by <see cref="ISessionStore"/>

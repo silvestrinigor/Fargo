@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Tests.Integration;
+namespace Fargo.Api.Tests.Integration;
 
 /// <summary>
 /// Probes the Fargo API once per test class run.

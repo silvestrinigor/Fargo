@@ -1,9 +1,10 @@
-using Fargo.Sdk.Contracts.Items;
-using Fargo.Sdk.Contracts.Partitions;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Partitions;
+using Fargo.Api.Contracts.Items;
+using Fargo.Api.Contracts.Partitions;
+using Fargo.Api.Http;
+using Fargo.Api.Partitions;
+using Fargo.Sdk;
 
-namespace Fargo.Sdk.Items;
+namespace Fargo.Api.Items;
 
 public sealed class ItemClient : IItemClient
 {
@@ -69,9 +70,9 @@ public sealed class ItemClient : IItemClient
         DateTimeOffset? productionDate = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<ItemCreateRequest, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<ItemCreateDto, Guid>(
             "/items",
-            ContractMappings.ToItemCreateRequest(articleGuid, firstPartition, productionDate),
+            ContractMappings.ToItemCreateDto(articleGuid, firstPartition, productionDate),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -87,9 +88,9 @@ public sealed class ItemClient : IItemClient
         DateTimeOffset? productionDate = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<ItemUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<ItemUpdateDto>(
             $"/items/{itemGuid}",
-            ContractMappings.ToItemUpdateRequest(productionDate),
+            ContractMappings.ToItemUpdateDto(productionDate),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

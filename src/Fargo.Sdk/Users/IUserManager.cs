@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>
 /// Combined user interface: CRUD and Created events.

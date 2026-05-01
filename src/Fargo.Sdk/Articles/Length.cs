@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Fargo.Sdk.Articles;
+namespace Fargo.Api.Articles;
 
 /// <summary>
 /// Represents a physical length value as returned by the API.

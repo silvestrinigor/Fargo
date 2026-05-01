@@ -1,4 +1,4 @@
-namespace Fargo.Sdk.Users;
+namespace Fargo.Api.Users;
 
 /// <summary>Delegate façade that implements <see cref="IUserManager"/> by composing the focused services.</summary>
 public sealed class UserManager(IUserService service, IUserEventSource eventSource) : IUserManager

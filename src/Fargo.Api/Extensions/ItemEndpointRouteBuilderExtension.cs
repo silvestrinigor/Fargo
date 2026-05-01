@@ -1,11 +1,11 @@
 using Fargo.Api.Contracts;
+using Fargo.Api.Contracts.Items;
+using Fargo.Api.Contracts.Partitions;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Sdk.Contracts.Items;
-using Fargo.Sdk.Contracts.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -123,7 +123,7 @@ public static class ItemEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateItem(
-        ItemCreateRequest request,
+        ItemCreateDto request,
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
@@ -134,7 +134,7 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateItem(
         Guid itemGuid,
-        ItemUpdateRequest request,
+        ItemUpdateDto request,
         ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

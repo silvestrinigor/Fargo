@@ -1,4 +1,4 @@
-using Fargo.Sdk.Articles;
+using Fargo.Api.Articles;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
