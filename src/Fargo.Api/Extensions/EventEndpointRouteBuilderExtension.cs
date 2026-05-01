@@ -1,8 +1,9 @@
+using Fargo.Api.Contracts;
+using ContractEvents = Fargo.Sdk.Contracts.Events;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Events;
 using Fargo.Domain;
-using Fargo.Domain.Events;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -19,15 +20,15 @@ public static class EventEndpointRouteBuilderExtension
         group.MapGet("/", GetManyEvents)
             .WithName("GetEvents")
             .WithSummary("Gets a filtered, paged list of domain events")
-            .Produces<IReadOnlyCollection<EventInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ContractEvents.EventDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<EventInformation>>, NoContent>> GetManyEvents(
+    private static async Task<Results<Ok<IReadOnlyCollection<ContractEvents.EventDto>>, NoContent>> GetManyEvents(
         IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>> handler,
         Guid? entityGuid,
-        EntityType? entityType,
-        EventType? eventType,
+        ContractEvents.EntityType? entityType,
+        ContractEvents.EventType? eventType,
         Guid? actorGuid,
         DateTimeOffset? from,
         DateTimeOffset? to,
@@ -37,14 +38,19 @@ public static class EventEndpointRouteBuilderExtension
     {
         var query = new EventManyQuery(
             EntityGuid: entityGuid,
-            EntityType: entityType,
-            EventType: eventType,
+            EntityType: entityType is null ? null : (Fargo.Domain.Events.EntityType)(int)entityType.Value,
+            EventType: eventType is null ? null : (Fargo.Domain.Events.EventType)(int)eventType.Value,
             ActorGuid: actorGuid,
             From: from,
             To: to,
             Pagination: PaginationHelpers.CreatePagination(page, limit));
 
         var result = await handler.Handle(query, cancellationToken);
-        return TypedResultsHelpers.HandleCollectionQueryResult(result);
+        if (result.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<ContractEvents.EventDto>>(result.Select(x => x.ToContract()).ToArray());
     }
 }

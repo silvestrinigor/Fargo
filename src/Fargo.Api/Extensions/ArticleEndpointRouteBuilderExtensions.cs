@@ -1,9 +1,11 @@
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Articles;
+using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Domain.Articles;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;
@@ -28,14 +30,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticle")
             .WithSummary("Gets a single article")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<ArticleInformation>(StatusCodes.Status200OK)
+            .Produces<ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/", GetManyArticle)
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
             .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<ArticleInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapPost("/", CreateArticle)
@@ -60,7 +62,7 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticlePartitions")
             .WithSummary("Gets the partitions containing an article")
             .WithDescription("Returns the partitions that directly contain the specified article.")
-            .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -101,7 +103,7 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticleBarcodes")
             .WithSummary("Gets the barcodes of an article")
             .WithDescription("Returns all barcodes associated with the specified article.")
-            .Produces<ArticleBarcodes>(StatusCodes.Status200OK)
+            .Produces<ArticleBarcodesDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/{articleGuid:guid}/barcodes", UpdateArticleBarcodes)
@@ -111,7 +113,7 @@ public static class ArticleEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<ArticleInformation>, NotFound>> GetSingleArticle(
+    private static async Task<Results<Ok<ArticleDto>, NotFound>> GetSingleArticle(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleSingleQuery, ArticleInformation?> handler,
@@ -121,10 +123,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return TypedResultsHelpers.HandleQueryResult(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ArticleInformation>>, NoContent>> GetManyArticle(
+    private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticle(
         DateTimeOffset? temporalAsOf,
         Page? page,
         Limit? limit,
@@ -144,28 +146,31 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        if (response.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<ArticleDto>>(response.Select(x => x.ToContract()).ToArray());
     }
 
     private static async Task<Ok<Guid>> CreateArticle(
-        ArticleCreateCommand command,
+        ArticleCreateRequest request,
         ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(command, cancellationToken);
+        var response = await handler.Handle(request.ToCommand(), cancellationToken);
 
         return TypedResults.Ok(response);
     }
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticleUpdateModel model,
+        ArticleUpdateRequest request,
         ICommandHandler<ArticleUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ArticleUpdateCommand(articleGuid, model);
-
-        await handler.Handle(command, cancellationToken);
+        await handler.Handle(request.ToCommand(articleGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -182,14 +187,24 @@ public static class ArticleEndpointRouteBuilderExtension
         return TypedResults.NoContent();
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NotFound, NoContent>> GetArticlePartitions(
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NotFound, NoContent>> GetArticlePartitions(
         Guid articleGuid,
         IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new ArticlePartitionsQuery(articleGuid), cancellationToken);
 
-        return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
+        if (result is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        if (result.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<PartitionDto>>(result.Select(x => x.ToContract()).ToArray());
     }
 
     private static async Task<NoContent> UploadArticleImage(
@@ -234,9 +249,9 @@ public static class ArticleEndpointRouteBuilderExtension
         return TypedResults.Stream(result.Stream, result.ContentType);
     }
 
-    private static async Task<Results<Ok<ArticleBarcodes>, NotFound>> GetArticleBarcodes(
+    private static async Task<Results<Ok<ArticleBarcodesDto>, NotFound>> GetArticleBarcodes(
         Guid articleGuid,
-        IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?> handler,
+        IQueryHandler<ArticleBarcodesQuery, Fargo.Domain.Articles.ArticleBarcodes?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new ArticleBarcodesQuery(articleGuid), cancellationToken);
@@ -246,18 +261,16 @@ public static class ArticleEndpointRouteBuilderExtension
             return TypedResults.NotFound();
         }
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<NoContent> UpdateArticleBarcodes(
         Guid articleGuid,
-        ArticleBarcodes barcodes,
+        ArticleBarcodesDto barcodes,
         ICommandHandler<ArticleUpdateBarcodesCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ArticleUpdateBarcodesCommand(articleGuid, barcodes);
-
-        await handler.Handle(command, cancellationToken);
+        await handler.Handle(barcodes.ToCommand(articleGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

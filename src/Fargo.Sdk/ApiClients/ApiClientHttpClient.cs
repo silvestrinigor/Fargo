@@ -1,3 +1,4 @@
+using Fargo.Sdk.Contracts.ApiClients;
 using Fargo.Sdk.Http;
 
 namespace Fargo.Sdk.ApiClients;
@@ -17,8 +18,8 @@ public sealed class ApiClientHttpClient : IApiClientHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<ApiClientResult>> GetAsync(Guid apiClientGuid, CancellationToken cancellationToken = default)
     {
-        var r = await httpClient.GetAsync<ApiClientResult>($"/api-clients/{apiClientGuid}", cancellationToken);
-        return r.IsSuccess ? new(r.Data!) : new(MapError(r.Problem));
+        var r = await httpClient.GetAsync<ApiClientDto>($"/api-clients/{apiClientGuid}", cancellationToken);
+        return r.IsSuccess ? new(r.Data!.ToSdk()) : new(MapError(r.Problem));
     }
 
     /// <inheritdoc />
@@ -28,21 +29,27 @@ public sealed class ApiClientHttpClient : IApiClientHttpClient
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
             ("search", search));
-        var r = await httpClient.GetAsync<IReadOnlyCollection<ApiClientResult>>($"/api-clients{query}", cancellationToken);
-        return r.IsSuccess ? new(r.Data ?? []) : new(MapError(r.Problem));
+        var r = await httpClient.GetAsync<IReadOnlyCollection<ApiClientDto>>($"/api-clients{query}", cancellationToken);
+        return r.IsSuccess ? new((r.Data ?? []).ToSdk()) : new(MapError(r.Problem));
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<ApiClientCreatedResult>> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<ApiClientCreatedDto>> CreateAsync(string name, string? description = null, CancellationToken cancellationToken = default)
     {
-        var r = await httpClient.PostFromJsonAsync<object, ApiClientCreatedResult>("/api-clients", new { name, description }, cancellationToken);
+        var r = await httpClient.PostFromJsonAsync<ApiClientCreateRequest, ApiClientCreatedDto>(
+            "/api-clients",
+            ContractMappings.ToApiClientCreateRequest(name, description),
+            cancellationToken);
         return r.IsSuccess ? new(r.Data!) : new(MapError(r.Problem));
     }
 
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid apiClientGuid, string? name, string? description, bool? isActive, CancellationToken cancellationToken = default)
     {
-        var r = await httpClient.PatchJsonAsync("/api-clients/" + apiClientGuid, new { name, description, isActive }, cancellationToken);
+        var r = await httpClient.PatchJsonAsync<ApiClientUpdateRequest>(
+            "/api-clients/" + apiClientGuid,
+            ContractMappings.ToApiClientUpdateRequest(name, description, isActive),
+            cancellationToken);
         return r.IsSuccess ? new(new EmptyResult()) : new(MapError(r.Problem));
     }
 

@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.UserGroups;
 using Fargo.Sdk.Http;
 using Fargo.Sdk.Partitions;
 
@@ -20,7 +22,7 @@ public sealed class UserGroupClient : IUserGroupClient
         var query = FargoSdkHttpClient.BuildQuery(
             ("temporalAsOf", temporalAsOf?.ToString("O")));
 
-        var httpResponse = await httpClient.GetAsync<UserGroupResult>(
+        var httpResponse = await httpClient.GetAsync<UserGroupDto>(
             $"/user-groups/{userGroupGuid}{query}",
             cancellationToken);
 
@@ -29,7 +31,7 @@ public sealed class UserGroupClient : IUserGroupClient
             return new FargoSdkResponse<UserGroupResult>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<UserGroupResult>(httpResponse.Data!);
+        return new FargoSdkResponse<UserGroupResult>(httpResponse.Data!.ToSdk());
     }
 
     public async Task<FargoSdkResponse<IReadOnlyCollection<UserGroupResult>>> GetManyAsync(
@@ -45,7 +47,7 @@ public sealed class UserGroupClient : IUserGroupClient
             ("page", page?.ToString()),
             ("limit", limit?.ToString()));
 
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<UserGroupResult>>(
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<UserGroupDto>>(
             $"/user-groups{query}",
             cancellationToken);
 
@@ -54,7 +56,7 @@ public sealed class UserGroupClient : IUserGroupClient
             return new FargoSdkResponse<IReadOnlyCollection<UserGroupResult>>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<UserGroupResult>>(httpResponse.Data ?? []);
+        return new FargoSdkResponse<IReadOnlyCollection<UserGroupResult>>((httpResponse.Data ?? []).ToSdk());
     }
 
     public async Task<FargoSdkResponse<Guid>> CreateAsync(
@@ -64,18 +66,9 @@ public sealed class UserGroupClient : IUserGroupClient
         Guid? firstPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<UserGroupCreateRequest, Guid>(
             "/user-groups",
-            new
-            {
-                userGroup = new
-                {
-                    nameid,
-                    description,
-                    permissions = permissions?.Select(a => new { action = a }).ToArray(),
-                    firstPartition
-                }
-            },
+            ContractMappings.ToUserGroupCreateRequest(nameid, description, permissions, firstPartition),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -94,15 +87,9 @@ public sealed class UserGroupClient : IUserGroupClient
         IReadOnlyCollection<ActionType>? permissions = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync(
+        var httpResponse = await httpClient.PatchJsonAsync<UserGroupUpdateRequest>(
             $"/user-groups/{userGroupGuid}",
-            new
-            {
-                nameid,
-                description,
-                isActive,
-                permissions = permissions?.Select(a => new { action = a }).ToArray()
-            },
+            ContractMappings.ToUserGroupUpdateRequest(nameid, description, isActive, permissions),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -133,7 +120,7 @@ public sealed class UserGroupClient : IUserGroupClient
         Guid userGroupGuid,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionResult>>(
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionDto>>(
             $"/user-groups/{userGroupGuid}/partitions",
             cancellationToken);
 
@@ -142,7 +129,7 @@ public sealed class UserGroupClient : IUserGroupClient
             return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(httpResponse.Data ?? []);
+        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>((httpResponse.Data ?? []).ToSdk());
     }
 
     private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);

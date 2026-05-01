@@ -1,3 +1,5 @@
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Tree;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Tree;
@@ -18,23 +20,23 @@ public static class TreeEndpointRouteBuilderExtension
         group.MapGet("/partitions", GetPartitionTree)
             .WithName("GetPartitionTree")
             .WithSummary("Gets partition tree members")
-            .Produces<IReadOnlyCollection<EntityTreeNode>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<EntityTreeNodeDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/user-groups", GetUserGroupTree)
             .WithName("GetUserGroupTree")
             .WithSummary("Gets user group tree members")
-            .Produces<IReadOnlyCollection<EntityTreeNode>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<EntityTreeNodeDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/articles", GetArticleTree)
             .WithName("GetArticleTree")
             .WithSummary("Gets article tree members")
-            .Produces<IReadOnlyCollection<EntityTreeNode>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<EntityTreeNodeDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNode>>, NoContent>> GetPartitionTree(
+    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNodeDto>>, NoContent>> GetPartitionTree(
         Guid? parentPartitionGuid,
         Page? page,
         Limit? limit,
@@ -47,10 +49,10 @@ public static class TreeEndpointRouteBuilderExtension
                 Pagination: PaginationHelpers.CreatePagination(page, limit)),
             cancellationToken);
 
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        return HandleTreeResult(response);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNode>>, NoContent>> GetUserGroupTree(
+    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNodeDto>>, NoContent>> GetUserGroupTree(
         Guid? userGroupGuid,
         Page? page,
         Limit? limit,
@@ -63,10 +65,10 @@ public static class TreeEndpointRouteBuilderExtension
                 Pagination: PaginationHelpers.CreatePagination(page, limit)),
             cancellationToken);
 
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        return HandleTreeResult(response);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNode>>, NoContent>> GetArticleTree(
+    private static async Task<Results<Ok<IReadOnlyCollection<EntityTreeNodeDto>>, NoContent>> GetArticleTree(
         Guid? articleGuid,
         Page? page,
         Limit? limit,
@@ -79,6 +81,17 @@ public static class TreeEndpointRouteBuilderExtension
                 Pagination: PaginationHelpers.CreatePagination(page, limit)),
             cancellationToken);
 
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        return HandleTreeResult(response);
+    }
+
+    private static Results<Ok<IReadOnlyCollection<EntityTreeNodeDto>>, NoContent> HandleTreeResult(
+        IReadOnlyCollection<EntityTreeNode> response)
+    {
+        if (response.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<EntityTreeNodeDto>>(response.Select(x => x.ToContract()).ToArray());
     }
 }

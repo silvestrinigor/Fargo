@@ -5,4 +5,4 @@ namespace Fargo.Sdk.Contracts.ApiClients;
 /// </summary>
 /// <param name="Guid">The unique identifier assigned to the API client.</param>
 /// <param name="PlainKey">The plain-text API key, shown only at creation time.</param>
-public sealed record ApiClientCreatedResult(Guid Guid, string PlainKey);
+public sealed record ApiClientCreatedDto(Guid Guid, string PlainKey);

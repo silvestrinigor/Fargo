@@ -1,8 +1,10 @@
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.UserGroups;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
-
 using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -28,14 +30,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroup")
             .WithSummary("Gets a single user group")
             .WithDescription("Retrieves a single user group by its unique identifier. Supports querying historical data using temporal tables.")
-            .Produces<UserGroupInformation>(StatusCodes.Status200OK)
+            .Produces<UserGroupDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/", GetManyUserGroups)
             .WithName("GetUserGroups")
             .WithSummary("Gets multiple user groups")
             .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<UserGroupInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<UserGroupDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapPost("/", CreateUserGroup)
@@ -62,12 +64,12 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroupPartitions")
             .WithSummary("Gets the partitions containing a user group")
             .WithDescription("Returns the partitions that directly contain the specified user group.")
-            .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<UserGroupInformation>, NotFound>> GetSingleUserGroup(
+    private static async Task<Results<Ok<UserGroupDto>, NotFound>> GetSingleUserGroup(
         Guid userGroupGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<UserGroupSingleQuery, UserGroupInformation?> handler,
@@ -77,10 +79,10 @@ public static class UserGroupEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return TypedResultsHelpers.HandleQueryResult(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<UserGroupInformation>>, NoContent>> GetManyUserGroups(
+    private static async Task<Results<Ok<IReadOnlyCollection<UserGroupDto>>, NoContent>> GetManyUserGroups(
         Guid? userGuid,
         DateTimeOffset? temporalAsOf,
         Page? page,
@@ -96,28 +98,31 @@ public static class UserGroupEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        if (response.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<UserGroupDto>>(response.Select(x => x.ToContract()).ToArray());
     }
 
     private static async Task<Ok<Guid>> CreateUserGroup(
-        UserGroupCreateCommand command,
+        UserGroupCreateRequest request,
         ICommandHandler<UserGroupCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(command, cancellationToken);
+        var response = await handler.Handle(request.ToCommand(), cancellationToken);
 
         return TypedResults.Ok(response);
     }
 
     private static async Task<NoContent> UpdateUserGroup(
         Guid userGroupGuid,
-        UserGroupUpdateModel model,
+        UserGroupUpdateRequest request,
         ICommandHandler<UserGroupUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new UserGroupUpdateCommand(userGroupGuid, model);
-
-        await handler.Handle(command, cancellationToken);
+        await handler.Handle(request.ToCommand(userGroupGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -134,13 +139,23 @@ public static class UserGroupEndpointRouteBuilderExtension
         return TypedResults.NoContent();
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NotFound, NoContent>> GetUserGroupPartitions(
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NotFound, NoContent>> GetUserGroupPartitions(
         Guid userGroupGuid,
         IQueryHandler<UserGroupPartitionsQuery, IReadOnlyCollection<PartitionInformation>?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new UserGroupPartitionsQuery(userGroupGuid), cancellationToken);
 
-        return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
+        if (result is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        if (result.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<PartitionDto>>(result.Select(x => x.ToContract()).ToArray());
     }
 }

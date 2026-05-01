@@ -10,7 +10,7 @@ namespace Fargo.Sdk.Contracts.Authentication;
 /// <param name="IsAdmin">Whether the authenticated user has administrative privileges.</param>
 /// <param name="PermissionActions">The set of action permissions granted to the user.</param>
 /// <param name="PartitionAccesses">The identifiers of partitions the user can access.</param>
-public sealed record AuthResult(
+public sealed record AuthDto(
     string AccessToken,
     string RefreshToken,
     DateTimeOffset ExpiresAt,

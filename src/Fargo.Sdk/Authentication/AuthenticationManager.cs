@@ -45,7 +45,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
     public bool IsExpired => session.IsExpired;
 
     /// <inheritdoc />
-    public async Task<AuthResult> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthDto> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
         if (IsAuthenticated)
         {
@@ -109,7 +109,7 @@ public sealed class AuthenticationManager : IAuthenticationManager
     }
 
     /// <inheritdoc />
-    public async Task<AuthResult> RefreshAsync(CancellationToken cancellationToken = default)
+    public async Task<AuthDto> RefreshAsync(CancellationToken cancellationToken = default)
     {
         if (!IsAuthenticated)
         {

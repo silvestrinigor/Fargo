@@ -1,3 +1,6 @@
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Items;
+using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Items;
@@ -27,14 +30,14 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItem")
             .WithSummary("Gets a single item")
             .WithDescription("Retrieves a single item by its unique identifier. Supports querying historical data using temporal tables.")
-            .Produces<ItemInformation>(StatusCodes.Status200OK)
+            .Produces<ItemDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/", GetManyItems)
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
             .WithDescription("Retrieves a paginated list of items with optional filters such as parent item or article.")
-            .Produces<IReadOnlyCollection<ItemInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapPost("/", CreateItem)
@@ -61,7 +64,7 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItemPartitions")
             .WithSummary("Gets the partitions containing an item")
             .WithDescription("Returns the partitions that directly contain the specified item.")
-            .Produces<IReadOnlyCollection<PartitionInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -78,7 +81,7 @@ public static class ItemEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<ItemInformation>, NotFound>> GetSingleItem(
+    private static async Task<Results<Ok<ItemDto>, NotFound>> GetSingleItem(
         Guid itemGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ItemSingleQuery, ItemInformation?> handler,
@@ -88,10 +91,10 @@ public static class ItemEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return TypedResultsHelpers.HandleQueryResult(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ItemInformation>>, NoContent>> GetManyItems(
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItems(
         Guid? articleGuid,
         DateTimeOffset? temporalAsOf,
         Page? page,
@@ -111,28 +114,31 @@ public static class ItemEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return TypedResultsHelpers.HandleCollectionQueryResult(response);
+        if (response.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<ItemDto>>(response.Select(x => x.ToContract()).ToArray());
     }
 
     private static async Task<Ok<Guid>> CreateItem(
-        ItemCreateCommand command,
+        ItemCreateRequest request,
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(command, cancellationToken);
+        var response = await handler.Handle(request.ToCommand(), cancellationToken);
 
         return TypedResults.Ok(response);
     }
 
     private static async Task<NoContent> UpdateItem(
         Guid itemGuid,
-        ItemUpdateModel model,
+        ItemUpdateRequest request,
         ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ItemUpdateCommand(itemGuid, model);
-
-        await handler.Handle(command, cancellationToken);
+        await handler.Handle(request.ToCommand(itemGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -149,14 +155,24 @@ public static class ItemEndpointRouteBuilderExtension
         return TypedResults.NoContent();
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInformation>>, NotFound, NoContent>> GetItemPartitions(
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NotFound, NoContent>> GetItemPartitions(
         Guid itemGuid,
         IQueryHandler<ItemPartitionsQuery, IReadOnlyCollection<PartitionInformation>?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new ItemPartitionsQuery(itemGuid), cancellationToken);
 
-        return TypedResultsHelpers.HandleNullableCollectionQueryResult(result);
+        if (result is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        if (result.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok<IReadOnlyCollection<PartitionDto>>(result.Select(x => x.ToContract()).ToArray());
     }
 
     private static async Task<NoContent> AddItemPartition(
