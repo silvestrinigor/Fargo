@@ -46,62 +46,62 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             barcodes.Property(x => x.Ean13)
                 .HasConversion(new ValueConverter<Ean13?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new Ean13(v) : null))
-                .HasMaxLength(13);
+                    v => v != null ? Ean13.FromStorage(v) : null))
+                .HasMaxLength(Ean13.CodeLength);
 
             barcodes.Property(x => x.Ean8)
                 .HasConversion(new ValueConverter<Ean8?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new Ean8(v) : null))
-                .HasMaxLength(8);
+                    v => v != null ? Ean8.FromStorage(v) : null))
+                .HasMaxLength(Ean8.CodeLength);
 
             barcodes.Property(x => x.UpcA)
                 .HasConversion(new ValueConverter<UpcA?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new UpcA(v) : null))
-                .HasMaxLength(12);
+                    v => v != null ? UpcA.FromStorage(v) : null))
+                .HasMaxLength(UpcA.CodeLength);
 
             barcodes.Property(x => x.UpcE)
                 .HasConversion(new ValueConverter<UpcE?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new UpcE(v) : null))
-                .HasMaxLength(8);
+                    v => v != null ? UpcE.FromStorage(v) : null))
+                .HasMaxLength(UpcE.CodeLength);
 
             barcodes.Property(x => x.Code128)
                 .HasConversion(new ValueConverter<Code128?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new Code128(v) : null))
-                .HasMaxLength(80);
+                    v => v != null ? Code128.FromStorage(v) : null))
+                .HasMaxLength(Code128.MaxLength);
 
             barcodes.Property(x => x.Code39)
                 .HasConversion(new ValueConverter<Code39?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new Code39(v) : null))
-                .HasMaxLength(80);
+                    v => v != null ? Code39.FromStorage(v) : null))
+                .HasMaxLength(Code39.MaxLength);
 
             barcodes.Property(x => x.Itf14)
                 .HasConversion(new ValueConverter<Itf14?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new Itf14(v) : null))
-                .HasMaxLength(14);
+                    v => v != null ? Itf14.FromStorage(v) : null))
+                .HasMaxLength(Itf14.CodeLength);
 
             barcodes.Property(x => x.Gs1128)
                 .HasConversion(new ValueConverter<Gs1128?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new Gs1128(v) : null))
-                .HasMaxLength(80);
+                    v => v != null ? Gs1128.FromStorage(v) : null))
+                .HasMaxLength(Gs1128.MaxLength);
 
             barcodes.Property(x => x.QrCode)
                 .HasConversion(new ValueConverter<QrCode?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new QrCode(v) : null))
-                .HasMaxLength(2953);
+                    v => v != null ? QrCode.FromStorage(v) : null))
+                .HasMaxLength(QrCode.MaxLength);
 
             barcodes.Property(x => x.DataMatrix)
                 .HasConversion(new ValueConverter<DataMatrix?, string?>(
                     v => v.HasValue ? v.Value.Code : null,
-                    v => v != null ? new DataMatrix(v) : null))
-                .HasMaxLength(2335);
+                    v => v != null ? DataMatrix.FromStorage(v) : null))
+                .HasMaxLength(DataMatrix.MaxLength);
 
             barcodes.HasIndex(x => x.Ean13).IsUnique().HasFilter("[Barcodes_Ean13] IS NOT NULL");
             barcodes.HasIndex(x => x.Ean8).IsUnique().HasFilter("[Barcodes_Ean8] IS NOT NULL");
