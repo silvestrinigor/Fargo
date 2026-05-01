@@ -26,8 +26,6 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.ConfigureFargoHttpJsonOptions();
 
-builder.Services.AddFargoTreeInfrastructure();
-
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
 builder.Services.AddFargoAuthentication(builder.Configuration);
@@ -66,8 +64,6 @@ app.MapFargoUserGroup();
 app.MapFargoPartition();
 
 app.MapFargoEvent();
-
-app.MapFargoTree();
 
 app.MapFargoAuthentication();
 

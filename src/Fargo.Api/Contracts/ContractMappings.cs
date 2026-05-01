@@ -4,7 +4,6 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
-using Fargo.Application.Tree;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Domain;
@@ -16,7 +15,6 @@ using Fargo.Sdk.Contracts.Authentication;
 using Fargo.Sdk.Contracts.Items;
 using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Sdk.Contracts.Permissions;
-using Fargo.Sdk.Contracts.Tree;
 using Fargo.Sdk.Contracts.UserGroups;
 using Fargo.Sdk.Contracts.Users;
 using UnitsNet;
@@ -186,14 +184,6 @@ internal static class ContractMappings
             info.EntityGuid,
             info.ActorGuid,
             info.OccurredAt);
-
-    public static EntityTreeNodeDto ToContract(this EntityTreeNode node)
-        => new(
-            new NodeIdDto((Fargo.Sdk.Contracts.Tree.TreeNodeType)(int)node.TreeNodeType, node.EntityGuid),
-            node.Title,
-            node.Subtitle,
-            node.HasChildren,
-            node.IsActive);
 
     private static PermissionDto ToContract(this Permission permission)
         => new(permission.Guid, (Fargo.Sdk.Contracts.ActionType)(int)permission.Action);
