@@ -1,9 +1,9 @@
-namespace Fargo.Domain.ApiClients;
+namespace Fargo.Domain.ClientApplications;
 
 /// <summary>
 /// Represents an external application that authenticates via an API key.
 /// </summary>
-public class ApiClient : ModifiedEntity, IActivable
+public class ClientApplication : ModifiedEntity, IActivable
 {
     /// <summary>
     /// Display name of the client application.

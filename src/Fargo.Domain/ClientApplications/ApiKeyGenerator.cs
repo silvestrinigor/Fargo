@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Fargo.Domain.ApiClients;
+namespace Fargo.Domain.ClientApplications;
 
 /// <summary>
-/// Generates and hashes API keys for <see cref="ApiClient"/> entities.
+/// Generates and hashes API keys for <see cref="ClientApplication"/> entities.
 /// </summary>
 public static class ApiKeyGenerator
 {

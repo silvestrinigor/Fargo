@@ -1,4 +1,4 @@
-using Fargo.Domain.ApiClients;
+using Fargo.Domain.ClientApplications;
 
 namespace Fargo.Application.ApiClients;
 
@@ -11,7 +11,7 @@ public static class ApiClientRepositoryExtensions
         /// <param name="guid">The unique identifier to look up.</param>
         /// <param name="cancellationToken">A token to cancel the operation.</param>
         /// <exception cref="ApiClientNotFoundFargoApplicationException">Thrown when no API client with the given identifier exists.</exception>
-        public async Task<ApiClient> GetFoundByGuid(Guid guid, CancellationToken cancellationToken = default)
+        public async Task<ClientApplication> GetFoundByGuid(Guid guid, CancellationToken cancellationToken = default)
         {
             return await repository.GetByGuid(guid, cancellationToken)
                 ?? throw new ApiClientNotFoundFargoApplicationException(guid);

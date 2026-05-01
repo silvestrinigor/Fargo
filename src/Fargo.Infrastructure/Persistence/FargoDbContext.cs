@@ -1,5 +1,5 @@
 using Fargo.Domain;
-using Fargo.Domain.ApiClients;
+using Fargo.Domain.ClientApplications;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Events;
 using Fargo.Domain.Items;
@@ -16,7 +16,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 {
     public DbSet<Event> Events { get; set; }
 
-    public DbSet<ApiClient> ApiClients { get; set; }
+    public DbSet<ClientApplication> ApiClients { get; set; }
 
     public DbSet<Article> Articles { get; set; }
 

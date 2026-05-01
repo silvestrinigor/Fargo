@@ -1,9 +1,9 @@
-namespace Fargo.Domain.ApiClients;
+namespace Fargo.Domain.ClientApplications;
 
 /// <summary>
 /// Well-known GUIDs for the system-seeded API clients.
 /// </summary>
-public static class ApiClientService
+public static class ClientApplicationService
 {
     /// <summary>
     /// Fixed GUID for the Fargo Web client.
