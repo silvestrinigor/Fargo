@@ -3,7 +3,6 @@ using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Partitions;
 using Fargo.Domain;
-using Fargo.Domain.Barcodes;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Api.Extensions;

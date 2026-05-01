@@ -1,7 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
-using Fargo.Domain.Barcodes;
 using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Items;

@@ -85,16 +85,55 @@ public sealed record ArticleBarcodes
     /// <summary>Enumerates the populated barcode slots as general barcode results.</summary>
     public IEnumerable<BarcodeResult> AsResults()
     {
-        if (Ean13 is { } ean13) yield return new BarcodeResult(ean13.Guid, ean13.ArticleGuid, ean13.Code, BarcodeFormat.Ean13);
-        if (Ean8 is { } ean8) yield return new BarcodeResult(ean8.Guid, ean8.ArticleGuid, ean8.Code, BarcodeFormat.Ean8);
-        if (UpcA is { } upcA) yield return new BarcodeResult(upcA.Guid, upcA.ArticleGuid, upcA.Code, BarcodeFormat.UpcA);
-        if (UpcE is { } upcE) yield return new BarcodeResult(upcE.Guid, upcE.ArticleGuid, upcE.Code, BarcodeFormat.UpcE);
-        if (Code128 is { } code128) yield return new BarcodeResult(code128.Guid, code128.ArticleGuid, code128.Code, BarcodeFormat.Code128);
-        if (Code39 is { } code39) yield return new BarcodeResult(code39.Guid, code39.ArticleGuid, code39.Code, BarcodeFormat.Code39);
-        if (Itf14 is { } itf14) yield return new BarcodeResult(itf14.Guid, itf14.ArticleGuid, itf14.Code, BarcodeFormat.Itf14);
-        if (Gs1128 is { } gs1128) yield return new BarcodeResult(gs1128.Guid, gs1128.ArticleGuid, gs1128.Code, BarcodeFormat.Gs1128);
-        if (QrCode is { } qrCode) yield return new BarcodeResult(qrCode.Guid, qrCode.ArticleGuid, qrCode.Code, BarcodeFormat.QrCode);
-        if (DataMatrix is { } dataMatrix) yield return new BarcodeResult(dataMatrix.Guid, dataMatrix.ArticleGuid, dataMatrix.Code, BarcodeFormat.DataMatrix);
+        if (Ean13 is { } ean13)
+        {
+            yield return new BarcodeResult(ean13.Guid, ean13.ArticleGuid, ean13.Code, BarcodeFormat.Ean13);
+        }
+
+        if (Ean8 is { } ean8)
+        {
+            yield return new BarcodeResult(ean8.Guid, ean8.ArticleGuid, ean8.Code, BarcodeFormat.Ean8);
+        }
+
+        if (UpcA is { } upcA)
+        {
+            yield return new BarcodeResult(upcA.Guid, upcA.ArticleGuid, upcA.Code, BarcodeFormat.UpcA);
+        }
+
+        if (UpcE is { } upcE)
+        {
+            yield return new BarcodeResult(upcE.Guid, upcE.ArticleGuid, upcE.Code, BarcodeFormat.UpcE);
+        }
+
+        if (Code128 is { } code128)
+        {
+            yield return new BarcodeResult(code128.Guid, code128.ArticleGuid, code128.Code, BarcodeFormat.Code128);
+        }
+
+        if (Code39 is { } code39)
+        {
+            yield return new BarcodeResult(code39.Guid, code39.ArticleGuid, code39.Code, BarcodeFormat.Code39);
+        }
+
+        if (Itf14 is { } itf14)
+        {
+            yield return new BarcodeResult(itf14.Guid, itf14.ArticleGuid, itf14.Code, BarcodeFormat.Itf14);
+        }
+
+        if (Gs1128 is { } gs1128)
+        {
+            yield return new BarcodeResult(gs1128.Guid, gs1128.ArticleGuid, gs1128.Code, BarcodeFormat.Gs1128);
+        }
+
+        if (QrCode is { } qrCode)
+        {
+            yield return new BarcodeResult(qrCode.Guid, qrCode.ArticleGuid, qrCode.Code, BarcodeFormat.QrCode);
+        }
+
+        if (DataMatrix is { } dataMatrix)
+        {
+            yield return new BarcodeResult(dataMatrix.Guid, dataMatrix.ArticleGuid, dataMatrix.Code, BarcodeFormat.DataMatrix);
+        }
     }
 }
 

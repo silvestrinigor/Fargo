@@ -1,4 +1,3 @@
-using Fargo.Domain.Barcodes;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

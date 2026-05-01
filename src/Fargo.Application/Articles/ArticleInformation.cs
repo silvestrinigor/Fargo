@@ -1,6 +1,5 @@
 using Fargo.Domain;
 using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
 
 namespace Fargo.Application.Articles;
 

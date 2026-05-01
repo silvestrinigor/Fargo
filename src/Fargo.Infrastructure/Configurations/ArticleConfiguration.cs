@@ -3,6 +3,7 @@ using Fargo.Domain.Barcodes;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fargo.Infrastructure.Configurations;
 
@@ -40,88 +41,67 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 ttb.HasPeriodEnd("PeriodEnd").HasColumnName("PeriodEnd");
             }));
 
-            barcodes.Ignore(x => x.Ean13);
-            barcodes.Ignore(x => x.Ean8);
-            barcodes.Ignore(x => x.UpcA);
-            barcodes.Ignore(x => x.UpcE);
-            barcodes.Ignore(x => x.Code128);
-            barcodes.Ignore(x => x.Code39);
-            barcodes.Ignore(x => x.Itf14);
-            barcodes.Ignore(x => x.Gs1128);
-            barcodes.Ignore(x => x.QrCode);
-            barcodes.Ignore(x => x.DataMatrix);
             barcodes.Ignore(x => x.IsEmpty);
 
-            barcodes.OwnsOne<Ean13Data>("Ean13Data", e =>
-            {
-                e.ToTable("ArticleEan13", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(13).IsRequired();
-            });
-            barcodes.OwnsOne<Ean8Data>("Ean8Data", e =>
-            {
-                e.ToTable("ArticleEan8", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(8).IsRequired();
-            });
-            barcodes.OwnsOne<UpcAData>("UpcAData", e =>
-            {
-                e.ToTable("ArticleUpcA", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(12).IsRequired();
-            });
-            barcodes.OwnsOne<UpcEData>("UpcEData", e =>
-            {
-                e.ToTable("ArticleUpcE", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(8).IsRequired();
-            });
-            barcodes.OwnsOne<Code128Data>("Code128Data", e =>
-            {
-                e.ToTable("ArticleCode128", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(80).IsRequired();
-            });
-            barcodes.OwnsOne<Code39Data>("Code39Data", e =>
-            {
-                e.ToTable("ArticleCode39", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(80).IsRequired();
-            });
-            barcodes.OwnsOne<Itf14Data>("Itf14Data", e =>
-            {
-                e.ToTable("ArticleItf14", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(14).IsRequired();
-            });
-            barcodes.OwnsOne<Gs1128Data>("Gs1128Data", e =>
-            {
-                e.ToTable("ArticleGs1128", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(80).IsRequired();
-            });
-            barcodes.OwnsOne<QrCodeData>("QrCodeData", e =>
-            {
-                e.ToTable("ArticleQrCode", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(2953).IsRequired();
-            });
-            barcodes.OwnsOne<DataMatrixData>("DataMatrixData", e =>
-            {
-                e.ToTable("ArticleDataMatrix", t => t.IsTemporal());
-                e.HasKey(x => x.ArticleGuid);
-                e.WithOwner().HasForeignKey(x => x.ArticleGuid);
-                e.Property(x => x.Code).HasMaxLength(2335).IsRequired();
-            });
+            barcodes.Property(x => x.Ean13)
+                .HasConversion(new ValueConverter<Ean13?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new Ean13(v) : null))
+                .HasMaxLength(13);
+
+            barcodes.Property(x => x.Ean8)
+                .HasConversion(new ValueConverter<Ean8?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new Ean8(v) : null))
+                .HasMaxLength(8);
+
+            barcodes.Property(x => x.UpcA)
+                .HasConversion(new ValueConverter<UpcA?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new UpcA(v) : null))
+                .HasMaxLength(12);
+
+            barcodes.Property(x => x.UpcE)
+                .HasConversion(new ValueConverter<UpcE?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new UpcE(v) : null))
+                .HasMaxLength(8);
+
+            barcodes.Property(x => x.Code128)
+                .HasConversion(new ValueConverter<Code128?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new Code128(v) : null))
+                .HasMaxLength(80);
+
+            barcodes.Property(x => x.Code39)
+                .HasConversion(new ValueConverter<Code39?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new Code39(v) : null))
+                .HasMaxLength(80);
+
+            barcodes.Property(x => x.Itf14)
+                .HasConversion(new ValueConverter<Itf14?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new Itf14(v) : null))
+                .HasMaxLength(14);
+
+            barcodes.Property(x => x.Gs1128)
+                .HasConversion(new ValueConverter<Gs1128?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new Gs1128(v) : null))
+                .HasMaxLength(80);
+
+            barcodes.Property(x => x.QrCode)
+                .HasConversion(new ValueConverter<QrCode?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new QrCode(v) : null))
+                .HasMaxLength(2953);
+
+            barcodes.Property(x => x.DataMatrix)
+                .HasConversion(new ValueConverter<DataMatrix?, string?>(
+                    v => v.HasValue ? v.Value.Code : null,
+                    v => v != null ? new DataMatrix(v) : null))
+                .HasMaxLength(2335);
         });
 
         builder.OwnsOne(x => x.Metrics, m =>

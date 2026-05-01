@@ -3,7 +3,6 @@ using Fargo.Application.Events;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
 using Fargo.Domain.Events;
 
 namespace Fargo.Application.Articles;
@@ -50,10 +49,21 @@ public sealed class ArticleUpdateBarcodesCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.ReplaceBarcodes(command.Barcodes);
+        article.Barcodes.Ean13 = command.Barcodes.Ean13;
+        article.Barcodes.Ean8 = command.Barcodes.Ean8;
+        article.Barcodes.UpcA = command.Barcodes.UpcA;
+        article.Barcodes.UpcE = command.Barcodes.UpcE;
+        article.Barcodes.Code128 = command.Barcodes.Code128;
+        article.Barcodes.Code39 = command.Barcodes.Code39;
+        article.Barcodes.Itf14 = command.Barcodes.Itf14;
+        article.Barcodes.Gs1128 = command.Barcodes.Gs1128;
+        article.Barcodes.QrCode = command.Barcodes.QrCode;
+        article.Barcodes.DataMatrix = command.Barcodes.DataMatrix;
 
         await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, article.Guid, cancellationToken);
+
         await unitOfWork.SaveChanges(cancellationToken);
+
         await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);
     }
 }

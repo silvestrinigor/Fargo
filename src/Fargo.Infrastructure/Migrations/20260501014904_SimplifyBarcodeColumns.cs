@@ -5,18 +5,204 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fargo.Infrastructure.Migrations;
 
 /// <inheritdoc />
-public partial class RefactBarcodes : Migration
+public partial class SimplifyBarcodeColumns : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropTable(
-            name: "Barcodes")
+            name: "ArticleCode128")
             .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "BarcodesHistory")
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleCode128History")
             .Annotation("SqlServer:TemporalHistoryTableSchema", null)
             .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
             .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleCode39")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleCode39History")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleDataMatrix")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleDataMatrixHistory")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleEan13")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleEan13History")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleEan8")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleEan8History")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleGs1128")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleGs1128History")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleItf14")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleItf14History")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleQrCode")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleQrCodeHistory")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleUpcA")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleUpcAHistory")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.DropTable(
+            name: "ArticleUpcE")
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleUpcEHistory")
+            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_Code128",
+            table: "Articles",
+            type: "nvarchar(80)",
+            maxLength: 80,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_Code39",
+            table: "Articles",
+            type: "nvarchar(80)",
+            maxLength: 80,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_DataMatrix",
+            table: "Articles",
+            type: "nvarchar(2335)",
+            maxLength: 2335,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_Ean13",
+            table: "Articles",
+            type: "nvarchar(13)",
+            maxLength: 13,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_Ean8",
+            table: "Articles",
+            type: "nvarchar(8)",
+            maxLength: 8,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_Gs1128",
+            table: "Articles",
+            type: "nvarchar(80)",
+            maxLength: 80,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_Itf14",
+            table: "Articles",
+            type: "nvarchar(14)",
+            maxLength: 14,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_QrCode",
+            table: "Articles",
+            type: "nvarchar(2953)",
+            maxLength: 2953,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_UpcA",
+            table: "Articles",
+            type: "nvarchar(12)",
+            maxLength: 12,
+            nullable: true);
+
+        migrationBuilder.AddColumn<string>(
+            name: "Barcodes_UpcE",
+            table: "Articles",
+            type: "nvarchar(8)",
+            maxLength: 8,
+            nullable: true);
+    }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "Barcodes_Code128",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_Code39",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_DataMatrix",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_Ean13",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_Ean8",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_Gs1128",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_Itf14",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_QrCode",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_UpcA",
+            table: "Articles");
+
+        migrationBuilder.DropColumn(
+            name: "Barcodes_UpcE",
+            table: "Articles");
 
         migrationBuilder.CreateTable(
             name: "ArticleCode128",
@@ -287,129 +473,5 @@ public partial class RefactBarcodes : Migration
             .Annotation("SqlServer:TemporalHistoryTableSchema", null)
             .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
             .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-    }
-
-    /// <inheritdoc />
-    protected override void Down(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.DropTable(
-            name: "ArticleCode128")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleCode128History")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleCode39")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleCode39History")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleDataMatrix")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleDataMatrixHistory")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleEan13")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleEan13History")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleEan8")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleEan8History")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleGs1128")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleGs1128History")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleItf14")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleItf14History")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleQrCode")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleQrCodeHistory")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleUpcA")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleUpcAHistory")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.DropTable(
-            name: "ArticleUpcE")
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "ArticleUpcEHistory")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.CreateTable(
-            name: "Barcodes",
-            columns: table => new
-            {
-                Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                ArticleGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                Code = table.Column<string>(type: "nvarchar(3000)", maxLength: 3000, nullable: false),
-                Format = table.Column<int>(type: "int", nullable: false),
-                PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-                    .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
-                PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                    .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_Barcodes", x => x.Guid);
-                table.ForeignKey(
-                    name: "FK_Barcodes_Articles_ArticleGuid",
-                    column: x => x.ArticleGuid,
-                    principalTable: "Articles",
-                    principalColumn: "Guid",
-                    onDelete: ReferentialAction.Cascade);
-            })
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalHistoryTableName", "BarcodesHistory")
-            .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Barcodes_ArticleGuid",
-            table: "Barcodes",
-            column: "ArticleGuid");
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Barcodes_ArticleGuid_Format",
-            table: "Barcodes",
-            columns: new[] { "ArticleGuid", "Format" },
-            unique: true);
     }
 }

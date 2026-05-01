@@ -1,4 +1,3 @@
-using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 
@@ -17,8 +16,7 @@ public sealed class ArticleBarcodesTests
 
         // Assert
         Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
-        var value = Assert.Single(article.Barcodes.AsValues());
-        Assert.Equal(BarcodeFormat.Ean13, value.Format);
+        Assert.False(article.Barcodes.IsEmpty);
     }
 
     [Fact]
@@ -33,7 +31,7 @@ public sealed class ArticleBarcodesTests
 
         // Assert
         Assert.Null(article.Barcodes.UpcA);
-        Assert.Empty(article.Barcodes.AsValues());
+        Assert.True(article.Barcodes.IsEmpty);
     }
 
     [Fact]
@@ -48,7 +46,7 @@ public sealed class ArticleBarcodesTests
 
         // Assert
         Assert.Equal("12345671", article.Barcodes.Ean8?.Code);
-        Assert.Single(article.Barcodes.AsValues());
+        Assert.False(article.Barcodes.IsEmpty);
     }
 
     [Fact]
@@ -63,7 +61,7 @@ public sealed class ArticleBarcodesTests
 
         // Assert
         Assert.Null(article.Barcodes.Code128);
-        Assert.Empty(article.Barcodes.AsValues());
+        Assert.True(article.Barcodes.IsEmpty);
     }
 
     [Fact]
@@ -78,10 +76,10 @@ public sealed class ArticleBarcodesTests
         };
 
         // Act
-        article.ReplaceBarcodes(barcodes);
+        article.Barcodes.Ean13 = barcodes.Ean13;
+        article.Barcodes.UpcA = barcodes.UpcA;
 
         // Assert
-        Assert.Equal(2, article.Barcodes.AsValues().Count());
         Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
         Assert.Equal("123456789012", article.Barcodes.UpcA?.Code);
     }

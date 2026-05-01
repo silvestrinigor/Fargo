@@ -1,4 +1,3 @@
-using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Articles;
@@ -37,17 +36,17 @@ public class Article : ModifiedEntity, IPartitionedEntity
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets or sets the physical measurements of the article, including mass, dimensions, and
-    /// computed density.
-    /// </summary>
-    public ArticleMetrics Metrics { get; set; } = new();
-
-    /// <summary>
     /// Gets or sets the shelf life of the article.
     /// When <see langword="null"/>, no shelf life constraint is defined.
     /// Persisted as <c>bigint</c> (ticks) in the database.
     /// </summary>
     public TimeSpan? ShelfLife { get; set; }
+
+    /// <summary>
+    /// Gets or sets the physical measurements of the article, including mass, dimensions, and
+    /// computed density.
+    /// </summary>
+    public ArticleMetrics Metrics { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the image metadata for the article.
@@ -59,16 +58,7 @@ public class Article : ModifiedEntity, IPartitionedEntity
     /// </summary>
     public ArticleBarcodes Barcodes { get; private set; } = new();
 
-    /// <summary>
-    /// Replaces all barcodes associated with the article.
-    /// </summary>
-    /// <param name="barcodes">The desired barcode state.</param>
-    public void ReplaceBarcodes(ArticleBarcodes barcodes)
-    {
-        ArgumentNullException.ThrowIfNull(barcodes);
-
-        Barcodes.ReplaceWith(barcodes);
-    }
+    #region Partition
 
     /// <summary>
     /// Gets the partitions associated with the article.
@@ -81,4 +71,6 @@ public class Article : ModifiedEntity, IPartitionedEntity
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+
+    #endregion Partition
 }
