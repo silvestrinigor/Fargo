@@ -1,4 +1,3 @@
-using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Articles;
@@ -16,7 +15,7 @@ namespace Fargo.Domain.Articles;
 /// if they have access to at least one of its partitions, subject to any
 /// additional authorization rules.
 /// </remarks>
-public class Article : ModifiedEntity, IPartitionedEntity
+public class Article : ModifiedEntity, IPartitionedEntity, IActivable
 {
     /// <summary>
     /// Gets or sets the name of the article.
@@ -37,31 +36,48 @@ public class Article : ModifiedEntity, IPartitionedEntity
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets or sets the physical measurements of the article, including mass, dimensions, and
-    /// computed density.
-    /// </summary>
-    public ArticleMetrics Metrics { get; set; } = new();
-
-    /// <summary>
     /// Gets or sets the shelf life of the article.
     /// When <see langword="null"/>, no shelf life constraint is defined.
     /// Persisted as <c>bigint</c> (ticks) in the database.
     /// </summary>
     public TimeSpan? ShelfLife { get; set; }
 
-    // TODO: I think insted of storing a string key, should create a table in the database for that that will contain the image information and how to get the image.
     /// <summary>
-    /// Gets or sets the storage key of the article's image.
-    /// When <see langword="null"/>, the article has no image.
-    /// The format of this key is determined by the configured storage provider,
-    /// allowing transparent migration between local disk, S3, or other backends.
+    /// Gets or sets the physical measurements of the article, including mass, dimensions, and
+    /// computed density.
     /// </summary>
-    public string? ImageKey { get; set; }
+    public ArticleMetrics Metrics { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the image metadata for the article.
+    /// </summary>
+    public ArticleImages Images { get; set; } = new();
 
     /// <summary>
     /// Gets the barcodes associated with the article.
     /// </summary>
-    public BarcodeCollection Barcodes { get; init; } = [];
+    public ArticleBarcodes Barcodes { get; private set; } = new();
+
+    #region Active
+
+    /// <summary>
+    /// Gets a value indicating whether the article is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the article.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the article.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
+
+    #region Partition
 
     /// <summary>
     /// Gets the partitions associated with the article.
@@ -74,4 +90,6 @@ public class Article : ModifiedEntity, IPartitionedEntity
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+
+    #endregion Partition
 }

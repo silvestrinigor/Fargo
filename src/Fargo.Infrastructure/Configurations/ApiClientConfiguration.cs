@@ -1,12 +1,12 @@
-using Fargo.Domain.ApiClients;
+using Fargo.Domain.ClientApplications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations;
 
-public sealed class ApiClientConfiguration : IEntityTypeConfiguration<ApiClient>
+public sealed class ApiClientConfiguration : IEntityTypeConfiguration<ClientApplication>
 {
-    public void Configure(EntityTypeBuilder<ApiClient> builder)
+    public void Configure(EntityTypeBuilder<ClientApplication> builder)
     {
         builder.ToTable("ApiClients", t => t.IsTemporal());
         builder.HasKey(x => x.Guid);

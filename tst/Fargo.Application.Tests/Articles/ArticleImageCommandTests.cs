@@ -19,7 +19,7 @@ public sealed class ArticleImageCommandTests
     public async Task Upload_ShouldDeleteNewImage_WhenDatabaseCommitFails()
     {
         var article = CreateArticle();
-        article.ImageKey = "articles/old.png";
+        article.Images.ImageKey = "articles/old.png";
 
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -43,7 +43,7 @@ public sealed class ArticleImageCommandTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             sut.Handle(new ArticleImageUploadCommand(article.Guid, new MemoryStream([1, 2, 3]), "image/png")));
 
-        Assert.Equal("articles/old.png", article.ImageKey);
+        Assert.Equal("articles/old.png", article.Images.ImageKey);
         await imageStorage.Received(1).DeleteAsync("articles/new.png", Arg.Any<CancellationToken>());
         await imageStorage.DidNotReceive().DeleteAsync("articles/old.png", Arg.Any<CancellationToken>());
     }
@@ -52,7 +52,7 @@ public sealed class ArticleImageCommandTests
     public async Task Upload_ShouldDeletePreviousImage_AfterDatabaseCommit()
     {
         var article = CreateArticle();
-        article.ImageKey = "articles/old.png";
+        article.Images.ImageKey = "articles/old.png";
 
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -73,7 +73,7 @@ public sealed class ArticleImageCommandTests
 
         await sut.Handle(new ArticleImageUploadCommand(article.Guid, new MemoryStream([1, 2, 3]), "image/png"));
 
-        Assert.Equal("articles/new.png", article.ImageKey);
+        Assert.Equal("articles/new.png", article.Images.ImageKey);
         Received.InOrder(async () =>
         {
             await imageStorage.SaveAsync(article.Guid, Arg.Any<Stream>(), "image/png", Arg.Any<CancellationToken>());
@@ -86,7 +86,7 @@ public sealed class ArticleImageCommandTests
     public async Task DeleteImage_ShouldDeleteStorage_AfterDatabaseCommit()
     {
         var article = CreateArticle();
-        article.ImageKey = "articles/existing.png";
+        article.Images.ImageKey = "articles/existing.png";
 
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -104,7 +104,7 @@ public sealed class ArticleImageCommandTests
 
         await sut.Handle(new ArticleImageDeleteCommand(article.Guid));
 
-        Assert.Null(article.ImageKey);
+        Assert.Null(article.Images.ImageKey);
         Received.InOrder(async () =>
         {
             await unitOfWork.SaveChanges(Arg.Any<CancellationToken>());
@@ -116,7 +116,7 @@ public sealed class ArticleImageCommandTests
     public async Task DeleteArticle_ShouldDeleteStorage_AfterDatabaseCommit()
     {
         var article = CreateArticle();
-        article.ImageKey = "articles/existing.png";
+        article.Images.ImageKey = "articles/existing.png";
 
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())

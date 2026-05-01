@@ -16,7 +16,7 @@ namespace Fargo.Domain.Users;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser
+public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
     /// <summary>
     /// Gets or sets the unique NAMEID of the user group.
@@ -36,14 +36,26 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// </remarks>
     public Description Description { get; set; } = Description.Empty;
 
+    #region Active
+
     /// <summary>
-    /// Gets or sets a value indicating whether the user group is active.
+    /// Gets a value indicating whether the user group is active.
     /// </summary>
-    /// <remarks>
-    /// Inactive groups should not be considered during permission evaluation
-    /// or operational use, depending on application rules.
-    /// </remarks>
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the user group.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the user group.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
+
+    #region Permission
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned to the user group.
@@ -100,6 +112,10 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
         userGroupPermissions.Remove(userGroupPermission);
     }
 
+    #endregion Permission
+
+    #region Partition
+
     /// <summary>
     /// Gets the partitions associated with the user group.
     /// </summary>
@@ -111,22 +127,6 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
-
-    /// <summary>
-    /// Gets the read-only collection of users associated with the user group.
-    /// </summary>
-    /// <remarks>
-    /// Represents users that belong to the group.
-    /// This collection is intended for navigation and persistence purposes.
-    /// Membership changes should be controlled through explicit domain behaviors.
-    /// </remarks>
-    public IReadOnlyCollection<User> Users
-    {
-        get => users;
-        init => users = [.. value];
-    }
-
-    private readonly List<User> users = [];
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
@@ -184,4 +184,26 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
 
         partitionAccesses.Remove(userGroupPartition);
     }
+
+    #endregion Partition
+
+    #region User
+
+    /// <summary>
+    /// Gets the read-only collection of users associated with the user group.
+    /// </summary>
+    /// <remarks>
+    /// Represents users that belong to the group.
+    /// This collection is intended for navigation and persistence purposes.
+    /// Membership changes should be controlled through explicit domain behaviors.
+    /// </remarks>
+    public IReadOnlyCollection<User> Users
+    {
+        get => users;
+        init => users = [.. value];
+    }
+
+    private readonly List<User> users = [];
+
+    #endregion User
 }

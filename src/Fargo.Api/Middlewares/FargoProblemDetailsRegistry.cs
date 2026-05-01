@@ -173,14 +173,6 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(404, "API client not found", "api-client/not-found")
             },
             {
-                typeof(BarcodeNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "Barcode not found", "barcode/not-found")
-            },
-            {
-                typeof(BarcodeAlreadyExistsFargoApplicationException),
-                new ProblemDetailsDefinition(409, "Barcode already exists", "barcode/already-exists")
-            },
-            {
                 typeof(ArgumentException),
                 new ProblemDetailsDefinition(400, "Invalid barcode value", "barcode/invalid-value")
             }

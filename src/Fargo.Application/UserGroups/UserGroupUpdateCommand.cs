@@ -96,7 +96,14 @@ public sealed class UserGroupUpdateCommandHandler(
 
         if (command.UserGroup.IsActive is not null)
         {
-            userGroup.IsActive = command.UserGroup.IsActive.Value;
+            if (command.UserGroup.IsActive.Value == true)
+            {
+                userGroup.Activate();
+            }
+            else
+            {
+                userGroup.Deactivate();
+            }
         }
 
         await eventRecorder.Record(EventType.UserGroupUpdated, EntityType.UserGroup, userGroup.Guid, cancellationToken);

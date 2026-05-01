@@ -1,6 +1,5 @@
 using Fargo.Infrastructure.Options;
 using Fargo.Infrastructure.Storage;
-using Microsoft.Extensions.Options;
 
 namespace Fargo.Infrastructure.Tests.Storage;
 

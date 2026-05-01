@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using Fargo.Sdk.Events;
+using System.Collections.Concurrent;
 
 namespace Fargo.Sdk.Users;
 

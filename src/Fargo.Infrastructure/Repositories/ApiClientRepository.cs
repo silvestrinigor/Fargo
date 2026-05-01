@@ -1,6 +1,6 @@
 using Fargo.Application.ApiClients;
 using Fargo.Domain;
-using Fargo.Domain.ApiClients;
+using Fargo.Domain.ClientApplications;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +9,12 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ApiClientRepository(FargoDbContext context) : IApiClientRepository, IApiClientQueryRepository
 {
-    private readonly DbSet<ApiClient> clients = context.ApiClients;
+    private readonly DbSet<ClientApplication> clients = context.ApiClients;
 
-    public void Add(ApiClient client) => context.ApiClients.Add(client);
-    public void Remove(ApiClient client) => context.ApiClients.Remove(client);
+    public void Add(ClientApplication client) => context.ApiClients.Add(client);
+    public void Remove(ClientApplication client) => context.ApiClients.Remove(client);
 
-    public async Task<ApiClient?> GetByGuid(Guid guid, CancellationToken cancellationToken = default)
+    public async Task<ClientApplication?> GetByGuid(Guid guid, CancellationToken cancellationToken = default)
     {
         return await clients
             .Where(c => c.Guid == guid)
@@ -37,7 +37,7 @@ public sealed class ApiClientRepository(FargoDbContext context) : IApiClientRepo
 
     public async Task<IReadOnlyCollection<ApiClientInformation>> GetManyInfo(Pagination? pagination = null, string? search = null, CancellationToken cancellationToken = default)
     {
-        IQueryable<ApiClient> query = clients.AsNoTracking();
+        IQueryable<ClientApplication> query = clients.AsNoTracking();
 
         if (search is not null)
         {

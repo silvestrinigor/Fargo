@@ -42,7 +42,14 @@ public sealed class ApiClientUpdateCommandHandler(
 
         if (command.IsActive.HasValue)
         {
-            client.IsActive = command.IsActive.Value;
+            if (command.IsActive.Value is true)
+            {
+                client.Activate();
+            }
+            else
+            {
+                client.Deactivate();
+            }
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

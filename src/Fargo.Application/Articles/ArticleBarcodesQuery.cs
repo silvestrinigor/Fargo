@@ -1,6 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.Barcodes;
+using Fargo.Domain.Articles;
 
 namespace Fargo.Application.Articles;
 
@@ -10,17 +10,16 @@ namespace Fargo.Application.Articles;
 /// <param name="ArticleGuid">The unique identifier of the article.</param>
 public sealed record ArticleBarcodesQuery(
     Guid ArticleGuid
-    ) : IQuery<IReadOnlyCollection<BarcodeInformation>?>;
+    ) : IQuery<ArticleBarcodes?>;
 
 /// <summary>
 /// Handles <see cref="ArticleBarcodesQuery"/>.
 /// </summary>
 public sealed class ArticleBarcodesQueryHandler(
     ActorService actorService,
-    IArticleQueryRepository articleRepository,
-    IBarcodeRepository barcodeRepository,
+    IArticleRepository articleRepository,
     ICurrentUser currentUser
-    ) : IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>
+    ) : IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>
 {
     /// <summary>
     /// Executes the query to retrieve all barcodes for an article.
@@ -28,13 +27,13 @@ public sealed class ArticleBarcodesQueryHandler(
     /// <param name="query">The query containing the article identifier.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>
-    /// A collection of <see cref="BarcodeInformation"/> records, or <see langword="null"/>
+    /// An <see cref="ArticleBarcodes"/> value, or <see langword="null"/>
     /// if the article does not exist or is not accessible.
     /// </returns>
     /// <exception cref="UnauthorizedAccessFargoApplicationException">
     /// Thrown when the current actor is not authenticated or inactive.
     /// </exception>
-    public async Task<IReadOnlyCollection<BarcodeInformation>?> Handle(
+    public async Task<ArticleBarcodes?> Handle(
         ArticleBarcodesQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -42,30 +41,24 @@ public sealed class ArticleBarcodesQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        bool articleExists;
+        var article = await articleRepository.GetByGuid(query.ArticleGuid, cancellationToken);
 
-        // TODO: Implement in the repository a function that returns if the article exists insted of return all the information.
-        if (actor.IsAdmin || actor.IsSystem)
-        {
-            articleExists = await articleRepository.GetInfoByGuid(query.ArticleGuid, null, cancellationToken) is not null;
-        }
-        else
-        {
-            articleExists = await articleRepository.GetInfoByGuidPublicOrInPartitions(
-                query.ArticleGuid,
-                actor.PartitionAccesses,
-                null,
-                cancellationToken) is not null;
-        }
-
-        if (!articleExists)
+        if (article is null)
         {
             return null;
         }
 
-        var barcodes = await barcodeRepository.GetByArticleGuid(query.ArticleGuid, cancellationToken);
+        if (!actor.IsAdmin && !actor.IsSystem)
+        {
+            var hasAccess = !article.Partitions.Any()
+                || article.Partitions.Any(p => actor.PartitionAccesses.Contains(p.Guid));
 
-        // TODO: Implement a BarcodeMapping like ArticleMapping.
-        return [.. barcodes.Select(b => new BarcodeInformation(b.Guid, b.ArticleGuid, b.Code, b.Format))];
+            if (!hasAccess)
+            {
+                return null;
+            }
+        }
+
+        return article.Barcodes;
     }
 }

@@ -1,7 +1,7 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
-using Fargo.Domain.ApiClients;
+using Fargo.Domain.ClientApplications;
 
 namespace Fargo.Application.ApiClients;
 
@@ -35,7 +35,7 @@ public sealed class ApiClientCreateCommandHandler(
         var plainKey = ApiKeyGenerator.Generate();
         var keyHash = ApiKeyGenerator.Hash(plainKey);
 
-        var client = new ApiClient
+        var client = new ClientApplication
         {
             Name = new(command.Name),
             Description = command.Description is not null ? new(command.Description) : Description.Empty,

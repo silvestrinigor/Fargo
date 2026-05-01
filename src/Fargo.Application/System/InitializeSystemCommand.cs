@@ -2,7 +2,7 @@ using Fargo.Application.ApiClients;
 using Fargo.Application.Authentication;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
-using Fargo.Domain.ApiClients;
+using Fargo.Domain.ClientApplications;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Logging;
@@ -112,12 +112,12 @@ public sealed class InitializeSystemCommandHandler(
 
     private void SeedApiClients(ApiClientSeedOptions opts)
     {
-        CreateApiClient(ApiClientService.WebApiClientGuid, "Fargo Web", opts.WebApiKey);
-        CreateApiClient(ApiClientService.McpApiClientGuid, "Fargo MCP", opts.McpApiKey);
+        CreateApiClient(ClientApplicationService.WebApiClientGuid, "Fargo Web", opts.WebApiKey);
+        CreateApiClient(ClientApplicationService.McpApiClientGuid, "Fargo MCP", opts.McpApiKey);
 
         if (opts.SeedTestClient)
         {
-            CreateApiClient(ApiClientService.TestApiClientGuid, "Test", opts.TestApiKey);
+            CreateApiClient(ClientApplicationService.TestApiClientGuid, "Test", opts.TestApiKey);
         }
     }
 
@@ -126,7 +126,7 @@ public sealed class InitializeSystemCommandHandler(
         var plainKey = configuredKey ?? ApiKeyGenerator.Generate();
         var keyHash = ApiKeyGenerator.Hash(plainKey);
 
-        var client = new ApiClient
+        var client = new ClientApplication
         {
             Guid = guid,
             Name = new(name),

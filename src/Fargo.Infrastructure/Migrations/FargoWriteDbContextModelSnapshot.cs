@@ -127,10 +127,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid?>("EditedByGuid")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ImageKey")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -156,54 +152,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
                                 ttb.UseHistoryTable("ArticlesHistory");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
-            modelBuilder.Entity("Fargo.Domain.Barcodes.Barcode", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(3000)
-                        .HasColumnType("nvarchar(3000)");
-
-                    b.Property<int>("Format")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
-                    b.HasKey("Guid");
-
-                    b.HasIndex("ArticleGuid");
-
-                    b.HasIndex("ArticleGuid", "Format")
-                        .IsUnique();
-
-                    b.ToTable("Barcodes");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("BarcodesHistory");
                                 ttb
                                     .HasPeriodStart("PeriodStart")
                                     .HasColumnName("PeriodStart");
@@ -840,6 +788,159 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Domain.Articles.Article", b =>
                 {
+                    b.OwnsOne("Fargo.Domain.Articles.ArticleBarcodes", "Barcodes", b1 =>
+                        {
+                            b1.Property<Guid>("ArticleGuid")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Code128")
+                                .HasMaxLength(80)
+                                .HasColumnType("nvarchar(80)");
+
+                            b1.Property<string>("Code39")
+                                .HasMaxLength(80)
+                                .HasColumnType("nvarchar(80)");
+
+                            b1.Property<string>("DataMatrix")
+                                .HasMaxLength(2335)
+                                .HasColumnType("nvarchar(2335)");
+
+                            b1.Property<string>("Ean13")
+                                .HasMaxLength(13)
+                                .HasColumnType("nvarchar(13)");
+
+                            b1.Property<string>("Ean8")
+                                .HasMaxLength(8)
+                                .HasColumnType("nvarchar(8)");
+
+                            b1.Property<string>("Gs1128")
+                                .HasMaxLength(80)
+                                .HasColumnType("nvarchar(80)");
+
+                            b1.Property<string>("Itf14")
+                                .HasMaxLength(14)
+                                .HasColumnType("nvarchar(14)");
+
+                            b1.Property<DateTime>("PeriodEnd")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasColumnType("datetime2")
+                                .HasColumnName("PeriodEnd");
+
+                            b1.Property<DateTime>("PeriodStart")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasColumnType("datetime2")
+                                .HasColumnName("PeriodStart");
+
+                            b1.Property<string>("QrCode")
+                                .HasMaxLength(2953)
+                                .HasColumnType("nvarchar(2953)");
+
+                            b1.Property<string>("UpcA")
+                                .HasMaxLength(12)
+                                .HasColumnType("nvarchar(12)");
+
+                            b1.Property<string>("UpcE")
+                                .HasMaxLength(8)
+                                .HasColumnType("nvarchar(8)");
+
+                            b1.HasKey("ArticleGuid");
+
+                            b1.HasIndex("Code128")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_Code128] IS NOT NULL");
+
+                            b1.HasIndex("Code39")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_Code39] IS NOT NULL");
+
+                            b1.HasIndex("DataMatrix")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_DataMatrix] IS NOT NULL");
+
+                            b1.HasIndex("Ean13")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_Ean13] IS NOT NULL");
+
+                            b1.HasIndex("Ean8")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_Ean8] IS NOT NULL");
+
+                            b1.HasIndex("Gs1128")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_Gs1128] IS NOT NULL");
+
+                            b1.HasIndex("Itf14")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_Itf14] IS NOT NULL");
+
+                            b1.HasIndex("QrCode")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_QrCode] IS NOT NULL");
+
+                            b1.HasIndex("UpcA")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_UpcA] IS NOT NULL");
+
+                            b1.HasIndex("UpcE")
+                                .IsUnique()
+                                .HasFilter("[Barcodes_UpcE] IS NOT NULL");
+
+                            b1.ToTable("Articles", (string)null);
+
+                            b1.ToTable(tb => tb.IsTemporal(ttb =>
+                                    {
+                                        ttb.UseHistoryTable("ArticlesHistory");
+                                        ttb
+                                            .HasPeriodStart("PeriodStart")
+                                            .HasColumnName("PeriodStart");
+                                        ttb
+                                            .HasPeriodEnd("PeriodEnd")
+                                            .HasColumnName("PeriodEnd");
+                                    }));
+
+                            b1.WithOwner()
+                                .HasForeignKey("ArticleGuid");
+                        });
+
+                    b.OwnsOne("Fargo.Domain.Articles.ArticleImages", "Images", b1 =>
+                        {
+                            b1.Property<Guid>("ArticleGuid")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("ImageKey")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)")
+                                .HasColumnName("ImageKey");
+
+                            b1.Property<DateTime>("PeriodEnd")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasColumnType("datetime2")
+                                .HasColumnName("PeriodEnd");
+
+                            b1.Property<DateTime>("PeriodStart")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasColumnType("datetime2")
+                                .HasColumnName("PeriodStart");
+
+                            b1.HasKey("ArticleGuid");
+
+                            b1.ToTable("Articles", (string)null);
+
+                            b1.ToTable(tb => tb.IsTemporal(ttb =>
+                                    {
+                                        ttb.UseHistoryTable("ArticlesHistory");
+                                        ttb
+                                            .HasPeriodStart("PeriodStart")
+                                            .HasColumnName("PeriodStart");
+                                        ttb
+                                            .HasPeriodEnd("PeriodEnd")
+                                            .HasColumnName("PeriodEnd");
+                                    }));
+
+                            b1.WithOwner()
+                                .HasForeignKey("ArticleGuid");
+                        });
+
                     b.OwnsOne("Fargo.Domain.Articles.ArticleMetrics", "Metrics", b1 =>
                         {
                             b1.Property<Guid>("ArticleGuid")
@@ -894,19 +995,14 @@ namespace Fargo.Infrastructure.Migrations
                                 .HasForeignKey("ArticleGuid");
                         });
 
+                    b.Navigation("Barcodes")
+                        .IsRequired();
+
+                    b.Navigation("Images")
+                        .IsRequired();
+
                     b.Navigation("Metrics")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Fargo.Domain.Barcodes.Barcode", b =>
-                {
-                    b.HasOne("Fargo.Domain.Articles.Article", "Article")
-                        .WithMany("Barcodes")
-                        .HasForeignKey("ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Article");
                 });
 
             modelBuilder.Entity("Fargo.Domain.Items.Item", b =>
@@ -1057,11 +1153,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasForeignKey("UsersGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Fargo.Domain.Articles.Article", b =>
-                {
-                    b.Navigation("Barcodes");
                 });
 
             modelBuilder.Entity("Fargo.Domain.Partitions.Partition", b =>

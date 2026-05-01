@@ -16,7 +16,7 @@ namespace Fargo.Domain.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser
+public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
     /// <summary>
     /// Gets or sets the unique NAMEID (username) of the user.
@@ -70,6 +70,27 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         get;
         set;
     } = Description.Empty;
+
+    #region Active
+
+    /// <summary>
+    /// Gets a value indicating whether the user is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
+    /// Activates the user.
+    /// </summary>
+    public void Activate() => IsActive = true;
+
+    /// <summary>
+    /// Deactivates the user.
+    /// </summary>
+    public void Deactivate() => IsActive = false;
+
+    #endregion Active
+
+    #region Password
 
     /// <summary>
     /// Gets or sets the hashed password of the user.
@@ -178,19 +199,9 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
     }
 
-    /// <summary>
-    /// Gets a value indicating whether the user is active.
-    ///
-    /// An active user is allowed to authenticate and interact with the system,
-    /// subject to any additional authorization or security rules.
-    ///
-    /// An inactive user is considered disabled and may be prevented from
-    /// signing in or performing operations, depending on application policies.
-    /// </summary>
-    /// <remarks>
-    /// This property represents the user's current activation status.
-    /// </remarks>
-    public bool IsActive { get; set; } = true;
+    #endregion Password
+
+    #region Permission
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
@@ -245,6 +256,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
         permissions.Remove(userPermission);
     }
 
+    #endregion Permission
+
     /// <summary>
     /// Gets the collection of groups the user belongs to.
     /// </summary>
@@ -257,6 +270,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
     /// - Permissions and partition access inherited from groups
     /// </remarks>
     public UserGroupCollection UserGroups { get; init; } = [];
+
+    #region Partition
 
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
@@ -337,4 +352,6 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermiss
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+
+    #endregion Partition
 }

@@ -1,7 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Authentication;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Fargo.Sdk.Contracts;
+using Microsoft.AspNetCore.Http.HttpResults;
 using AuthResultContract = Fargo.Sdk.Contracts.Authentication.AuthResult;
 
 namespace Fargo.Api.Extensions;

@@ -16,7 +16,8 @@ public sealed class Article : IAsyncDisposable
         Func<ValueTask>? onDispose = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
-        bool hasImage = false,
+        ArticleImages? images = null,
+        ArticleBarcodes? barcodes = null,
         Guid? editedByGuid = null)
     {
         Guid = guid;
@@ -24,7 +25,8 @@ public sealed class Article : IAsyncDisposable
         _description = description;
         _metrics = metrics;
         _shelfLife = shelfLife;
-        _hasImage = hasImage;
+        _images = images ?? new ArticleImages();
+        _barcodes = barcodes ?? new ArticleBarcodes();
         EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
@@ -80,13 +82,29 @@ public sealed class Article : IAsyncDisposable
         set => _shelfLife = value;
     }
 
-    private bool _hasImage;
+    private ArticleImages _images;
+
+    /// <summary>Gets image state for this article.</summary>
+    public ArticleImages Images
+    {
+        get => _images;
+        internal set => _images = value ?? new ArticleImages();
+    }
 
     /// <summary>Indicates whether this article has an image stored on the server.</summary>
     public bool HasImage
     {
-        get => _hasImage;
-        internal set => _hasImage = value;
+        get => _images.HasImage;
+        internal set => _images = new ArticleImages(value);
+    }
+
+    private ArticleBarcodes _barcodes;
+
+    /// <summary>Gets barcode state for this article, grouped by barcode format.</summary>
+    public ArticleBarcodes Barcodes
+    {
+        get => _barcodes;
+        internal set => _barcodes = value ?? new ArticleBarcodes();
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -151,7 +169,7 @@ public sealed class Article : IAsyncDisposable
         {
             throw new FargoSdkApiException(result.Error!);
         }
-        _hasImage = true;
+        _images = new ArticleImages(true);
     }
 
     /// <summary>
@@ -166,7 +184,7 @@ public sealed class Article : IAsyncDisposable
         {
             throw new FargoSdkApiException(result.Error!);
         }
-        _hasImage = false;
+        _images = new ArticleImages(false);
     }
 
     /// <summary>
@@ -179,6 +197,31 @@ public sealed class Article : IAsyncDisposable
     /// </returns>
     public Task<(Stream Stream, string ContentType)?> GetImageAsync(CancellationToken cancellationToken = default)
         => client.GetImageAsync(Guid, cancellationToken);
+
+    /// <summary>Refreshes this article's barcode state from the server.</summary>
+    public async Task<ArticleBarcodes> GetBarcodesAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await client.GetBarcodesAsync(Guid, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new FargoSdkApiException(result.Error!);
+        }
+
+        _barcodes = result.Data ?? new ArticleBarcodes();
+        return _barcodes;
+    }
+
+    /// <summary>Replaces this article's barcode state on the server.</summary>
+    public async Task UpdateBarcodesAsync(ArticleBarcodes barcodes, CancellationToken cancellationToken = default)
+    {
+        var result = await client.UpdateBarcodesAsync(Guid, barcodes, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new FargoSdkApiException(result.Error!);
+        }
+
+        _barcodes = barcodes;
+    }
 
     /// <inheritdoc/>
     public ValueTask DisposeAsync() => _onDispose?.Invoke() ?? ValueTask.CompletedTask;

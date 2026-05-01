@@ -1,8 +1,8 @@
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.ApiClients;
-using Fargo.Sdk.Contracts;
 using Fargo.Domain;
+using Fargo.Sdk.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ApiClientCreatedResultContract = Fargo.Sdk.Contracts.ApiClients.ApiClientCreatedResult;
 

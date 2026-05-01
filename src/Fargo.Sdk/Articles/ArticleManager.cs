@@ -68,23 +68,15 @@ public sealed class ArticleManager(
         => imageService.GetImageAsync(articleGuid, cancellationToken);
 
     /// <inheritdoc />
-    public Task<IReadOnlyCollection<BarcodeResult>> GetBarcodesAsync(
+    public Task<ArticleBarcodes> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
         => barcodeService.GetBarcodesAsync(articleGuid, cancellationToken);
 
     /// <inheritdoc />
-    public Task<Guid> AddBarcodeAsync(
+    public Task UpdateBarcodesAsync(
         Guid articleGuid,
-        string code,
-        BarcodeFormat format,
+        ArticleBarcodes barcodes,
         CancellationToken cancellationToken = default)
-        => barcodeService.AddBarcodeAsync(articleGuid, code, format, cancellationToken);
-
-    /// <inheritdoc />
-    public Task RemoveBarcodeAsync(
-        Guid articleGuid,
-        Guid barcodeGuid,
-        CancellationToken cancellationToken = default)
-        => barcodeService.RemoveBarcodeAsync(articleGuid, barcodeGuid, cancellationToken);
+        => barcodeService.UpdateBarcodesAsync(articleGuid, barcodes, cancellationToken);
 }

@@ -246,50 +246,31 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         => httpClient.GetStreamAsync($"/articles/{articleGuid}/image", cancellationToken);
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>> GetBarcodesAsync(
+    public async Task<FargoSdkResponse<ArticleBarcodes>> GetBarcodesAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<BarcodeResult>>(
+        var httpResponse = await httpClient.GetAsync<ArticleBarcodes>(
             $"/articles/{articleGuid}/barcodes",
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<ArticleBarcodes>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<BarcodeResult>>(httpResponse.Data ?? []);
+        return new FargoSdkResponse<ArticleBarcodes>(httpResponse.Data ?? new ArticleBarcodes());
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> AddBarcodeAsync(
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateBarcodesAsync(
         Guid articleGuid,
-        string code,
-        BarcodeFormat format,
+        ArticleBarcodes barcodes,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<object, Guid>(
+        var httpResponse = await httpClient.PutJsonAsync(
             $"/articles/{articleGuid}/barcodes",
-            new { code, format },
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<Guid>(httpResponse.Data);
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> RemoveBarcodeAsync(
-        Guid articleGuid,
-        Guid barcodeGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.DeleteAsync(
-            $"/articles/{articleGuid}/barcodes/{barcodeGuid}",
+            barcodes,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

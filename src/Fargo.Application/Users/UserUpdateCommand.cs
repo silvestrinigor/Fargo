@@ -114,7 +114,14 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.IsActive is not null)
         {
-            user.IsActive = command.User.IsActive.Value;
+            if (command.User.IsActive.Value == true)
+            {
+                user.Activate();
+            }
+            else
+            {
+                user.Deactivate();
+            }
         }
 
         await eventRecorder.Record(EventType.UserUpdated, EntityType.User, user.Guid, cancellationToken);

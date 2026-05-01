@@ -11,15 +11,14 @@ using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
+using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Options;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
-using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Security;
 using Fargo.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -116,7 +115,6 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IApiClientQueryRepository, ApiClientRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
-            services.AddScoped<IBarcodeRepository, BarcodeRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IItemQueryRepository, ItemRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -150,8 +148,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleRemovePartitionCommand>, ArticleRemovePartitionCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleImageUploadCommand>, ArticleImageUploadCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleImageDeleteCommand>, ArticleImageDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleAddBarcodeCommand, Guid>, ArticleAddBarcodeCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleRemoveBarcodeCommand>, ArticleRemoveBarcodeCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleUpdateBarcodesCommand>, ArticleUpdateBarcodesCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
@@ -181,7 +178,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>, ArticleManyQueryHandler>();
             services.AddScoped<IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, ArticlePartitionsQueryHandler>();
             services.AddScoped<IQueryHandler<ArticleImageQuery, ArticleImageResult?>, ArticleImageQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, IReadOnlyCollection<BarcodeInformation>?>, ArticleBarcodesQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>, ArticleBarcodesQueryHandler>();
 
             services.AddScoped<IQueryHandler<ItemSingleQuery, ItemInformation?>, ItemSingleQueryHandler>();
             services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>, ItemManyQueryHandler>();

@@ -22,6 +22,8 @@ namespace Fargo.Domain.Items;
 /// </remarks>
 public class Item : ModifiedEntity, IPartitionedEntity
 {
+    #region Article
+
     /// <summary>
     /// Gets the unique identifier of the associated <see cref="Article"/>.
     /// </summary>
@@ -50,11 +52,15 @@ public class Item : ModifiedEntity, IPartitionedEntity
         }
     }
 
+    #endregion Article
+
     /// <summary>
     /// Gets or sets the date on which this item was produced.
     /// When <see langword="null"/>, the production date is unknown.
     /// </summary>
     public DateTimeOffset? ProductionDate { get; set; }
+
+    #region  Partition
 
     /// <summary>
     /// Gets the partitions associated with the item.
@@ -67,4 +73,6 @@ public class Item : ModifiedEntity, IPartitionedEntity
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+
+    #endregion  Partition
 }
