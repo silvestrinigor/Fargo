@@ -31,11 +31,6 @@ public sealed class UserGroupSingleQueryHandler(
             cancellationToken
         );
 
-        if (userGroup is not null && userGroup.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p)))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
-
         return userGroup;
     }
 }
@@ -75,11 +70,6 @@ public sealed class UserGroupsQueryHandler(
             query.NotInsideAnyPartition,
             cancellationToken
         );
-
-        if (userGroups.Any(g => g.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p))))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
 
         return userGroups;
     }

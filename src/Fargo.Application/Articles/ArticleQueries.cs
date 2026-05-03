@@ -31,11 +31,6 @@ public sealed class ArticleSingleQueryHandler(
             cancellationToken
         );
 
-        if (article is not null && article.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p)))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
-
         return article;
     }
 }
@@ -75,11 +70,6 @@ public sealed class ArticlesQueryHandler(
             query.NotInsideAnyPartition,
             cancellationToken
         );
-
-        if (articles.Any(a => a.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p))))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
 
         return articles;
     }

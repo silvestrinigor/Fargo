@@ -19,7 +19,7 @@ public sealed class ArticleCreateCommandHandler(
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork
-    ) : ICommandHandler<ArticleCreateCommand, Guid>
+) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     public async Task<Guid> Handle(
         ArticleCreateCommand command,
@@ -210,9 +210,11 @@ public sealed class ArticleUpdateCommandHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.CreateArticle);
+        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
 
         if (article.Name != command.Article.Name)
         {

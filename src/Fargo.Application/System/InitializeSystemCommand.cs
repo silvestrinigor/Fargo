@@ -1,10 +1,7 @@
-using Fargo.Application.ApiClients;
 using Fargo.Application.Authentication;
 using Fargo.Domain;
-using Fargo.Domain.ClientApplications;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Fargo.Application.System;
@@ -12,24 +9,20 @@ namespace Fargo.Application.System;
 public sealed record InitializeSystemCommand() : ICommand;
 
 public sealed class InitializeSystemCommandHandler(
-        ActorService actorService,
-        IUserRepository userRepository,
-        IUserGroupRepository userGroupRepository,
-        IPartitionRepository partitionRepository,
-        IApiClientRepository apiClientRepository,
-        IPasswordHasher passwordHasher,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser,
-        IOptions<DefaultAdminOptions> defaultAdminOptions,
-        IOptions<ApiClientSeedOptions> apiClientSeedOptions,
-        ILogger<InitializeSystemCommandHandler> logger
-        )
-    : ICommandHandler<InitializeSystemCommand>
+    ActorService actorService,
+    IUserRepository userRepository,
+    IUserGroupRepository userGroupRepository,
+    IPartitionRepository partitionRepository,
+    IPasswordHasher passwordHasher,
+    IUnitOfWork unitOfWork,
+    ICurrentUser currentUser,
+    IOptions<DefaultAdminOptions> defaultAdminOptions
+    ) : ICommandHandler<InitializeSystemCommand>
 {
     public async Task Handle(
-            InitializeSystemCommand command,
-            CancellationToken cancellationToken = default
-            )
+        InitializeSystemCommand command,
+        CancellationToken cancellationToken = default
+    )
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
@@ -104,39 +97,6 @@ public sealed class InitializeSystemCommandHandler(
 
         userRepository.Add(admin);
 
-        SeedApiClients(apiClientSeedOptions.Value);
-
         await unitOfWork.SaveChanges(cancellationToken);
-    }
-
-    private void SeedApiClients(ApiClientSeedOptions opts)
-    {
-        CreateApiClient(ClientApplicationService.WebApiClientGuid, "Fargo Web", opts.WebApiKey);
-        CreateApiClient(ClientApplicationService.McpApiClientGuid, "Fargo MCP", opts.McpApiKey);
-
-        if (opts.SeedTestClient)
-        {
-            CreateApiClient(ClientApplicationService.TestApiClientGuid, "Test", opts.TestApiKey);
-        }
-    }
-
-    private void CreateApiClient(Guid guid, string name, string? configuredKey)
-    {
-        var plainKey = configuredKey ?? ApiKeyGenerator.Generate();
-        var keyHash = ApiKeyGenerator.Hash(plainKey);
-
-        var client = new ClientApplication
-        {
-            Guid = guid,
-            Name = new(name),
-            KeyHash = keyHash
-        };
-
-        apiClientRepository.Add(client);
-
-        if (configuredKey is null)
-        {
-            logger.LogWarning("ApiClient '{Name}' created. Key (shown once): {Key}", name, plainKey);
-        }
     }
 }

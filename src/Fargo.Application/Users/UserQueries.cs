@@ -31,11 +31,6 @@ public sealed class UserSingleQueryHandler(
             cancellationToken
         );
 
-        if (user is not null && user.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p)))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
-
         return user;
     }
 }
@@ -75,11 +70,6 @@ public sealed class UsersQueryHandler(
             query.NotInsideAnyPartition,
             cancellationToken
         );
-
-        if (users.Any(u => u.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p))))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
 
         return users;
     }

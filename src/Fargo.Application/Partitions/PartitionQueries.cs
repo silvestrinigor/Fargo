@@ -23,11 +23,6 @@ public sealed class PartitionSingleQueryHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        if (!actor.PartitionAccessesGuids.Contains(query.PartitionGuid))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
-
         var partition = await partitionRepository.GetInfoByGuid(
             query.PartitionGuid,
             query.AsOfDateTime,
@@ -75,11 +70,6 @@ public sealed class PartitionsQueryHandler(
             query.NotInsideAnyPartition,
             cancellationToken
         );
-
-        if (partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p.Guid)))
-        {
-            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
-        }
 
         return partitions;
     }

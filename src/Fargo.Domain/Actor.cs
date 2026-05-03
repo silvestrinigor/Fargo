@@ -135,4 +135,19 @@ public abstract class Actor : IActor
 
         return partitioned.Partitions.Any(p => PartitionAccessesGuids.Contains(p.Guid));
     }
+
+    public bool HasAccess(IPartitioned partitioned)
+    {
+        if (IsSystem || IsAdmin)
+        {
+            return true;
+        }
+
+        if (partitioned.PartitionGuids.Count == 0)
+        {
+            return true;
+        }
+
+        return partitioned.PartitionGuids.Any(p => PartitionAccessesGuids.Contains(p));
+    }
 }
