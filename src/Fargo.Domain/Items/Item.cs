@@ -55,10 +55,10 @@ public class Item : ModifiedEntity, IPartitionedEntity
     #endregion Article
 
     /// <summary>
-    /// Gets or sets the date on which this item was produced.
+    /// Gets the date on which this item was produced.
     /// When <see langword="null"/>, the production date is unknown.
     /// </summary>
-    public DateTimeOffset? ProductionDate { get; set; }
+    public DateTimeOffset? ProductionDate { get; init; }
 
     #region  Partition
 

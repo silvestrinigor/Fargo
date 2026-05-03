@@ -125,17 +125,17 @@ public sealed class PartitionUpdateCommandHandler(
             await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
         }
 
-        if (command.Partition.Name is not null)
+        if (command.Partition.Name is not null && partition.Name != command.Partition.Name.Value)
         {
-            partition.Name = command.Partition.Name;
+            partition.Name = command.Partition.Name.Value;
         }
 
-        if (command.Partition.Description is not null)
+        if (command.Partition.Description is not null && partition.Description != command.Partition.Description.Value)
         {
-            partition.Description = command.Partition.Description;
+            partition.Description = command.Partition.Description.Value;
         }
 
-        if (command.Partition.IsActive is not null)
+        if (command.Partition.IsActive is not null && partition.IsActive != command.Partition.IsActive.Value)
         {
             partition.IsActive = command.Partition.IsActive.Value;
         }

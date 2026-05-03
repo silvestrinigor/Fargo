@@ -188,14 +188,31 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.Nameid is not null)
         {
-            user.Nameid = ValidateNameid(command.User.Nameid);
+            var nameid = ValidateNameid(command.User.Nameid);
+
+            if (user.Nameid != nameid)
+            {
+                user.Nameid = nameid;
+            }
         }
 
-        user.FirstName = command.User.FirstName ?? user.FirstName;
-        user.LastName = command.User.LastName ?? user.LastName;
-        user.Description = command.User.Description ?? user.Description;
+        if (command.User.FirstName is not null && user.FirstName != command.User.FirstName)
+        {
+            user.FirstName = command.User.FirstName;
+        }
 
-        if (command.User.DefaultPasswordExpirationPeriod is not null)
+        if (command.User.LastName is not null && user.LastName != command.User.LastName)
+        {
+            user.LastName = command.User.LastName;
+        }
+
+        if (command.User.Description is not null && user.Description != command.User.Description)
+        {
+            user.Description = command.User.Description.Value;
+        }
+
+        if (command.User.DefaultPasswordExpirationPeriod is not null &&
+            user.DefaultPasswordExpirationPeriod != command.User.DefaultPasswordExpirationPeriod.Value)
         {
             user.DefaultPasswordExpirationPeriod = command.User.DefaultPasswordExpirationPeriod.Value;
         }
@@ -235,7 +252,7 @@ public sealed class UserUpdateCommandHandler(
             }
         }
 
-        if (command.User.IsActive is not null)
+        if (command.User.IsActive is not null && user.IsActive != command.User.IsActive.Value)
         {
             if (command.User.IsActive.Value)
             {
@@ -249,26 +266,64 @@ public sealed class UserUpdateCommandHandler(
 
         #region Partition
 
-        foreach (var partitionGuid in command.User.Partitions ?? [])
+        if (command.User.Partitions is { } requestedPartitions)
         {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+            foreach (var partitionGuid in requestedPartitions)
+            {
+                if (user.Partitions.Any(p => p.Guid == partitionGuid))
+                {
+                    continue;
+                }
 
-            actor.ValidateHasPartitionAccess(partition.Guid);
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            user.Partitions.Add(partition);
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                user.Partitions.Add(partition);
+            }
+
+            var partitionsToRemove = user.Partitions
+                .Where(p => !requestedPartitions.Contains(p.Guid))
+                .ToList();
+
+            foreach (var partition in partitionsToRemove)
+            {
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                user.Partitions.Remove(partition);
+            }
         }
 
         #endregion Partition
 
         #region UserGroup
 
-        foreach (var userGroupGuid in command.User.UserGroups ?? [])
+        if (command.User.UserGroups is { } requestedUserGroups)
         {
-            var userGroup = await userGroupRepository.GetFoundByGuid(userGroupGuid, cancellationToken);
+            foreach (var userGroupGuid in requestedUserGroups)
+            {
+                if (user.UserGroups.Any(g => g.Guid == userGroupGuid))
+                {
+                    continue;
+                }
 
-            actor.ValidateHasAccess(userGroup);
+                var userGroup = await userGroupRepository.GetFoundByGuid(userGroupGuid, cancellationToken);
 
-            user.UserGroups.Add(userGroup);
+                actor.ValidateHasAccess(userGroup);
+
+                user.UserGroups.Add(userGroup);
+            }
+
+            var userGroupsToRemove = user.UserGroups
+                .Where(g => !requestedUserGroups.Contains(g.Guid))
+                .ToList();
+
+            foreach (var userGroup in userGroupsToRemove)
+            {
+                actor.ValidateHasAccess(userGroup);
+
+                user.UserGroups.Remove(userGroup);
+            }
         }
 
         #endregion UserGroup

@@ -15,6 +15,5 @@ public sealed record ItemCreateDto(
 );
 
 public sealed record ItemUpdateDto(
-    DateTimeOffset? ProductionDate,
     IReadOnlyCollection<Guid> Partitions
 );

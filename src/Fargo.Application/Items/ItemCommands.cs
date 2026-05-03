@@ -123,17 +123,34 @@ public sealed class ItemUpdateCommandHandler(
 
         actor.ValidateHasAccess(item);
 
-        item.ProductionDate = command.Item.ProductionDate;
-
         #region Partition
 
-        foreach (var partitionGuid in command.Item.Partitions ?? [])
+        if (command.Item.Partitions is { } requestedPartitions)
         {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+            foreach (var partitionGuid in requestedPartitions)
+            {
+                if (item.Partitions.Any(p => p.Guid == partitionGuid))
+                {
+                    continue;
+                }
 
-            actor.ValidateHasPartitionAccess(partition.Guid);
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            item.Partitions.Add(partition);
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                item.Partitions.Add(partition);
+            }
+
+            var partitionsToRemove = item.Partitions
+                .Where(p => !requestedPartitions.Contains(p.Guid))
+                .ToList();
+
+            foreach (var partition in partitionsToRemove)
+            {
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                item.Partitions.Remove(partition);
+            }
         }
 
         #endregion Partition

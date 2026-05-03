@@ -214,23 +214,44 @@ public sealed class ArticleUpdateCommandHandler(
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        article.Name = command.Article.Name;
+        if (article.Name != command.Article.Name)
+        {
+            article.Name = command.Article.Name;
+        }
 
-        article.Description = command.Article.Description;
+        if (article.Description != command.Article.Description)
+        {
+            article.Description = command.Article.Description;
+        }
 
-        article.ShelfLife = command.Article.ShelfLife;
+        if (article.ShelfLife != command.Article.ShelfLife)
+        {
+            article.ShelfLife = command.Article.ShelfLife;
+        }
 
         #region Metrics
 
         if (command.Article.Metrics is { } metrics)
         {
-            article.Metrics = new ArticleMetrics
+            if (!article.Metrics.Mass.Equals(metrics.Mass))
             {
-                Mass = metrics.Mass,
-                LengthX = metrics.LengthX,
-                LengthY = metrics.LengthY,
-                LengthZ = metrics.LengthZ
-            };
+                article.Metrics.Mass = metrics.Mass;
+            }
+
+            if (!article.Metrics.LengthX.Equals(metrics.LengthX))
+            {
+                article.Metrics.LengthX = metrics.LengthX;
+            }
+
+            if (!article.Metrics.LengthY.Equals(metrics.LengthY))
+            {
+                article.Metrics.LengthY = metrics.LengthY;
+            }
+
+            if (!article.Metrics.LengthZ.Equals(metrics.LengthZ))
+            {
+                article.Metrics.LengthZ = metrics.LengthZ;
+            }
         }
 
         #endregion Metrics
@@ -239,87 +260,140 @@ public sealed class ArticleUpdateCommandHandler(
 
         if (command.Article.Barcodes is { } barcodes)
         {
-            if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
+            if (barcodes.Ean13 != article.Barcodes.Ean13)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
+                if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
+                }
+
+                article.Barcodes.Ean13 = barcodes.Ean13;
             }
 
-            if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
+            if (barcodes.Ean8 != article.Barcodes.Ean8)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
+                if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
+                }
+
+                article.Barcodes.Ean8 = barcodes.Ean8;
             }
 
-            if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
+            if (barcodes.UpcA != article.Barcodes.UpcA)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
+                if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
+                }
+
+                article.Barcodes.UpcA = barcodes.UpcA;
             }
 
-            if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
+            if (barcodes.UpcE != article.Barcodes.UpcE)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
+                if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
+                }
+
+                article.Barcodes.UpcE = barcodes.UpcE;
             }
 
-            if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
+            if (barcodes.Code128 != article.Barcodes.Code128)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
+                if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
+                }
+
+                article.Barcodes.Code128 = barcodes.Code128;
             }
 
-            if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
+            if (barcodes.Code39 != article.Barcodes.Code39)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
+                if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
+                }
+
+                article.Barcodes.Code39 = barcodes.Code39;
             }
 
-            if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
+            if (barcodes.Itf14 != article.Barcodes.Itf14)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
+                if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
+                }
+
+                article.Barcodes.Itf14 = barcodes.Itf14;
             }
 
-            if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
+            if (barcodes.Gs1128 != article.Barcodes.Gs1128)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
+                if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
+                }
+
+                article.Barcodes.Gs1128 = barcodes.Gs1128;
             }
 
-            if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
+            if (barcodes.QrCode != article.Barcodes.QrCode)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
+                if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
+                }
+
+                article.Barcodes.QrCode = barcodes.QrCode;
             }
 
-            if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
+            if (barcodes.DataMatrix != article.Barcodes.DataMatrix)
             {
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
-            }
+                if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
+                {
+                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
+                }
 
-            article.Barcodes = new ArticleBarcodes
-            {
-                Ean13 = barcodes.Ean13,
-                Ean8 = barcodes.Ean8,
-                UpcA = barcodes.UpcA,
-                UpcE = barcodes.UpcE,
-                Code128 = barcodes.Code128,
-                Code39 = barcodes.Code39,
-                Itf14 = barcodes.Itf14,
-                Gs1128 = barcodes.Gs1128,
-                QrCode = barcodes.QrCode,
-                DataMatrix = barcodes.DataMatrix
-            };
+                article.Barcodes.DataMatrix = barcodes.DataMatrix;
+            }
         }
 
         #endregion Barcode
 
         #region Partition
 
-        foreach (var partitionGuid in command.Article.Partitions ?? [])
+        if (command.Article.Partitions is { } requestedPartitions)
         {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+            foreach (var partitionGuid in requestedPartitions)
+            {
+                if (article.Partitions.Any(p => p.Guid == partitionGuid))
+                {
+                    continue;
+                }
 
-            actor.ValidateHasPartitionAccess(partition.Guid);
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            article.Partitions.Add(partition);
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                article.Partitions.Add(partition);
+            }
+
+            var partitionsToRemove = article.Partitions
+                .Where(p => !requestedPartitions.Contains(p.Guid))
+                .ToList();
+
+            foreach (var partition in partitionsToRemove)
+            {
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                article.Partitions.Remove(partition);
+            }
         }
 
         #endregion Partition
-
-        articleRepository.Add(article);
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

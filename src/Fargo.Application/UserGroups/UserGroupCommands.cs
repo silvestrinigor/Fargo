@@ -144,15 +144,20 @@ public sealed class UserGroupUpdateCommandHandler(
 
         if (command.UserGroup.Nameid is not null)
         {
-            userGroup.Nameid = ValidateNameid(command.UserGroup.Nameid);
+            var nameid = ValidateNameid(command.UserGroup.Nameid);
+
+            if (userGroup.Nameid != nameid)
+            {
+                userGroup.Nameid = nameid;
+            }
         }
 
-        if (command.UserGroup.Description is not null)
+        if (command.UserGroup.Description is not null && userGroup.Description != command.UserGroup.Description)
         {
-            userGroup.Description = command.UserGroup.Description;
+            userGroup.Description = command.UserGroup.Description.Value;
         }
 
-        if (command.UserGroup.IsActive is not null)
+        if (command.UserGroup.IsActive is not null && userGroup.IsActive != command.UserGroup.IsActive.Value)
         {
             if (command.UserGroup.IsActive.Value)
             {
@@ -188,13 +193,32 @@ public sealed class UserGroupUpdateCommandHandler(
 
         #region Partition
 
-        foreach (var partitionGuid in command.UserGroup.Partitions ?? [])
+        if (command.UserGroup.Partitions is { } requestedPartitions)
         {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+            foreach (var partitionGuid in requestedPartitions)
+            {
+                if (userGroup.Partitions.Any(p => p.Guid == partitionGuid))
+                {
+                    continue;
+                }
 
-            actor.ValidateHasPartitionAccess(partition.Guid);
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            userGroup.Partitions.Add(partition);
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                userGroup.Partitions.Add(partition);
+            }
+
+            var partitionsToRemove = userGroup.Partitions
+                .Where(p => !requestedPartitions.Contains(p.Guid))
+                .ToList();
+
+            foreach (var partition in partitionsToRemove)
+            {
+                actor.ValidateHasPartitionAccess(partition.Guid);
+
+                userGroup.Partitions.Remove(partition);
+            }
         }
 
         #endregion Partition
