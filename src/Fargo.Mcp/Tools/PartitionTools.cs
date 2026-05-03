@@ -6,45 +6,37 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class PartitionTools(IPartitionManager partitions)
+public sealed class PartitionTools(IPartitionHttpClient partitions)
 {
     [McpServerTool(Name = "list_partitions"), Description("Lists partitions. Omit parentPartitionGuid to list root partitions; provide it to list direct children.")]
     public async Task<string> ListPartitions(
         [Description("GUID of the parent partition to list children of. Omit to list root partitions.")] string? parentPartitionGuid = null)
     {
-        try
+        Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
+        var response = await partitions.GetManyAsync(
+            parentPartitionGuid: parentGuid,
+            rootOnly: parentGuid is null ? true : null);
+        if (!response.IsSuccess)
         {
-            Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
-            var result = await partitions.GetManyAsync(
-                parentPartitionGuid: parentGuid,
-                rootOnly: parentGuid is null ? true : null);
-            var list = result.Select(p => new { p.Guid, p.Name, p.Description, p.ParentPartitionGuid, p.IsActive }).ToList();
-            foreach (var p in result)
-            {
-                await p.DisposeAsync();
-            }
+            return $"Error: {response.Error!.Detail}";
+        }
 
-            return JsonSerializer.Serialize(list);
-        }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+        var list = response.Data!.Select(p => new { p.Guid, p.Name, p.Description, p.ParentPartitionGuid, p.IsActive }).ToList();
+        return JsonSerializer.Serialize(list);
     }
 
     [McpServerTool(Name = "get_partition"), Description("Gets a single partition by its GUID.")]
     public async Task<string> GetPartition(
         [Description("The GUID of the partition.")] string partitionGuid)
     {
-        try
+        var response = await partitions.GetAsync(Guid.Parse(partitionGuid));
+        if (!response.IsSuccess)
         {
-            await using var partition = await partitions.GetAsync(Guid.Parse(partitionGuid));
-            return JsonSerializer.Serialize(new { partition.Guid, partition.Name, partition.Description, partition.ParentPartitionGuid, partition.IsActive });
+            return $"Error: {response.Error!.Detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+
+        var partition = response.Data!;
+        return JsonSerializer.Serialize(new { partition.Guid, partition.Name, partition.Description, partition.ParentPartitionGuid, partition.IsActive });
     }
 
     [McpServerTool(Name = "create_partition"), Description("Creates a new partition.")]
@@ -53,16 +45,14 @@ public sealed class PartitionTools(IPartitionManager partitions)
         [Description("An optional description.")] string? description = null,
         [Description("GUID of the parent partition. Omit to create a top-level partition.")] string? parentPartitionGuid = null)
     {
-        try
+        Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
+        var response = await partitions.CreateAsync(name, description, parentGuid);
+        if (!response.IsSuccess)
         {
-            Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
-            await using var partition = await partitions.CreateAsync(name, description, parentGuid);
-            return $"Created partition with GUID: {partition.Guid}";
+            return $"Error: {response.Error!.Detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+
+        return $"Created partition with GUID: {response.Data}";
     }
 
     [McpServerTool(Name = "update_partition"), Description("Updates a partition's name and/or description.")]
@@ -71,41 +61,25 @@ public sealed class PartitionTools(IPartitionManager partitions)
         [Description("The new name. Omit to leave unchanged.")] string? name = null,
         [Description("The new description. Omit to leave unchanged.")] string? description = null)
     {
-        try
+        var response = await partitions.UpdateAsync(Guid.Parse(partitionGuid), name, description);
+        if (!response.IsSuccess)
         {
-            await using var partition = await partitions.GetAsync(Guid.Parse(partitionGuid));
-            await partition.UpdateAsync(p =>
-            {
-                if (name is not null)
-                {
-                    p.Name = name;
-                }
+            return $"Error: {response.Error!.Detail}";
+        }
 
-                if (description is not null)
-                {
-                    p.Description = description;
-                }
-            });
-            return "Partition updated successfully.";
-        }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+        return "Partition updated successfully.";
     }
 
     [McpServerTool(Name = "delete_partition"), Description("Deletes a partition. The global root partition cannot be deleted.")]
     public async Task<string> DeletePartition(
         [Description("The GUID of the partition to delete.")] string partitionGuid)
     {
-        try
+        var response = await partitions.DeleteAsync(Guid.Parse(partitionGuid));
+        if (!response.IsSuccess)
         {
-            await partitions.DeleteAsync(Guid.Parse(partitionGuid));
-            return "Partition deleted successfully.";
+            return $"Error: {response.Error!.Detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+
+        return "Partition deleted successfully.";
     }
 }

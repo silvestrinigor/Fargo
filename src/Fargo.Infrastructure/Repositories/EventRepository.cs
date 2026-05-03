@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Events;
 using Fargo.Domain.Events;
+using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,7 +55,7 @@ public sealed class EventRepository(FargoDbContext context) : IEventQueryReposit
 
         if (pagination.HasValue)
         {
-            query = query.Skip(pagination.Value.Skip).Take(pagination.Value.Take);
+            query = query.WithPagination(pagination.Value);
         }
 
         return await query

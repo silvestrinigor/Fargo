@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public class RefreshTokenRepository(FargoDbContext context) : IRefreshTokenRepository
+public sealed class RefreshTokenRepository(FargoDbContext context) : IRefreshTokenRepository
 {
     private readonly DbSet<RefreshToken> refreshTokens = context.RefreshTokens;
 

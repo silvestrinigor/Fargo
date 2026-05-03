@@ -14,7 +14,7 @@ namespace Fargo.Infrastructure.Security;
 /// The resulting <see cref="TokenHash"/> can be safely stored in persistent
 /// storage without exposing the original token value.
 /// </remarks>
-public class Sha256TokenHasher : ITokenHasher
+public sealed class Sha256TokenHasher : ITokenHasher
 {
     /// <summary>
     /// Computes the SHA-256 hash of the specified token.

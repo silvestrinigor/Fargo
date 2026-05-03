@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class ItemTools(IItemManager items)
+public sealed class ItemTools(IItemHttpClient items)
 {
     [McpServerTool(Name = "list_items"), Description("Lists items accessible to the current user. Optionally filter by article GUID.")]
     public async Task<string> ListItems(
@@ -14,37 +14,29 @@ public sealed class ItemTools(IItemManager items)
         [Description("Zero-based page index.")] int? page = null,
         [Description("Maximum number of results to return.")] int? limit = null)
     {
-        try
+        Guid? articleGuidParsed = articleGuid is not null ? Guid.Parse(articleGuid) : null;
+        var response = await items.GetManyAsync(articleGuid: articleGuidParsed, page: page, limit: limit);
+        if (!response.IsSuccess)
         {
-            Guid? articleGuidParsed = articleGuid is not null ? Guid.Parse(articleGuid) : null;
-            var result = await items.GetManyAsync(articleGuid: articleGuidParsed, page: page, limit: limit);
-            var list = result.Select(i => new { i.Guid, i.ArticleGuid }).ToList();
-            foreach (var i in result)
-            {
-                await i.DisposeAsync();
-            }
+            return $"Error: {response.Error!.Detail}";
+        }
 
-            return JsonSerializer.Serialize(list);
-        }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+        var list = response.Data!.Select(i => new { i.Guid, i.ArticleGuid }).ToList();
+        return JsonSerializer.Serialize(list);
     }
 
     [McpServerTool(Name = "get_item"), Description("Gets a single item by its GUID.")]
     public async Task<string> GetItem(
         [Description("The GUID of the item.")] string itemGuid)
     {
-        try
+        var response = await items.GetAsync(Guid.Parse(itemGuid));
+        if (!response.IsSuccess)
         {
-            await using var item = await items.GetAsync(Guid.Parse(itemGuid));
-            return JsonSerializer.Serialize(new { item.Guid, item.ArticleGuid });
+            return $"Error: {response.Error!.Detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+
+        var item = response.Data!;
+        return JsonSerializer.Serialize(new { item.Guid, item.ArticleGuid });
     }
 
     [McpServerTool(Name = "create_item"), Description("Creates a new item as an instance of the specified article.")]
@@ -52,30 +44,26 @@ public sealed class ItemTools(IItemManager items)
         [Description("The GUID of the article this item is an instance of.")] string articleGuid,
         [Description("GUID of the partition to associate with the item. Omit to create a public item with no partition.")] string? partitionGuid = null)
     {
-        try
+        Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
+        var response = await items.CreateAsync(Guid.Parse(articleGuid), firstPartition);
+        if (!response.IsSuccess)
         {
-            Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-            await using var item = await items.CreateAsync(Guid.Parse(articleGuid), firstPartition);
-            return $"Created item with GUID: {item.Guid}";
+            return $"Error: {response.Error!.Detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+
+        return $"Created item with GUID: {response.Data}";
     }
 
     [McpServerTool(Name = "delete_item"), Description("Deletes an item.")]
     public async Task<string> DeleteItem(
         [Description("The GUID of the item to delete.")] string itemGuid)
     {
-        try
+        var response = await items.DeleteAsync(Guid.Parse(itemGuid));
+        if (!response.IsSuccess)
         {
-            await items.DeleteAsync(Guid.Parse(itemGuid));
-            return "Item deleted successfully.";
+            return $"Error: {response.Error!.Detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Error: {ex.Message}";
-        }
+
+        return "Item deleted successfully.";
     }
 }

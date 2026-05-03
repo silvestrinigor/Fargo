@@ -9,8 +9,8 @@
 
   <PropertyGroup>
     <PackageId>Fargo.Sdk</PackageId>
-    <Description>Typed .NET client SDK for the Fargo inventory and resource management API. Provides strongly-typed managers for Articles, Items, Partitions, Users, UserGroups, and ApiClients, with real-time SignalR event support and automatic token refresh.</Description>
-    <PackageTags>fargo;inventory;sdk;signalr;dotnet</PackageTags>
+    <Description>Typed .NET HTTP client SDK for the Fargo inventory and resource management API. Provides simple per-feature HTTP clients for Articles, Items, Partitions, Users, UserGroups, ApiClients, and Authentication.</Description>
+    <PackageTags>fargo;inventory;sdk;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
@@ -19,11 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.6" />
-<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
