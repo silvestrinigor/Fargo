@@ -13,21 +13,6 @@ namespace Fargo.Application;
 public readonly record struct Pagination
 {
     /// <summary>
-    /// Gets a pagination instance representing the first page
-    /// with a limit of 20 items.
-    /// </summary>
-    /// <remarks>
-    /// This property provides a convenient default pagination
-    /// configuration commonly used in queries.
-    ///
-    /// It is equivalent to:
-    /// <code>
-    /// new Pagination(Page.FirstPage, new Limit(20))
-    /// </code>
-    /// </remarks>
-    public static Pagination FirstPage20Items => new(Page.FirstPage, new Limit(20));
-
-    /// <summary>
     /// Initializes a new instance of <see cref="Pagination"/>.
     /// </summary>
     /// <param name="page">
