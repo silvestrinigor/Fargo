@@ -38,20 +38,18 @@ public interface IUserRepository
     );
 
     /// <summary>
-    /// Gets a paginated collection of user unique identifiers.
+    /// Gets a collection of user unique identifiers.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default
     );
 
     /// <summary>
-    /// Gets a paginated collection of user unique identifiers,
+    /// Gets a collection of user unique identifiers,
     /// filtered to users that belong to at least one of the specified partitions.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default

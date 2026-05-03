@@ -1,4 +1,3 @@
-using Fargo.Application.Persistence;
 using Fargo.Domain.Tokens;
 
 namespace Fargo.Application.Authentication;

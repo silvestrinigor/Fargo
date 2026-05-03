@@ -1,6 +1,5 @@
 using Fargo.Application.ApiClients;
 using Fargo.Application.Authentication;
-using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.ClientApplications;
 using Fargo.Domain.Partitions;

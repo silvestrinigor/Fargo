@@ -1,4 +1,4 @@
-namespace Fargo.Application.Persistence;
+namespace Fargo.Application;
 
 /// <summary>
 /// Represents a unit of work responsible for committing changes

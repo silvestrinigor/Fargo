@@ -1,4 +1,3 @@
-using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
