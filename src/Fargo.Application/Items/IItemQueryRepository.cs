@@ -1,5 +1,3 @@
-using Fargo.Domain;
-
 namespace Fargo.Application.Items;
 
 public interface IItemQueryRepository

@@ -1,5 +1,5 @@
+using Fargo.Application;
 using Fargo.Application.ApiClients;
-using Fargo.Domain;
 using Fargo.Domain.ClientApplications;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;

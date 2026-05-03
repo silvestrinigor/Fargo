@@ -1,5 +1,5 @@
+using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;

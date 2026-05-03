@@ -1,7 +1,6 @@
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Events;
-using Fargo.Domain;
 using Fargo.Domain.Events;
 using Microsoft.AspNetCore.Http.HttpResults;
 

@@ -1,4 +1,3 @@
-using Fargo.Domain;
 using Fargo.Domain.Events;
 
 namespace Fargo.Application.Events;

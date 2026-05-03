@@ -1,6 +1,6 @@
+using Fargo.Application;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
-using Fargo.Domain;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Infrastructure.Extensions;

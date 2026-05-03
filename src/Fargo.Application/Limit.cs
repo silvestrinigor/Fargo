@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Fargo.Domain;
+namespace Fargo.Application;
 
 /// <summary>
 /// Represents the maximum number of items returned in a paginated query.

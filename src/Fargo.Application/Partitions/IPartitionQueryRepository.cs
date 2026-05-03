@@ -1,5 +1,3 @@
-using Fargo.Domain;
-
 namespace Fargo.Application.Partitions;
 
 public interface IPartitionQueryRepository

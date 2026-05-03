@@ -1,5 +1,5 @@
+using Fargo.Application;
 using Fargo.Application.Partitions;
-using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;

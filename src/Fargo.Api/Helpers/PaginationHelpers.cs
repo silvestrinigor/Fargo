@@ -1,4 +1,4 @@
-using Fargo.Domain;
+using Fargo.Application;
 
 namespace Fargo.Api.Helpers;
 
