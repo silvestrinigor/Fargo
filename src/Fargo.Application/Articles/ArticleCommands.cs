@@ -11,13 +11,7 @@ namespace Fargo.Application.Articles;
 #region Create
 
 public sealed record ArticleCreateCommand(
-    Name Name,
-    Description? Description = null,
-    TimeSpan? ShelfLife = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? PartitionGuids = null,
-    bool? IsActive = null
+    ArticleCreateDto Article
 ) : ICommand<Guid>;
 
 public sealed class ArticleCreateCommandHandler(
@@ -38,14 +32,14 @@ public sealed class ArticleCreateCommandHandler(
 
         var article = new Article
         {
-            Name = command.Name,
-            Description = command.Description ?? Description.Empty,
-            ShelfLife = command.ShelfLife
+            Name = command.Article.Name,
+            Description = command.Article.Description ?? Description.Empty,
+            ShelfLife = command.Article.ShelfLife
         };
 
         #region Metrics
 
-        if (command.Metrics is { } metrics)
+        if (command.Article.Metrics is { } metrics)
         {
             article.Metrics = new ArticleMetrics
             {
@@ -60,7 +54,7 @@ public sealed class ArticleCreateCommandHandler(
 
         #region Barcode
 
-        if (command.Barcodes is { } barcodes)
+        if (command.Article.Barcodes is { } barcodes)
         {
             if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
             {
@@ -131,7 +125,7 @@ public sealed class ArticleCreateCommandHandler(
 
         #region Partition
 
-        foreach (var partitionGuid in command.PartitionGuids ?? [])
+        foreach (var partitionGuid in command.Article.Partitions ?? [])
         {
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
@@ -199,13 +193,7 @@ public sealed class ArticleDeleteCommandHandler(
 
 public sealed record ArticleUpdateCommand(
     Guid ArticleGuid,
-    Name Name,
-    Description Description,
-    TimeSpan? ShelfLife,
-    ArticleMetricsDto Metrics,
-    ArticleBarcodesDto Barcodes,
-    IReadOnlyCollection<Guid> PartitionGuids,
-    bool IsActive
+    ArticleUpdateDto Article
 ) : ICommand;
 
 public sealed class ArticleUpdateCommandHandler(
@@ -227,15 +215,15 @@ public sealed class ArticleUpdateCommandHandler(
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        article.Name = command.Name;
+        article.Name = command.Article.Name;
 
-        article.Description = command.Description;
+        article.Description = command.Article.Description;
 
-        article.ShelfLife = command.ShelfLife;
+        article.ShelfLife = command.Article.ShelfLife;
 
         #region Metrics
 
-        if (command.Metrics is { } metrics)
+        if (command.Article.Metrics is { } metrics)
         {
             article.Metrics = new ArticleMetrics
             {
@@ -250,7 +238,7 @@ public sealed class ArticleUpdateCommandHandler(
 
         #region Barcode
 
-        if (command.Barcodes is { } barcodes)
+        if (command.Article.Barcodes is { } barcodes)
         {
             if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
             {
@@ -321,7 +309,7 @@ public sealed class ArticleUpdateCommandHandler(
 
         #region Partition
 
-        foreach (var partitionGuid in command.PartitionGuids ?? [])
+        foreach (var partitionGuid in command.Article.Partitions ?? [])
         {
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
@@ -335,8 +323,6 @@ public sealed class ArticleUpdateCommandHandler(
         articleRepository.Add(article);
 
         await unitOfWork.SaveChanges(cancellationToken);
-
-        return article.Guid;
     }
 }
 

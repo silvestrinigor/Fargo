@@ -9,22 +9,31 @@ public sealed record ArticleDto(
     Name Name,
     Description Description,
     TimeSpan? ShelfLife,
-    ArticleMetricsDto? Metrics,
+    ArticleMetricsDto Metrics,
     ArticleBarcodesDto Barcodes,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,
     Guid? EditedByGuid
 );
 
+public sealed record ArticleCreateDto(
+    Name Name,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
+);
+
 public sealed record ArticleUpdateDto(
     Name Name,
     Description Description,
     TimeSpan? ShelfLife,
-    ArticleMetricsDto? Metrics,
+    ArticleMetricsDto Metrics,
     ArticleBarcodesDto Barcodes,
     IReadOnlyCollection<Guid> Partitions,
-    bool IsActive,
-    Guid? EditedByGuid
+    bool IsActive
 );
 
 public sealed record ArticleBarcodesDto(
