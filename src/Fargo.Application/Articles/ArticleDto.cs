@@ -1,11 +1,13 @@
+using Fargo.Domain;
+
 namespace Fargo.Application.Articles;
 
 public sealed record ArticleDto(
     Guid Guid,
-    string Name,
-    string Description,
-    ArticleMetricsDto? Metrics,
+    Name Name,
+    Description Description,
     TimeSpan? ShelfLife,
+    ArticleMetricsDto? Metrics,
     ArticleBarcodesDto Barcodes,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,

@@ -1,4 +1,5 @@
 using Fargo.Api;
+using Fargo.Api.Articles;
 using Fargo.Api.Extensions;
 using Fargo.Api.Hubs;
 using Fargo.Api.Middlewares;

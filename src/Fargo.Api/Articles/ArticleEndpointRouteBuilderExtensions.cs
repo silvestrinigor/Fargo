@@ -3,7 +3,7 @@ using Fargo.Application.Articles;
 using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.Api.Extensions;
+namespace Fargo.Api.Articles;
 
 public static class ArticleEndpointRouteBuilderExtension
 {
@@ -41,7 +41,8 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithSummary("Gets a single article")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
             .Produces<ArticleDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound
+        );
 
         return builder;
     }
@@ -50,7 +51,8 @@ public static class ArticleEndpointRouteBuilderExtension
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleSingleQuery, ArticleDto?> handler,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var query = new ArticleSingleQuery(articleGuid, temporalAsOf);
 
@@ -70,7 +72,8 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithSummary("Gets multiple articles")
             .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
             .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            .Produces(StatusCodes.Status204NoContent
+        );
 
         return builder;
     }
@@ -79,17 +82,18 @@ public static class ArticleEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        IReadOnlyCollection<Guid>? insideAnyOfThiPartitions,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions,
         bool? notInsideAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
 
         var query = new ArticlesQuery(
             withPagination,
             temporalAsOfDateTime,
-            insideAnyOfThiPartitions,
+            insideAnyOfThisPartitions,
             notInsideAnyPartition
         );
 
