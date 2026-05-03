@@ -1,7 +1,6 @@
 using Fargo.Application;
-using Fargo.Application.Partitions;
 using Fargo.Application.Users;
-using Fargo.Domain.Partitions;
+using Fargo.Domain;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
@@ -14,255 +13,119 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     private readonly DbSet<User> users = context.Users;
 
     public Task<bool> Any(CancellationToken cancellationToken = default)
-    {
-        return context.Users.AnyAsync(cancellationToken);
-    }
+        => users.AnyAsync(cancellationToken);
 
-    public void Add(User user)
-    {
-        context.Users.Add(user);
-    }
+    public void Add(User user) => users.Add(user);
 
-    public async Task<User?> GetByGuid(
+    public void Remove(User user) => users.Remove(user);
+
+    public Task<User?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+        => IncludeAggregate(users)
+            .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
+
+    public Task<User?> GetByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+        => IncludeAggregate(users)
+            .SingleOrDefaultAsync(user => user.Nameid == nameid, cancellationToken);
+
+    public Task<bool> ExistsByGuid(Guid guid, CancellationToken cancellationToken = default)
+        => users.AnyAsync(user => user.Guid == guid, cancellationToken);
+
+    public Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+        => users.AnyAsync(user => user.Nameid == nameid, cancellationToken);
+
+    public async Task<UserDto?> GetInfoByGuid(
         Guid entityGuid,
+        DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        return await users
+        var user = await ApplyPartitionFilter(
+                users
+                    .TemporalAsOfIfProvided(asOfDateTime)
+                    .AsNoTracking()
+                    .Include(user => user.Permissions)
+                    .Include(user => user.Partitions)
+                    .Include(user => user.UserGroups),
+                insideAnyOfThisPartitions,
+                notInsideAnyPartition)
+            .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
+
+        return user is null ? null : Map(user);
+    }
+
+    public async Task<IReadOnlyCollection<UserDto>> GetManyInfo(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await ApplyPartitionFilter(
+                users
+                    .TemporalAsOfIfProvided(asOfDateTime)
+                    .AsNoTracking()
+                    .Include(user => user.Permissions)
+                    .Include(user => user.Partitions)
+                    .Include(user => user.UserGroups),
+                insideAnyOfThisPartitions,
+                notInsideAnyPartition)
+            .OrderBy(user => user.Guid)
+            .WithPagination(pagination)
+            .ToListAsync(cancellationToken);
+
+        return [.. result.Select(Map)];
+    }
+
+    private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
+        => query
             .Include(user => user.Permissions)
             .Include(user => user.UserGroups)
-                .ThenInclude(g => g.Permissions)
+                .ThenInclude(group => group.Permissions)
             .Include(user => user.UserGroups)
-                .ThenInclude(g => g.PartitionAccesses)
+                .ThenInclude(group => group.PartitionAccesses)
+            .Include(user => user.UserGroups)
+                .ThenInclude(group => group.Partitions)
             .Include(user => user.PartitionAccesses)
-            .Include(user => user.Partitions)
-            .Where(user => user.Guid == entityGuid)
-            .SingleOrDefaultAsync(cancellationToken);
-    }
+            .Include(user => user.Partitions);
 
-    public async Task<User?> GetByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default)
+    private static IQueryable<User> ApplyPartitionFilter(
+        IQueryable<User> query,
+        IReadOnlyCollection<Guid>? partitionGuids,
+        bool? notInsideAnyPartition)
     {
-        return await users
-            .Include(user => user.Permissions)
-            .Include(user => user.UserGroups)
-                .ThenInclude(g => g.Permissions)
-            .Include(user => user.UserGroups)
-                .ThenInclude(g => g.PartitionAccesses)
-            .Include(user => user.PartitionAccesses)
-            .Include(user => user.Partitions)
-            .Where(user => user.Nameid == nameid)
-            .SingleOrDefaultAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid>? partitionFilter = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (!await users.AnyAsync(u => u.Guid == entityGuid, cancellationToken))
+        if (notInsideAnyPartition is true)
         {
-            return null;
+            return query.Where(user => !user.Partitions.Any());
         }
 
-        IQueryable<Partition> query = users
-            .Where(u => u.Guid == entityGuid)
-            .SelectMany(u => u.Partitions);
-
-        if (partitionFilter is not null)
+        if (notInsideAnyPartition is false)
         {
-            query = query.Where(p => partitionFilter.Contains(p.Guid));
+            query = query.Where(user => user.Partitions.Any());
         }
 
-        return await query
-            .AsNoTracking()
-            .Select(PartitionMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
-    }
-
-    public void Remove(User user)
-    {
-        context.Users.Remove(user);
-    }
-
-    public async Task<bool> ExistsByGuid(
-        Guid guid,
-        CancellationToken cancellationToken = default)
-    {
-        return await context.Users
-            .AnyAsync(user => user.Guid == guid, cancellationToken);
-    }
-
-    public async Task<bool> ExistsByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default)
-    {
-        return await context.Users
-            .AnyAsync(user => user.Nameid == nameid, cancellationToken);
-    }
-
-    public async Task<UserInformation?> GetInfoByGuid(
-        Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        return await users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(user => user.Guid == entityGuid)
-            .Select(UserMappings.InformationProjection)
-            .SingleOrDefaultAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfo(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        return await users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(user => search == null || EF.Functions.Like(user.Nameid, $"%{search}%"))
-            .OrderBy(user => user.Guid)
-            .WithPagination(pagination)
-            .Select(UserMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfoWithNoPartition(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        return await users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(u => !u.Partitions.Any())
-            .Where(u => search == null || EF.Functions.Like(u.Nameid, $"%{search}%"))
-            .OrderBy(u => u.Guid)
-            .WithPagination(pagination)
-            .Select(UserMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<UserInformation?> GetInfoByGuidInPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (partitionGuids == null || partitionGuids.Count == 0)
+        if (partitionGuids is { Count: > 0 })
         {
-            return null;
+            query = query.Where(user =>
+                !user.Partitions.Any() ||
+                user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 
-        IQueryable<User> query = users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking();
-
-        return await query
-            .Where(user => user.Guid == entityGuid)
-            .Where(user => user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .Select(UserMappings.InformationProjection)
-            .FirstOrDefaultAsync(cancellationToken);
+        return query;
     }
 
-    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitions(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (partitionGuids == null || partitionGuids.Count == 0)
-        {
-            return [];
-        }
-
-        IQueryable<User> query = users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(user => search == null || EF.Functions.Like(user.Nameid, $"%{search}%"))
-            .Where(user => user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
-
-        return await query
-            .OrderBy(user => user.Guid)
-            .WithPagination(pagination)
-            .Select(UserMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<UserInformation?> GetInfoByGuidPublicOrInPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        return await users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(user => user.Guid == entityGuid)
-            .Where(user => !user.Partitions.Any()
-                || user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .Select(UserMappings.InformationProjection)
-            .FirstOrDefaultAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<UserInformation>> GetManyInfoInPartitionsOrPublic(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        return await users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(user => search == null || EF.Functions.Like(user.Nameid, $"%{search}%"))
-            .Where(user => !user.Partitions.Any()
-                || user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .OrderBy(user => user.Guid)
-            .WithPagination(pagination)
-            .Select(UserMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        return await users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .OrderBy(user => user.Guid)
-            .WithPagination(pagination)
-            .Select(user => user.Guid)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (partitionGuids == null || partitionGuids.Count == 0)
-        {
-            return [];
-        }
-
-        IQueryable<User> query = users
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(user => user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
-
-        return await query
-            .OrderBy(user => user.Guid)
-            .WithPagination(pagination)
-            .Select(user => user.Guid)
-            .ToListAsync(cancellationToken);
-    }
+    private static UserDto Map(User user)
+        => new(
+            user.Guid,
+            user.Nameid,
+            user.FirstName,
+            user.LastName,
+            user.Description,
+            user.DefaultPasswordExpirationPeriod,
+            user.RequirePasswordChangeAt,
+            [.. user.Permissions.Select(permission => new Permission(permission.Guid, permission.Action))],
+            [.. user.Partitions.Select(partition => partition.Guid)],
+            [.. user.UserGroups.Select(group => group.Guid)],
+            user.IsActive,
+            user.EditedByGuid);
 }

@@ -57,24 +57,6 @@ public interface IArticleRepository
     );
 
     /// <summary>
-    /// Gets a paginated collection of article unique identifiers.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Gets a paginated collection of article unique identifiers,
-    /// filtered to articles that belong to at least one of the specified partitions.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     /// Determines whether the specified article has any associated items.
     /// </summary>
     Task<bool> HasItemsAssociated(

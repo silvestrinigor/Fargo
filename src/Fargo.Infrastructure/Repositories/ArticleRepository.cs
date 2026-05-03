@@ -9,271 +9,141 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
+public sealed class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
     private readonly DbSet<Article> articles = context.Articles;
-
     private readonly DbSet<Item> items = context.Items;
 
     public void Add(Article article) => articles.Add(article);
 
     public void Remove(Article article) => articles.Remove(article);
 
-    public async Task<bool> HasItemsAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
-        => await items.Where(x => x.Article.Guid == articleGuid).AnyAsync(cancellationToken);
+    public Task<bool> HasItemsAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
+        => items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
 
-    public async Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
-        => await articles
-            .Include(a => a.Partitions)
-            .WithBarcodes()
-            .Where(a => a.Guid == entityGuid)
-            .SingleOrDefaultAsync(cancellationToken);
+    public Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+        => articles
+            .Include(article => article.Partitions)
+            .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
+
+    public Task<bool> ExistsByBarcode(Ean13 code)
+        => articles.AnyAsync(article => article.Barcodes.Ean13 == code);
+
+    public Task<bool> ExistsByBarcode(Ean8 code)
+        => articles.AnyAsync(article => article.Barcodes.Ean8 == code);
+
+    public Task<bool> ExistsByBarcode(UpcE code)
+        => articles.AnyAsync(article => article.Barcodes.UpcE == code);
+
+    public Task<bool> ExistsByBarcode(UpcA code)
+        => articles.AnyAsync(article => article.Barcodes.UpcA == code);
+
+    public Task<bool> ExistsByBarcode(Code128 code)
+        => articles.AnyAsync(article => article.Barcodes.Code128 == code);
+
+    public Task<bool> ExistsByBarcode(Code39 code)
+        => articles.AnyAsync(article => article.Barcodes.Code39 == code);
+
+    public Task<bool> ExistsByBarcode(Itf14 code)
+        => articles.AnyAsync(article => article.Barcodes.Itf14 == code);
+
+    public Task<bool> ExistsByBarcode(Gs1128 code)
+        => articles.AnyAsync(article => article.Barcodes.Gs1128 == code);
+
+    public Task<bool> ExistsByBarcode(QrCode code)
+        => articles.AnyAsync(article => article.Barcodes.QrCode == code);
+
+    public Task<bool> ExistsByBarcode(DataMatrix code)
+        => articles.AnyAsync(article => article.Barcodes.DataMatrix == code);
 
     public async Task<ArticleDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var article = await articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Include(a => a.Partitions)
-            .WithBarcodes()
-            .Where(article => article.Guid == entityGuid)
-            .SingleOrDefaultAsync(cancellationToken);
+        var article = await ApplyPartitionFilter(
+                articles
+                    .TemporalAsOfIfProvided(asOfDateTime)
+                    .AsNoTracking()
+                    .Include(article => article.Partitions),
+                insideAnyOfThisPartitions,
+                notInsideAnyPartition)
+            .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
-        return article?.ToInformation();
+        return article is null ? null : Map(article);
     }
 
     public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        string? search = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Include(a => a.Partitions)
-            .WithBarcodes()
-            .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
+        var result = await ApplyPartitionFilter(
+                articles
+                    .TemporalAsOfIfProvided(asOfDateTime)
+                    .AsNoTracking()
+                    .Include(article => article.Partitions),
+                insideAnyOfThisPartitions,
+                notInsideAnyPartition)
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(a => a.ToInformation())];
+        return [.. result.Select(Map)];
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
+    private static IQueryable<Article> ApplyPartitionFilter(
+        IQueryable<Article> query,
+        IReadOnlyCollection<Guid>? partitionGuids,
+        bool? notInsideAnyPartition)
     {
-        return await articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .OrderBy(article => article.Guid)
-            .WithPagination(pagination)
-            .Select(article => article.Guid)
-            .ToListAsync(cancellationToken);
+        if (notInsideAnyPartition is true)
+        {
+            return query.Where(article => !article.Partitions.Any());
+        }
+
+        if (notInsideAnyPartition is false)
+        {
+            query = query.Where(article => article.Partitions.Any());
+        }
+
+        if (partitionGuids is { Count: > 0 })
+        {
+            query = query.Where(article =>
+                !article.Partitions.Any() ||
+                article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+        }
+
+        return query;
     }
 
-    public async Task<ArticleDto?> GetInfoByGuidInPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (partitionGuids == null || partitionGuids.Count == 0)
-        {
-            return null;
-        }
-
-        var query = articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking();
-
-        var article = await query
-            .WithBarcodes()
-            .Where(article => article.Guid == entityGuid)
-            .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return article?.ToInformation();
-    }
-
-    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoWithNoPartition(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        var result = await articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Include(a => a.Partitions)
-            .WithBarcodes()
-            .Where(a => !a.Partitions.Any())
-            .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
-            .OrderBy(a => a.Guid)
-            .WithPagination(pagination)
-            .ToListAsync(cancellationToken);
-
-        return [.. result.Select(a => a.ToInformation())];
-    }
-
-    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoInPartitions(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (partitionGuids == null || partitionGuids.Count == 0)
-        {
-            return [];
-        }
-
-        var query = articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking();
-
-        var result = await query
-            .WithBarcodes()
-            .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
-            .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .OrderBy(article => article.Guid)
-            .WithPagination(pagination)
-            .ToListAsync(cancellationToken);
-
-        return [.. result.Select(a => a.ToInformation())];
-    }
-
-    public async Task<ArticleDto?> GetInfoByGuidPublicOrInPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        var article = await articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Include(a => a.Partitions)
-            .WithBarcodes()
-            .Where(article => article.Guid == entityGuid)
-            .Where(article => !article.Partitions.Any()
-                || article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return article?.ToInformation();
-    }
-
-    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoInPartitionsOrPublic(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        var result = await articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Include(a => a.Partitions)
-            .WithBarcodes()
-            .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
-            .Where(article => !article.Partitions.Any()
-                || article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .OrderBy(article => article.Guid)
-            .WithPagination(pagination)
-            .ToListAsync(cancellationToken);
-
-        return [.. result.Select(a => a.ToInformation())];
-    }
-
-    public async Task<(BarcodeFormat Format, string Code)?> FindConflictingBarcode(
-        ArticleBarcodes barcodes,
-        Guid excludeArticleGuid,
-        CancellationToken cancellationToken = default)
-    {
-        if (barcodes.Ean13 is { } ean13 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Ean13 == ean13, cancellationToken))
-        {
-            return (BarcodeFormat.Ean13, ean13.Code);
-        }
-
-        if (barcodes.Ean8 is { } ean8 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Ean8 == ean8, cancellationToken))
-        {
-            return (BarcodeFormat.Ean8, ean8.Code);
-        }
-
-        if (barcodes.UpcA is { } upcA && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.UpcA == upcA, cancellationToken))
-        {
-            return (BarcodeFormat.UpcA, upcA.Code);
-        }
-
-        if (barcodes.UpcE is { } upcE && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.UpcE == upcE, cancellationToken))
-        {
-            return (BarcodeFormat.UpcE, upcE.Code);
-        }
-
-        if (barcodes.Code128 is { } code128 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Code128 == code128, cancellationToken))
-        {
-            return (BarcodeFormat.Code128, code128.Code);
-        }
-
-        if (barcodes.Code39 is { } code39 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Code39 == code39, cancellationToken))
-        {
-            return (BarcodeFormat.Code39, code39.Code);
-        }
-
-        if (barcodes.Itf14 is { } itf14 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Itf14 == itf14, cancellationToken))
-        {
-            return (BarcodeFormat.Itf14, itf14.Code);
-        }
-
-        if (barcodes.Gs1128 is { } gs1128 && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.Gs1128 == gs1128, cancellationToken))
-        {
-            return (BarcodeFormat.Gs1128, gs1128.Code);
-        }
-
-        if (barcodes.QrCode is { } qrCode && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.QrCode == qrCode, cancellationToken))
-        {
-            return (BarcodeFormat.QrCode, qrCode.Code);
-        }
-
-        if (barcodes.DataMatrix is { } dataMatrix && await articles.AnyAsync(a => a.Guid != excludeArticleGuid && a.Barcodes.DataMatrix == dataMatrix, cancellationToken))
-        {
-            return (BarcodeFormat.DataMatrix, dataMatrix.Code);
-        }
-
-        return null;
-    }
-
-    public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (partitionGuids == null || partitionGuids.Count == 0)
-        {
-            return [];
-        }
-
-        var query = articles
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking();
-
-        return await query
-            .Where(article => article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)))
-            .OrderBy(article => article.Guid)
-            .WithPagination(pagination)
-            .Select(article => article.Guid)
-            .ToListAsync(cancellationToken);
-    }
-}
-
-file static class ArticleQueryExtensions
-{
-    // Barcodes are columns on the Articles table — no separate Include needed.
-    internal static IQueryable<Article> WithBarcodes(this IQueryable<Article> query) => query;
+    private static ArticleDto Map(Article article)
+        => new(
+            article.Guid,
+            article.Name,
+            article.Description,
+            article.ShelfLife,
+            new ArticleMetricsDto(
+                article.Metrics.Mass,
+                article.Metrics.LengthX,
+                article.Metrics.LengthY,
+                article.Metrics.LengthZ),
+            new ArticleBarcodesDto(
+                article.Barcodes.Ean13,
+                article.Barcodes.Ean8,
+                article.Barcodes.UpcA,
+                article.Barcodes.UpcE,
+                article.Barcodes.Code128,
+                article.Barcodes.Code39,
+                article.Barcodes.Itf14,
+                article.Barcodes.Gs1128,
+                article.Barcodes.QrCode,
+                article.Barcodes.DataMatrix),
+            [.. article.Partitions.Select(partition => partition.Guid)],
+            article.IsActive,
+            article.EditedByGuid);
 }

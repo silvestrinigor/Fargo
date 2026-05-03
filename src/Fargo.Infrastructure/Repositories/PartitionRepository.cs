@@ -11,96 +11,54 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 {
     private readonly DbSet<Partition> partitions = context.Partitions;
 
-    public void Add(Partition partition)
-    {
-        partitions.Add(partition);
-    }
+    public void Add(Partition partition) => partitions.Add(partition);
 
-    public void Remove(Partition partition)
-    {
-        partitions.Remove(partition);
-    }
+    public void Remove(Partition partition) => partitions.Remove(partition);
 
-    public async Task<Partition?> GetByGuid(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default)
-    {
-        return await partitions
-            .Where(partition => partition.Guid == entityGuid)
-            .SingleOrDefaultAsync(cancellationToken);
-    }
+    public Task<Partition?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+        => partitions.SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
 
-    public async Task<PartitionInformation?> GetInfoByGuid(
+    public async Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        return await partitions
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(partition => partition.Guid == entityGuid)
-            .Select(PartitionMappings.InformationProjection)
-            .SingleOrDefaultAsync(cancellationToken);
+        var partition = await ApplyPartitionFilter(
+                partitions
+                    .TemporalAsOfIfProvided(asOfDateTime)
+                    .AsNoTracking(),
+                insideAnyOfThisPartitions,
+                notInsideAnyPartition)
+            .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
+
+        return partition is null ? null : Map(partition);
     }
 
-    public async Task<IReadOnlyCollection<PartitionInformation>> GetManyInfo(
+    public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
-        Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
-        bool rootOnly = false,
-        string? search = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        return await partitions
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(partition => search == null || EF.Functions.Like(partition.Name, $"%{search}%"))
-            .Where(partition =>
-                !rootOnly || partition.ParentPartitionGuid == null)
-            .Where(partition =>
-                parentPartitionGuid == null ||
-                partition.ParentPartitionGuid == parentPartitionGuid)
+        var result = await ApplyPartitionFilter(
+                partitions
+                    .TemporalAsOfIfProvided(asOfDateTime)
+                    .AsNoTracking(),
+                insideAnyOfThisPartitions,
+                notInsideAnyPartition)
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
-            .Select(PartitionMappings.InformationProjection)
             .ToListAsync(cancellationToken);
-    }
 
-    public async Task<IReadOnlyCollection<PartitionInformation>> GetManyInfoByGuids(
-        IReadOnlyCollection<Guid> partitionGuids,
-        Pagination pagination,
-        Guid? parentPartitionGuid = null,
-        DateTimeOffset? asOfDateTime = null,
-        bool rootOnly = false,
-        string? search = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(partitionGuids);
-
-        if (partitionGuids.Count == 0)
-        {
-            return [];
-        }
-
-        return await partitions
-            .TemporalAsOfIfProvided(asOfDateTime)
-            .AsNoTracking()
-            .Where(partition => search == null || EF.Functions.Like(partition.Name, $"%{search}%"))
-            .Where(partition => partitionGuids.Contains(partition.Guid))
-            .Where(partition =>
-                !rootOnly || partition.ParentPartitionGuid == null)
-            .Where(partition =>
-                parentPartitionGuid == null ||
-                partition.ParentPartitionGuid == parentPartitionGuid)
-            .OrderBy(partition => partition.Guid)
-            .WithPagination(pagination)
-            .Select(PartitionMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
+        return [.. result.Select(Map)];
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
         Guid partitionGuid,
-        bool includeSelf = true,
+        bool includeRoot = true,
         CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
@@ -125,7 +83,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             .SqlQuery<Guid>(query)
             .ToListAsync(cancellationToken);
 
-        if (!includeSelf)
+        if (!includeRoot)
         {
             guids.RemoveAll(guid => guid == partitionGuid);
         }
@@ -138,8 +96,6 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         bool includeRoots = true,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(partitionGuids);
-
         if (partitionGuids.Count == 0)
         {
             return [];
@@ -152,12 +108,38 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             var descendants = await GetDescendantGuids(
                 partitionGuid,
                 includeRoots,
-                cancellationToken
-            );
+                cancellationToken);
 
             result.UnionWith(descendants);
         }
 
         return [.. result];
     }
+
+    private static IQueryable<Partition> ApplyPartitionFilter(
+        IQueryable<Partition> query,
+        IReadOnlyCollection<Guid>? partitionGuids,
+        bool? notInsideAnyPartition)
+    {
+        if (notInsideAnyPartition is true)
+        {
+            return query.Where(_ => false);
+        }
+
+        if (partitionGuids is { Count: > 0 })
+        {
+            query = query.Where(partition => partitionGuids.Contains(partition.Guid));
+        }
+
+        return query;
+    }
+
+    private static PartitionDto Map(Partition partition)
+        => new(
+            partition.Guid,
+            partition.Name,
+            partition.Description,
+            partition.ParentPartitionGuid,
+            partition.IsActive,
+            partition.EditedByGuid);
 }

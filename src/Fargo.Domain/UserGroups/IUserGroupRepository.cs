@@ -30,26 +30,6 @@ public interface IUserGroupRepository
     );
 
     /// <summary>
-    /// Gets a collection of user group unique identifiers.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        Guid? userGuid = null,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Gets a collection of user group unique identifiers,
-    /// filtered to user groups that belong to at least one of the specified partitions.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        IReadOnlyCollection<Guid> partitionGuids,
-        Guid? userGuid = null,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     /// Adds a new user group to the persistence context.
     /// </summary>
     void Add(UserGroup userGroup);
