@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Fargo.Api.Contracts/Fargo.Api.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Fargo.Domain\Fargo.Domain.csproj" />
     <ProjectReference Include="..\..\src\Fargo.Sdk\Fargo.Sdk.csproj" />
   </ItemGroup>

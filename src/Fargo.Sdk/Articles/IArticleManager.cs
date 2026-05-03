@@ -1,7 +1,7 @@
 namespace Fargo.Api.Articles;
 
 /// <summary>
-/// Combined article interface: CRUD, image management, barcode management, and Created events.
+/// Combined article interface: CRUD + Created events.
 /// Inject this when you need everything, or inject the narrower interfaces individually.
 /// </summary>
-public interface IArticleManager : IArticleService, IArticleImageService, IArticleBarcodeService, IArticleEventSource { }
+public interface IArticleManager : IArticleService, IArticleEventSource { }

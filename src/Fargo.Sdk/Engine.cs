@@ -49,10 +49,8 @@ public sealed class Engine : IEngine
 
         var articleHttpClient = new ArticleHttpClient(fargoHttp);
         var articleService = new ArticleService(articleHttpClient, _hub);
-        var articleImageService = new ArticleImageService(articleHttpClient);
-        var articleBarcodeService = new ArticleBarcodeService(articleHttpClient);
         var articleEventSource = new ArticleEventSource(_hub);
-        Articles = new ArticleManager(articleService, articleImageService, articleBarcodeService, articleEventSource);
+        Articles = new ArticleManager(articleService, articleEventSource);
 
         var userHttpClient = new UserHttpClient(fargoHttp);
         var userService = new UserService(userHttpClient, _hub);

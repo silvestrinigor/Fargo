@@ -905,45 +905,6 @@ namespace Fargo.Infrastructure.Migrations
                                 .HasForeignKey("ArticleGuid");
                         });
 
-                    b.OwnsOne("Fargo.Domain.Articles.ArticleImages", "Images", b1 =>
-                        {
-                            b1.Property<Guid>("ArticleGuid")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("ImageKey")
-                                .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)")
-                                .HasColumnName("ImageKey");
-
-                            b1.Property<DateTime>("PeriodEnd")
-                                .ValueGeneratedOnAddOrUpdate()
-                                .HasColumnType("datetime2")
-                                .HasColumnName("PeriodEnd");
-
-                            b1.Property<DateTime>("PeriodStart")
-                                .ValueGeneratedOnAddOrUpdate()
-                                .HasColumnType("datetime2")
-                                .HasColumnName("PeriodStart");
-
-                            b1.HasKey("ArticleGuid");
-
-                            b1.ToTable("Articles", (string)null);
-
-                            b1.ToTable(tb => tb.IsTemporal(ttb =>
-                                    {
-                                        ttb.UseHistoryTable("ArticlesHistory");
-                                        ttb
-                                            .HasPeriodStart("PeriodStart")
-                                            .HasColumnName("PeriodStart");
-                                        ttb
-                                            .HasPeriodEnd("PeriodEnd")
-                                            .HasColumnName("PeriodEnd");
-                                    }));
-
-                            b1.WithOwner()
-                                .HasForeignKey("ArticleGuid");
-                        });
-
                     b.OwnsOne("Fargo.Domain.Articles.ArticleMetrics", "Metrics", b1 =>
                         {
                             b1.Property<Guid>("ArticleGuid")
@@ -999,9 +960,6 @@ namespace Fargo.Infrastructure.Migrations
                         });
 
                     b.Navigation("Barcodes")
-                        .IsRequired();
-
-                    b.Navigation("Images")
                         .IsRequired();
 
                     b.Navigation("Metrics")

@@ -1,7 +1,5 @@
-using Fargo.Api.Contracts.Articles;
-using Fargo.Api.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Articles;
 using Fargo.Api.Http;
-using Fargo.Api.Partitions;
 using Fargo.Sdk;
 
 namespace Fargo.Api.Articles;
@@ -71,14 +69,16 @@ public sealed class ArticleClient : IArticleClient
     public async Task<FargoSdkResponse<Guid>> CreateAsync(
         string name,
         string? description = null,
-        Guid? firstPartition = null,
+        IReadOnlyCollection<Guid>? partitions = null,
+        ArticleBarcodes? barcodes = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
+        bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateDto, Guid>(
             "/articles",
-            ContractMappings.ToArticleCreateDto(name, description, firstPartition, metrics, shelfLife),
+            ContractMappings.ToArticleCreateDto(name, description, partitions, barcodes, metrics, shelfLife, isActive),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -92,15 +92,18 @@ public sealed class ArticleClient : IArticleClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid articleGuid,
-        string? name = null,
+        string name,
         string? description = null,
+        IReadOnlyCollection<Guid>? partitions = null,
+        ArticleBarcodes? barcodes = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
+        bool isActive = true,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<ArticleUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<ArticleUpdateDto>(
             $"/articles/{articleGuid}",
-            ContractMappings.ToArticleUpdateDto(name, description, metrics, shelfLife),
+            ContractMappings.ToArticleUpdateDto(name, description, partitions, barcodes, metrics, shelfLife, isActive),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -118,142 +121,6 @@ public sealed class ArticleClient : IArticleClient
     {
         var httpResponse = await httpClient.DeleteAsync(
             $"/articles/{articleGuid}",
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
-        Guid articleGuid,
-        Guid partitionGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.PostJsonAsync(
-            $"/articles/{articleGuid}/partitions/{partitionGuid}",
-            new { },
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
-        Guid articleGuid,
-        Guid partitionGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.DeleteAsync(
-            $"/articles/{articleGuid}/partitions/{partitionGuid}",
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionDto>>(
-            $"/articles/{articleGuid}/partitions",
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>((httpResponse.Data ?? []).ToSdk());
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UploadImageAsync(
-        Guid articleGuid,
-        Stream stream,
-        string contentType,
-        string fileName = "image",
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.PutMultipartAsync(
-            $"/articles/{articleGuid}/image",
-            stream,
-            contentType,
-            fileName,
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> DeleteImageAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.DeleteAsync(
-            $"/articles/{articleGuid}/image",
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
-    }
-
-    /// <inheritdoc />
-    public Task<(Stream Stream, string ContentType)?> GetImageAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default)
-        => httpClient.GetStreamAsync($"/articles/{articleGuid}/image", cancellationToken);
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<ArticleBarcodes>> GetBarcodesAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.GetAsync<ArticleBarcodesDto>(
-            $"/articles/{articleGuid}/barcodes",
-            cancellationToken);
-
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<ArticleBarcodes>(MapError(httpResponse.Problem));
-        }
-
-        return new FargoSdkResponse<ArticleBarcodes>(httpResponse.Data.ToSdk());
-    }
-
-    /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateBarcodesAsync(
-        Guid articleGuid,
-        ArticleBarcodes barcodes,
-        CancellationToken cancellationToken = default)
-    {
-        var httpResponse = await httpClient.PutJsonAsync(
-            $"/articles/{articleGuid}/barcodes",
-            barcodes.ToContract(),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

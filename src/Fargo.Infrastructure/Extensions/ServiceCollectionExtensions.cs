@@ -16,11 +16,9 @@ using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Events;
-using Fargo.Infrastructure.Options;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
-using Fargo.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +40,6 @@ public static class ServiceCollectionExtensions
             AddDomainServices(services);
             AddSecurity(services);
             AddPersistence(services);
-            AddImageStorage(services, configuration);
 
             services.AddScoped<ICurrentUser, CurrentUser>();
 
@@ -144,11 +141,6 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleAddPartitionCommand>, ArticleAddPartitionCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleRemovePartitionCommand>, ArticleRemovePartitionCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleImageUploadCommand>, ArticleImageUploadCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleImageDeleteCommand>, ArticleImageDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleUpdateBarcodesCommand>, ArticleUpdateBarcodesCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
@@ -174,11 +166,8 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
 
-            services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleInformation?>, ArticleSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>, ArticleManyQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, ArticlePartitionsQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleImageQuery, ArticleImageResult?>, ArticleImageQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>, ArticleBarcodesQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleDto>>, ArticleManyQueryHandler>();
 
             services.AddScoped<IQueryHandler<ItemSingleQuery, ItemInformation?>, ItemSingleQueryHandler>();
             services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>, ItemManyQueryHandler>();
@@ -219,17 +208,6 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<IEventRecorder, DbEventRecorder>();
             services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
-        }
-
-        private IServiceCollection AddImageStorage(IConfiguration configuration)
-        {
-            services
-                .AddOptions<ArticleImageOptions>()
-                .Bind(configuration.GetSection(ArticleImageOptions.SectionName));
-
-            services.AddScoped<IArticleImageStorage, LocalArticleImageStorage>();
-
-            return services;
         }
 
         private static void ConfigureSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)

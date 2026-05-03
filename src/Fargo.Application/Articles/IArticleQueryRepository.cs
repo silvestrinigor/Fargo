@@ -1,4 +1,3 @@
-using Fargo.Application.Partitions;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
@@ -7,49 +6,34 @@ namespace Fargo.Application.Articles;
 
 public interface IArticleQueryRepository
 {
-    Task<ArticleInformation?> GetInfoByGuid(
+    Task<ArticleDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<ArticleInformation>> GetManyInfo(
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         string? search = null,
         CancellationToken cancellationToken = default
     );
 
-    Task<ArticleInformation?> GetInfoByGuidInPartitions(
+    Task<ArticleDto?> GetInfoByGuidInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoWithNoPartition(
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoWithNoPartition(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         string? search = null,
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitions(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        string? search = null,
-        CancellationToken cancellationToken = default
-    );
-
-    Task<ArticleInformation?> GetInfoByGuidPublicOrInPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid> partitionGuids,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default
-    );
-
-    Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitionsOrPublic(
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
@@ -57,9 +41,18 @@ public interface IArticleQueryRepository
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
+    Task<ArticleDto?> GetInfoByGuidPublicOrInPartitions(
         Guid entityGuid,
-        IReadOnlyCollection<Guid>? partitionFilter = null,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoInPartitionsOrPublic(
+        Pagination pagination,
+        IReadOnlyCollection<Guid> partitionGuids,
+        DateTimeOffset? asOfDateTime = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 

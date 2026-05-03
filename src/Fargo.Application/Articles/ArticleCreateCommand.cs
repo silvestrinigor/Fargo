@@ -12,14 +12,6 @@ namespace Fargo.Application.Articles;
 /// <summary>
 /// Command used to create a new <see cref="Article"/>.
 /// </summary>
-/// <param name="Article">
-/// The data required to create the article, including its name,
-/// description, and optional target partition.
-/// </param>
-/// <remarks>
-/// This command represents an intention to create an article while
-/// respecting authorization and partition-based access rules.
-/// </remarks>
 public sealed record ArticleCreateCommand(
     ArticleCreateModel Article
     ) : ICommand<Guid>;
@@ -27,20 +19,10 @@ public sealed record ArticleCreateCommand(
 /// <summary>
 /// Handles <see cref="ArticleCreateCommand"/>.
 /// </summary>
-/// <remarks>
-/// This handler is responsible for:
-/// <list type="bullet">
-/// <item><description>Validating the current user's authorization.</description></item>
-/// <item><description>Ensuring the target partition exists and is accessible, when provided.</description></item>
-/// <item><description>Creating the article with an optional initial partition assignment.</description></item>
-/// </list>
-///
-/// When no partition is specified, the article is created without any partition and is
-/// publicly accessible to all authenticated actors.
-/// </remarks>
 public sealed class ArticleCreateCommandHandler(
     ActorService actorService,
     IArticleRepository articleRepository,
+    IArticleQueryRepository articleQueryRepository,
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork,
@@ -48,81 +30,89 @@ public sealed class ArticleCreateCommandHandler(
     IFargoEventPublisher eventPublisher
     ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
-    /// <summary>
-    /// Executes the command to create a new article.
-    /// </summary>
-    /// <param name="command">
-    /// The command containing the data required for article creation.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the operation.
-    /// </param>
-    /// <returns>
-    /// The unique identifier of the newly created <see cref="Article"/>.
-    /// </returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current user is not authenticated or inactive.
-    /// </exception>
-    /// <exception cref="Users.UserNotAuthorizedFargoApplicationException">
-    /// Thrown when the user does not have permission to create articles.
-    /// </exception>
-    /// <exception cref="PartitionNotFoundFargoApplicationException">
-    /// Thrown when the specified partition does not exist.
-    /// Only applicable when <c>firstPartition</c> is provided.
-    /// </exception>
-    /// <exception cref="PartitionAccessDeniedFargoApplicationException">
-    /// Thrown when the current user does not have access to the specified partition.
-    /// Only applicable when <c>firstPartition</c> is provided.
-    /// </exception>
-    /// <remarks>
-    /// When <c>firstPartition</c> is provided, the article is created in that partition
-    /// and the actor must have access to it. When <c>firstPartition</c> is
-    /// <see langword="null"/>, the article is created without any partition and is
-    /// publicly accessible to all authenticated actors.
-    /// </remarks>
     public async Task<Guid> Handle(
-            ArticleCreateCommand command,
-            CancellationToken cancellationToken = default
-            )
+        ArticleCreateCommand command,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(command.Article);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        Partition? partition = null;
-
-        if (command.Article.FirstPartition.HasValue)
-        {
-            partition = await partitionRepository.GetFoundByGuid(command.Article.FirstPartition.Value, cancellationToken);
-
-            actor.ValidateHasPartitionAccess(partition.Guid);
-        }
+        var partitions = await ResolvePartitions(actor, command.Article.Partitions, cancellationToken);
 
         var article = new Article
         {
-            Name = command.Article.Name,
-            Description = command.Article.Description ?? Description.Empty,
+            Name = new Name(command.Article.Name),
+            Description = command.Article.Description is null ? Description.Empty : new Description(command.Article.Description),
             ShelfLife = command.Article.ShelfLife,
-            Metrics =
-            {
-                Mass = command.Article.Metrics?.Mass,
-                LengthX = command.Article.Metrics?.LengthX,
-                LengthY = command.Article.Metrics?.LengthY,
-                LengthZ = command.Article.Metrics?.LengthZ,
-            }
         };
 
-        if (partition is not null)
+        article.Metrics.Mass = command.Article.Metrics?.Mass.ToUnitsNet();
+        article.Metrics.LengthX = command.Article.Metrics?.LengthX.ToUnitsNet();
+        article.Metrics.LengthY = command.Article.Metrics?.LengthY.ToUnitsNet();
+        article.Metrics.LengthZ = command.Article.Metrics?.LengthZ.ToUnitsNet();
+
+        var barcodes = command.Article.Barcodes.ToDomain();
+        if (!barcodes.IsEmpty)
+        {
+            var conflict = await articleQueryRepository.FindConflictingBarcode(barcodes, article.Guid, cancellationToken);
+            if (conflict is { } c)
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoApplicationException(c.Format, c.Code);
+            }
+        }
+
+        article.Barcodes.Ean13 = barcodes.Ean13;
+        article.Barcodes.Ean8 = barcodes.Ean8;
+        article.Barcodes.UpcA = barcodes.UpcA;
+        article.Barcodes.UpcE = barcodes.UpcE;
+        article.Barcodes.Code128 = barcodes.Code128;
+        article.Barcodes.Code39 = barcodes.Code39;
+        article.Barcodes.Itf14 = barcodes.Itf14;
+        article.Barcodes.Gs1128 = barcodes.Gs1128;
+        article.Barcodes.QrCode = barcodes.QrCode;
+        article.Barcodes.DataMatrix = barcodes.DataMatrix;
+
+        foreach (var partition in partitions)
         {
             article.Partitions.Add(partition);
+        }
+
+        if (command.Article.IsActive == false)
+        {
+            article.Deactivate();
         }
 
         articleRepository.Add(article);
 
         await eventRecorder.Record(EventType.ArticleCreated, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-        await eventPublisher.PublishArticleCreated(article.Guid, partition is null ? [] : [partition.Guid], cancellationToken);
+        await eventPublisher.PublishArticleCreated(article.Guid, partitions.Select(p => p.Guid).ToArray(), cancellationToken);
 
         return article.Guid;
+    }
+
+    private async Task<IReadOnlyList<Partition>> ResolvePartitions(
+        Actor actor,
+        IReadOnlyCollection<Guid>? partitionGuids,
+        CancellationToken cancellationToken)
+    {
+        if (partitionGuids is null || partitionGuids.Count == 0)
+        {
+            return [];
+        }
+
+        var partitions = new List<Partition>(partitionGuids.Count);
+        foreach (var partitionGuid in partitionGuids.Distinct())
+        {
+            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+            partitions.Add(partition);
+        }
+
+        return partitions;
     }
 }

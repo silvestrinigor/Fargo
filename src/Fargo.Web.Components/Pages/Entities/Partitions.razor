@@ -4,7 +4,7 @@
 @using Fargo.Api
 @using Fargo.Api.Articles
 @using Fargo.Api.Authentication
-@using Fargo.Api.Contracts
+@using Fargo.Sdk.Contracts
 @using Fargo.Api.Items
 @using Fargo.Api.Partitions
 @using Fargo.Api.Users
@@ -371,13 +371,14 @@
 
         try
         {
-            FargoSdkResponse<EmptyResult> result;
+            FargoSdkResponse<EmptyResult>? result = null;
 
             switch (row.Type)
             {
                 case EntityType.Article:
                     var article = await Articles.GetAsync(row.EntityGuid);
-                    result = await article.RemovePartitionAsync(EntityGuid.Value);
+                    var articlePartitions = article.Partitions.Where(p => p != EntityGuid.Value).ToArray();
+                    await article.UpdateAsync(a => a.Partitions = articlePartitions);
                     break;
                 case EntityType.Item:
                     var item = await Items.GetAsync(row.EntityGuid);
@@ -391,7 +392,7 @@
                     return;
             }
 
-            if (result.IsSuccess)
+            if (result is null || result.IsSuccess)
             {
                 _entityItems.Remove(row);
                 if (_entityPage > _entityTotalPages && _entityPage > 1)
@@ -415,18 +416,13 @@
 
         try
         {
-            var result = await article.AddPartitionAsync(EntityGuid.Value);
-            if (result.IsSuccess)
+            var newPartitions = article.Partitions.Append(EntityGuid.Value).Distinct().ToArray();
+            await article.UpdateAsync(a => a.Partitions = newPartitions);
+
+            if (!_entityItems.Any(r => r.EntityGuid == article.Guid))
             {
-                if (!_entityItems.Any(r => r.EntityGuid == article.Guid))
-                {
-                    _entityItems.Add(new PartitionEntityRow(article.Guid, article.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article));
-                    _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
-                }
-            }
-            else
-            {
-                _entityListError = result.Error?.Detail ?? "Failed to add article.";
+                _entityItems.Add(new PartitionEntityRow(article.Guid, article.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article));
+                _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
             }
         }
         catch (FargoSdkApiException ex)

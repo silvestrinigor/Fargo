@@ -5,8 +5,6 @@ namespace Fargo.Api.Articles;
 /// </summary>
 public sealed class ArticleManager(
     IArticleService service,
-    IArticleImageService imageService,
-    IArticleBarcodeService barcodeService,
     IArticleEventSource eventSource) : IArticleManager
 {
     /// <inheritdoc />
@@ -38,45 +36,15 @@ public sealed class ArticleManager(
     public Task<Article> CreateAsync(
         string name,
         string? description = null,
-        Guid? firstPartition = null,
+        IReadOnlyCollection<Guid>? partitions = null,
+        ArticleBarcodes? barcodes = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
+        bool? isActive = null,
         CancellationToken cancellationToken = default)
-        => service.CreateAsync(name, description, firstPartition, metrics, shelfLife, cancellationToken);
+        => service.CreateAsync(name, description, partitions, barcodes, metrics, shelfLife, isActive, cancellationToken);
 
     /// <inheritdoc />
     public Task DeleteAsync(Guid articleGuid, CancellationToken cancellationToken = default)
         => service.DeleteAsync(articleGuid, cancellationToken);
-
-    /// <inheritdoc />
-    public Task UploadImageAsync(
-        Guid articleGuid,
-        Stream stream,
-        string contentType,
-        string fileName = "image",
-        CancellationToken cancellationToken = default)
-        => imageService.UploadImageAsync(articleGuid, stream, contentType, fileName, cancellationToken);
-
-    /// <inheritdoc />
-    public Task DeleteImageAsync(Guid articleGuid, CancellationToken cancellationToken = default)
-        => imageService.DeleteImageAsync(articleGuid, cancellationToken);
-
-    /// <inheritdoc />
-    public Task<(Stream Stream, string ContentType)?> GetImageAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default)
-        => imageService.GetImageAsync(articleGuid, cancellationToken);
-
-    /// <inheritdoc />
-    public Task<ArticleBarcodes> GetBarcodesAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default)
-        => barcodeService.GetBarcodesAsync(articleGuid, cancellationToken);
-
-    /// <inheritdoc />
-    public Task UpdateBarcodesAsync(
-        Guid articleGuid,
-        ArticleBarcodes barcodes,
-        CancellationToken cancellationToken = default)
-        => barcodeService.UpdateBarcodesAsync(articleGuid, barcodes, cancellationToken);
 }

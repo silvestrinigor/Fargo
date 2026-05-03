@@ -1,5 +1,3 @@
-using Fargo.Api.Partitions;
-
 namespace Fargo.Api.Articles;
 
 /// <summary>
@@ -16,8 +14,9 @@ public sealed class Article : IAsyncDisposable
         Func<ValueTask>? onDispose = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
-        ArticleImages? images = null,
         ArticleBarcodes? barcodes = null,
+        IReadOnlyCollection<Guid>? partitions = null,
+        bool isActive = true,
         Guid? editedByGuid = null)
     {
         Guid = guid;
@@ -25,8 +24,9 @@ public sealed class Article : IAsyncDisposable
         _description = description;
         _metrics = metrics;
         _shelfLife = shelfLife;
-        _images = images ?? new ArticleImages();
         _barcodes = barcodes ?? new ArticleBarcodes();
+        _partitions = partitions ?? Array.Empty<Guid>();
+        _isActive = isActive;
         EditedByGuid = editedByGuid;
         this.client = client;
         _onDispose = onDispose;
@@ -82,29 +82,31 @@ public sealed class Article : IAsyncDisposable
         set => _shelfLife = value;
     }
 
-    private ArticleImages _images;
-
-    /// <summary>Gets image state for this article.</summary>
-    public ArticleImages Images
-    {
-        get => _images;
-        internal set => _images = value ?? new ArticleImages();
-    }
-
-    /// <summary>Indicates whether this article has an image stored on the server.</summary>
-    public bool HasImage
-    {
-        get => _images.HasImage;
-        internal set => _images = new ArticleImages(value);
-    }
-
     private ArticleBarcodes _barcodes;
 
-    /// <summary>Gets barcode state for this article, grouped by barcode format.</summary>
+    /// <summary>Gets or sets barcode state for this article, grouped by barcode format.</summary>
     public ArticleBarcodes Barcodes
     {
         get => _barcodes;
-        internal set => _barcodes = value ?? new ArticleBarcodes();
+        set => _barcodes = value ?? new ArticleBarcodes();
+    }
+
+    private IReadOnlyCollection<Guid> _partitions;
+
+    /// <summary>The partitions this article belongs to.</summary>
+    public IReadOnlyCollection<Guid> Partitions
+    {
+        get => _partitions;
+        set => _partitions = value ?? Array.Empty<Guid>();
+    }
+
+    private bool _isActive;
+
+    /// <summary>Whether this article is active.</summary>
+    public bool IsActive
+    {
+        get => _isActive;
+        set => _isActive = value;
     }
 
     /// <summary>Raised when this article is updated by any authenticated client.</summary>
@@ -117,25 +119,8 @@ public sealed class Article : IAsyncDisposable
 
     internal void RaiseDeleted() => Deleted?.Invoke(this, new ArticleDeletedEventArgs(Guid));
 
-    /// <summary>Gets the partitions that directly contain this article.</summary>
-    public Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(
-        CancellationToken cancellationToken = default)
-        => client.GetPartitionsAsync(Guid, cancellationToken);
-
-    /// <summary>Adds a partition to this article.</summary>
-    public Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(
-        Guid partitionGuid,
-        CancellationToken cancellationToken = default)
-        => client.AddPartitionAsync(Guid, partitionGuid, cancellationToken);
-
-    /// <summary>Removes a partition from this article.</summary>
-    public Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(
-        Guid partitionGuid,
-        CancellationToken cancellationToken = default)
-        => client.RemovePartitionAsync(Guid, partitionGuid, cancellationToken);
-
     /// <summary>
-    /// Applies <paramref name="update"/> to this article and persists all changes in a single request.
+    /// Applies <paramref name="update"/> to this article and persists all changes in a single PUT request.
     /// </summary>
     /// <param name="update">An action that sets one or more properties on this article.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
@@ -143,84 +128,20 @@ public sealed class Article : IAsyncDisposable
     public async Task UpdateAsync(Action<Article> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        var result = await client.UpdateAsync(Guid, _name, _description, _metrics, _shelfLife, cancellationToken);
+        var result = await client.UpdateAsync(
+            Guid,
+            _name,
+            _description,
+            _partitions,
+            _barcodes,
+            _metrics,
+            _shelfLife,
+            _isActive,
+            cancellationToken);
         if (!result.IsSuccess)
         {
             throw new FargoSdkApiException(result.Error!);
         }
-    }
-
-    /// <summary>
-    /// Uploads or replaces the image for this article.
-    /// </summary>
-    /// <param name="stream">The image data to upload.</param>
-    /// <param name="contentType">The MIME type of the image (e.g., <c>image/jpeg</c>).</param>
-    /// <param name="fileName">The file name hint sent to the server (e.g., <c>photo.jpg</c>).</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <exception cref="FargoSdkApiException">Thrown if the upload fails.</exception>
-    public async Task UploadImageAsync(
-        Stream stream,
-        string contentType,
-        string fileName = "image",
-        CancellationToken cancellationToken = default)
-    {
-        var result = await client.UploadImageAsync(Guid, stream, contentType, fileName, cancellationToken);
-        if (!result.IsSuccess)
-        {
-            throw new FargoSdkApiException(result.Error!);
-        }
-        _images = new ArticleImages(true);
-    }
-
-    /// <summary>
-    /// Removes the image from this article.
-    /// </summary>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <exception cref="FargoSdkApiException">Thrown if the deletion fails.</exception>
-    public async Task DeleteImageAsync(CancellationToken cancellationToken = default)
-    {
-        var result = await client.DeleteImageAsync(Guid, cancellationToken);
-        if (!result.IsSuccess)
-        {
-            throw new FargoSdkApiException(result.Error!);
-        }
-        _images = new ArticleImages(false);
-    }
-
-    /// <summary>
-    /// Retrieves the image for this article as a stream.
-    /// </summary>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>
-    /// A tuple of the image <see cref="Stream"/> and its MIME content type,
-    /// or <see langword="null"/> if the article has no image.
-    /// </returns>
-    public Task<(Stream Stream, string ContentType)?> GetImageAsync(CancellationToken cancellationToken = default)
-        => client.GetImageAsync(Guid, cancellationToken);
-
-    /// <summary>Refreshes this article's barcode state from the server.</summary>
-    public async Task<ArticleBarcodes> GetBarcodesAsync(CancellationToken cancellationToken = default)
-    {
-        var result = await client.GetBarcodesAsync(Guid, cancellationToken);
-        if (!result.IsSuccess)
-        {
-            throw new FargoSdkApiException(result.Error!);
-        }
-
-        _barcodes = result.Data ?? new ArticleBarcodes();
-        return _barcodes;
-    }
-
-    /// <summary>Replaces this article's barcode state on the server.</summary>
-    public async Task UpdateBarcodesAsync(ArticleBarcodes barcodes, CancellationToken cancellationToken = default)
-    {
-        var result = await client.UpdateBarcodesAsync(Guid, barcodes, cancellationToken);
-        if (!result.IsSuccess)
-        {
-            throw new FargoSdkApiException(result.Error!);
-        }
-
-        _barcodes = barcodes;
     }
 
     /// <inheritdoc/>

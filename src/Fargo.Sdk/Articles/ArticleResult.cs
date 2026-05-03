@@ -17,18 +17,19 @@ public sealed record ArticleResult
         string Description,
         ArticleMetrics? Metrics = null,
         TimeSpan? ShelfLife = null,
-        bool HasImage = false,
-        Guid? EditedByGuid = null,
-        ArticleImages? Images = null,
-        ArticleBarcodes? Barcodes = null)
+        ArticleBarcodes? Barcodes = null,
+        IReadOnlyCollection<Guid>? Partitions = null,
+        bool IsActive = true,
+        Guid? EditedByGuid = null)
     {
         this.Guid = Guid;
         this.Name = Name;
         this.Description = Description;
         this.Metrics = Metrics;
         this.ShelfLife = ShelfLife;
-        this.Images = Images ?? new ArticleImages(HasImage);
         this.Barcodes = Barcodes ?? new ArticleBarcodes();
+        this.Partitions = Partitions ?? Array.Empty<Guid>();
+        this.IsActive = IsActive;
         this.EditedByGuid = EditedByGuid;
     }
 
@@ -47,18 +48,14 @@ public sealed record ArticleResult
     /// <summary>The shelf life of the article, or <see langword="null"/> if unset.</summary>
     public TimeSpan? ShelfLife { get; init; }
 
-    /// <summary>Image state for the article.</summary>
-    public ArticleImages Images { get; init; } = new();
-
     /// <summary>Barcode state for the article, grouped by barcode format.</summary>
     public ArticleBarcodes Barcodes { get; init; } = new();
 
-    /// <summary>Whether the article has a stored image.</summary>
-    public bool HasImage
-    {
-        get => Images.HasImage;
-        init => Images = new ArticleImages(value);
-    }
+    /// <summary>Guids of the partitions the article belongs to.</summary>
+    public IReadOnlyCollection<Guid> Partitions { get; init; } = Array.Empty<Guid>();
+
+    /// <summary>Whether the article is active.</summary>
+    public bool IsActive { get; init; } = true;
 
     /// <summary>The identifier of the user who last edited this article.</summary>
     public Guid? EditedByGuid { get; init; }

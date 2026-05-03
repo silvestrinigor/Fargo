@@ -1,5 +1,5 @@
-using Fargo.Api.Contracts.Partitions;
-using Fargo.Api.Contracts.Users;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Users;
 using Fargo.Api.Http;
 using Fargo.Api.Partitions;
 using Fargo.Sdk;

@@ -10,40 +10,26 @@ namespace Fargo.Application.Articles;
 /// <summary>
 /// Command used to delete an existing article.
 /// </summary>
-/// <param name="ArticleGuid">
-/// The unique identifier of the article to delete.
-/// </param>
 public sealed record ArticleDeleteCommand(
-        Guid ArticleGuid
-        ) : ICommand;
+    Guid ArticleGuid
+    ) : ICommand;
 
 /// <summary>
-/// Handles the execution of <see cref="ArticleDeleteCommand"/>.
+/// Handles <see cref="ArticleDeleteCommand"/>.
 /// </summary>
 public sealed class ArticleDeleteCommandHandler(
-        ActorService actorService,
-        ArticleService articleService,
-        IArticleRepository articleRepository,
-        IArticleImageStorage imageStorage,
-        IUnitOfWork unitOfWork,
-        ICurrentUser currentUser,
-        IEventRecorder eventRecorder,
-        IFargoEventPublisher eventPublisher
-        ) : ICommandHandler<ArticleDeleteCommand>
+    ActorService actorService,
+    ArticleService articleService,
+    IArticleRepository articleRepository,
+    IUnitOfWork unitOfWork,
+    ICurrentUser currentUser,
+    IEventRecorder eventRecorder,
+    IFargoEventPublisher eventPublisher
+    ) : ICommandHandler<ArticleDeleteCommand>
 {
-    /// <summary>
-    /// Executes the command to delete an existing article.
-    /// </summary>
-    /// <param name="command">The command containing the article identifier.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    /// <exception cref="ArticleNotFoundFargoApplicationException">
-    /// Thrown when the specified article does not exist.
-    /// </exception>
     public async Task Handle(
-            ArticleDeleteCommand command,
-            CancellationToken cancellationToken = default
-            )
+        ArticleDeleteCommand command,
+        CancellationToken cancellationToken = default)
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
@@ -54,15 +40,9 @@ public sealed class ArticleDeleteCommandHandler(
         actor.ValidateHasAccess(article);
 
         await articleService.DeleteArticle(article, cancellationToken);
-        var imageKey = article.Images.ImageKey;
 
         await eventRecorder.Record(EventType.ArticleDeleted, EntityType.Article, article.Guid, cancellationToken);
         await unitOfWork.SaveChanges(cancellationToken);
-
-        if (imageKey is not null)
-        {
-            await imageStorage.DeleteAsync(imageKey, cancellationToken);
-        }
 
         await eventPublisher.PublishArticleDeleted(article.Guid, cancellationToken);
     }

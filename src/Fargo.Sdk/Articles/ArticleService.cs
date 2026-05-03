@@ -83,19 +83,31 @@ public sealed class ArticleService : IArticleService
     public async Task<Article> CreateAsync(
         string name,
         string? description = null,
-        Guid? firstPartition = null,
+        IReadOnlyCollection<Guid>? partitions = null,
+        ArticleBarcodes? barcodes = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
+        bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await client.CreateAsync(name, description, firstPartition, metrics, shelfLife, cancellationToken);
+        var response = await client.CreateAsync(name, description, partitions, barcodes, metrics, shelfLife, isActive, cancellationToken);
 
         if (!response.IsSuccess)
         {
             ThrowError(response.Error!);
         }
 
-        var article = new Article(response.Data, name, description ?? string.Empty, client, MakeDisposeCallback(response.Data), metrics, shelfLife);
+        var article = new Article(
+            response.Data,
+            name,
+            description ?? string.Empty,
+            client,
+            MakeDisposeCallback(response.Data),
+            metrics,
+            shelfLife,
+            barcodes,
+            partitions,
+            isActive ?? true);
         return await TrackAsync(article);
     }
 
@@ -112,7 +124,18 @@ public sealed class ArticleService : IArticleService
 
     private async Task<Article> ToEntityAsync(ArticleResult r)
     {
-        var article = new Article(r.Guid, r.Name, r.Description, client, MakeDisposeCallback(r.Guid), r.Metrics, r.ShelfLife, r.Images, r.Barcodes, r.EditedByGuid);
+        var article = new Article(
+            r.Guid,
+            r.Name,
+            r.Description,
+            client,
+            MakeDisposeCallback(r.Guid),
+            r.Metrics,
+            r.ShelfLife,
+            r.Barcodes,
+            r.Partitions,
+            r.IsActive,
+            r.EditedByGuid);
         return await TrackAsync(article);
     }
 

@@ -1,4 +1,4 @@
-using Fargo.Api.Contracts.ApiClients;
+using Fargo.Sdk.Contracts.ApiClients;
 using Fargo.Api.Http;
 using Fargo.Sdk;
 

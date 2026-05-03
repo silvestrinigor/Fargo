@@ -1,11 +1,11 @@
 using Fargo.Api;
-using Fargo.Api.Contracts.ApiClients;
-using Fargo.Api.Contracts.Articles;
-using Fargo.Api.Contracts.Items;
-using Fargo.Api.Contracts.Partitions;
-using Fargo.Api.Contracts.Permissions;
-using Fargo.Api.Contracts.UserGroups;
-using Fargo.Api.Contracts.Users;
+using Fargo.Sdk.Contracts.ApiClients;
+using Fargo.Sdk.Contracts.Articles;
+using Fargo.Sdk.Contracts.Items;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Permissions;
+using Fargo.Sdk.Contracts.UserGroups;
+using Fargo.Sdk.Contracts.Users;
 using ApiClients = Fargo.Api.ApiClients;
 using Articles = Fargo.Api.Articles;
 using Items = Fargo.Api.Items;
@@ -36,10 +36,10 @@ internal static class ContractMappings
             contract.Description,
             contract.Metrics.ToSdk(),
             contract.ShelfLife,
-            contract.HasImage,
-            contract.EditedByGuid,
-            contract.Images is null ? null : new Articles.ArticleImages(contract.Images.HasImage),
-            contract.Barcodes.ToSdk());
+            contract.Barcodes.ToSdk(),
+            contract.Partitions,
+            contract.IsActive,
+            contract.EditedByGuid);
 
     public static IReadOnlyCollection<Articles.ArticleResult> ToSdk(this IReadOnlyCollection<ArticleDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
@@ -47,17 +47,22 @@ internal static class ContractMappings
     public static ArticleCreateDto ToArticleCreateDto(
         string name,
         string? description,
-        Guid? firstPartition,
+        IReadOnlyCollection<Guid>? partitions,
+        Articles.ArticleBarcodes? barcodes,
         Articles.ArticleMetrics? metrics,
-        TimeSpan? shelfLife)
-        => new(name, description, firstPartition, metrics.ToContract(), shelfLife);
+        TimeSpan? shelfLife,
+        bool? isActive)
+        => new(name, description, metrics.ToContract(), shelfLife, partitions, barcodes?.ToContract(), isActive);
 
     public static ArticleUpdateDto ToArticleUpdateDto(
-        string? name,
+        string name,
         string? description,
+        IReadOnlyCollection<Guid>? partitions,
+        Articles.ArticleBarcodes? barcodes,
         Articles.ArticleMetrics? metrics,
-        TimeSpan? shelfLife)
-        => new(name, description, metrics.ToContract(), shelfLife);
+        TimeSpan? shelfLife,
+        bool isActive)
+        => new(name, description, metrics.ToContract(), shelfLife, partitions, barcodes?.ToContract(), isActive);
 
     public static Items.ItemResult ToSdk(this ItemDto contract)
         => new(contract.Guid, contract.ArticleGuid, contract.ProductionDate, contract.EditedByGuid);

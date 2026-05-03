@@ -49,7 +49,8 @@ public sealed class ArticleTools(IArticleManager articles)
     public async Task<string> CreateArticle(
         [Description("The display name of the article.")] string name,
         [Description("An optional description.")] string? description = null,
-        [Description("GUID of the partition to associate with the article. Omit to create a public article with no partition.")] string? partitionGuid = null,
+        [Description("GUIDs of partitions to associate with the article. Omit for a public article with no partition.")] string[]? partitionGuids = null,
+        [Description("Whether the article should be active. Defaults to true.")] bool? isActive = null,
         [Description("Mass value of the article. Omit if unknown.")] double? massValue = null,
         [Description("Mass unit (g, kg, mg, lb, oz). Defaults to g.")] string massUnit = "g",
         [Description("LengthX dimension value of the article. Omit if unknown.")] double? lengthXValue = null,
@@ -61,7 +62,7 @@ public sealed class ArticleTools(IArticleManager articles)
     {
         try
         {
-            Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
+            IReadOnlyCollection<Guid>? partitions = partitionGuids is null ? null : partitionGuids.Select(Guid.Parse).ToArray();
             var metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? null : new ArticleMetrics
             {
                 Mass = massValue is null ? null : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
@@ -69,7 +70,7 @@ public sealed class ArticleTools(IArticleManager articles)
                 LengthY = lengthYValue is null ? null : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
                 LengthZ = lengthZValue is null ? null : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
             };
-            await using var article = await articles.CreateAsync(name, description, firstPartition, metrics);
+            await using var article = await articles.CreateAsync(name, description, partitions, barcodes: null, metrics: metrics, shelfLife: null, isActive: isActive);
             return $"Created article with GUID: {article.Guid}";
         }
         catch (Exception ex)

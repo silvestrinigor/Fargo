@@ -1,3 +1,3 @@
-global using ActionType = Fargo.Api.Contracts.ActionType;
-global using ApiClientCreatedDto = Fargo.Api.Contracts.ApiClients.ApiClientCreatedDto;
-global using AuthDto = Fargo.Api.Contracts.Authentication.AuthDto;
+global using ActionType = Fargo.Sdk.Contracts.ActionType;
+global using ApiClientCreatedDto = Fargo.Sdk.Contracts.ApiClients.ApiClientCreatedDto;
+global using AuthDto = Fargo.Sdk.Contracts.Authentication.AuthDto;

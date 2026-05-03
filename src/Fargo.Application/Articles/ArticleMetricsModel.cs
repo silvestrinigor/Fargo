@@ -1,19 +1,20 @@
-using UnitsNet;
-
 namespace Fargo.Application.Articles;
 
 /// <summary>
-/// Groups the physical measurement properties used when creating or updating an article.
+/// Physical measurements of an article on the wire (primitives only).
 /// </summary>
-/// <param name="Mass">
-/// Optional physical mass. When <see langword="null"/>, mass is left unchanged (update) or
-/// unset (create).
-/// </param>
-/// <param name="LengthX">Optional X dimension.</param>
-/// <param name="LengthY">Optional Y dimension.</param>
-/// <param name="LengthZ">Optional Z dimension.</param>
 public sealed record ArticleMetricsModel(
-    Mass? Mass = null,
-    Length? LengthX = null,
-    Length? LengthY = null,
-    Length? LengthZ = null);
+    MassModel? Mass = null,
+    LengthModel? LengthX = null,
+    LengthModel? LengthY = null,
+    LengthModel? LengthZ = null,
+    DensityModel? Density = null);
+
+/// <summary>Mass value with unit abbreviation (e.g. "g", "kg").</summary>
+public sealed record MassModel(double Value, string Unit);
+
+/// <summary>Length value with unit abbreviation (e.g. "cm", "mm").</summary>
+public sealed record LengthModel(double Value, string Unit);
+
+/// <summary>Density value with unit abbreviation (e.g. "g/cm³").</summary>
+public sealed record DensityModel(double Value, string Unit);

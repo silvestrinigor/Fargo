@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Fargo.Api.Contracts/Fargo.Api.Contracts.csproj" />
     <ProjectReference Include="..\Fargo.Sdk\Fargo.Sdk.csproj" />
   </ItemGroup>
 

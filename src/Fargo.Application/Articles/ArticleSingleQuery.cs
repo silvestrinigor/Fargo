@@ -4,7 +4,7 @@ using Fargo.Domain;
 namespace Fargo.Application.Articles;
 
 /// <summary>
-/// Query used to retrieve a single <see cref="ArticleInformation"/> projection
+/// Query used to retrieve a single <see cref="ArticleDto"/> projection
 /// accessible to the current actor.
 /// </summary>
 /// <param name="ArticleGuid">
@@ -22,7 +22,7 @@ namespace Fargo.Application.Articles;
 public sealed record ArticleSingleQuery(
         Guid ArticleGuid,
         DateTimeOffset? AsOfDateTime = null
-        ) : IQuery<ArticleInformation?>;
+        ) : IQuery<ArticleDto?>;
 
 /// <summary>
 /// Handles <see cref="ArticleSingleQuery"/>.
@@ -74,60 +74,60 @@ public sealed class ArticleSingleQueryHandler(
         ActorService actorService,
         IArticleQueryRepository articleRepository,
         ICurrentUser currentUser
-        ) : IQueryHandler<ArticleSingleQuery, ArticleInformation?>
+        ) : IQueryHandler<ArticleSingleQuery, ArticleDto?>
 {
-    /// <summary>
-    /// Executes the query to retrieve a single article information projection
-    /// accessible to the current actor.
-    /// </summary>
-    /// <param name="query">
-    /// The query containing the article identifier and optional temporal parameter.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The <see cref="ArticleInformation"/> visible to the current actor,
-    /// or <see langword="null"/> if the article does not exist or is not accessible.
-    /// </returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current actor is not authenticated or inactive.
-    /// </exception>
-    /// <remarks>
-    /// If the actor has administrative or system privileges, the article is retrieved
-    /// without partition filtering.
-    ///
-    /// Otherwise, the article is returned if it belongs to at least one
-    /// partition accessible to the actor, or if the article has no partition (public).
-    /// </remarks>
-    public async Task<ArticleInformation?> Handle(
-            ArticleSingleQuery query,
-            CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(query);
-
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
-
-        if (actor.IsAdmin || actor.IsSystem)
+        /// <summary>
+        /// Executes the query to retrieve a single article information projection
+        /// accessible to the current actor.
+        /// </summary>
+        /// <param name="query">
+        /// The query containing the article identifier and optional temporal parameter.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        /// The <see cref="ArticleDto"/> visible to the current actor,
+        /// or <see langword="null"/> if the article does not exist or is not accessible.
+        /// </returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current actor is not authenticated or inactive.
+        /// </exception>
+        /// <remarks>
+        /// If the actor has administrative or system privileges, the article is retrieved
+        /// without partition filtering.
+        ///
+        /// Otherwise, the article is returned if it belongs to at least one
+        /// partition accessible to the actor, or if the article has no partition (public).
+        /// </remarks>
+        public async Task<ArticleDto?> Handle(
+                ArticleSingleQuery query,
+                CancellationToken cancellationToken = default)
         {
-            var article = await articleRepository.GetInfoByGuid(
-                    query.ArticleGuid,
-                    query.AsOfDateTime,
-                    cancellationToken
-                    );
+                ArgumentNullException.ThrowIfNull(query);
 
-            return article;
-        }
-        else
-        {
-            var article = await articleRepository.GetInfoByGuidPublicOrInPartitions(
-                    query.ArticleGuid,
-                    actor.PartitionAccesses,
-                    query.AsOfDateTime,
-                    cancellationToken
-                    );
+                var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-            return article;
+                if (actor.IsAdmin || actor.IsSystem)
+                {
+                        var article = await articleRepository.GetInfoByGuid(
+                                query.ArticleGuid,
+                                query.AsOfDateTime,
+                                cancellationToken
+                                );
+
+                        return article;
+                }
+                else
+                {
+                        var article = await articleRepository.GetInfoByGuidPublicOrInPartitions(
+                                query.ArticleGuid,
+                                actor.PartitionAccesses,
+                                query.AsOfDateTime,
+                                cancellationToken
+                                );
+
+                        return article;
+                }
         }
-    }
 }

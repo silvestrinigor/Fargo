@@ -1,4 +1,4 @@
-using Fargo.Api.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Api.Http;
 using Fargo.Sdk;
 

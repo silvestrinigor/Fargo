@@ -83,8 +83,6 @@ public static class FargoSdkServiceCollectionExtensions
         // Articles
         Add<IArticleHttpClient, ArticleHttpClient>();
         Add<IArticleService, ArticleService>();
-        Add<IArticleImageService, ArticleImageService>();
-        Add<IArticleBarcodeService, ArticleBarcodeService>();
         Add<IArticleEventSource, ArticleEventSource>();
         Add<IArticleManager, ArticleManager>();
 

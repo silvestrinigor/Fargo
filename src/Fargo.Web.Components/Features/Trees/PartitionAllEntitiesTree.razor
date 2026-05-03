@@ -1,7 +1,7 @@
 @using Fargo.Api
 @using Fargo.Api.Articles
 @using Fargo.Api.Authentication
-@using Fargo.Api.Contracts
+@using Fargo.Sdk.Contracts
 @using Fargo.Api.Items
 @using Fargo.Api.Partitions
 @using Fargo.Api.Users
@@ -191,15 +191,16 @@ else
 
         try
         {
-            FargoSdkResponse<EmptyResult> addResult;
+            FargoSdkResponse<EmptyResult>? addResult = null;
             FargoSdkResponse<EmptyResult>? removeResult = null;
 
             if (source.Icon == TreeSidebarNode.Icons.Article)
             {
                 var article = await Articles.GetAsync(source.EntityGuid);
-                addResult = await article.AddPartitionAsync(target.EntityGuid);
-                if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
-                    removeResult = await article.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                var articlePartitions = source.ContextPartitionGuid.HasValue
+                    ? article.Partitions.Where(p => p != source.ContextPartitionGuid.Value).Append(target.EntityGuid).Distinct().ToArray()
+                    : article.Partitions.Append(target.EntityGuid).Distinct().ToArray();
+                await article.UpdateAsync(a => a.Partitions = articlePartitions);
             }
             else if (source.Icon == TreeSidebarNode.Icons.Item)
             {
@@ -220,7 +221,7 @@ else
                 return;
             }
 
-            if (!addResult.IsSuccess)
+            if (addResult is { IsSuccess: false })
             {
                 _errorMessage = addResult.Error?.Detail ?? "Failed to move entity.";
                 return;

@@ -1,10 +1,8 @@
 using Fargo.Application.Articles;
-using Fargo.Application.Partitions;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +29,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
             .Where(a => a.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
 
-    public async Task<ArticleInformation?> GetInfoByGuid(
+    public async Task<ArticleDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default)
@@ -39,6 +37,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var article = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Include(a => a.Partitions)
             .WithBarcodes()
             .Where(article => article.Guid == entityGuid)
             .SingleOrDefaultAsync(cancellationToken);
@@ -46,7 +45,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         return article?.ToInformation();
     }
 
-    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfo(
+    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         string? search = null,
@@ -55,6 +54,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var result = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Include(a => a.Partitions)
             .WithBarcodes()
             .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
             .OrderBy(article => article.Guid)
@@ -78,7 +78,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<ArticleInformation?> GetInfoByGuidInPartitions(
+    public async Task<ArticleDto?> GetInfoByGuidInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
@@ -102,7 +102,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         return article?.ToInformation();
     }
 
-    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoWithNoPartition(
+    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoWithNoPartition(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         string? search = null,
@@ -111,6 +111,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var result = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Include(a => a.Partitions)
             .WithBarcodes()
             .Where(a => !a.Partitions.Any())
             .Where(a => search == null || EF.Functions.Like(a.Name, $"%{search}%"))
@@ -121,7 +122,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         return [.. result.Select(a => a.ToInformation())];
     }
 
-    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitions(
+    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoInPartitions(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
@@ -148,7 +149,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         return [.. result.Select(a => a.ToInformation())];
     }
 
-    public async Task<ArticleInformation?> GetInfoByGuidPublicOrInPartitions(
+    public async Task<ArticleDto?> GetInfoByGuidPublicOrInPartitions(
         Guid entityGuid,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
@@ -157,6 +158,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var article = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Include(a => a.Partitions)
             .WithBarcodes()
             .Where(article => article.Guid == entityGuid)
             .Where(article => !article.Partitions.Any()
@@ -166,7 +168,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         return article?.ToInformation();
     }
 
-    public async Task<IReadOnlyCollection<ArticleInformation>> GetManyInfoInPartitionsOrPublic(
+    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoInPartitionsOrPublic(
         Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
@@ -176,6 +178,7 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         var result = await articles
             .TemporalAsOfIfProvided(asOfDateTime)
             .AsNoTracking()
+            .Include(a => a.Partitions)
             .WithBarcodes()
             .Where(article => search == null || EF.Functions.Like(article.Name, $"%{search}%"))
             .Where(article => !article.Partitions.Any()
@@ -243,31 +246,6 @@ public class ArticleRepository(FargoDbContext context) : IArticleRepository, IAr
         }
 
         return null;
-    }
-
-    public async Task<IReadOnlyCollection<PartitionInformation>?> GetPartitions(
-        Guid entityGuid,
-        IReadOnlyCollection<Guid>? partitionFilter = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (!await articles.AnyAsync(a => a.Guid == entityGuid, cancellationToken))
-        {
-            return null;
-        }
-
-        IQueryable<Partition> query = articles
-            .Where(a => a.Guid == entityGuid)
-            .SelectMany(a => a.Partitions);
-
-        if (partitionFilter is not null)
-        {
-            query = query.Where(p => partitionFilter.Contains(p.Guid));
-        }
-
-        return await query
-            .AsNoTracking()
-            .Select(PartitionMappings.InformationProjection)
-            .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(

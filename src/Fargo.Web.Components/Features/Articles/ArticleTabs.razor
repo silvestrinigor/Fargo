@@ -2,7 +2,7 @@
 @using Fargo.Api
 @using Fargo.Api.Articles
 @using Fargo.Api.Authentication
-@using Fargo.Api.Contracts
+@using Fargo.Sdk.Contracts
 @using Microsoft.AspNetCore.Components.Forms
 @inject IArticleManager Articles
 @inject IJSRuntime JS
@@ -107,45 +107,6 @@ else
         </section>
 
         <section class="workspace-panel">
-            <h3>Image</h3>
-            <div class="article-image-section">
-                @if (!string.IsNullOrEmpty(_imageError))
-                {
-                    <div class="error-banner">@_imageError</div>
-                }
-                @if (_imageDataUrl is not null)
-                {
-                    <div class="article-image-container">
-                        <img src="@_imageDataUrl" class="article-image-preview" alt="Article image" />
-                    </div>
-                }
-                else if (_article!.Images.HasImage)
-                {
-                    <p class="muted-text">Loading image...</p>
-                }
-                else
-                {
-                    <p class="muted-text">No image has been uploaded yet.</p>
-                }
-                @if (!IsReadOnly)
-                {
-                    <div class="article-image-actions">
-                        <label class="ghost-button article-image-upload-label @(_isUploading ? "disabled" : null)">
-                            @(_isUploading ? "Uploading..." : "Upload Image")
-                            <InputFile OnChange="UploadImageAsync" accept="image/*" disabled="@_isUploading" style="display:none" />
-                        </label>
-                        @if (_article!.Images.HasImage)
-                        {
-                            <button type="button" class="ghost-button danger" @onclick="DeleteImageAsync" disabled="@_isDeletingImage">
-                                @(_isDeletingImage ? "Removing..." : "Remove")
-                            </button>
-                        }
-                    </div>
-                }
-            </div>
-        </section>
-
-        <section class="workspace-panel">
             <h3>Barcodes</h3>
             <div class="barcode-section">
                 @if (!string.IsNullOrEmpty(_barcodeError))
@@ -224,11 +185,6 @@ else
     private bool _deleteOpen;
     private EditModel _edit = new();
 
-    private string? _imageDataUrl;
-    private string? _imageError;
-    private bool _isUploading;
-    private bool _isDeletingImage;
-
     private ArticleBarcodes? _barcodes;
     private string? _barcodeError;
     private string _newBarcodeCode = string.Empty;
@@ -284,8 +240,6 @@ else
     {
         _article = null;
         _edit = new EditModel();
-        _imageDataUrl = null;
-        _imageError = null;
         _barcodes = null;
         _barcodeError = null;
 
@@ -309,36 +263,10 @@ else
             _origY = _article.Metrics?.LengthY?.Value;
             _origZ = _article.Metrics?.LengthZ?.Value;
 
-            if (_article.Images.HasImage)
-            {
-                await LoadImageAsync();
-            }
-
-            await LoadBarcodesAsync();
+            LoadBarcodes();
         }, "Failed to load article.");
 
         StateHasChanged();
-    }
-
-    private async Task LoadImageAsync()
-    {
-        _imageDataUrl = null;
-        try
-        {
-            var result = await _article!.GetImageAsync();
-            if (result is not null)
-            {
-                using var ms = new MemoryStream();
-                await result.Value.Stream.CopyToAsync(ms);
-                result.Value.Stream.Dispose();
-                var base64 = Convert.ToBase64String(ms.ToArray());
-                _imageDataUrl = $"data:{result.Value.ContentType};base64,{base64}";
-            }
-        }
-        catch
-        {
-            // best-effort preview
-        }
     }
 
     private async Task SaveAsync()
@@ -364,69 +292,12 @@ else
         }, "Failed to save.");
     }
 
-    private async Task UploadImageAsync(InputFileChangeEventArgs e)
-    {
-        if (_article is null) return;
-
-        _isUploading = true;
-        _imageError = null;
-        try
-        {
-            var file = e.File;
-            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            await _article.UploadImageAsync(stream, file.ContentType, file.Name);
-            await LoadAsync();
-        }
-        catch (FargoSdkApiException ex)
-        {
-            _imageError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to upload image." : ex.Message;
-        }
-        catch
-        {
-            _imageError = "Failed to upload image.";
-        }
-        finally
-        {
-            _isUploading = false;
-        }
-    }
-
-    private async Task DeleteImageAsync()
-    {
-        if (_article is null) return;
-
-        _isDeletingImage = true;
-        _imageError = null;
-        try
-        {
-            await _article.DeleteImageAsync();
-            _imageDataUrl = null;
-            _article = await Articles.GetAsync(_article.Guid);
-        }
-        catch (FargoSdkApiException ex)
-        {
-            _imageError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to remove image." : ex.Message;
-        }
-        finally
-        {
-            _isDeletingImage = false;
-        }
-    }
-
-    private async Task LoadBarcodesAsync()
+    private void LoadBarcodes()
     {
         _barcodeError = null;
-        try
-        {
-            _barcodes = await Articles.GetBarcodesAsync(_article!.Guid);
-            if (!_barcodes.IsEmpty)
-                _barcodesNeedRender = true;
-        }
-        catch (FargoSdkApiException ex)
-        {
-            _barcodeError = string.IsNullOrWhiteSpace(ex.Message) ? "Failed to load barcodes." : ex.Message;
-            _barcodes = new ArticleBarcodes();
-        }
+        _barcodes = _article?.Barcodes ?? new ArticleBarcodes();
+        if (!_barcodes.IsEmpty)
+            _barcodesNeedRender = true;
     }
 
     private async Task RenderBarcodeCanvasesAsync()
@@ -471,9 +342,9 @@ else
         try
         {
             var updated = SetBarcode(_barcodes ?? new ArticleBarcodes(), _newBarcodeFormat, _newBarcodeCode.Trim());
-            await Articles.UpdateBarcodesAsync(_article.Guid, updated);
+            await _article.UpdateAsync(a => a.Barcodes = updated);
             _newBarcodeCode = string.Empty;
-            await LoadBarcodesAsync();
+            LoadBarcodes();
             StateHasChanged();
             await Task.Yield();
             await RenderBarcodeCanvasesAsync();
@@ -497,8 +368,8 @@ else
         try
         {
             var updated = RemoveBarcode(_barcodes ?? new ArticleBarcodes(), barcodeFormat);
-            await Articles.UpdateBarcodesAsync(_article.Guid, updated);
-            await LoadBarcodesAsync();
+            await _article.UpdateAsync(a => a.Barcodes = updated);
+            LoadBarcodes();
             StateHasChanged();
             await Task.Yield();
             await RenderBarcodeCanvasesAsync();

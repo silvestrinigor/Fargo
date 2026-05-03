@@ -1,5 +1,3 @@
-using Fargo.Api.Contracts;
-using Fargo.Api.Contracts.ApiClients;
 using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.ApiClients;
@@ -20,19 +18,19 @@ public static class ApiClientEndpointRouteBuilderExtension
         group.MapGet("/", GetManyApiClients)
             .WithName("GetApiClients")
             .WithSummary("Gets all API clients")
-            .Produces<IReadOnlyCollection<ApiClientDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ApiClientInformation>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/{apiClientGuid:guid}", GetSingleApiClient)
             .WithName("GetApiClient")
             .WithSummary("Gets a single API client")
-            .Produces<ApiClientDto>(StatusCodes.Status200OK)
+            .Produces<ApiClientInformation>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateApiClient)
             .WithName("CreateApiClient")
             .WithSummary("Creates a new API client and returns its key (shown once)")
-            .Produces<ApiClientCreatedDto>(StatusCodes.Status200OK);
+            .Produces<ApiClientCreatedResult>(StatusCodes.Status200OK);
 
         group.MapPatch("/{apiClientGuid:guid}", UpdateApiClient)
             .WithName("UpdateApiClient")
@@ -47,7 +45,7 @@ public static class ApiClientEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ApiClientDto>>, NoContent>> GetManyApiClients(
+    private static async Task<Results<Ok<IReadOnlyCollection<ApiClientInformation>>, NoContent>> GetManyApiClients(
         IQueryHandler<ApiClientManyQuery, IReadOnlyCollection<ApiClientInformation>> handler,
         Page? page,
         Limit? limit,
@@ -65,35 +63,34 @@ public static class ApiClientEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok<IReadOnlyCollection<ApiClientDto>>(
-            [.. result.Select(x => x.ToContract())]);
+        return TypedResults.Ok(result);
     }
 
-    private static async Task<Results<Ok<ApiClientDto>, NotFound>> GetSingleApiClient(
+    private static async Task<Results<Ok<ApiClientInformation>, NotFound>> GetSingleApiClient(
         Guid apiClientGuid,
         IQueryHandler<ApiClientSingleQuery, ApiClientInformation?> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new ApiClientSingleQuery(apiClientGuid), cancellationToken);
-        return result is null ? TypedResults.NotFound() : TypedResults.Ok(result.ToContract());
+        return result is null ? TypedResults.NotFound() : TypedResults.Ok(result);
     }
 
-    private static async Task<Ok<ApiClientCreatedDto>> CreateApiClient(
-        ApiClientCreateDto request,
+    private static async Task<Ok<ApiClientCreatedResult>> CreateApiClient(
+        ApiClientCreateRequest request,
         ICommandHandler<ApiClientCreateCommand, ApiClientCreatedResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.Handle(request.ToCommand(), cancellationToken);
-        return TypedResults.Ok(result.ToContract());
+        var result = await handler.Handle(new ApiClientCreateCommand(request.Name, request.Description), cancellationToken);
+        return TypedResults.Ok(result);
     }
 
     private static async Task<Results<NoContent, NotFound>> UpdateApiClient(
         Guid apiClientGuid,
-        ApiClientUpdateDto request,
+        ApiClientUpdateRequest request,
         ICommandHandler<ApiClientUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(request.ToCommand(apiClientGuid), cancellationToken);
+        await handler.Handle(new ApiClientUpdateCommand(apiClientGuid, request.Name, request.Description, request.IsActive), cancellationToken);
         return TypedResults.NoContent();
     }
 

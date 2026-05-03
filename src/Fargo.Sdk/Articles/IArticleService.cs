@@ -28,9 +28,11 @@ public interface IArticleService
     Task<Article> CreateAsync(
         string name,
         string? description = null,
-        Guid? firstPartition = null,
+        IReadOnlyCollection<Guid>? partitions = null,
+        ArticleBarcodes? barcodes = null,
         ArticleMetrics? metrics = null,
         TimeSpan? shelfLife = null,
+        bool? isActive = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an article. The article must have no associated items.</summary>
