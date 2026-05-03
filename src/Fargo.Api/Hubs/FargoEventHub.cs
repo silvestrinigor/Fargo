@@ -29,7 +29,7 @@ public sealed class FargoEventHub(ActorService actorService, ICurrentUser curren
         }
         else
         {
-            foreach (var partitionGuid in actor.PartitionAccesses)
+            foreach (var partitionGuid in actor.PartitionAccessesGuids)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, partitionGuid.ToString());
             }

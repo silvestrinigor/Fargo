@@ -1,141 +1,151 @@
 using Fargo.Application.Authentication;
-using Fargo.Application.Events;
 using Fargo.Application.Partitions;
 using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
-using Fargo.Domain.Events;
 using Fargo.Domain.Partitions;
 
 namespace Fargo.Application.Articles;
 
-/// <summary>
-/// Command used to fully replace an existing article (PUT semantics).
-/// </summary>
 public sealed record ArticleUpdateCommand(
     Guid ArticleGuid,
-    ArticleUpdateModel Article
-    ) : ICommand;
+    Name Name,
+    Description Description,
+    TimeSpan? ShelfLife,
+    ArticleMetricsDto Metrics,
+    ArticleBarcodesDto Barcodes,
+    IReadOnlyCollection<Guid> PartitionGuids,
+    bool IsActive
+) : ICommand;
 
-/// <summary>
-/// Handles <see cref="ArticleUpdateCommand"/>.
-/// </summary>
 public sealed class ArticleUpdateCommandHandler(
     ActorService actorService,
     IArticleRepository articleRepository,
-    IArticleQueryRepository articleQueryRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
-    IEventRecorder eventRecorder,
-    IFargoEventPublisher eventPublisher
-    ) : ICommandHandler<ArticleUpdateCommand>
+    ICurrentUser currentUser
+) : ICommandHandler<ArticleUpdateCommand>
 {
     public async Task Handle(
         ArticleUpdateCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        ArgumentNullException.ThrowIfNull(command);
-        ArgumentNullException.ThrowIfNull(command.Article);
-
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.EditArticle);
+        actor.ValidateHasPermission(ActionType.CreateArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.Name = command.Name;
 
-        var partitions = await ResolvePartitions(actor, command.Article.Partitions, cancellationToken);
+        article.Description = command.Description;
 
-        var barcodes = command.Article.Barcodes.ToDomain();
-        if (!barcodes.IsEmpty)
+        article.ShelfLife = command.ShelfLife;
+
+        #region Metrics
+
+        if (command.Metrics is { } metrics)
         {
-            var conflict = await articleQueryRepository.FindConflictingBarcode(barcodes, article.Guid, cancellationToken);
-            if (conflict is { } c)
+            article.Metrics = new ArticleMetrics
             {
-                throw new ArticleBarcodeAlreadyInUseFargoApplicationException(c.Format, c.Code);
-            }
+                Mass = metrics.Mass,
+                LengthX = metrics.LengthX,
+                LengthY = metrics.LengthY,
+                LengthZ = metrics.LengthZ
+            };
         }
 
-        article.Name = new Name(command.Article.Name);
-        article.Description = command.Article.Description is null ? Description.Empty : new Description(command.Article.Description);
-        article.ShelfLife = command.Article.ShelfLife;
+        #endregion Metrics
 
-        article.Metrics.Mass = command.Article.Metrics?.Mass.ToUnitsNet();
-        article.Metrics.LengthX = command.Article.Metrics?.LengthX.ToUnitsNet();
-        article.Metrics.LengthY = command.Article.Metrics?.LengthY.ToUnitsNet();
-        article.Metrics.LengthZ = command.Article.Metrics?.LengthZ.ToUnitsNet();
+        #region Barcode
 
-        article.Barcodes.Ean13 = barcodes.Ean13;
-        article.Barcodes.Ean8 = barcodes.Ean8;
-        article.Barcodes.UpcA = barcodes.UpcA;
-        article.Barcodes.UpcE = barcodes.UpcE;
-        article.Barcodes.Code128 = barcodes.Code128;
-        article.Barcodes.Code39 = barcodes.Code39;
-        article.Barcodes.Itf14 = barcodes.Itf14;
-        article.Barcodes.Gs1128 = barcodes.Gs1128;
-        article.Barcodes.QrCode = barcodes.QrCode;
-        article.Barcodes.DataMatrix = barcodes.DataMatrix;
-
-        ReconcilePartitions(article, partitions);
-
-        if (article.IsActive != command.Article.IsActive)
+        if (command.Barcodes is { } barcodes)
         {
-            if (command.Article.IsActive)
+            if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
             {
-                article.Activate();
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
             }
-            else
+
+            if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
             {
-                article.Deactivate();
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
             }
+
+            if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
+            }
+
+            if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
+            }
+
+            if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
+            }
+
+            if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
+            }
+
+            if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
+            }
+
+            if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
+            }
+
+            if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
+            }
+
+            if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
+            {
+                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
+            }
+
+            article.Barcodes = new ArticleBarcodes
+            {
+                Ean13 = barcodes.Ean13,
+                Ean8 = barcodes.Ean8,
+                UpcA = barcodes.UpcA,
+                UpcE = barcodes.UpcE,
+                Code128 = barcodes.Code128,
+                Code39 = barcodes.Code39,
+                Itf14 = barcodes.Itf14,
+                Gs1128 = barcodes.Gs1128,
+                QrCode = barcodes.QrCode,
+                DataMatrix = barcodes.DataMatrix
+            };
         }
 
-        await eventRecorder.Record(EventType.ArticleUpdated, EntityType.Article, article.Guid, cancellationToken);
-        await unitOfWork.SaveChanges(cancellationToken);
-        await eventPublisher.PublishArticleUpdated(article.Guid, cancellationToken);
-    }
+        #endregion Barcode
 
-    private async Task<IReadOnlyList<Partition>> ResolvePartitions(
-        Actor actor,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        CancellationToken cancellationToken)
-    {
-        if (partitionGuids is null || partitionGuids.Count == 0)
-        {
-            return [];
-        }
+        #region Partition
 
-        var partitions = new List<Partition>(partitionGuids.Count);
-        foreach (var partitionGuid in partitionGuids.Distinct())
+        foreach (var partitionGuid in command.PartitionGuids ?? [])
         {
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
             actor.ValidateHasPartitionAccess(partition.Guid);
-            partitions.Add(partition);
+
+            article.Partitions.Add(partition);
         }
 
-        return partitions;
-    }
+        #endregion Partition
 
-    private static void ReconcilePartitions(Article article, IReadOnlyList<Partition> partitions)
-    {
-        var desired = partitions.Select(p => p.Guid).ToHashSet();
+        articleRepository.Add(article);
 
-        for (int i = article.Partitions.Count - 1; i >= 0; i--)
-        {
-            if (!desired.Contains(article.Partitions[i].Guid))
-            {
-                article.Partitions.RemoveAt(i);
-            }
-        }
+        await unitOfWork.SaveChanges(cancellationToken);
 
-        foreach (var partition in partitions)
-        {
-            if (!article.Partitions.Any(p => p.Guid == partition.Guid))
-            {
-                article.Partitions.Add(partition);
-            }
-        }
+        return article.Guid;
     }
 }

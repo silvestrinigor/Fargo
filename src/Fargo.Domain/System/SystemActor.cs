@@ -84,5 +84,5 @@ public sealed class SystemActor : Actor
     /// The system actor is not restricted by partitions. Partition checks
     /// are expected to be bypassed due to <see cref="IsAdmin"/>.
     /// </remarks>
-    public override IReadOnlyCollection<Guid> PartitionAccesses => [];
+    public override IReadOnlyCollection<Guid> PartitionAccessesGuids => [];
 }

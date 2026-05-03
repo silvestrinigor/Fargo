@@ -49,7 +49,7 @@ public abstract class Actor : IActor
     /// <summary>
     /// Gets the set of partitions the actor has access to.
     /// </summary>
-    public abstract IReadOnlyCollection<Guid> PartitionAccesses { get; }
+    public abstract IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
 
     /// <summary>
     /// Determines whether the actor has permission to perform a specific action.
@@ -90,7 +90,7 @@ public abstract class Actor : IActor
     /// <list type="number">
     /// <item><description>System actors have unrestricted access</description></item>
     /// <item><description>Administrative actors have unrestricted access</description></item>
-    /// <item><description>Otherwise, checks <see cref="PartitionAccesses"/></description></item>
+    /// <item><description>Otherwise, checks <see cref="PartitionAccessesGuids"/></description></item>
     /// </list>
     /// </remarks>
     public bool HasPartitionAccess(Guid partitionGuid)
@@ -100,7 +100,7 @@ public abstract class Actor : IActor
             return true;
         }
 
-        return PartitionAccesses.Contains(partitionGuid);
+        return PartitionAccessesGuids.Contains(partitionGuid);
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ public abstract class Actor : IActor
     /// <item><description>System actors have unrestricted access</description></item>
     /// <item><description>Administrative actors have unrestricted access</description></item>
     /// <item><description>Entities with no partitions are public and accessible to all authenticated actors</description></item>
-    /// <item><description>Otherwise, checks intersection with <see cref="PartitionAccesses"/></description></item>
+    /// <item><description>Otherwise, checks intersection with <see cref="PartitionAccessesGuids"/></description></item>
     /// </list>
     /// </remarks>
     public bool HasAccess(IPartitionedEntity partitioned)
@@ -133,6 +133,6 @@ public abstract class Actor : IActor
             return true;
         }
 
-        return partitioned.Partitions.Any(p => PartitionAccesses.Contains(p.Guid));
+        return partitioned.Partitions.Any(p => PartitionAccessesGuids.Contains(p.Guid));
     }
 }

@@ -1,3 +1,5 @@
+using Fargo.Domain.Barcodes;
+
 namespace Fargo.Domain.Articles;
 
 /// <summary>
@@ -13,11 +15,51 @@ public interface IArticleRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<bool> ExistsByBarcode(
+        Ean13 code
+    );
+
+    Task<bool> ExistsByBarcode(
+        Ean8 code
+    );
+
+    Task<bool> ExistsByBarcode(
+        UpcE code
+    );
+
+    Task<bool> ExistsByBarcode(
+        UpcA code
+    );
+
+    Task<bool> ExistsByBarcode(
+        Code128 code
+    );
+
+
+    Task<bool> ExistsByBarcode(
+        Code39 code
+    );
+
+    Task<bool> ExistsByBarcode(
+        Itf14 code
+    );
+
+    Task<bool> ExistsByBarcode(
+        Gs1128 code
+    );
+
+    Task<bool> ExistsByBarcode(
+        QrCode code
+    );
+
+    Task<bool> ExistsByBarcode(
+        DataMatrix code
+    );
+
     /// <summary>
     /// Gets a paginated collection of article unique identifiers.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default
     );
@@ -27,7 +69,6 @@ public interface IArticleRepository
     /// filtered to articles that belong to at least one of the specified partitions.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        Pagination pagination,
         IReadOnlyCollection<Guid> partitionGuids,
         DateTimeOffset? asOfDateTime = null,
         CancellationToken cancellationToken = default

@@ -49,9 +49,9 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     public ArticleMetrics Metrics { get; set; } = new();
 
     /// <summary>
-    /// Gets the barcodes associated with the article.
+    /// Gets or sets the barcodes associated with the article.
     /// </summary>
-    public ArticleBarcodes Barcodes { get; private set; } = new();
+    public ArticleBarcodes Barcodes { get; set; } = new();
 
     #region Active
 

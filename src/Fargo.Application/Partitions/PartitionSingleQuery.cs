@@ -75,50 +75,50 @@ public sealed class PartitionSingleQueryHandler(
         ICurrentUser currentUser
         ) : IQueryHandler<PartitionSingleQuery, PartitionInformation?>
 {
-    /// <summary>
-    /// Executes the query to retrieve a single partition information projection
-    /// accessible to the current actor.
-    /// </summary>
-    /// <param name="query">
-    /// The query containing the partition identifier and optional temporal parameter.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The <see cref="PartitionInformation"/> visible to the current actor,
-    /// or <see langword="null"/> if the partition does not exist or is not accessible.
-    /// </returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current actor is not authenticated or inactive.
-    /// </exception>
-    /// <remarks>
-    /// Administrative and system actors bypass access validation.
-    ///
-    /// Regular actors must have explicit access to the requested partition;
-    /// otherwise, <see langword="null"/> is returned.
-    ///
-    /// This method does not throw when access is denied, following the
-    /// query-side soft-authorization pattern.
-    /// </remarks>
-    public async Task<PartitionInformation?> Handle(
-            PartitionSingleQuery query,
-            CancellationToken cancellationToken = default
-            )
-    {
-        ArgumentNullException.ThrowIfNull(query);
-
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
-
-        if (!actor.IsAdmin && !actor.IsSystem && !actor.PartitionAccesses.Contains(query.PartitionGuid))
+        /// <summary>
+        /// Executes the query to retrieve a single partition information projection
+        /// accessible to the current actor.
+        /// </summary>
+        /// <param name="query">
+        /// The query containing the partition identifier and optional temporal parameter.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        /// The <see cref="PartitionInformation"/> visible to the current actor,
+        /// or <see langword="null"/> if the partition does not exist or is not accessible.
+        /// </returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current actor is not authenticated or inactive.
+        /// </exception>
+        /// <remarks>
+        /// Administrative and system actors bypass access validation.
+        ///
+        /// Regular actors must have explicit access to the requested partition;
+        /// otherwise, <see langword="null"/> is returned.
+        ///
+        /// This method does not throw when access is denied, following the
+        /// query-side soft-authorization pattern.
+        /// </remarks>
+        public async Task<PartitionInformation?> Handle(
+                PartitionSingleQuery query,
+                CancellationToken cancellationToken = default
+                )
         {
-            return null;
-        }
+                ArgumentNullException.ThrowIfNull(query);
 
-        return await partitionRepository.GetInfoByGuid(
-                query.PartitionGuid,
-                query.AsOfDateTime,
-                cancellationToken
-                );
-    }
+                var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+                if (!actor.IsAdmin && !actor.IsSystem && !actor.PartitionAccessesGuids.Contains(query.PartitionGuid))
+                {
+                        return null;
+                }
+
+                return await partitionRepository.GetInfoByGuid(
+                        query.PartitionGuid,
+                        query.AsOfDateTime,
+                        cancellationToken
+                        );
+        }
 }

@@ -130,7 +130,7 @@ public sealed class UserGroupManyQueryHandler(
         {
             var userGroups = await userGroupRepository.GetManyInfoInPartitionsOrPublic(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    actor.PartitionAccesses,
+                    actor.PartitionAccessesGuids,
                     query.UserGuid,
                     query.AsOfDateTime,
                     cancellationToken

@@ -76,59 +76,59 @@ public sealed class ItemSingleQueryHandler(
         ICurrentUser currentUser
         ) : IQueryHandler<ItemSingleQuery, ItemInformation?>
 {
-    /// <summary>
-    /// Executes the query to retrieve a single item information projection
-    /// accessible to the current actor.
-    /// </summary>
-    /// <param name="query">
-    /// The query containing the item identifier and optional temporal parameter.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The <see cref="ItemInformation"/> visible to the current actor,
-    /// or <see langword="null"/> if the item does not exist or is not accessible.
-    /// </returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current actor is not authenticated or inactive.
-    /// </exception>
-    /// <remarks>
-    /// If the actor has administrative or system privileges, the item is retrieved
-    /// without partition filtering.
-    ///
-    /// Otherwise, the item is only returned if it belongs to at least one
-    /// partition accessible to the actor.
-    /// </remarks>
-    public async Task<ItemInformation?> Handle(
-            ItemSingleQuery query,
-            CancellationToken cancellationToken = default
-            )
-    {
-        ArgumentNullException.ThrowIfNull(query);
-
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
-
-        if (actor.IsAdmin || actor.IsSystem)
+        /// <summary>
+        /// Executes the query to retrieve a single item information projection
+        /// accessible to the current actor.
+        /// </summary>
+        /// <param name="query">
+        /// The query containing the item identifier and optional temporal parameter.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        /// The <see cref="ItemInformation"/> visible to the current actor,
+        /// or <see langword="null"/> if the item does not exist or is not accessible.
+        /// </returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current actor is not authenticated or inactive.
+        /// </exception>
+        /// <remarks>
+        /// If the actor has administrative or system privileges, the item is retrieved
+        /// without partition filtering.
+        ///
+        /// Otherwise, the item is only returned if it belongs to at least one
+        /// partition accessible to the actor.
+        /// </remarks>
+        public async Task<ItemInformation?> Handle(
+                ItemSingleQuery query,
+                CancellationToken cancellationToken = default
+                )
         {
-            var itemInformation = await itemRepository.GetInfoByGuid(
-                    query.ItemGuid,
-                    query.AsOfDateTime,
-                    cancellationToken
-                    );
+                ArgumentNullException.ThrowIfNull(query);
 
-            return itemInformation;
-        }
-        else
-        {
-            var itemInformation = await itemRepository.GetInfoByGuidPublicOrInPartitions(
-                    query.ItemGuid,
-                    actor.PartitionAccesses,
-                    query.AsOfDateTime,
-                    cancellationToken
-                    );
+                var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-            return itemInformation;
+                if (actor.IsAdmin || actor.IsSystem)
+                {
+                        var itemInformation = await itemRepository.GetInfoByGuid(
+                                query.ItemGuid,
+                                query.AsOfDateTime,
+                                cancellationToken
+                                );
+
+                        return itemInformation;
+                }
+                else
+                {
+                        var itemInformation = await itemRepository.GetInfoByGuidPublicOrInPartitions(
+                                query.ItemGuid,
+                                actor.PartitionAccessesGuids,
+                                query.AsOfDateTime,
+                                cancellationToken
+                                );
+
+                        return itemInformation;
+                }
         }
-    }
 }

@@ -126,7 +126,7 @@ public sealed class UserGroupSingleQueryHandler(
         {
             var userGroup = await userGroupRepository.GetInfoByGuidPublicOrInPartitions(
                     query.UserGroupGuid,
-                    actor.PartitionAccesses,
+                    actor.PartitionAccessesGuids,
                     query.AsOfDateTime,
                     cancellationToken
                     );

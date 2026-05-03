@@ -157,7 +157,7 @@ public sealed class ItemManyQueryHandler(
                         );
             }
 
-            if (query.PartitionGuid.HasValue && !actor.PartitionAccesses.Contains(query.PartitionGuid.Value))
+            if (query.PartitionGuid.HasValue && !actor.PartitionAccessesGuids.Contains(query.PartitionGuid.Value))
             {
                 return [];
             }
@@ -175,7 +175,7 @@ public sealed class ItemManyQueryHandler(
 
             return await itemRepository.GetManyInfoInPartitionsOrPublic(
                     query.Pagination ?? Pagination.FirstPage20Items,
-                    actor.PartitionAccesses,
+                    actor.PartitionAccessesGuids,
                     query.ArticleGuid,
                     query.AsOfDateTime,
                     cancellationToken

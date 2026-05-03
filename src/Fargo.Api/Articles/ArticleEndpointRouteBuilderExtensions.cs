@@ -76,20 +76,21 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticle(
-        DateTimeOffset? temporalAsOf,
+        DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        string? search, // ??
-        IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleDto>> handler,
+        IReadOnlyCollection<Guid>? insideAnyOfThiPartitions,
+        bool? notInsideAnyPartition,
+        IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken)
     {
-        var pagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
+        var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
 
-        var query = new ArticleManyQuery(
-            pagination,
-            temporalAsOf,
-            partitionGuids
+        var query = new ArticlesQuery(
+            withPagination,
+            temporalAsOfDateTime,
+            insideAnyOfThiPartitions,
+            notInsideAnyPartition
         );
 
         var response = await handler.Handle(query, cancellationToken);
@@ -144,7 +145,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticleUpdateModel request,
+        ArticleUpdateDto request,
         ICommandHandler<ArticleUpdateCommand> handler,
         CancellationToken cancellationToken)
     {

@@ -1,12 +1,12 @@
 using Fargo.Domain.Barcodes;
 
-namespace Fargo.Application.Articles;
+namespace Fargo.Domain.Articles;
 
 /// <summary>
 /// Exception thrown when a barcode is already assigned to a different article.
 /// </summary>
-public class ArticleBarcodeAlreadyInUseFargoApplicationException(BarcodeFormat format, string code)
-    : FargoApplicationException($"Barcode '{code}' ({format}) is already assigned to another article.")
+public class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat format, string code)
+    : FargoDomainException($"Barcode '{code}' ({format}) is already assigned to another article.")
 {
     /// <summary>Gets the barcode format that conflicts.</summary>
     public BarcodeFormat Format { get; } = format;

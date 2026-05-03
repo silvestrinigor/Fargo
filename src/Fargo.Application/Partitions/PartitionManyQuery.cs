@@ -87,67 +87,67 @@ public sealed class PartitionManyQueryHandler(
         ICurrentUser currentUser
         ) : IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>>
 {
-    /// <summary>
-    /// Executes the query to retrieve partition information accessible
-    /// to the current actor.
-    /// </summary>
-    /// <param name="query">
-    /// The query containing optional parent filter, temporal parameter,
-    /// and pagination settings.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// A read-only collection of <see cref="PartitionInformation"/> objects
-    /// visible to the current actor.
-    /// </returns>
-    /// <exception cref="UnauthorizedAccessFargoApplicationException">
-    /// Thrown when the current actor is not authenticated or inactive.
-    /// </exception>
-    /// <remarks>
-    /// If the actor has administrative or system privileges, partitions are retrieved
-    /// without access filtering.
-    ///
-    /// Otherwise, only partitions explicitly accessible to the actor are returned.
-    ///
-    /// Pagination defaults to <see cref="Pagination.FirstPage20Items"/> when not specified.
-    /// </remarks>
-    public async Task<IReadOnlyCollection<PartitionInformation>> Handle(
-            PartitionManyQuery query,
-            CancellationToken cancellationToken = default
-            )
-    {
-        ArgumentNullException.ThrowIfNull(query);
-
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
-
-        if (actor.IsAdmin || actor.IsSystem)
+        /// <summary>
+        /// Executes the query to retrieve partition information accessible
+        /// to the current actor.
+        /// </summary>
+        /// <param name="query">
+        /// The query containing optional parent filter, temporal parameter,
+        /// and pagination settings.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A token used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        /// A read-only collection of <see cref="PartitionInformation"/> objects
+        /// visible to the current actor.
+        /// </returns>
+        /// <exception cref="UnauthorizedAccessFargoApplicationException">
+        /// Thrown when the current actor is not authenticated or inactive.
+        /// </exception>
+        /// <remarks>
+        /// If the actor has administrative or system privileges, partitions are retrieved
+        /// without access filtering.
+        ///
+        /// Otherwise, only partitions explicitly accessible to the actor are returned.
+        ///
+        /// Pagination defaults to <see cref="Pagination.FirstPage20Items"/> when not specified.
+        /// </remarks>
+        public async Task<IReadOnlyCollection<PartitionInformation>> Handle(
+                PartitionManyQuery query,
+                CancellationToken cancellationToken = default
+                )
         {
-            var partitions = await partitionRepository.GetManyInfo(
-                    query.Pagination ?? Pagination.FirstPage20Items,
-                    query.ParentPartitionGuid,
-                    query.AsOfDateTime,
-                    query.RootOnly,
-                    query.Search,
-                    cancellationToken
-                    );
+                ArgumentNullException.ThrowIfNull(query);
 
-            return partitions;
-        }
-        else
-        {
-            var partitions = await partitionRepository.GetManyInfoByGuids(
-                    actor.PartitionAccesses,
-                    query.Pagination ?? Pagination.FirstPage20Items,
-                    query.ParentPartitionGuid,
-                    query.AsOfDateTime,
-                    query.RootOnly,
-                    query.Search,
-                    cancellationToken
-                    );
+                var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-            return partitions;
+                if (actor.IsAdmin || actor.IsSystem)
+                {
+                        var partitions = await partitionRepository.GetManyInfo(
+                                query.Pagination ?? Pagination.FirstPage20Items,
+                                query.ParentPartitionGuid,
+                                query.AsOfDateTime,
+                                query.RootOnly,
+                                query.Search,
+                                cancellationToken
+                                );
+
+                        return partitions;
+                }
+                else
+                {
+                        var partitions = await partitionRepository.GetManyInfoByGuids(
+                                actor.PartitionAccessesGuids,
+                                query.Pagination ?? Pagination.FirstPage20Items,
+                                query.ParentPartitionGuid,
+                                query.AsOfDateTime,
+                                query.RootOnly,
+                                query.Search,
+                                cancellationToken
+                                );
+
+                        return partitions;
+                }
         }
-    }
 }

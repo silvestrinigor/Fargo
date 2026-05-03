@@ -126,7 +126,7 @@ public sealed class UserSingleQueryHandler(
         {
             var user = await userRepository.GetInfoByGuidPublicOrInPartitions(
                     query.UserGuid,
-                    actor.PartitionAccesses,
+                    actor.PartitionAccessesGuids,
                     query.AsOfDateTime,
                     cancellationToken
                     );

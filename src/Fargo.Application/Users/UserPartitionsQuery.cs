@@ -33,7 +33,7 @@ public sealed class UserPartitionsQueryHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var filter = (actor.IsAdmin || actor.IsSystem) ? null : actor.PartitionAccesses;
+        var filter = (actor.IsAdmin || actor.IsSystem) ? null : actor.PartitionAccessesGuids;
 
         return await userRepository.GetPartitions(query.UserGuid, filter, cancellationToken);
     }

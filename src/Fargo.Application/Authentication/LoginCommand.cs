@@ -122,7 +122,7 @@ public sealed class LoginCommandHandler(
                 accessTokenResult.ExpiresAt,
                 actor.IsAdmin,
                 actor.IsAdmin ? [] : actor.PermissionActions,
-                actor.IsAdmin ? [] : actor.PartitionAccesses
+                actor.IsAdmin ? [] : actor.PartitionAccessesGuids
                 );
     }
 }
