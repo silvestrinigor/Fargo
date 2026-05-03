@@ -3,6 +3,47 @@ using Fargo.Domain;
 
 namespace Fargo.Application.Articles;
 
+#region Single
+
+public sealed record ArticleSingleQuery(
+    Guid ArticleGuid,
+    DateTimeOffset? AsOfDateTime = null
+) : IQuery<ArticleDto?>;
+
+public sealed class ArticleSingleQueryHandler(
+    ActorService actorService,
+    IArticleQueryRepository articleRepository,
+    ICurrentUser currentUser
+) : IQueryHandler<ArticleSingleQuery, ArticleDto?>
+{
+    public async Task<ArticleDto?> Handle(
+        ArticleSingleQuery query,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+        var article = await articleRepository.GetInfoByGuid(
+            query.ArticleGuid,
+            query.AsOfDateTime,
+            actor.PartitionAccessesGuids,
+            notInsideAnyPartition: null,
+            cancellationToken
+        );
+
+        if (article is not null && article.Partitions.Any(p => !actor.PartitionAccessesGuids.Contains(p)))
+        {
+            throw new EntityAccessViolationFargoApplicationException(actor.Guid);
+        }
+
+        return article;
+    }
+}
+
+#endregion Single
+
+#region Many
+
 public sealed record ArticlesQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
@@ -43,3 +84,5 @@ public sealed class ArticlesQueryHandler(
         return articles;
     }
 }
+
+#endregion Many

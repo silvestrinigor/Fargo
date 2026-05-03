@@ -123,11 +123,11 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateArticle(
-        ArticleCreateModel request,
+        ArticleCreateCommand request,
         ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new ArticleCreateCommand(request), cancellationToken);
+        var response = await handler.Handle(request, cancellationToken);
 
         return TypedResults.Ok(response);
     }
