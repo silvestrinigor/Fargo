@@ -168,10 +168,6 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid operation", "user-group/cannot-delete-parent-group")
             },
             {
-                typeof(ApiClientNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "API client not found", "api-client/not-found")
-            },
-            {
                 typeof(ArgumentException),
                 new ProblemDetailsDefinition(400, "Invalid barcode value", "barcode/invalid-value")
             }

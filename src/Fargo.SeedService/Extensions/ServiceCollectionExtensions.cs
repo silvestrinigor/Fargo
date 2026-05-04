@@ -49,15 +49,5 @@ public static class ServiceCollectionExtensions
 
             return services;
         }
-
-        public IServiceCollection AddFargoApiClientSeed(IConfiguration configuration, bool isDevelopment)
-        {
-            services
-                .AddOptions<ApiClientSeedOptions>()
-                .Bind(configuration.GetSection(ApiClientSeedOptions.SectionName))
-                .PostConfigure(o => o.SeedTestClient = isDevelopment);
-
-            return services;
-        }
     }
 }

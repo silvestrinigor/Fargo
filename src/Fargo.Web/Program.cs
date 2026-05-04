@@ -1,6 +1,7 @@
 using Fargo.Api.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web;
+using Fargo.Web.Components;
 using Fargo.Web.Components.Session;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -25,6 +26,7 @@ builder.Services.AddFargoSdk(o =>
     o.ApiKey = builder.Configuration["Fargo:ApiKey"];
 });
 
+builder.Services.AddFargoWebComponents();
 builder.Services.AddScoped<FargoSession>();
 
 var app = builder.Build();

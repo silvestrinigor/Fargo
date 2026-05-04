@@ -41,8 +41,6 @@ app.UseResponseCompression();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
 
-app.UseMiddleware<ApiClientMiddleware>();
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

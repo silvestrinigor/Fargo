@@ -87,7 +87,7 @@ public static class AuthenticationEndpointRouteBuilderExtension
         ICommandHandler<PasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new PasswordChangeCommand(new UserPasswordUpdateModel(request.NewPassword, request.CurrentPassword)), cancellationToken);
+        await handler.Handle(new PasswordChangeCommand(new UserPasswordUpdateDto(request.NewPassword, request.CurrentPassword)), cancellationToken);
 
         return TypedResults.NoContent();
     }
