@@ -1,4 +1,5 @@
 using Fargo.Api.Http;
+using Fargo.Api.Items;
 using NSubstitute;
 using System.Net;
 
@@ -6,12 +7,12 @@ namespace Fargo.Api.Tests.Items;
 
 public sealed class ItemClientTests
 {
-    private readonly IFargoSdkHttpClient httpClient = Substitute.For<IFargoSdkHttpClient>();
-    private readonly ItemClient sut;
+    private readonly IFargoHttpClient httpClient = Substitute.For<IFargoHttpClient>();
+    private readonly ItemHttpClient sut;
 
     public ItemClientTests()
     {
-        sut = new ItemClient(httpClient);
+        sut = new ItemHttpClient(httpClient);
     }
 
     // --- GetAsync ---

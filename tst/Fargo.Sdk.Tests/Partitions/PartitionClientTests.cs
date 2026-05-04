@@ -1,4 +1,5 @@
 using Fargo.Api.Http;
+using Fargo.Api.Partitions;
 using NSubstitute;
 using System.Net;
 
@@ -6,12 +7,12 @@ namespace Fargo.Api.Tests.Partitions;
 
 public sealed class PartitionClientTests
 {
-    private readonly IFargoSdkHttpClient httpClient = Substitute.For<IFargoSdkHttpClient>();
-    private readonly PartitionClient sut;
+    private readonly IFargoHttpClient httpClient = Substitute.For<IFargoHttpClient>();
+    private readonly PartitionHttpClient sut;
 
     public PartitionClientTests()
     {
-        sut = new PartitionClient(httpClient);
+        sut = new PartitionHttpClient(httpClient);
     }
 
     // --- GetAsync ---

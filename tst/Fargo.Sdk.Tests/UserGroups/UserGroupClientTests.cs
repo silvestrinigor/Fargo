@@ -1,4 +1,5 @@
 using Fargo.Api.Http;
+using Fargo.Api.UserGroups;
 using NSubstitute;
 using System.Net;
 
@@ -6,12 +7,12 @@ namespace Fargo.Api.Tests.UserGroups;
 
 public sealed class UserGroupClientTests
 {
-    private readonly IFargoSdkHttpClient httpClient = Substitute.For<IFargoSdkHttpClient>();
-    private readonly UserGroupClient sut;
+    private readonly IFargoHttpClient httpClient = Substitute.For<IFargoHttpClient>();
+    private readonly UserGroupHttpClient sut;
 
     public UserGroupClientTests()
     {
-        sut = new UserGroupClient(httpClient);
+        sut = new UserGroupHttpClient(httpClient);
     }
 
     // --- GetAsync ---

@@ -1,3 +1,4 @@
+using Fargo.Api.Authentication;
 using Fargo.Api.Http;
 using NSubstitute;
 using System.Net;
@@ -6,12 +7,12 @@ namespace Fargo.Api.Tests.Authentication;
 
 public sealed class AuthenticationClientTests
 {
-    private readonly IFargoSdkHttpClient httpClient = Substitute.For<IFargoSdkHttpClient>();
-    private readonly AuthenticationClient sut;
+    private readonly IFargoHttpClient httpClient = Substitute.For<IFargoHttpClient>();
+    private readonly AuthenticationHttpClient sut;
 
     public AuthenticationClientTests()
     {
-        sut = new AuthenticationClient(httpClient);
+        sut = new AuthenticationHttpClient(httpClient);
     }
 
     // --- LogInAsync ---
