@@ -34,9 +34,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.DefaultPasswordExpirationPeriod)
             .HasConversion(
-                x => x.Ticks,
-                x => TimeSpan.FromTicks(x))
-            .IsRequired();
+                x => x.HasValue ? x.Value.Ticks : (long?)null,
+                x => x.HasValue ? TimeSpan.FromTicks(x.Value) : null)
+            .IsRequired(false);
 
         builder.Property(x => x.RequirePasswordChangeAt)
             .IsRequired();

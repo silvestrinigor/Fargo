@@ -2,8 +2,6 @@ using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Users;
 
-// TODO: the default should be the password never expire
-// TODO: organize the class
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
@@ -104,55 +102,12 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
         set;
     }
 
-    /// <summary>
-    /// The default number of days a user can keep the same password
-    /// before a password change is required.
-    /// </summary>
-    public const int DefaultPasswordChangeDays = 90;
+    public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
 
-    /// <summary>
-    /// Gets or sets the default password expiration period for the user.
-    ///
-    /// This value is persisted and represents the amount of time added to the
-    /// current UTC time when the user successfully changes their own password.
-    ///
-    /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
-    /// immediately after being changed.
-    /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the assigned value is less than <see cref="TimeSpan.Zero"/>.
-    /// </exception>
-    public TimeSpan DefaultPasswordExpirationPeriod
-    {
-        get;
-        set
-        {
-            ArgumentOutOfRangeException.ThrowIfLessThan(value, TimeSpan.Zero);
-            field = value;
-        }
-    } = TimeSpan.FromDays(DefaultPasswordChangeDays);
+    public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
-    /// <summary>
-    /// Gets or sets the date and time when the user must change their password.
-    ///
-    /// This value is initialized at entity creation time based on
-    /// <see cref="DefaultPasswordChangeDays"/> from the current UTC time.
-    /// </summary>
-    public DateTimeOffset RequirePasswordChangeAt
-    {
-        get;
-        set;
-    } = DateTimeOffset.UtcNow + TimeSpan.FromDays(DefaultPasswordChangeDays);
-
-    /// <summary>
-    /// Determines whether the user is currently required to change their password.
-    /// </summary>
-    /// <returns>
-    /// <c>true</c> if the current UTC time is greater than or equal to
-    /// <see cref="RequirePasswordChangeAt"/>; otherwise, <c>false</c>.
-    /// </returns>
     public bool IsPasswordChangeRequired
-        => DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
+        => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
 
     /// <summary>
     /// Resets the password expiration date based on the user's
