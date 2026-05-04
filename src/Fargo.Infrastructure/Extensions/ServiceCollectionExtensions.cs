@@ -168,7 +168,6 @@ public static class ServiceCollectionExtensions
 
         private void AddDomainServices()
         {
-            services.AddScoped<ArticleService>();
             services.AddScoped<UserService>();
             services.AddScoped<UserGroupService>();
             services.AddScoped<PartitionService>();
