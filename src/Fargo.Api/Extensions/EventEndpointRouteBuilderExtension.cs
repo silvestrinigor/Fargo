@@ -1,4 +1,3 @@
-using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Events;
 using Fargo.Domain.Events;
@@ -41,7 +40,7 @@ public static class EventEndpointRouteBuilderExtension
             ActorGuid: actorGuid,
             From: from,
             To: to,
-            Pagination: PaginationHelpers.CreatePagination(page, limit));
+            Pagination: new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit));
 
         var result = await handler.Handle(query, cancellationToken);
         if (result.Count == 0)
