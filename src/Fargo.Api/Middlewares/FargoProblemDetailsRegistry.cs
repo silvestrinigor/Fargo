@@ -1,4 +1,3 @@
-using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;

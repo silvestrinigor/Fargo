@@ -1,5 +1,4 @@
 using Fargo.Api.Http;
-using Fargo.Api.Partitions;
 using NSubstitute;
 using System.Net;
 

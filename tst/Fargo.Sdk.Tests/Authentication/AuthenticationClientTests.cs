@@ -1,4 +1,3 @@
-using Fargo.Api.Authentication;
 using Fargo.Api.Http;
 using NSubstitute;
 using System.Net;

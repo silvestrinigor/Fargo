@@ -12,7 +12,10 @@ public readonly struct Ean8 : IEquatable<Ean8>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length != CodeLength || !value.All(char.IsAsciiDigit))
+        {
             throw new ArgumentException($"EAN-8 code must be exactly {CodeLength} digits.", nameof(value));
+        }
+
         code = value;
     }
 

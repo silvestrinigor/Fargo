@@ -1,9 +1,3 @@
-using Fargo.Api.Articles;
-using Fargo.Api.Items;
-using Fargo.Api.Partitions;
-using Fargo.Api.UserGroups;
-using Fargo.Api.Users;
-
 namespace Fargo.Web.Components.Features.Trees;
 
 public sealed class TreeSidebarNode

@@ -1,6 +1,6 @@
-using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Api.Http;
 using Fargo.Sdk;
+using Fargo.Sdk.Contracts.Partitions;
 
 namespace Fargo.Api.Partitions;
 

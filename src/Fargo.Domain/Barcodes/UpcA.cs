@@ -12,7 +12,10 @@ public readonly struct UpcA : IEquatable<UpcA>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length != CodeLength || !value.All(char.IsAsciiDigit))
+        {
             throw new ArgumentException($"UPC-A code must be exactly {CodeLength} digits.", nameof(value));
+        }
+
         code = value;
     }
 

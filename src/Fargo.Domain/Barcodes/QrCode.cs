@@ -13,7 +13,10 @@ public readonly struct QrCode : IEquatable<QrCode>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length is < MinLength or > MaxLength)
+        {
             throw new ArgumentException($"QR Code must be {MinLength}–{MaxLength} characters.", nameof(value));
+        }
+
         code = value;
     }
 

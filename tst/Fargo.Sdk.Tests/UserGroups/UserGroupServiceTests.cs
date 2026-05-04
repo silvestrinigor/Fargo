@@ -1,4 +1,3 @@
-using Fargo.Api.Events;
 using Fargo.Api.UserGroups;
 using NSubstitute;
 

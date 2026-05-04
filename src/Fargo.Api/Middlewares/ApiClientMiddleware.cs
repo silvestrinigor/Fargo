@@ -1,5 +1,3 @@
-using Fargo.Application.ApiClients;
-using Fargo.Domain.ClientApplications;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 

@@ -1,8 +1,8 @@
-using Fargo.Sdk.Contracts.Items;
-using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Api.Http;
 using Fargo.Api.Partitions;
 using Fargo.Sdk;
+using Fargo.Sdk.Contracts.Items;
+using Fargo.Sdk.Contracts.Partitions;
 
 namespace Fargo.Api.Items;
 

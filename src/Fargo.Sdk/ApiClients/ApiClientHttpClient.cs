@@ -1,6 +1,6 @@
-using Fargo.Sdk.Contracts.ApiClients;
 using Fargo.Api.Http;
 using Fargo.Sdk;
+using Fargo.Sdk.Contracts.ApiClients;
 
 namespace Fargo.Api.ApiClients;
 

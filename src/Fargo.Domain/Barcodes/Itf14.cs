@@ -12,7 +12,10 @@ public readonly struct Itf14 : IEquatable<Itf14>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length != CodeLength || !value.All(char.IsAsciiDigit))
+        {
             throw new ArgumentException($"ITF-14 code must be exactly {CodeLength} digits.", nameof(value));
+        }
+
         code = value;
     }
 

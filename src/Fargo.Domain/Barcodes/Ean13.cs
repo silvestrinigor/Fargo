@@ -12,7 +12,10 @@ public readonly struct Ean13 : IEquatable<Ean13>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length != CodeLength || !value.All(char.IsAsciiDigit))
+        {
             throw new ArgumentException($"EAN-13 code must be exactly {CodeLength} digits.", nameof(value));
+        }
+
         code = value;
     }
 

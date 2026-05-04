@@ -1,5 +1,3 @@
-using Fargo.Api.Authentication;
-
 namespace Fargo.Api.Tests.Authentication;
 
 public sealed class AuthSessionTests

@@ -1,5 +1,3 @@
-using Fargo.Api.Authentication;
-
 namespace Fargo.Web.Components.Session;
 
 /// <summary>

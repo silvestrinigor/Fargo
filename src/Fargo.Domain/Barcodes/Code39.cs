@@ -13,7 +13,10 @@ public readonly struct Code39 : IEquatable<Code39>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length is < MinLength or > MaxLength || !value.All(c => c is >= '\x20' and <= '\x7E'))
+        {
             throw new ArgumentException($"Code 39 code must be {MinLength}–{MaxLength} printable ASCII characters.", nameof(value));
+        }
+
         code = value;
     }
 

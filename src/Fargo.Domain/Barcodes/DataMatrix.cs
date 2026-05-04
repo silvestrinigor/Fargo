@@ -13,7 +13,10 @@ public readonly struct DataMatrix : IEquatable<DataMatrix>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         if (value.Length is < MinLength or > MaxLength)
+        {
             throw new ArgumentException($"Data Matrix code must be {MinLength}–{MaxLength} characters.", nameof(value));
+        }
+
         code = value;
     }
 

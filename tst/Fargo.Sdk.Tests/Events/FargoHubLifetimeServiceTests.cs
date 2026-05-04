@@ -1,5 +1,4 @@
 using Fargo.Api.Authentication;
-using Fargo.Api.Events;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
