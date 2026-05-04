@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Api.UserGroups;
 
@@ -81,7 +82,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions,
+        [FromQuery] Guid[]? insideAnyOfThisPartitions,
         bool? notInsideAnyPartition,
         IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>> handler,
         CancellationToken cancellationToken

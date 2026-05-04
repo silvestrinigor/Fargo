@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Api.Partitions;
 
@@ -81,7 +82,7 @@ public static class PartitionEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions,
+        [FromQuery] Guid[]? insideAnyOfThisPartitions,
         bool? notInsideAnyPartition,
         IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>> handler,
         CancellationToken cancellationToken

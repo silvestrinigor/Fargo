@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Api.Articles;
 
@@ -81,7 +82,7 @@ public static class ArticleEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions,
+        [FromQuery] Guid[]? insideAnyOfThisPartitions,
         bool? notInsideAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken

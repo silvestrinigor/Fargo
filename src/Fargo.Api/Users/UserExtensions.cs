@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Api.Users;
 
@@ -81,7 +82,7 @@ public static class UserEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions,
+        [FromQuery] Guid[]? insideAnyOfThisPartitions,
         bool? notInsideAnyPartition,
         IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>> handler,
         CancellationToken cancellationToken
