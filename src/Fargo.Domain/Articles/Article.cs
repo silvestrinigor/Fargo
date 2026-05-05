@@ -1,6 +1,7 @@
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
 using UnitsNet;
+using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.Domain.Articles;
 
@@ -19,6 +20,26 @@ namespace Fargo.Domain.Articles;
 /// </remarks>
 public class Article : ModifiedEntity, IPartitionedEntity, IActivable
 {
+    public Article()
+    {
+
+    }
+
+    public Article(ArticleVariation variation)
+    {
+        Variation = variation;
+    }
+
+    public Article(ArticlePack pack)
+    {
+        Pack = pack;
+    }
+
+    public Article(ArticleKit kit)
+    {
+        Kit = kit;
+    }
+
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
@@ -54,6 +75,32 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     /// Gets or sets the barcodes associated with the article.
     /// </summary>
     public ArticleBarcodes Barcodes { get; set; } = new();
+
+    # region Relation
+
+    /// <summary>
+    /// Gets the variation info associated with the article.
+    /// When <see langword="null"/>, no variation constraint is defined.
+    /// </summary>
+    public ArticleVariation? Variation { get; private init; }
+
+    public ArticleContainer? Container { get; private init; }
+
+    public bool IsContainer => Container is not null;
+
+    /// <summary>
+    /// Gets the pack info associated with the article.
+    /// When <see langword="null"/>, no pack constraint is defined.
+    /// </summary>
+    public ArticlePack? Pack { get; private init; }
+
+    /// <summary>
+    /// Gets the kit info associated with the article.
+    /// When <see langword="null"/>, no kit constraint is defined.
+    /// </summary>
+    public ArticleKit? Kit { get; private init; }
+
+    #endregion Relation
 
     #region Active
 
@@ -201,4 +248,50 @@ public sealed class ArticleBarcodes
         Ean13 is null && Ean8 is null && UpcA is null && UpcE is null &&
         Code128 is null && Code39 is null && Itf14 is null && Gs1128 is null &&
         QrCode is null && DataMatrix is null;
+}
+
+public sealed class ArticleContainer
+{
+    public IReadOnlyCollection<Article>? RestrictList { get; set; }
+
+    public IReadOnlyCollection<Article>? AllowedList { get; set; }
+
+    public Mass? MaxMass { get; set; }
+}
+
+public sealed class ArticleVariation
+{
+    public Guid FromArticleGuid { get; private set; }
+
+    public required Article FromArticle
+    {
+        get;
+        init
+        {
+            FromArticleGuid = value.Guid;
+            field = value;
+        }
+    }
+}
+
+public sealed class ArticlePack
+{
+    public Guid FromArticleGuid { get; private set; }
+
+    public required Article FromArticle
+    {
+        get;
+        init
+        {
+            FromArticleGuid = value.Guid;
+            field = value;
+        }
+    }
+
+    public Scalar Quantity { get; set; } = 1.Amount();
+}
+
+public sealed class ArticleKit
+{
+    public required IReadOnlyCollection<ArticlePack> FromArticles { get; init; }
 }

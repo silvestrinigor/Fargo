@@ -22,6 +22,16 @@ namespace Fargo.Domain.Items;
 /// </remarks>
 public class Item : ModifiedEntity, IPartitionedEntity
 {
+    public Item(Article article)
+    {
+        if (article.IsContainer)
+        {
+            Container = new ItemContainer(this);
+        }
+
+        Article = article;
+    }
+
     #region Article
 
     /// <summary>
@@ -42,10 +52,10 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// When this property is initialized, <see cref="ArticleGuid"/> is
     /// automatically set to the identifier of the assigned article.
     /// </remarks>
-    public required Article Article
+    public Article Article
     {
         get;
-        init
+        private init
         {
             ArticleGuid = value.Guid;
             field = value;
@@ -59,6 +69,36 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// When <see langword="null"/>, the production date is unknown.
     /// </summary>
     public DateTimeOffset? ProductionDate { get; init; }
+
+    /// <summary>
+    /// Gets the date the item will expire.
+    /// When <see langword="null"/>, the expiration date is unknown.
+    /// </summary>
+    public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
+
+    #region Container
+
+    /// <summary>
+    /// Gets the parent container of the current item, if any.
+    /// </summary>
+    public ItemContainer? ParentContainer
+    {
+        get;
+        internal set;
+    }
+
+    /// <summary>
+    /// Gets the container information of the current item, if the current item is a container.
+    /// </summary>
+    public ItemContainer? Container
+    {
+        get;
+        private init;
+    }
+
+    public bool? IsContainer => Article.Container is not null;
+
+    #endregion Container
 
     #region  Partition
 
@@ -75,4 +115,15 @@ public class Item : ModifiedEntity, IPartitionedEntity
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 
     #endregion  Partition
+}
+
+public sealed class ItemContainer
+{
+    public ItemContainer(Item item)
+    {
+        Item = item;
+    }
+
+    public Item Item { get; private init; }
+
 }
