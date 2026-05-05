@@ -99,7 +99,8 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     private static IQueryable<Article> ApplyPartitionFilter(
         IQueryable<Article> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition)
+        bool? notInsideAnyPartition
+    )
     {
         if (notInsideAnyPartition is true)
         {
@@ -111,10 +112,9 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             query = query.Where(article => article.Partitions.Any());
         }
 
-        if (partitionGuids is { Count: > 0 })
+        if (partitionGuids is not null)
         {
             query = query.Where(article =>
-                !article.Partitions.Any() ||
                 article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 

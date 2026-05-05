@@ -75,10 +75,9 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             query = query.Where(item => item.Partitions.Any());
         }
 
-        if (partitionGuids is { Count: > 0 })
+        if (partitionGuids is not null)
         {
             query = query.Where(item =>
-                !item.Partitions.Any() ||
                 item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 

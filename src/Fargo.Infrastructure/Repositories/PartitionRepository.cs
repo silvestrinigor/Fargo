@@ -126,7 +126,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             return query.Where(_ => false);
         }
 
-        if (partitionGuids is { Count: > 0 })
+        if (partitionGuids is not null)
         {
             query = query.Where(partition => partitionGuids.Contains(partition.Guid));
         }

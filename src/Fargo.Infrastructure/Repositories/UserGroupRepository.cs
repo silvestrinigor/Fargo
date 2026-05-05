@@ -92,10 +92,9 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             query = query.Where(userGroup => userGroup.Partitions.Any());
         }
 
-        if (partitionGuids is { Count: > 0 })
+        if (partitionGuids is not null)
         {
             query = query.Where(userGroup =>
-                !userGroup.Partitions.Any() ||
                 userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 
