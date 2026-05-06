@@ -1,6 +1,6 @@
+using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.UserGroups;
-using Fargo.Api.Contracts;
 using Fargo.Sdk.Contracts.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,4 @@
 using Fargo.Sdk.Articles;
-using Fargo.Sdk.Contracts;
 using Fargo.Sdk.Contracts.Articles;
 using Fargo.Sdk.Contracts.Items;
 using Fargo.Sdk.Contracts.Partitions;

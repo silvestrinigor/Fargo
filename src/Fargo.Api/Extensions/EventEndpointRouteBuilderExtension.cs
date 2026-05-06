@@ -1,6 +1,6 @@
+using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Events;
-using Fargo.Api.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ContractEntityType = Fargo.Sdk.Contracts.EntityType;
 using ContractEvents = Fargo.Sdk.Contracts.Events;

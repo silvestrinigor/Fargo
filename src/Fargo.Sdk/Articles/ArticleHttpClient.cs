@@ -1,6 +1,5 @@
-using Fargo.Sdk.Http;
-using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Articles;
+using Fargo.Sdk.Http;
 
 namespace Fargo.Sdk.Articles;
 

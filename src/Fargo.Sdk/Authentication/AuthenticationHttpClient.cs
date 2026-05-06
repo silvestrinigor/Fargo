@@ -1,5 +1,5 @@
-using Fargo.Sdk.Http;
 using Fargo.Sdk.Contracts.Authentication;
+using Fargo.Sdk.Http;
 
 namespace Fargo.Sdk.Authentication;
 
