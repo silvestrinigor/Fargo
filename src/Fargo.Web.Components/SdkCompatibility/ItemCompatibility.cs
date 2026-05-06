@@ -28,6 +28,8 @@ public sealed class Item
         Guid = result.Guid;
         ArticleGuid = result.ArticleGuid;
         ProductionDate = result.ProductionDate;
+        ParentContainerGuid = result.ParentContainerGuid;
+        Partitions = result.Partitions.ToArray();
         EditedByGuid = result.EditedByGuid;
     }
 
@@ -35,21 +37,45 @@ public sealed class Item
 
     public Guid ArticleGuid { get; }
 
-    public DateTimeOffset? ProductionDate { get; set; }
+    public DateTimeOffset? ProductionDate { get; }
+
+    public Guid? ParentContainerGuid { get; set; }
+
+    public IReadOnlyCollection<Guid> Partitions { get; set; }
 
     public Guid? EditedByGuid { get; }
 
     public async Task UpdateAsync(Action<Item> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        (await client.UpdateAsync(Guid, ProductionDate, cancellationToken)).EnsureSuccess("Failed to update item.");
+        (await client.UpdateAsync(Guid, Partitions, ParentContainerGuid, cancellationToken)).EnsureSuccess("Failed to update item.");
     }
 
-    public Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
-        => client.AddPartitionAsync(Guid, partitionGuid, cancellationToken);
+    public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
+    {
+        var partitions = Partitions.Append(partitionGuid).Distinct().ToArray();
+        var response = await client.UpdateAsync(Guid, partitions, ParentContainerGuid, cancellationToken);
 
-    public Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
-        => client.RemovePartitionAsync(Guid, partitionGuid, cancellationToken);
+        if (response.IsSuccess)
+        {
+            Partitions = partitions;
+        }
+
+        return response;
+    }
+
+    public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
+    {
+        var partitions = Partitions.Where(guid => guid != partitionGuid).ToArray();
+        var response = await client.UpdateAsync(Guid, partitions, ParentContainerGuid, cancellationToken);
+
+        if (response.IsSuccess)
+        {
+            Partitions = partitions;
+        }
+
+        return response;
+    }
 }
 
 public sealed class ItemManager(IItemHttpClient client) : IItemManager

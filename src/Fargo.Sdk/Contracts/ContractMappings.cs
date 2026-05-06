@@ -65,7 +65,15 @@ internal static class ContractMappings
         => new(name, description, metrics.ToContract(), shelfLife, partitions, barcodes?.ToContract(), isActive);
 
     public static Items.ItemResult ToSdk(this ItemDto contract)
-        => new(contract.Guid, contract.ArticleGuid, contract.ProductionDate, contract.EditedByGuid);
+        => new(
+            contract.Guid,
+            contract.ArticleGuid,
+            contract.ProductionDate,
+            contract.ParentContainerGuid,
+            contract.EditedByGuid)
+        {
+            Partitions = contract.Partitions ?? []
+        };
 
     public static IReadOnlyCollection<Items.ItemResult> ToSdk(this IReadOnlyCollection<ItemDto> contracts)
         => contracts.Select(static x => x.ToSdk()).ToArray();
@@ -73,8 +81,10 @@ internal static class ContractMappings
     public static ItemCreateDto ToItemCreateDto(Guid articleGuid, Guid? firstPartition, DateTimeOffset? productionDate)
         => new(articleGuid, firstPartition, productionDate);
 
-    public static ItemUpdateDto ToItemUpdateDto(DateTimeOffset? productionDate)
-        => new(productionDate);
+    public static ItemUpdateDto ToItemUpdateDto(
+        IReadOnlyCollection<Guid> partitions,
+        Guid? parentContainerGuid)
+        => new(partitions, parentContainerGuid);
 
     public static Partitions.PartitionResult ToSdk(this PartitionDto contract)
         => new(

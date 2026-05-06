@@ -70,11 +70,15 @@ public sealed class ItemHttpClient : IItemHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
+        Guid itemGuid,
+        IReadOnlyCollection<Guid> partitions,
+        Guid? parentContainerGuid = null,
+        CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<ItemUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<ItemUpdateDto>(
             $"/items/{itemGuid}",
-            ContractMappings.ToItemUpdateDto(productionDate),
+            ContractMappings.ToItemUpdateDto(partitions, parentContainerGuid),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

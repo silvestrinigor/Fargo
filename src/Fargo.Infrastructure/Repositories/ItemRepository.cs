@@ -125,6 +125,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             item.Guid,
             item.ArticleGuid,
             item.ProductionDate,
+            item.ParentContainerGuid,
             [.. item.Partitions.Select(partition => partition.Guid)],
             item.EditedByGuid);
 }

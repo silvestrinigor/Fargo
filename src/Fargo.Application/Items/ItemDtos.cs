@@ -4,6 +4,7 @@ public sealed record ItemDto(
     Guid Guid,
     Guid ArticleGuid,
     DateTimeOffset? ProductionDate,
+    Guid? ParentContainerGuid,
     IReadOnlyCollection<Guid> Partitions,
     Guid? EditedByGuid
 );
@@ -15,5 +16,6 @@ public sealed record ItemCreateDto(
 );
 
 public sealed record ItemUpdateDto(
-    IReadOnlyCollection<Guid> Partitions
+    IReadOnlyCollection<Guid> Partitions,
+    Guid? ParentContainerGuid = null
 );

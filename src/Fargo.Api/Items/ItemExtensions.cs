@@ -141,7 +141,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapPut("/{itemGuid:guid}", UpdateItem)
             .WithName("UpdateItem")
             .WithSummary("Replaces an existing item")
-            .WithDescription("Replaces all item state including partitions.")
+            .WithDescription("Replaces mutable item state including partitions and parent container.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;

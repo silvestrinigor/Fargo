@@ -169,6 +169,42 @@ public sealed class ItemClientTests
         Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
     }
 
+    // --- UpdateAsync ---
+
+    [Fact]
+    public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
+    {
+        var itemGuid = Guid.NewGuid();
+        var partitionGuid = Guid.NewGuid();
+        var parentContainerGuid = Guid.NewGuid();
+
+        httpClient
+            .PutJsonAsync(
+                $"/items/{itemGuid}",
+                Arg.Is<Fargo.Sdk.Contracts.Items.ItemUpdateDto>(dto =>
+                    dto.Partitions.SequenceEqual(new[] { partitionGuid }) &&
+                    dto.ParentContainerGuid == parentContainerGuid),
+                Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
+
+        var result = await sut.UpdateAsync(itemGuid, [partitionGuid], parentContainerGuid);
+
+        Assert.True(result.IsSuccess);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Should_ReturnInvalidInput_When_CircularContainerHierarchy()
+    {
+        httpClient
+            .PutJsonAsync<Fargo.Sdk.Contracts.Items.ItemUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Items.ItemUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("item/circular-container-hierarchy"), HttpStatusCode.BadRequest));
+
+        var result = await sut.UpdateAsync(Guid.NewGuid(), [], Guid.NewGuid());
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
+    }
+
     // --- DeleteAsync ---
 
     [Fact]

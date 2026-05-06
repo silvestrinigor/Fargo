@@ -105,6 +105,7 @@ public sealed class ItemUpdateCommandHandler(
     ActorService actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
+    ItemService itemService,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser
 ) : ICommandHandler<ItemUpdateCommand>
@@ -121,6 +122,24 @@ public sealed class ItemUpdateCommandHandler(
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
         actor.ValidateHasAccess(item);
+
+        if (command.Item.ParentContainerGuid is { } parentContainerGuid)
+        {
+            var parentContainerItem = await itemRepository.GetFoundByGuid(
+                parentContainerGuid,
+                cancellationToken);
+
+            actor.ValidateHasAccess(parentContainerItem);
+
+            await itemService.MoveToContainer(
+                parentContainerItem,
+                item,
+                cancellationToken);
+        }
+        else
+        {
+            ItemService.RemoveFromContainer(item);
+        }
 
         #region Partition
 
