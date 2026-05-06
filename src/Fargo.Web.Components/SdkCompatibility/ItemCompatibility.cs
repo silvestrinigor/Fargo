@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Items;
+
 namespace Fargo.Sdk.Items;
 
 public interface IItemManager
@@ -22,14 +24,14 @@ public sealed class Item
 {
     private readonly IItemHttpClient client;
 
-    internal Item(ItemResult result, IItemHttpClient client)
+    internal Item(ItemInfo result, IItemHttpClient client)
     {
         this.client = client;
         Guid = result.Guid;
         ArticleGuid = result.ArticleGuid;
         ProductionDate = result.ProductionDate;
         ParentContainerGuid = result.ParentContainerGuid;
-        Partitions = result.Partitions.ToArray();
+        Partitions = result.Partitions?.ToArray() ?? [];
         EditedByGuid = result.EditedByGuid;
     }
 

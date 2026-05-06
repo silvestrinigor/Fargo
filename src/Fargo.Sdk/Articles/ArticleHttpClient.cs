@@ -17,24 +17,24 @@ public sealed class ArticleHttpClient : IArticleHttpClient
     private readonly IFargoHttpClient httpClient;
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<ArticleResult>> GetAsync(
+    public async Task<FargoSdkResponse<ArticleInfo>> GetAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
-        var httpResponse = await httpClient.GetAsync<ArticleDto>($"/articles/{articleGuid}{query}", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<ArticleInfo>($"/articles/{articleGuid}{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<ArticleResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<ArticleInfo>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<ArticleResult>(httpResponse.Data!.ToSdk());
+        return new FargoSdkResponse<ArticleInfo>(httpResponse.Data!);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<ArticleResult>>> GetManyAsync(
+    public async Task<FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
@@ -51,14 +51,14 @@ public sealed class ArticleHttpClient : IArticleHttpClient
             ("search", search),
             ("noPartition", noPartition?.ToString()));
 
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleDto>>($"/articles{query}", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleInfo>>($"/articles{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<ArticleResult>>((httpResponse.Data ?? []).ToSdk());
+        return new FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>(httpResponse.Data ?? []);
     }
 
     /// <inheritdoc />
@@ -72,9 +72,9 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateDto, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateRequest, Guid>(
             "/articles",
-            ContractMappings.ToArticleCreateDto(name, description, partitions, barcodes, metrics, shelfLife, isActive),
+            ContractMappings.ToArticleCreateRequest(name, description, partitions, barcodes, metrics, shelfLife, isActive),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -97,9 +97,9 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         bool isActive = true,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PutJsonAsync<ArticleUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<ArticleUpdateRequest>(
             $"/articles/{articleGuid}",
-            ContractMappings.ToArticleUpdateDto(name, description, partitions, barcodes, metrics, shelfLife, isActive),
+            ContractMappings.ToArticleUpdateRequest(name, description, partitions, barcodes, metrics, shelfLife, isActive),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

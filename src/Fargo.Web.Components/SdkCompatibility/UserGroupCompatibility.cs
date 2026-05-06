@@ -1,4 +1,5 @@
 using Fargo.Sdk.Contracts;
+using Fargo.Sdk.Contracts.UserGroups;
 
 namespace Fargo.Sdk.UserGroups;
 
@@ -27,7 +28,7 @@ public sealed class UserGroup
 {
     private readonly IUserGroupHttpClient client;
 
-    internal UserGroup(UserGroupResult result, IUserGroupHttpClient client)
+    internal UserGroup(UserGroupInfo result, IUserGroupHttpClient client)
     {
         this.client = client;
         Guid = result.Guid;
@@ -35,6 +36,7 @@ public sealed class UserGroup
         Description = result.Description;
         IsActive = result.IsActive;
         Permissions = result.Permissions.Select(x => x.Action).ToArray();
+        Partitions = result.Partitions.ToArray();
     }
 
     public Guid Guid { get; }
@@ -46,6 +48,8 @@ public sealed class UserGroup
     public bool IsActive { get; set; }
 
     public IReadOnlyCollection<ActionType> Permissions { get; set; }
+
+    public IReadOnlyCollection<Guid> Partitions { get; set; }
 
     public async Task UpdateAsync(Action<UserGroup> update, CancellationToken cancellationToken = default)
     {

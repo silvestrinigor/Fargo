@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Partitions;
+
 namespace Fargo.Sdk.Partitions;
 
 /// <summary>Low-level HTTP transport for partition endpoints.</summary>
@@ -7,7 +9,7 @@ public interface IPartitionHttpClient
     /// <param name="partitionGuid">The unique identifier of the partition.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<PartitionResult>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<PartitionInfo>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     /// <summary>Retrieves a paged, optionally filtered list of partitions.</summary>
     /// <param name="parentPartitionGuid">Filter to children of this parent partition.</param>
@@ -17,7 +19,7 @@ public interface IPartitionHttpClient
     /// <param name="rootOnly">When <see langword="true"/>, returns only root-level partitions.</param>
     /// <param name="search">An optional search term to filter by name.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new partition and returns its assigned identifier.</summary>
     /// <param name="name">The partition name.</param>

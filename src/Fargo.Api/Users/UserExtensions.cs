@@ -1,5 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Users;
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,14 +42,14 @@ public static class UserEndpointRouteBuilderExtension
             .WithName("GetUser")
             .WithSummary("Gets a single user")
             .WithDescription("Retrieves a single user by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<UserDto>(StatusCodes.Status200OK)
+            .Produces<UserInfo>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<UserDto>, NotFound>> GetSingleUser(
+    private static async Task<Results<Ok<UserInfo>, NotFound>> GetSingleUser(
         Guid userGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<UserSingleQuery, UserDto?> handler,
@@ -58,7 +60,7 @@ public static class UserEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Single
@@ -71,14 +73,14 @@ public static class UserEndpointRouteBuilderExtension
             .WithName("GetUsers")
             .WithSummary("Gets multiple users")
             .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<UserDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<UserInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<UserDto>>, NoContent>> GetManyUser(
+    private static async Task<Results<Ok<IReadOnlyCollection<UserInfo>>, NoContent>> GetManyUser(
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
@@ -104,7 +106,7 @@ public static class UserEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response);
+        return TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Many
@@ -123,11 +125,11 @@ public static class UserEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUser(
-        UserCreateCommand request,
+        UserCreateRequest request,
         ICommandHandler<UserCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(request, cancellationToken);
+        var response = await handler.Handle(new UserCreateCommand(request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -149,11 +151,11 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUser(
         Guid userGuid,
-        UserUpdateDto request,
+        UserUpdateRequest request,
         ICommandHandler<UserUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserUpdateCommand(userGuid, request), cancellationToken);
+        await handler.Handle(new UserUpdateCommand(userGuid, request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.NoContent();
     }

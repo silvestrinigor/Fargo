@@ -1,4 +1,5 @@
 using Fargo.Sdk.Articles;
+using Fargo.Sdk.Contracts.Articles;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -91,12 +92,13 @@ public sealed class ArticleTools(IArticleHttpClient articles)
         }
 
         var current = get.Data!;
-        var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? current.Metrics : new ArticleMetrics
+        var currentMetrics = current.Metrics.ToSdkArticleMetrics();
+        var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? currentMetrics : new ArticleMetrics
         {
-            Mass = massValue is null ? current.Metrics?.Mass : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
-            LengthX = lengthXValue is null ? current.Metrics?.LengthX : new Length(lengthXValue.Value, Length.ParseUnit(lengthXUnit)),
-            LengthY = lengthYValue is null ? current.Metrics?.LengthY : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
-            LengthZ = lengthZValue is null ? current.Metrics?.LengthZ : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
+            Mass = massValue is null ? currentMetrics?.Mass : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
+            LengthX = lengthXValue is null ? currentMetrics?.LengthX : new Length(lengthXValue.Value, Length.ParseUnit(lengthXUnit)),
+            LengthY = lengthYValue is null ? currentMetrics?.LengthY : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
+            LengthZ = lengthZValue is null ? currentMetrics?.LengthZ : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
         };
 
         var update = await articles.UpdateAsync(
@@ -104,7 +106,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             name ?? current.Name,
             description ?? current.Description,
             current.Partitions,
-            current.Barcodes,
+            current.Barcodes.ToSdkArticleBarcodes(),
             newMetrics,
             current.ShelfLife,
             current.IsActive);
@@ -129,4 +131,35 @@ public sealed class ArticleTools(IArticleHttpClient articles)
 
         return "Article deleted successfully.";
     }
+}
+
+internal static class ArticleToolContractMappings
+{
+    public static ArticleMetrics? ToSdkArticleMetrics(this ArticleMetricsInfo? contract)
+        => contract is null
+            ? null
+            : new ArticleMetrics
+            {
+                Mass = contract.Mass is null ? null : new Mass(contract.Mass.Value, Mass.ParseUnit(contract.Mass.Unit)),
+                LengthX = contract.LengthX is null ? null : new Length(contract.LengthX.Value, Length.ParseUnit(contract.LengthX.Unit)),
+                LengthY = contract.LengthY is null ? null : new Length(contract.LengthY.Value, Length.ParseUnit(contract.LengthY.Unit)),
+                LengthZ = contract.LengthZ is null ? null : new Length(contract.LengthZ.Value, Length.ParseUnit(contract.LengthZ.Unit)),
+            };
+
+    public static ArticleBarcodes ToSdkArticleBarcodes(this ArticleBarcodesInfo? contract)
+        => contract is null
+            ? new ArticleBarcodes()
+            : new ArticleBarcodes
+            {
+                Ean13 = contract.Ean13 is null ? null : new Ean13(Guid.Empty, Guid.Empty, contract.Ean13),
+                Ean8 = contract.Ean8 is null ? null : new Ean8(Guid.Empty, Guid.Empty, contract.Ean8),
+                UpcA = contract.UpcA is null ? null : new UpcA(Guid.Empty, Guid.Empty, contract.UpcA),
+                UpcE = contract.UpcE is null ? null : new UpcE(Guid.Empty, Guid.Empty, contract.UpcE),
+                Code128 = contract.Code128 is null ? null : new Code128(Guid.Empty, Guid.Empty, contract.Code128),
+                Code39 = contract.Code39 is null ? null : new Code39(Guid.Empty, Guid.Empty, contract.Code39),
+                Itf14 = contract.Itf14 is null ? null : new Itf14(Guid.Empty, Guid.Empty, contract.Itf14),
+                Gs1128 = contract.Gs1128 is null ? null : new Gs1128(Guid.Empty, Guid.Empty, contract.Gs1128),
+                QrCode = contract.QrCode is null ? null : new QrCode(Guid.Empty, Guid.Empty, contract.QrCode),
+                DataMatrix = contract.DataMatrix is null ? null : new DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix),
+            };
 }

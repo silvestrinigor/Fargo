@@ -1,5 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Articles;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,14 +42,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticle")
             .WithSummary("Gets a single article")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<ArticleDto>(StatusCodes.Status200OK)
+            .Produces<ArticleInfo>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ArticleDto>, NotFound>> GetSingleArticle(
+    private static async Task<Results<Ok<ArticleInfo>, NotFound>> GetSingleArticle(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleSingleQuery, ArticleDto?> handler,
@@ -58,7 +60,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Single
@@ -71,14 +73,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
             .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ArticleInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticle(
+    private static async Task<Results<Ok<IReadOnlyCollection<ArticleInfo>>, NoContent>> GetManyArticle(
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
@@ -104,7 +106,7 @@ public static class ArticleEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response);
+        return TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Many
@@ -123,11 +125,11 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateArticle(
-        ArticleCreateCommand request,
+        ArticleCreateRequest request,
         ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(request, cancellationToken);
+        var response = await handler.Handle(new ArticleCreateCommand(request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -149,11 +151,11 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticleUpdateDto request,
+        ArticleUpdateRequest request,
         ICommandHandler<ArticleUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ArticleUpdateCommand(articleGuid, request), cancellationToken);
+        await handler.Handle(new ArticleUpdateCommand(articleGuid, request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.NoContent();
     }

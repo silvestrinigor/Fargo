@@ -1,7 +1,9 @@
 using Fargo.Application;
 using Fargo.Application.Events;
-using Fargo.Domain.Events;
+using Fargo.Api.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
+using ContractEntityType = Fargo.Sdk.Contracts.EntityType;
+using ContractEvents = Fargo.Sdk.Contracts.Events;
 
 namespace Fargo.Api.Extensions;
 
@@ -17,15 +19,15 @@ public static class EventEndpointRouteBuilderExtension
 
         group.MapGet("/", GetManyEvents)
             .WithName("GetEvents")
-            .Produces<IReadOnlyCollection<EventInformation>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ContractEvents.EventInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<EventInformation>>, NoContent>> GetManyEvents(
+    private static async Task<Results<Ok<IReadOnlyCollection<ContractEvents.EventInfo>>, NoContent>> GetManyEvents(
         IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>> handler,
         Guid? entityGuid,
-        EntityType? entityType,
-        EventType? eventType,
+        ContractEntityType? entityType,
+        ContractEvents.EventType? eventType,
         Guid? actorGuid,
         DateTimeOffset? from,
         DateTimeOffset? to,
@@ -35,8 +37,8 @@ public static class EventEndpointRouteBuilderExtension
     {
         var query = new EventManyQuery(
             EntityGuid: entityGuid,
-            EntityType: entityType,
-            EventType: eventType,
+            EntityType: entityType?.ToDomain(),
+            EventType: eventType?.ToDomain(),
             ActorGuid: actorGuid,
             From: from,
             To: to,
@@ -48,6 +50,6 @@ public static class EventEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToInfo());
     }
 }

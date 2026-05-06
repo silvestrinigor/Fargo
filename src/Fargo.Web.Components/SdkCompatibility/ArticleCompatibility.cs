@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Articles;
+
 namespace Fargo.Sdk.Articles;
 
 public interface IArticleManager
@@ -30,15 +32,15 @@ public sealed class Article
 {
     private readonly IArticleHttpClient client;
 
-    internal Article(ArticleResult result, IArticleHttpClient client)
+    internal Article(ArticleInfo result, IArticleHttpClient client)
     {
         this.client = client;
         Guid = result.Guid;
         Name = result.Name;
         Description = result.Description;
-        Metrics = result.Metrics;
+        Metrics = result.Metrics.ToSdk();
         ShelfLife = result.ShelfLife;
-        Barcodes = result.Barcodes;
+        Barcodes = result.Barcodes.ToSdk();
         Partitions = result.Partitions.ToArray();
         IsActive = result.IsActive;
         EditedByGuid = result.EditedByGuid;
@@ -77,6 +79,37 @@ public sealed class Article
             cancellationToken);
         response.EnsureSuccess("Failed to update article.");
     }
+}
+
+internal static class ArticleCompatibilityMappings
+{
+    public static ArticleMetrics? ToSdk(this ArticleMetricsInfo? contract)
+        => contract is null
+            ? null
+            : new ArticleMetrics
+            {
+                Mass = contract.Mass is null ? null : new Mass(contract.Mass.Value, Mass.ParseUnit(contract.Mass.Unit)),
+                LengthX = contract.LengthX is null ? null : new Length(contract.LengthX.Value, Length.ParseUnit(contract.LengthX.Unit)),
+                LengthY = contract.LengthY is null ? null : new Length(contract.LengthY.Value, Length.ParseUnit(contract.LengthY.Unit)),
+                LengthZ = contract.LengthZ is null ? null : new Length(contract.LengthZ.Value, Length.ParseUnit(contract.LengthZ.Unit)),
+            };
+
+    public static ArticleBarcodes ToSdk(this ArticleBarcodesInfo? contract)
+        => contract is null
+            ? new ArticleBarcodes()
+            : new ArticleBarcodes
+            {
+                Ean13 = contract.Ean13 is null ? null : new Ean13(Guid.Empty, Guid.Empty, contract.Ean13),
+                Ean8 = contract.Ean8 is null ? null : new Ean8(Guid.Empty, Guid.Empty, contract.Ean8),
+                UpcA = contract.UpcA is null ? null : new UpcA(Guid.Empty, Guid.Empty, contract.UpcA),
+                UpcE = contract.UpcE is null ? null : new UpcE(Guid.Empty, Guid.Empty, contract.UpcE),
+                Code128 = contract.Code128 is null ? null : new Code128(Guid.Empty, Guid.Empty, contract.Code128),
+                Code39 = contract.Code39 is null ? null : new Code39(Guid.Empty, Guid.Empty, contract.Code39),
+                Itf14 = contract.Itf14 is null ? null : new Itf14(Guid.Empty, Guid.Empty, contract.Itf14),
+                Gs1128 = contract.Gs1128 is null ? null : new Gs1128(Guid.Empty, Guid.Empty, contract.Gs1128),
+                QrCode = contract.QrCode is null ? null : new QrCode(Guid.Empty, Guid.Empty, contract.QrCode),
+                DataMatrix = contract.DataMatrix is null ? null : new DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix),
+            };
 }
 
 public sealed class ArticleManager(IArticleHttpClient client) : IArticleManager

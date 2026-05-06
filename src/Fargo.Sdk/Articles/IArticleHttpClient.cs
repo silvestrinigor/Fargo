@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Articles;
+
 namespace Fargo.Sdk.Articles;
 
 /// <summary>Low-level HTTP transport for article endpoints.</summary>
@@ -7,7 +9,7 @@ public interface IArticleHttpClient
     /// <param name="articleGuid">The unique identifier of the article.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<ArticleResult>> GetAsync(
+    Task<FargoSdkResponse<ArticleInfo>> GetAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken cancellationToken = default);
@@ -20,7 +22,7 @@ public interface IArticleHttpClient
     /// <param name="search">An optional search term to filter by name.</param>
     /// <param name="noPartition">When <see langword="true"/>, returns only articles without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<ArticleResult>>> GetManyAsync(
+    Task<FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,

@@ -1,4 +1,5 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Users;
 
 namespace Fargo.Sdk.Users;
 
@@ -9,7 +10,7 @@ public interface IUserHttpClient
     /// <param name="userGuid">The unique identifier of the user.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<UserResult>> GetAsync(Guid userGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<UserInfo>> GetAsync(Guid userGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     /// <summary>Retrieves a paged, optionally filtered list of users.</summary>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
@@ -19,7 +20,7 @@ public interface IUserHttpClient
     /// <param name="search">An optional search term to filter by name identifier.</param>
     /// <param name="noPartition">When <see langword="true"/>, returns only users without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<UserResult>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, string? search = null, bool? noPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<UserInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, string? search = null, bool? noPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user and returns the assigned identifier.</summary>
     /// <param name="nameid">The login name identifier for the user.</param>
@@ -78,5 +79,5 @@ public interface IUserHttpClient
     /// <summary>Returns the partitions accessible to a user.</summary>
     /// <param name="userGuid">The unique identifier of the user.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(Guid userGuid, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetPartitionsAsync(Guid userGuid, CancellationToken cancellationToken = default);
 }

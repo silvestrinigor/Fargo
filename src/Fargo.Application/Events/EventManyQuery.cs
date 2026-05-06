@@ -27,7 +27,7 @@ public sealed class EventManyQueryHandler(
     {
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        actor.ValidateHasPermission(ActionType.EditApiClient);
+        actor.ValidateHasPermission(ActionType.EditUser);
 
         return await eventQueryRepository.GetMany(
             query.EntityGuid,

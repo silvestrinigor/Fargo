@@ -1,5 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Items;
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.Items;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,14 +42,14 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItem")
             .WithSummary("Gets a single item")
             .WithDescription("Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces<ItemInfo>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ItemDto>, NotFound>> GetSingleItem(
+    private static async Task<Results<Ok<ItemInfo>, NotFound>> GetSingleItem(
         Guid itemGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ItemSingleQuery, ItemDto?> handler,
@@ -58,7 +60,7 @@ public static class ItemEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Single
@@ -71,14 +73,14 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
             .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ItemInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItem(
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemInfo>>, NoContent>> GetManyItem(
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
@@ -104,7 +106,7 @@ public static class ItemEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response);
+        return TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Many
@@ -123,11 +125,11 @@ public static class ItemEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateItem(
-        ItemCreateCommand request,
+        ItemCreateRequest request,
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(request, cancellationToken);
+        var response = await handler.Handle(new ItemCreateCommand(request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -149,11 +151,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateItem(
         Guid itemGuid,
-        ItemUpdateDto request,
+        ItemUpdateRequest request,
         ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ItemUpdateCommand(itemGuid, request), cancellationToken);
+        await handler.Handle(new ItemUpdateCommand(itemGuid, request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.NoContent();
     }

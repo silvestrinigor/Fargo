@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Fargo.Sdk.Contracts\Fargo.Sdk.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>Fargo.Sdk.Tests</_Parameter1>
     </AssemblyAttribute>

@@ -1,2 +1,2 @@
 global using ActionType = Fargo.Sdk.Contracts.ActionType;
-global using AuthDto = Fargo.Sdk.Contracts.Authentication.AuthDto;
+global using AuthInfo = Fargo.Sdk.Contracts.Authentication.AuthInfo;

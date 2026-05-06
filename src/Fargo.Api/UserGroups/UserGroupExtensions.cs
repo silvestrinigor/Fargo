@@ -1,5 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.UserGroups;
+using Fargo.Api.Contracts;
+using Fargo.Sdk.Contracts.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,14 +42,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroup")
             .WithSummary("Gets a single user group")
             .WithDescription("Retrieves a single user group by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<UserGroupDto>(StatusCodes.Status200OK)
+            .Produces<UserGroupInfo>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<UserGroupDto>, NotFound>> GetSingleUserGroup(
+    private static async Task<Results<Ok<UserGroupInfo>, NotFound>> GetSingleUserGroup(
         Guid userGroupGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<UserGroupSingleQuery, UserGroupDto?> handler,
@@ -58,7 +60,7 @@ public static class UserGroupEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Single
@@ -71,14 +73,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroups")
             .WithSummary("Gets multiple user groups")
             .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<UserGroupDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<UserGroupInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<UserGroupDto>>, NoContent>> GetManyUserGroup(
+    private static async Task<Results<Ok<IReadOnlyCollection<UserGroupInfo>>, NoContent>> GetManyUserGroup(
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
@@ -104,7 +106,7 @@ public static class UserGroupEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response);
+        return TypedResults.Ok(response.ToInfo());
     }
 
     #endregion Get Many
@@ -123,11 +125,11 @@ public static class UserGroupEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUserGroup(
-        UserGroupCreateCommand request,
+        UserGroupCreateRequest request,
         ICommandHandler<UserGroupCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(request, cancellationToken);
+        var response = await handler.Handle(new UserGroupCreateCommand(request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -149,11 +151,11 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUserGroup(
         Guid userGroupGuid,
-        UserGroupUpdateDto request,
+        UserGroupUpdateRequest request,
         ICommandHandler<UserGroupUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request), cancellationToken);
+        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request.ToApplicationDto()), cancellationToken);
 
         return TypedResults.NoContent();
     }

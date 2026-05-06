@@ -1,3 +1,5 @@
+using Fargo.Sdk.Contracts.Partitions;
+
 namespace Fargo.Sdk.Partitions;
 
 public interface IPartitionManager
@@ -22,7 +24,7 @@ public sealed class Partition
 {
     private readonly IPartitionHttpClient client;
 
-    internal Partition(PartitionResult result, IPartitionHttpClient client)
+    internal Partition(PartitionInfo result, IPartitionHttpClient client)
     {
         this.client = client;
         Guid = result.Guid;

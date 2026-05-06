@@ -22,11 +22,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(true, Fakes.AuthDto(), null, HttpStatusCode.OK));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(true, Fakes.AuthInfo(), null, HttpStatusCode.OK));
 
         // Act
         var result = await sut.LogInAsync("user", "pass");
@@ -41,11 +41,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(false, null, Fakes.Problem("auth/invalid-password"), HttpStatusCode.BadRequest));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(false, null, Fakes.Problem("auth/invalid-password"), HttpStatusCode.BadRequest));
 
         // Act
         var result = await sut.LogInAsync("user", "wrong");
@@ -60,11 +60,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
 
         // Act
         var result = await sut.LogInAsync("user", "pass");
@@ -79,11 +79,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(false, null, Fakes.Problem("auth/password-change-required"), HttpStatusCode.Forbidden));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(false, null, Fakes.Problem("auth/password-change-required"), HttpStatusCode.Forbidden));
 
         // Act
         var result = await sut.LogInAsync("user", "pass");
@@ -98,11 +98,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(false, null, Fakes.Problem("server/internal-error"), HttpStatusCode.InternalServerError));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(false, null, Fakes.Problem("server/internal-error"), HttpStatusCode.InternalServerError));
 
         // Act
         var result = await sut.LogInAsync("user", "pass");
@@ -117,11 +117,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.LoginRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.LoginRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(false, null, null, HttpStatusCode.InternalServerError));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(false, null, null, HttpStatusCode.InternalServerError));
 
         // Act
         var result = await sut.LogInAsync("user", "pass");
@@ -139,11 +139,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.RefreshDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.RefreshRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.RefreshDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.RefreshRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(true, Fakes.AuthDto(), null, HttpStatusCode.OK));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(true, Fakes.AuthInfo(), null, HttpStatusCode.OK));
 
         // Act
         var result = await sut.Refresh("refresh-token");
@@ -157,11 +157,11 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.RefreshDto, AuthDto>(
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Authentication.RefreshRequest, AuthInfo>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.RefreshDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.RefreshRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<AuthDto>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
+            .Returns(new FargoSdkHttpResponse<AuthInfo>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
 
         // Act
         var result = await sut.Refresh("expired-token");
@@ -178,9 +178,9 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PutJsonAsync<Fargo.Sdk.Contracts.Authentication.PasswordUpdateDto>(
+            .PutJsonAsync<Fargo.Sdk.Contracts.Authentication.PasswordUpdateRequest>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.PasswordUpdateDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.PasswordUpdateRequest>(),
                 Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
@@ -196,9 +196,9 @@ public sealed class AuthenticationClientTests
     {
         // Arrange
         httpClient
-            .PutJsonAsync<Fargo.Sdk.Contracts.Authentication.PasswordUpdateDto>(
+            .PutJsonAsync<Fargo.Sdk.Contracts.Authentication.PasswordUpdateRequest>(
                 Arg.Any<string>(),
-                Arg.Any<Fargo.Sdk.Contracts.Authentication.PasswordUpdateDto>(),
+                Arg.Any<Fargo.Sdk.Contracts.Authentication.PasswordUpdateRequest>(),
                 Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("auth/invalid-password"), HttpStatusCode.BadRequest));
 
@@ -212,7 +212,7 @@ public sealed class AuthenticationClientTests
 
     private static class Fakes
     {
-        public static AuthDto AuthDto() =>
+        public static AuthInfo AuthInfo() =>
             new("access-token", "refresh-token", DateTimeOffset.UtcNow.AddHours(1), false, [], []);
 
         public static FargoProblemDetails Problem(string type, string detail = "An error occurred.") =>

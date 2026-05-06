@@ -34,8 +34,4 @@ public enum EntityType
     /// </summary>
     Partition = 4,
 
-    /// <summary>
-    /// Represents an API client entity.
-    /// </summary>
-    ApiClient = 5,
 }

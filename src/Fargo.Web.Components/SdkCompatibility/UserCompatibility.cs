@@ -1,5 +1,6 @@
-using Fargo.Sdk.Partitions;
 using Fargo.Sdk.Contracts;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Users;
 
 namespace Fargo.Sdk.Users;
 
@@ -37,7 +38,7 @@ public sealed class User
 {
     private readonly IUserHttpClient client;
 
-    internal User(UserResult result, IUserHttpClient client)
+    internal User(UserInfo result, IUserHttpClient client)
     {
         this.client = client;
         Guid = result.Guid;
@@ -50,6 +51,7 @@ public sealed class User
         IsActive = result.IsActive;
         Permissions = result.Permissions.Select(x => x.Action).ToArray();
         PartitionAccesses = result.PartitionAccesses.ToArray();
+        UserGroups = result.UserGroups.ToArray();
         EditedByGuid = result.EditedByGuid;
     }
 
@@ -63,15 +65,17 @@ public sealed class User
 
     public string Description { get; set; }
 
-    public TimeSpan DefaultPasswordExpirationPeriod { get; set; }
+    public TimeSpan? DefaultPasswordExpirationPeriod { get; set; }
 
-    public DateTimeOffset RequirePasswordChangeAt { get; }
+    public DateTimeOffset? RequirePasswordChangeAt { get; }
 
     public bool IsActive { get; set; }
 
     public IReadOnlyCollection<ActionType> Permissions { get; set; }
 
     public IReadOnlyCollection<Guid> PartitionAccesses { get; set; }
+
+    public IReadOnlyCollection<Guid> UserGroups { get; set; }
 
     public Guid? EditedByGuid { get; }
 
@@ -102,7 +106,7 @@ public sealed class User
     public Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
         => client.RemovePartitionAsync(Guid, partitionGuid, cancellationToken);
 
-    public Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(CancellationToken cancellationToken = default)
+    public Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetPartitionsAsync(CancellationToken cancellationToken = default)
         => client.GetPartitionsAsync(Guid, cancellationToken);
 }
 

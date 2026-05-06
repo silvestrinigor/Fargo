@@ -100,18 +100,4 @@ public enum EventType
     /// </summary>
     PartitionDeleted = 14,
 
-    /// <summary>
-    /// Indicates that an API client was created.
-    /// </summary>
-    ApiClientCreated = 15,
-
-    /// <summary>
-    /// Indicates that an API client was updated.
-    /// </summary>
-    ApiClientUpdated = 16,
-
-    /// <summary>
-    /// Indicates that an API client was deleted.
-    /// </summary>
-    ApiClientDeleted = 17,
 }

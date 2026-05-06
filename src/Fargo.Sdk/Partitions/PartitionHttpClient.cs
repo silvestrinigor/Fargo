@@ -16,21 +16,21 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     private readonly IFargoHttpClient httpClient;
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<PartitionResult>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<PartitionInfo>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
-        var httpResponse = await httpClient.GetAsync<PartitionDto>($"/partitions/{partitionGuid}{query}", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<PartitionInfo>($"/partitions/{partitionGuid}{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<PartitionResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<PartitionInfo>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<PartitionResult>(httpResponse.Data!.ToSdk());
+        return new FargoSdkResponse<PartitionInfo>(httpResponse.Data!);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
             ("parentPartitionGuid", parentPartitionGuid?.ToString()),
@@ -40,22 +40,22 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
             ("rootOnly", rootOnly?.ToString().ToLowerInvariant()),
             ("search", search));
 
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionDto>>($"/partitions{query}", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionInfo>>($"/partitions{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse.Problem));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>((httpResponse.Data ?? []).ToSdk());
+        return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(httpResponse.Data ?? []);
     }
 
     /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(string name, string? description = null, Guid? parentPartitionGuid = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<PartitionCreateDto, Guid>(
+        var httpResponse = await httpClient.PostFromJsonAsync<PartitionCreateRequest, Guid>(
             "/partitions",
-            ContractMappings.ToPartitionCreateDto(name, description, parentPartitionGuid),
+            ContractMappings.ToPartitionCreateRequest(name, description, parentPartitionGuid),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -69,9 +69,9 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, string? name = null, string? description = null, Guid? parentPartitionGuid = null, bool? isActive = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PutJsonAsync<PartitionUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<PartitionUpdateRequest>(
             $"/partitions/{partitionGuid}",
-            ContractMappings.ToPartitionUpdateDto(name, description, parentPartitionGuid, isActive),
+            ContractMappings.ToPartitionUpdateRequest(name, description, parentPartitionGuid, isActive),
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

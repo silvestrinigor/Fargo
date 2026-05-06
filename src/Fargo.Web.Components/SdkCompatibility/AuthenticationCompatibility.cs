@@ -74,7 +74,7 @@ public sealed record AuthSession(
         stored.PartitionAccesses,
         stored.Nameid);
 
-    public static AuthSession FromDto(AuthDto dto, string nameid) => new(
+    public static AuthSession FromDto(AuthInfo dto, string nameid) => new(
         dto.AccessToken,
         dto.RefreshToken,
         dto.ExpiresAt,
