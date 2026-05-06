@@ -8,5 +8,4 @@ public enum EntityType
     User = 2,
     UserGroup = 3,
     Partition = 4,
-    ApiClient = 5,
 }

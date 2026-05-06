@@ -1,34 +1,20 @@
-using Fargo.Api;
-using Fargo.Sdk.Contracts.ApiClients;
+using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Articles;
 using Fargo.Sdk.Contracts.Items;
 using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Sdk.Contracts.Permissions;
 using Fargo.Sdk.Contracts.UserGroups;
 using Fargo.Sdk.Contracts.Users;
-using ApiClients = Fargo.Api.ApiClients;
-using Articles = Fargo.Api.Articles;
-using Items = Fargo.Api.Items;
-using Partitions = Fargo.Api.Partitions;
-using UserGroups = Fargo.Api.UserGroups;
-using Users = Fargo.Api.Users;
+using Articles = Fargo.Sdk.Articles;
+using Items = Fargo.Sdk.Items;
+using Partitions = Fargo.Sdk.Partitions;
+using UserGroups = Fargo.Sdk.UserGroups;
+using Users = Fargo.Sdk.Users;
 
 namespace Fargo.Sdk;
 
 internal static class ContractMappings
 {
-    public static ApiClients.ApiClientResult ToSdk(this ApiClientDto contract)
-        => new(contract.Guid, contract.Name, contract.Description, contract.IsActive, contract.EditedByGuid);
-
-    public static IReadOnlyCollection<ApiClients.ApiClientResult> ToSdk(this IReadOnlyCollection<ApiClientDto> contracts)
-        => contracts.Select(static x => x.ToSdk()).ToArray();
-
-    public static ApiClientCreateDto ToApiClientCreateDto(string name, string? description)
-        => new(name, description);
-
-    public static ApiClientUpdateDto ToApiClientUpdateDto(string? name, string? description, bool? isActive)
-        => new(name, description, isActive);
-
     public static Articles.ArticleResult ToSdk(this ArticleDto contract)
         => new(
             contract.Guid,

@@ -101,7 +101,6 @@ public class ArticleListViewModel(IArticleManager articles, IAuthenticationServi
 | `IPartitionManager` | Partition hierarchy |
 | `IUserManager` | Users, partition access, group membership |
 | `IUserGroupManager` | User groups and shared permissions |
-| `IApiClientManager` | API clients and key management |
 | `IAuthenticationService` | Login, logout, token refresh, password change |
 
 ### Session Persistence

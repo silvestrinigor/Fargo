@@ -1,4 +1,4 @@
-using Fargo.Api.Extensions;
+using Fargo.Sdk.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web;
 using Fargo.Web.Components;

@@ -1,8 +1,8 @@
-using Fargo.Api.Http;
+using Fargo.Sdk.Http;
 using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Partitions;
 
-namespace Fargo.Api.Partitions;
+namespace Fargo.Sdk.Partitions;
 
 /// <summary>Default implementation of <see cref="IPartitionHttpClient"/>.</summary>
 public sealed class PartitionHttpClient : IPartitionHttpClient
@@ -69,7 +69,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, string? name = null, string? description = null, Guid? parentPartitionGuid = null, bool? isActive = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<PartitionUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<PartitionUpdateDto>(
             $"/partitions/{partitionGuid}",
             ContractMappings.ToPartitionUpdateDto(name, description, parentPartitionGuid, isActive),
             cancellationToken);

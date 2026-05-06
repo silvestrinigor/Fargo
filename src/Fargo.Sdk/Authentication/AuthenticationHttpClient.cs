@@ -1,7 +1,7 @@
-using Fargo.Api.Http;
+using Fargo.Sdk.Http;
 using Fargo.Sdk.Contracts.Authentication;
 
-namespace Fargo.Api.Authentication;
+namespace Fargo.Sdk.Authentication;
 
 /// <summary>Default implementation of <see cref="IAuthenticationHttpClient"/>.</summary>
 public sealed class AuthenticationHttpClient : IAuthenticationHttpClient

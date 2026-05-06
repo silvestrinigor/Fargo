@@ -1,4 +1,4 @@
-namespace Fargo.Api.Articles;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>
 /// Groups an article's barcodes by symbology. A property is <see langword="null"/>

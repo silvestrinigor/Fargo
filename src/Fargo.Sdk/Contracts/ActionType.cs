@@ -25,7 +25,4 @@ public enum ActionType
     EditPartition = 16,
     AddBarcode = 17,
     RemoveBarcode = 18,
-    CreateApiClient = 19,
-    DeleteApiClient = 20,
-    EditApiClient = 21,
 }

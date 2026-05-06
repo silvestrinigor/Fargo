@@ -1,4 +1,4 @@
-namespace Fargo.Api.UserGroups;
+namespace Fargo.Sdk.UserGroups;
 
 /// <summary>
 /// Represents a user group returned by the API.

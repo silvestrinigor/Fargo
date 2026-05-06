@@ -1,4 +1,4 @@
-namespace Fargo.Api.Partitions;
+namespace Fargo.Sdk.Partitions;
 
 /// <summary>
 /// Represents a partition returned by the API.

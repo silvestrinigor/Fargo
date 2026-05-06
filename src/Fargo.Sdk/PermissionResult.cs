@@ -1,4 +1,4 @@
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 /// <summary>
 /// Represents a permission entry returned by the API.

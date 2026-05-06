@@ -1,6 +1,6 @@
-using Fargo.Api.Partitions;
+using Fargo.Sdk.Partitions;
 
-namespace Fargo.Api.UserGroups;
+namespace Fargo.Sdk.UserGroups;
 
 /// <summary>Low-level HTTP transport for user group endpoints.</summary>
 public interface IUserGroupHttpClient

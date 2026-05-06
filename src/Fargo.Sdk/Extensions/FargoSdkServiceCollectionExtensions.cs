@@ -1,15 +1,14 @@
-using Fargo.Api.ApiClients;
-using Fargo.Api.Articles;
-using Fargo.Api.Authentication;
-using Fargo.Api.Http;
-using Fargo.Api.Items;
-using Fargo.Api.Partitions;
-using Fargo.Api.UserGroups;
-using Fargo.Api.Users;
+using Fargo.Sdk.Articles;
+using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Items;
+using Fargo.Sdk.Partitions;
+using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Fargo.Api.Extensions;
+namespace Fargo.Sdk.Extensions;
 
 /// <summary>
 /// Extension methods to register the Fargo SDK simple HTTP clients in a DI container.
@@ -52,7 +51,6 @@ public static class FargoSdkServiceCollectionExtensions
         Add<IItemHttpClient, ItemHttpClient>();
         Add<IPartitionHttpClient, PartitionHttpClient>();
         Add<IUserGroupHttpClient, UserGroupHttpClient>();
-        Add<IApiClientHttpClient, ApiClientHttpClient>();
 
         return services;
 

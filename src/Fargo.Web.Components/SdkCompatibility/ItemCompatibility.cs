@@ -1,4 +1,4 @@
-namespace Fargo.Api.Items;
+namespace Fargo.Sdk.Items;
 
 public interface IItemManager
 {

@@ -18,7 +18,4 @@ public enum EventType
     PartitionCreated = 12,
     PartitionUpdated = 13,
     PartitionDeleted = 14,
-    ApiClientCreated = 15,
-    ApiClientUpdated = 16,
-    ApiClientDeleted = 17,
 }

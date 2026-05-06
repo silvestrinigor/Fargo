@@ -1,4 +1,4 @@
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 public sealed class InvalidCredentialsFargoSdkException : Exception
 {

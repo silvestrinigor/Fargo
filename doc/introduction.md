@@ -24,10 +24,6 @@ A **User** authenticates with a username (`nameid`) and password. Each user hold
 
 A **UserGroup** is a named role that carries its own permission set and partition access list. Adding a user to a group grants them the union of their individual and group permissions.
 
-### ApiClient
-
-An **ApiClient** is a machine-to-machine identity. Clients authenticate with an API key sent in the `X-Api-Key` request header. They are useful for background services, scripts, and MCP tools that do not represent a human user.
-
 ## Architecture Layers
 
 ```
@@ -61,10 +57,9 @@ An **ApiClient** is a machine-to-machine identity. Clients authenticate with an 
 
 ## Authentication
 
-Fargo supports two authentication mechanisms:
+Fargo supports JWT bearer authentication:
 
-- **JWT bearer + refresh token** — the default for human users. The client logs in with a username and password, receives a short-lived access token and a longer-lived refresh token. The SDK refreshes the access token automatically when it expires.
-- **API key** — intended for machine clients. The key is sent as the `X-Api-Key` HTTP header.
+- **JWT bearer + refresh token** — the client logs in with a username and password, receives a short-lived access token and a longer-lived refresh token. The SDK refreshes the access token automatically when it expires.
 
 Users have fine-grained `ActionType` permissions. The full list is in the `ActionType` enum (`Fargo.Sdk.ActionType` / `Fargo.Domain.ActionType`). Permissions can be assigned directly to a user or inherited from a UserGroup.
 

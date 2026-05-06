@@ -1,6 +1,6 @@
-using Fargo.Api;
-using Fargo.Api.Authentication;
-using Fargo.Api.Extensions;
+using Fargo.Sdk;
+using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

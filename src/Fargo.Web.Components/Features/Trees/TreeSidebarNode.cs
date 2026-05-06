@@ -1,8 +1,8 @@
-using Fargo.Api.Articles;
-using Fargo.Api.Items;
-using Fargo.Api.Partitions;
-using Fargo.Api.UserGroups;
-using Fargo.Api.Users;
+using Fargo.Sdk.Articles;
+using Fargo.Sdk.Items;
+using Fargo.Sdk.Partitions;
+using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 
 namespace Fargo.Web.Components.Features.Trees;
 

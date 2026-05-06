@@ -1,4 +1,4 @@
-namespace Fargo.Api.Http;
+namespace Fargo.Sdk.Http;
 
 /// <summary>
 /// Represents an RFC 7807 problem details response from the API.

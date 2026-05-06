@@ -1,4 +1,4 @@
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 /// <summary>
 /// Categorizes the type of failure returned by an SDK operation.

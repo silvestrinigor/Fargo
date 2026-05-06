@@ -1,10 +1,10 @@
-using Fargo.Api.Articles;
-using Fargo.Api.Authentication;
-using Fargo.Api.Events;
-using Fargo.Api.Items;
-using Fargo.Api.Partitions;
-using Fargo.Api.UserGroups;
-using Fargo.Api.Users;
+using Fargo.Sdk.Articles;
+using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Events;
+using Fargo.Sdk.Items;
+using Fargo.Sdk.Partitions;
+using Fargo.Sdk.UserGroups;
+using Fargo.Sdk.Users;
 using Fargo.Web.Components.Security;
 using Microsoft.Extensions.DependencyInjection;
 

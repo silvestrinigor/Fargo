@@ -1,7 +1,7 @@
-using Fargo.Api.Partitions;
+using Fargo.Sdk.Partitions;
 using Fargo.Sdk.Contracts;
 
-namespace Fargo.Api.Users;
+namespace Fargo.Sdk.Users;
 
 public interface IUserService
 {

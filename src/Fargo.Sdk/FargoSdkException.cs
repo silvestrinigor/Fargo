@@ -1,4 +1,4 @@
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 /// <summary>
 /// Serves as the base class for all exceptions thrown by the Fargo SDK.

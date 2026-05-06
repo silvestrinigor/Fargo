@@ -1,4 +1,4 @@
-namespace Fargo.Api.Articles;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>
 /// Represents the barcode format (symbology) of a barcode.

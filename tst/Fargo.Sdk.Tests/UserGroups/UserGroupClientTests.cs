@@ -1,9 +1,9 @@
-using Fargo.Api.Http;
-using Fargo.Api.UserGroups;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.UserGroups;
 using NSubstitute;
 using System.Net;
 
-namespace Fargo.Api.Tests.UserGroups;
+namespace Fargo.Sdk.Tests.UserGroups;
 
 public sealed class UserGroupClientTests
 {
@@ -162,7 +162,7 @@ public sealed class UserGroupClientTests
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "newgroup");
@@ -174,7 +174,7 @@ public sealed class UserGroupClientTests
     public async Task UpdateAsync_Should_ReturnNotFound_When_UserGroupDoesNotExist()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("user-group/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "newgroup");

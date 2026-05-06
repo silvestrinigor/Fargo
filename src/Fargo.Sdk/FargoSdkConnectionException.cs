@@ -1,4 +1,4 @@
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 /// <summary>
 /// Thrown when a network-level failure prevents the SDK from reaching the server.

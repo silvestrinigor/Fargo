@@ -1,4 +1,4 @@
-namespace Fargo.Api.Articles;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>Low-level HTTP transport for article endpoints.</summary>
 public interface IArticleHttpClient

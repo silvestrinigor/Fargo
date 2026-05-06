@@ -1,9 +1,9 @@
-using Fargo.Api.Http;
-using Fargo.Api.Items;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Items;
 using NSubstitute;
 using System.Net;
 
-namespace Fargo.Api.Tests.Items;
+namespace Fargo.Sdk.Tests.Items;
 
 public sealed class ItemClientTests
 {

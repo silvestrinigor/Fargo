@@ -1,4 +1,4 @@
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 /// <summary>
 /// Describes a failure returned by the Fargo API.

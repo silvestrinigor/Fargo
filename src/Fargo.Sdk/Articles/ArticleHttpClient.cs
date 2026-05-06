@@ -1,8 +1,8 @@
-using Fargo.Api.Http;
+using Fargo.Sdk.Http;
 using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Articles;
 
-namespace Fargo.Api.Articles;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>Default implementation of <see cref="IArticleHttpClient"/>.</summary>
 public sealed class ArticleHttpClient : IArticleHttpClient

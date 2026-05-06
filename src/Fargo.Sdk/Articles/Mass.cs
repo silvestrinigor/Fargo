@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Fargo.Api.Articles;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>
 /// Represents a physical mass value as returned by the API.

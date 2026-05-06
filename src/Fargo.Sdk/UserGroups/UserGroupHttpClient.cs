@@ -1,10 +1,10 @@
-using Fargo.Api.Http;
-using Fargo.Api.Partitions;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Partitions;
 using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Sdk.Contracts.UserGroups;
 
-namespace Fargo.Api.UserGroups;
+namespace Fargo.Sdk.UserGroups;
 
 /// <summary>Default implementation of <see cref="IUserGroupHttpClient"/>.</summary>
 public sealed class UserGroupHttpClient : IUserGroupHttpClient
@@ -69,7 +69,7 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGroupGuid, string? nameid = null, string? description = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<UserGroupUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<UserGroupUpdateDto>(
             $"/user-groups/{userGroupGuid}",
             ContractMappings.ToUserGroupUpdateDto(nameid, description, isActive, permissions),
             cancellationToken);

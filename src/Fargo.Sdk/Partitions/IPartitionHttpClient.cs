@@ -1,4 +1,4 @@
-namespace Fargo.Api.Partitions;
+namespace Fargo.Sdk.Partitions;
 
 /// <summary>Low-level HTTP transport for partition endpoints.</summary>
 public interface IPartitionHttpClient

@@ -1,4 +1,4 @@
-namespace Fargo.Api.Users;
+namespace Fargo.Sdk.Users;
 
 /// <summary>
 /// Represents a user returned by the API.

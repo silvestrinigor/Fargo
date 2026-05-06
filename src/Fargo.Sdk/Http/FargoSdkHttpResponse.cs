@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Fargo.Api.Http;
+namespace Fargo.Sdk.Http;
 
 public sealed record FargoSdkHttpResponse<TData>(
     bool IsSuccess,

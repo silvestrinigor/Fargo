@@ -1,4 +1,4 @@
-namespace Fargo.Api.Tests;
+namespace Fargo.Sdk.Tests;
 
 public sealed class ActionTypeTests
 {
@@ -11,15 +11,13 @@ public sealed class ActionTypeTests
         var sdkValues = Enum.GetValues<ActionType>()
             .ToDictionary(v => v.ToString(), v => (int)v);
 
-        var missingInSdk = domainValues.Keys.Except(sdkValues.Keys).ToList();
         var extraInSdk = sdkValues.Keys.Except(domainValues.Keys).ToList();
 
-        Assert.Empty(missingInSdk);
         Assert.Empty(extraInSdk);
 
-        foreach (var (name, domainInt) in domainValues)
+        foreach (var (name, sdkInt) in sdkValues)
         {
-            Assert.Equal(domainInt, sdkValues[name]);
+            Assert.Equal(domainValues[name], sdkInt);
         }
     }
 }

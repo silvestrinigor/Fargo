@@ -1,4 +1,4 @@
-namespace Fargo.Api.Http;
+namespace Fargo.Sdk.Http;
 
 /// <summary>Low-level HTTP transport for the Fargo API. Handles auth headers and error mapping.</summary>
 public interface IFargoHttpClient
@@ -23,13 +23,6 @@ public interface IFargoHttpClient
     /// <param name="request">The request body to serialize.</param>
     /// <param name="ct">A token to cancel the operation.</param>
     Task<FargoSdkHttpResponse<EmptyResult>> PostJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default);
-
-    /// <summary>Sends a PATCH request with a JSON body and returns an empty result.</summary>
-    /// <typeparam name="TRequest">The request body type.</typeparam>
-    /// <param name="path">The request path relative to the base address.</param>
-    /// <param name="request">The request body to serialize.</param>
-    /// <param name="ct">A token to cancel the operation.</param>
-    Task<FargoSdkHttpResponse<EmptyResult>> PatchJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default);
 
     /// <summary>Sends a PUT request with a JSON body and returns an empty result.</summary>
     /// <typeparam name="TRequest">The request body type.</typeparam>

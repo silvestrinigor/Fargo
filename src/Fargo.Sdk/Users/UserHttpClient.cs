@@ -1,10 +1,10 @@
-using Fargo.Api.Http;
-using Fargo.Api.Partitions;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Partitions;
 using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Sdk.Contracts.Users;
 
-namespace Fargo.Api.Users;
+namespace Fargo.Sdk.Users;
 
 /// <summary>Default implementation of <see cref="IUserHttpClient"/>.</summary>
 public sealed class UserHttpClient : IUserHttpClient
@@ -79,7 +79,7 @@ public sealed class UserHttpClient : IUserHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGuid, string? nameid = null, string? firstName = null, string? lastName = null, string? description = null, string? password = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<UserUpdateDto>(
+        var httpResponse = await httpClient.PutJsonAsync<UserUpdateDto>(
             $"/users/{userGuid}",
             ContractMappings.ToUserUpdateDto(
                 nameid,

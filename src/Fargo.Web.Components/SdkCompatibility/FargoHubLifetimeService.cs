@@ -1,4 +1,4 @@
-namespace Fargo.Api.Events;
+namespace Fargo.Sdk.Events;
 
 public sealed class FargoHubLifetimeService
 {

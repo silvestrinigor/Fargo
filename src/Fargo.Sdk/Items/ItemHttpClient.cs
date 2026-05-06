@@ -1,10 +1,10 @@
-using Fargo.Api.Http;
-using Fargo.Api.Partitions;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Partitions;
 using Fargo.Sdk;
 using Fargo.Sdk.Contracts.Items;
 using Fargo.Sdk.Contracts.Partitions;
 
-namespace Fargo.Api.Items;
+namespace Fargo.Sdk.Items;
 
 /// <summary>Default implementation of <see cref="IItemHttpClient"/>.</summary>
 public sealed class ItemHttpClient : IItemHttpClient

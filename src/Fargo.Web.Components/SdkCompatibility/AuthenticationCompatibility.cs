@@ -1,7 +1,7 @@
 using Fargo.Sdk.Contracts;
 using Fargo.Sdk.Contracts.Authentication;
 
-namespace Fargo.Api.Authentication;
+namespace Fargo.Sdk.Authentication;
 
 public sealed record StoredSession(
     string AccessToken,

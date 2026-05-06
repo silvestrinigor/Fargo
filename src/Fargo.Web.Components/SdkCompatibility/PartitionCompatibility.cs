@@ -1,4 +1,4 @@
-namespace Fargo.Api.Partitions;
+namespace Fargo.Sdk.Partitions;
 
 public interface IPartitionManager
 {

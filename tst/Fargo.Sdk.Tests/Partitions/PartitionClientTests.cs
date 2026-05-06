@@ -1,9 +1,9 @@
-using Fargo.Api.Http;
-using Fargo.Api.Partitions;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Partitions;
 using NSubstitute;
 using System.Net;
 
-namespace Fargo.Api.Tests.Partitions;
+namespace Fargo.Sdk.Tests.Partitions;
 
 public sealed class PartitionClientTests
 {
@@ -162,7 +162,7 @@ public sealed class PartitionClientTests
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name");
@@ -174,7 +174,7 @@ public sealed class PartitionClientTests
     public async Task UpdateAsync_Should_ReturnNotFound_When_PartitionDoesNotExist()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("partition/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name");
@@ -187,7 +187,7 @@ public sealed class PartitionClientTests
     public async Task UpdateAsync_Should_ReturnInvalidInput_When_CircularHierarchy()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("partition/circular-hierarchy"), HttpStatusCode.UnprocessableEntity));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), null, null, Guid.NewGuid());

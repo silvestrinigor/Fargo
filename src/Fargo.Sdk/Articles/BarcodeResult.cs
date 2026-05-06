@@ -1,4 +1,4 @@
-namespace Fargo.Api.Articles;
+namespace Fargo.Sdk.Articles;
 
 /// <summary>
 /// Represents a barcode returned by the Fargo API.

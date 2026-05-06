@@ -1,4 +1,4 @@
-using Fargo.Api.Authentication;
+using Fargo.Sdk.Authentication;
 using Microsoft.JSInterop;
 using System.Text.Json;
 

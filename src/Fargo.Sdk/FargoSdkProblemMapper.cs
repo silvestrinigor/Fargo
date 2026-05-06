@@ -1,6 +1,6 @@
-using Fargo.Api.Http;
+using Fargo.Sdk.Http;
 
-namespace Fargo.Api;
+namespace Fargo.Sdk;
 
 internal static class FargoSdkProblemMapper
 {
@@ -18,8 +18,7 @@ internal static class FargoSdkProblemMapper
                 or "item/not-found"
                 or "user/not-found"
                 or "partition/not-found"
-                or "user-group/not-found"
-                or "api-client/not-found" => FargoSdkErrorType.NotFound,
+                or "user-group/not-found" => FargoSdkErrorType.NotFound,
 
             "user/nameid-already-exists"
                 or "user-group/nameid-already-exists"

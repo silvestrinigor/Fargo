@@ -1,10 +1,10 @@
-using Fargo.Api.Articles;
+using Fargo.Sdk.Articles;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Fargo.Api.Http;
+namespace Fargo.Sdk.Http;
 
 /// <summary>
 /// Default implementation of <see cref="IFargoHttpClient"/>. Wraps an <see cref="HttpClient"/>,
@@ -105,27 +105,6 @@ public sealed class FargoHttpClient : IFargoHttpClient
         using var requestMessage = BuildRequest(HttpMethod.Post, url, request);
         using var response = await SendAsync(() => httpClient.SendAsync(requestMessage, ct));
         ResponseLog(logger, "POST", url, (int)response.StatusCode, null);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return new FargoSdkHttpResponse<EmptyResult>(
-                IsSuccess: false,
-                Data: null,
-                Problem: await ReadProblemAsync(response.Content, ct),
-                StatusCode: response.StatusCode);
-        }
-
-        return new FargoSdkHttpResponse<EmptyResult>(IsSuccess: true, Data: null, Problem: null, StatusCode: response.StatusCode);
-    }
-
-    public async Task<FargoSdkHttpResponse<EmptyResult>> PatchJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default)
-    {
-        var url = ResolveUrl(path);
-        RequestLog(logger, "PATCH", url, null);
-
-        using var requestMessage = BuildRequest(HttpMethod.Patch, url, request);
-        using var response = await SendAsync(() => httpClient.SendAsync(requestMessage, ct));
-        ResponseLog(logger, "PATCH", url, (int)response.StatusCode, null);
 
         if (!response.IsSuccessStatusCode)
         {

@@ -1,6 +1,6 @@
 using Fargo.Sdk.Contracts;
 
-namespace Fargo.Api.UserGroups;
+namespace Fargo.Sdk.UserGroups;
 
 public interface IUserGroupManager
 {

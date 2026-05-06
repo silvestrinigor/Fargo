@@ -1,9 +1,9 @@
-using Fargo.Api.Authentication;
-using Fargo.Api.Http;
+using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Http;
 using NSubstitute;
 using System.Net;
 
-namespace Fargo.Api.Tests.Authentication;
+namespace Fargo.Sdk.Tests.Authentication;
 
 public sealed class AuthenticationClientTests
 {

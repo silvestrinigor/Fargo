@@ -1,9 +1,9 @@
-using Fargo.Api.Http;
-using Fargo.Api.Users;
+using Fargo.Sdk.Http;
+using Fargo.Sdk.Users;
 using NSubstitute;
 using System.Net;
 
-namespace Fargo.Api.Tests.Users;
+namespace Fargo.Sdk.Tests.Users;
 
 public sealed class UserClientTests
 {
@@ -188,7 +188,7 @@ public sealed class UserClientTests
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "newuser");
@@ -200,7 +200,7 @@ public sealed class UserClientTests
     public async Task UpdateAsync_Should_ReturnNotFound_When_UserDoesNotExist()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateDto>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateDto>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("user/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.UpdateAsync(Guid.NewGuid(), "newuser");
