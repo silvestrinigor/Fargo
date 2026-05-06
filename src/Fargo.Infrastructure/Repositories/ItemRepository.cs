@@ -17,8 +17,44 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public Task<Item?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
         => items
+            .Include(item => item.Article)
             .Include(item => item.Partitions)
             .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+
+    public async Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
+        Guid itemGuid,
+        bool includeRoot = true,
+        CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+            WITH ItemContainerTree AS
+            (
+                SELECT [Guid], [ParentContainerGuid]
+                FROM [Items]
+                WHERE [Guid] = {itemGuid}
+
+                UNION ALL
+
+                SELECT child.[Guid], child.[ParentContainerGuid]
+                FROM [Items] AS child
+                INNER JOIN ItemContainerTree AS parent
+                    ON child.[ParentContainerGuid] = parent.[Guid]
+            )
+            SELECT [Guid]
+            FROM ItemContainerTree
+            """;
+
+        var guids = await context.Database
+            .SqlQuery<Guid>(query)
+            .ToListAsync(cancellationToken);
+
+        if (!includeRoot)
+        {
+            guids.RemoveAll(guid => guid == itemGuid);
+        }
+
+        return guids;
+    }
 
     public async Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,

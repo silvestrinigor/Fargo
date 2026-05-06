@@ -5,6 +5,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 
@@ -146,6 +147,18 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(PartitionCannotBeOwnParentFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "partition/cannot-be-own-parent")
+            },
+            {
+                typeof(ItemCannotBeOwnContainerFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "item/cannot-be-own-container")
+            },
+            {
+                typeof(ItemParentIsNotContainerFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "item/parent-is-not-container")
+            },
+            {
+                typeof(ItemCircularContainerHierarchyFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "item/circular-container-hierarchy")
             },
             {
                 typeof(DeleteMainAdminUserFargoDomainException),

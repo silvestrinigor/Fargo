@@ -171,6 +171,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<UserService>();
             services.AddScoped<UserGroupService>();
             services.AddScoped<PartitionService>();
+            services.AddScoped<ItemService>();
             services.AddScoped<ActorService>();
         }
 

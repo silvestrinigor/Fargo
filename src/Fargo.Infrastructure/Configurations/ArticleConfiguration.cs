@@ -4,6 +4,7 @@ using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using UnitsNet;
 
 namespace Fargo.Infrastructure.Configurations;
 
@@ -29,6 +30,87 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(x => x.Description).IsRequired();
 
         builder.Property(x => x.EditedByGuid);
+
+        builder.OwnsOne(x => x.Container, container =>
+        {
+            container.ToTable("ArticleContainers");
+
+            container.WithOwner().HasForeignKey("ArticleGuid");
+
+            container.Property(x => x.MaxMass)
+                .HasConversion<MassStringConverter>()
+                .HasMaxLength(50)
+                .IsRequired(false);
+        });
+
+        builder.OwnsOne(x => x.Variation, variation =>
+        {
+            variation.ToTable("ArticleVariations");
+
+            variation.WithOwner().HasForeignKey("ArticleGuid");
+
+            variation.Property(x => x.FromArticleGuid).IsRequired();
+
+            variation.HasOne(x => x.FromArticle)
+                .WithMany()
+                .HasForeignKey(x => x.FromArticleGuid)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.OwnsOne(x => x.Pack, pack =>
+        {
+            pack.ToTable("ArticlePacks");
+
+            pack.WithOwner().HasForeignKey("ArticleGuid");
+
+            pack.Property(x => x.FromArticleGuid).IsRequired();
+
+            pack.HasOne(x => x.FromArticle)
+                .WithMany()
+                .HasForeignKey(x => x.FromArticleGuid)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            pack.Property(x => x.Quantity)
+                .HasConversion(
+                    x => x.Amount,
+                    x => Scalar.FromAmount(x))
+                .IsRequired();
+        });
+
+        builder.OwnsOne(x => x.Kit, kit =>
+        {
+            kit.ToTable("ArticleKits");
+
+            kit.WithOwner().HasForeignKey("ArticleGuid");
+
+            kit.OwnsMany(x => x.FromArticles, pack =>
+            {
+                pack.ToTable("ArticleKitPacks");
+
+                pack.WithOwner().HasForeignKey("KitArticleGuid");
+
+                pack.Property<Guid>("Guid");
+                pack.HasKey("Guid");
+
+                pack.Property(x => x.FromArticleGuid).IsRequired();
+
+                pack.HasOne(x => x.FromArticle)
+                    .WithMany()
+                    .HasForeignKey(x => x.FromArticleGuid)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                pack.Property(x => x.Quantity)
+                    .HasConversion(
+                        x => x.Amount,
+                        x => Scalar.FromAmount(x))
+                    .IsRequired();
+
+                pack.HasIndex("KitArticleGuid", nameof(ArticlePack.FromArticleGuid))
+                    .IsUnique();
+            });
+
+            kit.WithOwner();
+        });
 
         builder.OwnsOne(a => a.Barcodes, barcodes =>
         {

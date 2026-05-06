@@ -14,6 +14,15 @@ public interface IItemRepository
     );
 
     /// <summary>
+    /// Retrieves the unique identifiers of all items contained under a given item.
+    /// </summary>
+    Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
+        Guid itemGuid,
+        bool includeRoot = true,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Adds a new item to the persistence context.
     /// </summary>
     void Add(Item item);

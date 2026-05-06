@@ -112,8 +112,7 @@ public class Item : ModifiedEntity, IPartitionedEntity
         {
             if (value?.Item.Guid == Guid)
             {
-                throw new InvalidOperationException(
-                    "An item cannot be placed inside itself.");
+                throw new ItemCannotBeOwnContainerFargoDomainException(Guid);
             }
 
             ParentContainerGuid = value?.Item.Guid;
