@@ -61,7 +61,7 @@ Fargo supports JWT bearer authentication:
 
 - **JWT bearer + refresh token** — the client logs in with a username and password, receives a short-lived access token and a longer-lived refresh token. The SDK refreshes the access token automatically when it expires.
 
-Users have fine-grained `ActionType` permissions. The full list is in the `ActionType` enum (`Fargo.Sdk.ActionType` / `Fargo.Domain.ActionType`). Permissions can be assigned directly to a user or inherited from a UserGroup.
+Users have fine-grained `ActionType` permissions. The full list is in the `ActionType` enum (`Fargo.Sdk.Contracts.ActionType` / `Fargo.Domain.ActionType`). Permissions can be assigned directly to a user or inherited from a UserGroup.
 
 ## Real-time Events
 
