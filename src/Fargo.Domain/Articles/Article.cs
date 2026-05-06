@@ -20,24 +20,47 @@ namespace Fargo.Domain.Articles;
 /// </remarks>
 public class Article : ModifiedEntity, IPartitionedEntity, IActivable
 {
+    /// <summary>
+    /// Initialize a new article entity.
+    /// </summary>
     public Article()
     {
-
     }
 
+    /// <summary>
+    /// Initialize a new article entity that is a variation of another article.
+    /// </summary>
+    /// <param name="variation">The variation relationship associated with the article.</param>
     public Article(ArticleVariation variation)
     {
         Variation = variation;
     }
 
+    /// <summary>
+    /// Initialize a new article entity that is a pack of another article.
+    /// </summary>
+    /// <param name="pack">The pack relationship associated with the article.</param>
     public Article(ArticlePack pack)
     {
         Pack = pack;
     }
 
+    /// <summary>
+    /// Initialize a new article entity that is a kit of other articles.
+    /// </summary>
+    /// <param name="kit">The kit relationship associated with the article.</param>
     public Article(ArticleKit kit)
     {
         Kit = kit;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Article"/> class as a container article.
+    /// </summary>
+    /// <param name="container">The container constraints associated with the article.</param>
+    public Article(ArticleContainer container)
+    {
+        Container = container;
     }
 
     /// <summary>
@@ -84,9 +107,10 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     /// </summary>
     public ArticleVariation? Variation { get; private init; }
 
-    public ArticleContainer? Container { get; private init; }
-
-    public bool IsContainer => Container is not null;
+    /// <summary>
+    /// Gets a value indicating whether this article is a variation of another article.
+    /// </summary>
+    public bool IsVariation => Variation is not null;
 
     /// <summary>
     /// Gets the pack info associated with the article.
@@ -95,12 +119,37 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     public ArticlePack? Pack { get; private init; }
 
     /// <summary>
+    /// Gets a value indicating whether this article represents a pack.
+    /// </summary>
+    public bool IsPack => Pack is not null;
+
+    /// <summary>
     /// Gets the kit info associated with the article.
     /// When <see langword="null"/>, no kit constraint is defined.
     /// </summary>
     public ArticleKit? Kit { get; private init; }
 
+    /// <summary>
+    /// Gets a value indicating whether this article represents a kit.
+    /// </summary>
+    public bool IsKit => Kit is not null;
+
     #endregion Relation
+
+    #region Container
+
+    /// <summary>
+    /// Gets the container constraints associated with the article.
+    /// When <see langword="null"/>, the article is not a container.
+    /// </summary>
+    public ArticleContainer? Container { get; private init; }
+
+    /// <summary>
+    /// Gets a value indicating whether this article represents a container.
+    /// </summary>
+    public bool IsContainer => Container is not null;
+
+    #endregion Container
 
     #region Active
 
@@ -250,19 +299,60 @@ public sealed class ArticleBarcodes
         QrCode is null && DataMatrix is null;
 }
 
+/// <summary>
+/// Defines container constraints for an <see cref="Article"/>.
+/// </summary>
+/// <remarks>
+/// A container article represents an article that may contain other articles,
+/// optionally constrained by allowed articles, restricted articles, and maximum mass.
+/// </remarks>
 public sealed class ArticleContainer
 {
-    public IReadOnlyCollection<Article>? RestrictList { get; set; }
+    /// <summary>
+    /// Gets or sets the maximum mass allowed inside the container.
+    /// </summary>
+    /// <remarks>
+    /// When <see langword="null"/>, no maximum mass constraint is defined.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the value is less than or equal to zero.
+    /// </exception>
+    public Mass? MaxMass
+    {
+        get => field;
+        set
+        {
+            if (value is not null && value.Value <= Mass.Zero)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(MaxMass),
+                    value,
+                    "The maximum mass of a container must be greater than zero.");
+            }
 
-    public IReadOnlyCollection<Article>? AllowedList { get; set; }
-
-    public Mass? MaxMass { get; set; }
+            field = value;
+        }
+    }
 }
 
+
+/// <summary>
+/// Defines an article variation relationship.
+/// </summary>
+/// <remarks>
+/// A variation article is derived from another article, usually representing
+/// a different version, option, or presentation of the original article.
+/// </remarks>
 public sealed class ArticleVariation
 {
+    /// <summary>
+    /// Gets the unique identifier of the source article.
+    /// </summary>
     public Guid FromArticleGuid { get; private set; }
 
+    /// <summary>
+    /// Gets the article from which this variation originates.
+    /// </summary>
     public required Article FromArticle
     {
         get;
@@ -274,10 +364,23 @@ public sealed class ArticleVariation
     }
 }
 
+/// <summary>
+/// Defines an article pack relationship.
+/// </summary>
+/// <remarks>
+/// A pack article represents a quantity of another article grouped as a single article.
+/// For example, a pack may represent twelve units of the same source article.
+/// </remarks>
 public sealed class ArticlePack
 {
+    /// <summary>
+    /// Gets the unique identifier of the source article contained in the pack.
+    /// </summary>
     public Guid FromArticleGuid { get; private set; }
 
+    /// <summary>
+    /// Gets the article from which this pack is composed.
+    /// </summary>
     public required Article FromArticle
     {
         get;
@@ -288,10 +391,70 @@ public sealed class ArticlePack
         }
     }
 
-    public Scalar Quantity { get; set; } = 1.Amount();
+    /// <summary>
+    /// Gets or sets the quantity of the source article represented by the pack.
+    /// </summary>
+    /// <remarks>
+    /// The quantity must be greater than zero.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the quantity is less than or equal to zero.
+    /// </exception>
+    public Scalar Quantity
+    {
+        get => field;
+        set
+        {
+            if (value <= 0.Amount())
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(Quantity),
+                    value,
+                    "The pack quantity must be greater than zero.");
+            }
+
+            field = value;
+        }
+    }
 }
 
+/// <summary>
+/// Defines an article kit relationship.
+/// </summary>
+/// <remarks>
+/// A kit article is composed of one or more article packs.
+/// Each pack defines the source article and the quantity included in the kit.
+/// </remarks>
 public sealed class ArticleKit
 {
-    public required IReadOnlyCollection<ArticlePack> FromArticles { get; init; }
+    /// <summary>
+    /// Gets the article packs that compose the kit.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the collection contains null packs, or contains duplicated source articles.
+    /// </exception>
+    public required IReadOnlyCollection<ArticlePack> FromArticles
+    {
+        get;
+        init
+        {
+            if (value.Any(articlePack => articlePack is null))
+            {
+                throw new ArgumentException(
+                    "A kit cannot contain null article packs.",
+                    nameof(FromArticles));
+            }
+
+            if (value
+                .GroupBy(articlePack => articlePack.FromArticleGuid)
+                .Any(group => group.Count() > 1))
+            {
+                throw new ArgumentException(
+                    "A kit cannot contain duplicated source articles.",
+                    nameof(FromArticles));
+            }
+
+            field = value;
+        }
+    }
 }

@@ -33,9 +33,8 @@ public sealed class ItemCreateCommandHandler(
 
         var article = await articleRepository.GetFoundByGuid(command.Item.ArticleGuid, cancellationToken);
 
-        var item = new Item
+        var item = new Item(article)
         {
-            Article = article,
             ProductionDate = command.Item.ProductionDate
         };
 
