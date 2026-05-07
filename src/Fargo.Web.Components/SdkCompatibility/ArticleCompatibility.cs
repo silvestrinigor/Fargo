@@ -68,13 +68,14 @@ public sealed class Article
         update(this);
         var response = await client.UpdateAsync(
             Guid,
-            Name,
-            Description,
-            Partitions,
-            Barcodes,
-            Metrics,
-            ShelfLife,
-            IsActive,
+            new ArticleUpdateRequest(
+                Name,
+                Description,
+                Metrics.ToContract(),
+                ShelfLife,
+                Partitions,
+                Barcodes.ToContract(),
+                IsActive),
             cancellationToken);
         response.EnsureSuccess("Failed to update article.");
     }
@@ -109,6 +110,28 @@ internal static class ArticleCompatibilityMappings
                 QrCode = contract.QrCode is null ? null : new QrCode(Guid.Empty, Guid.Empty, contract.QrCode),
                 DataMatrix = contract.DataMatrix is null ? null : new DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix),
             };
+
+    public static ArticleMetricsInfo? ToContract(this ArticleMetrics? metrics)
+        => metrics is null
+            ? null
+            : new ArticleMetricsInfo(
+                metrics.Mass is null ? null : new MassInfo(metrics.Mass.Value, metrics.Mass.ToAbbreviation()),
+                metrics.LengthX is null ? null : new LengthInfo(metrics.LengthX.Value, metrics.LengthX.ToAbbreviation()),
+                metrics.LengthY is null ? null : new LengthInfo(metrics.LengthY.Value, metrics.LengthY.ToAbbreviation()),
+                metrics.LengthZ is null ? null : new LengthInfo(metrics.LengthZ.Value, metrics.LengthZ.ToAbbreviation()));
+
+    public static ArticleBarcodesInfo ToContract(this ArticleBarcodes barcodes)
+        => new(
+            barcodes.Ean13 is null ? null : barcodes.Ean13.Value.Code,
+            barcodes.Ean8 is null ? null : barcodes.Ean8.Value.Code,
+            barcodes.UpcA is null ? null : barcodes.UpcA.Value.Code,
+            barcodes.UpcE is null ? null : barcodes.UpcE.Value.Code,
+            barcodes.Code128 is null ? null : barcodes.Code128.Value.Code,
+            barcodes.Code39 is null ? null : barcodes.Code39.Value.Code,
+            barcodes.Itf14 is null ? null : barcodes.Itf14.Value.Code,
+            barcodes.Gs1128 is null ? null : barcodes.Gs1128.Value.Code,
+            barcodes.QrCode is null ? null : barcodes.QrCode.Value.Code,
+            barcodes.DataMatrix is null ? null : barcodes.DataMatrix.Value.Code);
 }
 
 public sealed class ArticleManager(IArticleHttpClient client) : IArticleManager
@@ -138,7 +161,16 @@ public sealed class ArticleManager(IArticleHttpClient client) : IArticleManager
         bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
-        var guid = (await client.CreateAsync(name, description, partitions, barcodes, metrics, shelfLife, isActive, cancellationToken))
+        var guid = (await client.CreateAsync(
+                new ArticleCreateRequest(
+                    name,
+                    description,
+                    metrics.ToContract(),
+                    shelfLife,
+                    partitions,
+                    barcodes?.ToContract(),
+                    isActive),
+                cancellationToken))
             .Unwrap("Failed to create article.");
 
         return await GetAsync(guid, cancellationToken: cancellationToken);

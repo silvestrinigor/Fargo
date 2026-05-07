@@ -161,11 +161,12 @@ public sealed class UserClientTests
     public async Task CreateAsync_Should_ReturnGuid_When_HttpResponseIsSuccess()
     {
         var guid = Guid.NewGuid();
+        var request = new Fargo.Sdk.Contracts.Users.UserCreateRequest("newuser", "password");
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserCreateRequest>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(true, guid, null, HttpStatusCode.Created));
 
-        var result = await sut.CreateAsync("newuser", "password");
+        var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(guid, result.Data);
@@ -178,7 +179,7 @@ public sealed class UserClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("request/invalid"), HttpStatusCode.BadRequest));
 
-        var result = await sut.CreateAsync(string.Empty, "password");
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Users.UserCreateRequest(string.Empty, "password"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
@@ -191,7 +192,7 @@ public sealed class UserClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("user/nameid-already-exists"), HttpStatusCode.Conflict));
 
-        var result = await sut.CreateAsync("existinguser", "password");
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Users.UserCreateRequest("existinguser", "password"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.Conflict, result.Error!.Type);
@@ -202,11 +203,12 @@ public sealed class UserClientTests
     [Fact]
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
+        var request = new Fargo.Sdk.Contracts.Users.UserUpdateRequest("newuser");
         httpClient
-            .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "newuser");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), request);
 
         Assert.True(result.IsSuccess);
     }
@@ -218,7 +220,7 @@ public sealed class UserClientTests
             .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("user/not-found"), HttpStatusCode.NotFound));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "newuser");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Users.UserUpdateRequest("newuser"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);

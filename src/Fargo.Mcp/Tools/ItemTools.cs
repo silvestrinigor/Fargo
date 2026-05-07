@@ -1,4 +1,5 @@
 using Fargo.Sdk.Items;
+using Fargo.Sdk.Contracts.Items;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -50,7 +51,11 @@ public sealed class ItemTools(IItemHttpClient items)
         [Description("GUID of the partition to associate with the item. Omit to create a public item with no partition.")] string? partitionGuid = null)
     {
         Guid? firstPartition = partitionGuid is not null ? Guid.Parse(partitionGuid) : null;
-        var response = await items.CreateAsync(Guid.Parse(articleGuid), firstPartition);
+        var response = await items.CreateAsync(
+            new ItemCreateRequest(
+                Guid.Parse(articleGuid),
+                ProductionDate: null,
+                firstPartition is null ? null : [firstPartition.Value]));
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";

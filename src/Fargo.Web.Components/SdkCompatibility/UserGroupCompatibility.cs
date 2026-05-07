@@ -1,4 +1,5 @@
 using Fargo.Sdk.Contracts;
+using Fargo.Sdk.Contracts.Permissions;
 using Fargo.Sdk.Contracts.UserGroups;
 
 namespace Fargo.Sdk.UserGroups;
@@ -55,7 +56,15 @@ public sealed class UserGroup
     public async Task UpdateAsync(Action<UserGroup> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        (await client.UpdateAsync(Guid, Nameid, Description, IsActive, Permissions, cancellationToken))
+        (await client.UpdateAsync(
+                Guid,
+                new UserGroupUpdateRequest(
+                    Nameid,
+                    Description,
+                    IsActive,
+                    Permissions.ToPermissionUpdateRequests(),
+                    null),
+                cancellationToken))
             .EnsureSuccess("Failed to update user group.");
     }
 }
@@ -84,7 +93,13 @@ public sealed class UserGroupManager(IUserGroupHttpClient client) : IUserGroupMa
         Guid? firstPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var guid = (await client.CreateAsync(nameid, description, permissions, firstPartition, cancellationToken))
+        var guid = (await client.CreateAsync(
+                new UserGroupCreateRequest(
+                    nameid,
+                    description,
+                    permissions.ToPermissionUpdateRequests(),
+                    firstPartition is null ? null : [firstPartition.Value]),
+                cancellationToken))
             .Unwrap("Failed to create user group.");
 
         return await GetAsync(guid, cancellationToken: cancellationToken);
@@ -92,4 +107,11 @@ public sealed class UserGroupManager(IUserGroupHttpClient client) : IUserGroupMa
 
     public async Task DeleteAsync(Guid userGroupGuid, CancellationToken cancellationToken = default)
         => (await client.DeleteAsync(userGroupGuid, cancellationToken)).EnsureSuccess("Failed to delete user group.");
+}
+
+internal static class UserGroupCompatibilityMappings
+{
+    public static IReadOnlyCollection<PermissionUpdateRequest>? ToPermissionUpdateRequests(
+        this IReadOnlyCollection<ActionType>? permissions)
+        => permissions?.Select(static action => new PermissionUpdateRequest(action)).ToArray();
 }

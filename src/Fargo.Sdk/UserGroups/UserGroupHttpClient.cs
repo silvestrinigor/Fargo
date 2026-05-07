@@ -54,11 +54,11 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(string nameid, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, Guid? firstPartition = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<Guid>> CreateAsync(UserGroupCreateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<UserGroupCreateRequest, Guid>(
             "/user-groups",
-            ContractMappings.ToUserGroupCreateRequest(nameid, description, permissions, firstPartition),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -70,11 +70,11 @@ public sealed class UserGroupHttpClient : IUserGroupHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGroupGuid, string? nameid = null, string? description = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGroupGuid, UserGroupUpdateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync<UserGroupUpdateRequest>(
             $"/user-groups/{userGroupGuid}",
-            ContractMappings.ToUserGroupUpdateRequest(nameid, description, isActive, permissions),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

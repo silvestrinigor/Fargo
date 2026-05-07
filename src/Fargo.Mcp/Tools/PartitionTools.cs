@@ -1,4 +1,5 @@
 using Fargo.Sdk.Partitions;
+using Fargo.Sdk.Contracts.Partitions;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Text.Json;
@@ -46,7 +47,7 @@ public sealed class PartitionTools(IPartitionHttpClient partitions)
         [Description("GUID of the parent partition. Omit to create a top-level partition.")] string? parentPartitionGuid = null)
     {
         Guid? parentGuid = parentPartitionGuid is not null ? Guid.Parse(parentPartitionGuid) : null;
-        var response = await partitions.CreateAsync(name, description, parentGuid);
+        var response = await partitions.CreateAsync(new PartitionCreateRequest(name, description, parentGuid));
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";
@@ -61,7 +62,7 @@ public sealed class PartitionTools(IPartitionHttpClient partitions)
         [Description("The new name. Omit to leave unchanged.")] string? name = null,
         [Description("The new description. Omit to leave unchanged.")] string? description = null)
     {
-        var response = await partitions.UpdateAsync(Guid.Parse(partitionGuid), name, description);
+        var response = await partitions.UpdateAsync(Guid.Parse(partitionGuid), new PartitionUpdateRequest(name, description));
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";

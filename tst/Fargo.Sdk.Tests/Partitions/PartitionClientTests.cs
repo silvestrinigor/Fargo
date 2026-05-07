@@ -133,11 +133,12 @@ public sealed class PartitionClientTests
     public async Task CreateAsync_Should_ReturnGuid_When_HttpResponseIsSuccess()
     {
         var guid = Guid.NewGuid();
+        var request = new Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest("My Partition");
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest, Guid>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(true, guid, null, HttpStatusCode.Created));
 
-        var result = await sut.CreateAsync("My Partition");
+        var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(guid, result.Data);
@@ -150,7 +151,7 @@ public sealed class PartitionClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("request/invalid"), HttpStatusCode.BadRequest));
 
-        var result = await sut.CreateAsync(string.Empty);
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest(string.Empty));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
@@ -161,11 +162,12 @@ public sealed class PartitionClientTests
     [Fact]
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
+        var request = new Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest("New Name");
         httpClient
-            .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), request);
 
         Assert.True(result.IsSuccess);
     }
@@ -177,7 +179,7 @@ public sealed class PartitionClientTests
             .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("partition/not-found"), HttpStatusCode.NotFound));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "New Name");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest("New Name"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
@@ -190,7 +192,7 @@ public sealed class PartitionClientTests
             .PutJsonAsync<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("partition/circular-hierarchy"), HttpStatusCode.UnprocessableEntity));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), null, null, Guid.NewGuid());
+        var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest(ParentPartitionGuid: Guid.NewGuid()));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);

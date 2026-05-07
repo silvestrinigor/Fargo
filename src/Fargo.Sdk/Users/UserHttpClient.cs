@@ -54,19 +54,11 @@ public sealed class UserHttpClient : IUserHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(string nameid, string password, string? firstName = null, string? lastName = null, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, Guid? firstPartition = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<Guid>> CreateAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<UserCreateRequest, Guid>(
             "/users",
-            ContractMappings.ToUserCreateRequest(
-                nameid,
-                password,
-                firstName,
-                lastName,
-                description,
-                permissions,
-                defaultPasswordExpirationPeriod,
-                firstPartition),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -78,19 +70,11 @@ public sealed class UserHttpClient : IUserHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGuid, string? nameid = null, string? firstName = null, string? lastName = null, string? description = null, string? password = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGuid, UserUpdateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync<UserUpdateRequest>(
             $"/users/{userGuid}",
-            ContractMappings.ToUserUpdateRequest(
-                nameid,
-                firstName,
-                lastName,
-                description,
-                password,
-                isActive,
-                permissions,
-                defaultPasswordExpirationPeriod),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

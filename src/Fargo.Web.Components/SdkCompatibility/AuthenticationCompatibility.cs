@@ -128,7 +128,7 @@ public sealed class AuthenticationService(
 
     public async Task LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
     {
-        var response = await client.LogInAsync(nameid, password, cancellationToken);
+        var response = await client.LogInAsync(new LoginRequest(nameid, password), cancellationToken);
         if (!response.IsSuccess)
         {
             ThrowAuthFailure(response.Error);
@@ -152,7 +152,7 @@ public sealed class AuthenticationService(
 
         if (IsExpired && !string.IsNullOrWhiteSpace(session.RefreshToken))
         {
-            var response = await client.Refresh(session.RefreshToken, cancellationToken);
+            var response = await client.Refresh(new RefreshRequest(session.RefreshToken), cancellationToken);
             if (response.IsSuccess)
             {
                 SetSession(AuthSession.FromDto(response.Data!, session.Nameid));
@@ -171,7 +171,7 @@ public sealed class AuthenticationService(
         var refreshToken = session.RefreshToken;
         if (!string.IsNullOrWhiteSpace(refreshToken))
         {
-            _ = await client.LogOutAsync(refreshToken, cancellationToken);
+            _ = await client.LogOutAsync(new RefreshRequest(refreshToken), cancellationToken);
         }
 
         await sessionStore.ClearAsync(cancellationToken);
@@ -181,7 +181,7 @@ public sealed class AuthenticationService(
 
     public async Task ChangePasswordAsync(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
     {
-        var response = await client.ChangePassword(newPassword, currentPassword, cancellationToken);
+        var response = await client.ChangePassword(new PasswordUpdateRequest(newPassword, currentPassword), cancellationToken);
         if (!response.IsSuccess)
         {
             ThrowAuthFailure(response.Error);

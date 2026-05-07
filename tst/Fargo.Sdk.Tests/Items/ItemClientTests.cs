@@ -146,11 +146,12 @@ public sealed class ItemClientTests
     public async Task CreateAsync_Should_ReturnGuid_When_HttpResponseIsSuccess()
     {
         var guid = Guid.NewGuid();
+        var request = new Fargo.Sdk.Contracts.Items.ItemCreateRequest(Guid.NewGuid());
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Items.ItemCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Items.ItemCreateRequest>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Items.ItemCreateRequest, Guid>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(true, guid, null, HttpStatusCode.Created));
 
-        var result = await sut.CreateAsync(Guid.NewGuid());
+        var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(guid, result.Data);
@@ -163,7 +164,7 @@ public sealed class ItemClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.Items.ItemCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Items.ItemCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("article/not-found"), HttpStatusCode.NotFound));
 
-        var result = await sut.CreateAsync(Guid.NewGuid());
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Items.ItemCreateRequest(Guid.NewGuid()));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
@@ -187,7 +188,7 @@ public sealed class ItemClientTests
                 Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
-        var result = await sut.UpdateAsync(itemGuid, [partitionGuid], parentContainerGuid);
+        var result = await sut.UpdateAsync(itemGuid, new Fargo.Sdk.Contracts.Items.ItemUpdateRequest([partitionGuid], parentContainerGuid));
 
         Assert.True(result.IsSuccess);
     }
@@ -199,7 +200,7 @@ public sealed class ItemClientTests
             .PutJsonAsync<Fargo.Sdk.Contracts.Items.ItemUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Items.ItemUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("item/circular-container-hierarchy"), HttpStatusCode.BadRequest));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), [], Guid.NewGuid());
+        var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Items.ItemUpdateRequest([], Guid.NewGuid()));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);

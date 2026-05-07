@@ -1,5 +1,6 @@
 using Fargo.Sdk.Contracts;
 using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.Permissions;
 using Fargo.Sdk.Contracts.Users;
 
 namespace Fargo.Sdk.Users;
@@ -83,14 +84,16 @@ public sealed class User
         update(this);
         (await client.UpdateAsync(
             Guid,
-            Nameid,
-            FirstName,
-            LastName,
-            Description,
-            isActive: IsActive,
-            permissions: Permissions,
-            defaultPasswordExpirationPeriod: DefaultPasswordExpirationPeriod,
-            cancellationToken: cancellationToken)).EnsureSuccess("Failed to update user.");
+            new UserUpdateRequest(
+                Nameid,
+                FirstName,
+                LastName,
+                Description,
+                Password: null,
+                IsActive,
+                Permissions.ToPermissionUpdateRequests(),
+                DefaultPasswordExpirationPeriod),
+            cancellationToken)).EnsureSuccess("Failed to update user.");
     }
 
     public Task<FargoSdkResponse<EmptyResult>> AddUserGroupAsync(Guid userGroupGuid, CancellationToken cancellationToken = default)
@@ -138,14 +141,16 @@ public sealed class UserManager(IUserHttpClient client) : IUserManager
         CancellationToken cancellationToken = default)
     {
         var guid = (await client.CreateAsync(
-            nameid,
-            password,
-            firstName,
-            lastName,
-            description,
-            permissions,
-            defaultPasswordExpirationPeriod,
-            firstPartition,
+            new UserCreateRequest(
+                nameid,
+                password,
+                firstName,
+                lastName,
+                description,
+                permissions.ToPermissionUpdateRequests(),
+                defaultPasswordExpirationPeriod,
+                firstPartition is null ? null : [firstPartition.Value],
+                null),
             cancellationToken)).Unwrap("Failed to create user.");
 
         return await GetAsync(guid, cancellationToken: cancellationToken);
@@ -153,4 +158,11 @@ public sealed class UserManager(IUserHttpClient client) : IUserManager
 
     public async Task DeleteAsync(Guid userGuid, CancellationToken cancellationToken = default)
         => (await client.DeleteAsync(userGuid, cancellationToken)).EnsureSuccess("Failed to delete user.");
+}
+
+internal static class UserCompatibilityMappings
+{
+    public static IReadOnlyCollection<PermissionUpdateRequest>? ToPermissionUpdateRequests(
+        this IReadOnlyCollection<ActionType>? permissions)
+        => permissions?.Select(static action => new PermissionUpdateRequest(action)).ToArray();
 }

@@ -47,11 +47,11 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(string name, string? description = null, Guid? parentPartitionGuid = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<Guid>> CreateAsync(PartitionCreateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<PartitionCreateRequest, Guid>(
             "/partitions",
-            ContractMappings.ToPartitionCreateRequest(name, description, parentPartitionGuid),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -63,11 +63,11 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, string? name = null, string? description = null, Guid? parentPartitionGuid = null, bool? isActive = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, PartitionUpdateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync<PartitionUpdateRequest>(
             $"/partitions/{partitionGuid}",
-            ContractMappings.ToPartitionUpdateRequest(name, description, parentPartitionGuid, isActive),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

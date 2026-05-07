@@ -69,7 +69,15 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             LengthZ = lengthZValue is null ? null : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
         };
 
-        var response = await articles.CreateAsync(name, description, partitions, barcodes: null, metrics: metrics, shelfLife: null, isActive: isActive);
+        var response = await articles.CreateAsync(
+            new ArticleCreateRequest(
+                name,
+                description,
+                metrics.ToContract(),
+                null,
+                partitions,
+                null,
+                isActive));
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";
@@ -110,13 +118,14 @@ public sealed class ArticleTools(IArticleHttpClient articles)
 
         var update = await articles.UpdateAsync(
             current.Guid,
-            name ?? current.Name,
-            description ?? current.Description,
-            current.Partitions,
-            current.Barcodes.ToSdkArticleBarcodes(),
-            newMetrics,
-            current.ShelfLife,
-            current.IsActive);
+            new ArticleUpdateRequest(
+                name ?? current.Name,
+                description ?? current.Description,
+                newMetrics.ToContract(),
+                current.ShelfLife,
+                current.Partitions,
+                current.Barcodes,
+                current.IsActive));
 
         if (!update.IsSuccess)
         {
@@ -140,7 +149,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
     }
 }
 
-internal static class ArticleToolContractMappings
+internal static class ArticleToolMappings
 {
     public static ArticleMetrics? ToSdkArticleMetrics(this ArticleMetricsInfo? contract)
         => contract is null
@@ -169,4 +178,13 @@ internal static class ArticleToolContractMappings
                 QrCode = contract.QrCode is null ? null : new QrCode(Guid.Empty, Guid.Empty, contract.QrCode),
                 DataMatrix = contract.DataMatrix is null ? null : new DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix),
             };
+
+    public static ArticleMetricsInfo? ToContract(this ArticleMetrics? metrics)
+        => metrics is null
+            ? null
+            : new ArticleMetricsInfo(
+                metrics.Mass is null ? null : new MassInfo(metrics.Mass.Value, metrics.Mass.ToAbbreviation()),
+                metrics.LengthX is null ? null : new LengthInfo(metrics.LengthX.Value, metrics.LengthX.ToAbbreviation()),
+                metrics.LengthY is null ? null : new LengthInfo(metrics.LengthY.Value, metrics.LengthY.ToAbbreviation()),
+                metrics.LengthZ is null ? null : new LengthInfo(metrics.LengthZ.Value, metrics.LengthZ.ToAbbreviation()));
 }

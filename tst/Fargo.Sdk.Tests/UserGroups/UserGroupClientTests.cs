@@ -133,11 +133,12 @@ public sealed class UserGroupClientTests
     public async Task CreateAsync_Should_ReturnGuid_When_HttpResponseIsSuccess()
     {
         var guid = Guid.NewGuid();
+        var request = new Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest("mygroup");
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest, Guid>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(true, guid, null, HttpStatusCode.Created));
 
-        var result = await sut.CreateAsync("mygroup");
+        var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(guid, result.Data);
@@ -150,7 +151,7 @@ public sealed class UserGroupClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("user-group/nameid-already-exists"), HttpStatusCode.Conflict));
 
-        var result = await sut.CreateAsync("existinggroup");
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.UserGroups.UserGroupCreateRequest("existinggroup"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.Conflict, result.Error!.Type);
@@ -161,11 +162,12 @@ public sealed class UserGroupClientTests
     [Fact]
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
+        var request = new Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest("newgroup");
         httpClient
-            .PutJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "newgroup");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), request);
 
         Assert.True(result.IsSuccess);
     }
@@ -177,7 +179,7 @@ public sealed class UserGroupClientTests
             .PutJsonAsync<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("user-group/not-found"), HttpStatusCode.NotFound));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "newgroup");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.UserGroups.UserGroupUpdateRequest("newgroup"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);

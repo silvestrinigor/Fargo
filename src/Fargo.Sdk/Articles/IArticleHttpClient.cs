@@ -30,43 +30,19 @@ public interface IArticleHttpClient
         CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new article and returns its assigned identifier.</summary>
-    /// <param name="name">The article name.</param>
-    /// <param name="description">An optional description.</param>
-    /// <param name="partitions">The partitions to assign on creation.</param>
-    /// <param name="barcodes">The initial barcodes for the article.</param>
-    /// <param name="metrics">Optional physical measurements (mass and dimensions).</param>
-    /// <param name="shelfLife">Optional shelf life.</param>
-    /// <param name="isActive">Whether the article should be active. Defaults to <see langword="true"/>.</param>
+    /// <param name="request">The article creation request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoSdkResponse<Guid>> CreateAsync(
-        string name,
-        string? description = null,
-        IReadOnlyCollection<Guid>? partitions = null,
-        ArticleBarcodes? barcodes = null,
-        ArticleMetrics? metrics = null,
-        TimeSpan? shelfLife = null,
-        bool? isActive = null,
+        ArticleCreateRequest request,
         CancellationToken cancellationToken = default);
 
     /// <summary>Replaces an existing article (full PUT semantics).</summary>
     /// <param name="articleGuid">The unique identifier of the article to update.</param>
-    /// <param name="name">The new name.</param>
-    /// <param name="description">The new description.</param>
-    /// <param name="partitions">The new full partition set; missing means cleared.</param>
-    /// <param name="barcodes">The new full barcode set; missing means cleared.</param>
-    /// <param name="metrics">The new metrics.</param>
-    /// <param name="shelfLife">The new shelf life.</param>
-    /// <param name="isActive">Whether the article is active.</param>
+    /// <param name="request">The article update request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid articleGuid,
-        string name,
-        string? description = null,
-        IReadOnlyCollection<Guid>? partitions = null,
-        ArticleBarcodes? barcodes = null,
-        ArticleMetrics? metrics = null,
-        TimeSpan? shelfLife = null,
-        bool isActive = true,
+        ArticleUpdateRequest request,
         CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an article by its unique identifier.</summary>

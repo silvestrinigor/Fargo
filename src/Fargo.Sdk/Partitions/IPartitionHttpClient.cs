@@ -22,20 +22,15 @@ public interface IPartitionHttpClient
     Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new partition and returns its assigned identifier.</summary>
-    /// <param name="name">The partition name.</param>
-    /// <param name="description">An optional description.</param>
-    /// <param name="parentPartitionGuid">An optional parent partition identifier.</param>
+    /// <param name="request">The partition creation request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> CreateAsync(string name, string? description = null, Guid? parentPartitionGuid = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<Guid>> CreateAsync(PartitionCreateRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Updates the properties of an existing partition.</summary>
     /// <param name="partitionGuid">The unique identifier of the partition to update.</param>
-    /// <param name="name">New name, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="description">New description, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="parentPartitionGuid">New parent partition, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="isActive">New active state, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="request">The partition update request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, string? name = null, string? description = null, Guid? parentPartitionGuid = null, bool? isActive = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, PartitionUpdateRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes a partition by its unique identifier.</summary>
     /// <param name="partitionGuid">The unique identifier of the partition to delete.</param>

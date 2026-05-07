@@ -64,18 +64,12 @@ public sealed class ArticleHttpClient : IArticleHttpClient
 
     /// <inheritdoc />
     public async Task<FargoSdkResponse<Guid>> CreateAsync(
-        string name,
-        string? description = null,
-        IReadOnlyCollection<Guid>? partitions = null,
-        ArticleBarcodes? barcodes = null,
-        ArticleMetrics? metrics = null,
-        TimeSpan? shelfLife = null,
-        bool? isActive = null,
+        ArticleCreateRequest request,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<ArticleCreateRequest, Guid>(
             "/articles",
-            ContractMappings.ToArticleCreateRequest(name, description, partitions, barcodes, metrics, shelfLife, isActive),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -89,18 +83,12 @@ public sealed class ArticleHttpClient : IArticleHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid articleGuid,
-        string name,
-        string? description = null,
-        IReadOnlyCollection<Guid>? partitions = null,
-        ArticleBarcodes? barcodes = null,
-        ArticleMetrics? metrics = null,
-        TimeSpan? shelfLife = null,
-        bool isActive = true,
+        ArticleUpdateRequest request,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync<ArticleUpdateRequest>(
             $"/articles/{articleGuid}",
-            ContractMappings.ToArticleUpdateRequest(name, description, partitions, barcodes, metrics, shelfLife, isActive),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

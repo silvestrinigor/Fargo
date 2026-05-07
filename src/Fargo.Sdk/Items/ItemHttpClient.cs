@@ -55,11 +55,11 @@ public sealed class ItemHttpClient : IItemHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<Guid>> CreateAsync(ItemCreateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<ItemCreateRequest, Guid>(
             "/items",
-            ContractMappings.ToItemCreateRequest(articleGuid, firstPartition, productionDate),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
@@ -73,13 +73,12 @@ public sealed class ItemHttpClient : IItemHttpClient
     /// <inheritdoc />
     public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
         Guid itemGuid,
-        IReadOnlyCollection<Guid> partitions,
-        Guid? parentContainerGuid = null,
+        ItemUpdateRequest request,
         CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync<ItemUpdateRequest>(
             $"/items/{itemGuid}",
-            ContractMappings.ToItemUpdateRequest(partitions, parentContainerGuid),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)

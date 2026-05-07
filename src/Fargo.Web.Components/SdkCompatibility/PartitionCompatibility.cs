@@ -50,14 +50,14 @@ public sealed class Partition
     public async Task UpdateAsync(Action<Partition> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        (await client.UpdateAsync(Guid, Name, Description, ParentPartitionGuid, IsActive, cancellationToken))
+        (await client.UpdateAsync(Guid, new PartitionUpdateRequest(Name, Description, ParentPartitionGuid, IsActive), cancellationToken))
             .EnsureSuccess("Failed to update partition.");
     }
 
     public async Task<FargoSdkResponse<EmptyResult>> MoveAsync(Guid parentPartitionGuid, CancellationToken cancellationToken = default)
     {
         ParentPartitionGuid = parentPartitionGuid;
-        return await client.UpdateAsync(Guid, parentPartitionGuid: parentPartitionGuid, cancellationToken: cancellationToken);
+        return await client.UpdateAsync(Guid, new PartitionUpdateRequest(ParentPartitionGuid: parentPartitionGuid), cancellationToken);
     }
 }
 
@@ -81,7 +81,7 @@ public sealed class PartitionManager(IPartitionHttpClient client) : IPartitionMa
 
     public async Task<Partition> CreateAsync(string name, string? description = null, Guid? parentPartitionGuid = null, CancellationToken cancellationToken = default)
     {
-        var guid = (await client.CreateAsync(name, description, parentPartitionGuid, cancellationToken)).Unwrap("Failed to create partition.");
+        var guid = (await client.CreateAsync(new PartitionCreateRequest(name, description, parentPartitionGuid), cancellationToken)).Unwrap("Failed to create partition.");
         return await GetAsync(guid, cancellationToken: cancellationToken);
     }
 

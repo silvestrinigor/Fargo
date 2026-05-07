@@ -22,29 +22,15 @@ public interface IUserHttpClient
     Task<FargoSdkResponse<IReadOnlyCollection<UserInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user and returns the assigned identifier.</summary>
-    /// <param name="nameid">The login name identifier for the user.</param>
-    /// <param name="password">The initial password.</param>
-    /// <param name="firstName">Optional first name.</param>
-    /// <param name="lastName">Optional last name.</param>
-    /// <param name="description">Optional description.</param>
-    /// <param name="permissions">Optional initial set of action permissions.</param>
-    /// <param name="defaultPasswordExpirationPeriod">Optional default period before password expiry.</param>
-    /// <param name="firstPartition">An optional initial partition to assign.</param>
+    /// <param name="request">The user creation request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> CreateAsync(string nameid, string password, string? firstName = null, string? lastName = null, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, Guid? firstPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<Guid>> CreateAsync(UserCreateRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Updates the properties of an existing user.</summary>
     /// <param name="userGuid">The unique identifier of the user to update.</param>
-    /// <param name="nameid">New name identifier, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="firstName">New first name, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="lastName">New last name, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="description">New description, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="password">New password, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="isActive">New active state, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="permissions">New permission set, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="defaultPasswordExpirationPeriod">New expiration period, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="request">The user update request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGuid, string? nameid = null, string? firstName = null, string? lastName = null, string? description = null, string? password = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, TimeSpan? defaultPasswordExpirationPeriod = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGuid, UserUpdateRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes a user by their unique identifier.</summary>
     /// <param name="userGuid">The unique identifier of the user to delete.</param>

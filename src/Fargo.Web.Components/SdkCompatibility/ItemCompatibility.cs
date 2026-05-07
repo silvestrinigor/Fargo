@@ -49,13 +49,13 @@ public sealed class Item
     public async Task UpdateAsync(Action<Item> update, CancellationToken cancellationToken = default)
     {
         update(this);
-        (await client.UpdateAsync(Guid, Partitions, ParentContainerGuid, cancellationToken)).EnsureSuccess("Failed to update item.");
+        (await client.UpdateAsync(Guid, new ItemUpdateRequest(Partitions, ParentContainerGuid), cancellationToken)).EnsureSuccess("Failed to update item.");
     }
 
     public async Task<FargoSdkResponse<EmptyResult>> AddPartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var partitions = Partitions.Append(partitionGuid).Distinct().ToArray();
-        var response = await client.UpdateAsync(Guid, partitions, ParentContainerGuid, cancellationToken);
+        var response = await client.UpdateAsync(Guid, new ItemUpdateRequest(partitions, ParentContainerGuid), cancellationToken);
 
         if (response.IsSuccess)
         {
@@ -68,7 +68,7 @@ public sealed class Item
     public async Task<FargoSdkResponse<EmptyResult>> RemovePartitionAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var partitions = Partitions.Where(guid => guid != partitionGuid).ToArray();
-        var response = await client.UpdateAsync(Guid, partitions, ParentContainerGuid, cancellationToken);
+        var response = await client.UpdateAsync(Guid, new ItemUpdateRequest(partitions, ParentContainerGuid), cancellationToken);
 
         if (response.IsSuccess)
         {
@@ -98,7 +98,12 @@ public sealed class ItemManager(IItemHttpClient client) : IItemManager
 
     public async Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
     {
-        var guid = (await client.CreateAsync(articleGuid, firstPartition, productionDate, cancellationToken)).Unwrap("Failed to create item.");
+        var guid = (await client.CreateAsync(
+            new ItemCreateRequest(
+                articleGuid,
+                productionDate,
+                firstPartition is null ? null : [firstPartition.Value]),
+            cancellationToken)).Unwrap("Failed to create item.");
         return await GetAsync(guid, cancellationToken: cancellationToken);
     }
 

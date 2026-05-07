@@ -22,21 +22,15 @@ public interface IUserGroupHttpClient
     Task<FargoSdkResponse<IReadOnlyCollection<UserGroupInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user group and returns its assigned identifier.</summary>
-    /// <param name="nameid">The name identifier for the group.</param>
-    /// <param name="description">An optional description.</param>
-    /// <param name="permissions">Optional initial set of action permissions.</param>
-    /// <param name="firstPartition">An optional initial partition to assign.</param>
+    /// <param name="request">The user group creation request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> CreateAsync(string nameid, string? description = null, IReadOnlyCollection<ActionType>? permissions = null, Guid? firstPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<Guid>> CreateAsync(UserGroupCreateRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Updates the properties of an existing user group.</summary>
     /// <param name="userGroupGuid">The unique identifier of the user group to update.</param>
-    /// <param name="nameid">New name identifier, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="description">New description, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="isActive">New active state, or <see langword="null"/> to leave unchanged.</param>
-    /// <param name="permissions">New permission set, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="request">The user group update request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGroupGuid, string? nameid = null, string? description = null, bool? isActive = null, IReadOnlyCollection<ActionType>? permissions = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid userGroupGuid, UserGroupUpdateRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes a user group by its unique identifier.</summary>
     /// <param name="userGroupGuid">The unique identifier of the user group to delete.</param>
