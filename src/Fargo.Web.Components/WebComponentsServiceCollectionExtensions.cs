@@ -1,10 +1,5 @@
-using Fargo.Sdk.Articles;
 using Fargo.Sdk.Authentication;
 using Fargo.Sdk.Events;
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.UserGroups;
-using Fargo.Sdk.Users;
 using Fargo.Web.Components.Security;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,12 +12,6 @@ public static class WebComponentsServiceCollectionExtensions
         services.AddScoped<BrowserSdkSessionStore>();
         services.AddScoped<ISessionStore>(sp => sp.GetRequiredService<BrowserSdkSessionStore>());
         services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IArticleManager, ArticleManager>();
-        services.AddScoped<IItemManager, ItemManager>();
-        services.AddScoped<IPartitionManager, PartitionManager>();
-        services.AddScoped<IUserManager, UserManager>();
-        services.AddScoped<IUserService>(sp => sp.GetRequiredService<IUserManager>());
-        services.AddScoped<IUserGroupManager, UserGroupManager>();
         services.AddScoped<FargoHubLifetimeService>();
 
         return services;

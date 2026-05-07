@@ -4,7 +4,7 @@
 @using Fargo.Sdk.Authentication
 @using Fargo.Sdk.Contracts
 @using Microsoft.AspNetCore.Components.Forms
-@inject IArticleManager Articles
+@inject IArticleHttpClient Articles
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
@@ -117,18 +117,18 @@ else
                 {
                     <p class="muted-text">Loading barcodes...</p>
                 }
-                else if (_barcodes.IsEmpty)
+                else if (IsBarcodesEmpty(_barcodes))
                 {
                     <p class="muted-text">No barcodes added yet.</p>
                 }
                 else
                 {
                     <div class="barcode-list">
-                        @foreach (var barcode in _barcodes.AsResults())
+                        @foreach (var barcode in GetBarcodeResults(_barcodes))
                         {
                             <div class="barcode-card">
                                 <div class="barcode-format-label">@barcode.Format</div>
-                                <canvas id="barcode-@barcode.Guid" class="barcode-canvas"></canvas>
+                                <canvas id="barcode-@barcode.Format" class="barcode-canvas"></canvas>
                                 @if (!IsReadOnly)
                                 {
                                     <button type="button" class="ghost-button danger" @onclick="() => ClearBarcodeAsync(barcode.Format)" disabled="@_isRemovingBarcode">Remove</button>
@@ -178,14 +178,14 @@ else
 
     private static readonly string[] LengthUnits = ["mm", "cm", "m", "km", "in", "ft"];
 
-    private Article? _article;
+    private ArticleInfo? _article;
     private readonly AsyncState _load = new();
     private readonly AsyncState _save = new();
     private readonly AsyncState _delete = new();
     private bool _deleteOpen;
     private EditModel _edit = new();
 
-    private ArticleBarcodes? _barcodes;
+    private ArticleBarcodesInfo? _barcodes;
     private string? _barcodeError;
     private string _newBarcodeCode = string.Empty;
     private BarcodeFormat _newBarcodeFormat = BarcodeFormat.Ean13;
@@ -228,13 +228,13 @@ else
         _edit.Name != _origName ||
         (_edit.Description ?? "") != (_origDescription ?? "") ||
         _edit.MassValue != _origMass ||
-        _edit.MassUnit != (_article.Metrics?.Mass is null ? "g" : _article.Metrics.Mass.ToAbbreviation()) ||
+        _edit.MassUnit != (_article.Metrics?.Mass?.Unit ?? "g") ||
         _edit.LengthXValue != _origX ||
-        _edit.LengthXUnit != (_article.Metrics?.LengthX is null ? "m" : _article.Metrics.LengthX.ToAbbreviation()) ||
+        _edit.LengthXUnit != (_article.Metrics?.LengthX?.Unit ?? "m") ||
         _edit.LengthYValue != _origY ||
-        _edit.LengthYUnit != (_article.Metrics?.LengthY is null ? "m" : _article.Metrics.LengthY.ToAbbreviation()) ||
+        _edit.LengthYUnit != (_article.Metrics?.LengthY?.Unit ?? "m") ||
         _edit.LengthZValue != _origZ ||
-        _edit.LengthZUnit != (_article.Metrics?.LengthZ is null ? "m" : _article.Metrics.LengthZ.ToAbbreviation()));
+        _edit.LengthZUnit != (_article.Metrics?.LengthZ?.Unit ?? "m"));
 
     private async Task LoadAsync()
     {
@@ -245,17 +245,17 @@ else
 
         await _load.RunAsync(async () =>
         {
-            _article = await Articles.GetAsync(EntityGuid, TemporalAsOf);
+            _article = (await Articles.GetAsync(EntityGuid, TemporalAsOf)).Unwrap("Failed to load article.");
             _edit.Name = _article.Name;
             _edit.Description = _article.Description;
             _edit.MassValue = _article.Metrics?.Mass?.Value;
-            _edit.MassUnit = _article.Metrics?.Mass is null ? "g" : _article.Metrics.Mass.ToAbbreviation();
+            _edit.MassUnit = _article.Metrics?.Mass?.Unit ?? "g";
             _edit.LengthXValue = _article.Metrics?.LengthX?.Value;
-            _edit.LengthXUnit = _article.Metrics?.LengthX is null ? "m" : _article.Metrics.LengthX.ToAbbreviation();
+            _edit.LengthXUnit = _article.Metrics?.LengthX?.Unit ?? "m";
             _edit.LengthYValue = _article.Metrics?.LengthY?.Value;
-            _edit.LengthYUnit = _article.Metrics?.LengthY is null ? "m" : _article.Metrics.LengthY.ToAbbreviation();
+            _edit.LengthYUnit = _article.Metrics?.LengthY?.Unit ?? "m";
             _edit.LengthZValue = _article.Metrics?.LengthZ?.Value;
-            _edit.LengthZUnit = _article.Metrics?.LengthZ is null ? "m" : _article.Metrics.LengthZ.ToAbbreviation();
+            _edit.LengthZUnit = _article.Metrics?.LengthZ?.Unit ?? "m";
             _origName = _article.Name;
             _origDescription = _article.Description;
             _origMass = _article.Metrics?.Mass?.Value;
@@ -275,18 +275,16 @@ else
 
         await _save.RunAsync(async () =>
         {
-            var metrics = new ArticleMetrics
+            var metrics = new ArticleMetricsInfo(
+                _edit.MassValue is null ? null : new MassInfo(_edit.MassValue.Value, _edit.MassUnit),
+                _edit.LengthXValue is null ? null : new LengthInfo(_edit.LengthXValue.Value, _edit.LengthXUnit),
+                _edit.LengthYValue is null ? null : new LengthInfo(_edit.LengthYValue.Value, _edit.LengthYUnit),
+                _edit.LengthZValue is null ? null : new LengthInfo(_edit.LengthZValue.Value, _edit.LengthZUnit));
+            await UpdateArticleAsync(_article with
             {
-                Mass = _edit.MassValue is null ? null : new Mass(_edit.MassValue.Value, Mass.ParseUnit(_edit.MassUnit)),
-                LengthX = _edit.LengthXValue is null ? null : new Length(_edit.LengthXValue.Value, Length.ParseUnit(_edit.LengthXUnit)),
-                LengthY = _edit.LengthYValue is null ? null : new Length(_edit.LengthYValue.Value, Length.ParseUnit(_edit.LengthYUnit)),
-                LengthZ = _edit.LengthZValue is null ? null : new Length(_edit.LengthZValue.Value, Length.ParseUnit(_edit.LengthZUnit)),
-            };
-            await _article.UpdateAsync(a =>
-            {
-                a.Name = _edit.Name!;
-                a.Description = _edit.Description ?? string.Empty;
-                a.Metrics = metrics;
+                Name = _edit.Name!,
+                Description = _edit.Description ?? string.Empty,
+                Metrics = metrics
             });
             await LoadAsync();
         }, "Failed to save.");
@@ -295,17 +293,17 @@ else
     private void LoadBarcodes()
     {
         _barcodeError = null;
-        _barcodes = _article?.Barcodes ?? new ArticleBarcodes();
-        if (!_barcodes.IsEmpty)
+        _barcodes = _article?.Barcodes ?? new ArticleBarcodesInfo();
+        if (!IsBarcodesEmpty(_barcodes))
             _barcodesNeedRender = true;
     }
 
     private async Task RenderBarcodeCanvasesAsync()
     {
         if (_barcodes is null) return;
-        foreach (var barcode in _barcodes.AsResults())
+        foreach (var barcode in GetBarcodeResults(_barcodes))
         {
-            var canvasId = $"barcode-{barcode.Guid}";
+            var canvasId = $"barcode-{barcode.Format}";
             var bcid = GetBcid(barcode.Format);
             try
             {
@@ -341,8 +339,9 @@ else
         _barcodeError = null;
         try
         {
-            var updated = SetBarcode(_barcodes ?? new ArticleBarcodes(), _newBarcodeFormat, _newBarcodeCode.Trim());
-            await _article.UpdateAsync(a => a.Barcodes = updated);
+            var updated = SetBarcode(_barcodes ?? new ArticleBarcodesInfo(), _newBarcodeFormat, _newBarcodeCode.Trim());
+            await UpdateArticleAsync(_article with { Barcodes = updated });
+            _article = _article with { Barcodes = updated };
             _newBarcodeCode = string.Empty;
             LoadBarcodes();
             StateHasChanged();
@@ -367,8 +366,9 @@ else
         _barcodeError = null;
         try
         {
-            var updated = RemoveBarcode(_barcodes ?? new ArticleBarcodes(), barcodeFormat);
-            await _article.UpdateAsync(a => a.Barcodes = updated);
+            var updated = RemoveBarcode(_barcodes ?? new ArticleBarcodesInfo(), barcodeFormat);
+            await UpdateArticleAsync(_article with { Barcodes = updated });
+            _article = _article with { Barcodes = updated };
             LoadBarcodes();
             StateHasChanged();
             await Task.Yield();
@@ -384,22 +384,36 @@ else
         }
     }
 
-    private static ArticleBarcodes SetBarcode(ArticleBarcodes barcodes, BarcodeFormat format, string code) => format switch
+    private async Task UpdateArticleAsync(ArticleInfo article)
     {
-        BarcodeFormat.Ean13 => barcodes with { Ean13 = new Ean13(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.Ean8 => barcodes with { Ean8 = new Ean8(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.UpcA => barcodes with { UpcA = new UpcA(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.UpcE => barcodes with { UpcE = new UpcE(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.Code128 => barcodes with { Code128 = new Code128(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.Code39 => barcodes with { Code39 = new Code39(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.Itf14 => barcodes with { Itf14 = new Itf14(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.Gs1128 => barcodes with { Gs1128 = new Gs1128(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.QrCode => barcodes with { QrCode = new QrCode(Guid.Empty, Guid.Empty, code) },
-        BarcodeFormat.DataMatrix => barcodes with { DataMatrix = new DataMatrix(Guid.Empty, Guid.Empty, code) },
+        (await Articles.UpdateAsync(
+            article.Guid,
+            new ArticleUpdateRequest(
+                article.Name,
+                article.Description,
+                article.Metrics,
+                article.ShelfLife,
+                article.Partitions,
+                article.Barcodes,
+                article.IsActive))).EnsureSuccess("Failed to update article.");
+    }
+
+    private static ArticleBarcodesInfo SetBarcode(ArticleBarcodesInfo barcodes, BarcodeFormat format, string code) => format switch
+    {
+        BarcodeFormat.Ean13 => barcodes with { Ean13 = code },
+        BarcodeFormat.Ean8 => barcodes with { Ean8 = code },
+        BarcodeFormat.UpcA => barcodes with { UpcA = code },
+        BarcodeFormat.UpcE => barcodes with { UpcE = code },
+        BarcodeFormat.Code128 => barcodes with { Code128 = code },
+        BarcodeFormat.Code39 => barcodes with { Code39 = code },
+        BarcodeFormat.Itf14 => barcodes with { Itf14 = code },
+        BarcodeFormat.Gs1128 => barcodes with { Gs1128 = code },
+        BarcodeFormat.QrCode => barcodes with { QrCode = code },
+        BarcodeFormat.DataMatrix => barcodes with { DataMatrix = code },
         _ => barcodes
     };
 
-    private static ArticleBarcodes RemoveBarcode(ArticleBarcodes barcodes, BarcodeFormat format) => format switch
+    private static ArticleBarcodesInfo RemoveBarcode(ArticleBarcodesInfo barcodes, BarcodeFormat format) => format switch
     {
         BarcodeFormat.Ean13 => barcodes with { Ean13 = null },
         BarcodeFormat.Ean8 => barcodes with { Ean8 = null },
@@ -414,6 +428,23 @@ else
         _ => barcodes
     };
 
+    private static bool IsBarcodesEmpty(ArticleBarcodesInfo barcodes)
+        => GetBarcodeResults(barcodes).All(static barcode => string.IsNullOrWhiteSpace(barcode.Code));
+
+    private static IEnumerable<BarcodeResult> GetBarcodeResults(ArticleBarcodesInfo barcodes)
+    {
+        if (!string.IsNullOrWhiteSpace(barcodes.Ean13)) yield return new(BarcodeFormat.Ean13, barcodes.Ean13);
+        if (!string.IsNullOrWhiteSpace(barcodes.Ean8)) yield return new(BarcodeFormat.Ean8, barcodes.Ean8);
+        if (!string.IsNullOrWhiteSpace(barcodes.UpcA)) yield return new(BarcodeFormat.UpcA, barcodes.UpcA);
+        if (!string.IsNullOrWhiteSpace(barcodes.UpcE)) yield return new(BarcodeFormat.UpcE, barcodes.UpcE);
+        if (!string.IsNullOrWhiteSpace(barcodes.Code128)) yield return new(BarcodeFormat.Code128, barcodes.Code128);
+        if (!string.IsNullOrWhiteSpace(barcodes.Code39)) yield return new(BarcodeFormat.Code39, barcodes.Code39);
+        if (!string.IsNullOrWhiteSpace(barcodes.Itf14)) yield return new(BarcodeFormat.Itf14, barcodes.Itf14);
+        if (!string.IsNullOrWhiteSpace(barcodes.Gs1128)) yield return new(BarcodeFormat.Gs1128, barcodes.Gs1128);
+        if (!string.IsNullOrWhiteSpace(barcodes.QrCode)) yield return new(BarcodeFormat.QrCode, barcodes.QrCode);
+        if (!string.IsNullOrWhiteSpace(barcodes.DataMatrix)) yield return new(BarcodeFormat.DataMatrix, barcodes.DataMatrix);
+    }
+
     private void OpenDelete()
     {
         _delete.Clear();
@@ -424,7 +455,7 @@ else
     {
         var ok = await _delete.RunAsync(async () =>
         {
-            await Articles.DeleteAsync(EntityGuid);
+            (await Articles.DeleteAsync(EntityGuid)).EnsureSuccess("Failed to delete article.");
             Navigation.NavigateTo("/entities/articles");
         }, "Failed to delete.");
 
@@ -435,6 +466,22 @@ else
     private void OnLengthXUnit(ChangeEventArgs e) => _edit.LengthXUnit = e.Value?.ToString() ?? "m";
     private void OnLengthYUnit(ChangeEventArgs e) => _edit.LengthYUnit = e.Value?.ToString() ?? "m";
     private void OnLengthZUnit(ChangeEventArgs e) => _edit.LengthZUnit = e.Value?.ToString() ?? "m";
+
+    private enum BarcodeFormat
+    {
+        Ean13,
+        Ean8,
+        UpcA,
+        UpcE,
+        Code128,
+        Code39,
+        Itf14,
+        Gs1128,
+        QrCode,
+        DataMatrix
+    }
+
+    private sealed record BarcodeResult(BarcodeFormat Format, string Code);
 
     private sealed class EditModel
     {

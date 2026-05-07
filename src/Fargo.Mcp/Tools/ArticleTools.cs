@@ -61,19 +61,19 @@ public sealed class ArticleTools(IArticleHttpClient articles)
         [Description("LengthZ dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthZUnit = "m")
     {
         IReadOnlyCollection<Guid>? partitions = partitionGuids?.Select(Guid.Parse).ToArray();
-        var metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? null : new ArticleMetrics
-        {
-            Mass = massValue is null ? null : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
-            LengthX = lengthXValue is null ? null : new Length(lengthXValue.Value, Length.ParseUnit(lengthXUnit)),
-            LengthY = lengthYValue is null ? null : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
-            LengthZ = lengthZValue is null ? null : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
-        };
+        var metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
+            ? null
+            : new ArticleMetricsInfo(
+                massValue is null ? null : new MassInfo(massValue.Value, massUnit),
+                lengthXValue is null ? null : new LengthInfo(lengthXValue.Value, lengthXUnit),
+                lengthYValue is null ? null : new LengthInfo(lengthYValue.Value, lengthYUnit),
+                lengthZValue is null ? null : new LengthInfo(lengthZValue.Value, lengthZUnit));
 
         var response = await articles.CreateAsync(
             new ArticleCreateRequest(
                 name,
                 description,
-                metrics.ToContract(),
+                metrics,
                 null,
                 partitions,
                 null,
@@ -107,21 +107,22 @@ public sealed class ArticleTools(IArticleHttpClient articles)
         }
 
         var current = get.Data!;
-        var currentMetrics = current.Metrics.ToSdkArticleMetrics();
-        var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null ? currentMetrics : new ArticleMetrics
-        {
-            Mass = massValue is null ? currentMetrics?.Mass : new Mass(massValue.Value, Mass.ParseUnit(massUnit)),
-            LengthX = lengthXValue is null ? currentMetrics?.LengthX : new Length(lengthXValue.Value, Length.ParseUnit(lengthXUnit)),
-            LengthY = lengthYValue is null ? currentMetrics?.LengthY : new Length(lengthYValue.Value, Length.ParseUnit(lengthYUnit)),
-            LengthZ = lengthZValue is null ? currentMetrics?.LengthZ : new Length(lengthZValue.Value, Length.ParseUnit(lengthZUnit)),
-        };
+        var currentMetrics = current.Metrics;
+        var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
+            ? currentMetrics
+            : new ArticleMetricsInfo(
+                massValue is null ? currentMetrics?.Mass : new MassInfo(massValue.Value, massUnit),
+                lengthXValue is null ? currentMetrics?.LengthX : new LengthInfo(lengthXValue.Value, lengthXUnit),
+                lengthYValue is null ? currentMetrics?.LengthY : new LengthInfo(lengthYValue.Value, lengthYUnit),
+                lengthZValue is null ? currentMetrics?.LengthZ : new LengthInfo(lengthZValue.Value, lengthZUnit),
+                currentMetrics?.Density);
 
         var update = await articles.UpdateAsync(
             current.Guid,
             new ArticleUpdateRequest(
                 name ?? current.Name,
                 description ?? current.Description,
-                newMetrics.ToContract(),
+                newMetrics,
                 current.ShelfLife,
                 current.Partitions,
                 current.Barcodes,
@@ -147,44 +148,4 @@ public sealed class ArticleTools(IArticleHttpClient articles)
 
         return "Article deleted successfully.";
     }
-}
-
-internal static class ArticleToolMappings
-{
-    public static ArticleMetrics? ToSdkArticleMetrics(this ArticleMetricsInfo? contract)
-        => contract is null
-            ? null
-            : new ArticleMetrics
-            {
-                Mass = contract.Mass is null ? null : new Mass(contract.Mass.Value, Mass.ParseUnit(contract.Mass.Unit)),
-                LengthX = contract.LengthX is null ? null : new Length(contract.LengthX.Value, Length.ParseUnit(contract.LengthX.Unit)),
-                LengthY = contract.LengthY is null ? null : new Length(contract.LengthY.Value, Length.ParseUnit(contract.LengthY.Unit)),
-                LengthZ = contract.LengthZ is null ? null : new Length(contract.LengthZ.Value, Length.ParseUnit(contract.LengthZ.Unit)),
-            };
-
-    public static ArticleBarcodes ToSdkArticleBarcodes(this ArticleBarcodesInfo? contract)
-        => contract is null
-            ? new ArticleBarcodes()
-            : new ArticleBarcodes
-            {
-                Ean13 = contract.Ean13 is null ? null : new Ean13(Guid.Empty, Guid.Empty, contract.Ean13),
-                Ean8 = contract.Ean8 is null ? null : new Ean8(Guid.Empty, Guid.Empty, contract.Ean8),
-                UpcA = contract.UpcA is null ? null : new UpcA(Guid.Empty, Guid.Empty, contract.UpcA),
-                UpcE = contract.UpcE is null ? null : new UpcE(Guid.Empty, Guid.Empty, contract.UpcE),
-                Code128 = contract.Code128 is null ? null : new Code128(Guid.Empty, Guid.Empty, contract.Code128),
-                Code39 = contract.Code39 is null ? null : new Code39(Guid.Empty, Guid.Empty, contract.Code39),
-                Itf14 = contract.Itf14 is null ? null : new Itf14(Guid.Empty, Guid.Empty, contract.Itf14),
-                Gs1128 = contract.Gs1128 is null ? null : new Gs1128(Guid.Empty, Guid.Empty, contract.Gs1128),
-                QrCode = contract.QrCode is null ? null : new QrCode(Guid.Empty, Guid.Empty, contract.QrCode),
-                DataMatrix = contract.DataMatrix is null ? null : new DataMatrix(Guid.Empty, Guid.Empty, contract.DataMatrix),
-            };
-
-    public static ArticleMetricsInfo? ToContract(this ArticleMetrics? metrics)
-        => metrics is null
-            ? null
-            : new ArticleMetricsInfo(
-                metrics.Mass is null ? null : new MassInfo(metrics.Mass.Value, metrics.Mass.ToAbbreviation()),
-                metrics.LengthX is null ? null : new LengthInfo(metrics.LengthX.Value, metrics.LengthX.ToAbbreviation()),
-                metrics.LengthY is null ? null : new LengthInfo(metrics.LengthY.Value, metrics.LengthY.ToAbbreviation()),
-                metrics.LengthZ is null ? null : new LengthInfo(metrics.LengthZ.Value, metrics.LengthZ.ToAbbreviation()));
 }

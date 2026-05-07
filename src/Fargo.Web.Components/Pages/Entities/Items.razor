@@ -7,8 +7,8 @@
 @using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Items
 @using Microsoft.AspNetCore.Components.Forms
-@inject IItemManager ItemManager
-@inject IArticleManager ArticleManager
+@inject IItemHttpClient ItemClient
+@inject IArticleHttpClient ArticleClient
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Items</PageTitle>
@@ -26,7 +26,7 @@
         }
         else
         {
-            <EntityTreeView TEntity="Item"
+            <EntityTreeView TEntity="ItemInfo"
                             Loader="LoadItemsAsync"
                             ToNode="@(i => TreeSidebarNode.FromItem(i))"
                             NavigationBase="/entities/items"
@@ -104,7 +104,7 @@
     <ValidationMessage For="() => context.ArticleGuid" />
 </EditorDialog>
 
-<EntityPickerDialog TEntity="Article"
+<EntityPickerDialog TEntity="ArticleInfo"
                     IsOpen="_pickerOpen"
                     Title="Select Article"
                     Loader="LoadArticlesForPicker"
@@ -129,20 +129,21 @@
     private readonly AsyncState _create = new();
     private readonly AsyncState _load = new();
     private readonly AsyncState _delete = new();
-    private Item? _item;
+    private ItemInfo? _item;
     private Guid? _loadedGuid;
 
-    private async Task<IEnumerable<Item>> LoadItemsAsync() => await ItemManager.GetManyAsync();
+    private async Task<IEnumerable<ItemInfo>> LoadItemsAsync()
+        => (await ItemClient.GetManyAsync()).Unwrap("Failed to load items.");
 
-    private async Task<IReadOnlyCollection<Article>> LoadArticlesForPicker(string? search)
+    private async Task<IReadOnlyCollection<ArticleInfo>> LoadArticlesForPicker(string? search)
     {
-        var articles = await ArticleManager.GetManyAsync();
+        var articles = (await ArticleClient.GetManyAsync()).Unwrap("Failed to load articles.");
         return string.IsNullOrWhiteSpace(search)
             ? articles
             : [.. articles.Where(article => article.Name.Contains(search, StringComparison.OrdinalIgnoreCase))];
     }
 
-    private void OnArticleSelected(Article article)
+    private void OnArticleSelected(ArticleInfo article)
     {
         _createForm.ArticleGuid = article.Guid.ToString();
         _selectedArticleName = article.Name;
@@ -158,7 +159,7 @@
             {
                 await _load.RunAsync(async () =>
                 {
-                    _item = await ItemManager.GetAsync(EntityGuid.Value);
+                    _item = (await ItemClient.GetAsync(EntityGuid.Value)).Unwrap("Failed to load item.");
                 }, "Failed to load item.");
             }
             else
@@ -179,7 +180,7 @@
         if (_item is null) return;
         var ok = await _delete.RunAsync(async () =>
         {
-            await ItemManager.DeleteAsync(_item.Guid);
+            (await ItemClient.DeleteAsync(_item.Guid)).EnsureSuccess("Failed to delete item.");
             Navigation.NavigateTo("/entities/items");
         }, "Failed to delete.");
 
@@ -205,8 +206,8 @@
 
         var ok = await _create.RunAsync(async () =>
         {
-            var item = await ItemManager.CreateAsync(articleGuid);
-            Navigation.NavigateTo($"/entities/items/{item.Guid}", forceLoad: true);
+            var itemGuid = (await ItemClient.CreateAsync(new ItemCreateRequest(articleGuid))).Unwrap("Failed to create item.");
+            Navigation.NavigateTo($"/entities/items/{itemGuid}", forceLoad: true);
         }, "Failed to create.");
 
         if (ok) _createOpen = false;

@@ -6,7 +6,7 @@
 @using Fargo.Sdk.Authentication
 @using Fargo.Sdk.Contracts
 @using Microsoft.AspNetCore.Components.Forms
-@inject IArticleManager ArticleManager
+@inject IArticleHttpClient ArticleClient
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Articles</PageTitle>
@@ -24,7 +24,7 @@
         }
         else
         {
-            <EntityTreeView TEntity="Article"
+            <EntityTreeView TEntity="ArticleInfo"
                             Loader="LoadArticlesAsync"
                             ToNode="TreeSidebarNode.FromArticle"
                             NavigationBase="/entities/articles"
@@ -68,7 +68,8 @@
     private CreateForm _createForm = new();
     private readonly AsyncState _create = new();
 
-    private async Task<IEnumerable<Article>> LoadArticlesAsync() => await ArticleManager.GetManyAsync();
+    private async Task<IEnumerable<ArticleInfo>> LoadArticlesAsync()
+        => (await ArticleClient.GetManyAsync()).Unwrap("Failed to load articles.");
 
     private void OpenCreate()
     {
@@ -81,8 +82,8 @@
     {
         var ok = await _create.RunAsync(async () =>
         {
-            var article = await ArticleManager.CreateAsync(_createForm.Name!);
-            Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
+            var articleGuid = (await ArticleClient.CreateAsync(new ArticleCreateRequest(_createForm.Name!))).Unwrap("Failed to create article.");
+            Navigation.NavigateTo($"/entities/articles/{articleGuid}", forceLoad: true);
         }, "Failed to create.");
 
         if (ok) _createOpen = false;

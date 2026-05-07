@@ -2,7 +2,7 @@
 @using Fargo.Sdk.Authentication
 @using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Partitions
-@inject IPartitionManager Partitions
+@inject IPartitionHttpClient Partitions
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -59,7 +59,7 @@ else
 
         try
         {
-            var roots = await Partitions.GetManyAsync(rootOnly: true);
+            var roots = (await Partitions.GetManyAsync(rootOnly: true)).Unwrap("Failed to load partitions.");
             rootNodes.Clear();
             rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }
@@ -89,7 +89,7 @@ else
 
         try
         {
-            var children = await Partitions.GetManyAsync(node.EntityGuid);
+            var children = (await Partitions.GetManyAsync(node.EntityGuid)).Unwrap("Failed to load partitions.");
             node.Children.Clear();
             node.Children.AddRange(children.Select(TreeSidebarNode.FromPartition));
             node.ChildrenLoaded = true;
@@ -150,8 +150,7 @@ else
 
         try
         {
-            var partition = await Partitions.GetAsync(source.EntityGuid);
-            var result = await partition.MoveAsync(target.EntityGuid);
+            var result = await Partitions.UpdateAsync(source.EntityGuid, new PartitionUpdateRequest(ParentPartitionGuid: target.EntityGuid));
 
             if (!result.IsSuccess)
                 errorMessage = result.Error?.Detail ?? "Failed to move partition.";
