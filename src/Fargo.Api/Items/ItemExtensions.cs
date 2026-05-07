@@ -72,7 +72,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyItem)
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
-            .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries.")
+            .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.")
             .Produces<IReadOnlyCollection<ItemInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );

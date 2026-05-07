@@ -12,13 +12,14 @@ public interface IUserGroupHttpClient
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoSdkResponse<UserGroupInfo>> GetAsync(Guid userGroupGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
-    /// <summary>Retrieves a paged list of user groups, optionally filtered by user membership.</summary>
-    /// <param name="userGuid">Filter to groups that contain this user.</param>
+    /// <summary>Retrieves a paged, optionally filtered list of user groups.</summary>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
+    /// <param name="insideAnyOfThisPartitions">Filters to user groups inside any of these partitions.</param>
+    /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes user groups without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<UserGroupInfo>>> GetManyAsync(Guid? userGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<UserGroupInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user group and returns its assigned identifier.</summary>
     /// <param name="nameid">The name identifier for the group.</param>

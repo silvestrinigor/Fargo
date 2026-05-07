@@ -30,14 +30,18 @@ public sealed class UserHttpClient : IUserHttpClient
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<UserInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, string? search = null, bool? noPartition = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<IReadOnlyCollection<UserInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default)
     {
-        var query = FargoHttpClient.BuildQuery(
+        var parameters = new List<(string Key, string? Value)>
+        {
             ("temporalAsOfDateTime", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("insideAnyOfThisPartitions", partitionGuid?.ToString()),
-            ("notInsideAnyPartition", noPartition?.ToString()));
+            ("notInsideAnyPartition", notInsideAnyPartition?.ToString())
+        };
+        parameters.AddRange(insideAnyOfThisPartitions?.Select(partitionGuid =>
+            ("insideAnyOfThisPartitions", (string?)partitionGuid.ToString())) ?? []);
+        var query = FargoHttpClient.BuildQuery([.. parameters]);
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<UserInfo>>($"/users{query}", cancellationToken);
 

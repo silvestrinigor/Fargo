@@ -15,9 +15,8 @@ public interface IUserManager : IUserService
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        string? search = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default);
 
     Task<User> CreateAsync(
@@ -119,11 +118,10 @@ public sealed class UserManager(IUserHttpClient client) : IUserManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        string? search = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
-        => (await client.GetManyAsync(temporalAsOf, page, limit, partitionGuid, search, noPartition, cancellationToken))
+        => (await client.GetManyAsync(temporalAsOf, page, limit, insideAnyOfThisPartitions, notInsideAnyPartition, cancellationToken))
             .Unwrap("Failed to load users.")
             .Select(x => new User(x, client))
             .ToArray();

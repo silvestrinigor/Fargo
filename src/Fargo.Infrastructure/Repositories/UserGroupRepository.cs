@@ -82,23 +82,30 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         IReadOnlyCollection<Guid>? partitionGuids,
         bool? notInsideAnyPartition)
     {
+        if (partitionGuids is null)
+        {
+            if (notInsideAnyPartition is true)
+            {
+                return query.Where(userGroup => !userGroup.Partitions.Any());
+            }
+
+            if (notInsideAnyPartition is false)
+            {
+                return query.Where(userGroup => userGroup.Partitions.Any());
+            }
+
+            return query;
+        }
+
         if (notInsideAnyPartition is true)
         {
-            return query.Where(userGroup => !userGroup.Partitions.Any());
-        }
-
-        if (notInsideAnyPartition is false)
-        {
-            query = query.Where(userGroup => userGroup.Partitions.Any());
-        }
-
-        if (partitionGuids is not null)
-        {
-            query = query.Where(userGroup =>
+            return query.Where(userGroup =>
+                !userGroup.Partitions.Any() ||
                 userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 
-        return query;
+        return query.Where(userGroup =>
+            userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
     private static UserGroupDto Map(UserGroup userGroup)

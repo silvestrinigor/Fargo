@@ -9,12 +9,19 @@ namespace Fargo.Mcp.Tools;
 [McpServerToolType]
 public sealed class ArticleTools(IArticleHttpClient articles)
 {
-    [McpServerTool(Name = "list_articles"), Description("Lists all articles accessible to the current user.")]
+    [McpServerTool(Name = "list_articles"), Description("Lists articles accessible to the current user. Optionally filters by partition and public articles.")]
     public async Task<string> ListArticles(
         [Description("Zero-based page index.")] int? page = null,
-        [Description("Maximum number of results to return.")] int? limit = null)
+        [Description("Maximum number of results to return.")] int? limit = null,
+        [Description("Partition GUIDs to include. Omit for no partition filter.")] string[]? insideAnyOfThisPartitions = null,
+        [Description("When true, include public articles with no partition.")] bool? notInsideAnyPartition = null)
     {
-        var response = await articles.GetManyAsync(page: page, limit: limit);
+        var partitionGuids = insideAnyOfThisPartitions?.Select(Guid.Parse).ToArray();
+        var response = await articles.GetManyAsync(
+            page: page,
+            limit: limit,
+            insideAnyOfThisPartitions: partitionGuids,
+            notInsideAnyPartition: notInsideAnyPartition);
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";

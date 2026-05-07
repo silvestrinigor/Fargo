@@ -13,14 +13,13 @@ public interface IItemHttpClient
     Task<FargoSdkResponse<ItemInfo>> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     /// <summary>Retrieves a paged, optionally filtered list of items.</summary>
-    /// <param name="articleGuid">Filter to items of this article.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
-    /// <param name="partitionGuid">Filter to items in this partition.</param>
-    /// <param name="noPartition">When <see langword="true"/>, returns only items without a partition.</param>
+    /// <param name="insideAnyOfThisPartitions">Filters to items inside any of these partitions.</param>
+    /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes items without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<ItemInfo>>> GetManyAsync(Guid? articleGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, bool? noPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<ItemInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new item for the specified article and returns its assigned identifier.</summary>
     /// <param name="articleGuid">The article this item is an instance of.</param>

@@ -337,7 +337,7 @@
 </EditorDialog>
 
 <EntityPickerDialog TEntity="User" IsOpen="_addMemberOpen" Title="Add member"
-                    Loader="s => UserManager.GetManyAsync(search: s)" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
+                    Loader="LoadUsersForPickerAsync" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
                     OnSelected="AddMemberAsync" OnCancel="() => _addMemberOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
@@ -348,7 +348,7 @@
 
 @* User dialogs *@
 <EntityPickerDialog TEntity="UserGroup" IsOpen="_addToGroupOpen" Title="Add to user group"
-                    Loader="s => UserGroupManager.GetManyAsync()" ColumnHeaders="@(new[] { "NameId", "Description" })"
+                    Loader="LoadUserGroupsForPickerAsync" ColumnHeaders="@(new[] { "NameId", "Description" })"
                     OnSelected="AddToGroupAsync" OnCancel="() => _addToGroupOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
@@ -454,6 +454,27 @@
 
     protected override void OnInitialized() => _ = LoadTreeAsync();
 
+    private async Task<IReadOnlyCollection<User>> LoadUsersForPickerAsync(string? search)
+    {
+        var users = await UserManager.GetManyAsync();
+        return string.IsNullOrWhiteSpace(search)
+            ? users
+            : [.. users.Where(user =>
+                user.Nameid.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                (user.FirstName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (user.LastName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false))];
+    }
+
+    private async Task<IReadOnlyCollection<UserGroup>> LoadUserGroupsForPickerAsync(string? search)
+    {
+        var userGroups = await UserGroupManager.GetManyAsync();
+        return string.IsNullOrWhiteSpace(search)
+            ? userGroups
+            : [.. userGroups.Where(group =>
+                group.Nameid.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                group.Description.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         if (EntityGuid != _loadedGuid)
@@ -476,12 +497,9 @@
             var groups = await UserGroupManager.GetManyAsync();
             var users = await UserManager.GetManyAsync();
 
-            var membershipTasks = users.Select(async u =>
-            {
-                var ug = await UserGroupManager.GetManyAsync(userGuid: u.Guid);
-                return (User: u, GroupGuids: ug.Select(g => g.Guid).ToHashSet());
-            });
-            var memberships = await Task.WhenAll(membershipTasks);
+            var memberships = users
+                .Select(u => (User: u, GroupGuids: u.UserGroups.ToHashSet()))
+                .ToArray();
 
             var groupMemberMap = memberships
                 .SelectMany(m => m.GroupGuids.Select(g => (GroupGuid: g, m.User)))
@@ -551,13 +569,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         await _membersLoad.RunAsync(async () =>
         {
             var allUsers = await UserManager.GetManyAsync();
-            var tasks = allUsers.Select(async u =>
-            {
-                var ug = await UserGroupManager.GetManyAsync(userGuid: u.Guid);
-                return (User: u, IsMember: ug.Any(g => g.Guid == groupGuid));
-            });
-            var results = await Task.WhenAll(tasks);
-            _groupMembers.AddRange(results.Where(r => r.IsMember).Select(r => r.User));
+            _groupMembers.AddRange(allUsers.Where(user => user.UserGroups.Contains(groupGuid)));
         }, "Failed to load members.");
     }
 
@@ -694,7 +706,9 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _userGroups.Clear();
         await _groupsLoad.RunAsync(async () =>
         {
-            var groups = await UserGroupManager.GetManyAsync(userGuid: _user.Guid);
+            var groups = (await UserGroupManager.GetManyAsync())
+                .Where(group => _user.UserGroups.Contains(group.Guid))
+                .ToArray();
             _userGroups.AddRange(groups);
         }, "Failed to load groups.");
     }

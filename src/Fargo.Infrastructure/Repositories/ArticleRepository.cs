@@ -102,23 +102,30 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         bool? notInsideAnyPartition
     )
     {
+        if (partitionGuids is null)
+        {
+            if (notInsideAnyPartition is true)
+            {
+                return query.Where(article => !article.Partitions.Any());
+            }
+
+            if (notInsideAnyPartition is false)
+            {
+                return query.Where(article => article.Partitions.Any());
+            }
+
+            return query;
+        }
+
         if (notInsideAnyPartition is true)
         {
-            return query.Where(article => !article.Partitions.Any());
-        }
-
-        if (notInsideAnyPartition is false)
-        {
-            query = query.Where(article => article.Partitions.Any());
-        }
-
-        if (partitionGuids is not null)
-        {
-            query = query.Where(article =>
+            return query.Where(article =>
+                !article.Partitions.Any() ||
                 article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 
-        return query;
+        return query.Where(article =>
+            article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
     private static ArticleDto Map(Article article)

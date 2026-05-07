@@ -72,7 +72,7 @@ public static class UserEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyUser)
             .WithName("GetUsers")
             .WithSummary("Gets multiple users")
-            .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries.")
+            .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.")
             .Produces<IReadOnlyCollection<UserInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );

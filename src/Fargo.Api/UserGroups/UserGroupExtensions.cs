@@ -72,7 +72,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyUserGroup)
             .WithName("GetUserGroups")
             .WithSummary("Gets multiple user groups")
-            .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries.")
+            .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.")
             .Produces<IReadOnlyCollection<UserGroupInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );

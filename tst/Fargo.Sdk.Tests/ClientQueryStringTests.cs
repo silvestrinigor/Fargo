@@ -21,10 +21,11 @@ public sealed class ClientQueryStringTests
             .Returns(Empty<Fargo.Sdk.Contracts.Articles.ArticleInfo>());
 
         var client = new ArticleHttpClient(httpClient);
-        var partitionGuid = Guid.NewGuid();
+        var firstPartitionGuid = Guid.NewGuid();
+        var secondPartitionGuid = Guid.NewGuid();
         var temporalAsOf = DateTimeOffset.Parse("2026-05-06T10:15:30+00:00");
 
-        await client.GetManyAsync(temporalAsOf, 2, 25, partitionGuid, "ignored", true);
+        await client.GetManyAsync(temporalAsOf, 2, 25, [firstPartitionGuid, secondPartitionGuid], true);
 
         await httpClient.Received().GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Articles.ArticleInfo>>(
             Arg.Is<string>(path =>
@@ -32,7 +33,8 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=2", StringComparison.Ordinal) &&
                 path.Contains("limit=25", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={partitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
                 path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
                 !path.Contains("noPartition=", StringComparison.Ordinal) &&
@@ -48,10 +50,10 @@ public sealed class ClientQueryStringTests
             .Returns(Empty<Fargo.Sdk.Contracts.Items.ItemInfo>());
 
         var client = new ItemHttpClient(httpClient);
-        var articleGuid = Guid.NewGuid();
-        var partitionGuid = Guid.NewGuid();
+        var firstPartitionGuid = Guid.NewGuid();
+        var secondPartitionGuid = Guid.NewGuid();
 
-        await client.GetManyAsync(articleGuid, DateTimeOffset.UtcNow, 3, 50, partitionGuid, true);
+        await client.GetManyAsync(DateTimeOffset.UtcNow, 3, 50, [firstPartitionGuid, secondPartitionGuid], true);
 
         await httpClient.Received().GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Items.ItemInfo>>(
             Arg.Is<string>(path =>
@@ -59,7 +61,8 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=3", StringComparison.Ordinal) &&
                 path.Contains("limit=50", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={partitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
                 path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("articleGuid=", StringComparison.Ordinal) &&
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
@@ -75,9 +78,10 @@ public sealed class ClientQueryStringTests
             .Returns(Empty<Fargo.Sdk.Contracts.Users.UserInfo>());
 
         var client = new UserHttpClient(httpClient);
-        var partitionGuid = Guid.NewGuid();
+        var firstPartitionGuid = Guid.NewGuid();
+        var secondPartitionGuid = Guid.NewGuid();
 
-        await client.GetManyAsync(DateTimeOffset.UtcNow, 4, 10, partitionGuid, "ignored", true);
+        await client.GetManyAsync(DateTimeOffset.UtcNow, 4, 10, [firstPartitionGuid, secondPartitionGuid], true);
 
         await httpClient.Received().GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(
             Arg.Is<string>(path =>
@@ -85,7 +89,8 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=4", StringComparison.Ordinal) &&
                 path.Contains("limit=10", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={partitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
                 path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
                 !path.Contains("noPartition=", StringComparison.Ordinal) &&
@@ -94,15 +99,17 @@ public sealed class ClientQueryStringTests
     }
 
     [Fact]
-    public async Task UserGroupGetManyAsync_Should_Not_SendUnsupportedUserFilter()
+    public async Task UserGroupGetManyAsync_Should_SendApiCanonicalQueryParameters()
     {
         httpClient
             .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.UserGroups.UserGroupInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Empty<Fargo.Sdk.Contracts.UserGroups.UserGroupInfo>());
 
         var client = new UserGroupHttpClient(httpClient);
+        var firstPartitionGuid = Guid.NewGuid();
+        var secondPartitionGuid = Guid.NewGuid();
 
-        await client.GetManyAsync(Guid.NewGuid(), DateTimeOffset.UtcNow, 5, 20);
+        await client.GetManyAsync(DateTimeOffset.UtcNow, 5, 20, [firstPartitionGuid, secondPartitionGuid], true);
 
         await httpClient.Received().GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.UserGroups.UserGroupInfo>>(
             Arg.Is<string>(path =>
@@ -110,6 +117,9 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=5", StringComparison.Ordinal) &&
                 path.Contains("limit=20", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("userGuid=", StringComparison.Ordinal)),
             Arg.Any<CancellationToken>());
     }

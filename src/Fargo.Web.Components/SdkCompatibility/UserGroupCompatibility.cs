@@ -8,10 +8,11 @@ public interface IUserGroupManager
     Task<UserGroup> GetAsync(Guid userGroupGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<UserGroup>> GetManyAsync(
-        Guid? userGuid = null,
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default);
 
     Task<UserGroup> CreateAsync(
@@ -65,12 +66,13 @@ public sealed class UserGroupManager(IUserGroupHttpClient client) : IUserGroupMa
         => new((await client.GetAsync(userGroupGuid, temporalAsOf, cancellationToken)).Unwrap("Failed to load user group."), client);
 
     public async Task<IReadOnlyCollection<UserGroup>> GetManyAsync(
-        Guid? userGuid = null,
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
-        => (await client.GetManyAsync(userGuid, temporalAsOf, page, limit, cancellationToken))
+        => (await client.GetManyAsync(temporalAsOf, page, limit, insideAnyOfThisPartitions, notInsideAnyPartition, cancellationToken))
             .Unwrap("Failed to load user groups.")
             .Select(x => new UserGroup(x, client))
             .ToArray();

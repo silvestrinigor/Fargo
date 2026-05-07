@@ -8,12 +8,19 @@ namespace Fargo.Mcp.Tools;
 [McpServerToolType]
 public sealed class UserTools(IUserHttpClient users)
 {
-    [McpServerTool(Name = "list_users"), Description("Lists users accessible to the current user.")]
+    [McpServerTool(Name = "list_users"), Description("Lists users accessible to the current user. Optionally filters by partition and public users.")]
     public async Task<string> ListUsers(
         [Description("Zero-based page index.")] int? page = null,
-        [Description("Maximum number of results to return.")] int? limit = null)
+        [Description("Maximum number of results to return.")] int? limit = null,
+        [Description("Partition GUIDs to include. Omit for no partition filter.")] string[]? insideAnyOfThisPartitions = null,
+        [Description("When true, include public users with no partition.")] bool? notInsideAnyPartition = null)
     {
-        var response = await users.GetManyAsync(page: page, limit: limit);
+        var partitionGuids = insideAnyOfThisPartitions?.Select(Guid.Parse).ToArray();
+        var response = await users.GetManyAsync(
+            page: page,
+            limit: limit,
+            insideAnyOfThisPartitions: partitionGuids,
+            notInsideAnyPartition: notInsideAnyPartition);
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";

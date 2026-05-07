@@ -27,7 +27,7 @@ public sealed class UserGroupSingleQueryHandler(
             query.UserGroupGuid,
             query.AsOfDateTime,
             actor.PartitionAccessesGuids,
-            notInsideAnyPartition: null,
+            notInsideAnyPartition: true,
             cancellationToken
         );
 
@@ -61,13 +61,17 @@ public sealed class UserGroupsQueryHandler(
 
         var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : actor.PartitionAccessesGuids;
+            : query.NotInsideAnyPartition is true
+                ? null
+                : actor.PartitionAccessesGuids;
+        var notInsideAnyPartition = query.NotInsideAnyPartition ??
+            (query.InsideAnyOfThisPartitions is null ? true : null);
 
         var userGroups = await userGroupRepository.GetManyInfo(
             query.WithPagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
-            query.NotInsideAnyPartition,
+            notInsideAnyPartition,
             cancellationToken
         );
 

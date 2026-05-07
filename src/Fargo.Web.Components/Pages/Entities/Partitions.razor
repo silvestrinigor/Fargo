@@ -212,7 +212,7 @@
 <EntityPickerDialog TEntity="Article"
                     IsOpen="_addArticleOpen"
                     Title="Add Article"
-                    Loader="s => Articles.GetManyAsync(search: s)"
+                    Loader="LoadArticlesForPickerAsync"
                     ColumnHeaders='["Name"]'
                     OnSelected="AddArticleAsync"
                     OnCancel="() => _addArticleOpen = false">
@@ -237,7 +237,7 @@
 <EntityPickerDialog TEntity="User"
                     IsOpen="_addUserOpen"
                     Title="Add User"
-                    Loader="s => Users.GetManyAsync(search: s)"
+                    Loader="LoadUsersForPickerAsync"
                     ColumnHeaders='["Name"]'
                     OnSelected="AddUserAsync"
                     OnCancel="() => _addUserOpen = false">
@@ -342,9 +342,9 @@
 
         try
         {
-            var articles = await Articles.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
-            var items = await Items.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
-            var users = await Users.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var articles = await Articles.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid], limit: 200);
+            var items = await Items.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid], limit: 200);
+            var users = await Users.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid], limit: 200);
 
             _entityItems.AddRange(articles.Select(a => new PartitionEntityRow(
                 a.Guid, a.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article)));
@@ -363,6 +363,22 @@
         {
             _entityListLoading = false;
         }
+    }
+
+    private async Task<IReadOnlyCollection<Article>> LoadArticlesForPickerAsync(string? search)
+    {
+        var articles = await Articles.GetManyAsync();
+        return string.IsNullOrWhiteSpace(search)
+            ? articles
+            : [.. articles.Where(article => article.Name.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
+
+    private async Task<IReadOnlyCollection<User>> LoadUsersForPickerAsync(string? search)
+    {
+        var users = await Users.GetManyAsync();
+        return string.IsNullOrWhiteSpace(search)
+            ? users
+            : [.. users.Where(user => user.Nameid.Contains(search, StringComparison.OrdinalIgnoreCase))];
     }
 
     private async Task RemoveEntityAsync(PartitionEntityRow row)

@@ -120,7 +120,7 @@ else
         {
             case "articles":
             {
-                var articleList = await Articles.GetManyAsync(partitionGuid: partitionGuid);
+                var articleList = await Articles.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid]);
                 return articleList.Select(a =>
                 {
                     var n = TreeSidebarNode.FromArticle(a);
@@ -130,7 +130,7 @@ else
             }
             case "items":
             {
-                var itemList = await Items.GetManyAsync(partitionGuid: partitionGuid);
+                var itemList = await Items.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid]);
                 return itemList.Select(i =>
                 {
                     var n = TreeSidebarNode.FromItem(i);
@@ -140,7 +140,7 @@ else
             }
             case "users":
             {
-                var userList = await Users.GetManyAsync(partitionGuid: partitionGuid);
+                var userList = await Users.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid]);
                 return userList.Select(u =>
                 {
                     var n = TreeSidebarNode.FromUser(u);

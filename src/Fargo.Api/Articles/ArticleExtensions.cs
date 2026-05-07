@@ -72,7 +72,7 @@ public static class ArticleEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyArticle)
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
-            .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries.")
+            .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.")
             .Produces<IReadOnlyCollection<ArticleInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );

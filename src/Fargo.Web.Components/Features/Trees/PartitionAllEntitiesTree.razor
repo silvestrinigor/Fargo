@@ -60,9 +60,9 @@ else
         try
         {
             var rootPartitions = await Partitions.GetManyAsync(rootOnly: true);
-            var unpartitionedArticles = await Articles.GetManyAsync(noPartition: true, limit: 200);
-            var unpartitionedItems = await Items.GetManyAsync(noPartition: true, limit: 200);
-            var unpartitionedUsers = await Users.GetManyAsync(noPartition: true, limit: 200);
+            var unpartitionedArticles = await Articles.GetManyAsync(notInsideAnyPartition: true, limit: 200);
+            var unpartitionedItems = await Items.GetManyAsync(notInsideAnyPartition: true, limit: 200);
+            var unpartitionedUsers = await Users.GetManyAsync(notInsideAnyPartition: true, limit: 200);
 
             _rootNodes.Clear();
             _rootNodes.AddRange(rootPartitions.Select(TreeSidebarNode.FromPartition));
@@ -94,9 +94,9 @@ else
         try
         {
             var childPartitions = await Partitions.GetManyAsync(node.EntityGuid);
-            var articles = await Articles.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
-            var items = await Items.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
-            var users = await Users.GetManyAsync(partitionGuid: node.EntityGuid, limit: 200);
+            var articles = await Articles.GetManyAsync(insideAnyOfThisPartitions: [node.EntityGuid], limit: 200);
+            var items = await Items.GetManyAsync(insideAnyOfThisPartitions: [node.EntityGuid], limit: 200);
+            var users = await Users.GetManyAsync(insideAnyOfThisPartitions: [node.EntityGuid], limit: 200);
 
             node.Children.Clear();
             node.Children.AddRange(childPartitions.Select(TreeSidebarNode.FromPartition));

@@ -135,7 +135,12 @@
     private async Task<IEnumerable<Item>> LoadItemsAsync() => await ItemManager.GetManyAsync();
 
     private async Task<IReadOnlyCollection<Article>> LoadArticlesForPicker(string? search)
-        => await ArticleManager.GetManyAsync(search: search);
+    {
+        var articles = await ArticleManager.GetManyAsync();
+        return string.IsNullOrWhiteSpace(search)
+            ? articles
+            : [.. articles.Where(article => article.Name.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
 
     private void OnArticleSelected(Article article)
     {

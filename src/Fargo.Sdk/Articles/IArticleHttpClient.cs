@@ -18,17 +18,15 @@ public interface IArticleHttpClient
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
-    /// <param name="partitionGuid">Filter to articles in this partition.</param>
-    /// <param name="search">An optional search term to filter by name.</param>
-    /// <param name="noPartition">When <see langword="true"/>, returns only articles without a partition.</param>
+    /// <param name="insideAnyOfThisPartitions">Filters to articles inside any of these partitions.</param>
+    /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes articles without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        string? search = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new article and returns its assigned identifier.</summary>

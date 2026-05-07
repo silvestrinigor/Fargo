@@ -8,14 +8,19 @@ namespace Fargo.Mcp.Tools;
 [McpServerToolType]
 public sealed class ItemTools(IItemHttpClient items)
 {
-    [McpServerTool(Name = "list_items"), Description("Lists items accessible to the current user. Optionally filter by article GUID.")]
+    [McpServerTool(Name = "list_items"), Description("Lists items accessible to the current user. Optionally filters by partition and public items.")]
     public async Task<string> ListItems(
-        [Description("GUID of the article to filter items by. Omit to list all items.")] string? articleGuid = null,
         [Description("Zero-based page index.")] int? page = null,
-        [Description("Maximum number of results to return.")] int? limit = null)
+        [Description("Maximum number of results to return.")] int? limit = null,
+        [Description("Partition GUIDs to include. Omit for no partition filter.")] string[]? insideAnyOfThisPartitions = null,
+        [Description("When true, include public items with no partition.")] bool? notInsideAnyPartition = null)
     {
-        Guid? articleGuidParsed = articleGuid is not null ? Guid.Parse(articleGuid) : null;
-        var response = await items.GetManyAsync(articleGuid: articleGuidParsed, page: page, limit: limit);
+        var partitionGuids = insideAnyOfThisPartitions?.Select(Guid.Parse).ToArray();
+        var response = await items.GetManyAsync(
+            page: page,
+            limit: limit,
+            insideAnyOfThisPartitions: partitionGuids,
+            notInsideAnyPartition: notInsideAnyPartition);
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";

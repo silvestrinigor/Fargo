@@ -10,9 +10,8 @@ public interface IArticleManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        string? search = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default);
 
     Task<Article> CreateAsync(
@@ -121,11 +120,10 @@ public sealed class ArticleManager(IArticleHttpClient client) : IArticleManager
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        string? search = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
-        => (await client.GetManyAsync(temporalAsOf, page, limit, partitionGuid, search, noPartition, cancellationToken))
+        => (await client.GetManyAsync(temporalAsOf, page, limit, insideAnyOfThisPartitions, notInsideAnyPartition, cancellationToken))
             .Unwrap("Failed to load articles.")
             .Select(x => new Article(x, client))
             .ToArray();

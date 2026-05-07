@@ -7,12 +7,11 @@ public interface IItemManager
     Task<Item> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<Item>> GetManyAsync(
-        Guid? articleGuid = null,
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default);
 
     Task<Item> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default);
@@ -86,14 +85,13 @@ public sealed class ItemManager(IItemHttpClient client) : IItemManager
         => new((await client.GetAsync(itemGuid, temporalAsOf, cancellationToken)).Unwrap("Failed to load item."), client);
 
     public async Task<IReadOnlyCollection<Item>> GetManyAsync(
-        Guid? articleGuid = null,
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
-        Guid? partitionGuid = null,
-        bool? noPartition = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default)
-        => (await client.GetManyAsync(articleGuid, temporalAsOf, page, limit, partitionGuid, noPartition, cancellationToken))
+        => (await client.GetManyAsync(temporalAsOf, page, limit, insideAnyOfThisPartitions, notInsideAnyPartition, cancellationToken))
             .Unwrap("Failed to load items.")
             .Select(x => new Item(x, client))
             .ToArray();

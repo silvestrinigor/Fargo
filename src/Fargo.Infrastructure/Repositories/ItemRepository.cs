@@ -101,23 +101,30 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         IReadOnlyCollection<Guid>? partitionGuids,
         bool? notInsideAnyPartition)
     {
+        if (partitionGuids is null)
+        {
+            if (notInsideAnyPartition is true)
+            {
+                return query.Where(item => !item.Partitions.Any());
+            }
+
+            if (notInsideAnyPartition is false)
+            {
+                return query.Where(item => item.Partitions.Any());
+            }
+
+            return query;
+        }
+
         if (notInsideAnyPartition is true)
         {
-            return query.Where(item => !item.Partitions.Any());
-        }
-
-        if (notInsideAnyPartition is false)
-        {
-            query = query.Where(item => item.Partitions.Any());
-        }
-
-        if (partitionGuids is not null)
-        {
-            query = query.Where(item =>
+            return query.Where(item =>
+                !item.Partitions.Any() ||
                 item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
         }
 
-        return query;
+        return query.Where(item =>
+            item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
     private static ItemDto Map(Item item)
