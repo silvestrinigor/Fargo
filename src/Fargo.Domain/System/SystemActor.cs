@@ -20,9 +20,13 @@ public sealed class SystemActor : Actor
     /// The created instance will always use the system-defined identifier
     /// (<see cref="SystemService.SystemGuid"/>).
     /// </remarks>
-    internal SystemActor()
+    internal SystemActor(
+        IReadOnlyCollection<ActionType> permissionActions,
+        IReadOnlyCollection<Guid> partitionAccessesGuids)
     {
         Guid = SystemService.SystemGuid;
+        PermissionActions = permissionActions;
+        PartitionAccessesGuids = partitionAccessesGuids;
     }
 
     /// <summary>
@@ -66,23 +70,24 @@ public sealed class SystemActor : Actor
     /// Gets the set of permission actions available to the actor.
     /// </summary>
     /// <value>
-    /// An empty collection.
+    /// The complete collection of actions available in the system.
     /// </value>
     /// <remarks>
-    /// The system actor does not rely on explicit permission entries.
-    /// Authorization is granted implicitly through <see cref="IsAdmin"/>.
+    /// Authorization is still granted implicitly through <see cref="IsAdmin"/>,
+    /// but the effective action set is exposed for diagnostics and clients.
     /// </remarks>
-    public override IReadOnlyCollection<ActionType> PermissionActions => [];
+    public override IReadOnlyCollection<ActionType> PermissionActions { get; }
 
     /// <summary>
     /// Gets the collection of partition identifiers the actor has access to.
     /// </summary>
     /// <value>
-    /// An empty collection.
+    /// The complete collection of partition identifiers available in the system.
     /// </value>
     /// <remarks>
-    /// The system actor is not restricted by partitions. Partition checks
-    /// are expected to be bypassed due to <see cref="IsAdmin"/>.
+    /// The system actor is not restricted by partitions. Partition checks still
+    /// bypass explicit checks, but the effective partition set is exposed for
+    /// diagnostics and clients.
     /// </remarks>
-    public override IReadOnlyCollection<Guid> PartitionAccessesGuids => [];
+    public override IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
 }

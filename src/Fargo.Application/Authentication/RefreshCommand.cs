@@ -104,8 +104,8 @@ public sealed class RefreshCommandHandler(
                 rawNewRefreshToken,
                 newAccessTokenResult.ExpiresAt,
                 actor.IsAdmin,
-                actor.IsAdmin ? [] : actor.PermissionActions,
-                actor.IsAdmin ? [] : actor.PartitionAccessesGuids
+                actor.PermissionActions,
+                actor.PartitionAccessesGuids
                 );
     }
 }

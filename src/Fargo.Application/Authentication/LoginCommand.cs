@@ -120,8 +120,8 @@ public sealed class LoginCommandHandler(
                 rawRefreshToken,
                 accessTokenResult.ExpiresAt,
                 actor.IsAdmin,
-                actor.IsAdmin ? [] : actor.PermissionActions,
-                actor.IsAdmin ? [] : actor.PartitionAccessesGuids
+                actor.PermissionActions,
+                actor.PartitionAccessesGuids
                 );
     }
 }
