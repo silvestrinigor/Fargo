@@ -24,7 +24,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<ItemInfo>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<ItemInfo>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<ItemInfo>(httpResponse.Data!);
@@ -34,18 +34,17 @@ public sealed class ItemHttpClient : IItemHttpClient
     public async Task<FargoSdkResponse<IReadOnlyCollection<ItemInfo>>> GetManyAsync(Guid? articleGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, bool? noPartition = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
-            ("articleGuid", articleGuid?.ToString()),
-            ("temporalAsOf", temporalAsOf?.ToString("O")),
+            ("temporalAsOfDateTime", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("partitionGuid", partitionGuid?.ToString()),
-            ("noPartition", noPartition?.ToString()));
+            ("insideAnyOfThisPartitions", partitionGuid?.ToString()),
+            ("notInsideAnyPartition", noPartition?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ItemInfo>>($"/items{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<ItemInfo>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<ItemInfo>>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<IReadOnlyCollection<ItemInfo>>(httpResponse.Data ?? []);
@@ -61,7 +60,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<Guid>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<Guid>(httpResponse.Data);
@@ -81,7 +80,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -94,7 +93,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -107,7 +106,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -120,7 +119,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -133,11 +132,11 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(httpResponse.Data ?? []);
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
+    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }

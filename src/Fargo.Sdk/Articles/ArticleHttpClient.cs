@@ -26,7 +26,7 @@ public sealed class ArticleHttpClient : IArticleHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<ArticleInfo>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<ArticleInfo>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<ArticleInfo>(httpResponse.Data!);
@@ -43,18 +43,17 @@ public sealed class ArticleHttpClient : IArticleHttpClient
         CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
-            ("temporalAsOf", temporalAsOf?.ToString("O")),
+            ("temporalAsOfDateTime", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("partitionGuid", partitionGuid?.ToString()),
-            ("search", search),
-            ("noPartition", noPartition?.ToString()));
+            ("insideAnyOfThisPartitions", partitionGuid?.ToString()),
+            ("notInsideAnyPartition", noPartition?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ArticleInfo>>($"/articles{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>(httpResponse.Data ?? []);
@@ -78,7 +77,7 @@ public sealed class ArticleHttpClient : IArticleHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<Guid>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<Guid>(httpResponse.Data);
@@ -103,7 +102,7 @@ public sealed class ArticleHttpClient : IArticleHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -118,11 +117,11 @@ public sealed class ArticleHttpClient : IArticleHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
+    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }

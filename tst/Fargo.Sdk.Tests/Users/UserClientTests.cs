@@ -98,6 +98,21 @@ public sealed class UserClientTests
         Assert.Equal("An unexpected error occurred.", result.Error.Detail);
     }
 
+    [Fact]
+    public async Task GetAsync_Should_ReturnNotFound_When_ResponseIsEmptyNotFound()
+    {
+        httpClient
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, null, HttpStatusCode.NotFound));
+
+        var result = await sut.GetAsync(Guid.NewGuid());
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.Equal(404, result.Error.StatusCode);
+        Assert.Equal("The requested resource was not found.", result.Error.Detail);
+    }
+
     // --- GetManyAsync ---
 
     [Fact]

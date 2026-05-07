@@ -22,7 +22,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<PartitionInfo>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<PartitionInfo>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<PartitionInfo>(httpResponse.Data!);
@@ -32,18 +32,15 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
-            ("parentPartitionGuid", parentPartitionGuid?.ToString()),
-            ("temporalAsOf", temporalAsOf?.ToString("O")),
+            ("temporalAsOfDateTime", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
-            ("limit", limit?.ToString()),
-            ("rootOnly", rootOnly?.ToString().ToLowerInvariant()),
-            ("search", search));
+            ("limit", limit?.ToString()));
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionInfo>>($"/partitions{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(httpResponse.Data ?? []);
@@ -59,7 +56,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<Guid>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<Guid>(httpResponse.Data);
@@ -75,7 +72,7 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -88,11 +85,11 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
+    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }

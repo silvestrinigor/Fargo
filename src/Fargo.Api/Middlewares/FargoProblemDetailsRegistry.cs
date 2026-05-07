@@ -1,3 +1,4 @@
+using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;
@@ -101,6 +102,10 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid operation", "article/delete-with-items")
             },
             {
+                typeof(ArticleBarcodeAlreadyInUseFargoDomainException),
+                new ProblemDetailsDefinition(409, "Conflict", "barcode/already-exists")
+            },
+            {
                 typeof(UserNameidAlreadyExistsDomainException),
                 new ProblemDetailsDefinition(409, "Conflict", "user/nameid-already-exists")
             },
@@ -134,6 +139,10 @@ public static class FargoProblemDetailsRegistry
             },
             {
                 typeof(PartitionedEntityAccessDeniedFargoApplicationException),
+                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
+            },
+            {
+                typeof(EntityAccessViolationFargoApplicationException),
                 new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
             },
             {
@@ -182,7 +191,15 @@ public static class FargoProblemDetailsRegistry
             },
             {
                 typeof(ArgumentException),
-                new ProblemDetailsDefinition(400, "Invalid barcode value", "barcode/invalid-value")
+                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
+            },
+            {
+                typeof(ArgumentNullException),
+                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
+            },
+            {
+                typeof(ArgumentOutOfRangeException),
+                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
             }
         };
 

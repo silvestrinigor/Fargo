@@ -24,7 +24,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<AuthInfo>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<AuthInfo>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<AuthInfo>(httpResponse.Data!);
@@ -40,7 +40,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<AuthInfo>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<AuthInfo>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<AuthInfo>(httpResponse.Data!);
@@ -56,7 +56,7 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -72,11 +72,11 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
+    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }
