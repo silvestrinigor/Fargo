@@ -4,7 +4,7 @@ var sqlserver = builder
     .AddSqlServer("sqlserver")
     .WithImage("mssql/server")
     .WithImageTag("2022-latest")
-    .WithLifetime(ContainerLifetime.Session);
+    .WithLifetime(ContainerLifetime.Persistent);
 
 var fargodb = sqlserver.AddDatabase("fargo");
 

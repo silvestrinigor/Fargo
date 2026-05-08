@@ -23,6 +23,8 @@ builder.Services.AddResponseCompression(opts =>
 
 builder.AddServiceDefaults();
 
+builder.Services.ConfigureFargoRouting();
+
 builder.Services.AddFargoOpenApi();
 
 builder.Services.AddHttpContextAccessor();
