@@ -33,6 +33,26 @@ public sealed class ArticleHttpClient : IArticleHttpClient
     }
 
     /// <inheritdoc />
+    public async Task<FargoSdkResponse<ArticleInfo>> GetByBarcodeAsync(
+        ArticleBarcode articleBarcode,
+        DateTimeOffset? temporalAsOf = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
+        var pathBarcode = Uri.EscapeDataString(articleBarcode.Barcode);
+        var httpResponse = await httpClient.GetAsync<ArticleInfo>(
+            $"/articles/{pathBarcode}:{articleBarcode.Type}{query}",
+            cancellationToken);
+
+        if (!httpResponse.IsSuccess)
+        {
+            return new FargoSdkResponse<ArticleInfo>(MapError(httpResponse));
+        }
+
+        return new FargoSdkResponse<ArticleInfo>(httpResponse.Data!);
+    }
+
+    /// <inheritdoc />
     public async Task<FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,

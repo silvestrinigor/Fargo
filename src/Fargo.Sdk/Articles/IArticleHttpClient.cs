@@ -14,6 +14,15 @@ public interface IArticleHttpClient
         DateTimeOffset? temporalAsOf = null,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Retrieves a single article by barcode and barcode type.</summary>
+    /// <param name="articleBarcode">The barcode route value.</param>
+    /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    Task<FargoSdkResponse<ArticleInfo>> GetByBarcodeAsync(
+        ArticleBarcode articleBarcode,
+        DateTimeOffset? temporalAsOf = null,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Retrieves a paged, optionally filtered list of articles.</summary>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>

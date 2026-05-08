@@ -149,6 +149,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
 
             services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>();
             services.AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>();
 
             services.AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>();

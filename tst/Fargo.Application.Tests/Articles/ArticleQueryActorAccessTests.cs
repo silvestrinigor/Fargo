@@ -1,6 +1,7 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Domain;
+using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.System;
 using Fargo.Domain.Users;
@@ -32,6 +33,30 @@ public sealed class ArticleQueryActorAccessTests
 
         await articleRepository.Received(1).GetManyInfo(
             Arg.Any<Pagination>(),
+            null,
+            Arg.Is<IReadOnlyCollection<Guid>>(guids => guids.SequenceEqual(partitionGuids)),
+            true,
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task BarcodeQuery_Should_PassActorPartitionsAndPublicFilterToRepository()
+    {
+        var partitionGuids = new[] { PartitionService.GlobalPartitionGuid, Guid.NewGuid() };
+        currentUser.UserGuid.Returns(SystemService.SystemGuid);
+        partitionRepository
+            .GetDescendantGuids(PartitionService.GlobalPartitionGuid, true, Arg.Any<CancellationToken>())
+            .Returns(partitionGuids);
+        var barcode = new ArticleBarcodeDto("ABC-123", BarcodeFormat.Code128);
+        var sut = new ArticleByBarcodeQueryHandler(
+            new ActorService(userRepository, partitionRepository),
+            articleRepository,
+            currentUser);
+
+        await sut.Handle(new ArticleByBarcodeQuery(barcode));
+
+        await articleRepository.Received(1).GetInfoByBarcode(
+            barcode,
             null,
             Arg.Is<IReadOnlyCollection<Guid>>(guids => guids.SequenceEqual(partitionGuids)),
             true,

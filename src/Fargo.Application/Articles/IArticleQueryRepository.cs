@@ -10,6 +10,14 @@ public interface IArticleQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<ArticleDto?> GetInfoByBarcode(
+        ArticleBarcodeDto articleBarcode,
+        DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
+        CancellationToken cancellationToken = default
+    );
+
     Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,

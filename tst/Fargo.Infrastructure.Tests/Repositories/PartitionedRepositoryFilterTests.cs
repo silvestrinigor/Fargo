@@ -1,6 +1,8 @@
 using Fargo.Application;
+using Fargo.Application.Articles;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
@@ -36,6 +38,42 @@ public sealed class PartitionedRepositoryFilterTests
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
             firstPartition.Guid);
+    }
+
+    [Fact]
+    public async Task ArticleGetInfoByBarcode_Should_ApplyPartitionFilter()
+    {
+        await using var context = CreateContext();
+        var (firstPartition, secondPartition) = AddPartitions(context);
+        var publicEntity = new Article { Name = new Name("Public article") };
+        publicEntity.Barcodes.Code128 = new Code128("PUBLIC-123");
+        var firstPartitionEntity = new Article { Name = new Name("First article") };
+        firstPartitionEntity.Barcodes.Ean13 = new Ean13("7891234567895");
+        firstPartitionEntity.Partitions.Add(firstPartition);
+        var secondPartitionEntity = new Article { Name = new Name("Second article") };
+        secondPartitionEntity.Barcodes.Ean13 = new Ean13("7891234567896");
+        secondPartitionEntity.Partitions.Add(secondPartition);
+        context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
+        await context.SaveChangesAsync();
+
+        var repository = new ArticleRepository(context);
+
+        var accessible = await repository.GetInfoByBarcode(
+            new ArticleBarcodeDto("7891234567895", BarcodeFormat.Ean13),
+            insideAnyOfThisPartitions: [firstPartition.Guid],
+            notInsideAnyPartition: true);
+        var inaccessible = await repository.GetInfoByBarcode(
+            new ArticleBarcodeDto("7891234567896", BarcodeFormat.Ean13),
+            insideAnyOfThisPartitions: [firstPartition.Guid],
+            notInsideAnyPartition: true);
+        var publicArticle = await repository.GetInfoByBarcode(
+            new ArticleBarcodeDto("PUBLIC-123", BarcodeFormat.Code128),
+            insideAnyOfThisPartitions: [firstPartition.Guid],
+            notInsideAnyPartition: true);
+
+        Assert.Equal(firstPartitionEntity.Guid, accessible?.Guid);
+        Assert.Null(inaccessible);
+        Assert.Equal(publicEntity.Guid, publicArticle?.Guid);
     }
 
     [Fact]

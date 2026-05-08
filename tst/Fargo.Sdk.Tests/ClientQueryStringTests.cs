@@ -1,4 +1,5 @@
 using Fargo.Sdk.Articles;
+using Fargo.Sdk.Contracts.Articles;
 using Fargo.Sdk.Http;
 using Fargo.Sdk.Items;
 using Fargo.Sdk.Partitions;
@@ -39,6 +40,29 @@ public sealed class ClientQueryStringTests
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
                 !path.Contains("noPartition=", StringComparison.Ordinal) &&
                 !path.Contains("search=", StringComparison.Ordinal)),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ArticleGetByBarcodeAsync_Should_SendEncodedBarcodeRoute()
+    {
+        httpClient
+            .GetAsync<ArticleInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<ArticleInfo>(
+                true,
+                new ArticleInfo(Guid.NewGuid(), "Article", string.Empty, null, null, new ArticleBarcodesInfo(), [], true, null),
+                null,
+                HttpStatusCode.OK));
+
+        var client = new ArticleHttpClient(httpClient);
+        var temporalAsOf = DateTimeOffset.Parse("2026-05-06T10:15:30+00:00");
+
+        await client.GetByBarcodeAsync(new ArticleBarcode("ABC/123", ArticleBarcodeType.Code128), temporalAsOf);
+
+        await httpClient.Received().GetAsync<ArticleInfo>(
+            Arg.Is<string>(path =>
+                path.StartsWith("/articles/ABC%2F123:Code128?", StringComparison.Ordinal) &&
+                path.Contains("temporalAsOf=", StringComparison.Ordinal)),
             Arg.Any<CancellationToken>());
     }
 

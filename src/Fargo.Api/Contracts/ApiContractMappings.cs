@@ -21,6 +21,7 @@ using ContractPermissions = Fargo.Sdk.Contracts.Permissions;
 using ContractUserGroups = Fargo.Sdk.Contracts.UserGroups;
 using ContractUsers = Fargo.Sdk.Contracts.Users;
 using DomainActionType = Fargo.Domain.ActionType;
+using DomainBarcodeFormat = Fargo.Domain.Barcodes.BarcodeFormat;
 using DomainEntityType = Fargo.Domain.Events.EntityType;
 using DomainEventType = Fargo.Domain.Events.EventType;
 
@@ -62,6 +63,9 @@ internal static class ApiContractMappings
             request.Barcodes.ToApplicationDto() ?? new AppArticles.ArticleBarcodesDto(),
             request.Partitions ?? [],
             request.IsActive);
+
+    public static AppArticles.ArticleBarcodeDto ToApplicationDto(this ContractArticles.ArticleBarcode articleBarcode)
+        => new(articleBarcode.Barcode, articleBarcode.Type.ToDomain());
 
     public static ContractItems.ItemInfo ToInfo(this AppItems.ItemDto item)
         => new(
@@ -196,6 +200,22 @@ internal static class ApiContractMappings
 
     public static DomainEventType ToDomain(this ContractEvents.EventType eventType)
         => (DomainEventType)(int)eventType;
+
+    private static DomainBarcodeFormat ToDomain(this ContractArticles.ArticleBarcodeType barcodeType)
+        => barcodeType switch
+        {
+            ContractArticles.ArticleBarcodeType.Ean13 => DomainBarcodeFormat.Ean13,
+            ContractArticles.ArticleBarcodeType.Ean8 => DomainBarcodeFormat.Ean8,
+            ContractArticles.ArticleBarcodeType.UpcA => DomainBarcodeFormat.UpcA,
+            ContractArticles.ArticleBarcodeType.UpcE => DomainBarcodeFormat.UpcE,
+            ContractArticles.ArticleBarcodeType.Code128 => DomainBarcodeFormat.Code128,
+            ContractArticles.ArticleBarcodeType.Code39 => DomainBarcodeFormat.Code39,
+            ContractArticles.ArticleBarcodeType.Itf14 => DomainBarcodeFormat.Itf14,
+            ContractArticles.ArticleBarcodeType.Gs1128 => DomainBarcodeFormat.Gs1128,
+            ContractArticles.ArticleBarcodeType.QrCode => DomainBarcodeFormat.QrCode,
+            ContractArticles.ArticleBarcodeType.DataMatrix => DomainBarcodeFormat.DataMatrix,
+            _ => throw new ArgumentOutOfRangeException(nameof(barcodeType), barcodeType, "Unsupported barcode type.")
+        };
 
     private static IReadOnlyCollection<ContractPermissions.PermissionInfo> ToInfo(this IReadOnlyCollection<Permission> permissions)
         => permissions.Select(static permission => new ContractPermissions.PermissionInfo(

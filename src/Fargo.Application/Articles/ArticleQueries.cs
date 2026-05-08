@@ -37,6 +37,40 @@ public sealed class ArticleSingleQueryHandler(
 
 #endregion Single
 
+#region Barcode
+
+public sealed record ArticleByBarcodeQuery(
+    ArticleBarcodeDto ArticleBarcode,
+    DateTimeOffset? AsOfDateTime = null
+) : IQuery<ArticleDto?>;
+
+public sealed class ArticleByBarcodeQueryHandler(
+    ActorService actorService,
+    IArticleQueryRepository articleRepository,
+    ICurrentUser currentUser
+) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
+{
+    public async Task<ArticleDto?> Handle(
+        ArticleByBarcodeQuery query,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+        var article = await articleRepository.GetInfoByBarcode(
+            query.ArticleBarcode,
+            query.AsOfDateTime,
+            actor.PartitionAccessesGuids,
+            notInsideAnyPartition: true,
+            cancellationToken
+        );
+
+        return article;
+    }
+}
+
+#endregion Barcode
+
 #region Many
 
 public sealed record ArticlesQuery(

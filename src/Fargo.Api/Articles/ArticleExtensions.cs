@@ -15,6 +15,8 @@ public static class ArticleEndpointRouteBuilderExtension
 
         group.MapGetArticle();
 
+        group.MapGetArticleByBarcode();
+
         group.MapGetArticles();
 
         group.MapCreateArticle();
@@ -64,6 +66,36 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     #endregion Get Single
+
+    #region Get By Barcode
+
+    private static IEndpointRouteBuilder MapGetArticleByBarcode(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{articleBarcode:barcode}", GetArticleByBarcode)
+            .WithName("GetArticleByBarcode")
+            .WithSummary("Gets a single article by barcode")
+            .WithDescription("Retrieves a single article by barcode and barcode type using the {barcode}:{type} route value.")
+            .Produces<ArticleInfo>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<ArticleInfo>, NotFound>> GetArticleByBarcode(
+        ArticleBarcode articleBarcode,
+        DateTimeOffset? temporalAsOf,
+        IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
+        CancellationToken cancellationToken
+    )
+    {
+        var query = new ArticleByBarcodeQuery(articleBarcode.ToApplicationDto(), temporalAsOf);
+
+        var response = await handler.Handle(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
+    }
+
+    #endregion Get By Barcode
 
     #region Get Many
 
