@@ -1,4 +1,3 @@
-using Fargo.Application.Persistence;
 using Fargo.Domain;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
@@ -105,8 +104,8 @@ public sealed class RefreshCommandHandler(
                 rawNewRefreshToken,
                 newAccessTokenResult.ExpiresAt,
                 actor.IsAdmin,
-                actor.IsAdmin ? [] : actor.PermissionActions,
-                actor.IsAdmin ? [] : actor.PartitionAccesses
+                actor.PermissionActions,
+                actor.PartitionAccessesGuids
                 );
     }
 }

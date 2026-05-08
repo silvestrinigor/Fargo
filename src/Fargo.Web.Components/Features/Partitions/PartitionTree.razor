@@ -1,5 +1,8 @@
+@using Fargo.Sdk
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Partitions
-@inject IPartitionManager Partitions
+@inject IPartitionHttpClient Partitions
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -20,7 +23,7 @@ else
         @foreach (var node in rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
         {
             <TreeSidebarNodeView Node="node" SelectedGuid="selectedPartitionGuid" OnToggle="ToggleAsync" OnSelect="Select"
-                                 OnDragStart="StartDrag" OnDrop="DropAsync" />
+                                 OnDragStart="StartDrag" OnDrop="DropAsync" AllowPartitionDrag="true" />
         }
     </ul>
 }
@@ -32,10 +35,10 @@ else
     private Guid? selectedPartitionGuid;
     private TreeSidebarNode? _dragging;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         selectedPartitionGuid = ReadSelectedGuid();
-        _ = LoadAndRenderAsync();
+        await ReloadAsync();
     }
 
     protected override void OnParametersSet()
@@ -43,7 +46,7 @@ else
         selectedPartitionGuid = ReadSelectedGuid();
     }
 
-    private async Task LoadAndRenderAsync()
+    public async Task ReloadAsync()
     {
         await LoadRootsAsync();
         await InvokeAsync(StateHasChanged);
@@ -56,7 +59,7 @@ else
 
         try
         {
-            var roots = await Partitions.GetManyAsync(rootOnly: true);
+            var roots = (await Partitions.GetManyAsync(rootOnly: true)).Unwrap("Failed to load partitions.");
             rootNodes.Clear();
             rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }
@@ -86,7 +89,7 @@ else
 
         try
         {
-            var children = await Partitions.GetManyAsync(node.EntityGuid);
+            var children = (await Partitions.GetManyAsync(node.EntityGuid)).Unwrap("Failed to load partitions.");
             node.Children.Clear();
             node.Children.AddRange(children.Select(TreeSidebarNode.FromPartition));
             node.ChildrenLoaded = true;
@@ -147,8 +150,7 @@ else
 
         try
         {
-            var partition = await Partitions.GetAsync(source.EntityGuid);
-            var result = await partition.MoveAsync(target.EntityGuid);
+            var result = await Partitions.UpdateAsync(source.EntityGuid, new PartitionUpdateRequest(ParentPartitionGuid: target.EntityGuid));
 
             if (!result.IsSuccess)
                 errorMessage = result.Error?.Detail ?? "Failed to move partition.";
@@ -195,6 +197,7 @@ else
             Title = name,
             Icon = TreeSidebarNode.Icons.Partition,
             IsActive = isActive,
+            IsPartitionNode = true,
             HasChildren = false
         };
 

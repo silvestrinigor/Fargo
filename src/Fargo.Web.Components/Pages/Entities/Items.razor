@@ -1,11 +1,14 @@
 @page "/entities/items"
 @page "/entities/items/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk.Items
+@using Fargo.Sdk
 @using Fargo.Sdk.Articles
-@inject IItemManager ItemManager
-@inject IArticleManager ArticleManager
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
+@using Fargo.Sdk.Items
+@using Microsoft.AspNetCore.Components.Forms
+@inject IItemHttpClient ItemClient
+@inject IArticleHttpClient ArticleClient
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Items</PageTitle>
@@ -19,11 +22,12 @@
     <Explorer>
         @if (_partitionView)
         {
-            <PartitionEntityTree EntitySection="items" NavigationBase="/entities/items" />
+            <PartitionEntityTree @ref="_partitionTree" EntitySection="items" NavigationBase="/entities/items" />
         }
         else
         {
-            <EntityTreeView TEntity="Item"
+            <EntityTreeView TEntity="ItemInfo"
+                            @ref="_itemTree"
                             Loader="LoadItemsAsync"
                             ToNode="@(i => TreeSidebarNode.FromItem(i))"
                             NavigationBase="/entities/items"
@@ -101,7 +105,7 @@
     <ValidationMessage For="() => context.ArticleGuid" />
 </EditorDialog>
 
-<EntityPickerDialog TEntity="Article"
+<EntityPickerDialog TEntity="ArticleInfo"
                     IsOpen="_pickerOpen"
                     Title="Select Article"
                     Loader="LoadArticlesForPicker"
@@ -117,6 +121,8 @@
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
+    private EntityTreeView<ItemInfo>? _itemTree;
+    private PartitionEntityTree? _partitionTree;
     private bool _partitionView;
     private bool _createOpen;
     private bool _deleteOpen;
@@ -126,15 +132,21 @@
     private readonly AsyncState _create = new();
     private readonly AsyncState _load = new();
     private readonly AsyncState _delete = new();
-    private Item? _item;
+    private ItemInfo? _item;
     private Guid? _loadedGuid;
 
-    private async Task<IEnumerable<Item>> LoadItemsAsync() => await ItemManager.GetManyAsync();
+    private async Task<IEnumerable<ItemInfo>> LoadItemsAsync()
+        => (await ItemClient.GetManyAsync()).Unwrap("Failed to load items.");
 
-    private async Task<IReadOnlyCollection<Article>> LoadArticlesForPicker(string? search)
-        => await ArticleManager.GetManyAsync(search: search);
+    private async Task<IReadOnlyCollection<ArticleInfo>> LoadArticlesForPicker(string? search)
+    {
+        var articles = (await ArticleClient.GetManyAsync()).Unwrap("Failed to load articles.");
+        return string.IsNullOrWhiteSpace(search)
+            ? articles
+            : [.. articles.Where(article => article.Name.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
 
-    private void OnArticleSelected(Article article)
+    private void OnArticleSelected(ArticleInfo article)
     {
         _createForm.ArticleGuid = article.Guid.ToString();
         _selectedArticleName = article.Name;
@@ -150,7 +162,7 @@
             {
                 await _load.RunAsync(async () =>
                 {
-                    _item = await ItemManager.GetAsync(EntityGuid.Value);
+                    _item = (await ItemClient.GetAsync(EntityGuid.Value)).Unwrap("Failed to load item.");
                 }, "Failed to load item.");
             }
             else
@@ -171,8 +183,9 @@
         if (_item is null) return;
         var ok = await _delete.RunAsync(async () =>
         {
-            await ItemManager.DeleteAsync(_item.Guid);
+            (await ItemClient.DeleteAsync(_item.Guid)).EnsureSuccess("Failed to delete item.");
             Navigation.NavigateTo("/entities/items");
+            await RefreshExplorerAsync();
         }, "Failed to delete.");
 
         if (ok) _deleteOpen = false;
@@ -197,14 +210,28 @@
 
         var ok = await _create.RunAsync(async () =>
         {
-            var item = await ItemManager.CreateAsync(articleGuid);
-            Navigation.NavigateTo($"/entities/items/{item.Guid}", forceLoad: true);
+            var itemGuid = (await ItemClient.CreateAsync(new ItemCreateRequest(articleGuid))).Unwrap("Failed to create item.");
+            await RefreshExplorerAsync();
+            Navigation.NavigateTo($"/entities/items/{itemGuid}");
         }, "Failed to create.");
 
         if (ok) _createOpen = false;
     }
 
     private string? _createError;
+
+    private async Task RefreshExplorerAsync()
+    {
+        if (_itemTree is not null)
+        {
+            await _itemTree.ReloadAsync();
+        }
+
+        if (_partitionTree is not null)
+        {
+            await _partitionTree.ReloadAsync();
+        }
+    }
 
     private sealed class CreateForm
     {

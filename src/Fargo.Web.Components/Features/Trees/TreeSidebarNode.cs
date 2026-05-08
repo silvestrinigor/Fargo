@@ -1,8 +1,8 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.UserGroups;
-using Fargo.Sdk.Users;
+using Fargo.Sdk.Contracts.Articles;
+using Fargo.Sdk.Contracts.Items;
+using Fargo.Sdk.Contracts.Partitions;
+using Fargo.Sdk.Contracts.UserGroups;
+using Fargo.Sdk.Contracts.Users;
 
 namespace Fargo.Web.Components.Features.Trees;
 
@@ -32,7 +32,7 @@ public sealed class TreeSidebarNode
 
     public List<TreeSidebarNode> Children { get; } = [];
 
-    public static TreeSidebarNode FromPartition(Partition p) => new()
+    public static TreeSidebarNode FromPartition(PartitionInfo p) => new()
     {
         EntityGuid = p.Guid,
         Title = p.Name,
@@ -42,7 +42,7 @@ public sealed class TreeSidebarNode
         HasChildren = true
     };
 
-    public static TreeSidebarNode FromUserGroup(UserGroup ug) => new()
+    public static TreeSidebarNode FromUserGroup(UserGroupInfo ug) => new()
     {
         EntityGuid = ug.Guid,
         Title = ug.Nameid,
@@ -51,7 +51,7 @@ public sealed class TreeSidebarNode
         HasChildren = false
     };
 
-    public static TreeSidebarNode FromArticle(Article a) => new()
+    public static TreeSidebarNode FromArticle(ArticleInfo a) => new()
     {
         EntityGuid = a.Guid,
         Title = a.Name,
@@ -60,7 +60,7 @@ public sealed class TreeSidebarNode
         HasChildren = false
     };
 
-    public static TreeSidebarNode FromItem(Item item, string? articleTitle = null) => new()
+    public static TreeSidebarNode FromItem(ItemInfo item, string? articleTitle = null) => new()
     {
         EntityGuid = item.Guid,
         Title = articleTitle ?? item.Guid.ToString("N")[..8],
@@ -69,7 +69,7 @@ public sealed class TreeSidebarNode
         HasChildren = false
     };
 
-    public static TreeSidebarNode FromUser(User user) => new()
+    public static TreeSidebarNode FromUser(UserInfo user) => new()
     {
         EntityGuid = user.Guid,
         Title = user.Nameid,

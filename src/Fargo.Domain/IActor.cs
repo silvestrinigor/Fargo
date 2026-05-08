@@ -66,7 +66,7 @@ public interface IActor
     /// <value>
     /// A read-only collection of partition identifiers (<see cref="Guid"/>).
     /// </value>
-    IReadOnlyCollection<Guid> PartitionAccesses { get; }
+    IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
 
     /// <summary>
     /// Determines whether the actor has access to a specific partition.

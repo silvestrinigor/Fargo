@@ -1,11 +1,9 @@
 using Fargo.Application;
-using Fargo.Application.ApiClients;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Events;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
-using Fargo.Application.Persistence;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
@@ -16,11 +14,9 @@ using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Events;
-using Fargo.Infrastructure.Options;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
-using Fargo.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +38,6 @@ public static class ServiceCollectionExtensions
             AddDomainServices(services);
             AddSecurity(services);
             AddPersistence(services);
-            AddImageStorage(services, configuration);
 
             services.AddScoped<ICurrentUser, CurrentUser>();
 
@@ -111,8 +106,6 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<IEventQueryRepository, EventRepository>();
 
-            services.AddScoped<IApiClientRepository, ApiClientRepository>();
-            services.AddScoped<IApiClientQueryRepository, ApiClientRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
@@ -130,12 +123,6 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
-            services.AddScoped<ICommandHandler<ApiClientCreateCommand, ApiClientCreatedResult>, ApiClientCreateCommandHandler>();
-            services.AddScoped<ICommandHandler<ApiClientUpdateCommand>, ApiClientUpdateCommandHandler>();
-            services.AddScoped<ICommandHandler<ApiClientDeleteCommand>, ApiClientDeleteCommandHandler>();
-            services.AddScoped<IQueryHandler<ApiClientSingleQuery, ApiClientInformation?>, ApiClientSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<ApiClientManyQuery, IReadOnlyCollection<ApiClientInformation>>, ApiClientManyQueryHandler>();
-
             services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
             services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();
             services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
@@ -144,66 +131,48 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleAddPartitionCommand>, ArticleAddPartitionCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleRemovePartitionCommand>, ArticleRemovePartitionCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleImageUploadCommand>, ArticleImageUploadCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleImageDeleteCommand>, ArticleImageDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleUpdateBarcodesCommand>, ArticleUpdateBarcodesCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>();
-            services.AddScoped<ICommandHandler<ItemAddPartitionCommand>, ItemAddPartitionCommandHandler>();
-            services.AddScoped<ICommandHandler<ItemRemovePartitionCommand>, ItemRemovePartitionCommandHandler>();
 
             services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
-            services.AddScoped<ICommandHandler<UserAddUserGroupCommand>, UserAddUserGroupCommandHandler>();
-            services.AddScoped<ICommandHandler<UserRemoveUserGroupCommand>, UserRemoveUserGroupCommandHandler>();
-            services.AddScoped<ICommandHandler<UserAddPartitionCommand>, UserAddPartitionCommandHandler>();
-            services.AddScoped<ICommandHandler<UserRemovePartitionCommand>, UserRemovePartitionCommandHandler>();
 
             services.AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>();
-            services.AddScoped<ICommandHandler<UserGroupPartitionAddCommand>, UserGroupPartitionAddCommandHandler>();
-            services.AddScoped<ICommandHandler<UserGroupPartitionRemoveCommand>, UserGroupPartitionRemoveCommandHandler>();
 
             services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
             services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
 
-            services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleInformation?>, ArticleSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleManyQuery, IReadOnlyCollection<ArticleInformation>>, ArticleManyQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticlePartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, ArticlePartitionsQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleImageQuery, ArticleImageResult?>, ArticleImageQueryHandler>();
-            services.AddScoped<IQueryHandler<ArticleBarcodesQuery, ArticleBarcodes?>, ArticleBarcodesQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>();
 
-            services.AddScoped<IQueryHandler<ItemSingleQuery, ItemInformation?>, ItemSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<ItemManyQuery, IReadOnlyCollection<ItemInformation>>, ItemManyQueryHandler>();
-            services.AddScoped<IQueryHandler<ItemPartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, ItemPartitionsQueryHandler>();
+            services.AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>, ItemsQueryHandler>();
 
-            services.AddScoped<IQueryHandler<UserSingleQuery, UserInformation?>, UserSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<UserManyQuery, IReadOnlyCollection<UserInformation>>, UserManyQueryHandler>();
-            services.AddScoped<IQueryHandler<UserPartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, UserPartitionsQueryHandler>();
+            services.AddScoped<IQueryHandler<UserSingleQuery, UserDto?>, UserSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>, UsersQueryHandler>();
 
-            services.AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupInformation?>, UserGroupSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<UserGroupManyQuery, IReadOnlyCollection<UserGroupInformation>>, UserGroupManyQueryHandler>();
-            services.AddScoped<IQueryHandler<UserGroupPartitionsQuery, IReadOnlyCollection<PartitionInformation>?>, UserGroupPartitionsQueryHandler>();
+            services.AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupDto?>, UserGroupSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>, UserGroupsQueryHandler>();
 
-            services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionInformation?>, PartitionSingleQueryHandler>();
-            services.AddScoped<IQueryHandler<PartitionManyQuery, IReadOnlyCollection<PartitionInformation>>, PartitionManyQueryHandler>();
+            services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
 
             services.AddScoped<IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>>, EventManyQueryHandler>();
         }
 
         private void AddDomainServices()
         {
-            services.AddScoped<ArticleService>();
             services.AddScoped<UserService>();
             services.AddScoped<UserGroupService>();
             services.AddScoped<PartitionService>();
+            services.AddScoped<ItemService>();
             services.AddScoped<ActorService>();
         }
 
@@ -219,17 +188,6 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<IEventRecorder, DbEventRecorder>();
             services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
-        }
-
-        private IServiceCollection AddImageStorage(IConfiguration configuration)
-        {
-            services
-                .AddOptions<ArticleImageOptions>()
-                .Bind(configuration.GetSection(ArticleImageOptions.SectionName));
-
-            services.AddScoped<IArticleImageStorage, LocalArticleImageStorage>();
-
-            return services;
         }
 
         private static void ConfigureSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)

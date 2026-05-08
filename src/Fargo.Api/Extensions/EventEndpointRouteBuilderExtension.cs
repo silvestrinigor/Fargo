@@ -1,13 +1,13 @@
 using Fargo.Api.Contracts;
-using ContractEvents = Fargo.Sdk.Contracts.Events;
-using Fargo.Api.Helpers;
 using Fargo.Application;
 using Fargo.Application.Events;
-using Fargo.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
+using ContractEntityType = Fargo.Sdk.Contracts.EntityType;
+using ContractEvents = Fargo.Sdk.Contracts.Events;
 
 namespace Fargo.Api.Extensions;
 
+/// <summary>Maps all Event endpoints.</summary>
 public static class EventEndpointRouteBuilderExtension
 {
     public static void MapFargoEvent(this IEndpointRouteBuilder builder)
@@ -19,15 +19,14 @@ public static class EventEndpointRouteBuilderExtension
 
         group.MapGet("/", GetManyEvents)
             .WithName("GetEvents")
-            .WithSummary("Gets a filtered, paged list of domain events")
-            .Produces<IReadOnlyCollection<ContractEvents.EventDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ContractEvents.EventInfo>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ContractEvents.EventDto>>, NoContent>> GetManyEvents(
+    private static async Task<Results<Ok<IReadOnlyCollection<ContractEvents.EventInfo>>, NoContent>> GetManyEvents(
         IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>> handler,
         Guid? entityGuid,
-        ContractEvents.EntityType? entityType,
+        ContractEntityType? entityType,
         ContractEvents.EventType? eventType,
         Guid? actorGuid,
         DateTimeOffset? from,
@@ -38,12 +37,12 @@ public static class EventEndpointRouteBuilderExtension
     {
         var query = new EventManyQuery(
             EntityGuid: entityGuid,
-            EntityType: entityType is null ? null : (Fargo.Domain.Events.EntityType)(int)entityType.Value,
-            EventType: eventType is null ? null : (Fargo.Domain.Events.EventType)(int)eventType.Value,
+            EntityType: entityType?.ToDomain(),
+            EventType: eventType?.ToDomain(),
             ActorGuid: actorGuid,
             From: from,
             To: to,
-            Pagination: PaginationHelpers.CreatePagination(page, limit));
+            Pagination: new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit));
 
         var result = await handler.Handle(query, cancellationToken);
         if (result.Count == 0)
@@ -51,6 +50,6 @@ public static class EventEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok<IReadOnlyCollection<ContractEvents.EventDto>>(result.Select(x => x.ToContract()).ToArray());
+        return TypedResults.Ok(result.ToInfo());
     }
 }

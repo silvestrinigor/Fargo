@@ -15,68 +15,68 @@ public sealed class AuthenticationHttpClient : IAuthenticationHttpClient
     private readonly IFargoHttpClient httpClient;
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<AuthDto>> LogInAsync(string nameid, string password, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<AuthInfo>> LogInAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<LoginRequest, AuthDto>(
+        var httpResponse = await httpClient.PostFromJsonAsync<LoginRequest, AuthInfo>(
             "/authentication/login",
-            new LoginRequest(nameid, password),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<AuthDto>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<AuthInfo>(MapError(httpResponse));
         }
 
-        return new FargoSdkResponse<AuthDto>(httpResponse.Data!);
+        return new FargoSdkResponse<AuthInfo>(httpResponse.Data!);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<AuthDto>> Refresh(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<AuthInfo>> Refresh(RefreshRequest request, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostFromJsonAsync<RefreshRequest, AuthDto>(
+        var httpResponse = await httpClient.PostFromJsonAsync<RefreshRequest, AuthInfo>(
             "/authentication/refresh",
-            new RefreshRequest(refreshToken),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<AuthDto>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<AuthInfo>(MapError(httpResponse));
         }
 
-        return new FargoSdkResponse<AuthDto>(httpResponse.Data!);
+        return new FargoSdkResponse<AuthInfo>(httpResponse.Data!);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> LogOutAsync(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> LogOutAsync(RefreshRequest request, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PostJsonAsync<LogoutRequest>(
+        var httpResponse = await httpClient.PostJsonAsync<RefreshRequest>(
             "/authentication/logout",
-            new LogoutRequest(refreshToken),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> ChangePassword(string newPassword, string currentPassword, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> ChangePassword(PasswordUpdateRequest request, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PutJsonAsync<PasswordChangeRequest>(
+        var httpResponse = await httpClient.PutJsonAsync<PasswordUpdateRequest>(
             "/authentication/password",
-            new PasswordChangeRequest(new PasswordUpdateRequest(newPassword, currentPassword)),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
+    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }

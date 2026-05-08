@@ -34,12 +34,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.DefaultPasswordExpirationPeriod)
             .HasConversion(
-                x => x.Ticks,
-                x => TimeSpan.FromTicks(x))
-            .IsRequired();
+                x => x.HasValue ? x.Value.Ticks : (long?)null,
+                x => x.HasValue ? TimeSpan.FromTicks(x.Value) : null);
 
-        builder.Property(x => x.RequirePasswordChangeAt)
-            .IsRequired();
+        builder.Property(x => x.RequirePasswordChangeAt);
 
         builder.Property(x => x.IsActive)
             .IsRequired();
@@ -51,8 +49,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserGuid)
             .OnDelete(DeleteBehavior.Cascade);
-
-        //builder.Navigation(x => x.Permissions).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasMany(x => x.UserGroups).WithMany(x => x.Users);
 

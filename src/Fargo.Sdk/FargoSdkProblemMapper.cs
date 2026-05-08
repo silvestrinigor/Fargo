@@ -1,10 +1,11 @@
 using Fargo.Sdk.Http;
+using System.Net;
 
 namespace Fargo.Sdk;
 
 internal static class FargoSdkProblemMapper
 {
-    public static FargoSdkError Map(FargoProblemDetails? problem)
+    public static FargoSdkError Map(FargoProblemDetails? problem, HttpStatusCode? statusCode = null)
     {
         var type = problem?.Type switch
         {
@@ -18,8 +19,7 @@ internal static class FargoSdkProblemMapper
                 or "item/not-found"
                 or "user/not-found"
                 or "partition/not-found"
-                or "user-group/not-found"
-                or "api-client/not-found" => FargoSdkErrorType.NotFound,
+                or "user-group/not-found" => FargoSdkErrorType.NotFound,
 
             "user/nameid-already-exists"
                 or "user-group/nameid-already-exists"
@@ -36,6 +36,9 @@ internal static class FargoSdkProblemMapper
                 or "user/invalid-nameid"
                 or "article/delete-with-items"
                 or "barcode/invalid-value"
+                or "item/cannot-be-own-container"
+                or "item/parent-is-not-container"
+                or "item/circular-container-hierarchy"
                 or "partition/circular-hierarchy"
                 or "partition/cannot-be-own-parent"
                 or "partition/cannot-delete-global"
@@ -49,12 +52,17 @@ internal static class FargoSdkProblemMapper
             _ => FargoSdkErrorType.Undefined
         };
 
+        if (type == FargoSdkErrorType.Undefined && (statusCode == HttpStatusCode.NotFound || problem?.Status == 404))
+        {
+            type = FargoSdkErrorType.NotFound;
+        }
+
         return new FargoSdkError(
             type,
-            problem?.Detail ?? "An unexpected error occurred.",
+            problem?.Detail ?? (type == FargoSdkErrorType.NotFound ? "The requested resource was not found." : "An unexpected error occurred."),
             problem?.Title,
             problem?.Type,
-            problem?.Status,
+            problem?.Status ?? (statusCode is null ? null : (int)statusCode.Value),
             problem?.Instance,
             problem?.TraceId);
     }

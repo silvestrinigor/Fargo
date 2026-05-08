@@ -1,7 +1,6 @@
 using Fargo.Sdk.Contracts.Items;
 using Fargo.Sdk.Contracts.Partitions;
 using Fargo.Sdk.Http;
-using Fargo.Sdk.Partitions;
 
 namespace Fargo.Sdk.Items;
 
@@ -18,67 +17,73 @@ public sealed class ItemHttpClient : IItemHttpClient
     private readonly IFargoHttpClient httpClient;
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<ItemResult>> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<ItemInfo>> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
-        var httpResponse = await httpClient.GetAsync<ItemDto>($"/items/{itemGuid}{query}", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<ItemInfo>($"/items/{itemGuid}{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<ItemResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<ItemInfo>(MapError(httpResponse));
         }
 
-        return new FargoSdkResponse<ItemResult>(httpResponse.Data!.ToSdk());
+        return new FargoSdkResponse<ItemInfo>(httpResponse.Data!);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<ItemResult>>> GetManyAsync(Guid? articleGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, bool? noPartition = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<IReadOnlyCollection<ItemInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default)
     {
-        var query = FargoHttpClient.BuildQuery(
-            ("articleGuid", articleGuid?.ToString()),
-            ("temporalAsOf", temporalAsOf?.ToString("O")),
+        var parameters = new List<(string Key, string? Value)>
+        {
+            ("temporalAsOfDateTime", temporalAsOf?.ToString("O")),
             ("page", page?.ToString()),
             ("limit", limit?.ToString()),
-            ("partitionGuid", partitionGuid?.ToString()),
-            ("noPartition", noPartition?.ToString()));
+            ("notInsideAnyPartition", notInsideAnyPartition?.ToString())
+        };
+        parameters.AddRange(insideAnyOfThisPartitions?.Select(partitionGuid =>
+            ("insideAnyOfThisPartitions", (string?)partitionGuid.ToString())) ?? []);
+        var query = FargoHttpClient.BuildQuery([.. parameters]);
 
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ItemDto>>($"/items{query}", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<ItemInfo>>($"/items{query}", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<ItemResult>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<ItemInfo>>(MapError(httpResponse));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<ItemResult>>((httpResponse.Data ?? []).ToSdk());
+        return new FargoSdkResponse<IReadOnlyCollection<ItemInfo>>(httpResponse.Data ?? []);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<Guid>> CreateAsync(ItemCreateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<ItemCreateRequest, Guid>(
             "/items",
-            ContractMappings.ToItemCreateRequest(articleGuid, firstPartition, productionDate),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<Guid>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<Guid>(httpResponse.Data);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
+        Guid itemGuid,
+        ItemUpdateRequest request,
+        CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PatchJsonAsync<ItemUpdateRequest>(
+        var httpResponse = await httpClient.PutJsonAsync<ItemUpdateRequest>(
             $"/items/{itemGuid}",
-            ContractMappings.ToItemUpdateRequest(productionDate),
+            request,
             cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -91,7 +96,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -104,7 +109,7 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
@@ -117,24 +122,24 @@ public sealed class ItemHttpClient : IItemHttpClient
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
         }
 
         return new FargoSdkResponse<EmptyResult>();
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(Guid itemGuid, CancellationToken cancellationToken = default)
+    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetPartitionsAsync(Guid itemGuid, CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionDto>>($"/items/{itemGuid}/partitions", cancellationToken);
+        var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionInfo>>($"/items/{itemGuid}/partitions", cancellationToken);
 
         if (!httpResponse.IsSuccess)
         {
-            return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>(MapError(httpResponse.Problem));
+            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse));
         }
 
-        return new FargoSdkResponse<IReadOnlyCollection<PartitionResult>>((httpResponse.Data ?? []).ToSdk());
+        return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(httpResponse.Data ?? []);
     }
 
-    private static FargoSdkError MapError(FargoProblemDetails? problem) => FargoSdkProblemMapper.Map(problem);
+    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }

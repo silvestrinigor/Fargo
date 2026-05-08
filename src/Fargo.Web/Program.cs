@@ -1,7 +1,7 @@
 using Fargo.Sdk.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.Web;
-using Fargo.Web.Components.Security;
+using Fargo.Web.Components;
 using Fargo.Web.Components.Session;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -21,13 +21,12 @@ builder.Services.AddAuthorizationCore();
 var apiUrl = builder.Configuration["services:apiservice:http:0"] ?? "http://apiservice";
 
 builder.Services.AddFargoSdk(o =>
-    {
-        o.Server = apiUrl;
-        o.ApiKey = builder.Configuration["Fargo:ApiKey"];
-    })
-    .WithHubLifetime()
-    .WithSessionStore<BrowserSdkSessionStore>();
+{
+    o.Server = apiUrl;
+    o.ApiKey = builder.Configuration["Fargo:ApiKey"];
+});
 
+builder.Services.AddFargoWebComponents();
 builder.Services.AddScoped<FargoSession>();
 
 var app = builder.Build();

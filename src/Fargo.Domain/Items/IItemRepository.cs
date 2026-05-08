@@ -14,24 +14,11 @@ public interface IItemRepository
     );
 
     /// <summary>
-    /// Gets a paginated collection of item unique identifiers.
+    /// Retrieves the unique identifiers of all items contained under a given item.
     /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetManyGuids(
-        Pagination pagination,
-        Guid? articleGuid = null,
-        DateTimeOffset? asOfDateTime = null,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Gets a paginated collection of item unique identifiers,
-    /// filtered to items that belong to at least one of the specified partitions.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetManyGuidsInPartitions(
-        Pagination pagination,
-        IReadOnlyCollection<Guid> partitionGuids,
-        Guid? articleGuid = null,
-        DateTimeOffset? asOfDateTime = null,
+    Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
+        Guid itemGuid,
+        bool includeRoot = true,
         CancellationToken cancellationToken = default
     );
 

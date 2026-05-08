@@ -41,7 +41,14 @@ public class ActorService(
     {
         if (actorGuid == SystemService.SystemGuid)
         {
-            var systemActor = new SystemActor();
+            var allPartitionAccesses = await partitionRepository.GetDescendantGuids(
+                PartitionService.GlobalPartitionGuid,
+                includeRoot: true,
+                cancellationToken);
+
+            var systemActor = new SystemActor(
+                Enum.GetValues<ActionType>(),
+                allPartitionAccesses);
 
             return systemActor;
         }

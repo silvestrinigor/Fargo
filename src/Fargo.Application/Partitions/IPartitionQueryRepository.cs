@@ -1,31 +1,20 @@
-using Fargo.Domain;
-
 namespace Fargo.Application.Partitions;
 
 public interface IPartitionQueryRepository
 {
-    Task<PartitionInformation?> GetInfoByGuid(
+    Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<PartitionInformation>> GetManyInfo(
+    Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
-        Guid? parentPartitionGuid = null,
         DateTimeOffset? asOfDateTime = null,
-        bool rootOnly = false,
-        string? search = null,
-        CancellationToken cancellationToken = default
-    );
-
-    Task<IReadOnlyCollection<PartitionInformation>> GetManyInfoByGuids(
-        IReadOnlyCollection<Guid> partitionGuids,
-        Pagination pagination,
-        Guid? parentPartitionGuid = null,
-        DateTimeOffset? asOfDateTime = null,
-        bool rootOnly = false,
-        string? search = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 }

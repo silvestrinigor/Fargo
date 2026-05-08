@@ -2,7 +2,7 @@
 
 <img src="doc/under_construction.png" width="400" alt="Under construction" />
 
-Fargo is a .NET 10 inventory and resource management system. It tracks **Articles** (product definitions), **Items** (physical instances of articles), and their location within a hierarchical **Partition** tree, while managing **Users**, **UserGroups**, and **ApiClients** with fine-grained permission control and real-time event broadcasting.
+Fargo is a .NET 10 inventory and resource management system. It tracks **Articles** (product definitions), **Items** (physical instances of articles), and their location within a hierarchical **Partition** tree, while managing **Users** and **UserGroups** with fine-grained permission control and real-time event broadcasting.
 
 ## Domain Model
 
@@ -13,7 +13,6 @@ Fargo is a .NET 10 inventory and resource management system. It tracks **Article
 | **Partition** | Hierarchical location or category (warehouse, shelf, zone…) used to organize Articles and Items |
 | **User** | System user with configurable action permissions and partition access |
 | **UserGroup** | Group of users sharing a common permission set |
-| **ApiClient** | Machine-to-machine identity authenticated via API key |
 
 ## Technology Stack
 

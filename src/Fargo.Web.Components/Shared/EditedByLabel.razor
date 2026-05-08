@@ -1,5 +1,8 @@
+@using Fargo.Sdk
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Users
-@inject IUserService Users
+@inject IUserHttpClient Users
 
 @if (EditedByGuid is null)
 {
@@ -36,7 +39,7 @@ else
         _loading = true;
         try
         {
-            var user = await Users.GetAsync(EditedByGuid.Value);
+            var user = (await Users.GetAsync(EditedByGuid.Value)).Unwrap("Failed to load user.");
             _nameid = user.Nameid;
         }
         catch

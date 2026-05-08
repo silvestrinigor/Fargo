@@ -50,7 +50,7 @@ public sealed class UserActor : Actor
         ArgumentNullException.ThrowIfNull(user);
 
         User = user;
-        PartitionAccesses = partitionAccesses;
+        PartitionAccessesGuids = partitionAccesses;
     }
 
     /// <summary>
@@ -115,5 +115,5 @@ public sealed class UserActor : Actor
     /// This includes partitions assigned directly to the user and those inherited
     /// from user groups, already expanded to include descendant partitions.
     /// </remarks>
-    public override IReadOnlyCollection<Guid> PartitionAccesses { get; }
+    public override IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
 }

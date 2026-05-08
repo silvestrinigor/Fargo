@@ -1,4 +1,3 @@
-using Fargo.Application.ApiClients;
 using Fargo.Application.Authentication;
 
 namespace Fargo.SeedService.Extensions;
@@ -47,16 +46,6 @@ public static class ServiceCollectionExtensions
                 .Validate(o => !string.IsNullOrWhiteSpace(o.Password),
                         "DefaultAdmin:Password must be provided.")
                 .ValidateOnStart();
-
-            return services;
-        }
-
-        public IServiceCollection AddFargoApiClientSeed(IConfiguration configuration, bool isDevelopment)
-        {
-            services
-                .AddOptions<ApiClientSeedOptions>()
-                .Bind(configuration.GetSection(ApiClientSeedOptions.SectionName))
-                .PostConfigure(o => o.SeedTestClient = isDevelopment);
 
             return services;
         }

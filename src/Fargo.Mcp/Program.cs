@@ -1,4 +1,6 @@
+using Fargo.Sdk;
 using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Contracts.Authentication;
 using Fargo.Sdk.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,10 +18,10 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Warning);
 
 builder.Services.AddFargoSdk(o =>
-    {
-        o.Server = server;
-        o.ApiKey = apiKey;
-    }, ServiceLifetime.Singleton);
+{
+    o.Server = server;
+    o.ApiKey = apiKey;
+}, ServiceLifetime.Singleton);
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
@@ -27,7 +29,14 @@ builder.Services
 
 var app = builder.Build();
 
-var auth = app.Services.GetRequiredService<IAuthenticationService>();
-await auth.LogInAsync(nameid, password);
+var auth = app.Services.GetRequiredService<IAuthenticationHttpClient>();
+var options = app.Services.GetRequiredService<FargoSdkOptions>();
+var login = await auth.LogInAsync(new LoginRequest(nameid, password));
+if (!login.IsSuccess)
+{
+    throw new InvalidOperationException($"Login failed: {login.Error!.Detail}");
+}
+
+options.AccessToken = login.Data!.AccessToken;
 
 await app.RunAsync();

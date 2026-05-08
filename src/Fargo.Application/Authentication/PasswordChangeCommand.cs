@@ -1,4 +1,3 @@
-using Fargo.Application.Persistence;
 using Fargo.Application.Users;
 using Fargo.Domain.Users;
 
@@ -11,7 +10,7 @@ namespace Fargo.Application.Authentication;
 /// The current password and the new password.
 /// </param>
 public sealed record PasswordChangeCommand(
-        UserPasswordUpdateModel Passwords
+        UserPasswordUpdateDto Passwords
         ) : ICommand;
 
 /// <summary>

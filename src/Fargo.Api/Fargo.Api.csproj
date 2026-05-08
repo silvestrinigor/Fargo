@@ -12,13 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.Sdk.Contracts\Fargo.Sdk.Contracts.csproj" />
     <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
+    <ProjectReference Include="..\Fargo.Sdk.Contracts\Fargo.Sdk.Contracts.csproj" />
     <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-using Fargo.Application.ApiClients;
+using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;
@@ -6,6 +6,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Domain.Articles;
+using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 
@@ -101,6 +102,10 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid operation", "article/delete-with-items")
             },
             {
+                typeof(ArticleBarcodeAlreadyInUseFargoDomainException),
+                new ProblemDetailsDefinition(409, "Conflict", "barcode/already-exists")
+            },
+            {
                 typeof(UserNameidAlreadyExistsDomainException),
                 new ProblemDetailsDefinition(409, "Conflict", "user/nameid-already-exists")
             },
@@ -137,6 +142,10 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
             },
             {
+                typeof(EntityAccessViolationFargoApplicationException),
+                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
+            },
+            {
                 typeof(UserGroupInactiveFargoDomainException),
                 new ProblemDetailsDefinition(403, "User group inactive", "user-group/inactive")
             },
@@ -147,6 +156,18 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(PartitionCannotBeOwnParentFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "partition/cannot-be-own-parent")
+            },
+            {
+                typeof(ItemCannotBeOwnContainerFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "item/cannot-be-own-container")
+            },
+            {
+                typeof(ItemParentIsNotContainerFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "item/parent-is-not-container")
+            },
+            {
+                typeof(ItemCircularContainerHierarchyFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "item/circular-container-hierarchy")
             },
             {
                 typeof(DeleteMainAdminUserFargoDomainException),
@@ -169,12 +190,16 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid operation", "user-group/cannot-delete-parent-group")
             },
             {
-                typeof(ApiClientNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "API client not found", "api-client/not-found")
+                typeof(ArgumentException),
+                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
             },
             {
-                typeof(ArgumentException),
-                new ProblemDetailsDefinition(400, "Invalid barcode value", "barcode/invalid-value")
+                typeof(ArgumentNullException),
+                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
+            },
+            {
+                typeof(ArgumentOutOfRangeException),
+                new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
             }
         };
 

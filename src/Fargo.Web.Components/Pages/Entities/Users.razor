@@ -1,11 +1,14 @@
 @page "/entities/users"
 @page "/entities/users/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk.Users
+@using Fargo.Sdk
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Fargo.Sdk.UserGroups
-@inject IUserManager UserManager
-@inject IUserGroupManager UserGroupManager
+@using Fargo.Sdk.Users
+@using Microsoft.AspNetCore.Components.Forms
+@inject IUserHttpClient UserClient
+@inject IUserGroupHttpClient UserGroupClient
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Users</PageTitle>
@@ -15,7 +18,7 @@
     <Explorer>
         @if (_partitionView)
         {
-            <PartitionEntityTree EntitySection="users" NavigationBase="/entities/users" />
+            <PartitionEntityTree @ref="_partitionTree" EntitySection="users" NavigationBase="/entities/users" />
         }
         else if (_treeState.IsBusy)
         {
@@ -333,8 +336,8 @@
     </label>
 </EditorDialog>
 
-<EntityPickerDialog TEntity="User" IsOpen="_addMemberOpen" Title="Add member"
-                    Loader="s => UserManager.GetManyAsync(search: s)" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
+<EntityPickerDialog TEntity="UserInfo" IsOpen="_addMemberOpen" Title="Add member"
+                    Loader="LoadUsersForPickerAsync" ColumnHeaders="@(new[] { "NameId", "First name", "Last name" })"
                     OnSelected="AddMemberAsync" OnCancel="() => _addMemberOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
@@ -344,8 +347,8 @@
 </EntityPickerDialog>
 
 @* User dialogs *@
-<EntityPickerDialog TEntity="UserGroup" IsOpen="_addToGroupOpen" Title="Add to user group"
-                    Loader="s => UserGroupManager.GetManyAsync()" ColumnHeaders="@(new[] { "NameId", "Description" })"
+<EntityPickerDialog TEntity="UserGroupInfo" IsOpen="_addToGroupOpen" Title="Add to user group"
+                    Loader="LoadUserGroupsForPickerAsync" ColumnHeaders="@(new[] { "NameId", "Description" })"
                     OnSelected="AddToGroupAsync" OnCancel="() => _addToGroupOpen = false">
     <RowTemplate>
         <td>@context.Nameid</td>
@@ -382,6 +385,7 @@
 
     // ── Tree ────────────────────────────────────────────────────────────────
     private bool _partitionView;
+    private PartitionEntityTree? _partitionTree;
     private readonly AsyncState _treeState = new();
     private readonly List<TreeSidebarNode> _treeNodes = [];
     private Guid? _selectedGroupGuid;
@@ -389,7 +393,7 @@
     private Guid? SelectedTreeGuid => _selectedGroupGuid ?? EntityGuid;
 
     // ── User group detail ───────────────────────────────────────────────────
-    private UserGroup? _group;
+    private UserGroupInfo? _group;
     private GroupEditForm_ _groupEdit = new();
     private string? _origGroupNameid;
     private string? _origGroupDescription;
@@ -403,13 +407,13 @@
     private readonly AsyncState _createGroup = new();
 
     // ── Group members ───────────────────────────────────────────────────────
-    private readonly List<User> _groupMembers = [];
+    private readonly List<UserInfo> _groupMembers = [];
     private readonly AsyncState _membersLoad = new();
     private readonly AsyncState _memberOp = new();
     private bool _addMemberOpen;
 
     // ── User detail ─────────────────────────────────────────────────────────
-    private User? _user;
+    private UserInfo? _user;
     private Guid? _loadedGuid;
     private UserEditForm_ _edit = new();
     private string? _origNameid;
@@ -426,7 +430,7 @@
     private readonly AsyncState _createUser = new();
 
     // ── User groups on user detail ──────────────────────────────────────────
-    private readonly List<UserGroup> _userGroups = [];
+    private readonly List<UserGroupInfo> _userGroups = [];
     private readonly AsyncState _groupsLoad = new();
     private readonly AsyncState _groupOp = new();
     private bool _addToGroupOpen;
@@ -449,7 +453,38 @@
 
     // ── Lifecycle ───────────────────────────────────────────────────────────
 
-    protected override void OnInitialized() => _ = LoadTreeAsync();
+    protected override async Task OnInitializedAsync() => await LoadTreeAsync();
+
+    private async Task<IReadOnlyCollection<UserInfo>> LoadUsersForPickerAsync(string? search)
+    {
+        var users = (await UserClient.GetManyAsync()).Unwrap("Failed to load users.");
+        if (_group is not null)
+        {
+            users = [.. users.Where(user => !user.UserGroups.Contains(_group.Guid))];
+        }
+
+        return string.IsNullOrWhiteSpace(search)
+            ? users
+            : [.. users.Where(user =>
+                user.Nameid.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                (user.FirstName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (user.LastName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false))];
+    }
+
+    private async Task<IReadOnlyCollection<UserGroupInfo>> LoadUserGroupsForPickerAsync(string? search)
+    {
+        var userGroups = (await UserGroupClient.GetManyAsync()).Unwrap("Failed to load user groups.");
+        if (_user is not null)
+        {
+            userGroups = [.. userGroups.Where(group => !_user.UserGroups.Contains(group.Guid))];
+        }
+
+        return string.IsNullOrWhiteSpace(search)
+            ? userGroups
+            : [.. userGroups.Where(group =>
+                group.Nameid.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                group.Description.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -470,15 +505,12 @@
     {
         await _treeState.RunAsync(async () =>
         {
-            var groups = await UserGroupManager.GetManyAsync();
-            var users = await UserManager.GetManyAsync();
+            var groups = (await UserGroupClient.GetManyAsync()).Unwrap("Failed to load user groups.");
+            var users = (await UserClient.GetManyAsync()).Unwrap("Failed to load users.");
 
-            var membershipTasks = users.Select(async u =>
-            {
-                var ug = await UserGroupManager.GetManyAsync(userGuid: u.Guid);
-                return (User: u, GroupGuids: ug.Select(g => g.Guid).ToHashSet());
-            });
-            var memberships = await Task.WhenAll(membershipTasks);
+            var memberships = users
+                .Select(u => (User: u, GroupGuids: u.UserGroups.ToHashSet()))
+                .ToArray();
 
             var groupMemberMap = memberships
                 .SelectMany(m => m.GroupGuids.Select(g => (GroupGuid: g, m.User)))
@@ -505,7 +537,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         StateHasChanged();
     }
 
-    private void SelectNode(TreeSidebarNode node)
+    private async Task SelectNode(TreeSidebarNode node)
     {
         if (node.HasChildren)
         {
@@ -514,7 +546,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
             _loadedGuid = null;
             _user = null;
             Navigation.NavigateTo("/entities/users");
-            _ = LoadGroupDetailAsync(node.EntityGuid);
+            await LoadGroupDetailAsync(node.EntityGuid);
             return;
         }
         _selectedGroupGuid = null;
@@ -530,12 +562,12 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _groupMembers.Clear();
         await _groupLoad.RunAsync(async () =>
         {
-            _group = await UserGroupManager.GetAsync(groupGuid);
+            _group = (await UserGroupClient.GetAsync(groupGuid)).Unwrap("Failed to load user group.");
             _groupEdit.Nameid = _group.Nameid;
             _groupEdit.Description = _group.Description;
             _origGroupNameid = _group.Nameid;
             _origGroupDescription = _group.Description;
-            _groupPermissions = _group.Permissions.ToHashSet();
+            _groupPermissions = _group.Permissions.Select(static p => p.Action).ToHashSet();
         }, "Failed to load user group.");
         await LoadGroupMembersAsync();
     }
@@ -547,14 +579,8 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         var groupGuid = _group.Guid;
         await _membersLoad.RunAsync(async () =>
         {
-            var allUsers = await UserManager.GetManyAsync();
-            var tasks = allUsers.Select(async u =>
-            {
-                var ug = await UserGroupManager.GetManyAsync(userGuid: u.Guid);
-                return (User: u, IsMember: ug.Any(g => g.Guid == groupGuid));
-            });
-            var results = await Task.WhenAll(tasks);
-            _groupMembers.AddRange(results.Where(r => r.IsMember).Select(r => r.User));
+            var allUsers = (await UserClient.GetManyAsync()).Unwrap("Failed to load users.");
+            _groupMembers.AddRange(allUsers.Where(user => user.UserGroups.Contains(groupGuid)));
         }, "Failed to load members.");
     }
 
@@ -563,14 +589,14 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         if (_group is null) return;
         await _groupSave.RunAsync(async () =>
         {
-            await _group.UpdateAsync(g =>
+            await UpdateGroupAsync(_group with
             {
-                g.Nameid = _groupEdit.Nameid!;
-                g.Description = _groupEdit.Description ?? string.Empty;
+                Nameid = _groupEdit.Nameid!,
+                Description = _groupEdit.Description ?? string.Empty
             });
             await LoadGroupDetailAsync(_group.Guid);
         }, "Failed to save.");
-        await LoadTreeAsync();
+        await ReloadTreesAsync();
     }
 
     private void OpenDeleteGroup()
@@ -584,14 +610,14 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         if (_group is null) return;
         var ok = await _groupDelete.RunAsync(async () =>
         {
-            await UserGroupManager.DeleteAsync(_group.Guid);
+            (await UserGroupClient.DeleteAsync(_group.Guid)).EnsureSuccess("Failed to delete user group.");
             _selectedGroupGuid = null;
             _group = null;
         }, "Failed to delete.");
         if (ok)
         {
             _deleteGroupOpen = false;
-            await LoadTreeAsync();
+            await ReloadTreesAsync();
         }
     }
 
@@ -601,9 +627,10 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         var target = !_group.IsActive;
         await _groupToggle.RunAsync(async () =>
         {
-            await _group.UpdateAsync(g => g.IsActive = target);
+            await UpdateGroupAsync(_group with { IsActive = target });
             await LoadGroupDetailAsync(_group.Guid);
         }, "Failed to update status.");
+        await ReloadTreesAsync();
     }
 
     private void OpenCreateGroup()
@@ -617,14 +644,15 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
     {
         var ok = await _createGroup.RunAsync(async () =>
         {
-            var group = await UserGroupManager.CreateAsync(_createGroupForm.Nameid!);
+            var groupGuid = (await UserGroupClient.CreateAsync(new UserGroupCreateRequest(_createGroupForm.Nameid!)))
+                .Unwrap("Failed to create user group.");
             _createGroupOpen = false;
-            _selectedGroupGuid = group.Guid;
+            _selectedGroupGuid = groupGuid;
             _loadedGuid = null;
             _user = null;
             Navigation.NavigateTo("/entities/users");
-            await LoadGroupDetailAsync(group.Guid);
-            await LoadTreeAsync();
+            await LoadGroupDetailAsync(groupGuid);
+            await ReloadTreesAsync();
         }, "Failed to create.");
         if (ok) _createGroupOpen = false;
     }
@@ -635,31 +663,31 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _addMemberOpen = true;
     }
 
-    private async Task AddMemberAsync(User user)
+    private async Task AddMemberAsync(UserInfo user)
     {
         _addMemberOpen = false;
         if (_group is null) return;
         await _memberOp.RunAsync(async () =>
         {
-            var result = await user.AddUserGroupAsync(_group.Guid);
+            var result = await UserClient.AddUserGroupAsync(user.Guid, _group.Guid);
             if (!result.IsSuccess)
                 throw new Exception(result.Error?.Detail ?? "Failed to add member.");
             await LoadGroupMembersAsync();
         }, "Failed to add member.");
-        await LoadTreeAsync();
+        await ReloadTreesAsync();
     }
 
-    private async Task RemoveMemberAsync(User user)
+    private async Task RemoveMemberAsync(UserInfo user)
     {
         if (_group is null) return;
         await _memberOp.RunAsync(async () =>
         {
-            var result = await user.RemoveUserGroupAsync(_group.Guid);
+            var result = await UserClient.RemoveUserGroupAsync(user.Guid, _group.Guid);
             if (!result.IsSuccess)
                 throw new Exception(result.Error?.Detail ?? "Failed to remove member.");
             await LoadGroupMembersAsync();
         }, "Failed to remove member.");
-        await LoadTreeAsync();
+        await ReloadTreesAsync();
     }
 
     // ── User detail ─────────────────────────────────────────────────────────
@@ -671,7 +699,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _userGroups.Clear();
         await _load.RunAsync(async () =>
         {
-            _user = await UserManager.GetAsync(EntityGuid!.Value);
+            _user = (await UserClient.GetAsync(EntityGuid!.Value)).Unwrap("Failed to load user.");
             _edit.Nameid = _user.Nameid;
             _edit.FirstName = _user.FirstName;
             _edit.LastName = _user.LastName;
@@ -680,7 +708,7 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
             _origFirstName = _user.FirstName;
             _origLastName = _user.LastName;
             _origDescription = _user.Description;
-            _userPermissions = _user.Permissions.ToHashSet();
+            _userPermissions = _user.Permissions.Select(static p => p.Action).ToHashSet();
         }, "Failed to load user.");
         await LoadGroupsForUserAsync();
     }
@@ -691,7 +719,9 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _userGroups.Clear();
         await _groupsLoad.RunAsync(async () =>
         {
-            var groups = await UserGroupManager.GetManyAsync(userGuid: _user.Guid);
+            var groups = (await UserGroupClient.GetManyAsync()).Unwrap("Failed to load user groups.")
+                .Where(group => _user.UserGroups.Contains(group.Guid))
+                .ToArray();
             _userGroups.AddRange(groups);
         }, "Failed to load groups.");
     }
@@ -701,16 +731,16 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         if (_user is null) return;
         await _save.RunAsync(async () =>
         {
-            await _user.UpdateAsync(u =>
+            await UpdateUserAsync(_user with
             {
-                u.Nameid = _edit.Nameid!;
-                u.FirstName = string.IsNullOrWhiteSpace(_edit.FirstName) ? null : _edit.FirstName;
-                u.LastName = string.IsNullOrWhiteSpace(_edit.LastName) ? null : _edit.LastName;
-                u.Description = _edit.Description ?? string.Empty;
+                Nameid = _edit.Nameid!,
+                FirstName = string.IsNullOrWhiteSpace(_edit.FirstName) ? null : _edit.FirstName,
+                LastName = string.IsNullOrWhiteSpace(_edit.LastName) ? null : _edit.LastName,
+                Description = _edit.Description ?? string.Empty
             });
             await LoadUserAsync();
         }, "Failed to save.");
-        await LoadTreeAsync();
+        await ReloadTreesAsync();
     }
 
     private void OpenDelete()
@@ -724,13 +754,13 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         if (_user is null) return;
         var ok = await _delete.RunAsync(async () =>
         {
-            await UserManager.DeleteAsync(_user.Guid);
+            (await UserClient.DeleteAsync(_user.Guid)).EnsureSuccess("Failed to delete user.");
             Navigation.NavigateTo("/entities/users");
         }, "Failed to delete.");
         if (ok)
         {
             _deleteOpen = false;
-            await LoadTreeAsync();
+            await ReloadTreesAsync();
         }
     }
 
@@ -740,9 +770,10 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         var target = !_user.IsActive;
         await _toggle.RunAsync(async () =>
         {
-            await _user.UpdateAsync(u => u.IsActive = target);
+            await UpdateUserAsync(_user with { IsActive = target });
             await LoadUserAsync();
         }, "Failed to update status.");
+        await ReloadTreesAsync();
     }
 
     private void OpenCreateUser()
@@ -756,8 +787,10 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
     {
         var ok = await _createUser.RunAsync(async () =>
         {
-            var user = await UserManager.CreateAsync(_createUserForm.Nameid!, _createUserForm.Password!);
-            Navigation.NavigateTo($"/entities/users/{user.Guid}", forceLoad: true);
+            var userGuid = (await UserClient.CreateAsync(new UserCreateRequest(_createUserForm.Nameid!, _createUserForm.Password!)))
+                .Unwrap("Failed to create user.");
+            await ReloadTreesAsync();
+            Navigation.NavigateTo($"/entities/users/{userGuid}");
         }, "Failed to create.");
         if (ok) _createUserOpen = false;
     }
@@ -768,31 +801,31 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         _addToGroupOpen = true;
     }
 
-    private async Task AddToGroupAsync(UserGroup group)
+    private async Task AddToGroupAsync(UserGroupInfo group)
     {
         _addToGroupOpen = false;
         if (_user is null) return;
         await _groupOp.RunAsync(async () =>
         {
-            var result = await _user.AddUserGroupAsync(group.Guid);
+            var result = await UserClient.AddUserGroupAsync(_user.Guid, group.Guid);
             if (!result.IsSuccess)
                 throw new Exception(result.Error?.Detail ?? "Failed to add to group.");
-            await LoadGroupsForUserAsync();
+            await LoadUserAsync();
         }, "Failed to add to group.");
-        await LoadTreeAsync();
+        await ReloadTreesAsync();
     }
 
-    private async Task RemoveFromGroupAsync(UserGroup group)
+    private async Task RemoveFromGroupAsync(UserGroupInfo group)
     {
         if (_user is null) return;
         await _groupOp.RunAsync(async () =>
         {
-            var result = await _user.RemoveUserGroupAsync(group.Guid);
+            var result = await UserClient.RemoveUserGroupAsync(_user.Guid, group.Guid);
             if (!result.IsSuccess)
                 throw new Exception(result.Error?.Detail ?? "Failed to remove from group.");
-            await LoadGroupsForUserAsync();
+            await LoadUserAsync();
         }, "Failed to remove from group.");
-        await LoadTreeAsync();
+        await ReloadTreesAsync();
     }
 
     // ── Permissions ─────────────────────────────────────────────────────────
@@ -803,7 +836,10 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         var perms = _userPermissions.ToList();
         await _permSave.RunAsync(async () =>
         {
-            await _user.UpdateAsync(u => u.Permissions = perms);
+            await UpdateUserAsync(_user with
+            {
+                Permissions = perms.Select(static action => new PermissionInfo(Guid.Empty, action)).ToArray()
+            });
         }, "Failed to save permissions.");
     }
 
@@ -813,7 +849,10 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
         var perms = _groupPermissions.ToList();
         await _groupPermSave.RunAsync(async () =>
         {
-            await _group.UpdateAsync(g => g.Permissions = perms);
+            await UpdateGroupAsync(_group with
+            {
+                Permissions = perms.Select(static action => new PermissionInfo(Guid.Empty, action)).ToArray()
+            });
         }, "Failed to save permissions.");
     }
 
@@ -825,6 +864,45 @@ StringComparer.OrdinalIgnoreCase).Select(TreeSidebarNode.FromUser));
 
     private static string FormatPermission(ActionType action) =>
         System.Text.RegularExpressions.Regex.Replace(action.ToString(), "(?<=[a-z])(?=[A-Z])", " ");
+
+    private async Task UpdateUserAsync(UserInfo user)
+    {
+        (await UserClient.UpdateAsync(
+            user.Guid,
+            new UserUpdateRequest(
+                user.Nameid,
+                user.FirstName,
+                user.LastName,
+                user.Description,
+                Password: null,
+                user.IsActive,
+                user.Permissions.Select(static p => new PermissionUpdateRequest(p.Action)).ToArray(),
+                user.DefaultPasswordExpirationPeriod,
+                user.PartitionAccesses,
+                user.UserGroups))).EnsureSuccess("Failed to update user.");
+    }
+
+    private async Task UpdateGroupAsync(UserGroupInfo group)
+    {
+        (await UserGroupClient.UpdateAsync(
+            group.Guid,
+            new UserGroupUpdateRequest(
+                group.Nameid,
+                group.Description,
+                group.IsActive,
+                group.Permissions.Select(static p => new PermissionUpdateRequest(p.Action)).ToArray(),
+                group.Partitions))).EnsureSuccess("Failed to update user group.");
+    }
+
+    private async Task ReloadTreesAsync()
+    {
+        await LoadTreeAsync();
+
+        if (_partitionTree is not null)
+        {
+            await _partitionTree.ReloadAsync();
+        }
+    }
 
     // ── Forms ────────────────────────────────────────────────────────────────
 

@@ -1,5 +1,9 @@
 ﻿@page "/Error"
+@using Fargo.Sdk
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Microsoft.AspNetCore.Http
+@using System.Diagnostics
 
 <PageTitle>Error</PageTitle>
 
@@ -33,6 +37,6 @@
 
     protected override void OnInitialized()
     {
-        // requestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+        requestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
     }
 }

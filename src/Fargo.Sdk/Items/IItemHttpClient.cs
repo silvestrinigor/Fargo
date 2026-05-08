@@ -1,4 +1,5 @@
-using Fargo.Sdk.Partitions;
+using Fargo.Sdk.Contracts.Items;
+using Fargo.Sdk.Contracts.Partitions;
 
 namespace Fargo.Sdk.Items;
 
@@ -9,30 +10,30 @@ public interface IItemHttpClient
     /// <param name="itemGuid">The unique identifier of the item.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<ItemResult>> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<ItemInfo>> GetAsync(Guid itemGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     /// <summary>Retrieves a paged, optionally filtered list of items.</summary>
-    /// <param name="articleGuid">Filter to items of this article.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
-    /// <param name="partitionGuid">Filter to items in this partition.</param>
-    /// <param name="noPartition">When <see langword="true"/>, returns only items without a partition.</param>
+    /// <param name="insideAnyOfThisPartitions">Filters to items inside any of these partitions.</param>
+    /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes items without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<ItemResult>>> GetManyAsync(Guid? articleGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, Guid? partitionGuid = null, bool? noPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<ItemInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new item for the specified article and returns its assigned identifier.</summary>
-    /// <param name="articleGuid">The article this item is an instance of.</param>
-    /// <param name="firstPartition">An optional initial partition to assign.</param>
-    /// <param name="productionDate">An optional production date.</param>
+    /// <param name="request">The item creation request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> CreateAsync(Guid articleGuid, Guid? firstPartition = null, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<Guid>> CreateAsync(ItemCreateRequest request, CancellationToken cancellationToken = default);
 
-    /// <summary>Updates an existing item.</summary>
+    /// <summary>Replaces an existing item (full PUT semantics).</summary>
     /// <param name="itemGuid">The unique identifier of the item to update.</param>
-    /// <param name="productionDate">The new production date, or <see langword="null"/> to leave unchanged.</param>
+    /// <param name="request">The item update request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid itemGuid, DateTimeOffset? productionDate = null, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
+        Guid itemGuid,
+        ItemUpdateRequest request,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an item by its unique identifier.</summary>
     /// <param name="itemGuid">The unique identifier of the item to delete.</param>
@@ -54,5 +55,5 @@ public interface IItemHttpClient
     /// <summary>Returns the partitions assigned to an item.</summary>
     /// <param name="itemGuid">The unique identifier of the item.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<PartitionResult>>> GetPartitionsAsync(Guid itemGuid, CancellationToken cancellationToken = default);
+    Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetPartitionsAsync(Guid itemGuid, CancellationToken cancellationToken = default);
 }

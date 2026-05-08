@@ -117,18 +117,4 @@ public enum ActionType
     /// </summary>
     RemoveBarcode = 18,
 
-    /// <summary>
-    /// Allows creating new API clients.
-    /// </summary>
-    CreateApiClient = 19,
-
-    /// <summary>
-    /// Allows deleting existing API clients.
-    /// </summary>
-    DeleteApiClient = 20,
-
-    /// <summary>
-    /// Allows editing existing API clients.
-    /// </summary>
-    EditApiClient = 21,
 }

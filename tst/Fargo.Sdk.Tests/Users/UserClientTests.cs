@@ -7,12 +7,12 @@ namespace Fargo.Sdk.Tests.Users;
 
 public sealed class UserClientTests
 {
-    private readonly IFargoSdkHttpClient httpClient = Substitute.For<IFargoSdkHttpClient>();
-    private readonly UserClient sut;
+    private readonly IFargoHttpClient httpClient = Substitute.For<IFargoHttpClient>();
+    private readonly UserHttpClient sut;
 
     public UserClientTests()
     {
-        sut = new UserClient(httpClient);
+        sut = new UserHttpClient(httpClient);
     }
 
     // --- GetAsync ---
@@ -20,10 +20,10 @@ public sealed class UserClientTests
     [Fact]
     public async Task GetAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
-        var userResult = Fakes.UserResult();
+        var userResult = Fakes.UserInfo();
         httpClient
-            .GetAsync<Fargo.Sdk.Contracts.Users.UserDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserDto>(true, userResult, null, HttpStatusCode.OK));
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(true, userResult, null, HttpStatusCode.OK));
 
         var result = await sut.GetAsync(userResult.Guid);
 
@@ -36,8 +36,8 @@ public sealed class UserClientTests
     public async Task GetAsync_Should_ReturnNotFound_When_ProblemTypeIsUserNotFound()
     {
         httpClient
-            .GetAsync<Fargo.Sdk.Contracts.Users.UserDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserDto>(false, null, Fakes.Problem("user/not-found"), HttpStatusCode.NotFound));
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, Fakes.Problem("user/not-found"), HttpStatusCode.NotFound));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -49,8 +49,8 @@ public sealed class UserClientTests
     public async Task GetAsync_Should_ReturnUnauthorizedAccess_When_ProblemTypeIsUnauthorized()
     {
         httpClient
-            .GetAsync<Fargo.Sdk.Contracts.Users.UserDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserDto>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, Fakes.Problem("auth/unauthorized"), HttpStatusCode.Unauthorized));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -62,8 +62,8 @@ public sealed class UserClientTests
     public async Task GetAsync_Should_ReturnForbidden_When_ProblemTypeIsUserForbidden()
     {
         httpClient
-            .GetAsync<Fargo.Sdk.Contracts.Users.UserDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserDto>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, Fakes.Problem("user/forbidden"), HttpStatusCode.Forbidden));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -75,8 +75,8 @@ public sealed class UserClientTests
     public async Task GetAsync_Should_ReturnUndefined_When_ProblemTypeIsUnknown()
     {
         httpClient
-            .GetAsync<Fargo.Sdk.Contracts.Users.UserDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserDto>(false, null, Fakes.Problem("server/internal-error"), HttpStatusCode.InternalServerError));
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, Fakes.Problem("server/internal-error"), HttpStatusCode.InternalServerError));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -88,8 +88,8 @@ public sealed class UserClientTests
     public async Task GetAsync_Should_ReturnFallbackDetail_When_ProblemDetailsIsNull()
     {
         httpClient
-            .GetAsync<Fargo.Sdk.Contracts.Users.UserDto>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserDto>(false, null, null, HttpStatusCode.InternalServerError));
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, null, HttpStatusCode.InternalServerError));
 
         var result = await sut.GetAsync(Guid.NewGuid());
 
@@ -98,15 +98,30 @@ public sealed class UserClientTests
         Assert.Equal("An unexpected error occurred.", result.Error.Detail);
     }
 
+    [Fact]
+    public async Task GetAsync_Should_ReturnNotFound_When_ResponseIsEmptyNotFound()
+    {
+        httpClient
+            .GetAsync<Fargo.Sdk.Contracts.Users.UserInfo>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<Fargo.Sdk.Contracts.Users.UserInfo>(false, null, null, HttpStatusCode.NotFound));
+
+        var result = await sut.GetAsync(Guid.NewGuid());
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.Equal(404, result.Error.StatusCode);
+        Assert.Equal("The requested resource was not found.", result.Error.Detail);
+    }
+
     // --- GetManyAsync ---
 
     [Fact]
     public async Task GetManyAsync_Should_ReturnUsers_When_HttpResponseIsSuccess()
     {
-        IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto> users = [Fakes.UserResult(), Fakes.UserResult()];
+        IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo> users = [Fakes.UserInfo(), Fakes.UserInfo()];
         httpClient
-            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto>>(true, users, null, HttpStatusCode.OK));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(true, users, null, HttpStatusCode.OK));
 
         var result = await sut.GetManyAsync();
 
@@ -118,8 +133,8 @@ public sealed class UserClientTests
     public async Task GetManyAsync_Should_ReturnEmptyCollection_When_DataIsNull()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto>>(true, null, null, HttpStatusCode.NoContent));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.GetManyAsync();
 
@@ -131,8 +146,8 @@ public sealed class UserClientTests
     public async Task GetManyAsync_Should_ReturnForbidden_When_ProblemTypeIsPartitionAccessDenied()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserDto>>(false, null, Fakes.Problem("partition/access-denied"), HttpStatusCode.Forbidden));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Users.UserInfo>>(false, null, Fakes.Problem("partition/access-denied"), HttpStatusCode.Forbidden));
 
         var result = await sut.GetManyAsync();
 
@@ -146,11 +161,12 @@ public sealed class UserClientTests
     public async Task CreateAsync_Should_ReturnGuid_When_HttpResponseIsSuccess()
     {
         var guid = Guid.NewGuid();
+        var request = new Fargo.Sdk.Contracts.Users.UserCreateRequest("newuser", "password");
         httpClient
-            .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserCreateRequest>(), Arg.Any<CancellationToken>())
+            .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(true, guid, null, HttpStatusCode.Created));
 
-        var result = await sut.CreateAsync("newuser", "password");
+        var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(guid, result.Data);
@@ -163,7 +179,7 @@ public sealed class UserClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("request/invalid"), HttpStatusCode.BadRequest));
 
-        var result = await sut.CreateAsync(string.Empty, "password");
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Users.UserCreateRequest(string.Empty, "password"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
@@ -176,7 +192,7 @@ public sealed class UserClientTests
             .PostFromJsonAsync<Fargo.Sdk.Contracts.Users.UserCreateRequest, Guid>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserCreateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<Guid>(false, default, Fakes.Problem("user/nameid-already-exists"), HttpStatusCode.Conflict));
 
-        var result = await sut.CreateAsync("existinguser", "password");
+        var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Users.UserCreateRequest("existinguser", "password"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.Conflict, result.Error!.Type);
@@ -187,11 +203,12 @@ public sealed class UserClientTests
     [Fact]
     public async Task UpdateAsync_Should_ReturnSuccess_When_HttpResponseIsSuccess()
     {
+        var request = new Fargo.Sdk.Contracts.Users.UserUpdateRequest("newuser");
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Is(request), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(true, null, null, HttpStatusCode.NoContent));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "newuser");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), request);
 
         Assert.True(result.IsSuccess);
     }
@@ -200,10 +217,10 @@ public sealed class UserClientTests
     public async Task UpdateAsync_Should_ReturnNotFound_When_UserDoesNotExist()
     {
         httpClient
-            .PatchJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(), Arg.Any<CancellationToken>())
+            .PutJsonAsync<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(Arg.Any<string>(), Arg.Any<Fargo.Sdk.Contracts.Users.UserUpdateRequest>(), Arg.Any<CancellationToken>())
             .Returns(new FargoSdkHttpResponse<EmptyResult>(false, null, Fakes.Problem("user/not-found"), HttpStatusCode.NotFound));
 
-        var result = await sut.UpdateAsync(Guid.NewGuid(), "newuser");
+        var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Users.UserUpdateRequest("newuser"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
@@ -241,10 +258,10 @@ public sealed class UserClientTests
     [Fact]
     public async Task GetPartitionsAsync_Should_ReturnPartitions_When_HttpResponseIsSuccess()
     {
-        IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto> partitions = [Fakes.PartitionResult()];
+        IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo> partitions = [Fakes.PartitionInfo()];
         httpClient
-            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(true, partitions, null, HttpStatusCode.OK));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo>>(true, partitions, null, HttpStatusCode.OK));
 
         var result = await sut.GetPartitionsAsync(Guid.NewGuid());
 
@@ -256,8 +273,8 @@ public sealed class UserClientTests
     public async Task GetPartitionsAsync_Should_ReturnEmptyCollection_When_DataIsNull()
     {
         httpClient
-            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionDto>>(true, null, null, HttpStatusCode.NoContent));
+            .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new FargoSdkHttpResponse<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo>>(true, null, null, HttpStatusCode.NoContent));
 
         var result = await sut.GetPartitionsAsync(Guid.NewGuid());
 
@@ -267,11 +284,11 @@ public sealed class UserClientTests
 
     private static class Fakes
     {
-        public static Fargo.Sdk.Contracts.Users.UserDto UserResult() =>
+        public static Fargo.Sdk.Contracts.Users.UserInfo UserInfo() =>
             new(Guid.NewGuid(), "testuser", null, null, string.Empty,
-                TimeSpan.Zero, DateTimeOffset.UtcNow.AddYears(1), true, [], []);
+                TimeSpan.Zero, DateTimeOffset.UtcNow.AddYears(1), true, [], [], []);
 
-        public static Fargo.Sdk.Contracts.Partitions.PartitionDto PartitionResult() =>
+        public static Fargo.Sdk.Contracts.Partitions.PartitionInfo PartitionInfo() =>
             new(Guid.NewGuid(), "Test Partition", "A test partition", null, true);
 
         public static FargoProblemDetails Problem(string type, string detail = "An error occurred.") =>

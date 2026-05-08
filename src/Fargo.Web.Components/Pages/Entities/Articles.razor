@@ -1,9 +1,12 @@
 @page "/entities/articles"
 @page "/entities/articles/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
 @using Fargo.Sdk.Articles
-@inject IArticleManager ArticleManager
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
+@using Microsoft.AspNetCore.Components.Forms
+@inject IArticleHttpClient ArticleClient
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Articles</PageTitle>
@@ -17,11 +20,12 @@
     <Explorer>
         @if (_partitionView)
         {
-            <PartitionEntityTree EntitySection="articles" NavigationBase="/entities/articles" />
+            <PartitionEntityTree @ref="_partitionTree" EntitySection="articles" NavigationBase="/entities/articles" />
         }
         else
         {
-            <EntityTreeView TEntity="Article"
+            <EntityTreeView TEntity="ArticleInfo"
+                            @ref="_articleTree"
                             Loader="LoadArticlesAsync"
                             ToNode="TreeSidebarNode.FromArticle"
                             NavigationBase="/entities/articles"
@@ -37,7 +41,9 @@
         }
         else
         {
-            <ArticleTabs EntityGuid="EntityGuid.Value" />
+            <ArticleTabs EntityGuid="EntityGuid.Value"
+                         OnChanged="RefreshExplorerAsync"
+                         OnDeleted="RefreshExplorerAsync" />
         }
     </Detail>
 </EntitiesShell>
@@ -60,12 +66,15 @@
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
+    private EntityTreeView<ArticleInfo>? _articleTree;
+    private PartitionEntityTree? _partitionTree;
     private bool _partitionView;
     private bool _createOpen;
     private CreateForm _createForm = new();
     private readonly AsyncState _create = new();
 
-    private async Task<IEnumerable<Article>> LoadArticlesAsync() => await ArticleManager.GetManyAsync();
+    private async Task<IEnumerable<ArticleInfo>> LoadArticlesAsync()
+        => (await ArticleClient.GetManyAsync()).Unwrap("Failed to load articles.");
 
     private void OpenCreate()
     {
@@ -78,11 +87,25 @@
     {
         var ok = await _create.RunAsync(async () =>
         {
-            var article = await ArticleManager.CreateAsync(_createForm.Name!);
-            Navigation.NavigateTo($"/entities/articles/{article.Guid}", forceLoad: true);
+            var articleGuid = (await ArticleClient.CreateAsync(new ArticleCreateRequest(_createForm.Name!))).Unwrap("Failed to create article.");
+            await RefreshExplorerAsync();
+            Navigation.NavigateTo($"/entities/articles/{articleGuid}");
         }, "Failed to create.");
 
         if (ok) _createOpen = false;
+    }
+
+    private async Task RefreshExplorerAsync()
+    {
+        if (_articleTree is not null)
+        {
+            await _articleTree.ReloadAsync();
+        }
+
+        if (_partitionTree is not null)
+        {
+            await _partitionTree.ReloadAsync();
+        }
     }
 
     private sealed class CreateForm

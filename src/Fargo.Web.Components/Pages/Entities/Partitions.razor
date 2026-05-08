@@ -1,15 +1,18 @@
 @page "/entities/partitions"
 @page "/entities/partitions/{EntityGuid:guid}"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Forms
-@using Fargo.Sdk.Partitions
+@using Fargo.Sdk
 @using Fargo.Sdk.Articles
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Items
+@using Fargo.Sdk.Partitions
 @using Fargo.Sdk.Users
-@inject IPartitionManager PartitionManager
-@inject IArticleManager Articles
-@inject IItemManager Items
-@inject IUserManager Users
+@using Microsoft.AspNetCore.Components.Forms
+@inject IPartitionHttpClient PartitionClient
+@inject IArticleHttpClient ArticleClient
+@inject IItemHttpClient ItemClient
+@inject IUserHttpClient UserClient
 @inject NavigationManager Navigation
 
 <PageTitle>Fargo · Partitions</PageTitle>
@@ -206,10 +209,10 @@
     }
 </ConfirmDialog>
 
-<EntityPickerDialog TEntity="Article"
+<EntityPickerDialog TEntity="ArticleInfo"
                     IsOpen="_addArticleOpen"
                     Title="Add Article"
-                    Loader="s => Articles.GetManyAsync(search: s)"
+                    Loader="LoadArticlesForPickerAsync"
                     ColumnHeaders='["Name"]'
                     OnSelected="AddArticleAsync"
                     OnCancel="() => _addArticleOpen = false">
@@ -218,10 +221,10 @@
     </RowTemplate>
 </EntityPickerDialog>
 
-<EntityPickerDialog TEntity="Item"
+<EntityPickerDialog TEntity="ItemInfo"
                     IsOpen="_addItemOpen"
                     Title="Add Item"
-                    Loader="async _ => (IReadOnlyCollection<Item>)await Items.GetManyAsync()"
+                    Loader="LoadItemsForPickerAsync"
                     ColumnHeaders='["Item", "Article"]'
                     OnSelected="AddItemAsync"
                     OnCancel="() => _addItemOpen = false">
@@ -231,10 +234,10 @@
     </RowTemplate>
 </EntityPickerDialog>
 
-<EntityPickerDialog TEntity="User"
+<EntityPickerDialog TEntity="UserInfo"
                     IsOpen="_addUserOpen"
                     Title="Add User"
-                    Loader="s => Users.GetManyAsync(search: s)"
+                    Loader="LoadUsersForPickerAsync"
                     ColumnHeaders='["Name"]'
                     OnSelected="AddUserAsync"
                     OnCancel="() => _addUserOpen = false">
@@ -250,7 +253,7 @@
     private PartitionAllEntitiesTree? _allEntitiesTree;
     private bool _entityView;
 
-    private Partition? _partition;
+    private PartitionInfo? _partition;
     private Guid? _loadedGuid;
     private EditModel _edit = new();
     private string? _origName;
@@ -314,7 +317,7 @@
 
         await _load.RunAsync(async () =>
         {
-            _partition = await PartitionManager.GetAsync(EntityGuid!.Value);
+            _partition = (await PartitionClient.GetAsync(EntityGuid!.Value)).Unwrap("Failed to load partition.");
             _edit.Name = _partition.Name;
             _edit.Description = _partition.Description;
             _edit.ParentGuid = _partition.ParentPartitionGuid?.ToString();
@@ -339,9 +342,9 @@
 
         try
         {
-            var articles = await Articles.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
-            var items = await Items.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
-            var users = await Users.GetManyAsync(partitionGuid: partitionGuid, limit: 200);
+            var articles = (await ArticleClient.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid], limit: 200)).Unwrap("Failed to load articles.");
+            var items = (await ItemClient.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid], limit: 200)).Unwrap("Failed to load items.");
+            var users = (await UserClient.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid], limit: 200)).Unwrap("Failed to load users.");
 
             _entityItems.AddRange(articles.Select(a => new PartitionEntityRow(
                 a.Guid, a.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article)));
@@ -362,37 +365,65 @@
         }
     }
 
+    private async Task<IReadOnlyCollection<ArticleInfo>> LoadArticlesForPickerAsync(string? search)
+    {
+        var articles = (await ArticleClient.GetManyAsync()).Unwrap("Failed to load articles.");
+        return string.IsNullOrWhiteSpace(search)
+            ? articles
+            : [.. articles.Where(article => article.Name.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
+
+    private async Task<IReadOnlyCollection<ItemInfo>> LoadItemsForPickerAsync(string? search)
+    {
+        var items = (await ItemClient.GetManyAsync()).Unwrap("Failed to load items.");
+        return string.IsNullOrWhiteSpace(search)
+            ? items
+            : [.. items.Where(item =>
+                item.Guid.ToString("N").Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                item.ArticleGuid.ToString("N").Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
+
+    private async Task<IReadOnlyCollection<UserInfo>> LoadUsersForPickerAsync(string? search)
+    {
+        var users = (await UserClient.GetManyAsync()).Unwrap("Failed to load users.");
+        return string.IsNullOrWhiteSpace(search)
+            ? users
+            : [.. users.Where(user => user.Nameid.Contains(search, StringComparison.OrdinalIgnoreCase))];
+    }
+
     private async Task RemoveEntityAsync(PartitionEntityRow row)
     {
         if (!EntityGuid.HasValue) return;
 
         try
         {
-            FargoSdkResponse<EmptyResult> result;
+            FargoSdkResponse<EmptyResult>? result = null;
 
             switch (row.Type)
             {
                 case EntityType.Article:
-                    var article = await Articles.GetAsync(row.EntityGuid);
-                    result = await article.RemovePartitionAsync(EntityGuid.Value);
+                    var article = (await ArticleClient.GetAsync(row.EntityGuid)).Unwrap("Failed to load article.");
+                    var articlePartitions = article.Partitions.Where(p => p != EntityGuid.Value).ToArray();
+                    await UpdateArticlePartitionsAsync(article, articlePartitions);
                     break;
                 case EntityType.Item:
-                    var item = await Items.GetAsync(row.EntityGuid);
-                    result = await item.RemovePartitionAsync(EntityGuid.Value);
+                    var item = (await ItemClient.GetAsync(row.EntityGuid)).Unwrap("Failed to load item.");
+                    result = await ItemClient.RemovePartitionAsync(item.Guid, EntityGuid.Value);
                     break;
                 case EntityType.User:
-                    var user = await Users.GetAsync(row.EntityGuid);
-                    result = await user.RemovePartitionAsync(EntityGuid.Value);
+                    var user = (await UserClient.GetAsync(row.EntityGuid)).Unwrap("Failed to load user.");
+                    result = await UserClient.RemovePartitionAsync(user.Guid, EntityGuid.Value);
                     break;
                 default:
                     return;
             }
 
-            if (result.IsSuccess)
+            if (result is null || result.IsSuccess)
             {
                 _entityItems.Remove(row);
                 if (_entityPage > _entityTotalPages && _entityPage > 1)
                     _entityPage--;
+                await ReloadPartitionTreesAsync();
             }
             else
             {
@@ -405,26 +436,22 @@
         }
     }
 
-    private async Task AddArticleAsync(Article article)
+    private async Task AddArticleAsync(ArticleInfo article)
     {
         _addArticleOpen = false;
         if (!EntityGuid.HasValue) return;
 
         try
         {
-            var result = await article.AddPartitionAsync(EntityGuid.Value);
-            if (result.IsSuccess)
+            var newPartitions = article.Partitions.Append(EntityGuid.Value).Distinct().ToArray();
+            await UpdateArticlePartitionsAsync(article, newPartitions);
+
+            if (!_entityItems.Any(r => r.EntityGuid == article.Guid && r.Type == EntityType.Article))
             {
-                if (!_entityItems.Any(r => r.EntityGuid == article.Guid))
-                {
-                    _entityItems.Add(new PartitionEntityRow(article.Guid, article.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article));
-                    _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
-                }
+                _entityItems.Add(new PartitionEntityRow(article.Guid, article.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article));
+                _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
             }
-            else
-            {
-                _entityListError = result.Error?.Detail ?? "Failed to add article.";
-            }
+            await ReloadPartitionTreesAsync();
         }
         catch (FargoSdkApiException ex)
         {
@@ -432,21 +459,22 @@
         }
     }
 
-    private async Task AddItemAsync(Item item)
+    private async Task AddItemAsync(ItemInfo item)
     {
         _addItemOpen = false;
         if (!EntityGuid.HasValue) return;
 
         try
         {
-            var result = await item.AddPartitionAsync(EntityGuid.Value);
+            var result = await ItemClient.AddPartitionAsync(item.Guid, EntityGuid.Value);
             if (result.IsSuccess)
             {
-                if (!_entityItems.Any(r => r.EntityGuid == item.Guid))
+                if (!_entityItems.Any(r => r.EntityGuid == item.Guid && r.Type == EntityType.Item))
                 {
                     _entityItems.Add(new PartitionEntityRow(item.Guid, item.Guid.ToString("N")[..8], "item", TreeSidebarNode.Icons.Item, EntityType.Item));
                     _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
                 }
+                await ReloadPartitionTreesAsync();
             }
             else
             {
@@ -459,21 +487,22 @@
         }
     }
 
-    private async Task AddUserAsync(User user)
+    private async Task AddUserAsync(UserInfo user)
     {
         _addUserOpen = false;
         if (!EntityGuid.HasValue) return;
 
         try
         {
-            var result = await user.AddPartitionAsync(EntityGuid.Value);
+            var result = await UserClient.AddPartitionAsync(user.Guid, EntityGuid.Value);
             if (result.IsSuccess)
             {
-                if (!_entityItems.Any(r => r.EntityGuid == user.Guid))
+                if (!_entityItems.Any(r => r.EntityGuid == user.Guid && r.Type == EntityType.User))
                 {
                     _entityItems.Add(new PartitionEntityRow(user.Guid, user.Nameid, "user", TreeSidebarNode.Icons.User, EntityType.User));
                     _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
                 }
+                await ReloadPartitionTreesAsync();
             }
             else
             {
@@ -493,9 +522,12 @@
         await _save.RunAsync(async () =>
         {
             Guid? movedToParent = null;
+            var parentChanged = false;
+            Guid? parentAfterSave = _partition.ParentPartitionGuid;
 
             if (!_isGlobal && (_edit.ParentGuid ?? "") != (_origParent ?? ""))
             {
+                parentChanged = true;
                 Guid? newParent = string.IsNullOrWhiteSpace(_edit.ParentGuid)
                     ? null
                     : Guid.TryParse(_edit.ParentGuid, out var parsed) ? parsed : null;
@@ -505,24 +537,27 @@
                     throw new InvalidOperationException("Parent partition GUID is not valid.");
                 }
 
-                var moveResult = await _partition.MoveAsync(newParent!.Value);
+                var moveResult = await PartitionClient.UpdateAsync(
+                    _partition.Guid,
+                    new PartitionUpdateRequest(ParentPartitionGuid: newParent));
                 if (!moveResult.IsSuccess)
                 {
                     throw new InvalidOperationException(moveResult.Error?.Detail ?? "Failed to move partition.");
                 }
 
                 movedToParent = newParent;
+                parentAfterSave = newParent;
             }
 
-            await _partition.UpdateAsync(p =>
-            {
-                if (!_isGlobal && _edit.Name is not null)
-                    p.Name = _edit.Name;
-                p.Description = _edit.Description ?? string.Empty;
-                p.IsActive = _edit.IsActive;
-            });
+            (await PartitionClient.UpdateAsync(
+                _partition.Guid,
+                new PartitionUpdateRequest(
+                    !_isGlobal ? _edit.Name : null,
+                    _edit.Description ?? string.Empty,
+                    parentAfterSave,
+                    _edit.IsActive))).EnsureSuccess("Failed to update partition.");
 
-            if (movedToParent.HasValue)
+            if (parentChanged && movedToParent.HasValue)
             {
                 _tree?.NotifyMoved(EntityGuid!.Value, movedToParent.Value);
                 _allEntitiesTree?.NotifyMoved(EntityGuid!.Value, movedToParent.Value);
@@ -532,6 +567,7 @@
             _allEntitiesTree?.NotifyUpdated(EntityGuid!.Value, _edit.Name ?? _partition.Name, _edit.IsActive);
 
             await LoadAsync();
+            await ReloadPartitionTreesAsync();
         }, "Failed to save.");
     }
 
@@ -547,13 +583,14 @@
         var ok = await _create.RunAsync(async () =>
         {
             var parentGuid = EntityGuid;
-            var partition = await PartitionManager.CreateAsync(
-                _createForm.Name!,
-                parentPartitionGuid: parentGuid);
+            var partitionGuid = (await PartitionClient.CreateAsync(
+                new PartitionCreateRequest(_createForm.Name!, ParentPartitionGuid: parentGuid))).Unwrap("Failed to create partition.");
+            var partition = (await PartitionClient.GetAsync(partitionGuid)).Unwrap("Failed to load partition.");
 
             _tree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
             _allEntitiesTree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
             Navigation.NavigateTo($"/entities/partitions/{partition.Guid}");
+            await ReloadPartitionTreesAsync();
         }, "Failed to create.");
 
         if (ok) _createOpen = false;
@@ -572,16 +609,44 @@
         var ok = await _delete.RunAsync(async () =>
         {
             var deletedGuid = EntityGuid.Value;
-            await PartitionManager.DeleteAsync(deletedGuid);
+            (await PartitionClient.DeleteAsync(deletedGuid)).EnsureSuccess("Failed to delete partition.");
             _tree?.NotifyDeleted(deletedGuid);
             _allEntitiesTree?.NotifyDeleted(deletedGuid);
             Navigation.NavigateTo("/entities/partitions");
+            await ReloadPartitionTreesAsync();
         }, "Failed to delete.");
 
         if (ok) _deleteOpen = false;
     }
 
+    private async Task ReloadPartitionTreesAsync()
+    {
+        if (_tree is not null)
+        {
+            await _tree.ReloadAsync();
+        }
+
+        if (_allEntitiesTree is not null)
+        {
+            await _allEntitiesTree.ReloadAsync();
+        }
+    }
+
     private enum EntityType { Article, Item, User }
+
+    private async Task UpdateArticlePartitionsAsync(ArticleInfo article, IReadOnlyCollection<Guid> partitions)
+    {
+        (await ArticleClient.UpdateAsync(
+            article.Guid,
+            new ArticleUpdateRequest(
+                article.Name,
+                article.Description,
+                article.Metrics,
+                article.ShelfLife,
+                partitions,
+                article.Barcodes,
+                article.IsActive))).EnsureSuccess("Failed to update article.");
+    }
 
     private sealed record PartitionEntityRow(Guid EntityGuid, string Title, string TypeLabel, string Icon, EntityType Type);
 

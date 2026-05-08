@@ -1,4 +1,5 @@
 @typeparam TEntity
+@implements IDisposable
 
 @if (IsOpen)
 {
@@ -79,6 +80,11 @@
             _search = null;
             await LoadAsync(null);
         }
+        else if (!IsOpen && _wasOpen)
+        {
+            ResetDialogState();
+        }
+
         _wasOpen = IsOpen;
     }
 
@@ -119,5 +125,21 @@
     private async Task HandleBackdropClick()
     {
         await OnCancel.InvokeAsync();
+    }
+
+    private void ResetDialogState()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+        _search = null;
+        _results.Clear();
+        _state.Clear();
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 }

@@ -25,6 +25,19 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.Property(x => x.ProductionDate).IsRequired(false);
 
+        builder.Property(x => x.ParentContainerGuid).IsRequired(false);
+
+        builder
+            .HasOne<Item>()
+            .WithMany()
+            .HasForeignKey(x => x.ParentContainerGuid)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(x => x.ParentContainerGuid);
+
+        builder.Ignore(x => x.ParentContainer);
+        builder.Ignore(x => x.Container);
+
         builder.HasMany(i => i.Partitions).WithMany(p => p.ItemMembers);
     }
 }

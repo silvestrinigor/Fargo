@@ -1,6 +1,8 @@
-using Fargo.Domain;
+using Fargo.Api.Articles;
+using Fargo.Application;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Security;
+using Fargo.Sdk.Contracts.Articles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -38,7 +40,6 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new FirstNameJsonConverter());
                 options.SerializerOptions.Converters.Add(new LastNameJsonConverter());
                 options.SerializerOptions.Converters.Add(new NameidJsonConverter());
-                options.SerializerOptions.Converters.Add(new NodeidJsonConverter());
                 options.SerializerOptions.Converters.Add(new MassJsonConverter());
                 options.SerializerOptions.Converters.Add(new LengthJsonConverter());
                 options.SerializerOptions.Converters.Add(new DensityJsonConverter());
@@ -89,6 +90,23 @@ public static class ServiceCollectionExtension
         }
 
         /// <summary>
+        /// Configures runtime routing options used by HTTP API endpoints.
+        /// </summary>
+        /// <returns>
+        /// The same <see cref="IServiceCollection"/> instance so that additional
+        /// calls can be chained.
+        /// </returns>
+        public IServiceCollection ConfigureFargoRouting()
+        {
+            services.Configure<RouteOptions>(options =>
+            {
+                options.ConstraintMap["barcode"] = typeof(ArticleBarcodeRouteConstraint);
+            });
+
+            return services;
+        }
+
+        /// <summary>
         /// Adds OpenAPI configuration including schema transformations
         /// for custom pagination value objects such as <see cref="Page"/> and <see cref="Limit"/>.
         /// </summary>
@@ -102,6 +120,13 @@ public static class ServiceCollectionExtension
             {
                 options.AddSchemaTransformer((schema, context, _) =>
                 {
+                    if (context.ParameterDescription?.Type == typeof(ArticleBarcode))
+                    {
+                        schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
+                        schema.Pattern = @".+:(Ean13|Ean8|UpcA|UpcE|Code128|Code39|Itf14|Gs1128|QrCode|DataMatrix)$";
+                        schema.Example = JsonValue.Create("7891234567895:Ean13");
+                    }
+
                     if (context.ParameterDescription?.Type == typeof(Page?))
                     {
                         schema.Type = Microsoft.OpenApi.JsonSchemaType.Integer;

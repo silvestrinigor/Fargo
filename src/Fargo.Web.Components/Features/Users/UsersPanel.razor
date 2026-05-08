@@ -1,7 +1,10 @@
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Forms
+@using Fargo.Sdk
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Users
-@inject IUserManager Users
+@using Microsoft.AspNetCore.Components.Forms
+@inject IUserHttpClient Users
 
 <div class="page-card">
     <div class="section-header">
@@ -116,7 +119,7 @@
 </ConfirmDialog>
 
 @code {
-    private readonly List<User> _users = [];
+    private readonly List<UserInfo> _users = [];
     private readonly AsyncState _load = new();
     private readonly AsyncState _save = new();
     private readonly AsyncState _delete = new();
@@ -124,7 +127,7 @@
     private bool _editorOpen;
     private bool _isEditing;
     private Guid? _editingUserGuid;
-    private User? _pendingDelete;
+    private UserInfo? _pendingDelete;
     private EditorModel _editor = new();
 
     protected override async Task OnInitializedAsync()
@@ -137,7 +140,7 @@
         await _load.RunAsync(async () =>
         {
             _users.Clear();
-            _users.AddRange(await Users.GetManyAsync());
+            _users.AddRange((await Users.GetManyAsync()).Unwrap("Failed to load users."));
         }, "Failed to load users.");
     }
 
@@ -150,7 +153,7 @@
         _editorOpen = true;
     }
 
-    private void OpenEdit(User user)
+    private void OpenEdit(UserInfo user)
     {
         _isEditing = true;
         _editingUserGuid = user.Guid;
@@ -182,23 +185,25 @@
                 var user = _users.FirstOrDefault(u => u.Guid == _editingUserGuid.Value);
                 if (user is not null)
                 {
-                    await user.UpdateAsync(u =>
+                    await UpdateUserAsync(user with
                     {
-                        u.Nameid = _editor.Nameid!;
-                        u.FirstName = string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName;
-                        u.LastName = string.IsNullOrWhiteSpace(_editor.LastName) ? null : _editor.LastName;
-                        u.Description = _editor.Description ?? string.Empty;
+                        Nameid = _editor.Nameid!,
+                        FirstName = string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName,
+                        LastName = string.IsNullOrWhiteSpace(_editor.LastName) ? null : _editor.LastName,
+                        Description = _editor.Description ?? string.Empty
                     });
                 }
             }
             else
             {
-                await Users.CreateAsync(
-                    _editor.Nameid!,
-                    _editor.Password!,
-                    string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName,
-                    string.IsNullOrWhiteSpace(_editor.LastName) ? null : _editor.LastName,
-                    string.IsNullOrWhiteSpace(_editor.Description) ? null : _editor.Description);
+                (await Users.CreateAsync(
+                    new UserCreateRequest(
+                        _editor.Nameid!,
+                        _editor.Password!,
+                        string.IsNullOrWhiteSpace(_editor.FirstName) ? null : _editor.FirstName,
+                        string.IsNullOrWhiteSpace(_editor.LastName) ? null : _editor.LastName,
+                        string.IsNullOrWhiteSpace(_editor.Description) ? null : _editor.Description)))
+                    .EnsureSuccess("Failed to create user.");
             }
 
             await LoadUsersAsync();
@@ -207,7 +212,7 @@
         if (ok) _editorOpen = false;
     }
 
-    private void OpenDelete(User user)
+    private void OpenDelete(UserInfo user)
     {
         _pendingDelete = user;
         _delete.Clear();
@@ -227,7 +232,7 @@
 
         var ok = await _delete.RunAsync(async () =>
         {
-            await Users.DeleteAsync(_pendingDelete.Guid);
+            (await Users.DeleteAsync(_pendingDelete.Guid)).EnsureSuccess("Failed to delete user.");
             await LoadUsersAsync();
         }, "Failed to delete user.");
 
@@ -247,5 +252,22 @@
 
         [Required(ErrorMessage = "Password is required when creating a user.")]
         public string? Password { get; set; }
+    }
+
+    private async Task UpdateUserAsync(UserInfo user)
+    {
+        (await Users.UpdateAsync(
+            user.Guid,
+            new UserUpdateRequest(
+                user.Nameid,
+                user.FirstName,
+                user.LastName,
+                user.Description,
+                Password: null,
+                user.IsActive,
+                user.Permissions.Select(static p => new PermissionUpdateRequest(p.Action)).ToArray(),
+                user.DefaultPasswordExpirationPeriod,
+                user.PartitionAccesses,
+                user.UserGroups))).EnsureSuccess("Failed to update user.");
     }
 }

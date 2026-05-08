@@ -5,6 +5,54 @@ using Fargo.Domain.Users;
 namespace Fargo.Domain.Partitions;
 
 /// <summary>
+/// Marker interface for domain entities that belong to one or more partitions.
+/// </summary>
+/// <remarks>
+/// Implementing this interface signals that an entity participates in the
+/// partition-based access control (PBAC) model, meaning its visibility and
+/// mutability are governed by the actor's partition access set.
+/// </remarks>
+public interface IPartitionEntity : IEntity;
+
+public interface IPartitioned
+{
+    IReadOnlyCollection<Guid> PartitionGuids { get; }
+}
+
+/// <summary>
+/// Represents an entity that is associated with one or more partitions.
+/// </summary>
+public interface IPartitionedEntity
+{
+    /// <summary>
+    /// Gets the partitions associated with the entity.
+    /// </summary>
+    IReadOnlyCollection<IPartitionEntity> Partitions { get; }
+}
+
+/// <summary>
+/// Represents an entity that has access to one or more partitions.
+/// </summary>
+public interface IPartitionUser
+{
+    /// <summary>
+    /// Gets the collection of partition accesses granted to the user.
+    /// </summary>
+    IReadOnlyCollection<IPartitionAccess> PartitionAccesses { get; }
+}
+
+/// <summary>
+/// Represents a user's access to a specific partition.
+/// </summary>
+public interface IPartitionAccess
+{
+    /// <summary>
+    /// Gets the partition associated with this access.
+    /// </summary>
+    Partition Partition { get; }
+}
+
+/// <summary>
 /// Represents a partition used to isolate and scope access to domain entities.
 /// </summary>
 /// <remarks>

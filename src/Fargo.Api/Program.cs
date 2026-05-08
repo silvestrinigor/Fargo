@@ -1,8 +1,11 @@
-using Fargo.Api;
+using Fargo.Api.Articles;
 using Fargo.Api.Extensions;
 using Fargo.Api.Hubs;
+using Fargo.Api.Items;
 using Fargo.Api.Middlewares;
-using Fargo.Application.Authentication;
+using Fargo.Api.Partitions;
+using Fargo.Api.UserGroups;
+using Fargo.Api.Users;
 using Fargo.Application.Events;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
@@ -20,19 +23,17 @@ builder.Services.AddResponseCompression(opts =>
 
 builder.AddServiceDefaults();
 
+builder.Services.ConfigureFargoRouting();
+
 builder.Services.AddFargoOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.ConfigureFargoHttpJsonOptions();
 
-builder.Services.AddFargoTreeInfrastructure();
-
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
 builder.Services.AddFargoAuthentication(builder.Configuration);
-
-builder.Services.Configure<ApiClientOptions>(builder.Configuration.GetSection(ApiClientOptions.SectionName));
 
 builder.Services.AddAuthorization();
 
@@ -42,8 +43,6 @@ app.UseResponseCompression();
 
 app.UseMiddleware<FargoExceptionMiddleware>();
 
-app.UseMiddleware<ApiClientMiddleware>();
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -52,8 +51,6 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.MapFargoApiClient();
 
 app.MapFargoArticle();
 
@@ -66,8 +63,6 @@ app.MapFargoUserGroup();
 app.MapFargoPartition();
 
 app.MapFargoEvent();
-
-app.MapFargoTree();
 
 app.MapFargoAuthentication();
 

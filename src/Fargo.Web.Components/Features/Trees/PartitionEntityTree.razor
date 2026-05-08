@@ -1,11 +1,14 @@
-@using Fargo.Sdk.Partitions
+@using Fargo.Sdk
 @using Fargo.Sdk.Articles
+@using Fargo.Sdk.Authentication
+@using Fargo.Sdk.Contracts
 @using Fargo.Sdk.Items
+@using Fargo.Sdk.Partitions
 @using Fargo.Sdk.Users
-@inject IPartitionManager Partitions
-@inject IArticleManager Articles
-@inject IItemManager Items
-@inject IUserManager Users
+@inject IPartitionHttpClient Partitions
+@inject IArticleHttpClient Articles
+@inject IItemHttpClient Items
+@inject IUserHttpClient Users
 @inject NavigationManager Navigation
 
 @if (!string.IsNullOrWhiteSpace(_errorMessage))
@@ -44,10 +47,10 @@ else
     private Guid? _selectedEntityGuid;
     private TreeSidebarNode? _dragging;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _selectedEntityGuid = ReadSelectedGuid();
-        _ = LoadAndRenderAsync();
+        await ReloadAsync();
     }
 
     protected override void OnParametersSet()
@@ -55,14 +58,14 @@ else
         _selectedEntityGuid = ReadSelectedGuid();
     }
 
-    private async Task LoadAndRenderAsync()
+    public async Task ReloadAsync()
     {
         _isLoading = true;
         _errorMessage = null;
 
         try
         {
-            var roots = await Partitions.GetManyAsync(rootOnly: true);
+            var roots = (await Partitions.GetManyAsync(rootOnly: true)).Unwrap("Failed to load partitions.");
             _rootNodes.Clear();
             _rootNodes.AddRange(roots.Select(TreeSidebarNode.FromPartition));
         }
@@ -89,7 +92,7 @@ else
 
         try
         {
-            var childPartitions = await Partitions.GetManyAsync(node.EntityGuid);
+            var childPartitions = (await Partitions.GetManyAsync(node.EntityGuid)).Unwrap("Failed to load partitions.");
             var entityNodes = await LoadEntityNodesForPartitionAsync(node.EntityGuid);
 
             node.Children.Clear();
@@ -117,7 +120,7 @@ else
         {
             case "articles":
             {
-                var articleList = await Articles.GetManyAsync(partitionGuid: partitionGuid);
+                var articleList = (await Articles.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid])).Unwrap("Failed to load articles.");
                 return articleList.Select(a =>
                 {
                     var n = TreeSidebarNode.FromArticle(a);
@@ -127,7 +130,7 @@ else
             }
             case "items":
             {
-                var itemList = await Items.GetManyAsync(partitionGuid: partitionGuid);
+                var itemList = (await Items.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid])).Unwrap("Failed to load items.");
                 return itemList.Select(i =>
                 {
                     var n = TreeSidebarNode.FromItem(i);
@@ -137,7 +140,7 @@ else
             }
             case "users":
             {
-                var userList = await Users.GetManyAsync(partitionGuid: partitionGuid);
+                var userList = (await Users.GetManyAsync(insideAnyOfThisPartitions: [partitionGuid])).Unwrap("Failed to load users.");
                 return userList.Select(u =>
                 {
                     var n = TreeSidebarNode.FromUser(u);
@@ -191,34 +194,35 @@ else
 
         try
         {
-            FargoSdkResponse<EmptyResult> addResult;
+            FargoSdkResponse<EmptyResult>? addResult = null;
             FargoSdkResponse<EmptyResult>? removeResult = null;
 
             switch (EntitySection)
             {
                 case "articles":
-                    var article = await Articles.GetAsync(source.EntityGuid);
-                    addResult = await article.AddPartitionAsync(target.EntityGuid);
-                    if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
-                        removeResult = await article.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                    var article = (await Articles.GetAsync(source.EntityGuid)).Unwrap("Failed to load article.");
+                    var articlePartitions = source.ContextPartitionGuid.HasValue
+                        ? article.Partitions.Where(p => p != source.ContextPartitionGuid.Value).Append(target.EntityGuid).Distinct().ToArray()
+                        : article.Partitions.Append(target.EntityGuid).Distinct().ToArray();
+                    await UpdateArticlePartitionsAsync(article, articlePartitions);
                     break;
                 case "items":
-                    var item = await Items.GetAsync(source.EntityGuid);
-                    addResult = await item.AddPartitionAsync(target.EntityGuid);
+                    var item = (await Items.GetAsync(source.EntityGuid)).Unwrap("Failed to load item.");
+                    addResult = await Items.AddPartitionAsync(item.Guid, target.EntityGuid);
                     if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
-                        removeResult = await item.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                        removeResult = await Items.RemovePartitionAsync(item.Guid, source.ContextPartitionGuid.Value);
                     break;
                 case "users":
-                    var user = await Users.GetAsync(source.EntityGuid);
-                    addResult = await user.AddPartitionAsync(target.EntityGuid);
+                    var user = (await Users.GetAsync(source.EntityGuid)).Unwrap("Failed to load user.");
+                    addResult = await Users.AddPartitionAsync(user.Guid, target.EntityGuid);
                     if (addResult.IsSuccess && source.ContextPartitionGuid.HasValue)
-                        removeResult = await user.RemovePartitionAsync(source.ContextPartitionGuid.Value);
+                        removeResult = await Users.RemovePartitionAsync(user.Guid, source.ContextPartitionGuid.Value);
                     break;
                 default:
                     return;
             }
 
-            if (!addResult.IsSuccess)
+            if (addResult is { IsSuccess: false })
             {
                 _errorMessage = addResult.Error?.Detail ?? "Failed to move entity.";
                 return;
@@ -250,6 +254,20 @@ else
         if (target.ChildrenLoaded)
             target.Children.Add(source);
         target.HasChildren = true;
+    }
+
+    private async Task UpdateArticlePartitionsAsync(ArticleInfo article, IReadOnlyCollection<Guid> partitions)
+    {
+        (await Articles.UpdateAsync(
+            article.Guid,
+            new ArticleUpdateRequest(
+                article.Name,
+                article.Description,
+                article.Metrics,
+                article.ShelfLife,
+                partitions,
+                article.Barcodes,
+                article.IsActive))).EnsureSuccess("Failed to update article.");
     }
 
     private List<TreeSidebarNode>? FindParentList(Guid guid, List<TreeSidebarNode> nodes)
