@@ -41,10 +41,10 @@ else
     private Guid? _selectedGuid;
     private TreeSidebarNode? _dragging;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _selectedGuid = ReadSelectedPartitionGuid();
-        _ = LoadAndRenderAsync();
+        await ReloadAsync();
     }
 
     protected override void OnParametersSet()
@@ -52,7 +52,7 @@ else
         _selectedGuid = ReadSelectedPartitionGuid();
     }
 
-    private async Task LoadAndRenderAsync()
+    public async Task ReloadAsync()
     {
         _isLoading = true;
         _errorMessage = null;

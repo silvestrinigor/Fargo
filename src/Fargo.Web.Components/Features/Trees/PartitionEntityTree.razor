@@ -47,10 +47,10 @@ else
     private Guid? _selectedEntityGuid;
     private TreeSidebarNode? _dragging;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _selectedEntityGuid = ReadSelectedGuid();
-        _ = LoadAndRenderAsync();
+        await ReloadAsync();
     }
 
     protected override void OnParametersSet()
@@ -58,7 +58,7 @@ else
         _selectedEntityGuid = ReadSelectedGuid();
     }
 
-    private async Task LoadAndRenderAsync()
+    public async Task ReloadAsync()
     {
         _isLoading = true;
         _errorMessage = null;

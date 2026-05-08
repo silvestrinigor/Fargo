@@ -23,7 +23,7 @@ else
         @foreach (var node in rootNodes.OrderBy(x => x.Title, StringComparer.OrdinalIgnoreCase))
         {
             <TreeSidebarNodeView Node="node" SelectedGuid="selectedPartitionGuid" OnToggle="ToggleAsync" OnSelect="Select"
-                                 OnDragStart="StartDrag" OnDrop="DropAsync" />
+                                 OnDragStart="StartDrag" OnDrop="DropAsync" AllowPartitionDrag="true" />
         }
     </ul>
 }
@@ -35,10 +35,10 @@ else
     private Guid? selectedPartitionGuid;
     private TreeSidebarNode? _dragging;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         selectedPartitionGuid = ReadSelectedGuid();
-        _ = LoadAndRenderAsync();
+        await ReloadAsync();
     }
 
     protected override void OnParametersSet()
@@ -46,7 +46,7 @@ else
         selectedPartitionGuid = ReadSelectedGuid();
     }
 
-    private async Task LoadAndRenderAsync()
+    public async Task ReloadAsync()
     {
         await LoadRootsAsync();
         await InvokeAsync(StateHasChanged);
@@ -197,6 +197,7 @@ else
             Title = name,
             Icon = TreeSidebarNode.Icons.Partition,
             IsActive = isActive,
+            IsPartitionNode = true,
             HasChildren = false
         };
 

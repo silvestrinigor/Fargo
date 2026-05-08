@@ -20,11 +20,12 @@
     <Explorer>
         @if (_partitionView)
         {
-            <PartitionEntityTree EntitySection="articles" NavigationBase="/entities/articles" />
+            <PartitionEntityTree @ref="_partitionTree" EntitySection="articles" NavigationBase="/entities/articles" />
         }
         else
         {
             <EntityTreeView TEntity="ArticleInfo"
+                            @ref="_articleTree"
                             Loader="LoadArticlesAsync"
                             ToNode="TreeSidebarNode.FromArticle"
                             NavigationBase="/entities/articles"
@@ -40,7 +41,9 @@
         }
         else
         {
-            <ArticleTabs EntityGuid="EntityGuid.Value" />
+            <ArticleTabs EntityGuid="EntityGuid.Value"
+                         OnChanged="RefreshExplorerAsync"
+                         OnDeleted="RefreshExplorerAsync" />
         }
     </Detail>
 </EntitiesShell>
@@ -63,6 +66,8 @@
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
+    private EntityTreeView<ArticleInfo>? _articleTree;
+    private PartitionEntityTree? _partitionTree;
     private bool _partitionView;
     private bool _createOpen;
     private CreateForm _createForm = new();
@@ -83,10 +88,24 @@
         var ok = await _create.RunAsync(async () =>
         {
             var articleGuid = (await ArticleClient.CreateAsync(new ArticleCreateRequest(_createForm.Name!))).Unwrap("Failed to create article.");
-            Navigation.NavigateTo($"/entities/articles/{articleGuid}", forceLoad: true);
+            await RefreshExplorerAsync();
+            Navigation.NavigateTo($"/entities/articles/{articleGuid}");
         }, "Failed to create.");
 
         if (ok) _createOpen = false;
+    }
+
+    private async Task RefreshExplorerAsync()
+    {
+        if (_articleTree is not null)
+        {
+            await _articleTree.ReloadAsync();
+        }
+
+        if (_partitionTree is not null)
+        {
+            await _partitionTree.ReloadAsync();
+        }
     }
 
     private sealed class CreateForm

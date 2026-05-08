@@ -175,6 +175,8 @@ else
 @code {
     [Parameter, EditorRequired] public Guid EntityGuid { get; set; }
     [Parameter] public DateTimeOffset? TemporalAsOf { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+    [Parameter] public EventCallback OnDeleted { get; set; }
 
     private static readonly string[] LengthUnits = ["mm", "cm", "m", "km", "in", "ft"];
 
@@ -287,6 +289,7 @@ else
                 Metrics = metrics
             });
             await LoadAsync();
+            await OnChanged.InvokeAsync();
         }, "Failed to save.");
     }
 
@@ -301,18 +304,27 @@ else
     private async Task RenderBarcodeCanvasesAsync()
     {
         if (_barcodes is null) return;
+
+        var failed = false;
         foreach (var barcode in GetBarcodeResults(_barcodes))
         {
             var canvasId = $"barcode-{barcode.Format}";
             var bcid = GetBcid(barcode.Format);
             try
             {
-                await JS.InvokeVoidAsync("fargoBarcode.render", canvasId, bcid, barcode.Code);
+                var rendered = await JS.InvokeAsync<bool>("fargoBarcode.render", canvasId, bcid, barcode.Code);
+                failed |= !rendered;
             }
-            catch
+            catch (JSException)
             {
-                // best-effort
+                failed = true;
             }
+        }
+
+        if (failed && string.IsNullOrWhiteSpace(_barcodeError))
+        {
+            _barcodeError = "One or more barcodes could not be rendered.";
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -457,6 +469,7 @@ else
         {
             (await Articles.DeleteAsync(EntityGuid)).EnsureSuccess("Failed to delete article.");
             Navigation.NavigateTo("/entities/articles");
+            await OnDeleted.InvokeAsync();
         }, "Failed to delete.");
 
         if (ok) _deleteOpen = false;

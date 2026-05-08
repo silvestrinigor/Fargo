@@ -423,6 +423,7 @@
                 _entityItems.Remove(row);
                 if (_entityPage > _entityTotalPages && _entityPage > 1)
                     _entityPage--;
+                await ReloadPartitionTreesAsync();
             }
             else
             {
@@ -445,11 +446,12 @@
             var newPartitions = article.Partitions.Append(EntityGuid.Value).Distinct().ToArray();
             await UpdateArticlePartitionsAsync(article, newPartitions);
 
-            if (!_entityItems.Any(r => r.EntityGuid == article.Guid))
+            if (!_entityItems.Any(r => r.EntityGuid == article.Guid && r.Type == EntityType.Article))
             {
                 _entityItems.Add(new PartitionEntityRow(article.Guid, article.Name, "article", TreeSidebarNode.Icons.Article, EntityType.Article));
                 _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
             }
+            await ReloadPartitionTreesAsync();
         }
         catch (FargoSdkApiException ex)
         {
@@ -467,11 +469,12 @@
             var result = await ItemClient.AddPartitionAsync(item.Guid, EntityGuid.Value);
             if (result.IsSuccess)
             {
-                if (!_entityItems.Any(r => r.EntityGuid == item.Guid))
+                if (!_entityItems.Any(r => r.EntityGuid == item.Guid && r.Type == EntityType.Item))
                 {
                     _entityItems.Add(new PartitionEntityRow(item.Guid, item.Guid.ToString("N")[..8], "item", TreeSidebarNode.Icons.Item, EntityType.Item));
                     _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
                 }
+                await ReloadPartitionTreesAsync();
             }
             else
             {
@@ -494,11 +497,12 @@
             var result = await UserClient.AddPartitionAsync(user.Guid, EntityGuid.Value);
             if (result.IsSuccess)
             {
-                if (!_entityItems.Any(r => r.EntityGuid == user.Guid))
+                if (!_entityItems.Any(r => r.EntityGuid == user.Guid && r.Type == EntityType.User))
                 {
                     _entityItems.Add(new PartitionEntityRow(user.Guid, user.Nameid, "user", TreeSidebarNode.Icons.User, EntityType.User));
                     _entityItems.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
                 }
+                await ReloadPartitionTreesAsync();
             }
             else
             {
@@ -563,6 +567,7 @@
             _allEntitiesTree?.NotifyUpdated(EntityGuid!.Value, _edit.Name ?? _partition.Name, _edit.IsActive);
 
             await LoadAsync();
+            await ReloadPartitionTreesAsync();
         }, "Failed to save.");
     }
 
@@ -585,6 +590,7 @@
             _tree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
             _allEntitiesTree?.NotifyCreated(partition.Guid, partition.Name, partition.IsActive, parentGuid);
             Navigation.NavigateTo($"/entities/partitions/{partition.Guid}");
+            await ReloadPartitionTreesAsync();
         }, "Failed to create.");
 
         if (ok) _createOpen = false;
@@ -607,9 +613,23 @@
             _tree?.NotifyDeleted(deletedGuid);
             _allEntitiesTree?.NotifyDeleted(deletedGuid);
             Navigation.NavigateTo("/entities/partitions");
+            await ReloadPartitionTreesAsync();
         }, "Failed to delete.");
 
         if (ok) _deleteOpen = false;
+    }
+
+    private async Task ReloadPartitionTreesAsync()
+    {
+        if (_tree is not null)
+        {
+            await _tree.ReloadAsync();
+        }
+
+        if (_allEntitiesTree is not null)
+        {
+            await _allEntitiesTree.ReloadAsync();
+        }
     }
 
     private enum EntityType { Article, Item, User }

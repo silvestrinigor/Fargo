@@ -1,6 +1,6 @@
 <li>
     <div class="tree-node-row @(SelectedGuid == Node.EntityGuid ? "selected" : null) @(_isDragOver ? "drag-over" : null)"
-         draggable="@(OnDragStart.HasDelegate && !Node.IsPartitionNode ? "true" : "false")"
+         draggable="@(IsDraggable ? "true" : "false")"
          @ondragstart:stopPropagation="true"
          @ondragstart="@(() => OnDragStart.InvokeAsync(Node))"
          @ondragover:preventDefault="@(OnDrop.HasDelegate && Node.IsPartitionNode)"
@@ -54,7 +54,8 @@
                                          OnToggle="OnToggle"
                                          OnSelect="OnSelect"
                                          OnDragStart="OnDragStart"
-                                         OnDrop="OnDrop" />
+                                         OnDrop="OnDrop"
+                                         AllowPartitionDrag="AllowPartitionDrag" />
                 }
             </ul>
         }
@@ -80,7 +81,12 @@
     [Parameter]
     public EventCallback<TreeSidebarNode> OnDrop { get; set; }
 
+    [Parameter]
+    public bool AllowPartitionDrag { get; set; }
+
     private bool _isDragOver;
+
+    private bool IsDraggable => OnDragStart.HasDelegate && (AllowPartitionDrag || !Node.IsPartitionNode);
 
     private async Task HandleDropAsync()
     {

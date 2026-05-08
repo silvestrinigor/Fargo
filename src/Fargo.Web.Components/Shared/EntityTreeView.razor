@@ -38,10 +38,10 @@ else
     private readonly AsyncState _state = new();
     private Guid? _selectedGuid;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _selectedGuid = ReadSelectedGuid();
-        _ = LoadAsync();
+        await ReloadAsync();
     }
 
     protected override void OnParametersSet()
@@ -49,7 +49,7 @@ else
         _selectedGuid = ReadSelectedGuid();
     }
 
-    private async Task LoadAsync()
+    public async Task ReloadAsync()
     {
         await _state.RunAsync(async () =>
         {

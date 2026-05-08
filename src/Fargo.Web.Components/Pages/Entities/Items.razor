@@ -22,11 +22,12 @@
     <Explorer>
         @if (_partitionView)
         {
-            <PartitionEntityTree EntitySection="items" NavigationBase="/entities/items" />
+            <PartitionEntityTree @ref="_partitionTree" EntitySection="items" NavigationBase="/entities/items" />
         }
         else
         {
             <EntityTreeView TEntity="ItemInfo"
+                            @ref="_itemTree"
                             Loader="LoadItemsAsync"
                             ToNode="@(i => TreeSidebarNode.FromItem(i))"
                             NavigationBase="/entities/items"
@@ -120,6 +121,8 @@
 @code {
     [Parameter] public Guid? EntityGuid { get; set; }
 
+    private EntityTreeView<ItemInfo>? _itemTree;
+    private PartitionEntityTree? _partitionTree;
     private bool _partitionView;
     private bool _createOpen;
     private bool _deleteOpen;
@@ -182,6 +185,7 @@
         {
             (await ItemClient.DeleteAsync(_item.Guid)).EnsureSuccess("Failed to delete item.");
             Navigation.NavigateTo("/entities/items");
+            await RefreshExplorerAsync();
         }, "Failed to delete.");
 
         if (ok) _deleteOpen = false;
@@ -207,13 +211,27 @@
         var ok = await _create.RunAsync(async () =>
         {
             var itemGuid = (await ItemClient.CreateAsync(new ItemCreateRequest(articleGuid))).Unwrap("Failed to create item.");
-            Navigation.NavigateTo($"/entities/items/{itemGuid}", forceLoad: true);
+            await RefreshExplorerAsync();
+            Navigation.NavigateTo($"/entities/items/{itemGuid}");
         }, "Failed to create.");
 
         if (ok) _createOpen = false;
     }
 
     private string? _createError;
+
+    private async Task RefreshExplorerAsync()
+    {
+        if (_itemTree is not null)
+        {
+            await _itemTree.ReloadAsync();
+        }
+
+        if (_partitionTree is not null)
+        {
+            await _partitionTree.ReloadAsync();
+        }
+    }
 
     private sealed class CreateForm
     {
