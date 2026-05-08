@@ -1,6 +1,4 @@
 using Fargo.Sdk.Contracts.Articles;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using System.Globalization;
 
 namespace Fargo.Api.Articles;

@@ -1,5 +1,5 @@
-using Fargo.Application;
 using Fargo.Api.Articles;
+using Fargo.Application;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Security;
 using Fargo.Sdk.Contracts.Articles;

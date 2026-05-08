@@ -156,55 +156,55 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         switch (articleBarcode.Type)
         {
             case BarcodeFormat.Ean13:
-            {
-                var code = new Ean13(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.Ean13 == code);
-            }
+                {
+                    var code = new Ean13(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.Ean13 == code);
+                }
             case BarcodeFormat.Ean8:
-            {
-                var code = new Ean8(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.Ean8 == code);
-            }
+                {
+                    var code = new Ean8(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.Ean8 == code);
+                }
             case BarcodeFormat.UpcA:
-            {
-                var code = new UpcA(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.UpcA == code);
-            }
+                {
+                    var code = new UpcA(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.UpcA == code);
+                }
             case BarcodeFormat.UpcE:
-            {
-                var code = new UpcE(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.UpcE == code);
-            }
+                {
+                    var code = new UpcE(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.UpcE == code);
+                }
             case BarcodeFormat.Code128:
-            {
-                var code = new Code128(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.Code128 == code);
-            }
+                {
+                    var code = new Code128(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.Code128 == code);
+                }
             case BarcodeFormat.Code39:
-            {
-                var code = new Code39(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.Code39 == code);
-            }
+                {
+                    var code = new Code39(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.Code39 == code);
+                }
             case BarcodeFormat.Itf14:
-            {
-                var code = new Itf14(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.Itf14 == code);
-            }
+                {
+                    var code = new Itf14(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.Itf14 == code);
+                }
             case BarcodeFormat.Gs1128:
-            {
-                var code = new Gs1128(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.Gs1128 == code);
-            }
+                {
+                    var code = new Gs1128(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.Gs1128 == code);
+                }
             case BarcodeFormat.QrCode:
-            {
-                var code = new QrCode(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.QrCode == code);
-            }
+                {
+                    var code = new QrCode(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.QrCode == code);
+                }
             case BarcodeFormat.DataMatrix:
-            {
-                var code = new DataMatrix(articleBarcode.Barcode);
-                return query.Where(article => article.Barcodes.DataMatrix == code);
-            }
+                {
+                    var code = new DataMatrix(articleBarcode.Barcode);
+                    return query.Where(article => article.Barcodes.DataMatrix == code);
+                }
             default:
                 throw new ArgumentOutOfRangeException(nameof(articleBarcode), articleBarcode.Type, "Unsupported barcode type.");
         }
