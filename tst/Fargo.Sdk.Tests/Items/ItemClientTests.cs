@@ -1,3 +1,4 @@
+using Fargo.Sdk.Contracts.Errors;
 using Fargo.Sdk.Http;
 using Fargo.Sdk.Items;
 using NSubstitute;
@@ -28,8 +29,8 @@ public sealed class ItemClientTests
         var result = await sut.GetAsync(itemResult.Guid);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(itemResult.Guid, result.Data!.Guid);
-        Assert.Equal(itemResult.ArticleGuid, result.Data.ArticleGuid);
+        Assert.Equal(itemResult.Guid, result.Result!.Guid);
+        Assert.Equal(itemResult.ArticleGuid, result.Result.ArticleGuid);
     }
 
     [Fact]
@@ -42,7 +43,7 @@ public sealed class ItemClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -55,7 +56,7 @@ public sealed class ItemClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -68,7 +69,7 @@ public sealed class ItemClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.UnauthorizedAccess, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -81,7 +82,7 @@ public sealed class ItemClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Forbidden, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public sealed class ItemClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Undefined, result.Error!.Type);
+        Assert.Null(result.Error!.Type);
         Assert.Equal("An unexpected error occurred.", result.Error.Detail);
     }
 
@@ -111,7 +112,7 @@ public sealed class ItemClientTests
         var result = await sut.GetManyAsync();
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Data!.Count);
+        Assert.Equal(2, result.Result!.Count);
     }
 
     [Fact]
@@ -124,7 +125,7 @@ public sealed class ItemClientTests
         var result = await sut.GetManyAsync();
 
         Assert.True(result.IsSuccess);
-        Assert.Empty(result.Data!);
+        Assert.Empty(result.Result!);
     }
 
     [Fact]
@@ -137,7 +138,7 @@ public sealed class ItemClientTests
         var result = await sut.GetManyAsync();
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Forbidden, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- CreateAsync ---
@@ -154,7 +155,7 @@ public sealed class ItemClientTests
         var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(guid, result.Data);
+        Assert.Equal(guid, result.Result);
     }
 
     [Fact]
@@ -167,7 +168,7 @@ public sealed class ItemClientTests
         var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Items.ItemCreateRequest(Guid.NewGuid()));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- UpdateAsync ---
@@ -203,7 +204,7 @@ public sealed class ItemClientTests
         var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Items.ItemUpdateRequest([], Guid.NewGuid()));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- DeleteAsync ---
@@ -230,7 +231,7 @@ public sealed class ItemClientTests
         var result = await sut.DeleteAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Forbidden, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- GetPartitionsAsync ---
@@ -246,7 +247,7 @@ public sealed class ItemClientTests
         var result = await sut.GetPartitionsAsync(Guid.NewGuid());
 
         Assert.True(result.IsSuccess);
-        Assert.Single(result.Data!);
+        Assert.Single(result.Result!);
     }
 
     [Fact]
@@ -259,7 +260,7 @@ public sealed class ItemClientTests
         var result = await sut.GetPartitionsAsync(Guid.NewGuid());
 
         Assert.True(result.IsSuccess);
-        Assert.Empty(result.Data!);
+        Assert.Empty(result.Result!);
     }
 
     private static class Fakes

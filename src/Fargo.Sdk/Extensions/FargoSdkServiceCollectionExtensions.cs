@@ -45,12 +45,12 @@ public static class FargoSdkServiceCollectionExtensions
                 sp.GetRequiredService<FargoSdkOptions>()),
             lifetime));
 
-        Add<IAuthenticationHttpClient, AuthenticationHttpClient>();
-        Add<IArticleHttpClient, ArticleHttpClient>();
-        Add<IUserHttpClient, UserHttpClient>();
-        Add<IItemHttpClient, ItemHttpClient>();
-        Add<IPartitionHttpClient, PartitionHttpClient>();
-        Add<IUserGroupHttpClient, UserGroupHttpClient>();
+        Add<IAuthenticationClient, AuthenticationHttpClient>();
+        Add<IArticleClient, ArticleHttpClient>();
+        Add<IUserClient, UserHttpClient>();
+        Add<IItemClient, ItemHttpClient>();
+        Add<IPartitionClient, PartitionHttpClient>();
+        Add<IUserGroupClient, UserGroupHttpClient>();
 
         return services;
 

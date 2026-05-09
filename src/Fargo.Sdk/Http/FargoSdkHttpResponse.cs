@@ -1,3 +1,4 @@
+using Fargo.Sdk.Contracts.Errors;
 using System.Net;
 
 namespace Fargo.Sdk.Http;

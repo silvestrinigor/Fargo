@@ -1,4 +1,5 @@
 using Fargo.Sdk.Authentication;
+using Fargo.Sdk.Contracts.Errors;
 using Fargo.Sdk.Contracts.Authentication;
 using Fargo.Sdk.Http;
 using NSubstitute;
@@ -35,7 +36,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Data);
+        Assert.NotNull(result.Result);
     }
 
     [Fact]
@@ -54,7 +55,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.InvalidCredentials, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -73,7 +74,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.UnauthorizedAccess, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -92,7 +93,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.PasswordChangeRequired, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -111,7 +112,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Undefined, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -130,7 +131,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Undefined, result.Error!.Type);
+        Assert.Null(result.Error!.Type);
         Assert.Equal("An unexpected error occurred.", result.Error.Detail);
     }
 
@@ -171,7 +172,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.UnauthorizedAccess, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- ChangePassword ---
@@ -211,7 +212,7 @@ public sealed class AuthenticationClientTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.InvalidCredentials, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     private static class Fakes

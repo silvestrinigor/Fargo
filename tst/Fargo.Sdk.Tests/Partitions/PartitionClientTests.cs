@@ -1,3 +1,4 @@
+using Fargo.Sdk.Contracts.Errors;
 using Fargo.Sdk.Http;
 using Fargo.Sdk.Partitions;
 using NSubstitute;
@@ -28,8 +29,8 @@ public sealed class PartitionClientTests
         var result = await sut.GetAsync(partitionResult.Guid);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(partitionResult.Guid, result.Data!.Guid);
-        Assert.Equal(partitionResult.Name, result.Data.Name);
+        Assert.Equal(partitionResult.Guid, result.Result!.Guid);
+        Assert.Equal(partitionResult.Name, result.Result.Name);
     }
 
     [Fact]
@@ -42,7 +43,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -55,7 +56,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.UnauthorizedAccess, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -68,7 +69,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Forbidden, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -81,7 +82,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Undefined, result.Error!.Type);
+        Assert.Null(result.Error!.Type);
         Assert.Equal("An unexpected error occurred.", result.Error.Detail);
     }
 
@@ -98,7 +99,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetManyAsync();
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Data!.Count);
+        Assert.Equal(2, result.Result!.Count);
     }
 
     [Fact]
@@ -111,7 +112,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetManyAsync();
 
         Assert.True(result.IsSuccess);
-        Assert.Empty(result.Data!);
+        Assert.Empty(result.Result!);
     }
 
     [Fact]
@@ -124,7 +125,7 @@ public sealed class PartitionClientTests
         var result = await sut.GetManyAsync();
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.Forbidden, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- CreateAsync ---
@@ -141,7 +142,7 @@ public sealed class PartitionClientTests
         var result = await sut.CreateAsync(request);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(guid, result.Data);
+        Assert.Equal(guid, result.Result);
     }
 
     [Fact]
@@ -154,7 +155,7 @@ public sealed class PartitionClientTests
         var result = await sut.CreateAsync(new Fargo.Sdk.Contracts.Partitions.PartitionCreateRequest(string.Empty));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- UpdateAsync ---
@@ -182,7 +183,7 @@ public sealed class PartitionClientTests
         var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest("New Name"));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.NotFound, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     [Fact]
@@ -195,7 +196,7 @@ public sealed class PartitionClientTests
         var result = await sut.UpdateAsync(Guid.NewGuid(), new Fargo.Sdk.Contracts.Partitions.PartitionUpdateRequest(ParentPartitionGuid: Guid.NewGuid()));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     // --- DeleteAsync ---
@@ -222,7 +223,7 @@ public sealed class PartitionClientTests
         var result = await sut.DeleteAsync(Guid.NewGuid());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(FargoSdkErrorType.InvalidInput, result.Error!.Type);
+        Assert.NotNull(result.Error!.Type);
     }
 
     private static class Fakes

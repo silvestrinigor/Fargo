@@ -1,3 +1,6 @@
+using Fargo.Sdk.Contracts.Errors;
+using System.Net;
+
 namespace Fargo.Sdk;
 
 /// <summary>
@@ -10,19 +13,19 @@ public class FargoSdkApiException : FargoSdkException
     {
     }
 
-    internal FargoSdkApiException(FargoSdkError error)
-        : base(CreateMessage(error))
+    internal FargoSdkApiException(FargoProblemDetails problem, HttpStatusCode statusCode)
+        : base(CreateMessage(problem))
     {
-        ErrorType = error.Type;
-        Title = error.Title;
-        ProblemType = error.ProblemType;
-        StatusCode = error.StatusCode;
-        Instance = error.Instance;
-        TraceId = error.TraceId;
+        Problem = problem;
+        Title = problem.Title;
+        ProblemType = problem.Type;
+        StatusCode = problem.Status ?? (int)statusCode;
+        Instance = problem.Instance;
+        TraceId = problem.TraceId;
     }
 
-    /// <summary>Gets the SDK error category associated with this API failure.</summary>
-    public FargoSdkErrorType ErrorType { get; }
+    /// <summary>Gets the problem details returned by the backend.</summary>
+    public FargoProblemDetails? Problem { get; }
 
     /// <summary>Gets the short problem title returned by the backend, when available.</summary>
     public string? Title { get; }
@@ -39,24 +42,24 @@ public class FargoSdkApiException : FargoSdkException
     /// <summary>Gets the backend trace identifier, when available.</summary>
     public string? TraceId { get; }
 
-    private static string CreateMessage(FargoSdkError error)
+    private static string CreateMessage(FargoProblemDetails problem)
     {
-        if (!string.IsNullOrWhiteSpace(error.Detail)
-            && !string.Equals(error.Detail, "An unexpected error occurred.", StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(problem.Detail)
+            && !string.Equals(problem.Detail, "An unexpected error occurred.", StringComparison.Ordinal))
         {
-            return error.Detail;
+            return problem.Detail;
         }
 
-        var summary = error.Title ?? error.Detail ?? "An unexpected error occurred.";
+        var summary = problem.Title ?? problem.Detail ?? "An unexpected error occurred.";
 
-        if (!string.IsNullOrWhiteSpace(error.TraceId))
+        if (!string.IsNullOrWhiteSpace(problem.TraceId))
         {
-            return $"{summary} TraceId: {error.TraceId}";
+            return $"{summary} TraceId: {problem.TraceId}";
         }
 
-        if (!string.IsNullOrWhiteSpace(error.ProblemType))
+        if (!string.IsNullOrWhiteSpace(problem.Type))
         {
-            return $"{summary} ({error.ProblemType})";
+            return $"{summary} ({problem.Type})";
         }
 
         return summary;

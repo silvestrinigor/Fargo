@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+using Fargo.Sdk.Contracts.Errors;
 
 namespace Fargo.Api.Middlewares;
 
@@ -7,7 +7,7 @@ namespace Fargo.Api.Middlewares;
 /// </summary>
 /// <remarks>
 /// This middleware converts known application and domain exceptions into standardized
-/// <see cref="ProblemDetails"/> responses using the <c>application/problem+json</c> format.
+/// <see cref="FargoProblemDetails"/> responses using the <c>application/problem+json</c> format.
 ///
 /// Unknown exceptions are mapped to a generic <c>500 Internal Server Error</c> response.
 /// </remarks>
@@ -39,7 +39,7 @@ public sealed class FargoExceptionMiddleware
     }
 
     /// <summary>
-    /// Handles an exception and writes the corresponding <see cref="ProblemDetails"/> response.
+    /// Handles an exception and writes the corresponding <see cref="FargoProblemDetails"/> response.
     /// </summary>
     /// <param name="context">The current HTTP request context.</param>
     /// <param name="exception">The exception to handle.</param>
@@ -70,7 +70,7 @@ public sealed class FargoExceptionMiddleware
     }
 
     /// <summary>
-    /// Writes a <see cref="ProblemDetails"/> response to the HTTP response stream.
+    /// Writes a <see cref="FargoProblemDetails"/> response to the HTTP response stream.
     /// </summary>
     /// <param name="context">The HTTP context associated with the current request.</param>
     /// <param name="statusCode">The HTTP status code returned to the client.</param>
@@ -94,15 +94,15 @@ public sealed class FargoExceptionMiddleware
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/problem+json";
 
-        var problemDetails = new ProblemDetails
+        var problemDetails = new FargoProblemDetails
         {
             Status = statusCode,
             Title = title,
             Detail = detail,
             Type = type,
-            Instance = context.Request.Path
+            Instance = context.Request.Path,
+            TraceId = traceId
         };
-        problemDetails.Extensions["traceId"] = traceId;
 
         await context.Response.WriteAsJsonAsync(problemDetails);
     }

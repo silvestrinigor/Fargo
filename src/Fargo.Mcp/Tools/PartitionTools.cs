@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class PartitionTools(IPartitionHttpClient partitions)
+public sealed class PartitionTools(IPartitionClient partitions)
 {
     [McpServerTool(Name = "list_partitions"), Description("Lists partitions. Omit parentPartitionGuid to list root partitions; provide it to list direct children.")]
     public async Task<string> ListPartitions(
@@ -22,7 +22,7 @@ public sealed class PartitionTools(IPartitionHttpClient partitions)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var list = response.Data!.Select(p => new { p.Guid, p.Name, p.Description, p.ParentPartitionGuid, p.IsActive }).ToList();
+        var list = response.Result!.Select(p => new { p.Guid, p.Name, p.Description, p.ParentPartitionGuid, p.IsActive }).ToList();
         return JsonSerializer.Serialize(list);
     }
 
@@ -36,7 +36,7 @@ public sealed class PartitionTools(IPartitionHttpClient partitions)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var partition = response.Data!;
+        var partition = response.Result!;
         return JsonSerializer.Serialize(new { partition.Guid, partition.Name, partition.Description, partition.ParentPartitionGuid, partition.IsActive });
     }
 
@@ -53,7 +53,7 @@ public sealed class PartitionTools(IPartitionHttpClient partitions)
             return $"Error: {response.Error!.Detail}";
         }
 
-        return $"Created partition with GUID: {response.Data}";
+        return $"Created partition with GUID: {response.Result}";
     }
 
     [McpServerTool(Name = "update_partition"), Description("Updates a partition's name and/or description.")]

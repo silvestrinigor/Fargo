@@ -3,13 +3,13 @@ using Fargo.Sdk.Contracts.Articles;
 namespace Fargo.Sdk.Articles;
 
 /// <summary>Low-level HTTP transport for article endpoints.</summary>
-public interface IArticleHttpClient
+public interface IArticleClient
 {
     /// <summary>Retrieves a single article by its unique identifier.</summary>
     /// <param name="articleGuid">The unique identifier of the article.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<ArticleInfo>> GetAsync(
+    Task<FargoResponse<ArticleInfo>> GetAsync(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken cancellationToken = default);
@@ -18,7 +18,7 @@ public interface IArticleHttpClient
     /// <param name="articleBarcode">The barcode route value.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<ArticleInfo>> GetByBarcodeAsync(
+    Task<FargoResponse<ArticleInfo>> GetByBarcodeAsync(
         ArticleBarcode articleBarcode,
         DateTimeOffset? temporalAsOf = null,
         CancellationToken cancellationToken = default);
@@ -30,7 +30,7 @@ public interface IArticleHttpClient
     /// <param name="insideAnyOfThisPartitions">Filters to articles inside any of these partitions.</param>
     /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes articles without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<IReadOnlyCollection<ArticleInfo>>> GetManyAsync(
+    Task<FargoResponse<IReadOnlyCollection<ArticleInfo>>> GetManyAsync(
         DateTimeOffset? temporalAsOf = null,
         int? page = null,
         int? limit = null,
@@ -41,7 +41,7 @@ public interface IArticleHttpClient
     /// <summary>Creates a new article and returns its assigned identifier.</summary>
     /// <param name="request">The article creation request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<Guid>> CreateAsync(
+    Task<FargoResponse<Guid>> CreateAsync(
         ArticleCreateRequest request,
         CancellationToken cancellationToken = default);
 
@@ -49,7 +49,7 @@ public interface IArticleHttpClient
     /// <param name="articleGuid">The unique identifier of the article to update.</param>
     /// <param name="request">The article update request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> UpdateAsync(
+    Task<FargoResponse> UpdateAsync(
         Guid articleGuid,
         ArticleUpdateRequest request,
         CancellationToken cancellationToken = default);
@@ -57,7 +57,7 @@ public interface IArticleHttpClient
     /// <summary>Deletes an article by its unique identifier.</summary>
     /// <param name="articleGuid">The unique identifier of the article to delete.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoSdkResponse<EmptyResult>> DeleteAsync(
+    Task<FargoResponse> DeleteAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 }

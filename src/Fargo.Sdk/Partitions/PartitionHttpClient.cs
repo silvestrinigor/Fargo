@@ -3,8 +3,8 @@ using Fargo.Sdk.Http;
 
 namespace Fargo.Sdk.Partitions;
 
-/// <summary>Default implementation of <see cref="IPartitionHttpClient"/>.</summary>
-public sealed class PartitionHttpClient : IPartitionHttpClient
+/// <summary>Default implementation of <see cref="IPartitionClient"/>.</summary>
+public sealed class PartitionHttpClient : IPartitionClient
 {
     /// <summary>Initializes a new instance.</summary>
     public PartitionHttpClient(IFargoHttpClient httpClient)
@@ -15,21 +15,16 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
     private readonly IFargoHttpClient httpClient;
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<PartitionInfo>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
+    public async Task<FargoResponse<PartitionInfo>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(("temporalAsOf", temporalAsOf?.ToString("O")));
         var httpResponse = await httpClient.GetAsync<PartitionInfo>($"/partitions/{partitionGuid}{query}", cancellationToken);
 
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<PartitionInfo>(MapError(httpResponse));
-        }
-
-        return new FargoSdkResponse<PartitionInfo>(httpResponse.Data!);
+        return FargoResponseMapper.Map(httpResponse);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
+    public async Task<FargoResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default)
     {
         var query = FargoHttpClient.BuildQuery(
             ("temporalAsOfDateTime", temporalAsOf?.ToString("O")),
@@ -38,58 +33,36 @@ public sealed class PartitionHttpClient : IPartitionHttpClient
 
         var httpResponse = await httpClient.GetAsync<IReadOnlyCollection<PartitionInfo>>($"/partitions{query}", cancellationToken);
 
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(MapError(httpResponse));
-        }
-
-        return new FargoSdkResponse<IReadOnlyCollection<PartitionInfo>>(httpResponse.Data ?? []);
+        return FargoResponseMapper.Map(httpResponse, Array.Empty<PartitionInfo>());
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<Guid>> CreateAsync(PartitionCreateRequest request, CancellationToken cancellationToken = default)
+    public async Task<FargoResponse<Guid>> CreateAsync(PartitionCreateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PostFromJsonAsync<PartitionCreateRequest, Guid>(
             "/partitions",
             request,
             cancellationToken);
 
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<Guid>(MapError(httpResponse));
-        }
-
-        return new FargoSdkResponse<Guid>(httpResponse.Data);
+        return FargoResponseMapper.Map(httpResponse);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> UpdateAsync(Guid partitionGuid, PartitionUpdateRequest request, CancellationToken cancellationToken = default)
+    public async Task<FargoResponse> UpdateAsync(Guid partitionGuid, PartitionUpdateRequest request, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.PutJsonAsync<PartitionUpdateRequest>(
             $"/partitions/{partitionGuid}",
             request,
             cancellationToken);
 
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
+        return FargoResponseMapper.Map(httpResponse);
     }
 
     /// <inheritdoc />
-    public async Task<FargoSdkResponse<EmptyResult>> DeleteAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
+    public async Task<FargoResponse> DeleteAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         var httpResponse = await httpClient.DeleteAsync($"/partitions/{partitionGuid}", cancellationToken);
 
-        if (!httpResponse.IsSuccess)
-        {
-            return new FargoSdkResponse<EmptyResult>(MapError(httpResponse));
-        }
-
-        return new FargoSdkResponse<EmptyResult>();
+        return FargoResponseMapper.Map(httpResponse);
     }
-
-    private static FargoSdkError MapError<T>(FargoSdkHttpResponse<T> response) => FargoSdkProblemMapper.Map(response.Problem, response.StatusCode);
 }

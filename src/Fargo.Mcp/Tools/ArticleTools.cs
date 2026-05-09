@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class ArticleTools(IArticleHttpClient articles)
+public sealed class ArticleTools(IArticleClient articles)
 {
     [McpServerTool(Name = "list_articles"), Description("Lists articles accessible to the current user. Optionally filters by partition and public articles.")]
     public async Task<string> ListArticles(
@@ -27,7 +27,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var list = response.Data!.Select(a => new { a.Guid, a.Name, a.Description }).ToList();
+        var list = response.Result!.Select(a => new { a.Guid, a.Name, a.Description }).ToList();
         return JsonSerializer.Serialize(list);
     }
 
@@ -41,7 +41,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var article = response.Data!;
+        var article = response.Result!;
         return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Metrics, article.ShelfLife });
     }
 
@@ -83,7 +83,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             return $"Error: {response.Error!.Detail}";
         }
 
-        return $"Created article with GUID: {response.Data}";
+        return $"Created article with GUID: {response.Result}";
     }
 
     [McpServerTool(Name = "update_article"), Description("Updates an article's name, description, mass, and/or dimensions.")]
@@ -106,7 +106,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             return $"Error: {get.Error!.Detail}";
         }
 
-        var current = get.Data!;
+        var current = get.Result!;
         var currentMetrics = current.Metrics;
         var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
             ? currentMetrics

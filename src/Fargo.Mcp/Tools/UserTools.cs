@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class UserTools(IUserHttpClient users)
+public sealed class UserTools(IUserClient users)
 {
     [McpServerTool(Name = "list_users"), Description("Lists users accessible to the current user. Optionally filters by partition and public users.")]
     public async Task<string> ListUsers(
@@ -26,7 +26,7 @@ public sealed class UserTools(IUserHttpClient users)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var list = response.Data!.Select(u => new
+        var list = response.Result!.Select(u => new
         {
             u.Guid,
             u.Nameid,
@@ -50,7 +50,7 @@ public sealed class UserTools(IUserHttpClient users)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var user = response.Data!;
+        var user = response.Result!;
         return JsonSerializer.Serialize(new
         {
             user.Guid,
