@@ -29,7 +29,6 @@ var apiService = builder
 builder
     .AddProject<Projects.Fargo_Web>("webfrontend")
     .WithExternalHttpEndpoints()
-    .WithHttpHealthCheck("/health")
     .WithReference(apiService)
     .WaitFor(apiService);
 

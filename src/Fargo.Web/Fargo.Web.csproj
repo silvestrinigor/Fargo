@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.Web.Components\Fargo.Web.Components.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.1" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.14.1" />
   </ItemGroup>
 </Project>
