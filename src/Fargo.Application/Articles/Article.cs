@@ -5,6 +5,7 @@ using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using UnitsNet;
 
 namespace Fargo.Application.Articles;
@@ -42,6 +43,34 @@ public sealed record ArticleMetricsDto(
 );
 
 public sealed record ArticleBarcodeDto(string Barcode, BarcodeFormat Type);
+
+public static class ArticleDtoMappings
+{
+    public static readonly Expression<Func<Article, ArticleDto>> Projection = article => new ArticleDto(
+        article.Guid,
+        article.Name,
+        article.Description,
+        article.ShelfLife,
+        new ArticleMetricsDto(
+            article.Metrics.Mass,
+            article.Metrics.LengthX,
+            article.Metrics.LengthY,
+            article.Metrics.LengthZ),
+        new ArticleBarcodesDto(
+            article.Barcodes.Ean13,
+            article.Barcodes.Ean8,
+            article.Barcodes.UpcA,
+            article.Barcodes.UpcE,
+            article.Barcodes.Code128,
+            article.Barcodes.Code39,
+            article.Barcodes.Itf14,
+            article.Barcodes.Gs1128,
+            article.Barcodes.QrCode,
+            article.Barcodes.DataMatrix),
+        article.Partitions.Select(partition => partition.Guid).ToArray(),
+        article.IsActive,
+        article.EditedByGuid);
+}
 
 /// <summary>
 /// Exception thrown when an article with the specified identifier cannot be found.

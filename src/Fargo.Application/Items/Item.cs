@@ -6,6 +6,7 @@ using Fargo.Domain.Articles;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Fargo.Application.Items;
 
@@ -30,6 +31,17 @@ public sealed record ItemUpdateDto(
     IReadOnlyCollection<Guid> Partitions,
     Guid? ParentContainerGuid = null
 );
+
+public static class ItemDtoMappings
+{
+    public static readonly Expression<Func<Item, ItemDto>> Projection = item => new ItemDto(
+        item.Guid,
+        item.ArticleGuid,
+        item.ProductionDate,
+        item.ParentContainerGuid,
+        item.Partitions.Select(partition => partition.Guid).ToArray(),
+        item.EditedByGuid);
+}
 
 #endregion DTOs
 

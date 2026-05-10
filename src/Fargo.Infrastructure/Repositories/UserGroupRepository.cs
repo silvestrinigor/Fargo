@@ -46,14 +46,13 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         var userGroup = await ApplyPartitionFilter(
                 userGroups
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(userGroup => userGroup.Permissions)
-                    .Include(userGroup => userGroup.Partitions),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
+            .Select(UserGroupDtoMappings.Projection)
             .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
 
-        return userGroup is null ? null : Map(userGroup);
+        return userGroup;
     }
 
     public async Task<IReadOnlyCollection<UserGroupDto>> GetManyInfo(
@@ -66,16 +65,15 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         var result = await ApplyPartitionFilter(
                 userGroups
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(userGroup => userGroup.Permissions)
-                    .Include(userGroup => userGroup.Partitions),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
             .OrderBy(userGroup => userGroup.Guid)
             .WithPagination(pagination)
+            .Select(UserGroupDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     private static IQueryable<UserGroup> ApplyPartitionFilter(
@@ -109,13 +107,4 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-    private static UserGroupDto Map(UserGroup userGroup)
-        => new(
-            userGroup.Guid,
-            userGroup.Nameid,
-            userGroup.Description,
-            [.. userGroup.Permissions.Select(permission => new Permission(permission.Guid, permission.Action))],
-            [.. userGroup.Partitions.Select(partition => partition.Guid)],
-            userGroup.IsActive,
-            userGroup.EditedByGuid);
 }

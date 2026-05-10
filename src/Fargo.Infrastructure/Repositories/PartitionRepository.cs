@@ -31,9 +31,10 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
                     .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
+            .Select(PartitionDtoMappings.Projection)
             .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
 
-        return partition is null ? null : Map(partition);
+        return partition;
     }
 
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
@@ -51,9 +52,10 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
                 notInsideAnyPartition)
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
+            .Select(PartitionDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
@@ -149,12 +151,4 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             partitionGuids.Contains(partition.ParentPartitionGuid.Value));
     }
 
-    private static PartitionDto Map(Partition partition)
-        => new(
-            partition.Guid,
-            partition.Name,
-            partition.Description,
-            partition.ParentPartitionGuid,
-            partition.IsActive,
-            partition.EditedByGuid);
 }

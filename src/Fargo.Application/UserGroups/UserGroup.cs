@@ -5,6 +5,7 @@ using Fargo.Domain.Partitions;
 using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Fargo.Application.UserGroups;
 
@@ -38,6 +39,18 @@ public sealed record UserGroupUpdateDto(
 public sealed record UserGroupPermissionUpdateDto(
     ActionType Action
 );
+
+public static class UserGroupDtoMappings
+{
+    public static readonly Expression<Func<UserGroup, UserGroupDto>> Projection = userGroup => new UserGroupDto(
+        userGroup.Guid,
+        userGroup.Nameid,
+        userGroup.Description,
+        userGroup.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
+        userGroup.Partitions.Select(partition => partition.Guid).ToArray(),
+        userGroup.IsActive,
+        userGroup.EditedByGuid);
+}
 
 #endregion DTOs
 

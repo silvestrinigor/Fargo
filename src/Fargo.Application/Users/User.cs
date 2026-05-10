@@ -6,6 +6,7 @@ using Fargo.Domain.Partitions;
 using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Fargo.Application.Users;
 
@@ -59,6 +60,23 @@ public sealed record UserPasswordUpdateDto(
     string NewPassword,
     string? CurrentPassword = null
 );
+
+public static class UserDtoMappings
+{
+    public static readonly Expression<Func<User, UserDto>> Projection = user => new UserDto(
+        user.Guid,
+        user.Nameid,
+        user.FirstName,
+        user.LastName,
+        user.Description,
+        user.DefaultPasswordExpirationPeriod,
+        user.RequirePasswordChangeAt,
+        user.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
+        user.Partitions.Select(partition => partition.Guid).ToArray(),
+        user.UserGroups.Select(group => group.Guid).ToArray(),
+        user.IsActive,
+        user.EditedByGuid);
+}
 
 #endregion DTOs
 

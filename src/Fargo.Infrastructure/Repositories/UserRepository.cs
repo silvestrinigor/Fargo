@@ -42,15 +42,13 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         var user = await ApplyPartitionFilter(
                 users
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(user => user.Permissions)
-                    .Include(user => user.Partitions)
-                    .Include(user => user.UserGroups),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
+            .Select(UserDtoMappings.Projection)
             .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
 
-        return user is null ? null : Map(user);
+        return user;
     }
 
     public async Task<IReadOnlyCollection<UserDto>> GetManyInfo(
@@ -63,17 +61,15 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         var result = await ApplyPartitionFilter(
                 users
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(user => user.Permissions)
-                    .Include(user => user.Partitions)
-                    .Include(user => user.UserGroups),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
             .OrderBy(user => user.Guid)
             .WithPagination(pagination)
+            .Select(UserDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
@@ -119,18 +115,4 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-    private static UserDto Map(User user)
-        => new(
-            user.Guid,
-            user.Nameid,
-            user.FirstName,
-            user.LastName,
-            user.Description,
-            user.DefaultPasswordExpirationPeriod,
-            user.RequirePasswordChangeAt,
-            [.. user.Permissions.Select(permission => new Permission(permission.Guid, permission.Action))],
-            [.. user.Partitions.Select(partition => partition.Guid)],
-            [.. user.UserGroups.Select(group => group.Guid)],
-            user.IsActive,
-            user.EditedByGuid);
 }

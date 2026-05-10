@@ -66,13 +66,13 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         var item = await ApplyPartitionFilter(
                 items
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(item => item.Partitions),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
+            .Select(ItemDtoMappings.Projection)
             .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
 
-        return item is null ? null : Map(item);
+        return item;
     }
 
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
@@ -85,15 +85,15 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         var result = await ApplyPartitionFilter(
                 items
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(item => item.Partitions),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
             .OrderBy(item => item.Guid)
             .WithPagination(pagination)
+            .Select(ItemDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     private static IQueryable<Item> ApplyPartitionFilter(
@@ -127,12 +127,4 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-    private static ItemDto Map(Item item)
-        => new(
-            item.Guid,
-            item.ArticleGuid,
-            item.ProductionDate,
-            item.ParentContainerGuid,
-            [.. item.Partitions.Select(partition => partition.Guid)],
-            item.EditedByGuid);
 }

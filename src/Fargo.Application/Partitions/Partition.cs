@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Fargo.Application.Partitions;
 
@@ -28,6 +29,17 @@ public sealed record PartitionUpdateDto(
     Guid? ParentPartitionGuid = null,
     bool? IsActive = null
 );
+
+public static class PartitionDtoMappings
+{
+    public static readonly Expression<Func<Partition, PartitionDto>> Projection = partition => new PartitionDto(
+        partition.Guid,
+        partition.Name,
+        partition.Description,
+        partition.ParentPartitionGuid,
+        partition.IsActive,
+        partition.EditedByGuid);
+}
 
 #endregion DTOs
 

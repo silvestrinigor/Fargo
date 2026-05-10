@@ -66,13 +66,13 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         var article = await ApplyPartitionFilter(
                 articles
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(article => article.Partitions),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
+            .Select(ArticleDtoMappings.Projection)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
-        return article is null ? null : Map(article);
+        return article;
     }
 
     public async Task<ArticleDto?> GetInfoByBarcode(
@@ -85,15 +85,13 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         var query = ApplyPartitionFilter(
             articles
                 .TemporalAsOfIfProvided(asOfDateTime)
-                .AsNoTracking()
-                .Include(article => article.Partitions),
+                .AsNoTracking(),
             insideAnyOfThisPartitions,
             notInsideAnyPartition);
 
-        var article = await ApplyBarcodeFilter(query, articleBarcode)
+        return await ApplyBarcodeFilter(query, articleBarcode)
+            .Select(ArticleDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
-
-        return article is null ? null : Map(article);
     }
 
     public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
@@ -106,15 +104,15 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         var result = await ApplyPartitionFilter(
                 articles
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(article => article.Partitions),
+                    .AsNoTracking(),
                 insideAnyOfThisPartitions,
                 notInsideAnyPartition)
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
+            .Select(ArticleDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     private static IQueryable<Article> ApplyPartitionFilter(
@@ -210,29 +208,4 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         }
     }
 
-    private static ArticleDto Map(Article article)
-        => new(
-            article.Guid,
-            article.Name,
-            article.Description,
-            article.ShelfLife,
-            new ArticleMetricsDto(
-                article.Metrics.Mass,
-                article.Metrics.LengthX,
-                article.Metrics.LengthY,
-                article.Metrics.LengthZ),
-            new ArticleBarcodesDto(
-                article.Barcodes.Ean13,
-                article.Barcodes.Ean8,
-                article.Barcodes.UpcA,
-                article.Barcodes.UpcE,
-                article.Barcodes.Code128,
-                article.Barcodes.Code39,
-                article.Barcodes.Itf14,
-                article.Barcodes.Gs1128,
-                article.Barcodes.QrCode,
-                article.Barcodes.DataMatrix),
-            [.. article.Partitions.Select(partition => partition.Guid)],
-            article.IsActive,
-            article.EditedByGuid);
 }
