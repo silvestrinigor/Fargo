@@ -1,9 +1,9 @@
-using Fargo.Api.Middlewares;
 using Fargo.Application;
 using Fargo.Domain;
 using Fargo.Domain.Articles;
+using Fargo.HttpApi.Middlewares;
 
-namespace Fargo.Api.Tests.Middlewares;
+namespace Fargo.HttpApi.Tests.Middlewares;
 
 public sealed class FargoProblemDetailsRegistryTests
 {

@@ -1,11 +1,11 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.UserGroups;
+using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.Api.UserGroups;
+namespace Fargo.HttpApi.UserGroups;
 
 public static class UserGroupEndpointRouteBuilderExtension
 {

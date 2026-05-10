@@ -1,5 +1,5 @@
-using Fargo.Api.Articles;
 using Fargo.Application;
+using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Security;
 using Fargo.Sdk.Contracts.Articles;
@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace Fargo.Api.Extensions;
+namespace Fargo.HttpApi.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring HTTP API services.

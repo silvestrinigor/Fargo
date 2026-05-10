@@ -1,4 +1,4 @@
-namespace Fargo.Api.Hubs;
+namespace Fargo.HttpApi.Hubs;
 
 /// <summary>
 /// Defines the methods the server can invoke on connected SignalR clients.

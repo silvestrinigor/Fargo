@@ -1,11 +1,11 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Users;
+using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.Api.Users;
+namespace Fargo.HttpApi.Users;
 
 public static class UserEndpointRouteBuilderExtension
 {

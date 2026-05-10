@@ -19,8 +19,15 @@ builder
     .WithReference(migrations)
     .WaitForCompletion(migrations);
 
-var apiService = builder
-    .AddProject<Projects.Fargo_Api>("apiservice")
+var httpApi = builder
+    .AddProject<Projects.Fargo_HttpApi>("apiservice")
+    .WithHttpHealthCheck("/health")
+    .WithReference(fargodb)
+    .WithReference(migrations)
+    .WaitForCompletion(migrations);
+
+builder
+    .AddProject<Projects.Fargo_GrpcApi>("grpcservice")
     .WithHttpHealthCheck("/health")
     .WithReference(fargodb)
     .WithReference(migrations)
@@ -29,7 +36,7 @@ var apiService = builder
 builder
     .AddProject<Projects.Fargo_Web>("webfrontend")
     .WithExternalHttpEndpoints()
-    .WithReference(apiService)
-    .WaitFor(apiService);
+    .WithReference(httpApi)
+    .WaitFor(httpApi);
 
 builder.Build().Run();

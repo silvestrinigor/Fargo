@@ -1,4 +1,4 @@
-namespace Fargo.Api.Middlewares;
+namespace Fargo.HttpApi.Middlewares;
 
 /// <summary>
 /// Represents the metadata used to build a ProblemDetails response.

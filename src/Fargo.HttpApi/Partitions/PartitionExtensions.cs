@@ -1,11 +1,11 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Partitions;
+using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.Api.Partitions;
+namespace Fargo.HttpApi.Partitions;
 
 public static class PartitionEndpointRouteBuilderExtension
 {

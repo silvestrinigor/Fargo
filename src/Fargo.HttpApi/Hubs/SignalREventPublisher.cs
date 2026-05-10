@@ -1,7 +1,7 @@
 using Fargo.Application.Events;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Fargo.Api.Hubs;
+namespace Fargo.HttpApi.Hubs;
 
 /// <summary>
 /// Implements <see cref="IFargoEventPublisher"/> using SignalR.

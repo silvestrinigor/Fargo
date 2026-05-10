@@ -1,11 +1,11 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Events;
+using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ContractEntityType = Fargo.Sdk.Contracts.EntityType;
 using ContractEvents = Fargo.Sdk.Contracts.Events;
 
-namespace Fargo.Api.Extensions;
+namespace Fargo.HttpApi.Extensions;
 
 /// <summary>Maps all Event endpoints.</summary>
 public static class EventEndpointRouteBuilderExtension

@@ -25,7 +25,7 @@ using DomainBarcodeFormat = Fargo.Domain.Barcodes.BarcodeFormat;
 using DomainEntityType = Fargo.Domain.Events.EntityType;
 using DomainEventType = Fargo.Domain.Events.EventType;
 
-namespace Fargo.Api.Contracts;
+namespace Fargo.HttpApi.Contracts;
 
 internal static class ApiContractMappings
 {

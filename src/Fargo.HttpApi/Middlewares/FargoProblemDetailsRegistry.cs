@@ -10,7 +10,7 @@ using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
 
-namespace Fargo.Api.Middlewares;
+namespace Fargo.HttpApi.Middlewares;
 
 /// <summary>
 /// Central registry that maps application and domain exceptions

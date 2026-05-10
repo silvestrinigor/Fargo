@@ -1,7 +1,4 @@
 using Fargo.GrpcApi.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.GrpcApi;
 

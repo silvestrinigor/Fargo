@@ -1,11 +1,11 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Articles;
+using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.Articles;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.Api.Articles;
+namespace Fargo.HttpApi.Articles;
 
 public static class ArticleEndpointRouteBuilderExtension
 {

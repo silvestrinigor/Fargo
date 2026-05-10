@@ -1,7 +1,7 @@
 using Fargo.Sdk.Contracts.Articles;
 using System.Globalization;
 
-namespace Fargo.Api.Articles;
+namespace Fargo.HttpApi.Articles;
 
 public sealed class ArticleBarcodeRouteConstraint : IRouteConstraint
 {

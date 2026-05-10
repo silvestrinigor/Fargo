@@ -4,7 +4,7 @@ using Fargo.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Fargo.Api.Hubs;
+namespace Fargo.HttpApi.Hubs;
 
 /// <summary>
 /// SignalR hub that broadcasts domain events to clients based on their partition access.

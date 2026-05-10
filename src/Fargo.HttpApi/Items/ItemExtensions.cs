@@ -1,11 +1,11 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Items;
+using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.Items;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.Api.Items;
+namespace Fargo.HttpApi.Items;
 
 public static class ItemEndpointRouteBuilderExtension
 {

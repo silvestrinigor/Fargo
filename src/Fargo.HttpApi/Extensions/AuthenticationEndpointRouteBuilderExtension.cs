@@ -1,12 +1,12 @@
-using Fargo.Api.Contracts;
 using Fargo.Application;
 using Fargo.Application.Authentication;
 using Fargo.Application.Users;
 using Fargo.Domain.Tokens;
+using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ContractAuthentication = Fargo.Sdk.Contracts.Authentication;
 
-namespace Fargo.Api.Extensions;
+namespace Fargo.HttpApi.Extensions;
 
 /// <summary>
 /// Extension responsible for mapping authentication endpoints.

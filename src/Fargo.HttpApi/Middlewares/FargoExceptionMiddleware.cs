@@ -1,6 +1,6 @@
 using Fargo.Sdk.Contracts.Errors;
 
-namespace Fargo.Api.Middlewares;
+namespace Fargo.HttpApi.Middlewares;
 
 /// <summary>
 /// Middleware responsible for handling exceptions thrown during HTTP request processing.
