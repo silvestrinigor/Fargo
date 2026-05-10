@@ -1,6 +1,6 @@
 using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Contracts.Errors;
 using Fargo.Sdk.Contracts.Authentication;
+using Fargo.Sdk.Contracts.Errors;
 using Fargo.Sdk.Http;
 using NSubstitute;
 using System.Net;

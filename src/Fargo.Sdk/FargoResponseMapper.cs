@@ -1,4 +1,3 @@
-using Fargo.Sdk.Contracts;
 using Fargo.Sdk.Contracts.Errors;
 using Fargo.Sdk.Http;
 using System.Net;
