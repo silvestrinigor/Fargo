@@ -4,10 +4,55 @@ using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
+using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
+public sealed record ArticleDto(
+    Guid Guid,
+    Name Name,
+    Description Description,
+    TimeSpan? ShelfLife,
+    ArticleMetricsDto Metrics,
+    ArticleBarcodesDto Barcodes,
+    IReadOnlyCollection<Guid> Partitions,
+    bool IsActive,
+    Guid? EditedByGuid
+);
+
+public sealed record ArticleBarcodesDto(
+    Ean13? Ean13 = null,
+    Ean8? Ean8 = null,
+    UpcA? UpcA = null,
+    UpcE? UpcE = null,
+    Code128? Code128 = null,
+    Code39? Code39 = null,
+    Itf14? Itf14 = null,
+    Gs1128? Gs1128 = null,
+    QrCode? QrCode = null,
+    DataMatrix? DataMatrix = null
+);
+
+public sealed record ArticleMetricsDto(
+    Mass? Mass = null,
+    Length? LengthX = null,
+    Length? LengthY = null,
+    Length? LengthZ = null
+);
+
+public sealed record ArticleBarcodeDto(string Barcode, BarcodeFormat Type);
+
 #region Create
+
+public sealed record ArticleCreateDto(
+    Name Name,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
+);
 
 public sealed record ArticleCreateCommand(
     ArticleCreateDto Article
@@ -190,6 +235,16 @@ public sealed class ArticleDeleteCommandHandler(
 
 #region Update
 
+public sealed record ArticleUpdateDto(
+    Name Name,
+    Description Description,
+    TimeSpan? ShelfLife,
+    ArticleMetricsDto Metrics,
+    ArticleBarcodesDto Barcodes,
+    IReadOnlyCollection<Guid> Partitions,
+    bool IsActive
+);
+
 public sealed record ArticleUpdateCommand(
     Guid ArticleGuid,
     ArticleUpdateDto Article
@@ -231,8 +286,6 @@ public sealed class ArticleUpdateCommandHandler(
             article.ShelfLife = command.Article.ShelfLife;
         }
 
-        #region Metrics
-
         if (command.Article.Metrics is { } metrics)
         {
             if (!article.Metrics.Mass.Equals(metrics.Mass))
@@ -255,10 +308,6 @@ public sealed class ArticleUpdateCommandHandler(
                 article.Metrics.LengthZ = metrics.LengthZ;
             }
         }
-
-        #endregion Metrics
-
-        #region Barcode
 
         if (command.Article.Barcodes is { } barcodes)
         {
@@ -363,10 +412,6 @@ public sealed class ArticleUpdateCommandHandler(
             }
         }
 
-        #endregion Barcode
-
-        #region Partition
-
         if (command.Article.Partitions is { } requestedPartitions)
         {
             foreach (var partitionGuid in requestedPartitions)
@@ -395,10 +440,120 @@ public sealed class ArticleUpdateCommandHandler(
             }
         }
 
-        #endregion Partition
-
         await unitOfWork.SaveChanges(cancellationToken);
     }
 }
 
 #endregion Update
+
+#region Single
+
+public sealed record ArticleSingleQuery(
+    Guid ArticleGuid,
+    DateTimeOffset? AsOfDateTime = null
+) : IQuery<ArticleDto?>;
+
+public sealed class ArticleSingleQueryHandler(
+    ActorService actorService,
+    IArticleQueryRepository articleRepository,
+    ICurrentUser currentUser
+) : IQueryHandler<ArticleSingleQuery, ArticleDto?>
+{
+    public async Task<ArticleDto?> Handle(
+        ArticleSingleQuery query,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+        var article = await articleRepository.GetInfoByGuid(
+            query.ArticleGuid,
+            query.AsOfDateTime,
+            actor.PartitionAccessesGuids,
+            notInsideAnyPartition: true,
+            cancellationToken
+        );
+
+        return article;
+    }
+}
+
+#endregion Single
+
+#region Barcode
+
+public sealed record ArticleByBarcodeQuery(
+    ArticleBarcodeDto ArticleBarcode,
+    DateTimeOffset? AsOfDateTime = null
+) : IQuery<ArticleDto?>;
+
+public sealed class ArticleByBarcodeQueryHandler(
+    ActorService actorService,
+    IArticleQueryRepository articleRepository,
+    ICurrentUser currentUser
+) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
+{
+    public async Task<ArticleDto?> Handle(
+        ArticleByBarcodeQuery query,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+        var article = await articleRepository.GetInfoByBarcode(
+            query.ArticleBarcode,
+            query.AsOfDateTime,
+            actor.PartitionAccessesGuids,
+            notInsideAnyPartition: true,
+            cancellationToken
+        );
+
+        return article;
+    }
+}
+
+#endregion Barcode
+
+#region Many
+
+public sealed record ArticlesQuery(
+    Pagination WithPagination,
+    DateTimeOffset? TemporalAsOfDateTime = null,
+    IReadOnlyCollection<Guid>? InsideAnyOfThisPartitions = null,
+    bool? NotInsideAnyPartition = null
+) : IQuery<IReadOnlyCollection<ArticleDto>>;
+
+public sealed class ArticlesQueryHandler(
+    ActorService actorService,
+    IArticleQueryRepository articleRepository,
+    ICurrentUser currentUser
+) : IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>
+{
+    public async Task<IReadOnlyCollection<ArticleDto>> Handle(
+        ArticlesQuery query,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+
+        var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
+            ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
+            : query.NotInsideAnyPartition is true
+                ? null
+                : actor.PartitionAccessesGuids;
+        var notInsideAnyPartition = query.NotInsideAnyPartition ??
+            (query.InsideAnyOfThisPartitions is null ? true : null);
+
+        var articles = await articleRepository.GetManyInfo(
+            query.WithPagination,
+            query.TemporalAsOfDateTime,
+            insideAnyOfThisPartitions,
+            notInsideAnyPartition,
+            cancellationToken
+        );
+
+        return articles;
+    }
+}
+
+#endregion Many
