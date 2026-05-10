@@ -84,9 +84,14 @@ public sealed class ArticleCreateCommandHandler(
         ArticleCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Article create flow started for actor {ActorGuid}.", currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Article create flow started for actor {ActorGuid}.", actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
@@ -210,11 +215,14 @@ public sealed class ArticleCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Article create flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
-            article.Guid,
-            actor.Guid,
-            article.Partitions.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article create flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                article.Guid,
+                actor.Guid,
+                article.Partitions.Count);
+        }
 
         return article.Guid;
     }
@@ -240,12 +248,17 @@ public sealed class ArticleDeleteCommandHandler(
         ArticleDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Article delete flow started for article {ArticleGuid} by actor {ActorGuid}.",
-            command.ArticleGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article delete flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteArticle);
 
@@ -270,10 +283,13 @@ public sealed class ArticleDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Article delete flow completed for article {ArticleGuid} by actor {ActorGuid}.",
-            article.Guid,
-            actor.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article delete flow completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.Guid);
+        }
     }
 }
 
@@ -310,12 +326,17 @@ public sealed class ArticleUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogInformation(
-            "Article update flow started for article {ArticleGuid} by actor {ActorGuid}.",
-            command.ArticleGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article update flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -504,11 +525,14 @@ public sealed class ArticleUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Article update flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
-            article.Guid,
-            actor.Guid,
-            article.Partitions.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article update flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                article.Guid,
+                actor.Guid,
+                article.Partitions.Count);
+        }
     }
 }
 
@@ -533,12 +557,17 @@ public sealed class ArticleSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "Article single query started for article {ArticleGuid} by actor {ActorGuid}.",
-            query.ArticleGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Article single query started for article {ArticleGuid} by actor {ActorGuid}.",
+                query.ArticleGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByGuid(
             query.ArticleGuid,
@@ -548,11 +577,14 @@ public sealed class ArticleSingleQueryHandler(
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Article single query completed for article {ArticleGuid} by actor {ActorGuid}. Found: {Found}.",
-            query.ArticleGuid,
-            actor.Guid,
-            article is not null);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Article single query completed for article {ArticleGuid} by actor {ActorGuid}. Found: {Found}.",
+                query.ArticleGuid,
+                actor.Guid,
+                article is not null);
+        }
 
         return article;
     }
@@ -579,12 +611,17 @@ public sealed class ArticleByBarcodeQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "Article barcode query started for barcode type {BarcodeType} by actor {ActorGuid}.",
-            query.ArticleBarcode.Type,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Article barcode query started for barcode type {BarcodeType} by actor {ActorGuid}.",
+                query.ArticleBarcode.Type,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByBarcode(
             query.ArticleBarcode,
@@ -594,11 +631,14 @@ public sealed class ArticleByBarcodeQueryHandler(
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Article barcode query completed for barcode type {BarcodeType} by actor {ActorGuid}. Found: {Found}.",
-            query.ArticleBarcode.Type,
-            actor.Guid,
-            article is not null);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Article barcode query completed for barcode type {BarcodeType} by actor {ActorGuid}. Found: {Found}.",
+                query.ArticleBarcode.Type,
+                actor.Guid,
+                article is not null);
+        }
 
         return article;
     }
@@ -627,32 +667,41 @@ public sealed class ArticlesQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "Articles query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-            currentUser.UserGuid,
-            query.WithPagination.Page,
-            query.WithPagination.Limit);
+        var actorGuid = currentUser.UserGuid;
+        var pagination = query.WithPagination;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Articles query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+                actorGuid,
+                pagination.Page,
+                pagination.Limit);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var insideAnyOfThisPartitions = query.ChildAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
             : actor.PartitionAccessesGuids;
 
         var articles = await articleRepository.GetManyInfo(
-            query.WithPagination,
+            pagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
             query.NotChildOfAnyPartition,
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Articles query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-            actor.Guid,
-            query.ChildAnyOfThisPartitions?.Count ?? 0,
-            insideAnyOfThisPartitions?.Count ?? 0,
-            articles.Count);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Articles query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+                actor.Guid,
+                query.ChildAnyOfThisPartitions?.Count ?? 0,
+                insideAnyOfThisPartitions?.Count ?? 0,
+                articles.Count);
+        }
 
         return articles;
     }

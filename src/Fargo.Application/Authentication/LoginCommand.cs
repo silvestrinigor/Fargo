@@ -107,7 +107,10 @@ public sealed class LoginCommandHandler(
 
         if (user.IsPasswordChangeRequired)
         {
-            logger.LogInformation("Login flow requires password change for user {UserGuid}.", user.Guid);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Login flow requires password change for user {UserGuid}.", user.Guid);
+            }
             throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
@@ -129,12 +132,15 @@ public sealed class LoginCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Login flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
-            user.Guid,
-            actor.IsAdmin,
-            actor.PermissionActions.Count,
-            actor.PartitionAccessesGuids.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Login flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
+                user.Guid,
+                actor.IsAdmin,
+                actor.PermissionActions.Count,
+                actor.PartitionAccessesGuids.Count);
+        }
 
         return new AuthResult(
                 accessTokenResult.AccessToken,

@@ -23,12 +23,17 @@ public sealed class UserSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "User single query started for user {UserGuid} by actor {ActorGuid}.",
-            query.UserGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "User single query started for user {UserGuid} by actor {ActorGuid}.",
+                query.UserGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var user = await userRepository.GetInfoByGuid(
             query.UserGuid,
@@ -38,11 +43,14 @@ public sealed class UserSingleQueryHandler(
             cancellationToken
         );
 
-        logger.LogDebug(
-            "User single query completed for user {UserGuid} by actor {ActorGuid}. Found: {Found}.",
-            query.UserGuid,
-            actor.Guid,
-            user is not null);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "User single query completed for user {UserGuid} by actor {ActorGuid}. Found: {Found}.",
+                query.UserGuid,
+                actor.Guid,
+                user is not null);
+        }
 
         return user;
     }
@@ -71,32 +79,41 @@ public sealed class UsersQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "Users query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-            currentUser.UserGuid,
-            query.WithPagination.Page,
-            query.WithPagination.Limit);
+        var actorGuid = currentUser.UserGuid;
+        var pagination = query.WithPagination;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Users query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+                actorGuid,
+                pagination.Page,
+                pagination.Limit);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
             : actor.PartitionAccessesGuids;
 
         var users = await userRepository.GetManyInfo(
-            query.WithPagination,
+            pagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
             query.NotInsideAnyPartition,
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Users query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-            actor.Guid,
-            query.InsideAnyOfThisPartitions?.Count ?? 0,
-            insideAnyOfThisPartitions?.Count ?? 0,
-            users.Count);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Users query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+                actor.Guid,
+                query.InsideAnyOfThisPartitions?.Count ?? 0,
+                insideAnyOfThisPartitions?.Count ?? 0,
+                users.Count);
+        }
 
         return users;
     }

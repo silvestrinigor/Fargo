@@ -23,12 +23,17 @@ public sealed class PartitionSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "Partition single query started for partition {PartitionGuid} by actor {ActorGuid}.",
-            query.PartitionGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Partition single query started for partition {PartitionGuid} by actor {ActorGuid}.",
+                query.PartitionGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var partition = await partitionRepository.GetInfoByGuid(
             query.PartitionGuid,
@@ -38,11 +43,14 @@ public sealed class PartitionSingleQueryHandler(
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Partition single query completed for partition {PartitionGuid} by actor {ActorGuid}. Found: {Found}.",
-            query.PartitionGuid,
-            actor.Guid,
-            partition is not null);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Partition single query completed for partition {PartitionGuid} by actor {ActorGuid}. Found: {Found}.",
+                query.PartitionGuid,
+                actor.Guid,
+                partition is not null);
+        }
 
         return partition;
     }
@@ -71,32 +79,41 @@ public sealed class PartitionsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogDebug(
-            "Partitions query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-            currentUser.UserGuid,
-            query.WithPagination.Page,
-            query.WithPagination.Limit);
+        var actorGuid = currentUser.UserGuid;
+        var pagination = query.WithPagination;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Partitions query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+                actorGuid,
+                pagination.Page,
+                pagination.Limit);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
             : actor.PartitionAccessesGuids;
 
         var partitions = await partitionRepository.GetManyInfo(
-            query.WithPagination,
+            pagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
             query.NotInsideAnyPartition,
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Partitions query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-            actor.Guid,
-            query.InsideAnyOfThisPartitions?.Count ?? 0,
-            insideAnyOfThisPartitions?.Count ?? 0,
-            partitions.Count);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Partitions query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+                actor.Guid,
+                query.InsideAnyOfThisPartitions?.Count ?? 0,
+                insideAnyOfThisPartitions?.Count ?? 0,
+                partitions.Count);
+        }
 
         return partitions;
     }

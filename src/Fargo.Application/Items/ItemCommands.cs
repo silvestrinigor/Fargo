@@ -29,12 +29,17 @@ public sealed class ItemCreateCommandHandler(
         ItemCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Item create flow started for article {ArticleGuid} by actor {ActorGuid}.",
-            command.Item.ArticleGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item create flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.Item.ArticleGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateItem);
 
@@ -62,12 +67,15 @@ public sealed class ItemCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Item create flow completed for item {ItemGuid} by actor {ActorGuid}. ArticleGuid: {ArticleGuid}. PartitionCount: {PartitionCount}.",
-            item.Guid,
-            actor.Guid,
-            article.Guid,
-            item.Partitions.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item create flow completed for item {ItemGuid} by actor {ActorGuid}. ArticleGuid: {ArticleGuid}. PartitionCount: {PartitionCount}.",
+                item.Guid,
+                actor.Guid,
+                article.Guid,
+                item.Partitions.Count);
+        }
 
         return item.Guid;
     }
@@ -93,12 +101,17 @@ public sealed class ItemDeleteCommandHandler(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Item delete flow started for item {ItemGuid} by actor {ActorGuid}.",
-            command.ItemGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item delete flow started for item {ItemGuid} by actor {ActorGuid}.",
+                command.ItemGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteItem);
 
@@ -110,10 +123,13 @@ public sealed class ItemDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Item delete flow completed for item {ItemGuid} by actor {ActorGuid}.",
-            item.Guid,
-            actor.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item delete flow completed for item {ItemGuid} by actor {ActorGuid}.",
+                item.Guid,
+                actor.Guid);
+        }
     }
 }
 
@@ -141,12 +157,17 @@ public sealed class ItemUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogInformation(
-            "Item update flow started for item {ItemGuid} by actor {ActorGuid}.",
-            command.ItemGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item update flow started for item {ItemGuid} by actor {ActorGuid}.",
+                command.ItemGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditItem);
 
@@ -167,15 +188,21 @@ public sealed class ItemUpdateCommandHandler(
                 item,
                 cancellationToken);
 
-            logger.LogInformation(
-                "Item update flow moved item {ItemGuid} into parent container {ParentContainerGuid}.",
-                item.Guid,
-                parentContainerItem.Guid);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item update flow moved item {ItemGuid} into parent container {ParentContainerGuid}.",
+                    item.Guid,
+                    parentContainerItem.Guid);
+            }
         }
         else
         {
             ItemService.RemoveFromContainer(item);
-            logger.LogInformation("Item update flow removed item {ItemGuid} from its parent container.", item.Guid);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Item update flow removed item {ItemGuid} from its parent container.", item.Guid);
+            }
         }
 
         #region Partition
@@ -212,11 +239,14 @@ public sealed class ItemUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Item update flow completed for item {ItemGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
-            item.Guid,
-            actor.Guid,
-            item.Partitions.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item update flow completed for item {ItemGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                item.Guid,
+                actor.Guid,
+                item.Partitions.Count);
+        }
     }
 }
 

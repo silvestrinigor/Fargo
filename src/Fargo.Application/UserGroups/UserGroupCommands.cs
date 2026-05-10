@@ -27,9 +27,14 @@ public sealed class UserGroupCreateCommandHandler(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("User group create flow started by actor {ActorGuid}.", currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("User group create flow started by actor {ActorGuid}.", actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
@@ -65,12 +70,15 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "User group create flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
-            userGroup.Guid,
-            actor.Guid,
-            userGroup.Partitions.Count,
-            userGroup.Permissions.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group create flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
+                userGroup.Guid,
+                actor.Guid,
+                userGroup.Partitions.Count,
+                userGroup.Permissions.Count);
+        }
 
         return userGroup.Guid;
     }
@@ -108,12 +116,17 @@ public sealed class UserGroupDeleteCommandHandler(
         UserGroupDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "User group delete flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
-            command.UserGroupGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group delete flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                command.UserGroupGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteUserGroup);
 
@@ -127,10 +140,13 @@ public sealed class UserGroupDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "User group delete flow completed for user group {UserGroupGuid} by actor {ActorGuid}.",
-            userGroup.Guid,
-            actor.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group delete flow completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+                userGroup.Guid,
+                actor.Guid);
+        }
     }
 }
 
@@ -157,12 +173,17 @@ public sealed class UserGroupUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogInformation(
-            "User group update flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
-            command.UserGroupGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group update flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                command.UserGroupGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUserGroup);
 
@@ -253,12 +274,15 @@ public sealed class UserGroupUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "User group update flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
-            userGroup.Guid,
-            actor.Guid,
-            userGroup.Partitions.Count,
-            userGroup.Permissions.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group update flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
+                userGroup.Guid,
+                actor.Guid,
+                userGroup.Partitions.Count,
+                userGroup.Permissions.Count);
+        }
     }
 
     private static Nameid ValidateNameid(string value)

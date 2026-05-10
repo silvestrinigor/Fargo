@@ -26,9 +26,14 @@ public sealed class InitializeSystemCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogInformation("System initialization flow started for actor {ActorGuid}.", currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("System initialization flow started for actor {ActorGuid}.", actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         if (!actor.IsSystem)
         {
@@ -55,7 +60,10 @@ public sealed class InitializeSystemCommandHandler(
             };
 
             partitionRepository.Add(globalPartition);
-            logger.LogInformation("System initialization flow created global partition {PartitionGuid}.", globalPartition.Guid);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("System initialization flow created global partition {PartitionGuid}.", globalPartition.Guid);
+            }
         }
 
         var administratorsGroup = await userGroupRepository.GetByGuid(UserGroupService.AdministratorsUserGroupGuid, cancellationToken);
@@ -79,10 +87,13 @@ public sealed class InitializeSystemCommandHandler(
                 administratorsGroup.AddPermission(a);
             }
 
-            logger.LogInformation(
-                "System initialization flow created administrators user group {UserGroupGuid}. PermissionCount: {PermissionCount}.",
-                administratorsGroup.Guid,
-                administratorsGroup.Permissions.Count);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "System initialization flow created administrators user group {UserGroupGuid}. PermissionCount: {PermissionCount}.",
+                    administratorsGroup.Guid,
+                    administratorsGroup.Permissions.Count);
+            }
         }
 
         var options = defaultAdminOptions.Value;
@@ -111,9 +122,12 @@ public sealed class InitializeSystemCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "System initialization flow completed. AdminUserGuid: {UserGuid}. AdministratorsUserGroupGuid: {UserGroupGuid}.",
-            admin.Guid,
-            administratorsGroup.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "System initialization flow completed. AdminUserGuid: {UserGuid}. AdministratorsUserGroupGuid: {UserGroupGuid}.",
+                admin.Guid,
+                administratorsGroup.Guid);
+        }
     }
 }

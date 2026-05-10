@@ -24,9 +24,14 @@ public sealed class PartitionCreateCommandHandler(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Partition create flow started by actor {ActorGuid}.", currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Partition create flow started by actor {ActorGuid}.", actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreatePartition);
 
@@ -48,11 +53,14 @@ public sealed class PartitionCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Partition create flow completed for partition {PartitionGuid} by actor {ActorGuid}. ParentPartitionGuid: {ParentPartitionGuid}.",
-            partition.Guid,
-            actor.Guid,
-            parentPartition.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition create flow completed for partition {PartitionGuid} by actor {ActorGuid}. ParentPartitionGuid: {ParentPartitionGuid}.",
+                partition.Guid,
+                actor.Guid,
+                parentPartition.Guid);
+        }
 
         return partition.Guid;
     }
@@ -79,12 +87,17 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "Partition delete flow started for partition {PartitionGuid} by actor {ActorGuid}.",
-            command.PartitionGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition delete flow started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeletePartition);
 
@@ -96,10 +109,13 @@ public sealed class PartitionDeleteCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Partition delete flow completed for partition {PartitionGuid} by actor {ActorGuid}.",
-            partition.Guid,
-            actor.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition delete flow completed for partition {PartitionGuid} by actor {ActorGuid}.",
+                partition.Guid,
+                actor.Guid);
+        }
     }
 }
 
@@ -126,12 +142,17 @@ public sealed class PartitionUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.LogInformation(
-            "Partition update flow started for partition {PartitionGuid} by actor {ActorGuid}.",
-            command.PartitionGuid,
-            currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition update flow started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditPartition);
 
@@ -151,10 +172,13 @@ public sealed class PartitionUpdateCommandHandler(
 
             await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
 
-            logger.LogInformation(
-                "Partition update flow moved partition {PartitionGuid} under parent partition {ParentPartitionGuid}.",
-                partition.Guid,
-                parentPartition.Guid);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Partition update flow moved partition {PartitionGuid} under parent partition {ParentPartitionGuid}.",
+                    partition.Guid,
+                    parentPartition.Guid);
+            }
         }
 
         if (command.Partition.Name is not null && partition.Name != command.Partition.Name.Value)
@@ -174,11 +198,14 @@ public sealed class PartitionUpdateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Partition update flow completed for partition {PartitionGuid} by actor {ActorGuid}. IsActive: {IsActive}.",
-            partition.Guid,
-            actor.Guid,
-            partition.IsActive);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition update flow completed for partition {PartitionGuid} by actor {ActorGuid}. IsActive: {IsActive}.",
+                partition.Guid,
+                actor.Guid,
+                partition.IsActive);
+        }
     }
 }
 

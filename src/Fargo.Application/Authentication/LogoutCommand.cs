@@ -67,6 +67,9 @@ public sealed class LogoutCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation("Logout flow completed for user {UserGuid}.", storedRefreshToken.UserGuid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Logout flow completed for user {UserGuid}.", storedRefreshToken.UserGuid);
+        }
     }
 }

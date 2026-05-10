@@ -113,12 +113,15 @@ public sealed class RefreshCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation(
-            "Refresh flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
-            user.Guid,
-            actor.IsAdmin,
-            actor.PermissionActions.Count,
-            actor.PartitionAccessesGuids.Count);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Refresh flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
+                user.Guid,
+                actor.IsAdmin,
+                actor.PermissionActions.Count,
+                actor.PartitionAccessesGuids.Count);
+        }
 
         return new AuthResult(
                 newAccessTokenResult.AccessToken,

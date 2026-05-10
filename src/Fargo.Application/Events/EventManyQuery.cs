@@ -27,9 +27,14 @@ public sealed class EventManyQueryHandler(
     /// <summary>Returns a paged list of domain events matching the given filters.</summary>
     public async Task<IReadOnlyCollection<EventInformation>> Handle(EventManyQuery query, CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Events query started for actor {ActorGuid}.", currentUser.UserGuid);
+        var actorGuid = currentUser.UserGuid;
 
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug("Events query started for actor {ActorGuid}.", actorGuid);
+        }
+
+        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUser);
 
@@ -44,13 +49,16 @@ public sealed class EventManyQueryHandler(
             cancellationToken
         );
 
-        logger.LogDebug(
-            "Events query completed for actor {ActorGuid}. EntityGuid: {EntityGuid}. EntityType: {EntityType}. EventType: {EventType}. ResultCount: {ResultCount}.",
-            actor.Guid,
-            query.EntityGuid,
-            query.EntityType,
-            query.EventType,
-            events.Count);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug(
+                "Events query completed for actor {ActorGuid}. EntityGuid: {EntityGuid}. EntityType: {EntityType}. EventType: {EventType}. ResultCount: {ResultCount}.",
+                actor.Guid,
+                query.EntityGuid,
+                query.EntityType,
+                query.EventType,
+                events.Count);
+        }
 
         return events;
     }

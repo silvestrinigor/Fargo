@@ -51,18 +51,23 @@ public sealed class PasswordChangeCommandHandler(
     public async Task Handle(
             PasswordChangeCommand command,
             CancellationToken cancellationToken = default
-            )
+    )
     {
-        logger.LogInformation("Password change flow started for user {UserGuid}.", currentUser.UserGuid);
+        var userGuid = currentUser.UserGuid;
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Password change flow started for user {UserGuid}.", userGuid);
+        }
 
         var user = await userRepository.GetByGuid(
-                currentUser.UserGuid,
+                userGuid,
                 cancellationToken
                 );
 
         if (user is null)
         {
-            logger.LogWarning("Password change flow rejected because user {UserGuid} was not found.", currentUser.UserGuid);
+            logger.LogWarning("Password change flow rejected because user {UserGuid} was not found.", userGuid);
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
@@ -100,7 +105,10 @@ public sealed class PasswordChangeCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
-        logger.LogInformation("Password change flow completed for user {UserGuid}.", user.Guid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Password change flow completed for user {UserGuid}.", user.Guid);
+        }
     }
 
     private static void ValidatePasswordPolicy(string password)
