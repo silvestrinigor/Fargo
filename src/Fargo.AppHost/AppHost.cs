@@ -7,6 +7,7 @@ var sqlserver = builder
     .WithLifetime(ContainerLifetime.Persistent);
 
 var fargodb = sqlserver.AddDatabase("fargo");
+var environmentName = builder.Environment.EnvironmentName;
 
 var migrations = builder
     .AddProject<Projects.Fargo_MigrationService>("migrations")
@@ -22,6 +23,8 @@ builder
 var httpApi = builder
     .AddProject<Projects.Fargo_HttpApi>("apiservice")
     .WithHttpHealthCheck("/health")
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WithReference(migrations)
     .WaitForCompletion(migrations);
@@ -29,6 +32,8 @@ var httpApi = builder
 builder
     .AddProject<Projects.Fargo_GrpcApi>("grpcservice")
     .WithHttpHealthCheck("/health")
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WithReference(migrations)
     .WaitForCompletion(migrations);
