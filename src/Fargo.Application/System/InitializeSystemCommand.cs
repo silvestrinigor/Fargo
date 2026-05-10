@@ -1,6 +1,7 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

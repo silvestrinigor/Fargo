@@ -12,6 +12,7 @@ using Fargo.Domain.Articles;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Persistence;

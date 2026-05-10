@@ -8,6 +8,7 @@ using Fargo.Application.Users;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 
 namespace Fargo.GrpcApi;

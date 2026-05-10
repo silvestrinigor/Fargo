@@ -1,5 +1,6 @@
 using Fargo.Domain.Partitions;
 using Fargo.Domain.System;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using NSubstitute;
 

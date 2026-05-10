@@ -3,6 +3,8 @@ using Fargo.Domain.Partitions;
 
 namespace Fargo.Domain.Items;
 
+#region Entity
+
 /// <summary>
 /// Represents an item in the system.
 /// </summary>
@@ -171,3 +173,156 @@ public sealed class ItemContainer
     /// </summary>
     public Item Item { get; private init; }
 }
+
+#endregion Entity
+
+#region Repositories
+
+/// <summary>
+/// Defines the repository contract for managing <see cref="Item"/> entities.
+/// </summary>
+public interface IItemRepository
+{
+    /// <summary>
+    /// Gets an item by its unique identifier.
+    /// </summary>
+    Task<Item?> GetByGuid(
+        Guid entityGuid,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Retrieves the unique identifiers of all items contained under a given item.
+    /// </summary>
+    Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
+        Guid itemGuid,
+        bool includeRoot = true,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Adds a new item to the persistence context.
+    /// </summary>
+    void Add(Item item);
+
+    /// <summary>
+    /// Removes an item from the persistence context.
+    /// </summary>
+    void Remove(Item item);
+}
+
+#endregion Repositories
+
+#region Services
+
+/// <summary>
+/// Provides domain operations for moving items between item containers.
+/// </summary>
+public sealed class ItemService(IItemRepository itemRepository)
+{
+    /// <summary>
+    /// Places an item inside a container item.
+    /// </summary>
+    /// <exception cref="ItemCannotBeOwnContainerFargoDomainException">
+    /// Thrown when an item is assigned as its own container.
+    /// </exception>
+    /// <exception cref="ItemParentIsNotContainerFargoDomainException">
+    /// Thrown when the parent item is not backed by a container article.
+    /// </exception>
+    /// <exception cref="ItemCircularContainerHierarchyFargoDomainException">
+    /// Thrown when assigning the container would create a circular hierarchy.
+    /// </exception>
+    public async Task MoveToContainer(
+        Item parentContainerItem,
+        Item memberItem,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(parentContainerItem);
+        ArgumentNullException.ThrowIfNull(memberItem);
+
+        if (parentContainerItem.Guid == memberItem.Guid)
+        {
+            throw new ItemCannotBeOwnContainerFargoDomainException(memberItem.Guid);
+        }
+
+        if (!parentContainerItem.Article.IsContainer)
+        {
+            throw new ItemParentIsNotContainerFargoDomainException(parentContainerItem.Guid);
+        }
+
+        var descendantItemGuids = await itemRepository.GetContainerDescendantGuids(
+            memberItem.Guid,
+            includeRoot: false,
+            cancellationToken);
+
+        if (descendantItemGuids.Contains(parentContainerItem.Guid))
+        {
+            throw new ItemCircularContainerHierarchyFargoDomainException(
+                parentContainerItem.Guid,
+                memberItem.Guid);
+        }
+
+        memberItem.ParentContainer = new ItemContainer(parentContainerItem);
+    }
+
+    /// <summary>
+    /// Removes an item from its current parent container.
+    /// </summary>
+    public static void RemoveFromContainer(Item item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        item.ParentContainer = null;
+    }
+}
+
+#endregion Services
+
+#region Exceptions
+
+/// <summary>
+/// Exception thrown when an item is placed inside itself.
+/// </summary>
+public sealed class ItemCannotBeOwnContainerFargoDomainException(Guid itemGuid)
+    : FargoDomainException($"Item '{itemGuid}' cannot be its own container.")
+{
+    /// <summary>
+    /// Gets the identifier of the item involved in the violation.
+    /// </summary>
+    public Guid ItemGuid { get; } = itemGuid;
+}
+
+/// <summary>
+/// Exception thrown when an item is placed inside a non-container item.
+/// </summary>
+public sealed class ItemParentIsNotContainerFargoDomainException(Guid parentItemGuid)
+    : FargoDomainException($"Item '{parentItemGuid}' cannot contain items.")
+{
+    /// <summary>
+    /// Gets the identifier of the invalid parent item.
+    /// </summary>
+    public Guid ParentItemGuid { get; } = parentItemGuid;
+}
+
+/// <summary>
+/// Exception thrown when an item container hierarchy would become circular.
+/// </summary>
+public sealed class ItemCircularContainerHierarchyFargoDomainException(
+    Guid parentContainerItemGuid,
+    Guid memberItemGuid)
+    : FargoDomainException(
+        $"Item '{memberItemGuid}' cannot be assigned to container " +
+        $"'{parentContainerItemGuid}' because this would create a circular hierarchy.")
+{
+    /// <summary>
+    /// Gets the identifier of the candidate parent container item.
+    /// </summary>
+    public Guid ParentContainerItemGuid { get; } = parentContainerItemGuid;
+
+    /// <summary>
+    /// Gets the identifier of the member item.
+    /// </summary>
+    public Guid MemberItemGuid { get; } = memberItemGuid;
+}
+
+#endregion Exceptions

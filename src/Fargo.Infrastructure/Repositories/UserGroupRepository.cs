@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.UserGroups;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;

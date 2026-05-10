@@ -1,4 +1,4 @@
-using Fargo.Domain.Users;
+using Fargo.Domain.UserGroups;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

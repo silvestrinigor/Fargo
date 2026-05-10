@@ -5,6 +5,7 @@ using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;

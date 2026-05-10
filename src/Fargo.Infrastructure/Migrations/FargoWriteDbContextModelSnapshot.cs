@@ -367,7 +367,7 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Users.UserGroup", b =>
+            modelBuilder.Entity("Fargo.Domain.UserGroups.UserGroup", b =>
                 {
                     b.Property<Guid>("Guid")
                         .HasColumnType("uniqueidentifier");
@@ -417,7 +417,7 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Users.UserGroupPartitionAccess", b =>
+            modelBuilder.Entity("Fargo.Domain.UserGroups.UserGroupPartitionAccess", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
@@ -459,7 +459,7 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Users.UserGroupPermission", b =>
+            modelBuilder.Entity("Fargo.Domain.UserGroups.UserGroupPermission", b =>
                 {
                     b.Property<Guid>("Guid")
                         .HasColumnType("uniqueidentifier");
@@ -1082,7 +1082,7 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Users.UserGroupPartitionAccess", b =>
+            modelBuilder.Entity("Fargo.Domain.UserGroups.UserGroupPartitionAccess", b =>
                 {
                     b.HasOne("Fargo.Domain.Partitions.Partition", "Partition")
                         .WithMany()
@@ -1090,7 +1090,7 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fargo.Domain.Users.UserGroup", "UserGroup")
+                    b.HasOne("Fargo.Domain.UserGroups.UserGroup", "UserGroup")
                         .WithMany("PartitionAccesses")
                         .HasForeignKey("UserGroupGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1101,9 +1101,9 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("UserGroup");
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Users.UserGroupPermission", b =>
+            modelBuilder.Entity("Fargo.Domain.UserGroups.UserGroupPermission", b =>
                 {
-                    b.HasOne("Fargo.Domain.Users.UserGroup", "UserGroup")
+                    b.HasOne("Fargo.Domain.UserGroups.UserGroup", "UserGroup")
                         .WithMany("Permissions")
                         .HasForeignKey("UserGroupGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1180,7 +1180,7 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fargo.Domain.Users.UserGroup", null)
+                    b.HasOne("Fargo.Domain.UserGroups.UserGroup", null)
                         .WithMany()
                         .HasForeignKey("UserGroupMembersGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1189,7 +1189,7 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("UserUserGroup", b =>
                 {
-                    b.HasOne("Fargo.Domain.Users.UserGroup", null)
+                    b.HasOne("Fargo.Domain.UserGroups.UserGroup", null)
                         .WithMany()
                         .HasForeignKey("UserGroupsGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1214,7 +1214,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Permissions");
                 });
 
-            modelBuilder.Entity("Fargo.Domain.Users.UserGroup", b =>
+            modelBuilder.Entity("Fargo.Domain.UserGroups.UserGroup", b =>
                 {
                     b.Navigation("PartitionAccesses");
 

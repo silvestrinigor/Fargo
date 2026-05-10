@@ -1,8 +1,12 @@
 using Fargo.Domain.Articles;
 using Fargo.Domain.Items;
+using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
+using System.Collections.ObjectModel;
 
 namespace Fargo.Domain.Partitions;
+
+#region Entity
 
 /// <summary>
 /// Marker interface for domain entities that belong to one or more partitions.
@@ -145,7 +149,6 @@ public class Partition : ModifiedEntity, IPartitionEntity
 
     #region ChildPartition
 
-    // TODO: I Think should be called child partitions insted of partition members because this is related only with the hierarchical child partitions, not all partitions inside.
     /// <summary>
     /// Gets the child partitions that belong to the current partition.
     /// </summary>
@@ -246,3 +249,322 @@ public class Partition : ModifiedEntity, IPartitionEntity
 
     #endregion UserGroup
 }
+
+#endregion Entity
+
+#region Collections
+
+/// <summary>
+/// Represents a collection of <see cref="Partition"/> instances associated with an entity.
+/// </summary>
+/// <remarks>
+/// This collection enforces domain rules for entity partitions, such as preventing
+/// duplicate items and rejecting <see langword="null"/> values.
+/// </remarks>
+public sealed class PartitionCollection : Collection<Partition>
+{
+    /// <summary>
+    /// Initializes an empty <see cref="PartitionCollection"/>.
+    /// </summary>
+    public PartitionCollection()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="PartitionCollection"/> with the specified partitions.
+    /// </summary>
+    /// <param name="partitions">
+    /// The partitions to populate the collection with.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partitions"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the collection contains duplicate partitions.
+    /// </exception>
+    public PartitionCollection(IEnumerable<Partition> partitions)
+    {
+        ArgumentNullException.ThrowIfNull(partitions);
+
+        foreach (var partition in partitions)
+        {
+            Add(partition);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void InsertItem(int index, Partition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        if (Items.Contains(item))
+        {
+            throw new InvalidOperationException(
+                "The partition already exists in the collection.");
+        }
+
+        base.InsertItem(index, item);
+    }
+
+    /// <inheritdoc />
+    protected override void SetItem(int index, Partition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        if (Items.Contains(item) && !ReferenceEquals(Items[index], item))
+        {
+            throw new InvalidOperationException(
+                "The partition already exists in the collection.");
+        }
+
+        base.SetItem(index, item);
+    }
+}
+
+#endregion Collections
+
+#region Repositories
+
+/// <summary>
+/// Defines the repository contract for managing <see cref="Partition"/> entities.
+/// </summary>
+public interface IPartitionRepository
+{
+    /// <summary>
+    /// Retrieves a partition by its unique identifier.
+    /// </summary>
+    Task<Partition?> GetByGuid(
+        Guid entityGuid,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Retrieves the unique identifiers of all descendant partitions of a given partition.
+    /// </summary>
+    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+        Guid partitionGuid,
+        bool includeRoot = true,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Retrieves the unique identifiers of all descendant partitions of the specified root partitions.
+    /// </summary>
+    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+        IReadOnlyCollection<Guid> partitionGuids,
+        bool includeRoots = true,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Adds a new partition to the persistence context.
+    /// </summary>
+    void Add(Partition partition);
+
+    /// <summary>
+    /// Removes a partition from the persistence context.
+    /// </summary>
+    void Remove(Partition partition);
+}
+
+#endregion Repositories
+
+#region Services
+
+/// <summary>
+/// Provides domain operations related to partition retrieval
+/// and partition-based access evaluation.
+/// </summary>
+/// <remarks>
+/// This service encapsulates logic for retrieving partitions while enforcing
+/// access rules based on the effective partition access of a <see cref="Fargo.Domain.Users.User"/>.
+///
+/// Effective access may be granted either:
+/// <list type="bullet">
+/// <item>
+/// <description>directly to the user</description>
+/// </item>
+/// <item>
+/// <description>indirectly through one of the user's <see cref="Fargo.Domain.UserGroups.UserGroup"/> memberships</description>
+/// </item>
+/// </list>
+///
+/// Access inheritance flows from parent to child. This means that a user
+/// with access to a parent partition also has access to all of its descendant
+/// partitions. Access does not flow from child to parent.
+/// </remarks>
+public class PartitionService(
+    IPartitionRepository partitionRepository)
+{
+    /// <summary>
+    /// The predefined unique identifier string representing
+    /// the global partition.
+    /// </summary>
+    /// <remarks>
+    /// The global partition is the root of the partition hierarchy
+    /// and has implicit access to all descendant partitions.
+    /// </remarks>
+    private const string GlobalPartitionGuidString =
+        "00000000-0000-0000-0000-000000000002";
+
+    /// <summary>
+    /// Gets the predefined unique identifier representing
+    /// the global partition.
+    /// </summary>
+    /// <remarks>
+    /// This GUID is reserved for the root partition of the system.
+    /// It must remain constant across environments and is used
+    /// to establish the top-level access scope for privileged users.
+    /// </remarks>
+    public static Guid GlobalPartitionGuid =>
+        new(GlobalPartitionGuidString);
+
+    /// <summary>
+    /// Deletes the specified <see cref="Partition"/> from the system.
+    /// </summary>
+    /// <param name="partition">
+    /// The partition to be deleted.
+    /// </param>
+    /// <exception cref="PartitionGlobalDeleteFargoDomainException">
+    /// Thrown when an attempt is made to delete the global partition.
+    /// </exception>
+    /// <remarks>
+    /// This operation removes the partition from the system.
+    /// The global partition cannot be deleted under any circumstances.
+    /// </remarks>
+    public void DeletePartition(Partition partition)
+    {
+        if (partition.Guid == GlobalPartitionGuid)
+        {
+            throw new PartitionGlobalDeleteFargoDomainException();
+        }
+
+        partitionRepository.Remove(partition);
+    }
+
+    /// <summary>
+    /// Sets the parent partition of a member partition.
+    /// </summary>
+    /// <param name="parentPartition">
+    /// The partition that will become the parent.
+    /// </param>
+    /// <param name="memberPartition">
+    /// The partition that will become a child of <paramref name="parentPartition"/>.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentPartition"/> or
+    /// <paramref name="memberPartition"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="PartitionCannotBeOwnParentFargoDomainException">
+    /// Thrown when a partition is assigned as its own parent.
+    /// </exception>
+    /// <exception cref="PartitionCircularHierarchyFargoDomainException">
+    /// Thrown when assigning the parent would create a circular hierarchy.
+    /// </exception>
+    public async Task SetParentPartition(
+        Partition parentPartition,
+        Partition memberPartition,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(parentPartition);
+        ArgumentNullException.ThrowIfNull(memberPartition);
+
+        if (parentPartition.Guid == memberPartition.Guid)
+        {
+            throw new PartitionCannotBeOwnParentFargoDomainException(
+                memberPartition.Guid
+            );
+        }
+
+        var createsCircularHierarchy =
+            await CreatesCircularHierarchy(
+                parentPartition,
+                memberPartition.Guid,
+                cancellationToken
+            );
+
+        if (createsCircularHierarchy)
+        {
+            throw new PartitionCircularHierarchyFargoDomainException(
+                parentPartition.Guid,
+                memberPartition.Guid
+            );
+        }
+
+        memberPartition.ParentPartition = parentPartition;
+    }
+
+    private async Task<bool> CreatesCircularHierarchy(
+        Partition candidateParentPartition,
+        Guid memberPartitionGuid,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(candidateParentPartition);
+
+        if (candidateParentPartition.Guid == memberPartitionGuid)
+        {
+            return true;
+        }
+
+        var descendantPartitionGuids =
+            await partitionRepository.GetDescendantGuids(
+                memberPartitionGuid,
+                false,
+                cancellationToken
+            );
+
+        return descendantPartitionGuids.Contains(candidateParentPartition.Guid);
+    }
+}
+
+#endregion Services
+
+#region Exceptions
+
+/// <summary>
+/// Exception thrown when a partition is assigned as its own parent.
+/// </summary>
+public sealed class PartitionCannotBeOwnParentFargoDomainException(
+    Guid partitionGuid
+    ) : FargoDomainException(
+        $"Partition '{partitionGuid}' cannot be its own parent.")
+{
+    /// <summary>
+    /// Gets the identifier of the partition involved in the violation.
+    /// </summary>
+    public Guid PartitionGuid { get; } = partitionGuid;
+}
+
+/// <summary>
+/// Exception thrown when an attempt is made to delete the global partition.
+/// </summary>
+public sealed class PartitionGlobalDeleteFargoDomainException()
+    : FargoDomainException("The global partition cannot be deleted.")
+{
+}
+
+/// <summary>
+/// Exception thrown when a partition hierarchy would become circular.
+/// </summary>
+public sealed class PartitionCircularHierarchyFargoDomainException(
+    Guid parentPartitionGuid,
+    Guid memberPartitionGuid
+    ) : FargoDomainException(
+        $"Partition '{memberPartitionGuid}' cannot be assigned to parent " +
+        $"'{parentPartitionGuid}' because this would create a circular hierarchy.")
+{
+    /// <summary>
+    /// Gets the identifier of the candidate parent partition.
+    /// </summary>
+    public Guid ParentPartitionGuid { get; } = parentPartitionGuid;
+
+    /// <summary>
+    /// Gets the identifier of the member partition.
+    /// </summary>
+    public Guid MemberPartitionGuid { get; } = memberPartitionGuid;
+}
+
+#endregion Exceptions
