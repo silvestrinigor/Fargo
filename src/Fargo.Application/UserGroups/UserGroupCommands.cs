@@ -3,6 +3,7 @@ using Fargo.Application.Partitions;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
@@ -18,13 +19,16 @@ public sealed class UserGroupCreateCommandHandler(
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    ILogger<UserGroupCreateCommandHandler> logger
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
 {
     public async Task<Guid> Handle(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("User group create flow started by actor {ActorGuid}.", currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
@@ -61,6 +65,13 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
+        logger.LogInformation(
+            "User group create flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
+            userGroup.Guid,
+            actor.Guid,
+            userGroup.Partitions.Count,
+            userGroup.Permissions.Count);
+
         return userGroup.Guid;
     }
 
@@ -89,13 +100,19 @@ public sealed class UserGroupDeleteCommandHandler(
     ActorService actorService,
     IUserGroupRepository userGroupRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserGroupDeleteCommandHandler> logger
 ) : ICommandHandler<UserGroupDeleteCommand>
 {
     public async Task Handle(
         UserGroupDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation(
+            "User group delete flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+            command.UserGroupGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteUserGroup);
@@ -109,6 +126,11 @@ public sealed class UserGroupDeleteCommandHandler(
         userGroupRepository.Remove(userGroup);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "User group delete flow completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+            userGroup.Guid,
+            actor.Guid);
     }
 }
 
@@ -126,7 +148,8 @@ public sealed class UserGroupUpdateCommandHandler(
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserGroupUpdateCommandHandler> logger
 ) : ICommandHandler<UserGroupUpdateCommand>
 {
     public async Task Handle(
@@ -134,6 +157,11 @@ public sealed class UserGroupUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogInformation(
+            "User group update flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+            command.UserGroupGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUserGroup);
@@ -224,6 +252,13 @@ public sealed class UserGroupUpdateCommandHandler(
         #endregion Partition
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "User group update flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
+            userGroup.Guid,
+            actor.Guid,
+            userGroup.Partitions.Count,
+            userGroup.Permissions.Count);
     }
 
     private static Nameid ValidateNameid(string value)

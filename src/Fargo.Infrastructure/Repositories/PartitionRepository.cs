@@ -119,19 +119,34 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     private static IQueryable<Partition> ApplyPartitionFilter(
         IQueryable<Partition> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition)
+        bool? notInsideAnyPartition
+    )
     {
+        if (partitionGuids is null)
+        {
+            if (notInsideAnyPartition is true)
+            {
+                return query.Where(partition => partition.ParentPartitionGuid == null);
+            }
+
+            if (notInsideAnyPartition is false)
+            {
+                return query.Where(article => article.ParentPartitionGuid != null);
+            }
+
+            return query;
+        }
+
         if (notInsideAnyPartition is true)
         {
-            return query.Where(_ => false);
+            return query.Where(partition =>
+                partition.ParentPartitionGuid == null ||
+                partitionGuids.Contains(partition.ParentPartitionGuid.Value));
         }
 
-        if (partitionGuids is not null)
-        {
-            query = query.Where(partition => partitionGuids.Contains(partition.Guid));
-        }
-
-        return query;
+        return query.Where(partition =>
+            partition.ParentPartitionGuid != null &&
+            partitionGuids.Contains(partition.ParentPartitionGuid.Value));
     }
 
     private static PartitionDto Map(Partition partition)

@@ -1,5 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
@@ -13,7 +14,8 @@ public sealed record UserGroupSingleQuery(
 public sealed class UserGroupSingleQueryHandler(
     ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserGroupSingleQueryHandler> logger
 ) : IQueryHandler<UserGroupSingleQuery, UserGroupDto?>
 {
     public async Task<UserGroupDto?> Handle(
@@ -21,6 +23,11 @@ public sealed class UserGroupSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "User group single query started for user group {UserGroupGuid} by actor {ActorGuid}.",
+            query.UserGroupGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var userGroup = await userGroupRepository.GetInfoByGuid(
@@ -30,6 +37,12 @@ public sealed class UserGroupSingleQueryHandler(
             notInsideAnyPartition: true,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "User group single query completed for user group {UserGroupGuid} by actor {ActorGuid}. Found: {Found}.",
+            query.UserGroupGuid,
+            actor.Guid,
+            userGroup is not null);
 
         return userGroup;
     }
@@ -49,7 +62,8 @@ public sealed record UserGroupsQuery(
 public sealed class UserGroupsQueryHandler(
     ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserGroupsQueryHandler> logger
 ) : IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>
 {
     public async Task<IReadOnlyCollection<UserGroupDto>> Handle(
@@ -57,23 +71,32 @@ public sealed class UserGroupsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "User groups query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+            currentUser.UserGuid,
+            query.WithPagination.Page,
+            query.WithPagination.Limit);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : query.NotInsideAnyPartition is true
-                ? null
-                : actor.PartitionAccessesGuids;
-        var notInsideAnyPartition = query.NotInsideAnyPartition ??
-            (query.InsideAnyOfThisPartitions is null ? true : null);
+            : actor.PartitionAccessesGuids;
 
         var userGroups = await userGroupRepository.GetManyInfo(
             query.WithPagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
-            notInsideAnyPartition,
+            query.NotInsideAnyPartition,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "User groups query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+            actor.Guid,
+            query.InsideAnyOfThisPartitions?.Count ?? 0,
+            insideAnyOfThisPartitions?.Count ?? 0,
+            userGroups.Count);
 
         return userGroups;
     }

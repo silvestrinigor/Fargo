@@ -1,6 +1,7 @@
 using Fargo.Domain;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Authentication;
 
@@ -29,7 +30,8 @@ public sealed class RefreshCommandHandler(
         ITokenHasher tokenHasher,
         IRefreshTokenRepository refreshTokenRepository,
         ActorService actorService,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ILogger<RefreshCommandHandler> logger
         ) : ICommandHandler<RefreshCommand, AuthResult>
 {
     /// <summary>
@@ -54,6 +56,8 @@ public sealed class RefreshCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
+        logger.LogInformation("Refresh flow started.");
+
         var oldRefreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
         var storedOldRefreshToken = await refreshTokenRepository.GetByTokenHash(
@@ -63,18 +67,28 @@ public sealed class RefreshCommandHandler(
 
         if (storedOldRefreshToken == null || storedOldRefreshToken.IsExpired)
         {
+            logger.LogWarning("Refresh flow rejected because the refresh token was missing or expired.");
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
         var user = await userRepository.GetByGuid(
                 storedOldRefreshToken.UserGuid,
                 cancellationToken
-                ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                );
+
+        if (user is null)
+        {
+            logger.LogWarning(
+                "Refresh flow rejected because user {UserGuid} from the refresh token was not found.",
+                storedOldRefreshToken.UserGuid);
+            throw new UnauthorizedAccessFargoApplicationException();
+        }
 
         if (!user.IsActive)
         {
             refreshTokenRepository.Remove(storedOldRefreshToken);
             await unitOfWork.SaveChanges(cancellationToken);
+            logger.LogWarning("Refresh flow rejected for inactive user {UserGuid}; old refresh token was removed.", user.Guid);
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
@@ -98,6 +112,13 @@ public sealed class RefreshCommandHandler(
         var newAccessTokenResult = tokenGenerator.Generate(user);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "Refresh flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
+            user.Guid,
+            actor.IsAdmin,
+            actor.PermissionActions.Count,
+            actor.PartitionAccessesGuids.Count);
 
         return new AuthResult(
                 newAccessTokenResult.AccessToken,

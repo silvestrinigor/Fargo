@@ -6,6 +6,7 @@ using Fargo.Domain.Items;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.System;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -79,7 +80,8 @@ public sealed class ItemUpdateCommandHandlerTests
             partitionRepository,
             itemService ?? new ItemService(itemRepository),
             unitOfWork,
-            currentUser);
+            currentUser,
+            NullLogger<ItemUpdateCommandHandler>.Instance);
 
     private static Item CreateItem()
         => new(CreateArticle());

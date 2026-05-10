@@ -1,5 +1,6 @@
 using Fargo.Application.Users;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Authentication;
 
@@ -25,7 +26,8 @@ public sealed class PasswordChangeCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser
+        ICurrentUser currentUser,
+        ILogger<PasswordChangeCommandHandler> logger
         ) : ICommandHandler<PasswordChangeCommand>
 {
     /// <summary>
@@ -51,18 +53,34 @@ public sealed class PasswordChangeCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
+        logger.LogInformation("Password change flow started for user {UserGuid}.", currentUser.UserGuid);
+
         var user = await userRepository.GetByGuid(
                 currentUser.UserGuid,
                 cancellationToken
-                ) ?? throw new UnauthorizedAccessFargoApplicationException();
+                );
 
-        if (!user.IsActive)
+        if (user is null)
         {
+            logger.LogWarning("Password change flow rejected because user {UserGuid} was not found.", currentUser.UserGuid);
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
-        var currentPassword = command.Passwords.CurrentPassword
-            ?? throw new InvalidPasswordFargoApplicationException();
+        if (!user.IsActive)
+        {
+            logger.LogWarning("Password change flow rejected for inactive user {UserGuid}.", user.Guid);
+            throw new UnauthorizedAccessFargoApplicationException();
+        }
+
+        if (command.Passwords.CurrentPassword is null)
+        {
+            logger.LogWarning(
+                "Password change flow rejected because the current password was missing for user {UserGuid}.",
+                user.Guid);
+            throw new InvalidPasswordFargoApplicationException();
+        }
+
+        var currentPassword = command.Passwords.CurrentPassword;
 
         var isValid = passwordHasher.Verify(
                 user.PasswordHash,
@@ -71,6 +89,7 @@ public sealed class PasswordChangeCommandHandler(
 
         if (!isValid)
         {
+            logger.LogWarning("Password change flow rejected because the current password was invalid for user {UserGuid}.", user.Guid);
             throw new InvalidPasswordFargoApplicationException();
         }
 
@@ -80,6 +99,8 @@ public sealed class PasswordChangeCommandHandler(
         user.ResetPasswordExpiration();
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation("Password change flow completed for user {UserGuid}.", user.Guid);
     }
 
     private static void ValidatePasswordPolicy(string password)

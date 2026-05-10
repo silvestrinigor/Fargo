@@ -3,6 +3,7 @@ using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Authentication;
@@ -46,7 +47,8 @@ public sealed class AuthenticationAccessResultTests
             tokenHasher,
             refreshTokenRepository,
             new ActorService(userRepository, partitionRepository),
-            unitOfWork);
+            unitOfWork,
+            NullLogger<LoginCommandHandler>.Instance);
 
         var result = await sut.Handle(new LoginCommand(admin.Nameid, "password"));
 
@@ -90,7 +92,8 @@ public sealed class AuthenticationAccessResultTests
             tokenHasher,
             refreshTokenRepository,
             new ActorService(userRepository, partitionRepository),
-            unitOfWork);
+            unitOfWork,
+            NullLogger<RefreshCommandHandler>.Instance);
 
         var result = await sut.Handle(new RefreshCommand(oldRefreshToken));
 

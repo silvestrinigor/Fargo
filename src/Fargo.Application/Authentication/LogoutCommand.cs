@@ -1,4 +1,5 @@
 using Fargo.Domain.Tokens;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Authentication;
 
@@ -22,7 +23,8 @@ public sealed record LogoutCommand(
 public sealed class LogoutCommandHandler(
         IRefreshTokenRepository refreshTokenRepository,
         ITokenHasher tokenHasher,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ILogger<LogoutCommandHandler> logger
         ) : ICommandHandler<LogoutCommand>
 {
     /// <summary>
@@ -46,6 +48,8 @@ public sealed class LogoutCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
+        logger.LogInformation("Logout flow started.");
+
         var refreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
         var storedRefreshToken = await refreshTokenRepository.GetByTokenHash(
@@ -55,11 +59,14 @@ public sealed class LogoutCommandHandler(
 
         if (storedRefreshToken == null)
         {
+            logger.LogWarning("Logout flow completed without removing a refresh token because it was not found.");
             return;
         }
 
         refreshTokenRepository.Remove(storedRefreshToken);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation("Logout flow completed for user {UserGuid}.", storedRefreshToken.UserGuid);
     }
 }

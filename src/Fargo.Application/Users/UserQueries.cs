@@ -1,5 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Users;
 
@@ -13,7 +14,8 @@ public sealed record UserSingleQuery(
 public sealed class UserSingleQueryHandler(
     ActorService actorService,
     IUserQueryRepository userRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserSingleQueryHandler> logger
 ) : IQueryHandler<UserSingleQuery, UserDto?>
 {
     public async Task<UserDto?> Handle(
@@ -21,6 +23,11 @@ public sealed class UserSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "User single query started for user {UserGuid} by actor {ActorGuid}.",
+            query.UserGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var user = await userRepository.GetInfoByGuid(
@@ -30,6 +37,12 @@ public sealed class UserSingleQueryHandler(
             notInsideAnyPartition: true,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "User single query completed for user {UserGuid} by actor {ActorGuid}. Found: {Found}.",
+            query.UserGuid,
+            actor.Guid,
+            user is not null);
 
         return user;
     }
@@ -49,7 +62,8 @@ public sealed record UsersQuery(
 public sealed class UsersQueryHandler(
     ActorService actorService,
     IUserQueryRepository userRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UsersQueryHandler> logger
 ) : IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>
 {
     public async Task<IReadOnlyCollection<UserDto>> Handle(
@@ -57,23 +71,32 @@ public sealed class UsersQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "Users query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+            currentUser.UserGuid,
+            query.WithPagination.Page,
+            query.WithPagination.Limit);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : query.NotInsideAnyPartition is true
-                ? null
-                : actor.PartitionAccessesGuids;
-        var notInsideAnyPartition = query.NotInsideAnyPartition ??
-            (query.InsideAnyOfThisPartitions is null ? true : null);
+            : actor.PartitionAccessesGuids;
 
         var users = await userRepository.GetManyInfo(
             query.WithPagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
-            notInsideAnyPartition,
+            query.NotInsideAnyPartition,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Users query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+            actor.Guid,
+            query.InsideAnyOfThisPartitions?.Count ?? 0,
+            insideAnyOfThisPartitions?.Count ?? 0,
+            users.Count);
 
         return users;
     }

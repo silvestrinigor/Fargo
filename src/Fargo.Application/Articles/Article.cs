@@ -4,6 +4,7 @@ using Fargo.Domain;
 using Fargo.Domain.Articles;
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Fargo.Application.Articles;
@@ -42,6 +43,18 @@ public sealed record ArticleMetricsDto(
 
 public sealed record ArticleBarcodeDto(string Barcode, BarcodeFormat Type);
 
+/// <summary>
+/// Exception thrown when an article with the specified identifier cannot be found.
+/// </summary>
+public class ArticleNotFoundFargoApplicationException(Guid articleGuid)
+    : FargoApplicationException($"Article with guid '{articleGuid}' was not found.")
+{
+    /// <summary>
+    /// Gets the identifier of the article that could not be found.
+    /// </summary>
+    public Guid ArticleGuid { get; } = articleGuid;
+}
+
 #region Create
 
 public sealed record ArticleCreateDto(
@@ -63,13 +76,16 @@ public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreateCommandHandler> logger
 ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     public async Task<Guid> Handle(
         ArticleCreateCommand command,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Article create flow started for actor {ActorGuid}.", currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
@@ -102,51 +118,61 @@ public sealed class ArticleCreateCommandHandler(
         {
             if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Ean13);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
             }
 
             if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Ean8);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
             }
 
             if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.UpcA);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
             }
 
             if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.UpcE);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
             }
 
             if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Code128);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
             }
 
             if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Code39);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
             }
 
             if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Itf14);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
             }
 
             if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Gs1128);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
             }
 
             if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.QrCode);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
             }
 
             if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
             {
+                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.DataMatrix);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
             }
 
@@ -184,6 +210,12 @@ public sealed class ArticleCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
+        logger.LogInformation(
+            "Article create flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+            article.Guid,
+            actor.Guid,
+            article.Partitions.Count);
+
         return article.Guid;
     }
 }
@@ -200,13 +232,19 @@ public sealed class ArticleDeleteCommandHandler(
     ActorService actorService,
     IArticleRepository articleRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<ArticleDeleteCommandHandler> logger
 ) : ICommandHandler<ArticleDeleteCommand>
 {
     public async Task Handle(
         ArticleDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation(
+            "Article delete flow started for article {ArticleGuid} by actor {ActorGuid}.",
+            command.ArticleGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteArticle);
@@ -222,12 +260,20 @@ public sealed class ArticleDeleteCommandHandler(
 
         if (hasItems)
         {
+            logger.LogWarning(
+                "Article delete flow rejected because article {ArticleGuid} has associated items.",
+                article.Guid);
             throw new ArticleDeleteWithItemsAssociatedFargoDomainException(article.Guid);
         }
 
         articleRepository.Remove(article);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "Article delete flow completed for article {ArticleGuid} by actor {ActorGuid}.",
+            article.Guid,
+            actor.Guid);
     }
 }
 
@@ -255,7 +301,8 @@ public sealed class ArticleUpdateCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<ArticleUpdateCommandHandler> logger
 ) : ICommandHandler<ArticleUpdateCommand>
 {
     public async Task Handle(
@@ -263,6 +310,11 @@ public sealed class ArticleUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogInformation(
+            "Article update flow started for article {ArticleGuid} by actor {ActorGuid}.",
+            command.ArticleGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditArticle);
@@ -315,6 +367,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Ean13, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
                 }
 
@@ -325,6 +378,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Ean8, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
                 }
 
@@ -335,6 +389,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.UpcA, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
                 }
 
@@ -345,6 +400,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.UpcE, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
                 }
 
@@ -355,6 +411,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Code128, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
                 }
 
@@ -365,6 +422,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Code39, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
                 }
 
@@ -375,6 +433,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Itf14, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
                 }
 
@@ -385,6 +444,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Gs1128, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
                 }
 
@@ -395,6 +455,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.QrCode, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
                 }
 
@@ -405,6 +466,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
                 {
+                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.DataMatrix, article.Guid);
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
                 }
 
@@ -441,6 +503,12 @@ public sealed class ArticleUpdateCommandHandler(
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "Article update flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+            article.Guid,
+            actor.Guid,
+            article.Partitions.Count);
     }
 }
 
@@ -456,7 +524,8 @@ public sealed record ArticleSingleQuery(
 public sealed class ArticleSingleQueryHandler(
     ActorService actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<ArticleSingleQueryHandler> logger
 ) : IQueryHandler<ArticleSingleQuery, ArticleDto?>
 {
     public async Task<ArticleDto?> Handle(
@@ -464,6 +533,11 @@ public sealed class ArticleSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "Article single query started for article {ArticleGuid} by actor {ActorGuid}.",
+            query.ArticleGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByGuid(
@@ -473,6 +547,12 @@ public sealed class ArticleSingleQueryHandler(
             notInsideAnyPartition: true,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Article single query completed for article {ArticleGuid} by actor {ActorGuid}. Found: {Found}.",
+            query.ArticleGuid,
+            actor.Guid,
+            article is not null);
 
         return article;
     }
@@ -490,7 +570,8 @@ public sealed record ArticleByBarcodeQuery(
 public sealed class ArticleByBarcodeQueryHandler(
     ActorService actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<ArticleByBarcodeQueryHandler> logger
 ) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
     public async Task<ArticleDto?> Handle(
@@ -498,6 +579,11 @@ public sealed class ArticleByBarcodeQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "Article barcode query started for barcode type {BarcodeType} by actor {ActorGuid}.",
+            query.ArticleBarcode.Type,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByBarcode(
@@ -507,6 +593,12 @@ public sealed class ArticleByBarcodeQueryHandler(
             notInsideAnyPartition: true,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Article barcode query completed for barcode type {BarcodeType} by actor {ActorGuid}. Found: {Found}.",
+            query.ArticleBarcode.Type,
+            actor.Guid,
+            article is not null);
 
         return article;
     }
@@ -519,14 +611,15 @@ public sealed class ArticleByBarcodeQueryHandler(
 public sealed record ArticlesQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? InsideAnyOfThisPartitions = null,
-    bool? NotInsideAnyPartition = null
+    IReadOnlyCollection<Guid>? ChildAnyOfThisPartitions = null,
+    bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;
 
 public sealed class ArticlesQueryHandler(
     ActorService actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<ArticlesQueryHandler> logger
 ) : IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>
 {
     public async Task<IReadOnlyCollection<ArticleDto>> Handle(
@@ -534,26 +627,83 @@ public sealed class ArticlesQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "Articles query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+            currentUser.UserGuid,
+            query.WithPagination.Page,
+            query.WithPagination.Limit);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
-        var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
+        var insideAnyOfThisPartitions = query.ChildAnyOfThisPartitions is { } requested
             ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : query.NotInsideAnyPartition is true
-                ? null
-                : actor.PartitionAccessesGuids;
-        var notInsideAnyPartition = query.NotInsideAnyPartition ??
-            (query.InsideAnyOfThisPartitions is null ? true : null);
+            : actor.PartitionAccessesGuids;
 
         var articles = await articleRepository.GetManyInfo(
             query.WithPagination,
             query.TemporalAsOfDateTime,
             insideAnyOfThisPartitions,
-            notInsideAnyPartition,
+            query.NotChildOfAnyPartition,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Articles query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+            actor.Guid,
+            query.ChildAnyOfThisPartitions?.Count ?? 0,
+            insideAnyOfThisPartitions?.Count ?? 0,
+            articles.Count);
 
         return articles;
     }
 }
 
 #endregion Many
+
+#region Repositories
+
+public interface IArticleQueryRepository
+{
+    Task<ArticleDto?> GetInfoByGuid(
+        Guid entityGuid,
+        DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<ArticleDto?> GetInfoByBarcode(
+        ArticleBarcodeDto articleBarcode,
+        DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
+        Pagination pagination,
+        DateTimeOffset? asOfDateTime = null,
+        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
+        bool? notInsideAnyPartition = null,
+        CancellationToken cancellationToken = default
+    );
+}
+
+public static class ArticleRepositoryExtensions
+{
+    extension(IArticleRepository repository)
+    {
+        public async Task<Article> GetFoundByGuid(
+            Guid articleGuid,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var article = await repository.GetByGuid(articleGuid, cancellationToken)
+                ?? throw new ArticleNotFoundFargoApplicationException(articleGuid);
+
+            return article;
+        }
+    }
+}
+
+#endregion Repositories

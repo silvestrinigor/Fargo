@@ -2,6 +2,7 @@ using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Fargo.Application.System;
@@ -16,7 +17,8 @@ public sealed class InitializeSystemCommandHandler(
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
-    IOptions<DefaultAdminOptions> defaultAdminOptions
+    IOptions<DefaultAdminOptions> defaultAdminOptions,
+    ILogger<InitializeSystemCommandHandler> logger
     ) : ICommandHandler<InitializeSystemCommand>
 {
     public async Task Handle(
@@ -24,10 +26,13 @@ public sealed class InitializeSystemCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogInformation("System initialization flow started for actor {ActorGuid}.", currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         if (!actor.IsSystem)
         {
+            logger.LogWarning("System initialization flow rejected for non-system actor {ActorGuid}.", actor.Guid);
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
@@ -35,6 +40,7 @@ public sealed class InitializeSystemCommandHandler(
 
         if (anyUser)
         {
+            logger.LogInformation("System initialization flow skipped because users already exist.");
             return;
         }
 
@@ -49,6 +55,7 @@ public sealed class InitializeSystemCommandHandler(
             };
 
             partitionRepository.Add(globalPartition);
+            logger.LogInformation("System initialization flow created global partition {PartitionGuid}.", globalPartition.Guid);
         }
 
         var administratorsGroup = await userGroupRepository.GetByGuid(UserGroupService.AdministratorsUserGroupGuid, cancellationToken);
@@ -71,6 +78,11 @@ public sealed class InitializeSystemCommandHandler(
             {
                 administratorsGroup.AddPermission(a);
             }
+
+            logger.LogInformation(
+                "System initialization flow created administrators user group {UserGroupGuid}. PermissionCount: {PermissionCount}.",
+                administratorsGroup.Guid,
+                administratorsGroup.Permissions.Count);
         }
 
         var options = defaultAdminOptions.Value;
@@ -98,5 +110,10 @@ public sealed class InitializeSystemCommandHandler(
         userRepository.Add(admin);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "System initialization flow completed. AdminUserGuid: {UserGuid}. AdministratorsUserGroupGuid: {UserGroupGuid}.",
+            admin.Guid,
+            administratorsGroup.Guid);
     }
 }

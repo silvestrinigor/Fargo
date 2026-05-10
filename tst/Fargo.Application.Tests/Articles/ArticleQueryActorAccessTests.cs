@@ -5,6 +5,7 @@ using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.System;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Articles;
@@ -27,7 +28,8 @@ public sealed class ArticleQueryActorAccessTests
         var sut = new ArticlesQueryHandler(
             new ActorService(userRepository, partitionRepository),
             articleRepository,
-            currentUser);
+            currentUser,
+            NullLogger<ArticlesQueryHandler>.Instance);
 
         await sut.Handle(new ArticlesQuery(new Pagination(Page.FirstPage, Limit.MaxLimit)));
 
@@ -51,7 +53,8 @@ public sealed class ArticleQueryActorAccessTests
         var sut = new ArticleByBarcodeQueryHandler(
             new ActorService(userRepository, partitionRepository),
             articleRepository,
-            currentUser);
+            currentUser,
+            NullLogger<ArticleByBarcodeQueryHandler>.Instance);
 
         await sut.Handle(new ArticleByBarcodeQuery(barcode));
 
@@ -87,11 +90,12 @@ public sealed class ArticleQueryActorAccessTests
         var sut = new ArticlesQueryHandler(
             new ActorService(userRepository, partitionRepository),
             articleRepository,
-            currentUser);
+            currentUser,
+            NullLogger<ArticlesQueryHandler>.Instance);
 
         await sut.Handle(new ArticlesQuery(
             new Pagination(Page.FirstPage, Limit.MaxLimit),
-            InsideAnyOfThisPartitions: [accessibleChildGuid, inaccessiblePartitionGuid]));
+            ChildAnyOfThisPartitions: [accessibleChildGuid, inaccessiblePartitionGuid]));
 
         await articleRepository.Received(1).GetManyInfo(
             Arg.Any<Pagination>(),
@@ -113,11 +117,12 @@ public sealed class ArticleQueryActorAccessTests
         var sut = new ArticlesQueryHandler(
             new ActorService(userRepository, partitionRepository),
             articleRepository,
-            currentUser);
+            currentUser,
+            NullLogger<ArticlesQueryHandler>.Instance);
 
         await sut.Handle(new ArticlesQuery(
             new Pagination(Page.FirstPage, Limit.MaxLimit),
-            NotInsideAnyPartition: true));
+            NotChildOfAnyPartition: true));
 
         await articleRepository.Received(1).GetManyInfo(
             Arg.Any<Pagination>(),
@@ -151,12 +156,13 @@ public sealed class ArticleQueryActorAccessTests
         var sut = new ArticlesQueryHandler(
             new ActorService(userRepository, partitionRepository),
             articleRepository,
-            currentUser);
+            currentUser,
+            NullLogger<ArticlesQueryHandler>.Instance);
 
         await sut.Handle(new ArticlesQuery(
             new Pagination(Page.FirstPage, Limit.MaxLimit),
-            InsideAnyOfThisPartitions: [accessibleChildGuid, inaccessiblePartitionGuid],
-            NotInsideAnyPartition: true));
+            ChildAnyOfThisPartitions: [accessibleChildGuid, inaccessiblePartitionGuid],
+            NotChildOfAnyPartition: true));
 
         await articleRepository.Received(1).GetManyInfo(
             Arg.Any<Pagination>(),

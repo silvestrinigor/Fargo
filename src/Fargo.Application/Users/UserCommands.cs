@@ -4,6 +4,7 @@ using Fargo.Application.UserGroups;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Users;
 
@@ -21,13 +22,16 @@ public sealed class UserCreateCommandHandler(
     IPartitionRepository partitionRepository,
     ICurrentUser currentUser,
     IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    ILogger<UserCreateCommandHandler> logger
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> Handle(
         UserCreateCommand command,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("User create flow started by actor {ActorGuid}.", currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateUser);
@@ -91,6 +95,14 @@ public sealed class UserCreateCommandHandler(
 
         await unitOfWork.SaveChanges(cancellationToken);
 
+        logger.LogInformation(
+            "User create flow completed for user {UserGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}. UserGroupCount: {UserGroupCount}.",
+            user.Guid,
+            actor.Guid,
+            user.Partitions.Count,
+            user.Permissions.Count,
+            user.UserGroups.Count);
+
         return user.Guid;
     }
 
@@ -131,13 +143,19 @@ public sealed class UserDeleteCommandHandler(
     ActorService actorService,
     IUserRepository userRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserDeleteCommandHandler> logger
 ) : ICommandHandler<UserDeleteCommand>
 {
     public async Task Handle(
         UserDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation(
+            "User delete flow started for user {UserGuid} by actor {ActorGuid}.",
+            command.UserGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteUser);
@@ -151,6 +169,11 @@ public sealed class UserDeleteCommandHandler(
         userRepository.Remove(user);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "User delete flow completed for user {UserGuid} by actor {ActorGuid}.",
+            user.Guid,
+            actor.Guid);
     }
 }
 
@@ -170,7 +193,8 @@ public sealed class UserUpdateCommandHandler(
     IPartitionRepository partitionRepository,
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserUpdateCommandHandler> logger
 ) : ICommandHandler<UserUpdateCommand>
 {
     public async Task Handle(
@@ -178,6 +202,11 @@ public sealed class UserUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogInformation(
+            "User update flow started for user {UserGuid} by actor {ActorGuid}.",
+            command.UserGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUser);
@@ -226,6 +255,11 @@ public sealed class UserUpdateCommandHandler(
             user.PasswordHash = passwordHasher.Hash(command.User.Password);
 
             user.MarkPasswordChangeAsRequired();
+
+            logger.LogInformation(
+                "User update flow changed password for user {UserGuid} by actor {ActorGuid}; password change is required.",
+                user.Guid,
+                actor.Guid);
         }
 
         if (command.User.Permissions is not null)
@@ -329,6 +363,14 @@ public sealed class UserUpdateCommandHandler(
         #endregion UserGroup
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "User update flow completed for user {UserGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}. UserGroupCount: {UserGroupCount}.",
+            user.Guid,
+            actor.Guid,
+            user.Partitions.Count,
+            user.Permissions.Count,
+            user.UserGroups.Count);
     }
 
     private static Nameid ValidateNameid(string value)

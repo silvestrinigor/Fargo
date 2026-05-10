@@ -1,6 +1,7 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
 using Fargo.Domain.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Events;
 
@@ -19,17 +20,20 @@ public sealed record EventManyQuery(
 public sealed class EventManyQueryHandler(
     ActorService actorService,
     IEventQueryRepository eventQueryRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<EventManyQueryHandler> logger
 ) : IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>>
 {
     /// <summary>Returns a paged list of domain events matching the given filters.</summary>
     public async Task<IReadOnlyCollection<EventInformation>> Handle(EventManyQuery query, CancellationToken cancellationToken = default)
     {
+        logger.LogDebug("Events query started for actor {ActorGuid}.", currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUser);
 
-        return await eventQueryRepository.GetMany(
+        var events = await eventQueryRepository.GetMany(
             query.EntityGuid,
             query.EntityType,
             query.EventType,
@@ -39,5 +43,15 @@ public sealed class EventManyQueryHandler(
             query.Pagination,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Events query completed for actor {ActorGuid}. EntityGuid: {EntityGuid}. EntityType: {EntityType}. EventType: {EventType}. ResultCount: {ResultCount}.",
+            actor.Guid,
+            query.EntityGuid,
+            query.EntityType,
+            query.EventType,
+            events.Count);
+
+        return events;
     }
 }

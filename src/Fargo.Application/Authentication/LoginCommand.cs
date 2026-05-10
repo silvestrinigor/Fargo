@@ -1,6 +1,7 @@
 using Fargo.Domain;
 using Fargo.Domain.Tokens;
 using Fargo.Domain.Users;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Authentication;
 
@@ -33,7 +34,8 @@ public sealed class LoginCommandHandler(
         ITokenHasher tokenHasher,
         IRefreshTokenRepository refreshTokenRepository,
         ActorService actorService,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        ILogger<LoginCommandHandler> logger
         ) : ICommandHandler<LoginCommand, AuthResult>
 {
     /// <summary>
@@ -61,6 +63,8 @@ public sealed class LoginCommandHandler(
             CancellationToken cancellationToken = default
             )
     {
+        logger.LogInformation("Login flow started.");
+
         Nameid nameid;
 
         try
@@ -69,16 +73,24 @@ public sealed class LoginCommandHandler(
         }
         catch (ArgumentException)
         {
+            logger.LogWarning("Login flow rejected because the provided NAMEID format is invalid.");
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         var user = await userRepository.GetByNameid(
                 nameid,
                 cancellationToken
-                ) ?? throw new InvalidCredentialsFargoApplicationException();
+                );
+
+        if (user is null)
+        {
+            logger.LogWarning("Login flow rejected because the user was not found.");
+            throw new InvalidCredentialsFargoApplicationException();
+        }
 
         if (!user.IsActive)
         {
+            logger.LogWarning("Login flow rejected for inactive user {UserGuid}.", user.Guid);
             throw new InvalidCredentialsFargoApplicationException();
         }
 
@@ -89,11 +101,13 @@ public sealed class LoginCommandHandler(
 
         if (!isValid)
         {
+            logger.LogWarning("Login flow rejected because the password was invalid for user {UserGuid}.", user.Guid);
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (user.IsPasswordChangeRequired)
         {
+            logger.LogInformation("Login flow requires password change for user {UserGuid}.", user.Guid);
             throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
@@ -114,6 +128,13 @@ public sealed class LoginCommandHandler(
         refreshTokenRepository.Add(refreshToken);
 
         await unitOfWork.SaveChanges(cancellationToken);
+
+        logger.LogInformation(
+            "Login flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
+            user.Guid,
+            actor.IsAdmin,
+            actor.PermissionActions.Count,
+            actor.PartitionAccessesGuids.Count);
 
         return new AuthResult(
                 accessTokenResult.AccessToken,

@@ -1,5 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Domain;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
 
@@ -13,7 +14,8 @@ public sealed record PartitionSingleQuery(
 public sealed class PartitionSingleQueryHandler(
     ActorService actorService,
     IPartitionQueryRepository partitionRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<PartitionSingleQueryHandler> logger
 ) : IQueryHandler<PartitionSingleQuery, PartitionDto?>
 {
     public async Task<PartitionDto?> Handle(
@@ -21,6 +23,11 @@ public sealed class PartitionSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "Partition single query started for partition {PartitionGuid} by actor {ActorGuid}.",
+            query.PartitionGuid,
+            currentUser.UserGuid);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var partition = await partitionRepository.GetInfoByGuid(
@@ -30,6 +37,12 @@ public sealed class PartitionSingleQueryHandler(
             notInsideAnyPartition: null,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Partition single query completed for partition {PartitionGuid} by actor {ActorGuid}. Found: {Found}.",
+            query.PartitionGuid,
+            actor.Guid,
+            partition is not null);
 
         return partition;
     }
@@ -49,7 +62,8 @@ public sealed record PartitionsQuery(
 public sealed class PartitionsQueryHandler(
     ActorService actorService,
     IPartitionQueryRepository partitionRepository,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<PartitionsQueryHandler> logger
 ) : IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>
 {
     public async Task<IReadOnlyCollection<PartitionDto>> Handle(
@@ -57,6 +71,12 @@ public sealed class PartitionsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogDebug(
+            "Partitions query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
+            currentUser.UserGuid,
+            query.WithPagination.Page,
+            query.WithPagination.Limit);
+
         var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid, cancellationToken);
 
         var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
@@ -70,6 +90,13 @@ public sealed class PartitionsQueryHandler(
             query.NotInsideAnyPartition,
             cancellationToken
         );
+
+        logger.LogDebug(
+            "Partitions query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
+            actor.Guid,
+            query.InsideAnyOfThisPartitions?.Count ?? 0,
+            insideAnyOfThisPartitions?.Count ?? 0,
+            partitions.Count);
 
         return partitions;
     }
