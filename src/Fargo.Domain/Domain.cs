@@ -323,6 +323,9 @@ public interface IActivable
     /// </remarks>
     void Deactivate();
 }
+
+#region Actor
+
 /// <summary>
 /// Represents an actor responsible for performing operations within the system.
 /// </summary>
@@ -566,6 +569,7 @@ public abstract class Actor : IActor
 /// This service centralizes the logic for loading users and aggregating their
 /// effective partition access based on direct assignments and group memberships.
 /// </remarks>
+
 public class ActorService(
     IUserRepository userRepository,
     IPartitionRepository partitionRepository)
@@ -631,6 +635,8 @@ public class ActorService(
         return new UserActor(user, partitionAccess);
     }
 }
+
+#endregion Actor
 
 #endregion Entities
 

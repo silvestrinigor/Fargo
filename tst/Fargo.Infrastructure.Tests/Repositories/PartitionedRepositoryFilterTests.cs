@@ -47,12 +47,12 @@ public sealed class PartitionedRepositoryFilterTests
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
         var publicEntity = new Article { Name = new Name("Public article") };
-        publicEntity.Barcodes.Code128 = new Code128("PUBLIC-123");
+        publicEntity.Code128 = new Code128("PUBLIC-123");
         var firstPartitionEntity = new Article { Name = new Name("First article") };
-        firstPartitionEntity.Barcodes.Ean13 = new Ean13("7891234567895");
+        firstPartitionEntity.Ean13 = new Ean13("7891234567895");
         firstPartitionEntity.Partitions.Add(firstPartition);
         var secondPartitionEntity = new Article { Name = new Name("Second article") };
-        secondPartitionEntity.Barcodes.Ean13 = new Ean13("7891234567896");
+        secondPartitionEntity.Ean13 = new Ean13("7891234567896");
         secondPartitionEntity.Partitions.Add(secondPartition);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();

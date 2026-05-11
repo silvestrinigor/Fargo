@@ -57,16 +57,16 @@ public static class ArticleDtoMappings
             article.Metrics.LengthY,
             article.Metrics.LengthZ),
         new ArticleBarcodesDto(
-            article.Barcodes.Ean13,
-            article.Barcodes.Ean8,
-            article.Barcodes.UpcA,
-            article.Barcodes.UpcE,
-            article.Barcodes.Code128,
-            article.Barcodes.Code39,
-            article.Barcodes.Itf14,
-            article.Barcodes.Gs1128,
-            article.Barcodes.QrCode,
-            article.Barcodes.DataMatrix),
+            article.Ean13,
+            article.Ean8,
+            article.UpcA,
+            article.UpcE,
+            article.Code128,
+            article.Code39,
+            article.Itf14,
+            article.Gs1128,
+            article.QrCode,
+            article.DataMatrix),
         article.Partitions.Select(partition => partition.Guid).ToArray(),
         article.IsActive,
         article.EditedByGuid);
@@ -156,11 +156,15 @@ public sealed class ArticleCreateCommandHandler(
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
             }
 
+            article.Ean13 = barcodes.Ean13;
+
             if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
             {
                 logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Ean8);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
             }
+
+            article.Ean8 = barcodes.Ean8;
 
             if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
             {
@@ -168,11 +172,15 @@ public sealed class ArticleCreateCommandHandler(
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
             }
 
+            article.UpcA = barcodes.UpcA;
+
             if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
             {
                 logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.UpcE);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
             }
+
+            article.UpcE = barcodes.UpcE;
 
             if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
             {
@@ -180,11 +188,15 @@ public sealed class ArticleCreateCommandHandler(
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
             }
 
+            article.Code128 = barcodes.Code128;
+
             if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
             {
                 logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Code39);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
             }
+
+            article.Code39 = barcodes.Code39;
 
             if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
             {
@@ -192,11 +204,15 @@ public sealed class ArticleCreateCommandHandler(
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
             }
 
+            article.Itf14 = barcodes.Itf14;
+
             if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
             {
                 logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Gs1128);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
             }
+
+            article.Gs1128 = barcodes.Gs1128;
 
             if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
             {
@@ -204,25 +220,15 @@ public sealed class ArticleCreateCommandHandler(
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
             }
 
+            article.QrCode = barcodes.QrCode;
+
             if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
             {
                 logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.DataMatrix);
                 throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
             }
 
-            article.Barcodes = new ArticleBarcodes
-            {
-                Ean13 = barcodes.Ean13,
-                Ean8 = barcodes.Ean8,
-                UpcA = barcodes.UpcA,
-                UpcE = barcodes.UpcE,
-                Code128 = barcodes.Code128,
-                Code39 = barcodes.Code39,
-                Itf14 = barcodes.Itf14,
-                Gs1128 = barcodes.Gs1128,
-                QrCode = barcodes.QrCode,
-                DataMatrix = barcodes.DataMatrix
-            };
+            article.DataMatrix = barcodes.DataMatrix;
         }
 
         #endregion Barcode
@@ -413,7 +419,7 @@ public sealed class ArticleUpdateCommandHandler(
 
         if (command.Article.Barcodes is { } barcodes)
         {
-            if (barcodes.Ean13 != article.Barcodes.Ean13)
+            if (barcodes.Ean13 != article.Ean13)
             {
                 if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
                 {
@@ -421,10 +427,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
                 }
 
-                article.Barcodes.Ean13 = barcodes.Ean13;
+                article.Ean13 = barcodes.Ean13;
             }
 
-            if (barcodes.Ean8 != article.Barcodes.Ean8)
+            if (barcodes.Ean8 != article.Ean8)
             {
                 if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
                 {
@@ -432,10 +438,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
                 }
 
-                article.Barcodes.Ean8 = barcodes.Ean8;
+                article.Ean8 = barcodes.Ean8;
             }
 
-            if (barcodes.UpcA != article.Barcodes.UpcA)
+            if (barcodes.UpcA != article.UpcA)
             {
                 if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
                 {
@@ -443,10 +449,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
                 }
 
-                article.Barcodes.UpcA = barcodes.UpcA;
+                article.UpcA = barcodes.UpcA;
             }
 
-            if (barcodes.UpcE != article.Barcodes.UpcE)
+            if (barcodes.UpcE != article.UpcE)
             {
                 if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
                 {
@@ -454,10 +460,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
                 }
 
-                article.Barcodes.UpcE = barcodes.UpcE;
+                article.UpcE = barcodes.UpcE;
             }
 
-            if (barcodes.Code128 != article.Barcodes.Code128)
+            if (barcodes.Code128 != article.Code128)
             {
                 if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
                 {
@@ -465,10 +471,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
                 }
 
-                article.Barcodes.Code128 = barcodes.Code128;
+                article.Code128 = barcodes.Code128;
             }
 
-            if (barcodes.Code39 != article.Barcodes.Code39)
+            if (barcodes.Code39 != article.Code39)
             {
                 if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
                 {
@@ -476,10 +482,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
                 }
 
-                article.Barcodes.Code39 = barcodes.Code39;
+                article.Code39 = barcodes.Code39;
             }
 
-            if (barcodes.Itf14 != article.Barcodes.Itf14)
+            if (barcodes.Itf14 != article.Itf14)
             {
                 if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
                 {
@@ -487,10 +493,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
                 }
 
-                article.Barcodes.Itf14 = barcodes.Itf14;
+                article.Itf14 = barcodes.Itf14;
             }
 
-            if (barcodes.Gs1128 != article.Barcodes.Gs1128)
+            if (barcodes.Gs1128 != article.Gs1128)
             {
                 if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
                 {
@@ -498,10 +504,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
                 }
 
-                article.Barcodes.Gs1128 = barcodes.Gs1128;
+                article.Gs1128 = barcodes.Gs1128;
             }
 
-            if (barcodes.QrCode != article.Barcodes.QrCode)
+            if (barcodes.QrCode != article.QrCode)
             {
                 if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
                 {
@@ -509,10 +515,10 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
                 }
 
-                article.Barcodes.QrCode = barcodes.QrCode;
+                article.QrCode = barcodes.QrCode;
             }
 
-            if (barcodes.DataMatrix != article.Barcodes.DataMatrix)
+            if (barcodes.DataMatrix != article.DataMatrix)
             {
                 if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
                 {
@@ -520,7 +526,7 @@ public sealed class ArticleUpdateCommandHandler(
                     throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
                 }
 
-                article.Barcodes.DataMatrix = barcodes.DataMatrix;
+                article.DataMatrix = barcodes.DataMatrix;
             }
         }
 
