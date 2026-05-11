@@ -59,16 +59,16 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public async Task<ArticleDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var article = await ApplyPartitionFilter(
                 articles
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .Select(ArticleDtoMappings.Projection)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
@@ -78,16 +78,16 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public async Task<ArticleDto?> GetInfoByBarcode(
         ArticleBarcodeDto articleBarcode,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var query = ApplyPartitionFilter(
             articles
                 .TemporalAsOfIfProvided(asOfDateTime)
                 .AsNoTracking(),
-            insideAnyOfThisPartitions,
-            notInsideAnyPartition);
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
 
         return await ApplyBarcodeFilter(query, articleBarcode)
             .Select(ArticleDtoMappings.Projection)
@@ -97,16 +97,16 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 articles
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
             .Select(ArticleDtoMappings.Projection)
@@ -118,17 +118,17 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     private static IQueryable<Article> ApplyPartitionFilter(
         IQueryable<Article> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition
+        bool? notChildOfAnyPartition
     )
     {
         if (partitionGuids is null)
         {
-            if (notInsideAnyPartition is true)
+            if (notChildOfAnyPartition is true)
             {
                 return query.Where(article => !article.Partitions.Any());
             }
 
-            if (notInsideAnyPartition is false)
+            if (notChildOfAnyPartition is false)
             {
                 return query.Where(article => article.Partitions.Any());
             }
@@ -136,7 +136,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             return query;
         }
 
-        if (notInsideAnyPartition is true)
+        if (notChildOfAnyPartition is true)
         {
             return query.Where(article =>
                 !article.Partitions.Any() ||

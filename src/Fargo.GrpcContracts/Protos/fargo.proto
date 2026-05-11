@@ -55,8 +55,8 @@ message GetManyRequest {
   google.protobuf.Timestamp temporal_as_of = 1;
   optional int32 page = 2;
   optional int32 limit = 3;
-  repeated string inside_any_of_this_partitions = 4;
-  optional bool not_inside_any_partition = 5;
+  repeated string child_of_any_of_these_partitions = 4;
+  optional bool not_child_of_any_partition = 5;
 }
 
 message LoginRequest {

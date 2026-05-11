@@ -21,16 +21,16 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     public async Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var partition = await ApplyPartitionFilter(
                 partitions
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .Select(PartitionDtoMappings.Projection)
             .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
 
@@ -40,16 +40,16 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 partitions
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
             .Select(PartitionDtoMappings.Projection)
@@ -121,17 +121,17 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     private static IQueryable<Partition> ApplyPartitionFilter(
         IQueryable<Partition> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition
+        bool? notChildOfAnyPartition
     )
     {
         if (partitionGuids is null)
         {
-            if (notInsideAnyPartition is true)
+            if (notChildOfAnyPartition is true)
             {
                 return query.Where(partition => partition.ParentPartitionGuid == null);
             }
 
-            if (notInsideAnyPartition is false)
+            if (notChildOfAnyPartition is false)
             {
                 return query.Where(article => article.ParentPartitionGuid != null);
             }
@@ -139,7 +139,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             return query;
         }
 
-        if (notInsideAnyPartition is true)
+        if (notChildOfAnyPartition is true)
         {
             return query.Where(partition =>
                 partition.ParentPartitionGuid == null ||

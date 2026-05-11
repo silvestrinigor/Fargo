@@ -568,9 +568,9 @@ public sealed class RefreshCommandHandler(
                 cancellationToken
                 );
 
-        if (storedOldRefreshToken == null || storedOldRefreshToken.IsExpired)
+        if (storedOldRefreshToken == null || !storedOldRefreshToken.IsUsable)
         {
-            logger.LogWarning("Refresh flow rejected because the refresh token was missing or expired.");
+            logger.LogWarning("Refresh flow rejected because the refresh token was missing or not usable.");
             throw new UnauthorizedAccessFargoApplicationException();
         }
 
@@ -589,10 +589,18 @@ public sealed class RefreshCommandHandler(
 
         if (!user.IsActive)
         {
-            refreshTokenRepository.Remove(storedOldRefreshToken);
+            storedOldRefreshToken.Revoke();
             await unitOfWork.SaveChanges(cancellationToken);
-            logger.LogWarning("Refresh flow rejected for inactive user {UserGuid}; old refresh token was removed.", user.Guid);
+            logger.LogWarning("Refresh flow rejected for inactive user {UserGuid}; old refresh token was revoked.", user.Guid);
             throw new UnauthorizedAccessFargoApplicationException();
+        }
+
+        if (user.IsPasswordChangeRequired)
+        {
+            storedOldRefreshToken.Revoke();
+            await unitOfWork.SaveChanges(cancellationToken);
+            logger.LogInformation("Refresh flow requires password change for user {UserGuid}; old refresh token was revoked.", user.Guid);
+            throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
         var actor = (UserActor)(await actorService.GetActorByGuid(user.Guid, cancellationToken))!;
@@ -607,7 +615,7 @@ public sealed class RefreshCommandHandler(
             TokenHash = newRefreshTokenHash
         };
 
-        refreshTokenRepository.Remove(storedOldRefreshToken);
+        storedOldRefreshToken.ReplaceWith(newRefreshTokenHash);
 
         refreshTokenRepository.Add(storedNewRefreshToken);
 
@@ -696,11 +704,11 @@ public sealed class LogoutCommandHandler(
 
         if (storedRefreshToken == null)
         {
-            logger.LogWarning("Logout flow completed without removing a refresh token because it was not found.");
+            logger.LogWarning("Logout flow completed without revoking a refresh token because it was not found.");
             return;
         }
 
-        refreshTokenRepository.Remove(storedRefreshToken);
+        storedRefreshToken.Revoke();
 
         await unitOfWork.SaveChanges(cancellationToken);
 
@@ -736,6 +744,7 @@ public sealed record PasswordChangeCommand(
 public sealed class PasswordChangeCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
+        IRefreshTokenRepository refreshTokenRepository,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser,
         ILogger<PasswordChangeCommandHandler> logger
@@ -813,6 +822,13 @@ public sealed class PasswordChangeCommandHandler(
 
         user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
         user.ResetPasswordExpiration();
+        user.RotateAuthVersion();
+
+        var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
+        foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
+        {
+            refreshToken.Revoke();
+        }
 
         await unitOfWork.SaveChanges(cancellationToken);
 

@@ -546,6 +546,29 @@ public class UserGroupService(
         }
     }
 
+    public async Task ValidateUserGroupNameidChange(
+        UserGroup userGroup,
+        Nameid nameid,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(userGroup);
+
+        if (userGroup.Nameid == nameid)
+        {
+            return;
+        }
+
+        var alreadyExistsWithName =
+            await userGroupRepository.ExistsByNameid(
+                nameid,
+                cancellationToken);
+
+        if (alreadyExistsWithName)
+        {
+            throw new UserGroupNameidAlreadyExistsDomainException(nameid);
+        }
+    }
+
     /// <summary>
     /// Validates whether a user group can be deleted by the specified actor.
     /// </summary>

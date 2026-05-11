@@ -95,7 +95,7 @@ public sealed class ArticleQueryActorAccessTests
 
         await sut.Handle(new ArticlesQuery(
             new Pagination(Page.FirstPage, Limit.MaxLimit),
-            ChildAnyOfThisPartitions: [accessibleChildGuid, inaccessiblePartitionGuid]));
+            ChildOfAnyOfThesePartitions: [accessibleChildGuid, inaccessiblePartitionGuid]));
 
         await articleRepository.Received(1).GetManyInfo(
             Arg.Any<Pagination>(),
@@ -108,7 +108,33 @@ public sealed class ArticleQueryActorAccessTests
     }
 
     [Fact]
-    public async Task ManyQuery_Should_RequestOnlyPublicEntities_When_NotInsideAnyPartitionIsTrueWithoutPartitions()
+    public async Task ManyQuery_Should_TreatEmptyRequestedPartitionsAsNoPartitionFilter()
+    {
+        var partitionGuids = new[] { PartitionService.GlobalPartitionGuid, Guid.NewGuid() };
+        currentUser.UserGuid.Returns(SystemService.SystemGuid);
+        partitionRepository
+            .GetDescendantGuids(PartitionService.GlobalPartitionGuid, true, Arg.Any<CancellationToken>())
+            .Returns(partitionGuids);
+        var sut = new ArticlesQueryHandler(
+            new ActorService(userRepository, partitionRepository),
+            articleRepository,
+            currentUser,
+            NullLogger<ArticlesQueryHandler>.Instance);
+
+        await sut.Handle(new ArticlesQuery(
+            new Pagination(Page.FirstPage, Limit.MaxLimit),
+            ChildOfAnyOfThesePartitions: []));
+
+        await articleRepository.Received(1).GetManyInfo(
+            Arg.Any<Pagination>(),
+            null,
+            Arg.Is<IReadOnlyCollection<Guid>>(guids => guids.SequenceEqual(partitionGuids)),
+            true,
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ManyQuery_Should_RequestOnlyPublicEntities_When_NotChildOfAnyPartitionIsTrueWithoutPartitions()
     {
         currentUser.UserGuid.Returns(SystemService.SystemGuid);
         partitionRepository
@@ -128,6 +154,46 @@ public sealed class ArticleQueryActorAccessTests
             Arg.Any<Pagination>(),
             null,
             null,
+            true,
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ManyQuery_Should_RequestOnlyPublicEntities_When_InaccessiblePartitionsAndPublicFilterAreProvided()
+    {
+        var globalPartition = CreatePartition(PartitionService.GlobalPartitionGuid, "Global");
+        var accessibleChildGuid = Guid.NewGuid();
+        var inaccessiblePartitionGuid = Guid.NewGuid();
+        var admin = new User
+        {
+            Guid = UserService.DefaultAdministratorUserGuid,
+            Nameid = new Nameid("admin"),
+            PasswordHash = new PasswordHash(new string('h', PasswordHash.MinLength))
+        };
+        admin.AddPartitionAccess(globalPartition);
+        currentUser.UserGuid.Returns(admin.Guid);
+        userRepository.GetByGuid(admin.Guid, Arg.Any<CancellationToken>()).Returns(admin);
+        partitionRepository
+            .GetDescendantGuids(
+                Arg.Is<IReadOnlyCollection<Guid>>(guids => guids.SequenceEqual(new[] { globalPartition.Guid })),
+                true,
+                Arg.Any<CancellationToken>())
+            .Returns([globalPartition.Guid, accessibleChildGuid]);
+        var sut = new ArticlesQueryHandler(
+            new ActorService(userRepository, partitionRepository),
+            articleRepository,
+            currentUser,
+            NullLogger<ArticlesQueryHandler>.Instance);
+
+        await sut.Handle(new ArticlesQuery(
+            new Pagination(Page.FirstPage, Limit.MaxLimit),
+            ChildOfAnyOfThesePartitions: [inaccessiblePartitionGuid],
+            NotChildOfAnyPartition: true));
+
+        await articleRepository.Received(1).GetManyInfo(
+            Arg.Any<Pagination>(),
+            null,
+            Arg.Is<IReadOnlyCollection<Guid>>(guids => guids.Count == 0),
             true,
             Arg.Any<CancellationToken>());
     }
@@ -161,7 +227,7 @@ public sealed class ArticleQueryActorAccessTests
 
         await sut.Handle(new ArticlesQuery(
             new Pagination(Page.FirstPage, Limit.MaxLimit),
-            ChildAnyOfThisPartitions: [accessibleChildGuid, inaccessiblePartitionGuid],
+            ChildOfAnyOfThesePartitions: [accessibleChildGuid, inaccessiblePartitionGuid],
             NotChildOfAnyPartition: true));
 
         await articleRepository.Received(1).GetManyInfo(

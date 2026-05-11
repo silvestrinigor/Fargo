@@ -84,8 +84,8 @@ public static class UserGroupEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        [FromQuery] Guid[]? insideAnyOfThisPartitions,
-        bool? notInsideAnyPartition,
+        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        bool? notChildOfAnyPartition,
         IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>> handler,
         CancellationToken cancellationToken
     )
@@ -95,8 +95,8 @@ public static class UserGroupEndpointRouteBuilderExtension
         var query = new UserGroupsQuery(
             withPagination,
             temporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            notInsideAnyPartition
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition
         );
 
         var response = await handler.Handle(query, cancellationToken);

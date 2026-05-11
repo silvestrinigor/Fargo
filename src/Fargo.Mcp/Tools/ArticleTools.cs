@@ -13,15 +13,15 @@ public sealed class ArticleTools(IArticleClient articles)
     public async Task<string> ListArticles(
         [Description("Zero-based page index.")] int? page = null,
         [Description("Maximum number of results to return.")] int? limit = null,
-        [Description("Partition GUIDs to include. Omit for no partition filter.")] string[]? insideAnyOfThisPartitions = null,
-        [Description("When true, include public articles with no partition.")] bool? notInsideAnyPartition = null)
+        [Description("Partition GUIDs whose direct child articles should be included. Omit for no child filter.")] string[]? childOfAnyOfThesePartitions = null,
+        [Description("When true, include public articles with no partition.")] bool? notChildOfAnyPartition = null)
     {
-        var partitionGuids = insideAnyOfThisPartitions?.Select(Guid.Parse).ToArray();
+        var partitionGuids = childOfAnyOfThesePartitions?.Select(Guid.Parse).ToArray();
         var response = await articles.GetManyAsync(
             page: page,
             limit: limit,
-            insideAnyOfThisPartitions: partitionGuids,
-            notInsideAnyPartition: notInsideAnyPartition);
+            childOfAnyOfThesePartitions: partitionGuids,
+            notChildOfAnyPartition: notChildOfAnyPartition);
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";

@@ -82,16 +82,16 @@ public interface IPartitionQueryRepository
     Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
     Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 }
@@ -360,10 +360,15 @@ public sealed class PartitionSingleQueryHandler(
         var partition = await partitionRepository.GetInfoByGuid(
             query.PartitionGuid,
             query.AsOfDateTime,
-            actor.PartitionAccessesGuids,
-            notInsideAnyPartition: null,
+            childOfAnyOfThesePartitions: null,
+            notChildOfAnyPartition: null,
             cancellationToken
         );
+
+        if (partition is not null)
+        {
+            actor.ValidateHasPartitionAccess(partition.Guid);
+        }
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
@@ -385,8 +390,8 @@ public sealed class PartitionSingleQueryHandler(
 public sealed record PartitionsQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? InsideAnyOfThisPartitions = null,
-    bool? NotInsideAnyPartition = null
+    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
+    bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<PartitionDto>>;
 
 public sealed class PartitionsQueryHandler(
@@ -415,15 +420,17 @@ public sealed class PartitionsQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
-        var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
-            ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : actor.PartitionAccessesGuids;
+        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+            PartitionQueryFilter.ForPartitionedEntities(
+                actor.PartitionAccessesGuids,
+                query.ChildOfAnyOfThesePartitions,
+                query.NotChildOfAnyPartition);
 
         var partitions = await partitionRepository.GetManyInfo(
             pagination,
             query.TemporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            query.NotInsideAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken
         );
 
@@ -432,8 +439,8 @@ public sealed class PartitionsQueryHandler(
             logger.LogDebug(
                 "Partitions query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
                 actor.Guid,
-                query.InsideAnyOfThisPartitions?.Count ?? 0,
-                insideAnyOfThisPartitions?.Count ?? 0,
+                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+                childOfAnyOfThesePartitions?.Count ?? 0,
                 partitions.Count);
         }
 

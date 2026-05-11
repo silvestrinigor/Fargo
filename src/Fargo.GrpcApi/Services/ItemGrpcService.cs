@@ -35,8 +35,8 @@ public sealed class ItemGrpcService(
             new ItemsQuery(
                 request.ToPagination(),
                 request.TemporalAsOf.ToDateTimeOffset(),
-                request.InsideAnyOfThisPartitions.ToGuidCollectionOrNull(),
-                request.HasNotInsideAnyPartition ? request.NotInsideAnyPartition : null),
+                request.ChildOfAnyOfThesePartitions.ToGuidCollectionOrNull(),
+                request.HasNotChildOfAnyPartition ? request.NotChildOfAnyPartition : null),
             context.CancellationToken);
 
         var response = new GrpcContracts.ItemList();

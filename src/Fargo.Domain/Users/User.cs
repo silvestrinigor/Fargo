@@ -952,6 +952,8 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
 
     public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
+    public Guid AuthVersion { get; private set; } = Guid.NewGuid();
+
     public bool IsPasswordChangeRequired
         => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
 
@@ -998,6 +1000,11 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     public void MarkPasswordChangeAsRequired()
     {
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
+    }
+
+    public void RotateAuthVersion()
+    {
+        AuthVersion = Guid.NewGuid();
     }
 
     #endregion Password
@@ -1455,7 +1462,7 @@ public sealed class UserActor : Actor
             var permissions = new HashSet<ActionType>(
                 User.Permissions.Select(p => p.Action));
 
-            foreach (var group in User.UserGroups)
+            foreach (var group in User.UserGroups.Where(group => group.IsActive))
             {
                 permissions.UnionWith(group.Permissions.Select(p => p.Action));
             }
@@ -1619,6 +1626,27 @@ public class UserService(
         if (alreadyExistsWithNameid)
         {
             throw new UserNameidAlreadyExistsDomainException(user.Nameid);
+        }
+    }
+
+    public async Task ValidateUserNameidChange(
+        User user,
+        Nameid nameid,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(user);
+
+        if (user.Nameid == nameid)
+        {
+            return;
+        }
+
+        var alreadyExistsWithNameid =
+            await userRepository.ExistsByNameid(nameid, cancellationToken);
+
+        if (alreadyExistsWithNameid)
+        {
+            throw new UserNameidAlreadyExistsDomainException(nameid);
         }
     }
 

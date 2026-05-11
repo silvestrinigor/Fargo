@@ -3,6 +3,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Domain;
 using Fargo.Domain.Partitions;
+using Fargo.Domain.Tokens;
 using Fargo.Domain.UserGroups;
 using Fargo.Domain.Users;
 using Microsoft.Extensions.Logging;
@@ -122,16 +123,16 @@ public interface IUserQueryRepository
     Task<UserDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
     Task<IReadOnlyCollection<UserDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 }
@@ -238,6 +239,11 @@ public sealed class UserCreateCommandHandler(
             var userGroup = await userGroupRepository.GetFoundByGuid(userGroupGuid, cancellationToken);
 
             actor.ValidateHasAccess(userGroup);
+
+            if (!userGroup.IsActive)
+            {
+                throw new UserGroupInactiveFargoDomainException(userGroup.Guid);
+            }
 
             user.UserGroups.Add(userGroup);
         }
@@ -352,10 +358,12 @@ public sealed record UserUpdateCommand(
 
 public sealed class UserUpdateCommandHandler(
     ActorService actorService,
+    UserService userService,
     IUserRepository userRepository,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IPasswordHasher passwordHasher,
+    IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
     ILogger<UserUpdateCommandHandler> logger
@@ -390,6 +398,7 @@ public sealed class UserUpdateCommandHandler(
 
             if (user.Nameid != nameid)
             {
+                await userService.ValidateUserNameidChange(user, nameid, cancellationToken);
                 user.Nameid = nameid;
             }
         }
@@ -424,6 +433,12 @@ public sealed class UserUpdateCommandHandler(
             user.PasswordHash = passwordHasher.Hash(command.User.Password);
 
             user.MarkPasswordChangeAsRequired();
+
+            var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
+            foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
+            {
+                refreshToken.Revoke();
+            }
 
             if (logger.IsEnabled(LogLevel.Information))
             {
@@ -516,6 +531,11 @@ public sealed class UserUpdateCommandHandler(
                 var userGroup = await userGroupRepository.GetFoundByGuid(userGroupGuid, cancellationToken);
 
                 actor.ValidateHasAccess(userGroup);
+
+                if (!userGroup.IsActive)
+                {
+                    throw new UserGroupInactiveFargoDomainException(userGroup.Guid);
+                }
 
                 user.UserGroups.Add(userGroup);
             }
@@ -614,7 +634,7 @@ public sealed class UserSingleQueryHandler(
             query.UserGuid,
             query.AsOfDateTime,
             actor.PartitionAccessesGuids,
-            notInsideAnyPartition: true,
+            notChildOfAnyPartition: true,
             cancellationToken
         );
 
@@ -638,8 +658,8 @@ public sealed class UserSingleQueryHandler(
 public sealed record UsersQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? InsideAnyOfThisPartitions = null,
-    bool? NotInsideAnyPartition = null
+    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
+    bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<UserDto>>;
 
 public sealed class UsersQueryHandler(
@@ -668,15 +688,17 @@ public sealed class UsersQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
-        var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
-            ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : actor.PartitionAccessesGuids;
+        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+            PartitionQueryFilter.ForPartitionedEntities(
+                actor.PartitionAccessesGuids,
+                query.ChildOfAnyOfThesePartitions,
+                query.NotChildOfAnyPartition);
 
         var users = await userRepository.GetManyInfo(
             pagination,
             query.TemporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            query.NotInsideAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken
         );
 
@@ -685,8 +707,8 @@ public sealed class UsersQueryHandler(
             logger.LogDebug(
                 "Users query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
                 actor.Guid,
-                query.InsideAnyOfThisPartitions?.Count ?? 0,
-                insideAnyOfThisPartitions?.Count ?? 0,
+                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+                childOfAnyOfThesePartitions?.Count ?? 0,
                 users.Count);
         }
 

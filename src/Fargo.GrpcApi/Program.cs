@@ -62,6 +62,8 @@ internal static class FargoGrpcAuthentication
                     ValidAudience = jwt.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key))
                 };
+
+                options.UseFargoTokenValidation();
             });
 
         return services;

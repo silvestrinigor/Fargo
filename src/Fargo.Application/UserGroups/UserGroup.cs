@@ -71,16 +71,16 @@ public interface IUserGroupQueryRepository
     Task<UserGroupDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
     Task<IReadOnlyCollection<UserGroupDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 }
@@ -259,6 +259,7 @@ public sealed record UserGroupUpdateCommand(
 
 public sealed class UserGroupUpdateCommandHandler(
     ActorService actorService,
+    UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
@@ -295,6 +296,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
             if (userGroup.Nameid != nameid)
             {
+                await userGroupService.ValidateUserGroupNameidChange(userGroup, nameid, cancellationToken);
                 userGroup.Nameid = nameid;
             }
         }
@@ -437,7 +439,7 @@ public sealed class UserGroupSingleQueryHandler(
             query.UserGroupGuid,
             query.AsOfDateTime,
             actor.PartitionAccessesGuids,
-            notInsideAnyPartition: true,
+            notChildOfAnyPartition: true,
             cancellationToken
         );
 
@@ -461,8 +463,8 @@ public sealed class UserGroupSingleQueryHandler(
 public sealed record UserGroupsQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? InsideAnyOfThisPartitions = null,
-    bool? NotInsideAnyPartition = null
+    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
+    bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<UserGroupDto>>;
 
 public sealed class UserGroupsQueryHandler(
@@ -491,15 +493,17 @@ public sealed class UserGroupsQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
-        var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
-            ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : actor.PartitionAccessesGuids;
+        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+            PartitionQueryFilter.ForPartitionedEntities(
+                actor.PartitionAccessesGuids,
+                query.ChildOfAnyOfThesePartitions,
+                query.NotChildOfAnyPartition);
 
         var userGroups = await userGroupRepository.GetManyInfo(
             pagination,
             query.TemporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            query.NotInsideAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken
         );
 
@@ -508,8 +512,8 @@ public sealed class UserGroupsQueryHandler(
             logger.LogDebug(
                 "User groups query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
                 actor.Guid,
-                query.InsideAnyOfThisPartitions?.Count ?? 0,
-                insideAnyOfThisPartitions?.Count ?? 0,
+                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+                childOfAnyOfThesePartitions?.Count ?? 0,
                 userGroups.Count);
         }
 

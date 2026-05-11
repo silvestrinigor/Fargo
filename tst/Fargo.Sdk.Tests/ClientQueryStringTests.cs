@@ -34,9 +34,9 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=2", StringComparison.Ordinal) &&
                 path.Contains("limit=25", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains("notChildOfAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
                 !path.Contains("noPartition=", StringComparison.Ordinal) &&
                 !path.Contains("search=", StringComparison.Ordinal)),
@@ -85,9 +85,9 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=3", StringComparison.Ordinal) &&
                 path.Contains("limit=50", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains("notChildOfAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("articleGuid=", StringComparison.Ordinal) &&
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
                 !path.Contains("noPartition=", StringComparison.Ordinal)),
@@ -113,9 +113,9 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=4", StringComparison.Ordinal) &&
                 path.Contains("limit=10", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains("notChildOfAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("partitionGuid=", StringComparison.Ordinal) &&
                 !path.Contains("noPartition=", StringComparison.Ordinal) &&
                 !path.Contains("search=", StringComparison.Ordinal)),
@@ -141,23 +141,25 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=5", StringComparison.Ordinal) &&
                 path.Contains("limit=20", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains($"insideAnyOfThisPartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
-                path.Contains("notInsideAnyPartition=True", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains("notChildOfAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("userGuid=", StringComparison.Ordinal)),
             Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task PartitionGetManyAsync_Should_Not_SendUnsupportedHierarchyFilters()
+    public async Task PartitionGetManyAsync_Should_SendApiCanonicalQueryParameters()
     {
         httpClient
             .GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo>>(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Empty<Fargo.Sdk.Contracts.Partitions.PartitionInfo>());
 
         var client = new PartitionHttpClient(httpClient);
+        var firstPartitionGuid = Guid.NewGuid();
+        var secondPartitionGuid = Guid.NewGuid();
 
-        await client.GetManyAsync(Guid.NewGuid(), DateTimeOffset.UtcNow, 6, 30, true, "ignored");
+        await client.GetManyAsync(DateTimeOffset.UtcNow, 6, 30, [firstPartitionGuid, secondPartitionGuid], true);
 
         await httpClient.Received().GetAsync<IReadOnlyCollection<Fargo.Sdk.Contracts.Partitions.PartitionInfo>>(
             Arg.Is<string>(path =>
@@ -165,8 +167,9 @@ public sealed class ClientQueryStringTests
                 path.Contains("temporalAsOfDateTime=", StringComparison.Ordinal) &&
                 path.Contains("page=6", StringComparison.Ordinal) &&
                 path.Contains("limit=30", StringComparison.Ordinal) &&
-                !path.Contains("parentPartitionGuid=", StringComparison.Ordinal) &&
-                !path.Contains("rootOnly=", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={firstPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains($"childOfAnyOfThesePartitions={secondPartitionGuid}", StringComparison.Ordinal) &&
+                path.Contains("notChildOfAnyPartition=True", StringComparison.Ordinal) &&
                 !path.Contains("search=", StringComparison.Ordinal)),
             Arg.Any<CancellationToken>());
     }

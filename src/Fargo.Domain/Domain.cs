@@ -620,6 +620,7 @@ public class ActorService(
 
         parentPartitions.UnionWith(
             user.UserGroups
+                .Where(group => group.IsActive)
                 .SelectMany(g => g.PartitionAccesses)
                 .Select(p => p.PartitionGuid)
         );

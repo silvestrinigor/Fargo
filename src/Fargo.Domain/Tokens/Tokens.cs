@@ -21,7 +21,7 @@ public readonly struct Token : IEquatable<Token>
     /// <summary>
     /// Maximum allowed length for the token.
     /// </summary>
-    public const int MaxLength = 512;
+    public const int MaxLength = 4096;
 
     private readonly string value;
 
@@ -332,6 +332,8 @@ public sealed class RefreshToken : Entity
         init;
     } = DateTimeOffset.UtcNow + DefaultExpirationTimeSpan;
 
+    public DateTimeOffset? RevokedAt { get; private set; }
+
     /// <summary>
     /// Gets the hash of the token that replaced this token during rotation.
     ///
@@ -339,12 +341,25 @@ public sealed class RefreshToken : Entity
     /// is replaced by a new one and this property stores the hash
     /// of the replacement token.
     /// </summary>
-    public TokenHash? ReplacedByTokenHash { get; init; } = null;
+    public TokenHash? ReplacedByTokenHash { get; private set; } = null;
 
     /// <summary>
     /// Gets a value indicating whether the refresh token is expired.
     /// </summary>
     public bool IsExpired => ExpiresAt <= DateTimeOffset.UtcNow;
+
+    public bool IsUsable => !IsExpired && RevokedAt is null && ReplacedByTokenHash is null;
+
+    public void ReplaceWith(TokenHash replacementTokenHash)
+    {
+        ReplacedByTokenHash = replacementTokenHash;
+        RevokedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void Revoke()
+    {
+        RevokedAt ??= DateTimeOffset.UtcNow;
+    }
 }
 
 #endregion Entities
@@ -381,6 +396,10 @@ public interface IRefreshTokenRepository
     /// </returns>
     Task<RefreshToken?> GetByTokenHash(
         TokenHash tokenHash,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<RefreshToken>> GetByUserGuid(
+        Guid userGuid,
         CancellationToken cancellationToken = default);
 
     /// <summary>

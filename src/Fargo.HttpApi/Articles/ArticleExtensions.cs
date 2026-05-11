@@ -116,8 +116,8 @@ public static class ArticleEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
-        [FromQuery] Guid[]? insideAnyOfThisPartitions,
-        bool? notInsideAnyPartition,
+        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        bool? notChildOfAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken
     )
@@ -127,8 +127,8 @@ public static class ArticleEndpointRouteBuilderExtension
         var query = new ArticlesQuery(
             withPagination,
             temporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            notInsideAnyPartition
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition
         );
 
         var response = await handler.Handle(query, cancellationToken);

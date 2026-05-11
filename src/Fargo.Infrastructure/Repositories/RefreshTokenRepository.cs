@@ -23,6 +23,15 @@ public sealed class RefreshTokenRepository(FargoDbContext context) : IRefreshTok
         return await refreshTokens.Where(r => r.TokenHash == tokenHash).SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<RefreshToken>> GetByUserGuid(
+        Guid userGuid,
+        CancellationToken cancellationToken = default)
+    {
+        return await refreshTokens
+            .Where(r => r.UserGuid == userGuid)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Remove(RefreshToken refreshToken)
     {
         refreshTokens.Remove(refreshToken);

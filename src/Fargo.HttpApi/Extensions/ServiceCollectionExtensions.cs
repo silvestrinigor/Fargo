@@ -84,6 +84,8 @@ public static class ServiceCollectionExtension
                         IssuerSigningKey = new SymmetricSecurityKey(
                                 Encoding.UTF8.GetBytes(jwt.Key))
                     };
+
+                    options.UseFargoTokenValidation();
                 });
 
             return services;

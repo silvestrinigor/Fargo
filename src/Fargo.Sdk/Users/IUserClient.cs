@@ -16,10 +16,10 @@ public interface IUserClient
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
-    /// <param name="insideAnyOfThisPartitions">Filters to users inside any of these partitions.</param>
-    /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes users without a partition.</param>
+    /// <param name="childOfAnyOfThesePartitions">Filters to users that are direct children of any of these partitions.</param>
+    /// <param name="notChildOfAnyPartition">When <see langword="true"/>, includes public users without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoResponse<IReadOnlyCollection<UserInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoResponse<IReadOnlyCollection<UserInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, bool? notChildOfAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user and returns the assigned identifier.</summary>
     /// <param name="request">The user creation request body.</param>

@@ -39,16 +39,16 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public async Task<UserGroupDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var userGroup = await ApplyPartitionFilter(
                 userGroups
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .Select(UserGroupDtoMappings.Projection)
             .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
 
@@ -58,16 +58,16 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public async Task<IReadOnlyCollection<UserGroupDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 userGroups
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .OrderBy(userGroup => userGroup.Guid)
             .WithPagination(pagination)
             .Select(UserGroupDtoMappings.Projection)
@@ -79,16 +79,16 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     private static IQueryable<UserGroup> ApplyPartitionFilter(
         IQueryable<UserGroup> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition)
+        bool? notChildOfAnyPartition)
     {
         if (partitionGuids is null)
         {
-            if (notInsideAnyPartition is true)
+            if (notChildOfAnyPartition is true)
             {
                 return query.Where(userGroup => !userGroup.Partitions.Any());
             }
 
-            if (notInsideAnyPartition is false)
+            if (notChildOfAnyPartition is false)
             {
                 return query.Where(userGroup => userGroup.Partitions.Any());
             }
@@ -96,7 +96,7 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             return query;
         }
 
-        if (notInsideAnyPartition is true)
+        if (notChildOfAnyPartition is true)
         {
             return query.Where(userGroup =>
                 !userGroup.Partitions.Any() ||

@@ -1,0 +1,16 @@
+using Fargo.Domain.Tokens;
+
+namespace Fargo.Domain.Tests.ValueObjects;
+
+public sealed class TokenTests
+{
+    [Fact]
+    public void Constructor_Should_CreateToken_When_ValueIsJwtSized()
+    {
+        var value = new string('a', 1024);
+
+        var token = new Token(value);
+
+        Assert.Equal(value, token.Value);
+    }
+}

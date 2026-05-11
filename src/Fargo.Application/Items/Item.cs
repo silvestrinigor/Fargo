@@ -62,16 +62,16 @@ public interface IItemQueryRepository
     Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
     Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 }
@@ -378,7 +378,7 @@ public sealed class ItemSingleQueryHandler(
             query.ItemGuid,
             query.AsOfDateTime,
             actor.PartitionAccessesGuids,
-            notInsideAnyPartition: true,
+            notChildOfAnyPartition: true,
             cancellationToken
         );
 
@@ -402,8 +402,8 @@ public sealed class ItemSingleQueryHandler(
 public sealed record ItemsQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? InsideAnyOfThisPartitions = null,
-    bool? NotInsideAnyPartition = null
+    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
+    bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<ItemDto>>;
 
 public sealed class ItemsQueryHandler(
@@ -432,15 +432,17 @@ public sealed class ItemsQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
-        var insideAnyOfThisPartitions = query.InsideAnyOfThisPartitions is { } requested
-            ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : actor.PartitionAccessesGuids;
+        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+            PartitionQueryFilter.ForPartitionedEntities(
+                actor.PartitionAccessesGuids,
+                query.ChildOfAnyOfThesePartitions,
+                query.NotChildOfAnyPartition);
 
         var items = await itemRepository.GetManyInfo(
             pagination,
             query.TemporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            query.NotInsideAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken
         );
 
@@ -449,8 +451,8 @@ public sealed class ItemsQueryHandler(
             logger.LogDebug(
                 "Items query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
                 actor.Guid,
-                query.InsideAnyOfThisPartitions?.Count ?? 0,
-                insideAnyOfThisPartitions?.Count ?? 0,
+                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+                childOfAnyOfThesePartitions?.Count ?? 0,
                 items.Count);
         }
 

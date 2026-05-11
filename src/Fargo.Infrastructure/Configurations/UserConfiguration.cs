@@ -39,6 +39,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.RequirePasswordChangeAt);
 
+        builder.Property(x => x.AuthVersion)
+            .HasDefaultValueSql("newid()")
+            .IsRequired();
+
         builder.Property(x => x.IsActive)
             .IsRequired();
 

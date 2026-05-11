@@ -117,6 +117,42 @@ public sealed class ActorServiceTests
             actor.PartitionAccessesGuids.Order());
     }
 
+    [Fact]
+    public async Task GetActorByGuid_Should_IgnoreInactiveGroupPermissionsAndPartitionAccess()
+    {
+        var directPartition = CreatePartition(Guid.NewGuid(), "Direct partition");
+        var groupPartition = CreatePartition(Guid.NewGuid(), "Group partition");
+        var group = new UserGroup { Nameid = new Nameid("inactive-operators") };
+        group.AddPermission(ActionType.DeleteItem);
+        group.AddPartitionAccess(groupPartition);
+        group.Deactivate();
+        var user = new User
+        {
+            Nameid = new Nameid("operator"),
+            PasswordHash = CreatePasswordHash()
+        };
+        user.AddPermission(ActionType.CreateItem);
+        user.AddPartitionAccess(directPartition);
+        user.UserGroups.Add(group);
+
+        userRepository.GetByGuid(user.Guid, Arg.Any<CancellationToken>()).Returns(user);
+        partitionRepository
+            .GetDescendantGuids(
+                Arg.Is<IReadOnlyCollection<Guid>>(guids =>
+                    guids.Count == 1 &&
+                    guids.Contains(directPartition.Guid)),
+                true,
+                Arg.Any<CancellationToken>())
+            .Returns([directPartition.Guid]);
+        var sut = new ActorService(userRepository, partitionRepository);
+
+        var actor = await sut.GetActorByGuid(user.Guid);
+
+        Assert.NotNull(actor);
+        Assert.Equal([ActionType.CreateItem], actor.PermissionActions);
+        Assert.Equal([directPartition.Guid], actor.PartitionAccessesGuids);
+    }
+
     private static Partition CreatePartition(Guid guid, string name)
         => new()
         {

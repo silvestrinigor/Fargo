@@ -16,10 +16,10 @@ public interface IUserGroupClient
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
-    /// <param name="insideAnyOfThisPartitions">Filters to user groups inside any of these partitions.</param>
-    /// <param name="notInsideAnyPartition">When <see langword="true"/>, includes user groups without a partition.</param>
+    /// <param name="childOfAnyOfThesePartitions">Filters to user groups that are direct children of any of these partitions.</param>
+    /// <param name="notChildOfAnyPartition">When <see langword="true"/>, includes public user groups without a partition.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoResponse<IReadOnlyCollection<UserGroupInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null, bool? notInsideAnyPartition = null, CancellationToken cancellationToken = default);
+    Task<FargoResponse<IReadOnlyCollection<UserGroupInfo>>> GetManyAsync(DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, bool? notChildOfAnyPartition = null, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new user group and returns its assigned identifier.</summary>
     /// <param name="request">The user group creation request body.</param>

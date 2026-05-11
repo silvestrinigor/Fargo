@@ -24,5 +24,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.Property(x => x.ReplacedByTokenHash);
 
         builder.Property(x => x.ExpiresAt);
+
+        builder.Property(x => x.RevokedAt);
     }
 }

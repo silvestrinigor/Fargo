@@ -31,10 +31,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new ArticleRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
@@ -61,16 +61,16 @@ public sealed class PartitionedRepositoryFilterTests
 
         var accessible = await repository.GetInfoByBarcode(
             new ArticleBarcodeDto("7891234567895", BarcodeFormat.Ean13),
-            insideAnyOfThisPartitions: [firstPartition.Guid],
-            notInsideAnyPartition: true);
+            childOfAnyOfThesePartitions: [firstPartition.Guid],
+            notChildOfAnyPartition: true);
         var inaccessible = await repository.GetInfoByBarcode(
             new ArticleBarcodeDto("7891234567896", BarcodeFormat.Ean13),
-            insideAnyOfThisPartitions: [firstPartition.Guid],
-            notInsideAnyPartition: true);
+            childOfAnyOfThesePartitions: [firstPartition.Guid],
+            notChildOfAnyPartition: true);
         var publicArticle = await repository.GetInfoByBarcode(
             new ArticleBarcodeDto("PUBLIC-123", BarcodeFormat.Code128),
-            insideAnyOfThisPartitions: [firstPartition.Guid],
-            notInsideAnyPartition: true);
+            childOfAnyOfThesePartitions: [firstPartition.Guid],
+            notChildOfAnyPartition: true);
 
         Assert.Equal(firstPartitionEntity.Guid, accessible?.Guid);
         Assert.Null(inaccessible);
@@ -95,10 +95,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new ItemRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
@@ -121,10 +121,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new UserRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
@@ -147,10 +147,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new UserGroupRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,

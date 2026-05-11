@@ -12,14 +12,19 @@ public interface IPartitionClient
     Task<FargoResponse<PartitionInfo>> GetAsync(Guid partitionGuid, DateTimeOffset? temporalAsOf = null, CancellationToken cancellationToken = default);
 
     /// <summary>Retrieves a paged, optionally filtered list of partitions.</summary>
-    /// <param name="parentPartitionGuid">Filter to children of this parent partition.</param>
     /// <param name="temporalAsOf">Optional point-in-time for temporal queries.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="limit">Maximum results per page.</param>
-    /// <param name="rootOnly">When <see langword="true"/>, returns only root-level partitions.</param>
-    /// <param name="search">An optional search term to filter by name.</param>
+    /// <param name="childOfAnyOfThesePartitions">Filters to direct children of any of these partitions.</param>
+    /// <param name="notChildOfAnyPartition">When <see langword="true"/>, includes root-level partitions.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    Task<FargoResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(Guid? parentPartitionGuid = null, DateTimeOffset? temporalAsOf = null, int? page = null, int? limit = null, bool? rootOnly = null, string? search = null, CancellationToken cancellationToken = default);
+    Task<FargoResponse<IReadOnlyCollection<PartitionInfo>>> GetManyAsync(
+        DateTimeOffset? temporalAsOf = null,
+        int? page = null,
+        int? limit = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new partition and returns its assigned identifier.</summary>
     /// <param name="request">The partition creation request body.</param>

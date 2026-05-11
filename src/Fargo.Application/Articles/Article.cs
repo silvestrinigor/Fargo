@@ -602,7 +602,7 @@ public sealed class ArticleSingleQueryHandler(
             query.ArticleGuid,
             query.AsOfDateTime,
             actor.PartitionAccessesGuids,
-            notInsideAnyPartition: true,
+            notChildOfAnyPartition: true,
             cancellationToken
         );
 
@@ -656,7 +656,7 @@ public sealed class ArticleByBarcodeQueryHandler(
             query.ArticleBarcode,
             query.AsOfDateTime,
             actor.PartitionAccessesGuids,
-            notInsideAnyPartition: true,
+            notChildOfAnyPartition: true,
             cancellationToken
         );
 
@@ -680,7 +680,7 @@ public sealed class ArticleByBarcodeQueryHandler(
 public sealed record ArticlesQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? ChildAnyOfThisPartitions = null,
+    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
     bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;
 
@@ -710,15 +710,17 @@ public sealed class ArticlesQueryHandler(
 
         var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
-        var insideAnyOfThisPartitions = query.ChildAnyOfThisPartitions is { } requested
-            ? [.. actor.PartitionAccessesGuids.Intersect(requested)]
-            : actor.PartitionAccessesGuids;
+        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+            PartitionQueryFilter.ForPartitionedEntities(
+                actor.PartitionAccessesGuids,
+                query.ChildOfAnyOfThesePartitions,
+                query.NotChildOfAnyPartition);
 
         var articles = await articleRepository.GetManyInfo(
             pagination,
             query.TemporalAsOfDateTime,
-            insideAnyOfThisPartitions,
-            query.NotChildOfAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken
         );
 
@@ -727,8 +729,8 @@ public sealed class ArticlesQueryHandler(
             logger.LogDebug(
                 "Articles query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
                 actor.Guid,
-                query.ChildAnyOfThisPartitions?.Count ?? 0,
-                insideAnyOfThisPartitions?.Count ?? 0,
+                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+                childOfAnyOfThesePartitions?.Count ?? 0,
                 articles.Count);
         }
 
@@ -745,24 +747,24 @@ public interface IArticleQueryRepository
     Task<ArticleDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
     Task<ArticleDto?> GetInfoByBarcode(
         ArticleBarcodeDto articleBarcode,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 
     Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
 }

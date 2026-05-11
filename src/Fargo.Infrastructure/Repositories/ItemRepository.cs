@@ -59,16 +59,16 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     public async Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var item = await ApplyPartitionFilter(
                 items
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .Select(ItemDtoMappings.Projection)
             .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
 
@@ -78,16 +78,16 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 items
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .OrderBy(item => item.Guid)
             .WithPagination(pagination)
             .Select(ItemDtoMappings.Projection)
@@ -99,16 +99,16 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     private static IQueryable<Item> ApplyPartitionFilter(
         IQueryable<Item> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition)
+        bool? notChildOfAnyPartition)
     {
         if (partitionGuids is null)
         {
-            if (notInsideAnyPartition is true)
+            if (notChildOfAnyPartition is true)
             {
                 return query.Where(item => !item.Partitions.Any());
             }
 
-            if (notInsideAnyPartition is false)
+            if (notChildOfAnyPartition is false)
             {
                 return query.Where(item => item.Partitions.Any());
             }
@@ -116,7 +116,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             return query;
         }
 
-        if (notInsideAnyPartition is true)
+        if (notChildOfAnyPartition is true)
         {
             return query.Where(item =>
                 !item.Partitions.Any() ||
