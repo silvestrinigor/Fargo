@@ -52,10 +52,10 @@ public static class ArticleDtoMappings
         article.Description,
         article.ShelfLife,
         new ArticleMetricsDto(
-            article.Metrics.Mass,
-            article.Metrics.LengthX,
-            article.Metrics.LengthY,
-            article.Metrics.LengthZ),
+            article.Mass,
+            article.LengthX,
+            article.LengthY,
+            article.LengthZ),
         new ArticleBarcodesDto(
             article.Ean13,
             article.Ean8,
@@ -135,13 +135,10 @@ public sealed class ArticleCreateCommandHandler(
 
         if (command.Article.Metrics is { } metrics)
         {
-            article.Metrics = new ArticleMetrics
-            {
-                Mass = metrics.Mass,
-                LengthX = metrics.LengthX,
-                LengthY = metrics.LengthY,
-                LengthZ = metrics.LengthZ
-            };
+            article.Mass = metrics.Mass;
+            article.LengthX = metrics.LengthX;
+            article.LengthY = metrics.LengthY;
+            article.LengthZ = metrics.LengthZ;
         }
 
         #endregion Metrics
@@ -396,24 +393,24 @@ public sealed class ArticleUpdateCommandHandler(
 
         if (command.Article.Metrics is { } metrics)
         {
-            if (!article.Metrics.Mass.Equals(metrics.Mass))
+            if (!article.Mass.Equals(metrics.Mass))
             {
-                article.Metrics.Mass = metrics.Mass;
+                article.Mass = metrics.Mass;
             }
 
-            if (!article.Metrics.LengthX.Equals(metrics.LengthX))
+            if (!article.LengthX.Equals(metrics.LengthX))
             {
-                article.Metrics.LengthX = metrics.LengthX;
+                article.LengthX = metrics.LengthX;
             }
 
-            if (!article.Metrics.LengthY.Equals(metrics.LengthY))
+            if (!article.LengthY.Equals(metrics.LengthY))
             {
-                article.Metrics.LengthY = metrics.LengthY;
+                article.LengthY = metrics.LengthY;
             }
 
-            if (!article.Metrics.LengthZ.Equals(metrics.LengthZ))
+            if (!article.LengthZ.Equals(metrics.LengthZ))
             {
-                article.Metrics.LengthZ = metrics.LengthZ;
+                article.LengthZ = metrics.LengthZ;
             }
         }
 

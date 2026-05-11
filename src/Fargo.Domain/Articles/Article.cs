@@ -90,11 +90,39 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     /// </summary>
     public TimeSpan? ShelfLife { get; set; }
 
+    #region Metrics
+
     /// <summary>
-    /// Gets or sets the physical measurements of the article, including mass, dimensions, and
-    /// computed density.
+    /// Gets or sets the X dimension of the article.
     /// </summary>
-    public ArticleMetrics Metrics { get; set; } = new();
+    public Length? LengthX { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Y dimension of the article.
+    /// </summary>
+    public Length? LengthY { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Z dimension of the article.
+    /// </summary>
+    public Length? LengthZ { get; set; }
+
+    /// <summary>
+    /// Gets or sets the physical mass of the article.
+    /// </summary>
+    public Mass? Mass { get; set; }
+
+    /// <summary>
+    /// Gets the volume of the article.
+    /// </summary>
+    public Volume? Volume => LengthX * LengthY * LengthZ;
+
+    /// <summary>
+    /// Gets the density of the article.
+    /// </summary>
+    public Density? Density => Mass / Volume;
+
+    #endregion Metrics
 
     #region Barcode
 
@@ -236,46 +264,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 
     #endregion Partition
-}
-
-/// <summary>
-/// Groups the physical measurement properties of an <see cref="Article"/>.
-/// </summary>
-public sealed class ArticleMetrics
-{
-    #region Length
-
-    /// <summary>
-    /// Gets or sets the X dimension of the article.
-    /// </summary>
-    public Length? LengthX { get; set; }
-
-    /// <summary>
-    /// Gets or sets the Y dimension of the article.
-    /// </summary>
-    public Length? LengthY { get; set; }
-
-    /// <summary>
-    /// Gets or sets the Z dimension of the article.
-    /// </summary>
-    public Length? LengthZ { get; set; }
-
-    #endregion Length
-
-    /// <summary>
-    /// Gets or sets the physical mass of the article.
-    /// </summary>
-    public Mass? Mass { get; set; }
-
-    /// <summary>
-    /// Gets the volume of the article.
-    /// </summary>
-    public Volume? Volume => LengthX * LengthY * LengthZ;
-
-    /// <summary>
-    /// Gets the density of the article.
-    /// </summary>
-    public Density? Density => Mass / Volume;
 }
 
 /// <summary>

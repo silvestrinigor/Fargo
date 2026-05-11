@@ -192,41 +192,29 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("[Barcodes_DataMatrix] IS NOT NULL");
 
-        builder.OwnsOne(x => x.Metrics, m =>
-        {
-            m.ToTable("Articles", t => t.IsTemporal(ttb =>
-            {
-                ttb.UseHistoryTable("ArticlesHistory");
-                ttb.HasPeriodStart("PeriodStart").HasColumnName("PeriodStart");
-                ttb.HasPeriodEnd("PeriodEnd").HasColumnName("PeriodEnd");
-            }));
+        builder.Property(x => x.Mass)
+            .HasConversion<MassStringConverter>()
+            .HasMaxLength(50)
+            .HasColumnName("Mass")
+            .IsRequired(false);
 
-            m.Property(x => x.Mass)
-                .HasConversion<MassStringConverter>()
-                .HasMaxLength(50)
-                .HasColumnName("Mass")
-                .IsRequired(false);
+        builder.Property(x => x.LengthX)
+            .HasConversion<LengthStringConverter>()
+            .HasMaxLength(50)
+            .HasColumnName("LengthX")
+            .IsRequired(false);
 
-            m.Property(x => x.LengthX)
-                .HasConversion<LengthStringConverter>()
-                .HasMaxLength(50)
-                .HasColumnName("LengthX")
-                .IsRequired(false);
+        builder.Property(x => x.LengthY)
+            .HasConversion<LengthStringConverter>()
+            .HasMaxLength(50)
+            .HasColumnName("LengthY")
+            .IsRequired(false);
 
-            m.Property(x => x.LengthY)
-                .HasConversion<LengthStringConverter>()
-                .HasMaxLength(50)
-                .HasColumnName("LengthY")
-                .IsRequired(false);
-
-            m.Property(x => x.LengthZ)
-                .HasConversion<LengthStringConverter>()
-                .HasMaxLength(50)
-                .HasColumnName("LengthZ")
-                .IsRequired(false);
-
-            m.WithOwner();
-        });
+        builder.Property(x => x.LengthZ)
+            .HasConversion<LengthStringConverter>()
+            .HasMaxLength(50)
+            .HasColumnName("LengthZ")
+            .IsRequired(false);
 
         builder.Property(x => x.ShelfLife)
             .HasConversion(
