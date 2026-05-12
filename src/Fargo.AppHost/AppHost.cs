@@ -4,9 +4,10 @@ var sqlserver = builder
     .AddSqlServer("sqlserver")
     .WithImage("mssql/server")
     .WithImageTag("2022-latest")
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Session);
 
 var fargodb = sqlserver.AddDatabase("fargo");
+var environmentName = builder.Environment.EnvironmentName;
 
 var migrations = builder
     .AddProject<Projects.Fargo_MigrationService>("migrations")
@@ -19,9 +20,11 @@ builder
     .WithReference(migrations)
     .WaitForCompletion(migrations);
 
-var apiService = builder
-    .AddProject<Projects.Fargo_Api>("apiservice")
+var httpApi = builder
+    .AddProject<Projects.Fargo_HttpApi>("apiservice")
     .WithHttpHealthCheck("/health")
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WithReference(migrations)
     .WaitForCompletion(migrations);
@@ -29,8 +32,7 @@ var apiService = builder
 builder
     .AddProject<Projects.Fargo_Web>("webfrontend")
     .WithExternalHttpEndpoints()
-    .WithHttpHealthCheck("/health")
-    .WithReference(apiService)
-    .WaitFor(apiService);
+    .WithReference(httpApi)
+    .WaitFor(httpApi);
 
 builder.Build().Run();

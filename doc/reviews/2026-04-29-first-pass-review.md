@@ -10,7 +10,7 @@ Open items kept from the initial review while the event persistence path is bein
 
 2. API key enforcement can block `/health` and break Aspire readiness checks when `EnforceApiClient` is enabled.
    Files:
-   `src/Fargo.Api/Middlewares/ApiClientMiddleware.cs`
+   `src/Fargo.HttpApi/Middlewares/ApiClientMiddleware.cs`
    `src/Fargo.ServiceDefaults/Extensions.cs`
    `src/Fargo.AppHost/AppHost.cs`
 

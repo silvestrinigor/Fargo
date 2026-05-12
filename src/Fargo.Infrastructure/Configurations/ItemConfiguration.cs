@@ -1,4 +1,4 @@
-using Fargo.Domain.Items;
+using Fargo.Core.Items;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

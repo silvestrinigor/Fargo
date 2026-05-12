@@ -28,7 +28,7 @@ A **UserGroup** is a named role that carries its own permission set and partitio
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Fargo.Api          REST endpoints + SignalR │
+│  Fargo.HttpApi          REST endpoints + SignalR │
 │  Fargo.Web          Blazor Server UI         │
 │  Fargo.Sdk          Typed .NET client SDK    │
 │  Fargo.Mcp          MCP tools                │
@@ -47,7 +47,7 @@ A **UserGroup** is a named role that carries its own permission set and partitio
 
 **Fargo.Infrastructure** provides persistence (SQL Server via EF Core), password hashing, JWT generation, refresh-token management, and file storage.
 
-**Fargo.Api** is the ASP.NET Core host. It maps HTTP endpoints to application commands/queries and publishes mutation events to connected SignalR clients via `FargoEventHub`.
+**Fargo.HttpApi** is the ASP.NET Core host. It maps HTTP endpoints to application commands/queries and publishes mutation events to connected SignalR clients via `FargoEventHub`.
 
 **Fargo.Sdk** is the typed .NET client SDK. It wraps the REST API and the SignalR hub into easy-to-use manager interfaces. Live entity objects (e.g. `Article`, `Item`) fire .NET events when they are updated or deleted by any connected client.
 

@@ -7,12 +7,12 @@ using Fargo.Application.Partitions;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
-using Fargo.Domain;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.Tokens;
-using Fargo.Domain.Users;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
+using Fargo.Core.Partitions;
+using Fargo.Core.Tokens;
+using Fargo.Core.UserGroups;
+using Fargo.Core.Users;
 using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
@@ -40,6 +40,9 @@ public static class ServiceCollectionExtensions
             AddPersistence(services);
 
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IAuthorizationContextFactory, AuthorizationContextFactory>();
+            services.AddScoped<ICurrentAuthorizationContext, CurrentAuthorizationContext>();
+            services.AddScoped<IAuditPrincipal, CurrentAuditPrincipal>();
 
             return services;
         }
@@ -62,8 +65,7 @@ public static class ServiceCollectionExtensions
             AddDomainServices(services);
 
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
-
-            services.AddScoped<ICurrentUser, SystemCurrentUser>();
+            services.AddScoped<IAuditPrincipal, SystemAuditPrincipal>();
 
             return services;
         }
@@ -169,11 +171,11 @@ public static class ServiceCollectionExtensions
 
         private void AddDomainServices()
         {
+            services.AddScoped<ArticleService>();
             services.AddScoped<UserService>();
             services.AddScoped<UserGroupService>();
             services.AddScoped<PartitionService>();
             services.AddScoped<ItemService>();
-            services.AddScoped<ActorService>();
         }
 
         private void AddSecurity()

@@ -7,27 +7,27 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class ItemTools(IItemHttpClient items)
+public sealed class ItemTools(IItemClient items)
 {
     [McpServerTool(Name = "list_items"), Description("Lists items accessible to the current user. Optionally filters by partition and public items.")]
     public async Task<string> ListItems(
         [Description("Zero-based page index.")] int? page = null,
         [Description("Maximum number of results to return.")] int? limit = null,
-        [Description("Partition GUIDs to include. Omit for no partition filter.")] string[]? insideAnyOfThisPartitions = null,
-        [Description("When true, include public items with no partition.")] bool? notInsideAnyPartition = null)
+        [Description("Partition GUIDs whose direct child items should be included. Omit for no child filter.")] string[]? childOfAnyOfThesePartitions = null,
+        [Description("When true, include public items with no partition.")] bool? notChildOfAnyPartition = null)
     {
-        var partitionGuids = insideAnyOfThisPartitions?.Select(Guid.Parse).ToArray();
+        var partitionGuids = childOfAnyOfThesePartitions?.Select(Guid.Parse).ToArray();
         var response = await items.GetManyAsync(
             page: page,
             limit: limit,
-            insideAnyOfThisPartitions: partitionGuids,
-            notInsideAnyPartition: notInsideAnyPartition);
+            childOfAnyOfThesePartitions: partitionGuids,
+            notChildOfAnyPartition: notChildOfAnyPartition);
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";
         }
 
-        var list = response.Data!.Select(i => new { i.Guid, i.ArticleGuid }).ToList();
+        var list = response.Result!.Select(i => new { i.Guid, i.ArticleGuid }).ToList();
         return JsonSerializer.Serialize(list);
     }
 
@@ -41,7 +41,7 @@ public sealed class ItemTools(IItemHttpClient items)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var item = response.Data!;
+        var item = response.Result!;
         return JsonSerializer.Serialize(new { item.Guid, item.ArticleGuid });
     }
 
@@ -61,7 +61,7 @@ public sealed class ItemTools(IItemHttpClient items)
             return $"Error: {response.Error!.Detail}";
         }
 
-        return $"Created item with GUID: {response.Data}";
+        return $"Created item with GUID: {response.Result}";
     }
 
     [McpServerTool(Name = "delete_item"), Description("Deletes an item.")]

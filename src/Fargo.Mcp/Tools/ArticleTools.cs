@@ -7,27 +7,27 @@ using System.Text.Json;
 namespace Fargo.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class ArticleTools(IArticleHttpClient articles)
+public sealed class ArticleTools(IArticleClient articles)
 {
     [McpServerTool(Name = "list_articles"), Description("Lists articles accessible to the current user. Optionally filters by partition and public articles.")]
     public async Task<string> ListArticles(
         [Description("Zero-based page index.")] int? page = null,
         [Description("Maximum number of results to return.")] int? limit = null,
-        [Description("Partition GUIDs to include. Omit for no partition filter.")] string[]? insideAnyOfThisPartitions = null,
-        [Description("When true, include public articles with no partition.")] bool? notInsideAnyPartition = null)
+        [Description("Partition GUIDs whose direct child articles should be included. Omit for no child filter.")] string[]? childOfAnyOfThesePartitions = null,
+        [Description("When true, include public articles with no partition.")] bool? notChildOfAnyPartition = null)
     {
-        var partitionGuids = insideAnyOfThisPartitions?.Select(Guid.Parse).ToArray();
+        var partitionGuids = childOfAnyOfThesePartitions?.Select(Guid.Parse).ToArray();
         var response = await articles.GetManyAsync(
             page: page,
             limit: limit,
-            insideAnyOfThisPartitions: partitionGuids,
-            notInsideAnyPartition: notInsideAnyPartition);
+            childOfAnyOfThesePartitions: partitionGuids,
+            notChildOfAnyPartition: notChildOfAnyPartition);
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";
         }
 
-        var list = response.Data!.Select(a => new { a.Guid, a.Name, a.Description }).ToList();
+        var list = response.Result!.Select(a => new { a.Guid, a.Name, a.Description }).ToList();
         return JsonSerializer.Serialize(list);
     }
 
@@ -41,7 +41,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             return $"Error: {response.Error!.Detail}";
         }
 
-        var article = response.Data!;
+        var article = response.Result!;
         return JsonSerializer.Serialize(new { article.Guid, article.Name, article.Description, article.Metrics, article.ShelfLife });
     }
 
@@ -72,18 +72,17 @@ public sealed class ArticleTools(IArticleHttpClient articles)
         var response = await articles.CreateAsync(
             new ArticleCreateRequest(
                 name,
-                description,
-                metrics,
-                null,
-                partitions,
-                null,
-                isActive));
+                Description: description,
+                Metrics: metrics,
+                ShelfLife: null,
+                Partitions: partitions,
+                IsActive: isActive));
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";
         }
 
-        return $"Created article with GUID: {response.Data}";
+        return $"Created article with GUID: {response.Result}";
     }
 
     [McpServerTool(Name = "update_article"), Description("Updates an article's name, description, mass, and/or dimensions.")]
@@ -106,7 +105,7 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             return $"Error: {get.Error!.Detail}";
         }
 
-        var current = get.Data!;
+        var current = get.Result!;
         var currentMetrics = current.Metrics;
         var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
             ? currentMetrics
@@ -122,11 +121,20 @@ public sealed class ArticleTools(IArticleHttpClient articles)
             new ArticleUpdateRequest(
                 name ?? current.Name,
                 description ?? current.Description,
-                newMetrics,
-                current.ShelfLife,
-                current.Partitions,
-                current.Barcodes,
-                current.IsActive));
+                Metrics: newMetrics,
+                ShelfLife: current.ShelfLife,
+                Partitions: current.Partitions,
+                Ean13: current.Ean13,
+                Ean8: current.Ean8,
+                UpcA: current.UpcA,
+                UpcE: current.UpcE,
+                Code128: current.Code128,
+                Code39: current.Code39,
+                Itf14: current.Itf14,
+                Gs1128: current.Gs1128,
+                QrCode: current.QrCode,
+                DataMatrix: current.DataMatrix,
+                IsActive: current.IsActive));
 
         if (!update.IsSuccess)
         {

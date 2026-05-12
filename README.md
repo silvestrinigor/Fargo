@@ -35,7 +35,7 @@ The solution follows Clean Architecture with Domain-Driven Design principles:
 Fargo.Domain          — Entities, value objects, domain services
 Fargo.Application     — CQRS commands and queries (use cases)
 Fargo.Infrastructure  — EF Core persistence, security, file storage
-Fargo.Api             — ASP.NET Core REST API + SignalR hub
+Fargo.HttpApi             — ASP.NET Core REST API + SignalR hub
 Fargo.Sdk             — Client SDK for consuming the API
 Fargo.Web             — Blazor web application (uses Fargo.Sdk)
 Fargo.Mcp             — Model Context Protocol tools

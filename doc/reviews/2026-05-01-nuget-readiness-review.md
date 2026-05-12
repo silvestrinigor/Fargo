@@ -11,7 +11,7 @@ Goal:
 
 ## Summary
 
-The SDK is close enough to package, but it is not ready for a clean first public publish yet. `Fargo.Sdk` can currently produce a `.nupkg`; `Fargo.Sdk.Contracts` can also pack, but with weak default metadata. A Release solution build currently fails in `Fargo.Api`, which is a release-pipeline blocker even though the package project can be packed individually.
+The SDK is close enough to package, but it is not ready for a clean first public publish yet. `Fargo.Sdk` can currently produce a `.nupkg`; `Fargo.Sdk.Contracts` can also pack, but with weak default metadata. A Release solution build currently fails in `Fargo.HttpApi`, which is a release-pipeline blocker even though the package project can be packed individually.
 
 Recommended publish order:
 1. Fix Release build.
@@ -29,7 +29,7 @@ Recommended publish order:
 `dotnet build Fargo.slnx -c Release --no-restore` fails:
 
 ```text
-src/Fargo.Api/Contracts/ContractMappings.cs(192,28): error CS0104:
+src/Fargo.HttpApi/Contracts/ContractMappings.cs(192,28): error CS0104:
 'TreeNodeType' is an ambiguous reference between
 'Fargo.Application.Tree.TreeNodeType' and 'Fargo.Sdk.Contracts.Tree.TreeNodeType'
 ```

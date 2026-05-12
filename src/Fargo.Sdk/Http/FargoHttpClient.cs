@@ -1,3 +1,4 @@
+using Fargo.Sdk.Contracts.Errors;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -208,7 +209,7 @@ public sealed class FargoHttpClient : IFargoHttpClient
         {
             var problem = await ReadProblemAsync(response.Content, ct);
             response.Dispose();
-            throw new FargoSdkApiException(FargoSdkProblemMapper.Map(problem));
+            throw new FargoSdkApiException(FargoResponseMapper.CreateProblem(problem, response.StatusCode), response.StatusCode);
         }
 
         var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";

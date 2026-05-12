@@ -1,11 +1,12 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Domain;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
-using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.Users;
+using Fargo.Core;
+using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
+using Fargo.Core.Items;
+using Fargo.Core.Partitions;
+using Fargo.Core.UserGroups;
+using Fargo.Core.Users;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -30,10 +31,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new ArticleRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
@@ -46,12 +47,12 @@ public sealed class PartitionedRepositoryFilterTests
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
         var publicEntity = new Article { Name = new Name("Public article") };
-        publicEntity.Barcodes.Code128 = new Code128("PUBLIC-123");
+        publicEntity.Code128 = new Code128("PUBLIC-123");
         var firstPartitionEntity = new Article { Name = new Name("First article") };
-        firstPartitionEntity.Barcodes.Ean13 = new Ean13("7891234567895");
+        firstPartitionEntity.Ean13 = new Ean13("7891234567895");
         firstPartitionEntity.Partitions.Add(firstPartition);
         var secondPartitionEntity = new Article { Name = new Name("Second article") };
-        secondPartitionEntity.Barcodes.Ean13 = new Ean13("7891234567896");
+        secondPartitionEntity.Ean13 = new Ean13("7891234567896");
         secondPartitionEntity.Partitions.Add(secondPartition);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
@@ -60,16 +61,16 @@ public sealed class PartitionedRepositoryFilterTests
 
         var accessible = await repository.GetInfoByBarcode(
             new ArticleBarcodeDto("7891234567895", BarcodeFormat.Ean13),
-            insideAnyOfThisPartitions: [firstPartition.Guid],
-            notInsideAnyPartition: true);
+            childOfAnyOfThesePartitions: [firstPartition.Guid],
+            notChildOfAnyPartition: true);
         var inaccessible = await repository.GetInfoByBarcode(
             new ArticleBarcodeDto("7891234567896", BarcodeFormat.Ean13),
-            insideAnyOfThisPartitions: [firstPartition.Guid],
-            notInsideAnyPartition: true);
+            childOfAnyOfThesePartitions: [firstPartition.Guid],
+            notChildOfAnyPartition: true);
         var publicArticle = await repository.GetInfoByBarcode(
             new ArticleBarcodeDto("PUBLIC-123", BarcodeFormat.Code128),
-            insideAnyOfThisPartitions: [firstPartition.Guid],
-            notInsideAnyPartition: true);
+            childOfAnyOfThesePartitions: [firstPartition.Guid],
+            notChildOfAnyPartition: true);
 
         Assert.Equal(firstPartitionEntity.Guid, accessible?.Guid);
         Assert.Null(inaccessible);
@@ -94,10 +95,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new ItemRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
@@ -120,10 +121,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new UserRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,
@@ -146,10 +147,10 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new UserGroupRepository(context);
 
         await AssertFilterCombinations(
-            (partitions, notInsideAnyPartition) => repository.GetManyInfo(
+            (partitions, notChildOfAnyPartition) => repository.GetManyInfo(
                 AllRows,
-                insideAnyOfThisPartitions: partitions,
-                notInsideAnyPartition: notInsideAnyPartition),
+                childOfAnyOfThesePartitions: partitions,
+                notChildOfAnyPartition: notChildOfAnyPartition),
             publicEntity.Guid,
             firstPartitionEntity.Guid,
             secondPartitionEntity.Guid,

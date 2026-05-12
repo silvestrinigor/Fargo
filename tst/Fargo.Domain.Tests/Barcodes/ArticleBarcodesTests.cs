@@ -1,7 +1,7 @@
-using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
+using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
 
-namespace Fargo.Domain.Tests.Barcodes;
+namespace Fargo.Core.Tests.Barcodes;
 
 public sealed class ArticleBarcodesTests
 {
@@ -12,11 +12,10 @@ public sealed class ArticleBarcodesTests
         var article = CreateArticle();
 
         // Act
-        article.Barcodes.Ean13 = new Ean13("1234567890123");
+        article.Ean13 = new Ean13("1234567890123");
 
         // Assert
-        Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
-        Assert.False(article.Barcodes.IsEmpty);
+        Assert.Equal("1234567890123", article.Ean13?.Code);
     }
 
     [Fact]
@@ -24,14 +23,13 @@ public sealed class ArticleBarcodesTests
     {
         // Arrange
         var article = CreateArticle();
-        article.Barcodes.UpcA = new UpcA("123456789012");
+        article.UpcA = new UpcA("123456789012");
 
         // Act
-        article.Barcodes.UpcA = null;
+        article.UpcA = null;
 
         // Assert
-        Assert.Null(article.Barcodes.UpcA);
-        Assert.True(article.Barcodes.IsEmpty);
+        Assert.Null(article.UpcA);
     }
 
     [Fact]
@@ -39,14 +37,13 @@ public sealed class ArticleBarcodesTests
     {
         // Arrange
         var article = CreateArticle();
-        article.Barcodes.Ean8 = new Ean8("12345670");
+        article.Ean8 = new Ean8("12345670");
 
         // Act
-        article.Barcodes.Ean8 = new Ean8("12345671");
+        article.Ean8 = new Ean8("12345671");
 
         // Assert
-        Assert.Equal("12345671", article.Barcodes.Ean8?.Code);
-        Assert.False(article.Barcodes.IsEmpty);
+        Assert.Equal("12345671", article.Ean8?.Code);
     }
 
     [Fact]
@@ -54,14 +51,13 @@ public sealed class ArticleBarcodesTests
     {
         // Arrange
         var article = CreateArticle();
-        article.Barcodes.Code128 = new Code128("ABC-123");
+        article.Code128 = new Code128("ABC-123");
 
         // Act
-        article.Barcodes.Code128 = null;
+        article.Code128 = null;
 
         // Assert
-        Assert.Null(article.Barcodes.Code128);
-        Assert.True(article.Barcodes.IsEmpty);
+        Assert.Null(article.Code128);
     }
 
     [Fact]
@@ -69,19 +65,17 @@ public sealed class ArticleBarcodesTests
     {
         // Arrange
         var article = CreateArticle();
-        var barcodes = new ArticleBarcodes
-        {
-            Ean13 = new Ean13("1234567890123"),
-            UpcA = new UpcA("123456789012")
-        };
+
+        var newEan13 = new Ean13("1234567890123");
+        var newUpcA = new UpcA("123456789012");
 
         // Act
-        article.Barcodes.Ean13 = barcodes.Ean13;
-        article.Barcodes.UpcA = barcodes.UpcA;
+        article.Ean13 = newEan13;
+        article.UpcA = newUpcA;
 
         // Assert
-        Assert.Equal("1234567890123", article.Barcodes.Ean13?.Code);
-        Assert.Equal("123456789012", article.Barcodes.UpcA?.Code);
+        Assert.Equal("1234567890123", article.Ean13?.Code);
+        Assert.Equal("123456789012", article.UpcA?.Code);
     }
 
     private static Article CreateArticle() => new()

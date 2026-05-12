@@ -1,6 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Users;
-using Fargo.Domain.Users;
+using Fargo.Core.Users;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -35,45 +35,41 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     public async Task<UserDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var user = await ApplyPartitionFilter(
                 users
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(user => user.Permissions)
-                    .Include(user => user.Partitions)
-                    .Include(user => user.UserGroups),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                    .AsNoTracking(),
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
+            .Select(UserDtoMappings.Projection)
             .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
 
-        return user is null ? null : Map(user);
+        return user;
     }
 
     public async Task<IReadOnlyCollection<UserDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 users
                     .TemporalAsOfIfProvided(asOfDateTime)
-                    .AsNoTracking()
-                    .Include(user => user.Permissions)
-                    .Include(user => user.Partitions)
-                    .Include(user => user.UserGroups),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                    .AsNoTracking(),
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .OrderBy(user => user.Guid)
             .WithPagination(pagination)
+            .Select(UserDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
@@ -91,16 +87,16 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     private static IQueryable<User> ApplyPartitionFilter(
         IQueryable<User> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition)
+        bool? notChildOfAnyPartition)
     {
         if (partitionGuids is null)
         {
-            if (notInsideAnyPartition is true)
+            if (notChildOfAnyPartition is true)
             {
                 return query.Where(user => !user.Partitions.Any());
             }
 
-            if (notInsideAnyPartition is false)
+            if (notChildOfAnyPartition is false)
             {
                 return query.Where(user => user.Partitions.Any());
             }
@@ -108,7 +104,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             return query;
         }
 
-        if (notInsideAnyPartition is true)
+        if (notChildOfAnyPartition is true)
         {
             return query.Where(user =>
                 !user.Partitions.Any() ||
@@ -119,18 +115,4 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-    private static UserDto Map(User user)
-        => new(
-            user.Guid,
-            user.Nameid,
-            user.FirstName,
-            user.LastName,
-            user.Description,
-            user.DefaultPasswordExpirationPeriod,
-            user.RequirePasswordChangeAt,
-            [.. user.Permissions.Select(permission => new Permission(permission.Guid, permission.Action))],
-            [.. user.Partitions.Select(partition => partition.Guid)],
-            [.. user.UserGroups.Select(group => group.Guid)],
-            user.IsActive,
-            user.EditedByGuid);
 }

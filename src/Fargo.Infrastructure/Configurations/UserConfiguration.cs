@@ -1,4 +1,4 @@
-using Fargo.Domain.Users;
+using Fargo.Core.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -38,6 +38,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 x => x.HasValue ? TimeSpan.FromTicks(x.Value) : null);
 
         builder.Property(x => x.RequirePasswordChangeAt);
+
+        builder.Property(x => x.AuthVersion)
+            .HasDefaultValueSql("newid()")
+            .IsRequired();
 
         builder.Property(x => x.IsActive)
             .IsRequired();

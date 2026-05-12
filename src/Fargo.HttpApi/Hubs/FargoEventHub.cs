@@ -1,0 +1,50 @@
+using Fargo.Application.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+
+namespace Fargo.HttpApi.Hubs;
+
+/// <summary>
+/// SignalR hub that broadcasts domain events to clients based on their partition access.
+/// Each connection joins partition-specific groups on connect so events are only
+/// delivered to clients who have access to the affected entity's partition.
+/// </summary>
+[Authorize]
+public sealed class FargoEventHub(ICurrentAuthorizationContext currentAuthorizationContext)
+    : Hub<IFargoEventClient>
+{
+    /// <summary>
+    /// Adds the connecting client to SignalR groups for each partition they can access.
+    /// Admin actors join a single <c>"fargo-admin"</c> group that receives all events.
+    /// </summary>
+    public override async Task OnConnectedAsync()
+    {
+        var actor = await currentAuthorizationContext.GetAsync();
+
+        if (actor.IsAdmin)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, "fargo-admin");
+        }
+        else
+        {
+            foreach (var partitionGuid in actor.PartitionAccesses)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, partitionGuid.ToString());
+            }
+        }
+
+        await base.OnConnectedAsync();
+    }
+
+    /// <summary>
+    /// Subscribes the calling client to Updated/Deleted events for a specific entity.
+    /// </summary>
+    public Task SubscribeToEntityAsync(Guid entityGuid)
+        => Groups.AddToGroupAsync(Context.ConnectionId, $"e:{entityGuid}");
+
+    /// <summary>
+    /// Unsubscribes the calling client from Updated/Deleted events for a specific entity.
+    /// </summary>
+    public Task UnsubscribeFromEntityAsync(Guid entityGuid)
+        => Groups.RemoveFromGroupAsync(Context.ConnectionId, $"e:{entityGuid}");
+}

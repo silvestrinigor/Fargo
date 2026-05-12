@@ -1,4 +1,4 @@
-using Fargo.Domain.Tokens;
+using Fargo.Core.Tokens;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +21,15 @@ public sealed class RefreshTokenRepository(FargoDbContext context) : IRefreshTok
     public async Task<RefreshToken?> GetByTokenHash(TokenHash tokenHash, CancellationToken cancellationToken = default)
     {
         return await refreshTokens.Where(r => r.TokenHash == tokenHash).SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<RefreshToken>> GetByUserGuid(
+        Guid userGuid,
+        CancellationToken cancellationToken = default)
+    {
+        return await refreshTokens
+            .Where(r => r.UserGuid == userGuid)
+            .ToListAsync(cancellationToken);
     }
 
     public void Remove(RefreshToken refreshToken)

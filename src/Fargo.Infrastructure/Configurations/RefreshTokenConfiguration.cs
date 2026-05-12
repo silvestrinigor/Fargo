@@ -1,5 +1,5 @@
-using Fargo.Domain.Tokens;
-using Fargo.Domain.Users;
+using Fargo.Core.Tokens;
+using Fargo.Core.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,5 +24,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.Property(x => x.ReplacedByTokenHash);
 
         builder.Property(x => x.ExpiresAt);
+
+        builder.Property(x => x.RevokedAt);
     }
 }

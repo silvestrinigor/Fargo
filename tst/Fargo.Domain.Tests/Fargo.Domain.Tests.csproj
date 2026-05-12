@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fargo.Domain\Fargo.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.Core\Fargo.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

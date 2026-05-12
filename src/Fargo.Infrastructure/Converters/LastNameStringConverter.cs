@@ -1,4 +1,4 @@
-using Fargo.Domain.Users;
+using Fargo.Core.Users;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fargo.Infrastructure.Converters;

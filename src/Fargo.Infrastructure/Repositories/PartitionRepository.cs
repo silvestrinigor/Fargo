@@ -1,6 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Partitions;
-using Fargo.Domain.Partitions;
+using Fargo.Core.Partitions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -21,39 +21,41 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     public async Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var partition = await ApplyPartitionFilter(
                 partitions
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
+            .Select(PartitionDtoMappings.Projection)
             .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
 
-        return partition is null ? null : Map(partition);
+        return partition;
     }
 
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? insideAnyOfThisPartitions = null,
-        bool? notInsideAnyPartition = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 partitions
                     .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
-                insideAnyOfThisPartitions,
-                notInsideAnyPartition)
+                childOfAnyOfThesePartitions,
+                notChildOfAnyPartition)
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
+            .Select(PartitionDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return [.. result.Select(Map)];
+        return result;
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
@@ -119,27 +121,34 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     private static IQueryable<Partition> ApplyPartitionFilter(
         IQueryable<Partition> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notInsideAnyPartition)
+        bool? notChildOfAnyPartition
+    )
     {
-        if (notInsideAnyPartition is true)
+        if (partitionGuids is null)
         {
-            return query.Where(_ => false);
+            if (notChildOfAnyPartition is true)
+            {
+                return query.Where(partition => partition.ParentPartitionGuid == null);
+            }
+
+            if (notChildOfAnyPartition is false)
+            {
+                return query.Where(article => article.ParentPartitionGuid != null);
+            }
+
+            return query;
         }
 
-        if (partitionGuids is not null)
+        if (notChildOfAnyPartition is true)
         {
-            query = query.Where(partition => partitionGuids.Contains(partition.Guid));
+            return query.Where(partition =>
+                partition.ParentPartitionGuid == null ||
+                partitionGuids.Contains(partition.ParentPartitionGuid.Value));
         }
 
-        return query;
+        return query.Where(partition =>
+            partition.ParentPartitionGuid != null &&
+            partitionGuids.Contains(partition.ParentPartitionGuid.Value));
     }
 
-    private static PartitionDto Map(Partition partition)
-        => new(
-            partition.Guid,
-            partition.Name,
-            partition.Description,
-            partition.ParentPartitionGuid,
-            partition.IsActive,
-            partition.EditedByGuid);
 }

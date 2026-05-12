@@ -29,7 +29,7 @@ builder.Services
 
 var app = builder.Build();
 
-var auth = app.Services.GetRequiredService<IAuthenticationHttpClient>();
+var auth = app.Services.GetRequiredService<IAuthenticationClient>();
 var options = app.Services.GetRequiredService<FargoSdkOptions>();
 var login = await auth.LogInAsync(new LoginRequest(nameid, password));
 if (!login.IsSuccess)
@@ -37,6 +37,6 @@ if (!login.IsSuccess)
     throw new InvalidOperationException($"Login failed: {login.Error!.Detail}");
 }
 
-options.AccessToken = login.Data!.AccessToken;
+options.AccessToken = login.Result!.AccessToken;
 
 await app.RunAsync();

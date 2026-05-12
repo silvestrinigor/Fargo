@@ -1,7 +1,7 @@
 using Fargo.Application.Authentication;
 
-using Fargo.Domain.Tokens;
-using Fargo.Domain.Users;
+using Fargo.Core.Tokens;
+using Fargo.Core.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -63,6 +63,7 @@ public sealed class JwtTokenGenerator(
             new(ClaimTypes.NameIdentifier, user.Guid.ToString()),
             new(ClaimTypes.Name, user.Nameid.ToString() ?? string.Empty),
             new(JwtRegisteredClaimNames.Sub, user.Guid.ToString()),
+            new(FargoJwtClaims.AuthVersion, user.AuthVersion.ToString()),
         };
 
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(

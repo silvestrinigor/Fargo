@@ -8,11 +8,12 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
         <PackageReference Include="UnitsNet" Version="5.75.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Fargo.Domain\Fargo.Domain.csproj" />
+        <ProjectReference Include="..\Fargo.Core\Fargo.Core.csproj" />
     </ItemGroup>
 
 </Project>
