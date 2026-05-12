@@ -11,14 +11,10 @@
     <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
     <Project Path="src/Fargo.Sdk.Contracts/Fargo.Sdk.Contracts.csproj" />
     <Project Path="src/Fargo.Sdk/Fargo.Sdk.csproj" />
-    <Project Path="src/Fargo.GrpcContracts/Fargo.GrpcContracts.csproj" />
-    <Project Path="src/Fargo.GrpcApi/Fargo.GrpcApi.csproj" />
-    <Project Path="src/Fargo.GrpcClient/Fargo.GrpcClient.csproj" />
     <Project Path="src/Fargo.Mcp/Fargo.Mcp.csproj" />
     <Project Path="tst/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
     <Project Path="tst/Fargo.HttpApi.Tests/Fargo.HttpApi.Tests.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tst/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
     <Project Path="tst/Fargo.Sdk.Tests/Fargo.Sdk.Tests.csproj" />
-    <Project Path="tst/Fargo.GrpcClient.Tests/Fargo.GrpcClient.Tests.csproj" />
 </Solution>
