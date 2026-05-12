@@ -157,43 +157,43 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.HasIndex("Code128")
                         .IsUnique()
-                        .HasFilter("[Barcodes_Code128] IS NOT NULL");
+                        .HasFilter("[Code128] IS NOT NULL");
 
                     b.HasIndex("Code39")
                         .IsUnique()
-                        .HasFilter("[Barcodes_Code39] IS NOT NULL");
+                        .HasFilter("[Code39] IS NOT NULL");
 
                     b.HasIndex("DataMatrix")
                         .IsUnique()
-                        .HasFilter("[Barcodes_DataMatrix] IS NOT NULL");
+                        .HasFilter("[DataMatrix] IS NOT NULL");
 
                     b.HasIndex("Ean13")
                         .IsUnique()
-                        .HasFilter("[Barcodes_Ean13] IS NOT NULL");
+                        .HasFilter("[Ean13] IS NOT NULL");
 
                     b.HasIndex("Ean8")
                         .IsUnique()
-                        .HasFilter("[Barcodes_Ean8] IS NOT NULL");
+                        .HasFilter("[Ean8] IS NOT NULL");
 
                     b.HasIndex("Gs1128")
                         .IsUnique()
-                        .HasFilter("[Barcodes_Gs1128] IS NOT NULL");
+                        .HasFilter("[Gs1128] IS NOT NULL");
 
                     b.HasIndex("Itf14")
                         .IsUnique()
-                        .HasFilter("[Barcodes_Itf14] IS NOT NULL");
+                        .HasFilter("[Itf14] IS NOT NULL");
 
                     b.HasIndex("QrCode")
                         .IsUnique()
-                        .HasFilter("[Barcodes_QrCode] IS NOT NULL");
+                        .HasFilter("[QrCode] IS NOT NULL");
 
                     b.HasIndex("UpcA")
                         .IsUnique()
-                        .HasFilter("[Barcodes_UpcA] IS NOT NULL");
+                        .HasFilter("[UpcA] IS NOT NULL");
 
                     b.HasIndex("UpcE")
                         .IsUnique()
-                        .HasFilter("[Barcodes_UpcE] IS NOT NULL");
+                        .HasFilter("[UpcE] IS NOT NULL");
 
                     b.ToTable("Articles", (string)null);
 

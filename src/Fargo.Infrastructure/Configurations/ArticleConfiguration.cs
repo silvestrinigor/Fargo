@@ -172,25 +172,25 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 v => v != null ? DataMatrix.FromStorage(v) : null))
             .HasMaxLength(DataMatrix.MaxLength);
 
-        builder.HasIndex(x => x.Ean13).IsUnique().HasFilter("[Barcodes_Ean13] IS NOT NULL");
+        builder.HasIndex(x => x.Ean13).IsUnique().HasFilter("[Ean13] IS NOT NULL");
 
-        builder.HasIndex(x => x.Ean8).IsUnique().HasFilter("[Barcodes_Ean8] IS NOT NULL");
+        builder.HasIndex(x => x.Ean8).IsUnique().HasFilter("[Ean8] IS NOT NULL");
 
-        builder.HasIndex(x => x.UpcA).IsUnique().HasFilter("[Barcodes_UpcA] IS NOT NULL");
+        builder.HasIndex(x => x.UpcA).IsUnique().HasFilter("[UpcA] IS NOT NULL");
 
-        builder.HasIndex(x => x.UpcE).IsUnique().HasFilter("[Barcodes_UpcE] IS NOT NULL");
+        builder.HasIndex(x => x.UpcE).IsUnique().HasFilter("[UpcE] IS NOT NULL");
 
-        builder.HasIndex(x => x.Code128).IsUnique().HasFilter("[Barcodes_Code128] IS NOT NULL");
+        builder.HasIndex(x => x.Code128).IsUnique().HasFilter("[Code128] IS NOT NULL");
 
-        builder.HasIndex(x => x.Code39).IsUnique().HasFilter("[Barcodes_Code39] IS NOT NULL");
+        builder.HasIndex(x => x.Code39).IsUnique().HasFilter("[Code39] IS NOT NULL");
 
-        builder.HasIndex(x => x.Itf14).IsUnique().HasFilter("[Barcodes_Itf14] IS NOT NULL");
+        builder.HasIndex(x => x.Itf14).IsUnique().HasFilter("[Itf14] IS NOT NULL");
 
-        builder.HasIndex(x => x.Gs1128).IsUnique().HasFilter("[Barcodes_Gs1128] IS NOT NULL");
+        builder.HasIndex(x => x.Gs1128).IsUnique().HasFilter("[Gs1128] IS NOT NULL");
 
-        builder.HasIndex(x => x.QrCode).IsUnique().HasFilter("[Barcodes_QrCode] IS NOT NULL");
+        builder.HasIndex(x => x.QrCode).IsUnique().HasFilter("[QrCode] IS NOT NULL");
 
-        builder.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("[Barcodes_DataMatrix] IS NOT NULL");
+        builder.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("[DataMatrix] IS NOT NULL");
 
         builder.Property(x => x.Mass)
             .HasConversion<MassStringConverter>()

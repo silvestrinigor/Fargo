@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    [Migration("20260512012717_RefactArticleMetricsAndBarcodes")]
-    partial class RefactArticleMetricsAndBarcodes
+    [Migration("20260512013402_RefactArticleMetricsAndBarcodes2")]
+    partial class RefactArticleMetricsAndBarcodes2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

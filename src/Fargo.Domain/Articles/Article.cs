@@ -1,5 +1,6 @@
 using Fargo.Domain.Barcodes;
 using Fargo.Domain.Partitions;
+using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
@@ -89,6 +90,12 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable
     /// Persisted as <c>bigint</c> (ticks) in the database.
     /// </summary>
     public TimeSpan? ShelfLife { get; set; }
+
+    /// <summary>
+    /// Gets or sets the color of the article.
+    /// When <see langword="null"/>, no color constraint is defined.
+    /// </summary>
+    public Color? Color { get; set; }
 
     #region Metrics
 
