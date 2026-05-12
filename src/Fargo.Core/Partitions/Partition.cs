@@ -1,10 +1,10 @@
-using Fargo.Domain.Articles;
-using Fargo.Domain.Items;
-using Fargo.Domain.UserGroups;
-using Fargo.Domain.Users;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
+using Fargo.Core.UserGroups;
+using Fargo.Core.Users;
 using System.Collections.ObjectModel;
 
-namespace Fargo.Domain.Partitions;
+namespace Fargo.Core.Partitions;
 
 #region Entity
 
@@ -377,7 +377,7 @@ public interface IPartitionRepository
 /// </summary>
 /// <remarks>
 /// This service encapsulates logic for retrieving partitions while enforcing
-/// access rules based on the effective partition access of a <see cref="Fargo.Domain.Users.User"/>.
+/// access rules based on the effective partition access of a <see cref="Fargo.Core.Users.User"/>.
 ///
 /// Effective access may be granted either:
 /// <list type="bullet">
@@ -385,7 +385,7 @@ public interface IPartitionRepository
 /// <description>directly to the user</description>
 /// </item>
 /// <item>
-/// <description>indirectly through one of the user's <see cref="Fargo.Domain.UserGroups.UserGroup"/> memberships</description>
+/// <description>indirectly through one of the user's <see cref="Fargo.Core.UserGroups.UserGroup"/> memberships</description>
 /// </item>
 /// </list>
 ///

@@ -1,11 +1,11 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
-using Fargo.Domain;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.Tokens;
-using Fargo.Domain.UserGroups;
-using Fargo.Domain.Users;
+using Fargo.Core;
+using Fargo.Core.Partitions;
+using Fargo.Core.Tokens;
+using Fargo.Core.UserGroups;
+using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 

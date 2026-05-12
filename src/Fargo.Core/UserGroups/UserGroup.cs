@@ -1,8 +1,8 @@
-using Fargo.Domain.Partitions;
-using Fargo.Domain.Users;
+using Fargo.Core.Partitions;
+using Fargo.Core.Users;
 using System.Collections.ObjectModel;
 
-namespace Fargo.Domain.UserGroups;
+namespace Fargo.Core.UserGroups;
 
 #region Entity
 
@@ -633,7 +633,7 @@ public sealed class UserGroupInactiveFargoDomainException(Guid userGroupGuid)
     public Guid UserGroupGuid { get; } = userGroupGuid;
 }
 /// <summary>
-/// Exception thrown when attempting to create a <see cref="Fargo.Domain.UserGroups.UserGroup"/>
+/// Exception thrown when attempting to create a <see cref="Fargo.Core.UserGroups.UserGroup"/>
 /// with a <see cref="Nameid"/> that already exists in the system.
 /// </summary>
 public sealed class UserGroupNameidAlreadyExistsDomainException(

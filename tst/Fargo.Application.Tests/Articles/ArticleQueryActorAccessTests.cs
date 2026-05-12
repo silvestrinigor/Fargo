@@ -1,10 +1,10 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
-using Fargo.Domain;
-using Fargo.Domain.Barcodes;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.System;
-using Fargo.Domain.Users;
+using Fargo.Core;
+using Fargo.Core.Barcodes;
+using Fargo.Core.Partitions;
+using Fargo.Core.System;
+using Fargo.Core.Users;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 

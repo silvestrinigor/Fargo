@@ -1,7 +1,7 @@
 using Fargo.Application.Authentication;
-using Fargo.Domain;
-using Fargo.Domain.Barcodes;
-using Fargo.Domain.Users;
+using Fargo.Core;
+using Fargo.Core.Barcodes;
+using Fargo.Core.Users;
 using UnitsNet;
 using UnitsNet.Units;
 using AppArticles = Fargo.Application.Articles;
@@ -20,10 +20,10 @@ using ContractPartitions = Fargo.Sdk.Contracts.Partitions;
 using ContractPermissions = Fargo.Sdk.Contracts.Permissions;
 using ContractUserGroups = Fargo.Sdk.Contracts.UserGroups;
 using ContractUsers = Fargo.Sdk.Contracts.Users;
-using DomainActionType = Fargo.Domain.ActionType;
-using DomainBarcodeFormat = Fargo.Domain.Barcodes.BarcodeFormat;
-using DomainEntityType = Fargo.Domain.Events.EntityType;
-using DomainEventType = Fargo.Domain.Events.EventType;
+using DomainActionType = Fargo.Core.ActionType;
+using DomainBarcodeFormat = Fargo.Core.Barcodes.BarcodeFormat;
+using DomainEntityType = Fargo.Core.Events.EntityType;
+using DomainEventType = Fargo.Core.Events.EventType;
 
 namespace Fargo.HttpApi.Contracts;
 

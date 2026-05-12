@@ -1,10 +1,10 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Authentication;
 using Fargo.Application.Partitions;
-using Fargo.Domain;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
+using Fargo.Core;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
+using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 

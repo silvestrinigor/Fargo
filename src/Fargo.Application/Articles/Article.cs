@@ -1,9 +1,9 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Partitions;
-using Fargo.Domain;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
-using Fargo.Domain.Partitions;
+using Fargo.Core;
+using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
+using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using UnitsNet;

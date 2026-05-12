@@ -1,6 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Partitions;
-using Fargo.Domain.Partitions;
+using Fargo.Core.Partitions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

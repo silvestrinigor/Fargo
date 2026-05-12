@@ -1,4 +1,4 @@
-using Fargo.Domain.Users;
+using Fargo.Core.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;

@@ -1,10 +1,10 @@
-using Fargo.Domain.Partitions;
-using Fargo.Domain.System;
-using Fargo.Domain.UserGroups;
-using Fargo.Domain.Users;
+using Fargo.Core.Partitions;
+using Fargo.Core.System;
+using Fargo.Core.UserGroups;
+using Fargo.Core.Users;
 using NSubstitute;
 
-namespace Fargo.Domain.Tests.Actors;
+namespace Fargo.Core.Tests.Actors;
 
 public sealed class ActorServiceTests
 {

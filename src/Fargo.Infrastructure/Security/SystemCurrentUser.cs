@@ -1,5 +1,5 @@
 using Fargo.Application.Authentication;
-using Fargo.Domain.System;
+using Fargo.Core.System;
 
 namespace Fargo.Infrastructure.Security;
 

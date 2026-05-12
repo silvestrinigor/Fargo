@@ -1,6 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Events;
-using Fargo.Domain.Events;
+using Fargo.Core.Events;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

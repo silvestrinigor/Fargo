@@ -1,6 +1,6 @@
 
 
-namespace Fargo.Domain.Tokens;
+namespace Fargo.Core.Tokens;
 
 #region Values
 

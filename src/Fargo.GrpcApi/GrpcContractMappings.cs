@@ -1,6 +1,6 @@
 using Fargo.Application;
-using Fargo.Domain;
-using Fargo.Domain.Barcodes;
+using Fargo.Core;
+using Fargo.Core.Barcodes;
 using Google.Protobuf.WellKnownTypes;
 using UnitsNet;
 using UnitsNet.Units;
@@ -10,8 +10,8 @@ using AppPartitions = Fargo.Application.Partitions;
 using AppUserGroups = Fargo.Application.UserGroups;
 using AppUsers = Fargo.Application.Users;
 using Contracts = Fargo.GrpcContracts;
-using DomainActionType = Fargo.Domain.ActionType;
-using DomainBarcodeFormat = Fargo.Domain.Barcodes.BarcodeFormat;
+using DomainActionType = Fargo.Core.ActionType;
+using DomainBarcodeFormat = Fargo.Core.Barcodes.BarcodeFormat;
 
 namespace Fargo.GrpcApi;
 
@@ -241,8 +241,8 @@ internal static class GrpcContractMappings
         => new(
             request.Nameid,
             request.Password,
-            request.HasFirstName ? new Domain.Users.FirstName(request.FirstName) : null,
-            request.HasLastName ? new Domain.Users.LastName(request.LastName) : null,
+            request.HasFirstName ? new Core.Users.FirstName(request.FirstName) : null,
+            request.HasLastName ? new Core.Users.LastName(request.LastName) : null,
             request.HasDescription ? new Description(request.Description) : null,
             request.Permissions.Select(static permission => new AppUsers.UserPermissionUpdateDto((DomainActionType)(int)permission.Action)).ToArray(),
             request.DefaultPasswordExpirationPeriod.ToTimeSpan(),
@@ -252,8 +252,8 @@ internal static class GrpcContractMappings
     public static AppUsers.UserUpdateDto ToApplicationDto(this Contracts.UserUpdateRequest request)
         => new(
             request.HasNameid ? request.Nameid : null,
-            request.HasFirstName ? new Domain.Users.FirstName(request.FirstName) : null,
-            request.HasLastName ? new Domain.Users.LastName(request.LastName) : null,
+            request.HasFirstName ? new Core.Users.FirstName(request.FirstName) : null,
+            request.HasLastName ? new Core.Users.LastName(request.LastName) : null,
             request.HasDescription ? new Description(request.Description) : null,
             request.HasPassword ? request.Password : null,
             request.HasIsActive ? request.IsActive : null,

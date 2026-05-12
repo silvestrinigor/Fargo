@@ -1,6 +1,6 @@
 using Fargo.Application.Authentication;
-using Fargo.Domain;
-using Fargo.Domain.Events;
+using Fargo.Core;
+using Fargo.Core.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Events;

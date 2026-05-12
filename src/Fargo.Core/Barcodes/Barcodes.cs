@@ -1,6 +1,6 @@
 
 
-namespace Fargo.Domain.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 #region Formats
 

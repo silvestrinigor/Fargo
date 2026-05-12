@@ -1,7 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Authentication;
 using Fargo.Application.Users;
-using Fargo.Domain.Tokens;
+using Fargo.Core.Tokens;
 using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ContractAuthentication = Fargo.Sdk.Contracts.Authentication;

@@ -1,4 +1,4 @@
-using Fargo.Domain.Tokens;
+using Fargo.Core.Tokens;
 using System.Security.Cryptography;
 
 namespace Fargo.Infrastructure.Security;

@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Tests.Entities;
+namespace Fargo.Core.Tests.Entities;
 
 public sealed class ModifiedEntityTests
 {

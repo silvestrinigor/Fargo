@@ -1,7 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Authentication;
 using Fargo.Application.Users;
-using Fargo.Domain.Tokens;
+using Fargo.Core.Tokens;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;

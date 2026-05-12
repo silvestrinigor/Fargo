@@ -1,8 +1,8 @@
-using Fargo.Domain.Articles;
-using Fargo.Domain.Items;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
 using NSubstitute;
 
-namespace Fargo.Domain.Tests.Items;
+namespace Fargo.Core.Tests.Items;
 
 public sealed class ItemServiceTests
 {

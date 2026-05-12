@@ -1,7 +1,7 @@
-using Fargo.Domain.Articles;
-using Fargo.Domain.Partitions;
+using Fargo.Core.Articles;
+using Fargo.Core.Partitions;
 
-namespace Fargo.Domain.Items;
+namespace Fargo.Core.Items;
 
 #region Entity
 

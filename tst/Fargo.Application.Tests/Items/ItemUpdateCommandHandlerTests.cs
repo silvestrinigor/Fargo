@@ -1,11 +1,11 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Items;
-using Fargo.Domain;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.System;
-using Fargo.Domain.Users;
+using Fargo.Core;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
+using Fargo.Core.Partitions;
+using Fargo.Core.System;
+using Fargo.Core.Users;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 

@@ -5,11 +5,11 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Items;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.UserGroups;
-using Fargo.Domain.Users;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
+using Fargo.Core.Partitions;
+using Fargo.Core.UserGroups;
+using Fargo.Core.Users;
 
 namespace Fargo.HttpApi.Middlewares;
 

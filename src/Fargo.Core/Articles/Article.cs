@@ -1,10 +1,10 @@
-using Fargo.Domain.Barcodes;
-using Fargo.Domain.Partitions;
+using Fargo.Core.Barcodes;
+using Fargo.Core.Partitions;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
-namespace Fargo.Domain.Articles;
+namespace Fargo.Core.Articles;
 
 #region Entity
 

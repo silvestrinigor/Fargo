@@ -1,4 +1,4 @@
-namespace Fargo.Domain.Tests.ValueObjects;
+namespace Fargo.Core.Tests.ValueObjects;
 
 public sealed class DescriptionTests
 {

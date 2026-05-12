@@ -1,8 +1,8 @@
-using Fargo.Domain.Partitions;
-using Fargo.Domain.System;
-using Fargo.Domain.Users;
+using Fargo.Core.Partitions;
+using Fargo.Core.System;
+using Fargo.Core.Users;
 
-namespace Fargo.Domain;
+namespace Fargo.Core;
 
 #region Exceptions
 
@@ -334,10 +334,10 @@ public interface IActivable
 /// different initiators uniformly. An actor can be:
 /// <list type="bullet">
 /// <item>
-/// <description>A real authenticated user (<see cref="Fargo.Domain.Users.UserActor"/>)</description>
+/// <description>A real authenticated user (<see cref="Fargo.Core.Users.UserActor"/>)</description>
 /// </item>
 /// <item>
-/// <description>The system itself (<see cref="Fargo.Domain.System.SystemActor"/>)</description>
+/// <description>The system itself (<see cref="Fargo.Core.System.SystemActor"/>)</description>
 /// </item>
 /// </list>
 ///
@@ -419,7 +419,7 @@ public interface IActor
 /// The <see cref="Actor"/> class defines common authorization behavior shared by all actor types,
 /// including permission and partition access evaluation.
 ///
-/// Concrete implementations (e.g., <see cref="Fargo.Domain.Users.UserActor"/> and <see cref="Fargo.Domain.System.SystemActor"/>)
+/// Concrete implementations (e.g., <see cref="Fargo.Core.Users.UserActor"/> and <see cref="Fargo.Core.System.SystemActor"/>)
 /// are responsible for supplying identity and access data.
 ///
 /// Authorization rules follow a hierarchical model:
@@ -940,7 +940,7 @@ public readonly struct Description : IEquatable<Description>
 /// Represents the set of actions that can be authorized in the system.
 ///
 /// Each value defines a specific permission that can be granted
-/// to a user through <see cref="Fargo.Domain.Users.UserPermission"/>.
+/// to a user through <see cref="Fargo.Core.Users.UserPermission"/>.
 /// </summary>
 public enum ActionType
 {
@@ -1020,7 +1020,7 @@ public enum ActionType
     /// including adding or removing users from the group.
     ///
     /// This permission controls operations that change which
-    /// users belong to a given <see cref="Fargo.Domain.UserGroups.UserGroup"/>.
+    /// users belong to a given <see cref="Fargo.Core.UserGroups.UserGroup"/>.
     /// It does not grant permission to create, delete, or edit the group
     /// itself, which are controlled by <see cref="CreateUserGroup"/>,
     /// <see cref="DeleteUserGroup"/>, and <see cref="EditUserGroup"/>.

@@ -1,6 +1,6 @@
 
 
-namespace Fargo.Domain.System;
+namespace Fargo.Core.System;
 
 #region Actor
 

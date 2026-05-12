@@ -1,7 +1,7 @@
-using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
+using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
 
-namespace Fargo.Domain.Tests.Barcodes;
+namespace Fargo.Core.Tests.Barcodes;
 
 public sealed class ArticleBarcodesTests
 {

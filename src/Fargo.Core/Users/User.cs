@@ -1,7 +1,7 @@
-using Fargo.Domain.Partitions;
-using Fargo.Domain.UserGroups;
+using Fargo.Core.Partitions;
+using Fargo.Core.UserGroups;
 
-namespace Fargo.Domain.Users;
+namespace Fargo.Core.Users;
 
 #region Value Objects
 

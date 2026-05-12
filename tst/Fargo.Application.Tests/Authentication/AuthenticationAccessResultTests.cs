@@ -1,9 +1,9 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Users;
-using Fargo.Domain;
-using Fargo.Domain.Partitions;
-using Fargo.Domain.Tokens;
-using Fargo.Domain.Users;
+using Fargo.Core;
+using Fargo.Core.Partitions;
+using Fargo.Core.Tokens;
+using Fargo.Core.Users;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 

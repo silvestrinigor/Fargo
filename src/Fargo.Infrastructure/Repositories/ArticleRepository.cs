@@ -1,8 +1,8 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Domain.Articles;
-using Fargo.Domain.Barcodes;
-using Fargo.Domain.Items;
+using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
+using Fargo.Core.Items;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

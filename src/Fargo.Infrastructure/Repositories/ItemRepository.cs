@@ -1,6 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Items;
-using Fargo.Domain.Items;
+using Fargo.Core.Items;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

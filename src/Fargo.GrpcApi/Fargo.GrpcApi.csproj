@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
-    <ProjectReference Include="..\Fargo.Domain\Fargo.Domain.csproj" />
+    <ProjectReference Include="..\Fargo.Core\Fargo.Core.csproj" />
     <ProjectReference Include="..\Fargo.GrpcContracts\Fargo.GrpcContracts.csproj" />
     <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
     <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />

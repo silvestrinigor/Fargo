@@ -1,6 +1,6 @@
 using Fargo.Application.Authentication;
 using Fargo.Application.Events;
-using Fargo.Domain.Events;
+using Fargo.Core.Events;
 using Fargo.Infrastructure.Persistence;
 
 namespace Fargo.Infrastructure.Events;

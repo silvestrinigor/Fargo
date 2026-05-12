@@ -1,6 +1,6 @@
 
 
-namespace Fargo.Domain.Events;
+namespace Fargo.Core.Events;
 
 #region Types
 

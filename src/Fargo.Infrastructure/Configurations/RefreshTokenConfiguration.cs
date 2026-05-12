@@ -1,5 +1,5 @@
-using Fargo.Domain.Tokens;
-using Fargo.Domain.Users;
+using Fargo.Core.Tokens;
+using Fargo.Core.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

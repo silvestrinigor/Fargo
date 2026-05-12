@@ -1,6 +1,6 @@
-using Fargo.Domain.Tokens;
+using Fargo.Core.Tokens;
 
-namespace Fargo.Domain.Tests.ValueObjects;
+namespace Fargo.Core.Tests.ValueObjects;
 
 public sealed class TokenTests
 {

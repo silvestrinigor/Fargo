@@ -1,6 +1,6 @@
 using Fargo.Application.Authentication;
-using Fargo.Domain;
-using Fargo.Domain.Partitions;
+using Fargo.Core;
+using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
