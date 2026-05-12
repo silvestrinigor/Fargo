@@ -39,7 +39,8 @@ public sealed class ArticleCreateCommandHandler(
         {
             Name = command.Article.Name,
             Description = command.Article.Description ?? Description.Empty,
-            ShelfLife = command.Article.ShelfLife
+            ShelfLife = command.Article.ShelfLife,
+            Color = command.Article.Color
         };
 
         if (command.Article.Metrics is { } metrics)
@@ -50,6 +51,7 @@ public sealed class ArticleCreateCommandHandler(
             article.LengthZ = metrics.LengthZ;
         }
 
+        // TODO: Move this to inside a ArticleBarcodesDto to only edit the article barcodes if the dto is not null because the way it is can have some problems when more than one client tries to edit the entity at the same time.
         await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
 
         await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);
@@ -213,6 +215,11 @@ public sealed class ArticleUpdateCommandHandler(
             article.ShelfLife = command.Article.ShelfLife;
         }
 
+        if (article.Color != command.Article.Color)
+        {
+            article.Color = command.Article.Color;
+        }
+
         if (command.Article.Metrics is { } metrics)
         {
             if (!article.Mass.Equals(metrics.Mass))
@@ -236,6 +243,7 @@ public sealed class ArticleUpdateCommandHandler(
             }
         }
 
+        // TODO: Move this to inside a ArticleBarcodesDto to only edit the article barcodes if the dto is not null because the way it is can have some problems when more than one client tries to edit the entity at the same time.
         await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
 
         await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);

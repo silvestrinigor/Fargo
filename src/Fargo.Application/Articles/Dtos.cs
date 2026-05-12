@@ -1,6 +1,7 @@
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using System.Drawing;
 using System.Linq.Expressions;
 using UnitsNet;
 
@@ -11,6 +12,7 @@ public sealed record ArticleDto(
     Name Name,
     Description Description,
     TimeSpan? ShelfLife,
+    Color? Color,
     ArticleMetricsDto Metrics,
     Ean13? Ean13,
     Ean8? Ean8,
@@ -38,6 +40,7 @@ public sealed record ArticleCreateDto(
     Name Name,
     Description? Description = null,
     TimeSpan? ShelfLife = null,
+    Color? Color = null,
     ArticleMetricsDto? Metrics = null,
     Ean13? Ean13 = null,
     Ean8? Ean8 = null,
@@ -57,6 +60,7 @@ public sealed record ArticleUpdateDto(
     Name Name,
     Description Description,
     TimeSpan? ShelfLife,
+    Color? Color,
     ArticleMetricsDto Metrics,
     Ean13? Ean13,
     Ean8? Ean8,
@@ -81,6 +85,7 @@ public static class ArticleDtoMappings
         article.Name,
         article.Description,
         article.ShelfLife,
+        article.Color,
         new ArticleMetricsDto(
             article.Mass,
             article.LengthX,
@@ -98,5 +103,6 @@ public static class ArticleDtoMappings
         article.DataMatrix,
         article.Partitions.Select(partition => partition.Guid).ToArray(),
         article.IsActive,
-        article.EditedByGuid);
+        article.EditedByGuid
+    );
 }
