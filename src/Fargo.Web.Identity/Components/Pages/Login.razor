@@ -1,0 +1,18 @@
+@page "/login"
+@rendermode InteractiveServer
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+<div><FluentTextField @bind-Value=nameid TextFieldType="TextFieldType.Text">Nameid</FluentTextField></div>
+
+<div><FluentTextField @bind-Value=password TextFieldType="TextFieldType.Password">Password</FluentTextField></div>
+
+<div><FluentButton>Login</FluentButton></div>
+
+@code {
+    string nameid = "";
+
+    string password = "";
+}

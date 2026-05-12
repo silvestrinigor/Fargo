@@ -1,4 +1,4 @@
-using Fargo.Web.Auth.Components;
+using Fargo.Web.Identity.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
