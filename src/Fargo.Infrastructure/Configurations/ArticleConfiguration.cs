@@ -4,6 +4,7 @@ using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Drawing;
 using UnitsNet;
 
 namespace Fargo.Infrastructure.Configurations;
@@ -28,6 +29,12 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(x => x.Name).IsRequired();
 
         builder.Property(x => x.Description).IsRequired();
+
+        builder.Property(x => x.Color)
+            .HasConversion(
+                x => x.HasValue ? x.Value.ToArgb() : (int?)null,
+                x => x.HasValue ? Color.FromArgb(x.Value) : null)
+            .IsRequired(false);
 
         builder.Property(x => x.EditedByGuid);
 
