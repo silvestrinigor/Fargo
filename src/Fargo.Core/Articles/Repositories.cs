@@ -16,44 +16,54 @@ public interface IArticleRepository
     );
 
     Task<bool> ExistsByBarcode(
-        Ean13 code
+        Ean13 code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        Ean8 code
+        Ean8 code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        UpcE code
+        UpcE code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        UpcA code
+        UpcA code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        Code128 code
+        Code128 code,
+        CancellationToken cancellationToken = default
     );
 
 
     Task<bool> ExistsByBarcode(
-        Code39 code
+        Code39 code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        Itf14 code
+        Itf14 code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        Gs1128 code
+        Gs1128 code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        QrCode code
+        QrCode code,
+        CancellationToken cancellationToken = default
     );
 
     Task<bool> ExistsByBarcode(
-        DataMatrix code
+        DataMatrix code,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>

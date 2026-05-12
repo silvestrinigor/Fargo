@@ -26,35 +26,35 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             .Include(article => article.Partitions)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Ean13 code)
-        => articles.AnyAsync(article => article.Ean13 == code);
+    public Task<bool> ExistsByBarcode(Ean13 code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.Ean13 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Ean8 code)
-        => articles.AnyAsync(article => article.Ean8 == code);
+    public Task<bool> ExistsByBarcode(Ean8 code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.Ean8 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(UpcE code)
-        => articles.AnyAsync(article => article.UpcE == code);
+    public Task<bool> ExistsByBarcode(UpcE code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.UpcE == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(UpcA code)
-        => articles.AnyAsync(article => article.UpcA == code);
+    public Task<bool> ExistsByBarcode(UpcA code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.UpcA == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Code128 code)
-        => articles.AnyAsync(article => article.Code128 == code);
+    public Task<bool> ExistsByBarcode(Code128 code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.Code128 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Code39 code)
-        => articles.AnyAsync(article => article.Code39 == code);
+    public Task<bool> ExistsByBarcode(Code39 code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.Code39 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Itf14 code)
-        => articles.AnyAsync(article => article.Itf14 == code);
+    public Task<bool> ExistsByBarcode(Itf14 code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.Itf14 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Gs1128 code)
-        => articles.AnyAsync(article => article.Gs1128 == code);
+    public Task<bool> ExistsByBarcode(Gs1128 code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.Gs1128 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(QrCode code)
-        => articles.AnyAsync(article => article.QrCode == code);
+    public Task<bool> ExistsByBarcode(QrCode code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.QrCode == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(DataMatrix code)
-        => articles.AnyAsync(article => article.DataMatrix == code);
+    public Task<bool> ExistsByBarcode(DataMatrix code, CancellationToken cancellationToken = default)
+        => articles.AnyAsync(article => article.DataMatrix == code, cancellationToken);
 
     public async Task<ArticleDto?> GetInfoByGuid(
         Guid entityGuid,

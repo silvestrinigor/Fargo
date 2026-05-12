@@ -44,7 +44,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         TBarcode? value,
         Func<Article, TBarcode?> getter,
         Action<Article, TBarcode?> setter,
-        Func<TBarcode, Task<bool>> existsByBarcode,
+        Func<TBarcode, CancellationToken, Task<bool>> existsByBarcode,
         BarcodeFormat format,
         CancellationToken cancellationToken)
         where TBarcode : struct, IEquatable<TBarcode>
@@ -56,7 +56,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
             return;
         }
 
-        if (value is { } barcode && await existsByBarcode(barcode))
+        if (value is { } barcode && await existsByBarcode(barcode, cancellationToken))
         {
             throw new ArticleBarcodeAlreadyInUseFargoDomainException(format, barcode.ToString()!);
         }
