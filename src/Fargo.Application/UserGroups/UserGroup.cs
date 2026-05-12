@@ -112,11 +112,10 @@ public sealed record UserGroupCreateCommand(
 ) : ICommand<Guid>;
 
 public sealed class UserGroupCreateCommandHandler(
-    ActorService actorService,
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<UserGroupCreateCommandHandler> logger
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
@@ -125,14 +124,12 @@ public sealed class UserGroupCreateCommandHandler(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("User group create flow started by actor {ActorGuid}.", actorGuid);
+            logger.LogInformation("User group create flow started by actor {ActorGuid}.", actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
@@ -173,7 +170,7 @@ public sealed class UserGroupCreateCommandHandler(
             logger.LogInformation(
                 "User group create flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
                 userGroup.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 userGroup.Partitions.Count,
                 userGroup.Permissions.Count);
         }
@@ -203,10 +200,9 @@ public sealed record UserGroupDeleteCommand(
 ) : ICommand;
 
 public sealed class UserGroupDeleteCommandHandler(
-    ActorService actorService,
     IUserGroupRepository userGroupRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupDeleteCommandHandler> logger
 ) : ICommandHandler<UserGroupDeleteCommand>
 {
@@ -214,17 +210,15 @@ public sealed class UserGroupDeleteCommandHandler(
         UserGroupDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "User group delete flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
                 command.UserGroupGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteUserGroup);
 
@@ -232,7 +226,12 @@ public sealed class UserGroupDeleteCommandHandler(
 
         actor.ValidateHasAccess(userGroup);
 
-        UserGroupService.ValidateUserGroupDelete(userGroup, actor);
+        if (actor.UserGroupGuids.Contains(userGroup.Guid))
+        {
+            throw new UserCannotDeleteParentUserGroupFargoDomainException(userGroup.Guid);
+        }
+
+        UserGroupService.ValidateUserGroupDelete(userGroup);
 
         userGroupRepository.Remove(userGroup);
 
@@ -243,7 +242,7 @@ public sealed class UserGroupDeleteCommandHandler(
             logger.LogInformation(
                 "User group delete flow completed for user group {UserGroupGuid} by actor {ActorGuid}.",
                 userGroup.Guid,
-                actor.Guid);
+                actor.ActorGuid);
         }
     }
 }
@@ -258,12 +257,11 @@ public sealed record UserGroupUpdateCommand(
 ) : ICommand;
 
 public sealed class UserGroupUpdateCommandHandler(
-    ActorService actorService,
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupUpdateCommandHandler> logger
 ) : ICommandHandler<UserGroupUpdateCommand>
 {
@@ -272,17 +270,15 @@ public sealed class UserGroupUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "User group update flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
                 command.UserGroupGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUserGroup);
 
@@ -379,7 +375,7 @@ public sealed class UserGroupUpdateCommandHandler(
             logger.LogInformation(
                 "User group update flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
                 userGroup.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 userGroup.Partitions.Count,
                 userGroup.Permissions.Count);
         }
@@ -412,9 +408,8 @@ public sealed record UserGroupSingleQuery(
 ) : IQuery<UserGroupDto?>;
 
 public sealed class UserGroupSingleQueryHandler(
-    ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupSingleQueryHandler> logger
 ) : IQueryHandler<UserGroupSingleQuery, UserGroupDto?>
 {
@@ -423,22 +418,20 @@ public sealed class UserGroupSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "User group single query started for user group {UserGroupGuid} by actor {ActorGuid}.",
                 query.UserGroupGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var userGroup = await userGroupRepository.GetInfoByGuid(
             query.UserGroupGuid,
             query.AsOfDateTime,
-            actor.PartitionAccessesGuids,
+            actor.PartitionAccesses,
             notChildOfAnyPartition: true,
             cancellationToken
         );
@@ -448,7 +441,7 @@ public sealed class UserGroupSingleQueryHandler(
             logger.LogDebug(
                 "User group single query completed for user group {UserGroupGuid} by actor {ActorGuid}. Found: {Found}.",
                 query.UserGroupGuid,
-                actor.Guid,
+                actor.ActorGuid,
                 userGroup is not null);
         }
 
@@ -468,9 +461,8 @@ public sealed record UserGroupsQuery(
 ) : IQuery<IReadOnlyCollection<UserGroupDto>>;
 
 public sealed class UserGroupsQueryHandler(
-    ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupsQueryHandler> logger
 ) : IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>
 {
@@ -479,23 +471,21 @@ public sealed class UserGroupsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "User groups query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actorGuid,
+                actor.ActorGuid,
                 pagination.Page,
                 pagination.Limit);
         }
 
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
-
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccessesGuids,
+                actor.PartitionAccesses,
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
@@ -511,7 +501,7 @@ public sealed class UserGroupsQueryHandler(
         {
             logger.LogDebug(
                 "User groups query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.Guid,
+                actor.ActorGuid,
                 query.ChildOfAnyOfThesePartitions?.Count ?? 0,
                 childOfAnyOfThesePartitions?.Count ?? 0,
                 userGroups.Count);

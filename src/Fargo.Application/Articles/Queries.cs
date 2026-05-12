@@ -12,9 +12,8 @@ public sealed record ArticleSingleQuery(
 ) : IQuery<ArticleDto?>;
 
 public sealed class ArticleSingleQueryHandler(
-    ActorService actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleSingleQueryHandler> logger
 ) : IQueryHandler<ArticleSingleQuery, ArticleDto?>
 {
@@ -23,22 +22,20 @@ public sealed class ArticleSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Article single query started for article {ArticleGuid} by actor {ActorGuid}.",
                 query.ArticleGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByGuid(
             query.ArticleGuid,
             query.AsOfDateTime,
-            actor.PartitionAccessesGuids,
+            actor.PartitionAccesses,
             notChildOfAnyPartition: true,
             cancellationToken
         );
@@ -48,7 +45,7 @@ public sealed class ArticleSingleQueryHandler(
             logger.LogDebug(
                 "Article single query completed for article {ArticleGuid} by actor {ActorGuid}. Found: {Found}.",
                 query.ArticleGuid,
-                actor.Guid,
+                actor.ActorGuid,
                 article is not null);
         }
 
@@ -66,9 +63,8 @@ public sealed record ArticleByBarcodeQuery(
 ) : IQuery<ArticleDto?>;
 
 public sealed class ArticleByBarcodeQueryHandler(
-    ActorService actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleByBarcodeQueryHandler> logger
 ) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
@@ -77,22 +73,20 @@ public sealed class ArticleByBarcodeQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Article barcode query started for barcode type {BarcodeType} by actor {ActorGuid}.",
                 query.ArticleBarcode.Type,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var article = await articleRepository.GetInfoByBarcode(
             query.ArticleBarcode,
             query.AsOfDateTime,
-            actor.PartitionAccessesGuids,
+            actor.PartitionAccesses,
             notChildOfAnyPartition: true,
             cancellationToken
         );
@@ -102,7 +96,7 @@ public sealed class ArticleByBarcodeQueryHandler(
             logger.LogDebug(
                 "Article barcode query completed for barcode type {BarcodeType} by actor {ActorGuid}. Found: {Found}.",
                 query.ArticleBarcode.Type,
-                actor.Guid,
+                actor.ActorGuid,
                 article is not null);
         }
 
@@ -122,9 +116,8 @@ public sealed record ArticlesQuery(
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;
 
 public sealed class ArticlesQueryHandler(
-    ActorService actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticlesQueryHandler> logger
 ) : IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>
 {
@@ -133,23 +126,21 @@ public sealed class ArticlesQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Articles query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actorGuid,
+                actor.ActorGuid,
                 pagination.Page,
                 pagination.Limit);
         }
 
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
-
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccessesGuids,
+                actor.PartitionAccesses,
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
@@ -165,7 +156,7 @@ public sealed class ArticlesQueryHandler(
         {
             logger.LogDebug(
                 "Articles query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.Guid,
+                actor.ActorGuid,
                 query.ChildOfAnyOfThesePartitions?.Count ?? 0,
                 childOfAnyOfThesePartitions?.Count ?? 0,
                 articles.Count);

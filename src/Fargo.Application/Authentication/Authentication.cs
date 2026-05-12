@@ -40,6 +40,68 @@ public interface ICurrentUser
     }
 }
 /// <summary>
+/// Provides the audit origin used when persisting changes and events.
+/// </summary>
+public interface IAuditPrincipal
+{
+    /// <summary>
+    /// Gets the actor identifier that should be written to audit columns.
+    /// </summary>
+    Guid ActorGuid
+    {
+        get;
+    }
+}
+/// <summary>
+/// Represents the resolved authorization snapshot for a request or user.
+/// </summary>
+public interface IAuthorizationContext
+{
+    Guid ActorGuid { get; }
+
+    bool IsAuthenticated { get; }
+
+    bool IsAdmin { get; }
+
+    IReadOnlyCollection<ActionType> PermissionActions { get; }
+
+    IReadOnlyCollection<Guid> PartitionAccesses { get; }
+
+    IReadOnlyCollection<Guid> UserGroupGuids { get; }
+}
+/// <summary>
+/// Immutable authorization snapshot used across the application layer.
+/// </summary>
+public sealed record AuthorizationContext(
+    Guid ActorGuid,
+    bool IsAuthenticated,
+    bool IsAdmin,
+    IReadOnlyCollection<ActionType> PermissionActions,
+    IReadOnlyCollection<Guid> PartitionAccesses,
+    IReadOnlyCollection<Guid> UserGroupGuids
+) : IAuthorizationContext;
+/// <summary>
+/// Creates authorization snapshots from user data.
+/// </summary>
+public interface IAuthorizationContextFactory
+{
+    Task<IAuthorizationContext> CreateFromUserGuid(
+        Guid userGuid,
+        CancellationToken cancellationToken = default);
+
+    Task<IAuthorizationContext> CreateFromUser(
+        User user,
+        CancellationToken cancellationToken = default);
+}
+/// <summary>
+/// Provides the authorization snapshot for the current request.
+/// </summary>
+public interface ICurrentAuthorizationContext
+{
+    Task<IAuthorizationContext> GetAsync(
+        CancellationToken cancellationToken = default);
+}
+/// <summary>
 /// Defines a service responsible for generating access tokens
 /// for authenticated users.
 /// </summary>
@@ -221,10 +283,10 @@ public sealed class WeakPasswordFargoApplicationException(string reason)
 
 #endregion Exceptions
 
-#region Actor Helpers
+#region Authorization Helpers
 
 /// <summary>
-/// Provides extension methods for <see cref="Actor"/> to enforce
+/// Provides extension methods for <see cref="IAuthorizationContext"/> to enforce
 /// authorization and partition-based access control rules.
 /// </summary>
 /// <remarks>
@@ -232,9 +294,9 @@ public sealed class WeakPasswordFargoApplicationException(string reason)
 /// ensuring that authorization checks are consistently applied before executing
 /// domain operations.
 /// </remarks>
-public static class ActorExtensions
+public static class AuthorizationContextExtensions
 {
-    extension(Actor actor)
+    extension(IAuthorizationContext context)
     {
         /// <summary>
         /// Ensures that the actor has permission to execute the specified action.
@@ -250,9 +312,9 @@ public static class ActorExtensions
         /// </remarks>
         public void ValidateHasPermission(ActionType action)
         {
-            if (!actor.HasActionPermission(action))
+            if (!context.IsAdmin && !context.PermissionActions.Contains(action))
             {
-                throw new UserNotAuthorizedFargoApplicationException(actor.Guid, action);
+                throw new UserNotAuthorizedFargoApplicationException(context.ActorGuid, action);
             }
         }
 
@@ -271,9 +333,9 @@ public static class ActorExtensions
         /// </remarks>
         public void ValidateHasPartitionAccess(Guid partitionGuid)
         {
-            if (!actor.HasPartitionAccess(partitionGuid))
+            if (!context.IsAdmin && !context.PartitionAccesses.Contains(partitionGuid))
             {
-                throw new PartitionAccessDeniedFargoApplicationException(partitionGuid, actor.Guid);
+                throw new PartitionAccessDeniedFargoApplicationException(partitionGuid, context.ActorGuid);
             }
         }
 
@@ -297,62 +359,18 @@ public static class ActorExtensions
         public void ValidateHasAccess<TEntity>(TEntity partitioned)
             where TEntity : IEntity, IPartitionedEntity
         {
-            if (!actor.HasAccess(partitioned))
+            if (!context.IsAdmin &&
+                partitioned.Partitions.Count > 0 &&
+                !partitioned.Partitions.Any(p => context.PartitionAccesses.Contains(p.Guid)))
             {
-                throw new PartitionedEntityAccessDeniedFargoApplicationException(partitioned.Guid, actor.Guid);
+                throw new PartitionedEntityAccessDeniedFargoApplicationException(partitioned.Guid, context.ActorGuid);
             }
         }
-    }
-}
-/// <summary>
-/// Provides authorization-related extension methods for <see cref="ActorService"/>.
-/// </summary>
-/// <remarks>
-/// These extensions centralize common validation logic for retrieving actors,
-/// ensuring they exist and are in a valid state before being used in application operations.
-/// </remarks>
-public static class ActorServiceExtensions
-{
-    extension(ActorService service)
-    {
-        /// <summary>
-        /// Retrieves an <see cref="Actor"/> by its GUID and ensures it is valid and active.
-        /// </summary>
-        /// <param name="actorGuid">
-        /// The unique identifier of the actor.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A token used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A valid and active <see cref="Actor"/> instance.
-        /// </returns>
-        /// <exception cref="UnauthorizedAccessFargoApplicationException">
-        /// Thrown when the actor does not exist or is not active.
-        /// </exception>
-        /// <remarks>
-        /// This method is typically used at the beginning of application workflows
-        /// to ensure that the current actor is authenticated and eligible to perform
-        /// further operations.
-        /// </remarks>
-        public async Task<Actor> GetAuthorizedActorByGuid(
-            Guid actorGuid,
-            CancellationToken cancellationToken = default
-        )
-        {
-            var actor = await service.GetActorByGuid(actorGuid, cancellationToken);
 
-            if (actor is null || !actor.IsActive)
-            {
-                throw new UnauthorizedAccessFargoApplicationException();
-            }
-
-            return actor;
-        }
     }
 }
 
-#endregion Actor Helpers
+#endregion Authorization Helpers
 
 #region Login
 
@@ -384,7 +402,7 @@ public sealed class LoginCommandHandler(
         IRefreshTokenGenerator refreshTokenGenerator,
         ITokenHasher tokenHasher,
         IRefreshTokenRepository refreshTokenRepository,
-        ActorService actorService,
+        IAuthorizationContextFactory authorizationContextFactory,
         IUnitOfWork unitOfWork,
         ILogger<LoginCommandHandler> logger
         ) : ICommandHandler<LoginCommand, AuthResult>
@@ -465,7 +483,7 @@ public sealed class LoginCommandHandler(
             throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
-        var actor = (UserActor)(await actorService.GetActorByGuid(user.Guid, cancellationToken))!;
+        var authorization = await authorizationContextFactory.CreateFromUser(user, cancellationToken);
 
         var accessTokenResult = tokenGenerator.Generate(user);
 
@@ -488,18 +506,18 @@ public sealed class LoginCommandHandler(
             logger.LogInformation(
                 "Login flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
                 user.Guid,
-                actor.IsAdmin,
-                actor.PermissionActions.Count,
-                actor.PartitionAccessesGuids.Count);
+                authorization.IsAdmin,
+                authorization.PermissionActions.Count,
+                authorization.PartitionAccesses.Count);
         }
 
         return new AuthResult(
                 accessTokenResult.AccessToken,
                 rawRefreshToken,
                 accessTokenResult.ExpiresAt,
-                actor.IsAdmin,
-                actor.PermissionActions,
-                actor.PartitionAccessesGuids
+                authorization.IsAdmin,
+                authorization.PermissionActions,
+                authorization.PartitionAccesses
                 );
     }
 }
@@ -532,7 +550,7 @@ public sealed class RefreshCommandHandler(
         IRefreshTokenGenerator refreshTokenGenerator,
         ITokenHasher tokenHasher,
         IRefreshTokenRepository refreshTokenRepository,
-        ActorService actorService,
+        IAuthorizationContextFactory authorizationContextFactory,
         IUnitOfWork unitOfWork,
         ILogger<RefreshCommandHandler> logger
         ) : ICommandHandler<RefreshCommand, AuthResult>
@@ -603,7 +621,7 @@ public sealed class RefreshCommandHandler(
             throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
-        var actor = (UserActor)(await actorService.GetActorByGuid(user.Guid, cancellationToken))!;
+        var authorization = await authorizationContextFactory.CreateFromUser(user, cancellationToken);
 
         var rawNewRefreshToken = refreshTokenGenerator.Generate();
 
@@ -628,18 +646,18 @@ public sealed class RefreshCommandHandler(
             logger.LogInformation(
                 "Refresh flow completed for user {UserGuid}. IsAdmin: {IsAdmin}. PermissionCount: {PermissionCount}. PartitionAccessCount: {PartitionAccessCount}.",
                 user.Guid,
-                actor.IsAdmin,
-                actor.PermissionActions.Count,
-                actor.PartitionAccessesGuids.Count);
+                authorization.IsAdmin,
+                authorization.PermissionActions.Count,
+                authorization.PartitionAccesses.Count);
         }
 
         return new AuthResult(
                 newAccessTokenResult.AccessToken,
                 rawNewRefreshToken,
                 newAccessTokenResult.ExpiresAt,
-                actor.IsAdmin,
-                actor.PermissionActions,
-                actor.PartitionAccessesGuids
+                authorization.IsAdmin,
+                authorization.PermissionActions,
+                authorization.PartitionAccesses
                 );
     }
 }

@@ -11,13 +11,11 @@ namespace Fargo.Application.System;
 public sealed record InitializeSystemCommand() : ICommand;
 
 public sealed class InitializeSystemCommandHandler(
-    ActorService actorService,
     IUserRepository userRepository,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
     IOptions<DefaultAdminOptions> defaultAdminOptions,
     ILogger<InitializeSystemCommandHandler> logger
     ) : ICommandHandler<InitializeSystemCommand>
@@ -27,19 +25,9 @@ public sealed class InitializeSystemCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
-
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("System initialization flow started for actor {ActorGuid}.", actorGuid);
-        }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
-
-        if (!actor.IsSystem)
-        {
-            logger.LogWarning("System initialization flow rejected for non-system actor {ActorGuid}.", actor.Guid);
-            throw new UnauthorizedAccessFargoApplicationException();
+            logger.LogInformation("System initialization flow started.");
         }
 
         var anyUser = await userRepository.Any(cancellationToken);

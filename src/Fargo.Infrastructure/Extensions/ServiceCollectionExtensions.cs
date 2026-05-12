@@ -41,6 +41,9 @@ public static class ServiceCollectionExtensions
             AddPersistence(services);
 
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IAuthorizationContextFactory, AuthorizationContextFactory>();
+            services.AddScoped<ICurrentAuthorizationContext, CurrentAuthorizationContext>();
+            services.AddScoped<IAuditPrincipal, CurrentAuditPrincipal>();
 
             return services;
         }
@@ -63,8 +66,7 @@ public static class ServiceCollectionExtensions
             AddDomainServices(services);
 
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
-
-            services.AddScoped<ICurrentUser, SystemCurrentUser>();
+            services.AddScoped<IAuditPrincipal, SystemAuditPrincipal>();
 
             return services;
         }
@@ -174,7 +176,6 @@ public static class ServiceCollectionExtensions
             services.AddScoped<UserGroupService>();
             services.AddScoped<PartitionService>();
             services.AddScoped<ItemService>();
-            services.AddScoped<ActorService>();
         }
 
         private void AddSecurity()

@@ -10,7 +10,7 @@ namespace Fargo.Infrastructure.Events;
 /// </summary>
 public sealed class DbEventRecorder(
     FargoDbContext db,
-    ICurrentUser currentUser
+    IAuditPrincipal auditPrincipal
 ) : IEventRecorder
 {
     public Task Record(EventType eventType, EntityType entityType, Guid entityGuid, CancellationToken cancellationToken = default)
@@ -20,7 +20,7 @@ public sealed class DbEventRecorder(
             EventType = eventType,
             EntityType = entityType,
             EntityGuid = entityGuid,
-            ActorGuid = currentUser.UserGuid,
+            ActorGuid = auditPrincipal.ActorGuid,
         });
 
         return Task.CompletedTask;

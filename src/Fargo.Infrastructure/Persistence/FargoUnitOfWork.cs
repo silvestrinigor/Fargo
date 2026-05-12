@@ -25,7 +25,7 @@ namespace Fargo.Infrastructure.Persistence;
 /// </remarks>
 public sealed class FargoUnitOfWork(
     FargoDbContext fargoContext,
-    ICurrentUser currentUser) : IUnitOfWork
+    IAuditPrincipal auditPrincipal) : IUnitOfWork
 {
     /// <summary>
     /// The write database context used to persist changes.
@@ -33,9 +33,9 @@ public sealed class FargoUnitOfWork(
     private readonly FargoDbContext fargoContext = fargoContext;
 
     /// <summary>
-    /// Provides information about the current authenticated user.
+    /// Provides the audit origin for persistence writes.
     /// </summary>
-    private readonly ICurrentUser currentUser = currentUser;
+    private readonly IAuditPrincipal auditPrincipal = auditPrincipal;
 
     /// <summary>
     /// Persists all pending changes tracked by the <see cref="FargoDbContext"/>.
@@ -53,7 +53,7 @@ public sealed class FargoUnitOfWork(
     /// </remarks>
     public async Task<int> SaveChanges(CancellationToken cancellationToken = default)
     {
-        fargoContext.ChangeTracker.ApplyAuditing(currentUser.UserGuid);
+        fargoContext.ChangeTracker.ApplyAuditing(auditPrincipal.ActorGuid);
 
         return await fargoContext.SaveChangesAsync(cancellationToken);
     }

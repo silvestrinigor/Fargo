@@ -149,13 +149,14 @@ public abstract class Entity : IEntity
 /// the last modification performed on the entity.
 ///
 /// The modification metadata is expected to be managed automatically
-/// by the application or infrastructure layer (e.g., change tracker).
+/// by the application or infrastructure layer (for example, the EF Core
+/// change tracker).
 ///
 /// <para>
 /// <strong>Important:</strong>
 /// <see cref="EditedByGuid"/> is expected to be <see langword="null"/>
 /// only during the entity creation phase. After the entity is tracked
-/// and persisted, this value should always be populated.
+/// and persisted, this value should normally be populated.
 /// A <see langword="null"/> value outside this scenario typically
 /// indicates a misconfiguration or a missing auditing operation.
 /// </para>
@@ -196,8 +197,8 @@ public interface IModifiedEntity
     /// been modified since its creation.
     ///
     /// When the modification is performed by an internal system process,
-    /// implementations should typically use
-    /// <see cref="System.SystemService.SystemGuid"/>.
+    /// implementations should use the reserved audit-origin guid used by
+    /// the infrastructure layer.
     /// </remarks>
     Guid? EditedByGuid { get; }
 
@@ -214,7 +215,7 @@ public interface IModifiedEntity
     /// (such as timestamps, if applicable).
     ///
     /// When the modification is performed by the system, the caller should pass
-    /// <see cref="System.SystemService.SystemGuid"/>.
+    /// the reserved system audit guid from the infrastructure layer.
     /// </remarks>
     void MarkAsEdited(Guid actorGuid);
 }
@@ -283,19 +284,9 @@ public interface IActivable
 /// Represents an actor responsible for performing operations within the system.
 /// </summary>
 /// <remarks>
-/// An actor abstracts the origin of an action, allowing the domain to treat
-/// different initiators uniformly. An actor can be:
-/// <list type="bullet">
-/// <item>
-/// <description>A real authenticated user (<see cref="Fargo.Core.Users.UserActor"/>)</description>
-/// </item>
-/// <item>
-/// <description>The system itself (<see cref="Fargo.Core.System.SystemActor"/>)</description>
-/// </item>
-/// </list>
-///
-/// This abstraction enables consistent authorization, auditing, and permission handling
-/// across the domain, regardless of whether the action was triggered by a user or internally.
+/// An actor abstracts the authenticated user responsible for an action.
+/// Authorization is evaluated against the actor's permissions and partition
+/// access, while auditing is handled separately by the infrastructure layer.
 /// </remarks>
 public interface IActor
 {
@@ -314,14 +305,6 @@ public interface IActor
     /// <c>true</c> if the actor is an administrator; otherwise, <c>false</c>.
     /// </value>
     bool IsAdmin { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the actor represents the system.
-    /// </summary>
-    /// <value>
-    /// <c>true</c> if the actor is the system actor; otherwise, <c>false</c>.
-    /// </value>
-    bool IsSystem { get; }
 
     /// <summary>
     /// Gets a value indicating whether the actor is active.
@@ -369,15 +352,11 @@ public interface IActor
 /// Provides a base implementation for <see cref="IActor"/>.
 /// </summary>
 /// <remarks>
-/// The <see cref="Actor"/> class defines common authorization behavior shared by all actor types,
-/// including permission and partition access evaluation.
-///
-/// Concrete implementations (e.g., <see cref="Fargo.Core.Users.UserActor"/> and <see cref="Fargo.Core.System.SystemActor"/>)
-/// are responsible for supplying identity and access data.
+/// The <see cref="Actor"/> class defines common authorization behavior shared by
+/// user-backed actor types, including permission and partition access evaluation.
 ///
 /// Authorization rules follow a hierarchical model:
 /// <list type="number">
-/// <item><description><b>System actors</b> have unrestricted access to all operations and partitions</description></item>
 /// <item><description><b>Administrative actors</b> have unrestricted access within the domain</description></item>
 /// <item><description>All other actors are evaluated based on their assigned permissions and partition access</description></item>
 /// </list>
@@ -393,11 +372,6 @@ public abstract class Actor : IActor
     /// Gets a value indicating whether the actor has administrative privileges.
     /// </summary>
     public abstract bool IsAdmin { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the actor represents the system.
-    /// </summary>
-    public abstract bool IsSystem { get; }
 
     /// <summary>
     /// Gets a value indicating whether the actor is active.
@@ -419,20 +393,16 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="action">The action to evaluate.</param>
     /// <returns>
-    /// <c>true</c> if the actor is a system or administrative actor, or if the action
+    /// <c>true</c> if the actor is an administrative actor, or if the action
     /// is explicitly granted; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// Evaluation order:
-    /// <list type="number">
-    /// <item><description>System actors are always authorized</description></item>
-    /// <item><description>Administrative actors are always authorized</description></item>
-    /// <item><description>Otherwise, checks <see cref="PermissionActions"/></description></item>
-    /// </list>
+    /// Administrative actors are always authorized; otherwise the actor's
+    /// effective permissions are checked.
     /// </remarks>
     public bool HasActionPermission(ActionType action)
     {
-        if (IsSystem || IsAdmin)
+        if (IsAdmin)
         {
             return true;
         }
@@ -445,20 +415,16 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="partitionGuid">The unique identifier of the partition.</param>
     /// <returns>
-    /// <c>true</c> if the actor is a system or administrative actor, or if the partition
+    /// <c>true</c> if the actor is an administrative actor, or if the partition
     /// is explicitly accessible; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// Evaluation order:
-    /// <list type="number">
-    /// <item><description>System actors have unrestricted access</description></item>
-    /// <item><description>Administrative actors have unrestricted access</description></item>
-    /// <item><description>Otherwise, checks <see cref="PartitionAccessesGuids"/></description></item>
-    /// </list>
+    /// Administrative actors have unrestricted access; otherwise the actor's
+    /// partition list is checked.
     /// </remarks>
     public bool HasPartitionAccess(Guid partitionGuid)
     {
-        if (IsSystem || IsAdmin)
+        if (IsAdmin)
         {
             return true;
         }
@@ -471,22 +437,17 @@ public abstract class Actor : IActor
     /// </summary>
     /// <param name="partitioned">The partitioned entity to evaluate.</param>
     /// <returns>
-    /// <c>true</c> if the actor is a system or administrative actor, if the entity has no
+    /// <c>true</c> if the actor is an administrative actor, if the entity has no
     /// partitions (public), or if at least one partition of the entity is accessible;
     /// otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// Evaluation order:
-    /// <list type="number">
-    /// <item><description>System actors have unrestricted access</description></item>
-    /// <item><description>Administrative actors have unrestricted access</description></item>
-    /// <item><description>Entities with no partitions are public and accessible to all authenticated actors</description></item>
-    /// <item><description>Otherwise, checks intersection with <see cref="PartitionAccessesGuids"/></description></item>
-    /// </list>
+    /// Entities with no partitions are public and accessible to all authenticated
+    /// actors. Otherwise, the actor's partition access is checked.
     /// </remarks>
     public bool HasAccess(IPartitionedEntity partitioned)
     {
-        if (IsSystem || IsAdmin)
+        if (IsAdmin)
         {
             return true;
         }
@@ -501,7 +462,7 @@ public abstract class Actor : IActor
 
     public bool HasAccess(IPartitioned partitioned)
     {
-        if (IsSystem || IsAdmin)
+        if (IsAdmin)
         {
             return true;
         }

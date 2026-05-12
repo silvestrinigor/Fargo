@@ -156,23 +156,20 @@ public sealed record EventManyQuery(
 
 /// <summary>Handles <see cref="EventManyQuery"/>.</summary>
 public sealed class EventManyQueryHandler(
-    ActorService actorService,
     IEventQueryRepository eventQueryRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<EventManyQueryHandler> logger
 ) : IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>>
 {
     /// <summary>Returns a paged list of domain events matching the given filters.</summary>
     public async Task<IReadOnlyCollection<EventInformation>> Handle(EventManyQuery query, CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Events query started for actor {ActorGuid}.", actorGuid);
+            logger.LogDebug("Events query started for actor {ActorGuid}.", actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditUser);
 
@@ -191,7 +188,7 @@ public sealed class EventManyQueryHandler(
         {
             logger.LogDebug(
                 "Events query completed for actor {ActorGuid}. EntityGuid: {EntityGuid}. EntityType: {EntityType}. EventType: {EventType}. ResultCount: {ResultCount}.",
-                actor.Guid,
+                actor.ActorGuid,
                 query.EntityGuid,
                 query.EntityType,
                 query.EventType,

@@ -570,29 +570,13 @@ public class UserGroupService(
     }
 
     /// <summary>
-    /// Validates whether a user group can be deleted by the specified actor.
+    /// Validates whether a user group can be deleted.
     /// </summary>
     /// <param name="userGroup">
     /// The user group that is being deleted.
     /// </param>
-    /// <param name="actor">
-    /// The user attempting to delete the group.
-    /// </param>
-    /// <exception cref="UserCannotDeleteParentUserGroupFargoDomainException">
-    /// Thrown when the actor belongs to the group being deleted.
-    /// </exception>
-    public static void ValidateUserGroupDelete(
-        UserGroup userGroup,
-        Actor actor)
+    public static void ValidateUserGroupDelete(UserGroup userGroup)
     {
-        var actorIsMember = actor is UserActor userActor &&
-            userActor.User.UserGroups.Any(x => x.Guid == userGroup.Guid);
-
-        if (actorIsMember)
-        {
-            throw new UserCannotDeleteParentUserGroupFargoDomainException(userGroup.Guid);
-        }
-
         if (userGroup.Guid == AdministratorsUserGroupGuid)
         {
             throw new DeleteDefaultAdministratorsUserGroupFargoDomainException();

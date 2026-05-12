@@ -16,8 +16,8 @@ internal static class ChangeTrackerExtensions
     /// <param name="changeTracker">
     /// The EF Core change tracker.
     /// </param>
-    /// <param name="currentUserGuid">
-    /// The unique identifier of the user performing the operation.
+    /// <param name="actorGuid">
+    /// The unique identifier of the actor performing the operation.
     /// </param>
     /// <remarks>
     /// This method applies auditing in three scenarios:
@@ -45,17 +45,17 @@ internal static class ChangeTrackerExtensions
     /// </item>
     /// </list>
     /// </remarks>
-    public static void ApplyAuditing(this ChangeTracker changeTracker, Guid currentUserGuid)
+    public static void ApplyAuditing(this ChangeTracker changeTracker, Guid actorGuid)
     {
         foreach (var entry in changeTracker.Entries<IModifiedEntity>())
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.MarkAsEdited(currentUserGuid);
+                entry.Entity.MarkAsEdited(actorGuid);
             }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.MarkAsEdited(currentUserGuid);
+                entry.Entity.MarkAsEdited(actorGuid);
             }
         }
 
@@ -68,7 +68,7 @@ internal static class ChangeTrackerExtensions
 
         foreach (var parentEntity in parentEntitiesToUpdate)
         {
-            parentEntity.MarkAsEdited(currentUserGuid);
+            parentEntity.MarkAsEdited(actorGuid);
         }
     }
 }

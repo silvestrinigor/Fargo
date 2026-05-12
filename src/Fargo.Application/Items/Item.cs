@@ -103,11 +103,10 @@ public sealed record ItemCreateCommand(
 ) : ICommand<Guid>;
 
 public sealed class ItemCreateCommandHandler(
-    ActorService actorService,
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
@@ -116,17 +115,15 @@ public sealed class ItemCreateCommandHandler(
         ItemCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item create flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.Item.ArticleGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateItem);
 
@@ -159,7 +156,7 @@ public sealed class ItemCreateCommandHandler(
             logger.LogInformation(
                 "Item create flow completed for item {ItemGuid} by actor {ActorGuid}. ArticleGuid: {ArticleGuid}. PartitionCount: {PartitionCount}.",
                 item.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 article.Guid,
                 item.Partitions.Count);
         }
@@ -177,10 +174,9 @@ public sealed record ItemDeleteCommand(
 ) : ICommand;
 
 public sealed class ItemDeleteCommandHandler(
-    ActorService actorService,
     IItemRepository itemRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemDeleteCommandHandler> logger
 ) : ICommandHandler<ItemDeleteCommand>
 {
@@ -188,17 +184,15 @@ public sealed class ItemDeleteCommandHandler(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item delete flow started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteItem);
 
@@ -215,7 +209,7 @@ public sealed class ItemDeleteCommandHandler(
             logger.LogInformation(
                 "Item delete flow completed for item {ItemGuid} by actor {ActorGuid}.",
                 item.Guid,
-                actor.Guid);
+                actor.ActorGuid);
         }
     }
 }
@@ -230,12 +224,11 @@ public sealed record ItemUpdateCommand(
 ) : ICommand;
 
 public sealed class ItemUpdateCommandHandler(
-    ActorService actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
     ItemService itemService,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemUpdateCommandHandler> logger
 ) : ICommandHandler<ItemUpdateCommand>
 {
@@ -244,17 +237,15 @@ public sealed class ItemUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item update flow started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditItem);
 
@@ -331,7 +322,7 @@ public sealed class ItemUpdateCommandHandler(
             logger.LogInformation(
                 "Item update flow completed for item {ItemGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
                 item.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 item.Partitions.Count);
         }
     }
@@ -351,9 +342,8 @@ public sealed record ItemSingleQuery(
 ) : IQuery<ItemDto?>;
 
 public sealed class ItemSingleQueryHandler(
-    ActorService actorService,
     IItemQueryRepository itemRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemSingleQueryHandler> logger
 ) : IQueryHandler<ItemSingleQuery, ItemDto?>
 {
@@ -362,22 +352,20 @@ public sealed class ItemSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Item single query started for item {ItemGuid} by actor {ActorGuid}.",
                 query.ItemGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var item = await itemRepository.GetInfoByGuid(
             query.ItemGuid,
             query.AsOfDateTime,
-            actor.PartitionAccessesGuids,
+            actor.PartitionAccesses,
             notChildOfAnyPartition: true,
             cancellationToken
         );
@@ -387,7 +375,7 @@ public sealed class ItemSingleQueryHandler(
             logger.LogDebug(
                 "Item single query completed for item {ItemGuid} by actor {ActorGuid}. Found: {Found}.",
                 query.ItemGuid,
-                actor.Guid,
+                actor.ActorGuid,
                 item is not null);
         }
 
@@ -407,9 +395,8 @@ public sealed record ItemsQuery(
 ) : IQuery<IReadOnlyCollection<ItemDto>>;
 
 public sealed class ItemsQueryHandler(
-    ActorService actorService,
     IItemQueryRepository itemRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemsQueryHandler> logger
 ) : IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>
 {
@@ -418,23 +405,21 @@ public sealed class ItemsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Items query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actorGuid,
+                actor.ActorGuid,
                 pagination.Page,
                 pagination.Limit);
         }
 
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
-
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccessesGuids,
+                actor.PartitionAccesses,
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
@@ -450,7 +435,7 @@ public sealed class ItemsQueryHandler(
         {
             logger.LogDebug(
                 "Items query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.Guid,
+                actor.ActorGuid,
                 query.ChildOfAnyOfThesePartitions?.Count ?? 0,
                 childOfAnyOfThesePartitions?.Count ?? 0,
                 items.Count);

@@ -1390,7 +1390,7 @@ public class UserPartitionAccess : Entity, IModifiedEntityMember, IPartitionAcce
 /// </item>
 /// </list>
 /// These accesses are typically expanded to include descendant partitions
-/// by the <see cref="ActorService"/> before constructing the actor.
+/// by the request authorization context before the snapshot is used.
 /// </para>
 /// </remarks>
 public sealed class UserActor : Actor
@@ -1435,17 +1435,6 @@ public sealed class UserActor : Actor
     /// </remarks>
     public override bool IsAdmin => Guid == UserService.DefaultAdministratorUserGuid;
 
-    /// <summary>
-    /// Gets a value indicating whether the actor represents a system process.
-    /// </summary>
-    /// <value>
-    /// Always <c>false</c> for <see cref="UserActor"/>.
-    /// </value>
-    public override bool IsSystem => false;
-
-    /// <summary>
-    /// Gets a value indicating whether the underlying user is active.
-    /// </summary>
     public override bool IsActive => User.IsActive;
 
     /// <summary>
@@ -1656,12 +1645,11 @@ public class UserService(
     /// <param name="user">
     /// The user being deleted.
     /// </param>
-    /// <param name="actor">
-    /// The user performing the delete operation.
+    /// <param name="actorGuid">
+    /// The identifier of the user performing the delete operation.
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="user"/> or <paramref name="actor"/> is
-    /// <see langword="null"/>.
+    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
     /// </exception>
     /// <exception cref="UserCannotDeleteSelfFargoDomainException">
     /// Thrown when the acting user attempts to delete their own account.
@@ -1669,14 +1657,13 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot delete their own account.
     /// </remarks>
-    public static void ValidateUserDelete(User user, Actor actor)
+    public static void ValidateUserDelete(User user, Guid actorGuid)
     {
         ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(actor);
 
-        if (user.Guid == actor.Guid)
+        if (user.Guid == actorGuid)
         {
-            throw new UserCannotDeleteSelfFargoDomainException(actor.Guid);
+            throw new UserCannotDeleteSelfFargoDomainException(actorGuid);
         }
 
         if (user.Guid == DefaultAdministratorUserGuid)
@@ -1691,12 +1678,11 @@ public class UserService(
     /// <param name="user">
     /// The user whose permissions are being modified.
     /// </param>
-    /// <param name="actor">
-    /// The user performing the permission change operation.
+    /// <param name="actorGuid">
+    /// The identifier of the user performing the permission change operation.
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="user"/> or <paramref name="actor"/> is
-    /// <see langword="null"/>.
+    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
     /// </exception>
     /// <exception cref="UserCannotChangeOwnPermissionsFargoDomainException">
     /// Thrown when the acting user attempts to modify their own permissions.
@@ -1704,14 +1690,13 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot modify their own permissions.
     /// </remarks>
-    public static void ValidateUserPermissionChange(User user, Actor actor)
+    public static void ValidateUserPermissionChange(User user, Guid actorGuid)
     {
         ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(actor);
 
-        if (user.Guid == actor.Guid)
+        if (user.Guid == actorGuid)
         {
-            throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
+            throw new UserCannotChangeOwnPermissionsFargoDomainException(actorGuid);
         }
 
         if (user.Guid == DefaultAdministratorUserGuid)

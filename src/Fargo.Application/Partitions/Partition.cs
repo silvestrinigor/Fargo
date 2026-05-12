@@ -123,10 +123,9 @@ public sealed record PartitionCreateCommand(
 ) : ICommand<Guid>;
 
 public sealed class PartitionCreateCommandHandler(
-    ActorService actorService,
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<PartitionCreateCommandHandler> logger
 ) : ICommandHandler<PartitionCreateCommand, Guid>
@@ -135,14 +134,12 @@ public sealed class PartitionCreateCommandHandler(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("Partition create flow started by actor {ActorGuid}.", actorGuid);
+            logger.LogInformation("Partition create flow started by actor {ActorGuid}.", actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreatePartition);
 
@@ -169,7 +166,7 @@ public sealed class PartitionCreateCommandHandler(
             logger.LogInformation(
                 "Partition create flow completed for partition {PartitionGuid} by actor {ActorGuid}. ParentPartitionGuid: {ParentPartitionGuid}.",
                 partition.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 parentPartition.Guid);
         }
 
@@ -186,10 +183,9 @@ public sealed record PartitionDeleteCommand(
 ) : ICommand;
 
 public sealed class PartitionDeleteCommandHandler(
-    ActorService actorService,
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<PartitionDeleteCommandHandler> logger
 ) : ICommandHandler<PartitionDeleteCommand>
@@ -198,17 +194,15 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition delete flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeletePartition);
 
@@ -225,7 +219,7 @@ public sealed class PartitionDeleteCommandHandler(
             logger.LogInformation(
                 "Partition delete flow completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.Guid);
+                actor.ActorGuid);
         }
     }
 }
@@ -240,10 +234,9 @@ public sealed record PartitionUpdateCommand(
 ) : ICommand;
 
 public sealed class PartitionUpdateCommandHandler(
-    ActorService actorService,
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<PartitionUpdateCommandHandler> logger
 ) : ICommandHandler<PartitionUpdateCommand>
@@ -253,17 +246,15 @@ public sealed class PartitionUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition update flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditPartition);
 
@@ -314,7 +305,7 @@ public sealed class PartitionUpdateCommandHandler(
             logger.LogInformation(
                 "Partition update flow completed for partition {PartitionGuid} by actor {ActorGuid}. IsActive: {IsActive}.",
                 partition.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 partition.IsActive);
         }
     }
@@ -334,9 +325,8 @@ public sealed record PartitionSingleQuery(
 ) : IQuery<PartitionDto?>;
 
 public sealed class PartitionSingleQueryHandler(
-    ActorService actorService,
     IPartitionQueryRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<PartitionSingleQueryHandler> logger
 ) : IQueryHandler<PartitionSingleQuery, PartitionDto?>
 {
@@ -345,17 +335,15 @@ public sealed class PartitionSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Partition single query started for partition {PartitionGuid} by actor {ActorGuid}.",
                 query.PartitionGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         var partition = await partitionRepository.GetInfoByGuid(
             query.PartitionGuid,
@@ -375,7 +363,7 @@ public sealed class PartitionSingleQueryHandler(
             logger.LogDebug(
                 "Partition single query completed for partition {PartitionGuid} by actor {ActorGuid}. Found: {Found}.",
                 query.PartitionGuid,
-                actor.Guid,
+                actor.ActorGuid,
                 partition is not null);
         }
 
@@ -395,9 +383,8 @@ public sealed record PartitionsQuery(
 ) : IQuery<IReadOnlyCollection<PartitionDto>>;
 
 public sealed class PartitionsQueryHandler(
-    ActorService actorService,
     IPartitionQueryRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<PartitionsQueryHandler> logger
 ) : IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>
 {
@@ -406,23 +393,21 @@ public sealed class PartitionsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Partitions query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actorGuid,
+                actor.ActorGuid,
                 pagination.Page,
                 pagination.Limit);
         }
 
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
-
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccessesGuids,
+                actor.PartitionAccesses,
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
@@ -438,7 +423,7 @@ public sealed class PartitionsQueryHandler(
         {
             logger.LogDebug(
                 "Partitions query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.Guid,
+                actor.ActorGuid,
                 query.ChildOfAnyOfThesePartitions?.Count ?? 0,
                 childOfAnyOfThesePartitions?.Count ?? 0,
                 partitions.Count);

@@ -12,24 +12,24 @@ namespace Fargo.HttpApi.Hubs;
 /// delivered to clients who have access to the affected entity's partition.
 /// </summary>
 [Authorize]
-public sealed class FargoEventHub(ActorService actorService, ICurrentUser currentUser)
+public sealed class FargoEventHub(ICurrentAuthorizationContext currentAuthorizationContext)
     : Hub<IFargoEventClient>
 {
     /// <summary>
     /// Adds the connecting client to SignalR groups for each partition they can access.
-    /// Admin and system actors join a single <c>"fargo-admin"</c> group that receives all events.
+    /// Admin actors join a single <c>"fargo-admin"</c> group that receives all events.
     /// </summary>
     public override async Task OnConnectedAsync()
     {
-        var actor = await actorService.GetAuthorizedActorByGuid(currentUser.UserGuid);
+        var actor = await currentAuthorizationContext.GetAsync();
 
-        if (actor.IsAdmin || actor.IsSystem)
+        if (actor.IsAdmin)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, "fargo-admin");
         }
         else
         {
-            foreach (var partitionGuid in actor.PartitionAccessesGuids)
+            foreach (var partitionGuid in actor.PartitionAccesses)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, partitionGuid.ToString());
             }

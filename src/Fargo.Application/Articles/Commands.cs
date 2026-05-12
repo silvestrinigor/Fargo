@@ -15,10 +15,9 @@ public sealed record ArticleCreateCommand(
 ) : ICommand<Guid>;
 
 public sealed class ArticleCreateCommandHandler(
-    ActorService actorService,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreateCommandHandler> logger
 ) : ICommandHandler<ArticleCreateCommand, Guid>
@@ -27,14 +26,12 @@ public sealed class ArticleCreateCommandHandler(
         ArticleCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("Article create flow started for actor {ActorGuid}.", actorGuid);
+            logger.LogInformation("Article create flow started for actor {ActorGuid}.", actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
@@ -166,7 +163,7 @@ public sealed class ArticleCreateCommandHandler(
             logger.LogInformation(
                 "Article create flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
                 article.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 article.Partitions.Count);
         }
 
@@ -183,10 +180,9 @@ public sealed record ArticleDeleteCommand(
 ) : ICommand;
 
 public sealed class ArticleDeleteCommandHandler(
-    ActorService actorService,
     IArticleRepository articleRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleDeleteCommandHandler> logger
 ) : ICommandHandler<ArticleDeleteCommand>
 {
@@ -194,17 +190,15 @@ public sealed class ArticleDeleteCommandHandler(
         ArticleDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article delete flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.DeleteArticle);
 
@@ -234,7 +228,7 @@ public sealed class ArticleDeleteCommandHandler(
             logger.LogInformation(
                 "Article delete flow completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.Guid);
+                actor.ActorGuid);
         }
     }
 }
@@ -249,11 +243,10 @@ public sealed record ArticleUpdateCommand(
 ) : ICommand;
 
 public sealed class ArticleUpdateCommandHandler(
-    ActorService actorService,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUser currentUser,
+    ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleUpdateCommandHandler> logger
 ) : ICommandHandler<ArticleUpdateCommand>
 {
@@ -262,17 +255,15 @@ public sealed class ArticleUpdateCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actorGuid = currentUser.UserGuid;
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article update flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actorGuid);
+                actor.ActorGuid);
         }
-
-        var actor = await actorService.GetAuthorizedActorByGuid(actorGuid, cancellationToken);
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -466,7 +457,7 @@ public sealed class ArticleUpdateCommandHandler(
             logger.LogInformation(
                 "Article update flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
                 article.Guid,
-                actor.Guid,
+                actor.ActorGuid,
                 article.Partitions.Count);
         }
     }
