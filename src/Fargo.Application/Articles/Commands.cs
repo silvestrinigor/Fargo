@@ -131,6 +131,7 @@ public sealed class ArticleDeleteCommandHandler(
 
         actor.ValidateHasAccess(article);
 
+        // TODO: move this validation to a domain service.
         var hasItems = await articleRepository.HasItemsAssociated(
             article.Guid,
             cancellationToken
@@ -236,14 +237,23 @@ public sealed class ArticleUpdateCommandHandler(
         }
 
         await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
+
         await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);
+
         await articleService.SetUpcA(article, command.Article.UpcA, cancellationToken);
+
         await articleService.SetUpcE(article, command.Article.UpcE, cancellationToken);
+
         await articleService.SetCode128(article, command.Article.Code128, cancellationToken);
+
         await articleService.SetCode39(article, command.Article.Code39, cancellationToken);
+
         await articleService.SetItf14(article, command.Article.Itf14, cancellationToken);
+
         await articleService.SetGs1128(article, command.Article.Gs1128, cancellationToken);
+
         await articleService.SetQrCode(article, command.Article.QrCode, cancellationToken);
+
         await articleService.SetDataMatrix(article, command.Article.DataMatrix, cancellationToken);
 
         if (command.Article.Partitions is { } requestedPartitions)

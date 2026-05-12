@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
-#region Single
+#region Guid
 
 public sealed record ArticleSingleQuery(
     Guid ArticleGuid,
@@ -34,7 +34,7 @@ public sealed class ArticleSingleQueryHandler(
         var article = await articleRepository.GetInfoByGuid(
             query.ArticleGuid,
             query.AsOfDateTime,
-            actor.PartitionAccesses,
+            childOfAnyOfThesePartitions: actor.PartitionAccesses,
             notChildOfAnyPartition: true,
             cancellationToken
         );
@@ -52,7 +52,7 @@ public sealed class ArticleSingleQueryHandler(
     }
 }
 
-#endregion Single
+#endregion Guid
 
 #region Barcode
 
@@ -85,7 +85,7 @@ public sealed class ArticleByBarcodeQueryHandler(
         var article = await articleRepository.GetInfoByBarcode(
             query.ArticleBarcode,
             query.AsOfDateTime,
-            actor.PartitionAccesses,
+            childOfAnyOfThesePartitions: actor.PartitionAccesses,
             notChildOfAnyPartition: true,
             cancellationToken
         );
@@ -126,6 +126,7 @@ public sealed class ArticlesQueryHandler(
     )
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
