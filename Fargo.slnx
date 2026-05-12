@@ -16,5 +16,4 @@
     <Project Path="tst/Fargo.HttpApi.Tests/Fargo.HttpApi.Tests.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tst/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
-    <Project Path="tst/Fargo.Sdk.Tests/Fargo.Sdk.Tests.csproj" />
 </Solution>

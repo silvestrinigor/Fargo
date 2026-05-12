@@ -1,6 +1,4 @@
 using Fargo.Application.Authentication;
-
-using Fargo.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 

@@ -41,8 +41,8 @@ public sealed class AuthorizationContextFactory(
                 .Select(p => p.PartitionGuid));
 
         var partitionAccesses = await partitionRepository.GetDescendantGuids(
-            partitionGuids,
-            includeRoot: true,
+            partitionGuids: partitionGuids,
+            includeRoots: true,
             cancellationToken);
 
         var permissions = new HashSet<ActionType>(

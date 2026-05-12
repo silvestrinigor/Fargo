@@ -1,5 +1,4 @@
 using Fargo.Application.Authentication;
-using Fargo.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
