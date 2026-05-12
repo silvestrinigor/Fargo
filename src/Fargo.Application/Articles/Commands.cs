@@ -42,8 +42,6 @@ public sealed class ArticleCreateCommandHandler(
             ShelfLife = command.Article.ShelfLife
         };
 
-        #region Metrics
-
         if (command.Article.Metrics is { } metrics)
         {
             article.Mass = metrics.Mass;
@@ -51,10 +49,6 @@ public sealed class ArticleCreateCommandHandler(
             article.LengthY = metrics.LengthY;
             article.LengthZ = metrics.LengthZ;
         }
-
-        #endregion Metrics
-
-        #region Barcode
 
         if (command.Article.Barcodes is { } barcodes)
         {
@@ -139,10 +133,6 @@ public sealed class ArticleCreateCommandHandler(
             article.DataMatrix = barcodes.DataMatrix;
         }
 
-        #endregion Barcode
-
-        #region Partition
-
         foreach (var partitionGuid in command.Article.Partitions ?? [])
         {
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
@@ -151,8 +141,6 @@ public sealed class ArticleCreateCommandHandler(
 
             article.Partitions.Add(partition);
         }
-
-        #endregion Partition
 
         articleRepository.Add(article);
 
