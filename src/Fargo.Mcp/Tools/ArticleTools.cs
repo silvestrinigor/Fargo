@@ -72,12 +72,11 @@ public sealed class ArticleTools(IArticleClient articles)
         var response = await articles.CreateAsync(
             new ArticleCreateRequest(
                 name,
-                description,
-                metrics,
-                null,
-                partitions,
-                null,
-                isActive));
+                Description: description,
+                Metrics: metrics,
+                ShelfLife: null,
+                Partitions: partitions,
+                IsActive: isActive));
         if (!response.IsSuccess)
         {
             return $"Error: {response.Error!.Detail}";
@@ -122,11 +121,20 @@ public sealed class ArticleTools(IArticleClient articles)
             new ArticleUpdateRequest(
                 name ?? current.Name,
                 description ?? current.Description,
-                newMetrics,
-                current.ShelfLife,
-                current.Partitions,
-                current.Barcodes,
-                current.IsActive));
+                Metrics: newMetrics,
+                ShelfLife: current.ShelfLife,
+                Partitions: current.Partitions,
+                Ean13: current.Ean13,
+                Ean8: current.Ean8,
+                UpcA: current.UpcA,
+                UpcE: current.UpcE,
+                Code128: current.Code128,
+                Code39: current.Code39,
+                Itf14: current.Itf14,
+                Gs1128: current.Gs1128,
+                QrCode: current.QrCode,
+                DataMatrix: current.DataMatrix,
+                IsActive: current.IsActive));
 
         if (!update.IsSuccess)
         {

@@ -36,7 +36,16 @@ internal static class ApiContractMappings
             article.Description,
             article.Metrics.ToInfo(),
             article.ShelfLife,
-            article.Barcodes.ToInfo(),
+            article.Ean13,
+            article.Ean8,
+            article.UpcA,
+            article.UpcE,
+            article.Code128,
+            article.Code39,
+            article.Itf14,
+            article.Gs1128,
+            article.QrCode,
+            article.DataMatrix,
             article.Partitions,
             article.IsActive,
             article.EditedByGuid);
@@ -50,7 +59,16 @@ internal static class ApiContractMappings
             request.Description.ToDescription(),
             request.ShelfLife,
             request.Metrics.ToApplicationDto(),
-            request.Barcodes.ToApplicationDto(),
+            request.Ean13.ToEan13ApplicationDto(),
+            request.Ean8.ToEan8ApplicationDto(),
+            request.UpcA.ToUpcAApplicationDto(),
+            request.UpcE.ToUpcEApplicationDto(),
+            request.Code128.ToCode128ApplicationDto(),
+            request.Code39.ToCode39ApplicationDto(),
+            request.Itf14.ToItf14ApplicationDto(),
+            request.Gs1128.ToGs1128ApplicationDto(),
+            request.QrCode.ToQrCodeApplicationDto(),
+            request.DataMatrix.ToDataMatrixApplicationDto(),
             request.Partitions,
             request.IsActive);
 
@@ -60,7 +78,16 @@ internal static class ApiContractMappings
             request.Description.ToDescription() ?? Description.Empty,
             request.ShelfLife,
             request.Metrics.ToApplicationDto() ?? new AppArticles.ArticleMetricsDto(),
-            request.Barcodes.ToApplicationDto() ?? new AppArticles.ArticleBarcodesDto(),
+            request.Ean13.ToEan13ApplicationDto(),
+            request.Ean8.ToEan8ApplicationDto(),
+            request.UpcA.ToUpcAApplicationDto(),
+            request.UpcE.ToUpcEApplicationDto(),
+            request.Code128.ToCode128ApplicationDto(),
+            request.Code39.ToCode39ApplicationDto(),
+            request.Itf14.ToItf14ApplicationDto(),
+            request.Gs1128.ToGs1128ApplicationDto(),
+            request.QrCode.ToQrCodeApplicationDto(),
+            request.DataMatrix.ToDataMatrixApplicationDto(),
             request.Partitions ?? [],
             request.IsActive);
 
@@ -260,33 +287,35 @@ internal static class ApiContractMappings
     private static Length? ToLength(this ContractArticles.LengthInfo? length)
         => length is null ? null : Length.From(length.Value, UnitParser.Default.Parse<LengthUnit>(length.Unit));
 
-    private static ContractArticles.ArticleBarcodesInfo ToInfo(this AppArticles.ArticleBarcodesDto barcodes)
-        => new(
-            barcodes.Ean13?.Code,
-            barcodes.Ean8?.Code,
-            barcodes.UpcA?.Code,
-            barcodes.UpcE?.Code,
-            barcodes.Code128?.Code,
-            barcodes.Code39?.Code,
-            barcodes.Itf14?.Code,
-            barcodes.Gs1128?.Code,
-            barcodes.QrCode?.Code,
-            barcodes.DataMatrix?.Code);
+    private static Ean13? ToEan13ApplicationDto(this string? barcode)
+        => barcode is null ? null : new Ean13(barcode);
 
-    private static AppArticles.ArticleBarcodesDto? ToApplicationDto(this ContractArticles.ArticleBarcodesInfo? barcodes)
-        => barcodes is null
-            ? null
-            : new AppArticles.ArticleBarcodesDto(
-                barcodes.Ean13 is null ? null : new Ean13(barcodes.Ean13),
-                barcodes.Ean8 is null ? null : new Ean8(barcodes.Ean8),
-                barcodes.UpcA is null ? null : new UpcA(barcodes.UpcA),
-                barcodes.UpcE is null ? null : new UpcE(barcodes.UpcE),
-                barcodes.Code128 is null ? null : new Code128(barcodes.Code128),
-                barcodes.Code39 is null ? null : new Code39(barcodes.Code39),
-                barcodes.Itf14 is null ? null : new Itf14(barcodes.Itf14),
-                barcodes.Gs1128 is null ? null : new Gs1128(barcodes.Gs1128),
-                barcodes.QrCode is null ? null : new QrCode(barcodes.QrCode),
-                barcodes.DataMatrix is null ? null : new DataMatrix(barcodes.DataMatrix));
+    private static Ean8? ToEan8ApplicationDto(this string? barcode)
+        => barcode is null ? null : new Ean8(barcode);
+
+    private static UpcA? ToUpcAApplicationDto(this string? barcode)
+        => barcode is null ? null : new UpcA(barcode);
+
+    private static UpcE? ToUpcEApplicationDto(this string? barcode)
+        => barcode is null ? null : new UpcE(barcode);
+
+    private static Code128? ToCode128ApplicationDto(this string? barcode)
+        => barcode is null ? null : new Code128(barcode);
+
+    private static Code39? ToCode39ApplicationDto(this string? barcode)
+        => barcode is null ? null : new Code39(barcode);
+
+    private static Itf14? ToItf14ApplicationDto(this string? barcode)
+        => barcode is null ? null : new Itf14(barcode);
+
+    private static Gs1128? ToGs1128ApplicationDto(this string? barcode)
+        => barcode is null ? null : new Gs1128(barcode);
+
+    private static QrCode? ToQrCodeApplicationDto(this string? barcode)
+        => barcode is null ? null : new QrCode(barcode);
+
+    private static DataMatrix? ToDataMatrixApplicationDto(this string? barcode)
+        => barcode is null ? null : new DataMatrix(barcode);
 
     private static Name? ToName(this string? value)
         => value is null ? null : new Name(value);

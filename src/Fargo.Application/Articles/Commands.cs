@@ -2,7 +2,6 @@ using Fargo.Application.Authentication;
 using Fargo.Application.Partitions;
 using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +16,7 @@ public sealed record ArticleCreateCommand(
 public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
+    ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreateCommandHandler> logger
@@ -50,88 +50,25 @@ public sealed class ArticleCreateCommandHandler(
             article.LengthZ = metrics.LengthZ;
         }
 
-        if (command.Article.Barcodes is { } barcodes)
-        {
-            if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Ean13);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
-            }
+        await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
 
-            article.Ean13 = barcodes.Ean13;
+        await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);
 
-            if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Ean8);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
-            }
+        await articleService.SetUpcA(article, command.Article.UpcA, cancellationToken);
 
-            article.Ean8 = barcodes.Ean8;
+        await articleService.SetUpcE(article, command.Article.UpcE, cancellationToken);
 
-            if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.UpcA);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
-            }
+        await articleService.SetCode128(article, command.Article.Code128, cancellationToken);
 
-            article.UpcA = barcodes.UpcA;
+        await articleService.SetCode39(article, command.Article.Code39, cancellationToken);
 
-            if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.UpcE);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
-            }
+        await articleService.SetItf14(article, command.Article.Itf14, cancellationToken);
 
-            article.UpcE = barcodes.UpcE;
+        await articleService.SetGs1128(article, command.Article.Gs1128, cancellationToken);
 
-            if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Code128);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
-            }
+        await articleService.SetQrCode(article, command.Article.QrCode, cancellationToken);
 
-            article.Code128 = barcodes.Code128;
-
-            if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Code39);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
-            }
-
-            article.Code39 = barcodes.Code39;
-
-            if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Itf14);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
-            }
-
-            article.Itf14 = barcodes.Itf14;
-
-            if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.Gs1128);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
-            }
-
-            article.Gs1128 = barcodes.Gs1128;
-
-            if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.QrCode);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
-            }
-
-            article.QrCode = barcodes.QrCode;
-
-            if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
-            {
-                logger.LogWarning("Article create flow rejected because barcode type {BarcodeType} is already in use.", BarcodeFormat.DataMatrix);
-                throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
-            }
-
-            article.DataMatrix = barcodes.DataMatrix;
-        }
+        await articleService.SetDataMatrix(article, command.Article.DataMatrix, cancellationToken);
 
         foreach (var partitionGuid in command.Article.Partitions ?? [])
         {
@@ -233,6 +170,7 @@ public sealed record ArticleUpdateCommand(
 public sealed class ArticleUpdateCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
+    ArticleService articleService,
     IUnitOfWork unitOfWork,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleUpdateCommandHandler> logger
@@ -297,118 +235,16 @@ public sealed class ArticleUpdateCommandHandler(
             }
         }
 
-        if (command.Article.Barcodes is { } barcodes)
-        {
-            if (barcodes.Ean13 != article.Ean13)
-            {
-                if (barcodes.Ean13 is { } ean13 && await articleRepository.ExistsByBarcode(ean13))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Ean13, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean13, ean13);
-                }
-
-                article.Ean13 = barcodes.Ean13;
-            }
-
-            if (barcodes.Ean8 != article.Ean8)
-            {
-                if (barcodes.Ean8 is { } ean8 && await articleRepository.ExistsByBarcode(ean8))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Ean8, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Ean8, ean8);
-                }
-
-                article.Ean8 = barcodes.Ean8;
-            }
-
-            if (barcodes.UpcA != article.UpcA)
-            {
-                if (barcodes.UpcA is { } upcA && await articleRepository.ExistsByBarcode(upcA))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.UpcA, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcA, upcA);
-                }
-
-                article.UpcA = barcodes.UpcA;
-            }
-
-            if (barcodes.UpcE != article.UpcE)
-            {
-                if (barcodes.UpcE is { } upcE && await articleRepository.ExistsByBarcode(upcE))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.UpcE, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.UpcE, upcE);
-                }
-
-                article.UpcE = barcodes.UpcE;
-            }
-
-            if (barcodes.Code128 != article.Code128)
-            {
-                if (barcodes.Code128 is { } code128 && await articleRepository.ExistsByBarcode(code128))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Code128, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code128, code128);
-                }
-
-                article.Code128 = barcodes.Code128;
-            }
-
-            if (barcodes.Code39 != article.Code39)
-            {
-                if (barcodes.Code39 is { } code39 && await articleRepository.ExistsByBarcode(code39))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Code39, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Code39, code39);
-                }
-
-                article.Code39 = barcodes.Code39;
-            }
-
-            if (barcodes.Itf14 != article.Itf14)
-            {
-                if (barcodes.Itf14 is { } itf14 && await articleRepository.ExistsByBarcode(itf14))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Itf14, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Itf14, itf14);
-                }
-
-                article.Itf14 = barcodes.Itf14;
-            }
-
-            if (barcodes.Gs1128 != article.Gs1128)
-            {
-                if (barcodes.Gs1128 is { } gs1128 && await articleRepository.ExistsByBarcode(gs1128))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.Gs1128, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.Gs1128, gs1128);
-                }
-
-                article.Gs1128 = barcodes.Gs1128;
-            }
-
-            if (barcodes.QrCode != article.QrCode)
-            {
-                if (barcodes.QrCode is { } qrCode && await articleRepository.ExistsByBarcode(qrCode))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.QrCode, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.QrCode, qrCode);
-                }
-
-                article.QrCode = barcodes.QrCode;
-            }
-
-            if (barcodes.DataMatrix != article.DataMatrix)
-            {
-                if (barcodes.DataMatrix is { } dataMatrix && await articleRepository.ExistsByBarcode(dataMatrix))
-                {
-                    logger.LogWarning("Article update flow rejected because barcode type {BarcodeType} is already in use for article {ArticleGuid}.", BarcodeFormat.DataMatrix, article.Guid);
-                    throw new ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat.DataMatrix, dataMatrix);
-                }
-
-                article.DataMatrix = barcodes.DataMatrix;
-            }
-        }
+        await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
+        await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);
+        await articleService.SetUpcA(article, command.Article.UpcA, cancellationToken);
+        await articleService.SetUpcE(article, command.Article.UpcE, cancellationToken);
+        await articleService.SetCode128(article, command.Article.Code128, cancellationToken);
+        await articleService.SetCode39(article, command.Article.Code39, cancellationToken);
+        await articleService.SetItf14(article, command.Article.Itf14, cancellationToken);
+        await articleService.SetGs1128(article, command.Article.Gs1128, cancellationToken);
+        await articleService.SetQrCode(article, command.Article.QrCode, cancellationToken);
+        await articleService.SetDataMatrix(article, command.Article.DataMatrix, cancellationToken);
 
         if (command.Article.Partitions is { } requestedPartitions)
         {
