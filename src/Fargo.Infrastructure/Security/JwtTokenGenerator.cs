@@ -1,4 +1,4 @@
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 
 using Fargo.Core.Tokens;
 using Fargo.Core.Users;

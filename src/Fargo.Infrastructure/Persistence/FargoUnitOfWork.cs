@@ -1,5 +1,5 @@
 using Fargo.Application;
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 

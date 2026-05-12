@@ -1,7 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Application.Authentication;
 using Fargo.Application.Events;
+using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.System;

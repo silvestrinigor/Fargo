@@ -1,4 +1,4 @@
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 using Fargo.Core;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Users;
@@ -58,6 +58,7 @@ internal static class ApiContractMappings
             new Name(request.Name),
             request.Description.ToDescription(),
             request.ShelfLife,
+            null,
             request.Metrics.ToApplicationDto(),
             request.Ean13.ToEan13ApplicationDto(),
             request.Ean8.ToEan8ApplicationDto(),
@@ -77,6 +78,7 @@ internal static class ApiContractMappings
             new Name(request.Name),
             request.Description.ToDescription() ?? Description.Empty,
             request.ShelfLife,
+            null,
             request.Metrics.ToApplicationDto() ?? new AppArticles.ArticleMetricsDto(),
             request.Ean13.ToEan13ApplicationDto(),
             request.Ean8.ToEan8ApplicationDto(),

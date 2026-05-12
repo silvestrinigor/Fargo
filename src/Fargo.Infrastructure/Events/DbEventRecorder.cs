@@ -1,5 +1,5 @@
-using Fargo.Application.Authentication;
 using Fargo.Application.Events;
+using Fargo.Application.Identity;
 using Fargo.Core.Events;
 using Fargo.Infrastructure.Persistence;
 

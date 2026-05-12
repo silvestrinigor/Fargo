@@ -1,5 +1,5 @@
 using Fargo.Application;
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 using Fargo.Application.Users;
 using Fargo.Core.Tokens;
 using Fargo.HttpApi.Contracts;

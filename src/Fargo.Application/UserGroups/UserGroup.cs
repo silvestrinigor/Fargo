@@ -1,4 +1,4 @@
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Core;
 using Fargo.Core.Partitions;
