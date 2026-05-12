@@ -174,6 +174,15 @@ public sealed class ItemContainer
     public Item Item { get; private init; }
 }
 
+public sealed class ItemBatch : Entity
+{
+    /// <summary>
+    /// Gets the date on which this batch was produced.
+    /// When <see langword="null"/>, the production date is unknown.
+    /// </summary>
+    public DateTimeOffset? ProductionDate { get; init; }
+}
+
 #endregion Entity
 
 #region Repositories
