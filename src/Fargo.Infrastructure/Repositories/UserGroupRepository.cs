@@ -1,7 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.UserGroups;
 using Fargo.Core.UserGroups;
-using Fargo.Core.Users;
+using Fargo.Core;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

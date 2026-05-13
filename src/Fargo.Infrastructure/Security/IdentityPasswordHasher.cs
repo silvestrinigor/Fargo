@@ -1,3 +1,4 @@
+using Fargo.Core;
 using Fargo.Core.Users;
 using Microsoft.AspNetCore.Identity;
 

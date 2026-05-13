@@ -289,3 +289,846 @@ public readonly struct Description : IEquatable<Description>
         }
     }
 }
+
+/// <summary>
+/// Represents a validated user identifier (NAMEID) in the domain.
+///
+/// A NAMEID is used as a unique textual identifier for a user and must
+/// follow a restricted set of allowed characters and formatting rules.
+/// Comparisons are case-insensitive.
+/// </summary>
+public readonly struct Nameid : IEquatable<Nameid>
+{
+    /// <summary>
+    /// Maximum allowed length for the identifier.
+    /// </summary>
+    public const int MaxLength = 100;
+
+    /// <summary>
+    /// Minimum allowed length for the identifier.
+    /// </summary>
+    public const int MinLength = 3;
+
+    private readonly string value;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Nameid"/> value object.
+    /// </summary>
+    /// <param name="value">The identifier string.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the value is invalid.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the value length is outside the allowed range.
+    /// </exception>
+    public Nameid(string value)
+    {
+        Validate(value);
+        this.value = value.ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Gets the underlying normalized string value.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the value object was not properly initialized.
+    /// This protects against the default struct state.
+    /// </exception>
+    public string Value
+        => value ?? throw new InvalidOperationException("Nameid not initialized.");
+
+    /// <summary>
+    /// Creates a new <see cref="Nameid"/> from a string.
+    /// </summary>
+    /// <param name="value">The string value.</param>
+    /// <returns>A validated <see cref="Nameid"/> instance.</returns>
+    public static Nameid FromString(string value)
+        => new(value);
+
+    /// <summary>
+    /// Creates a new validated <see cref="Nameid"/>.
+    /// </summary>
+    /// <param name="value">The identifier value.</param>
+    /// <returns>A validated <see cref="Nameid"/> instance.</returns>
+    public static Nameid NewNameid(string value)
+        => new(value);
+
+    /// <summary>
+    /// Returns the string representation of the identifier.
+    /// </summary>
+    public override string ToString()
+        => Value;
+
+    /// <summary>
+    /// Determines whether this instance and another <see cref="Nameid"/> are equal,
+    /// ignoring character casing.
+    /// </summary>
+    public bool Equals(Nameid other)
+        => string.Equals(value, other.value, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Determines whether this instance and a specified object are equal.
+    /// </summary>
+    public override bool Equals(object? obj)
+        => obj is Nameid other && Equals(other);
+
+    /// <summary>
+    /// Returns a hash code for this instance, using case-insensitive semantics.
+    /// </summary>
+    public override int GetHashCode()
+        => value is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(value);
+
+    /// <summary>
+    /// Determines whether two <see cref="Nameid"/> instances are equal.
+    /// </summary>
+    /// <param name="left">The first <see cref="Nameid"/> to compare.</param>
+    /// <param name="right">The second <see cref="Nameid"/> to compare.</param>
+    /// <returns>
+    /// <see langword="true"/> if both <see cref="Nameid"/> instances are equal;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool operator ==(Nameid left, Nameid right)
+        => left.Equals(right);
+
+    /// <summary>
+    /// Determines whether two <see cref="Nameid"/> instances are different.
+    /// </summary>
+    /// <param name="left">The first <see cref="Nameid"/> to compare.</param>
+    /// <param name="right">The second <see cref="Nameid"/> to compare.</param>
+    /// <returns>
+    /// <see langword="true"/> if both <see cref="Nameid"/> instances are different;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool operator !=(Nameid left, Nameid right)
+        => !left.Equals(right);
+
+    /// <summary>
+    /// Implicitly converts a <see cref="Nameid"/> to <see cref="string"/>.
+    /// </summary>
+    public static implicit operator string(Nameid nameid)
+        => nameid.Value;
+
+    /// <summary>
+    /// Explicitly converts a <see cref="string"/> to <see cref="Nameid"/>.
+    /// </summary>
+    public static explicit operator Nameid(string value)
+        => new(value);
+
+    /// <summary>
+    /// Validates the identifier value.
+    /// </summary>
+    /// <param name="value">The value to validate.</param>
+    private static void Validate(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(
+                "Nameid cannot be null, empty, or whitespace.",
+                nameof(value));
+        }
+
+        if (value.Length < MinLength || value.Length > MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value,
+                $"Nameid length must be between {MinLength} and {MaxLength} characters.");
+        }
+
+        if (value != value.Trim())
+        {
+            throw new ArgumentException(
+                "Nameid cannot start or end with whitespace.",
+                nameof(value));
+        }
+
+        if (value.Contains(' '))
+        {
+            throw new ArgumentException(
+                "Nameid cannot contain spaces.",
+                nameof(value));
+        }
+
+        if (!char.IsLetterOrDigit(value[0]))
+        {
+            throw new ArgumentException(
+                "Nameid must start with a letter or digit.",
+                nameof(value));
+        }
+
+        if (!char.IsLetterOrDigit(value[^1]))
+        {
+            throw new ArgumentException(
+                "Nameid must end with a letter or digit.",
+                nameof(value));
+        }
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            var current = value[i];
+            var isAllowed =
+                char.IsLetterOrDigit(current) ||
+                current == '.' ||
+                current == '_' ||
+                current == '-';
+
+            if (!isAllowed)
+            {
+                throw new ArgumentException(
+                    "Nameid can only contain letters, digits, '.', '_' and '-'.",
+                    nameof(value));
+            }
+
+            if (i > 0)
+            {
+                var previous = value[i - 1];
+                var currentIsSeparator = current == '.' || current == '_' || current == '-';
+                var previousIsSeparator = previous == '.' || previous == '_' || previous == '-';
+
+                if (currentIsSeparator && previousIsSeparator)
+                {
+                    throw new ArgumentException(
+                        "Nameid cannot contain consecutive special characters.",
+                        nameof(value));
+                }
+            }
+        }
+    }
+}
+
+/// <summary>
+/// Represents a validated first name value object used in the domain.
+///
+/// This value object guarantees that a first name:
+/// - is not null, empty, or whitespace
+/// - is within the allowed length range
+/// - contains only letters, spaces, or hyphens
+/// - does not start or end with spaces or hyphens
+/// - does not contain consecutive spaces or hyphens
+/// </summary>
+public readonly struct FirstName : IEquatable<FirstName>
+{
+    /// <summary>
+    /// Maximum allowed length for a first name.
+    /// </summary>
+    public const int MaxLength = 50;
+
+    /// <summary>
+    /// Minimum allowed length for a first name.
+    /// </summary>
+    public const int MinLength = 2;
+
+    private readonly string value;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FirstName"/> struct.
+    /// </summary>
+    /// <param name="value">The string value representing the first name.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the value is null, empty, or contains only whitespace.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the value length is outside the allowed range.
+    /// </exception>
+    public FirstName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(
+                "First name cannot be null, empty, or whitespace.",
+                nameof(value));
+        }
+
+        value = value.Trim();
+
+        if (value.Length < MinLength || value.Length > MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value,
+                $"First name length must be between {MinLength} and {MaxLength} characters.");
+        }
+
+        ValidateCharacters(value);
+
+        this.value = value;
+    }
+
+    /// <summary>
+    /// Gets the underlying string value of the first name.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the value object was not properly initialized.
+    /// </exception>
+    public string Value
+        => value ?? throw new InvalidOperationException("First name not initialized.");
+
+    /// <summary>
+    /// Creates a new <see cref="FirstName"/> from a string.
+    /// </summary>
+    /// <param name="value">The string to convert.</param>
+    /// <returns>A validated <see cref="FirstName"/> instance.</returns>
+    public static FirstName FromString(string value)
+        => new(value);
+
+    /// <summary>
+    /// Creates a new validated <see cref="FirstName"/>.
+    /// </summary>
+    /// <param name="value">The string value.</param>
+    /// <returns>A new <see cref="FirstName"/> instance.</returns>
+    public static FirstName NewFirstName(string value)
+        => new(value);
+
+    /// <summary>
+    /// Determines whether the current first name is equal to another first name.
+    /// </summary>
+    /// <param name="other">The other first name to compare.</param>
+    /// <returns>
+    /// <see langword="true"/> if both first names have the same value; otherwise, <see langword="false"/>.
+    /// </returns>
+    public bool Equals(FirstName other)
+        => string.Equals(value, other.value, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether the current first name is equal to the specified object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current first name.</param>
+    /// <returns>
+    /// <see langword="true"/> if the specified object is a <see cref="FirstName"/> with the same value;
+    /// otherwise, <see langword="false"/>.
+    /// </returns>
+    public override bool Equals(object? obj)
+        => obj is FirstName other && Equals(other);
+
+    /// <summary>
+    /// Returns a hash code for the current first name.
+    /// </summary>
+    /// <returns>A hash code based on the underlying value.</returns>
+    public override int GetHashCode()
+        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether two <see cref="FirstName"/> instances are equal.
+    /// </summary>
+    public static bool operator ==(FirstName left, FirstName right)
+        => left.Equals(right);
+
+    /// <summary>
+    /// Determines whether two <see cref="FirstName"/> instances are different.
+    /// </summary>
+    public static bool operator !=(FirstName left, FirstName right)
+        => !left.Equals(right);
+
+    /// <summary>
+    /// Returns the string representation of the first name.
+    /// </summary>
+    public override string ToString()
+        => Value;
+
+    /// <summary>
+    /// Implicitly converts a <see cref="FirstName"/> to its string representation.
+    /// </summary>
+    public static implicit operator string(FirstName firstName)
+        => firstName.Value;
+
+    /// <summary>
+    /// Explicitly converts a string to a <see cref="FirstName"/>.
+    /// </summary>
+    public static explicit operator FirstName(string value)
+        => new(value);
+
+    private static void ValidateCharacters(string value)
+    {
+        var previousWasSeparator = false;
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            var current = value[i];
+            var isSeparator = current == ' ' || current == '-';
+
+            if (char.IsLetter(current))
+            {
+                previousWasSeparator = false;
+                continue;
+            }
+
+            if (isSeparator)
+            {
+                if (i == 0 || i == value.Length - 1 || previousWasSeparator)
+                {
+                    throw new ArgumentException(
+                        "First name cannot start or end with a separator, or contain consecutive separators.",
+                        nameof(value));
+                }
+
+                previousWasSeparator = true;
+                continue;
+            }
+
+            throw new ArgumentException(
+                "First name can contain only letters, spaces, or hyphens.",
+                nameof(value));
+        }
+    }
+}
+
+/// <summary>
+/// Represents a validated last name value object used in the domain.
+///
+/// This value object guarantees that a last name:
+/// - is not null, empty, or whitespace
+/// - is within the allowed length range
+/// - contains only letters, spaces, or hyphens
+/// - does not start or end with separators
+/// - does not contain consecutive separators
+/// </summary>
+public readonly struct LastName : IEquatable<LastName>
+{
+    /// <summary>
+    /// Maximum allowed length for a last name.
+    /// </summary>
+    public const int MaxLength = 100;
+
+    /// <summary>
+    /// Minimum allowed length for a last name.
+    /// </summary>
+    public const int MinLength = 2;
+
+    private readonly string value;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LastName"/> struct.
+    /// </summary>
+    /// <param name="value">The string value representing the last name.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the value is null, empty, or whitespace.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the value length is outside the allowed range.
+    /// </exception>
+    public LastName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(
+                "Last name cannot be null, empty, or whitespace.",
+                nameof(value));
+        }
+
+        value = value.Trim();
+
+        if (value.Length < MinLength || value.Length > MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value,
+                $"Last name length must be between {MinLength} and {MaxLength} characters.");
+        }
+
+        ValidateCharacters(value);
+
+        this.value = value;
+    }
+
+    /// <summary>
+    /// Gets the underlying string value of the last name.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the value object was not properly initialized.
+    /// </exception>
+    public string Value
+        => value ?? throw new InvalidOperationException("LastName not initialized.");
+
+    /// <summary>
+    /// Creates a new <see cref="LastName"/> from a string.
+    /// </summary>
+    public static LastName FromString(string value)
+        => new(value);
+
+    /// <summary>
+    /// Creates a new validated <see cref="LastName"/>.
+    /// </summary>
+    public static LastName NewLastName(string value)
+        => new(value);
+
+    /// <summary>
+    /// Determines whether the current last name is equal to another last name.
+    /// </summary>
+    public bool Equals(LastName other)
+        => string.Equals(value, other.value, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether the current last name is equal to the specified object.
+    /// </summary>
+    public override bool Equals(object? obj)
+        => obj is LastName other && Equals(other);
+
+    /// <summary>
+    /// Returns a hash code for the current last name.
+    /// </summary>
+    public override int GetHashCode()
+        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether two <see cref="LastName"/> instances are equal.
+    /// </summary>
+    public static bool operator ==(LastName left, LastName right)
+        => left.Equals(right);
+
+    /// <summary>
+    /// Determines whether two <see cref="LastName"/> instances are different.
+    /// </summary>
+    public static bool operator !=(LastName left, LastName right)
+        => !left.Equals(right);
+
+    /// <summary>
+    /// Returns the string representation of the last name.
+    /// </summary>
+    public override string ToString()
+        => Value;
+
+    /// <summary>
+    /// Implicitly converts a <see cref="LastName"/> to its string representation.
+    /// </summary>
+    public static implicit operator string(LastName lastName)
+        => lastName.Value;
+
+    /// <summary>
+    /// Explicitly converts a string to a <see cref="LastName"/>.
+    /// </summary>
+    public static explicit operator LastName(string value)
+        => new(value);
+
+    private static void ValidateCharacters(string value)
+    {
+        var previousWasSeparator = false;
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            var current = value[i];
+            var isSeparator = current == ' ' || current == '-';
+
+            if (char.IsLetter(current))
+            {
+                previousWasSeparator = false;
+                continue;
+            }
+
+            if (isSeparator)
+            {
+                if (i == 0 || i == value.Length - 1 || previousWasSeparator)
+                {
+                    throw new ArgumentException(
+                        "Last name cannot start or end with a separator, or contain consecutive separators.",
+                        nameof(value));
+                }
+
+                previousWasSeparator = true;
+                continue;
+            }
+
+            throw new ArgumentException(
+                "Last name can contain only letters, spaces, or hyphens.",
+                nameof(value));
+        }
+    }
+}
+
+/// <summary>
+/// Represents a validated plaintext password in the domain.
+///
+/// This value object enforces minimum security rules for passwords
+/// before they are hashed and stored in the system.
+/// </summary>
+public readonly struct Password : IEquatable<Password>
+{
+    /// <summary>
+    /// Maximum allowed length for the password.
+    /// </summary>
+    public const int MaxLength = 512;
+
+    /// <summary>
+    /// Minimum allowed length for the password.
+    /// </summary>
+    public const int MinLength = 9;
+
+    private readonly string value;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Password"/> value object.
+    /// </summary>
+    /// <param name="value">The plaintext password.</param>
+    public Password(string value)
+    {
+        Validate(value);
+        this.value = value;
+    }
+
+    /// <summary>
+    /// Gets the underlying password string.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the password was not properly initialized.
+    /// This protects against the default struct state.
+    /// </exception>
+    public string Value
+        => value ?? throw new InvalidOperationException("Password value must be set.");
+
+    /// <summary>
+    /// Creates a new <see cref="Password"/> from a string.
+    /// </summary>
+    public static Password FromString(string value)
+        => new(value);
+
+    /// <summary>
+    /// Determines whether the current password is equal to another password.
+    /// </summary>
+    public bool Equals(Password other)
+        => string.Equals(value, other.value, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether the current password is equal to the specified object.
+    /// </summary>
+    public override bool Equals(object? obj)
+        => obj is Password other && Equals(other);
+
+    /// <summary>
+    /// Returns a hash code for the current password.
+    /// </summary>
+    public override int GetHashCode()
+        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether two <see cref="Password"/> instances are equal.
+    /// </summary>
+    public static bool operator ==(Password left, Password right)
+        => left.Equals(right);
+
+    /// <summary>
+    /// Determines whether two <see cref="Password"/> instances are different.
+    /// </summary>
+    public static bool operator !=(Password left, Password right)
+        => !left.Equals(right);
+
+    /// <summary>
+    /// Returns the string representation of the password.
+    /// </summary>
+    /// <remarks>
+    /// Use carefully, as this exposes the plaintext password.
+    /// </remarks>
+    public override string ToString()
+        => Value;
+
+    /// <summary>
+    /// Implicitly converts a <see cref="Password"/> to <see cref="string"/>.
+    /// </summary>
+    public static implicit operator string(Password password)
+        => password.Value;
+
+    /// <summary>
+    /// Explicitly converts a <see cref="string"/> to <see cref="Password"/>.
+    /// </summary>
+    public static explicit operator Password(string value)
+        => new(value);
+
+    /// <summary>
+    /// Validates the password value.
+    /// </summary>
+    private static void Validate(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(
+                "Password cannot be null, empty, or whitespace.",
+                nameof(value));
+        }
+
+        if (value.Length < MinLength || value.Length > MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value,
+                $"Password length must be between {MinLength} and {MaxLength} characters.");
+        }
+
+        if (value.Contains(' '))
+        {
+            throw new ArgumentException(
+                "Password cannot contain spaces.",
+                nameof(value));
+        }
+
+        bool hasLetter = false;
+        bool hasDigit = false;
+        bool hasSpecial = false;
+
+        foreach (var c in value)
+        {
+            if (char.IsLetter(c))
+            {
+                hasLetter = true;
+            }
+            else if (char.IsDigit(c))
+            {
+                hasDigit = true;
+            }
+            else
+            {
+                hasSpecial = true;
+            }
+        }
+
+        if (!hasLetter)
+        {
+            throw new ArgumentException(
+                "Password must contain at least one letter.",
+                nameof(value));
+        }
+
+        if (!hasDigit)
+        {
+            throw new ArgumentException(
+                "Password must contain at least one digit.",
+                nameof(value));
+        }
+
+        if (!hasSpecial)
+        {
+            throw new ArgumentException(
+                "Password must contain at least one special character.",
+                nameof(value));
+        }
+    }
+}
+
+/// <summary>
+/// Represents a hashed password stored in the system.
+///
+/// This value object guarantees that the stored value is a valid
+/// password hash produced by the hashing infrastructure.
+/// The plaintext password should never be persisted.
+/// </summary>
+public readonly struct PasswordHash : IEquatable<PasswordHash>
+{
+    /// <summary>
+    /// Minimum allowed length for the password hash.
+    /// </summary>
+    public const int MinLength = 50;
+
+    /// <summary>
+    /// Maximum allowed length for the password hash.
+    /// </summary>
+    public const int MaxLength = 512;
+
+    private readonly string value;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PasswordHash"/> value object.
+    /// </summary>
+    /// <param name="value">The hashed password value.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the value is null, empty, or contains invalid characters.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the value length is outside the allowed range.
+    /// </exception>
+    public PasswordHash(string value)
+    {
+        Validate(value);
+        this.value = value;
+    }
+
+    /// <summary>
+    /// Gets the underlying hash string.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the struct is not properly initialized.
+    /// </exception>
+    public string Value
+        => value ?? throw new InvalidOperationException("Password hash value must be set.");
+
+    /// <summary>
+    /// Creates a <see cref="PasswordHash"/> from the specified string.
+    /// </summary>
+    public static PasswordHash FromString(string value)
+        => new(value);
+
+    /// <summary>
+    /// Determines whether the current password hash is equal to another password hash.
+    /// </summary>
+    public bool Equals(PasswordHash other)
+        => string.Equals(value, other.value, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether the current password hash is equal to the specified object.
+    /// </summary>
+    public override bool Equals(object? obj)
+        => obj is PasswordHash other && Equals(other);
+
+    /// <summary>
+    /// Returns a hash code for the current password hash.
+    /// </summary>
+    public override int GetHashCode()
+        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+
+    /// <summary>
+    /// Determines whether two <see cref="PasswordHash"/> instances are equal.
+    /// </summary>
+    public static bool operator ==(PasswordHash left, PasswordHash right)
+        => left.Equals(right);
+
+    /// <summary>
+    /// Determines whether two <see cref="PasswordHash"/> instances are different.
+    /// </summary>
+    public static bool operator !=(PasswordHash left, PasswordHash right)
+        => !left.Equals(right);
+
+    /// <summary>
+    /// Returns the string representation of the password hash.
+    /// </summary>
+    public override string ToString()
+        => Value;
+
+    /// <summary>
+    /// Implicitly converts a <see cref="PasswordHash"/> to <see cref="string"/>.
+    /// </summary>
+    public static implicit operator string(PasswordHash passwordHash)
+        => passwordHash.Value;
+
+    /// <summary>
+    /// Explicitly converts a <see cref="string"/> to <see cref="PasswordHash"/>.
+    /// </summary>
+    public static explicit operator PasswordHash(string value)
+        => new(value);
+
+    /// <summary>
+    /// Validates the password hash value.
+    /// </summary>
+    private static void Validate(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(
+                "Password hash cannot be null or empty.",
+                nameof(value));
+        }
+
+        if (value.Length < MinLength || value.Length > MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value.Length,
+                $"Password hash length must be between {MinLength} and {MaxLength} characters.");
+        }
+
+        foreach (var c in value)
+        {
+            if (char.IsWhiteSpace(c))
+            {
+                throw new ArgumentException(
+                    "Password hash cannot contain whitespace.",
+                    nameof(value));
+            }
+        }
+    }
+}

@@ -1,4 +1,5 @@
 using Fargo.Application.Users;
+using Fargo.Core;
 using Fargo.Core.Tokens;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
