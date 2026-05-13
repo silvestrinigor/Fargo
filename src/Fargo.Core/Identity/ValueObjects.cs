@@ -1,4 +1,4 @@
-namespace Fargo.Core.Tokens;
+namespace Fargo.Core.Identity;
 
 /// <summary>
 /// Represents a security token used by the system.

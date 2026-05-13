@@ -1,5 +1,3 @@
-
-
 namespace Fargo.Core.Barcodes;
 
 #region Formats

@@ -1,4 +1,4 @@
-namespace Fargo.Core.Tokens;
+namespace Fargo.Core.Identity;
 
 /// <summary>
 /// Defines the contract for generating refresh tokens used
@@ -16,6 +16,7 @@ public interface IRefreshTokenGenerator
     /// <returns>A newly generated <see cref="Token"/>.</returns>
     Token Generate();
 }
+
 /// <summary>
 /// Defines the contract for hashing security tokens.
 ///

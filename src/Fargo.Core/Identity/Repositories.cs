@@ -1,4 +1,4 @@
-namespace Fargo.Core.Tokens;
+namespace Fargo.Core.Identity;
 
 /// <summary>
 /// Defines the repository contract for managing <see cref="RefreshToken"/> entities.

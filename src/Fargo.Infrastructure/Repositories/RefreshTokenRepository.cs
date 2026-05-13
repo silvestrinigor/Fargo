@@ -1,4 +1,4 @@
-using Fargo.Core.Tokens;
+using Fargo.Core.Identity;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

@@ -3,7 +3,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Core;
 using Fargo.Core.Partitions;
-using Fargo.Core.Tokens;
+using Fargo.Core.Identity;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;

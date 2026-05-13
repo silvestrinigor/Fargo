@@ -1,6 +1,6 @@
 using Fargo.Core.Partitions;
 
-namespace Fargo.Core.Actors;
+namespace Fargo.Core.Identity;
 
 /// <summary>
 /// Represents an actor responsible for performing operations within the system.

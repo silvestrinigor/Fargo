@@ -1,4 +1,4 @@
-namespace Fargo.Core.Tokens;
+namespace Fargo.Core.Identity;
 
 #region Entities
 

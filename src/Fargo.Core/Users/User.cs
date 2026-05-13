@@ -1,4 +1,4 @@
-using Fargo.Core.Actors;
+using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 
