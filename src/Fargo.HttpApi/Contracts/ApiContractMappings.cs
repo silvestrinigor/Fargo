@@ -5,7 +5,6 @@ using Fargo.Core.Users;
 using UnitsNet;
 using UnitsNet.Units;
 using AppArticles = Fargo.Application.Articles;
-using AppEvents = Fargo.Application.Events;
 using AppItems = Fargo.Application.Items;
 using AppPartitions = Fargo.Application.Partitions;
 using AppUserGroups = Fargo.Application.UserGroups;
@@ -13,8 +12,6 @@ using AppUsers = Fargo.Application.Users;
 using ContractActionType = Fargo.Sdk.Contracts.ActionType;
 using ContractArticles = Fargo.Sdk.Contracts.Articles;
 using ContractAuthentication = Fargo.Sdk.Contracts.Authentication;
-using ContractEntityType = Fargo.Sdk.Contracts.EntityType;
-using ContractEvents = Fargo.Sdk.Contracts.Events;
 using ContractItems = Fargo.Sdk.Contracts.Items;
 using ContractPartitions = Fargo.Sdk.Contracts.Partitions;
 using ContractPermissions = Fargo.Sdk.Contracts.Permissions;
@@ -22,8 +19,6 @@ using ContractUserGroups = Fargo.Sdk.Contracts.UserGroups;
 using ContractUsers = Fargo.Sdk.Contracts.Users;
 using DomainActionType = Fargo.Core.ActionType;
 using DomainBarcodeFormat = Fargo.Core.Barcodes.BarcodeFormat;
-using DomainEntityType = Fargo.Core.Events.EntityType;
-using DomainEventType = Fargo.Core.Events.EventType;
 
 namespace Fargo.HttpApi.Contracts;
 
@@ -211,24 +206,6 @@ internal static class ApiContractMappings
             result.IsAdmin,
             result.PermissionActions.Select(static action => (ContractActionType)(int)action).ToArray(),
             result.PartitionAccesses);
-
-    public static ContractEvents.EventInfo ToInfo(this AppEvents.EventInformation eventInformation)
-        => new(
-            eventInformation.Guid,
-            (ContractEvents.EventType)(int)eventInformation.EventType,
-            (ContractEntityType)(int)eventInformation.EntityType,
-            eventInformation.EntityGuid,
-            eventInformation.ActorGuid,
-            eventInformation.OccurredAt);
-
-    public static IReadOnlyCollection<ContractEvents.EventInfo> ToInfo(this IReadOnlyCollection<AppEvents.EventInformation> events)
-        => events.Select(static eventInformation => eventInformation.ToInfo()).ToArray();
-
-    public static DomainEntityType ToDomain(this ContractEntityType entityType)
-        => (DomainEntityType)(int)entityType;
-
-    public static DomainEventType ToDomain(this ContractEvents.EventType eventType)
-        => (DomainEventType)(int)eventType;
 
     private static DomainBarcodeFormat ToDomain(this ContractArticles.ArticleBarcodeType barcodeType)
         => barcodeType switch

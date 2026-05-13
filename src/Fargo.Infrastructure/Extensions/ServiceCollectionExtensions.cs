@@ -1,6 +1,5 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Application.Events;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
@@ -13,7 +12,6 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Tokens;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
@@ -106,8 +104,6 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
-            services.AddScoped<IEventQueryRepository, EventRepository>();
-
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
@@ -165,8 +161,6 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>();
             services.AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
-
-            services.AddScoped<IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>>, EventManyQueryHandler>();
         }
 
         private void AddDomainServices()
@@ -188,7 +182,6 @@ public static class ServiceCollectionExtensions
 
         private void AddPersistence()
         {
-            services.AddScoped<IEventRecorder, DbEventRecorder>();
             services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
         }
 

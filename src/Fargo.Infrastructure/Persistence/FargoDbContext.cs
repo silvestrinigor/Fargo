@@ -1,6 +1,5 @@
 using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.Core.Events;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.Tokens;
@@ -14,8 +13,6 @@ namespace Fargo.Infrastructure.Persistence;
 
 public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
-    public DbSet<Event> Events { get; set; }
-
     public DbSet<Article> Articles { get; set; }
 
     public DbSet<Item> Items { get; set; }
@@ -76,8 +73,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new EventConfiguration());
-
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
