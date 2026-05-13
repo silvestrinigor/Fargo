@@ -129,6 +129,8 @@ public sealed class ItemCreateCommandHandler(
 
         var article = await articleRepository.GetFoundByGuid(command.Item.ArticleGuid, cancellationToken);
 
+        actor.ValidateHasAccess(article);
+
         var item = new Item(article)
         {
             ProductionDate = command.Item.ProductionDate
