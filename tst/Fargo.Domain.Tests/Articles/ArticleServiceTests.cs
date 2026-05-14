@@ -1,5 +1,6 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Identity;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Articles;
@@ -29,7 +30,7 @@ public sealed class ArticleServiceTests
         var sut = new ArticleService(articleRepository);
         var current = CreateBarcode(barcodeKind, variant: 0);
 
-        WriteBarcode(article, barcodeKind, current);
+        await WriteBarcode(sut, article, barcodeKind, current);
 
         await InvokeSet(sut, article, barcodeKind, null);
 
@@ -44,7 +45,7 @@ public sealed class ArticleServiceTests
         var sut = new ArticleService(articleRepository);
         var current = CreateBarcode(barcodeKind, variant: 0);
 
-        WriteBarcode(article, barcodeKind, current);
+        await WriteBarcode(sut, article, barcodeKind, current);
         ConfigureExists(articleRepository, barcodeKind, current, returns: true);
 
         await InvokeSet(sut, article, barcodeKind, current);
@@ -61,7 +62,7 @@ public sealed class ArticleServiceTests
         var current = CreateBarcode(barcodeKind, variant: 0);
         var next = CreateBarcode(barcodeKind, variant: 1);
 
-        WriteBarcode(article, barcodeKind, current);
+        await WriteBarcode(sut, article, barcodeKind, current);
         ConfigureExists(articleRepository, barcodeKind, next, returns: true);
 
         var exception = await Assert.ThrowsAsync<ArticleBarcodeAlreadyInUseFargoDomainException>(
@@ -85,11 +86,13 @@ public sealed class ArticleServiceTests
     }
 
     private static Article CreateArticle()
-        => new()
-        {
-            Name = new Name("Test article"),
-            Description = new Description("Test description")
-        };
+    {
+        var article = new Article(new Name("Test article"), TestActor.Instance);
+
+        article.ChangeDescription(new Description("Test description"));
+
+        return article;
+    }
 
     private static async Task InvokeSet(
         ArticleService service,
@@ -97,37 +100,39 @@ public sealed class ArticleServiceTests
         string barcodeKind,
         object? value)
     {
+        article.StartEdit(TestActor.Instance);
+
         switch (barcodeKind)
         {
             case "Ean13":
-                await service.SetEan13(article, (Ean13?)value);
+                await service.SetEan13((Ean13?)value, article, TestActor.Instance);
                 return;
             case "Ean8":
-                await service.SetEan8(article, (Ean8?)value);
+                await service.SetEan8((Ean8?)value, article, TestActor.Instance);
                 return;
             case "UpcA":
-                await service.SetUpcA(article, (UpcA?)value);
+                await service.SetUpcA((UpcA?)value, article, TestActor.Instance);
                 return;
             case "UpcE":
-                await service.SetUpcE(article, (UpcE?)value);
+                await service.SetUpcE((UpcE?)value, article, TestActor.Instance);
                 return;
             case "Code128":
-                await service.SetCode128(article, (Code128?)value);
+                await service.SetCode128((Code128?)value, article, TestActor.Instance);
                 return;
             case "Code39":
-                await service.SetCode39(article, (Code39?)value);
+                await service.SetCode39((Code39?)value, article, TestActor.Instance);
                 return;
             case "Itf14":
-                await service.SetItf14(article, (Itf14?)value);
+                await service.SetItf14((Itf14?)value, article, TestActor.Instance);
                 return;
             case "Gs1128":
-                await service.SetGs1128(article, (Gs1128?)value);
+                await service.SetGs1128((Gs1128?)value, article, TestActor.Instance);
                 return;
             case "QrCode":
-                await service.SetQrCode(article, (QrCode?)value);
+                await service.SetQrCode((QrCode?)value, article, TestActor.Instance);
                 return;
             case "DataMatrix":
-                await service.SetDataMatrix(article, (DataMatrix?)value);
+                await service.SetDataMatrix((DataMatrix?)value, article, TestActor.Instance);
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");
@@ -150,39 +155,41 @@ public sealed class ArticleServiceTests
             _ => throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.")
         };
 
-    private static void WriteBarcode(Article article, string barcodeKind, object? value)
+    private static async Task WriteBarcode(ArticleService service, Article article, string barcodeKind, object? value)
     {
+        article.StartEdit(TestActor.Instance);
+
         switch (barcodeKind)
         {
             case "Ean13":
-                article.Ean13 = (Ean13?)value;
+                await service.SetEan13((Ean13?)value, article, TestActor.Instance);
                 return;
             case "Ean8":
-                article.Ean8 = (Ean8?)value;
+                await service.SetEan8((Ean8?)value, article, TestActor.Instance);
                 return;
             case "UpcA":
-                article.UpcA = (UpcA?)value;
+                await service.SetUpcA((UpcA?)value, article, TestActor.Instance);
                 return;
             case "UpcE":
-                article.UpcE = (UpcE?)value;
+                await service.SetUpcE((UpcE?)value, article, TestActor.Instance);
                 return;
             case "Code128":
-                article.Code128 = (Code128?)value;
+                await service.SetCode128((Code128?)value, article, TestActor.Instance);
                 return;
             case "Code39":
-                article.Code39 = (Code39?)value;
+                await service.SetCode39((Code39?)value, article, TestActor.Instance);
                 return;
             case "Itf14":
-                article.Itf14 = (Itf14?)value;
+                await service.SetItf14((Itf14?)value, article, TestActor.Instance);
                 return;
             case "Gs1128":
-                article.Gs1128 = (Gs1128?)value;
+                await service.SetGs1128((Gs1128?)value, article, TestActor.Instance);
                 return;
             case "QrCode":
-                article.QrCode = (QrCode?)value;
+                await service.SetQrCode((QrCode?)value, article, TestActor.Instance);
                 return;
             case "DataMatrix":
-                article.DataMatrix = (DataMatrix?)value;
+                await service.SetDataMatrix((DataMatrix?)value, article, TestActor.Instance);
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");
@@ -247,4 +254,20 @@ public sealed class ArticleServiceTests
             "DataMatrix" => new DataMatrix(variant == 0 ? "DM-123" : "DM-456"),
             _ => throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.")
         };
+
+    private static class TestActor
+    {
+        public static readonly Actor Instance = new(
+            Guid.NewGuid(),
+            isAdmin: false,
+            isActive: true,
+            permissionActions:
+            [
+                ActionType.CreateArticle,
+                ActionType.EditArticle,
+                ActionType.AddBarcode,
+                ActionType.RemoveBarcode
+            ],
+            partitionAccessesGuids: []);
+    }
 }

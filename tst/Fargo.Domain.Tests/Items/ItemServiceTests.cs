@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using NSubstitute;
 
@@ -109,14 +110,18 @@ public sealed class ItemServiceTests
         => new(CreateContainerArticle());
 
     private static Article CreateArticle()
-        => new()
-        {
-            Name = new Name("Test article")
-        };
+        => new(new Name("Test article"), TestActor.Instance);
 
     private static Article CreateContainerArticle()
-        => new(new ArticleContainer())
-        {
-            Name = new Name("Container article")
-        };
+        => new(new Name("Container article"), new ArticleContainer(null), TestActor.Instance);
+
+    private static class TestActor
+    {
+        public static readonly Actor Instance = new(
+            Guid.NewGuid(),
+            isAdmin: true,
+            isActive: true,
+            permissionActions: [],
+            partitionAccessesGuids: []);
+    }
 }

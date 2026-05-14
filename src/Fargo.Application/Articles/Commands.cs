@@ -35,42 +35,43 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var article = new Article
+        var articleActor = actor.ToActor();
+
+        var article = new Article(command.Article.Name, articleActor);
+
+        if (command.Article.Description is { } description)
         {
-            Name = command.Article.Name,
-            Description = command.Article.Description ?? Description.Empty,
-            ShelfLife = command.Article.ShelfLife,
-            Color = command.Article.Color
-        };
+            article.ChangeDescription(description);
+        }
+
+        article.SetShelfLife(command.Article.ShelfLife);
+
+        article.SetColor(command.Article.Color);
 
         if (command.Article.Metrics is { } metrics)
         {
-            article.Mass = metrics.Mass;
-            article.LengthX = metrics.LengthX;
-            article.LengthY = metrics.LengthY;
-            article.LengthZ = metrics.LengthZ;
+            article.SetMetrics(metrics.Mass, metrics.LengthX, metrics.LengthY, metrics.LengthZ);
         }
 
-        // TODO: Move this to inside a ArticleBarcodesDto to only edit the article barcodes if the dto is not null because the way it is can have some problems when more than one client tries to edit the entity at the same time.
-        await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
+        await articleService.SetEan13(command.Article.Ean13, article, articleActor, cancellationToken);
 
-        await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);
+        await articleService.SetEan8(command.Article.Ean8, article, articleActor, cancellationToken);
 
-        await articleService.SetUpcA(article, command.Article.UpcA, cancellationToken);
+        await articleService.SetUpcA(command.Article.UpcA, article, articleActor, cancellationToken);
 
-        await articleService.SetUpcE(article, command.Article.UpcE, cancellationToken);
+        await articleService.SetUpcE(command.Article.UpcE, article, articleActor, cancellationToken);
 
-        await articleService.SetCode128(article, command.Article.Code128, cancellationToken);
+        await articleService.SetCode128(command.Article.Code128, article, articleActor, cancellationToken);
 
-        await articleService.SetCode39(article, command.Article.Code39, cancellationToken);
+        await articleService.SetCode39(command.Article.Code39, article, articleActor, cancellationToken);
 
-        await articleService.SetItf14(article, command.Article.Itf14, cancellationToken);
+        await articleService.SetItf14(command.Article.Itf14, article, articleActor, cancellationToken);
 
-        await articleService.SetGs1128(article, command.Article.Gs1128, cancellationToken);
+        await articleService.SetGs1128(command.Article.Gs1128, article, articleActor, cancellationToken);
 
-        await articleService.SetQrCode(article, command.Article.QrCode, cancellationToken);
+        await articleService.SetQrCode(command.Article.QrCode, article, articleActor, cancellationToken);
 
-        await articleService.SetDataMatrix(article, command.Article.DataMatrix, cancellationToken);
+        await articleService.SetDataMatrix(command.Article.DataMatrix, article, articleActor, cancellationToken);
 
         foreach (var partitionGuid in command.Article.Partitions ?? [])
         {
@@ -78,7 +79,12 @@ public sealed class ArticleCreateCommandHandler(
 
             actor.ValidateHasPartitionAccess(partition.Guid);
 
-            article.Partitions.Add(partition);
+            article.AddPartition(partition);
+        }
+
+        if (command.Article.IsActive == false)
+        {
+            article.Deactivate();
         }
 
         articleRepository.Add(article);
@@ -199,70 +205,48 @@ public sealed class ArticleUpdateCommandHandler(
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
         actor.ValidateHasAccess(article);
+        var articleActor = actor.ToActor();
+        article.StartEdit(articleActor);
 
-        if (article.Name != command.Article.Name)
-        {
-            article.Name = command.Article.Name;
-        }
-
-        if (article.Description != command.Article.Description)
-        {
-            article.Description = command.Article.Description;
-        }
-
-        if (article.ShelfLife != command.Article.ShelfLife)
-        {
-            article.ShelfLife = command.Article.ShelfLife;
-        }
-
-        if (article.Color != command.Article.Color)
-        {
-            article.Color = command.Article.Color;
-        }
+        article.Rename(command.Article.Name);
+        article.ChangeDescription(command.Article.Description);
+        article.SetShelfLife(command.Article.ShelfLife);
+        article.SetColor(command.Article.Color);
 
         if (command.Article.Metrics is { } metrics)
         {
-            if (!article.Mass.Equals(metrics.Mass))
-            {
-                article.Mass = metrics.Mass;
-            }
+            article.SetMetrics(metrics.Mass, metrics.LengthX, metrics.LengthY, metrics.LengthZ);
+        }
 
-            if (!article.LengthX.Equals(metrics.LengthX))
-            {
-                article.LengthX = metrics.LengthX;
-            }
-
-            if (!article.LengthY.Equals(metrics.LengthY))
-            {
-                article.LengthY = metrics.LengthY;
-            }
-
-            if (!article.LengthZ.Equals(metrics.LengthZ))
-            {
-                article.LengthZ = metrics.LengthZ;
-            }
+        if (command.Article.IsActive)
+        {
+            article.Activate();
+        }
+        else
+        {
+            article.Deactivate();
         }
 
         // TODO: Move this to inside a ArticleBarcodesDto to only edit the article barcodes if the dto is not null because the way it is can have some problems when more than one client tries to edit the entity at the same time.
-        await articleService.SetEan13(article, command.Article.Ean13, cancellationToken);
+        await articleService.SetEan13(command.Article.Ean13, article, articleActor, cancellationToken);
 
-        await articleService.SetEan8(article, command.Article.Ean8, cancellationToken);
+        await articleService.SetEan8(command.Article.Ean8, article, articleActor, cancellationToken);
 
-        await articleService.SetUpcA(article, command.Article.UpcA, cancellationToken);
+        await articleService.SetUpcA(command.Article.UpcA, article, articleActor, cancellationToken);
 
-        await articleService.SetUpcE(article, command.Article.UpcE, cancellationToken);
+        await articleService.SetUpcE(command.Article.UpcE, article, articleActor, cancellationToken);
 
-        await articleService.SetCode128(article, command.Article.Code128, cancellationToken);
+        await articleService.SetCode128(command.Article.Code128, article, articleActor, cancellationToken);
 
-        await articleService.SetCode39(article, command.Article.Code39, cancellationToken);
+        await articleService.SetCode39(command.Article.Code39, article, articleActor, cancellationToken);
 
-        await articleService.SetItf14(article, command.Article.Itf14, cancellationToken);
+        await articleService.SetItf14(command.Article.Itf14, article, articleActor, cancellationToken);
 
-        await articleService.SetGs1128(article, command.Article.Gs1128, cancellationToken);
+        await articleService.SetGs1128(command.Article.Gs1128, article, articleActor, cancellationToken);
 
-        await articleService.SetQrCode(article, command.Article.QrCode, cancellationToken);
+        await articleService.SetQrCode(command.Article.QrCode, article, articleActor, cancellationToken);
 
-        await articleService.SetDataMatrix(article, command.Article.DataMatrix, cancellationToken);
+        await articleService.SetDataMatrix(command.Article.DataMatrix, article, articleActor, cancellationToken);
 
         if (command.Article.Partitions is { } requestedPartitions)
         {
@@ -275,9 +259,7 @@ public sealed class ArticleUpdateCommandHandler(
 
                 var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                article.Partitions.Add(partition);
+                article.AddPartition(partition);
             }
 
             var partitionsToRemove = article.Partitions
@@ -286,9 +268,7 @@ public sealed class ArticleUpdateCommandHandler(
 
             foreach (var partition in partitionsToRemove)
             {
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                article.Partitions.Remove(partition);
+                article.RemovePartition(partition);
             }
         }
 

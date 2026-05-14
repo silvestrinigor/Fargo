@@ -3,6 +3,7 @@ using Fargo.Application.Articles;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
@@ -20,11 +21,9 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new Article { Name = new Name("Public article") };
-        var firstPartitionEntity = new Article { Name = new Name("First article") };
-        firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new Article { Name = new Name("Second article") };
-        secondPartitionEntity.Partitions.Add(secondPartition);
+        var publicEntity = CreateArticle("Public article");
+        var firstPartitionEntity = CreateArticle("First article", partitions: [firstPartition]);
+        var secondPartitionEntity = CreateArticle("Second article", partitions: [secondPartition]);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
@@ -46,14 +45,13 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new Article { Name = new Name("Public article") };
-        publicEntity.Code128 = new Code128("PUBLIC-123");
-        var firstPartitionEntity = new Article { Name = new Name("First article") };
-        firstPartitionEntity.Ean13 = new Ean13("7891234567895");
-        firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new Article { Name = new Name("Second article") };
-        secondPartitionEntity.Ean13 = new Ean13("7891234567896");
-        secondPartitionEntity.Partitions.Add(secondPartition);
+        var articleService = new ArticleService(new ArticleRepository(context));
+        var publicEntity = CreateArticle("Public article");
+        var firstPartitionEntity = CreateArticle("First article", partitions: [firstPartition]);
+        var secondPartitionEntity = CreateArticle("Second article", partitions: [secondPartition]);
+        await articleService.SetCode128(new Code128("PUBLIC-123"), publicEntity, TestActor.Instance);
+        await articleService.SetEan13(new Ean13("7891234567895"), firstPartitionEntity, TestActor.Instance);
+        await articleService.SetEan13(new Ean13("7891234567896"), secondPartitionEntity, TestActor.Instance);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
@@ -82,7 +80,7 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var article = new Article { Name = new Name("Article") };
+        var article = CreateArticle("Article");
         var publicEntity = new Item(article);
         var firstPartitionEntity = new Item(article);
         firstPartitionEntity.Partitions.Add(firstPartition);
@@ -158,6 +156,30 @@ public sealed class PartitionedRepositoryFilterTests
     }
 
     private static readonly Pagination AllRows = new(Page.FirstPage, Limit.MaxLimit);
+
+    private static Article CreateArticle(
+        string name,
+        IReadOnlyCollection<Partition>? partitions = null)
+    {
+        var article = new Article(new Name(name), TestActor.Instance);
+
+        foreach (var partition in partitions ?? [])
+        {
+            article.AddPartition(partition);
+        }
+
+        return article;
+    }
+
+    private static class TestActor
+    {
+        public static readonly Actor Instance = new(
+            Guid.NewGuid(),
+            isAdmin: true,
+            isActive: true,
+            permissionActions: [],
+            partitionAccessesGuids: []);
+    }
 
     private static async Task AssertFilterCombinations<T>(
         Func<IReadOnlyCollection<Guid>?, bool?, Task<IReadOnlyCollection<T>>> query,

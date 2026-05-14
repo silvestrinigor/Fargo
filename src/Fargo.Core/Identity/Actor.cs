@@ -10,106 +10,49 @@ namespace Fargo.Core.Identity;
 /// Authorization is evaluated against the actor's permissions and partition
 /// access, while auditing is handled separately by the infrastructure layer.
 /// </remarks>
-public interface IActor
+public sealed class Actor
 {
+    public Actor(
+        Guid guid,
+        bool isAdmin,
+        bool isActive,
+        IReadOnlyCollection<ActionType> permissionActions,
+        IReadOnlyCollection<Guid> partitionAccessesGuids)
+    {
+        ArgumentNullException.ThrowIfNull(permissionActions);
+        ArgumentNullException.ThrowIfNull(partitionAccessesGuids);
+
+        Guid = guid;
+        IsAdmin = isAdmin;
+        IsActive = isActive;
+        PermissionActions = permissionActions;
+        PartitionAccessesGuids = partitionAccessesGuids;
+    }
+
     /// <summary>
     /// Gets the unique identifier of the actor.
     /// </summary>
-    /// <value>
-    /// A <see cref="Guid"/> that uniquely identifies the actor instance.
-    /// </value>
-    Guid Guid { get; }
+    public Guid Guid { get; }
 
     /// <summary>
     /// Gets a value indicating whether the actor has administrative privileges.
     /// </summary>
-    /// <value>
-    /// <c>true</c> if the actor is an administrator; otherwise, <c>false</c>.
-    /// </value>
-    bool IsAdmin { get; }
+    public bool IsAdmin { get; }
 
     /// <summary>
     /// Gets a value indicating whether the actor is active.
     /// </summary>
-    /// <value>
-    /// <c>true</c> if the actor is active and allowed to perform actions; otherwise, <c>false</c>.
-    /// </value>
-    bool IsActive { get; }
+    public bool IsActive { get; }
 
     /// <summary>
     /// Gets the set of actions the actor is permitted to perform.
     /// </summary>
-    /// <value>
-    /// A read-only collection of <see cref="ActionType"/> representing allowed operations.
-    /// </value>
-    IReadOnlyCollection<ActionType> PermissionActions { get; }
+    public IReadOnlyCollection<ActionType> PermissionActions { get; }
 
     /// <summary>
     /// Gets the set of partitions the actor has access to.
     /// </summary>
-    /// <value>
-    /// A read-only collection of partition identifiers (<see cref="Guid"/>).
-    /// </value>
-    IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
-
-    /// <summary>
-    /// Determines whether the actor has access to a specific partition.
-    /// </summary>
-    /// <param name="partitionGuid">The unique identifier of the partition.</param>
-    /// <returns>
-    /// <c>true</c> if the actor has access to the specified partition; otherwise, <c>false</c>.
-    /// </returns>
-    bool HasPartitionAccess(Guid partitionGuid);
-
-    /// <summary>
-    /// Determines whether the actor has permission to perform a specific action.
-    /// </summary>
-    /// <param name="action">The action to evaluate.</param>
-    /// <returns>
-    /// <c>true</c> if the actor has permission for the specified action; otherwise, <c>false</c>.
-    /// </returns>
-    bool HasActionPermission(ActionType action);
-}
-
-/// <summary>
-/// Provides a base implementation for <see cref="IActor"/>.
-/// </summary>
-/// <remarks>
-/// The <see cref="Actor"/> class defines common authorization behavior shared by
-/// user-backed actor types, including permission and partition access evaluation.
-///
-/// Authorization rules follow a hierarchical model:
-/// <list type="number">
-/// <item><description><b>Administrative actors</b> have unrestricted access within the domain</description></item>
-/// <item><description>All other actors are evaluated based on their assigned permissions and partition access</description></item>
-/// </list>
-/// </remarks>
-public abstract class Actor : IActor
-{
-    /// <summary>
-    /// Gets the unique identifier of the actor.
-    /// </summary>
-    public abstract Guid Guid { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the actor has administrative privileges.
-    /// </summary>
-    public abstract bool IsAdmin { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the actor is active.
-    /// </summary>
-    public abstract bool IsActive { get; }
-
-    /// <summary>
-    /// Gets the set of actions the actor is permitted to perform.
-    /// </summary>
-    public abstract IReadOnlyCollection<ActionType> PermissionActions { get; }
-
-    /// <summary>
-    /// Gets the set of partitions the actor has access to.
-    /// </summary>
-    public abstract IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
+    public IReadOnlyCollection<Guid> PartitionAccessesGuids { get; }
 
     /// <summary>
     /// Determines whether the actor has permission to perform a specific action.

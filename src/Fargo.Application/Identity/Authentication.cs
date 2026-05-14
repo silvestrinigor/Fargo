@@ -230,6 +230,14 @@ public sealed class DefaultAdminOptions
 /// </remarks>
 public static class AuthorizationContextExtensions
 {
+    public static Actor ToActor(this IAuthorizationContext context)
+        => new(
+            context.ActorGuid,
+            context.IsAdmin,
+            context.IsAuthenticated,
+            context.PermissionActions,
+            context.PartitionAccesses);
+
     extension(IAuthorizationContext context)
     {
         /// <summary>
@@ -305,4 +313,3 @@ public static class AuthorizationContextExtensions
 }
 
 #endregion Authorization Helpers
-

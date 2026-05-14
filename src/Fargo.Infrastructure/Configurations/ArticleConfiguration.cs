@@ -38,6 +38,10 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(x => x.EditedByGuid);
 
+        builder.Property(x => x.ModificationTypes)
+            .HasConversion<int>()
+            .HasDefaultValue(ArticleModifiedType.None);
+
         builder.OwnsOne(x => x.Container, container =>
         {
             container.ToTable("ArticleContainers");
