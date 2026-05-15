@@ -4,21 +4,19 @@ using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
+using System.Drawing;
 
 namespace Fargo.Application.Articles;
 
 #region Create
 
 public sealed record ArticleCreateCommand(
-    ArticleCreateDto Article
+    Name Name
 ) : ICommand<Guid>;
 
 public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
-    IPartitionRepository partitionRepository,
-    ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    IUnitOfWork unitOfWork,
     ILogger<ArticleCreateCommandHandler> logger
 ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
@@ -35,69 +33,18 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var articleActor = actor.ToActor();
+        var article = new Article(command.Name);
 
-        var article = new Article(command.Article.Name, articleActor);
-
-        if (command.Article.Description is { } description)
-        {
-            article.ChangeDescription(description);
-        }
-
-        article.SetShelfLife(command.Article.ShelfLife);
-
-        article.SetColor(command.Article.Color);
-
-        if (command.Article.Metrics is { } metrics)
-        {
-            article.SetMetrics(metrics.Mass, metrics.LengthX, metrics.LengthY, metrics.LengthZ);
-        }
-
-        await articleService.SetEan13(command.Article.Ean13, article, articleActor, cancellationToken);
-
-        await articleService.SetEan8(command.Article.Ean8, article, articleActor, cancellationToken);
-
-        await articleService.SetUpcA(command.Article.UpcA, article, articleActor, cancellationToken);
-
-        await articleService.SetUpcE(command.Article.UpcE, article, articleActor, cancellationToken);
-
-        await articleService.SetCode128(command.Article.Code128, article, articleActor, cancellationToken);
-
-        await articleService.SetCode39(command.Article.Code39, article, articleActor, cancellationToken);
-
-        await articleService.SetItf14(command.Article.Itf14, article, articleActor, cancellationToken);
-
-        await articleService.SetGs1128(command.Article.Gs1128, article, articleActor, cancellationToken);
-
-        await articleService.SetQrCode(command.Article.QrCode, article, articleActor, cancellationToken);
-
-        await articleService.SetDataMatrix(command.Article.DataMatrix, article, articleActor, cancellationToken);
-
-        foreach (var partitionGuid in command.Article.Partitions ?? [])
-        {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            article.AddPartition(partition);
-        }
-
-        if (command.Article.IsActive == false)
-        {
-            article.Deactivate();
-        }
+        article.MarkAsEditedBy(actor.ActorGuid);
 
         articleRepository.Add(article);
-
-        await unitOfWork.SaveChanges(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Article create flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                "Article create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid,
-                article.Partitions.Count);
+                actor.ActorGuid);
         }
 
         return article.Guid;
@@ -105,6 +52,365 @@ public sealed class ArticleCreateCommandHandler(
 }
 
 #endregion Create
+
+#region General
+
+public sealed record ArticleRenameCommand(
+    Guid ArticleGuid,
+    Name Name
+) : ICommand;
+
+public sealed class ArticleRenameCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleRenameCommand>
+{
+    public async Task Handle(
+        ArticleRenameCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.Rename(command.Name);
+    }
+}
+
+public sealed record ArticleChangeDescriptionCommand(
+    Guid ArticleGuid,
+    Description Description
+) : ICommand;
+
+public sealed class ArticleChangeDescriptionCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleChangeDescriptionCommand>
+{
+    public async Task Handle(
+        ArticleChangeDescriptionCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.ChangeDescription(command.Description);
+    }
+}
+
+public sealed record ArticleSetShelfLifeCommand(
+    Guid ArticleGuid,
+    TimeSpan? ShelfLife
+) : ICommand;
+
+public sealed class ArticleSetShelfLifeCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleSetShelfLifeCommand>
+{
+    public async Task Handle(
+        ArticleSetShelfLifeCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.SetShelfLife(command.ShelfLife);
+    }
+}
+
+public sealed record ArticleSetColorCommand(
+    Guid ArticleGuid,
+    Color? Color
+) : ICommand;
+
+public sealed class ArticleSetColorCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleSetColorCommand>
+{
+    public async Task Handle(
+        ArticleSetColorCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.SetColor(command.Color);
+    }
+}
+
+public sealed record ArticleActivateCommand(
+    Guid ArticleGuid
+) : ICommand;
+
+public sealed class ArticleActivateCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleActivateCommand>
+{
+    public async Task Handle(
+        ArticleActivateCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.Activate();
+    }
+}
+
+public sealed record ArticleDeactivateCommand(
+    Guid ArticleGuid
+) : ICommand;
+
+public sealed class ArticleDeactivateCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleDeactivateCommand>
+{
+    public async Task Handle(
+        ArticleDeactivateCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.Deactivate();
+    }
+}
+
+#endregion General
+
+#region Metrics
+
+public sealed record ArticleSetMetricsCommand(
+    Guid ArticleGuid,
+    ArticleMetricsDto Metrics
+) : ICommand;
+
+public sealed class ArticleSetMetricsCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleSetMetricsCommand>
+{
+    public async Task Handle(
+        ArticleSetMetricsCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        article.SetMetrics(
+            command.Metrics.Mass,
+            command.Metrics.LengthX,
+            command.Metrics.LengthY,
+            command.Metrics.LengthZ);
+    }
+}
+
+#endregion Metrics
+
+#region Barcodes
+
+public sealed record ArticleSetBarcodesCommand(
+    Guid ArticleGuid,
+    ArticleBarcodesDto Barcodes
+) : ICommand;
+
+public sealed class ArticleSetBarcodesCommandHandler(
+    IArticleRepository articleRepository,
+    ArticleService articleService,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleSetBarcodesCommand>
+{
+    public async Task Handle(
+        ArticleSetBarcodesCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        ValidateBarcodePermissions(actor, article.Ean13, command.Barcodes.Ean13);
+
+        ValidateBarcodePermissions(actor, article.Ean8, command.Barcodes.Ean8);
+
+        ValidateBarcodePermissions(actor, article.UpcA, command.Barcodes.UpcA);
+
+        ValidateBarcodePermissions(actor, article.UpcE, command.Barcodes.UpcE);
+
+        ValidateBarcodePermissions(actor, article.Code128, command.Barcodes.Code128);
+
+        ValidateBarcodePermissions(actor, article.Code39, command.Barcodes.Code39);
+
+        ValidateBarcodePermissions(actor, article.Itf14, command.Barcodes.Itf14);
+
+        ValidateBarcodePermissions(actor, article.Gs1128, command.Barcodes.Gs1128);
+
+        ValidateBarcodePermissions(actor, article.QrCode, command.Barcodes.QrCode);
+
+        ValidateBarcodePermissions(actor, article.DataMatrix, command.Barcodes.DataMatrix);
+
+        await articleService.SetEan13(command.Barcodes.Ean13, article, cancellationToken);
+
+        await articleService.SetEan8(command.Barcodes.Ean8, article, cancellationToken);
+
+        await articleService.SetUpcA(command.Barcodes.UpcA, article, cancellationToken);
+
+        await articleService.SetUpcE(command.Barcodes.UpcE, article, cancellationToken);
+
+        await articleService.SetCode128(command.Barcodes.Code128, article, cancellationToken);
+
+        await articleService.SetCode39(command.Barcodes.Code39, article, cancellationToken);
+
+        await articleService.SetItf14(command.Barcodes.Itf14, article, cancellationToken);
+
+        await articleService.SetGs1128(command.Barcodes.Gs1128, article, cancellationToken);
+
+        await articleService.SetQrCode(command.Barcodes.QrCode, article, cancellationToken);
+
+        await articleService.SetDataMatrix(command.Barcodes.DataMatrix, article, cancellationToken);
+    }
+
+    private static void ValidateBarcodePermissions<TBarcode>(
+        IAuthorizationContext actor,
+        TBarcode? current,
+        TBarcode? requested)
+        where TBarcode : struct, IEquatable<TBarcode>
+    {
+        if (EqualityComparer<TBarcode?>.Default.Equals(current, requested))
+        {
+            return;
+        }
+
+        if (current is null && requested is not null)
+        {
+            actor.ValidateHasPermission(ActionType.AddBarcode);
+        }
+        else if (current is not null && requested is null)
+        {
+            actor.ValidateHasPermission(ActionType.RemoveBarcode);
+        }
+        else
+        {
+            actor.ValidateHasPermission(ActionType.AddBarcode);
+            actor.ValidateHasPermission(ActionType.RemoveBarcode);
+        }
+    }
+}
+
+#endregion Barcodes
+
+#region Partitions
+
+public sealed record ArticleSetPartitionsCommand(
+    Guid ArticleGuid,
+    IReadOnlyCollection<Guid> PartitionGuids
+) : ICommand;
+
+public sealed class ArticleSetPartitionsCommandHandler(
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ArticleSetPartitionsCommand>
+{
+    public async Task Handle(
+        ArticleSetPartitionsCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        article.StartEdit(actor.ToActor());
+
+        foreach (var partitionGuid in command.PartitionGuids)
+        {
+            if (article.Partitions.Any(p => p.Guid == partitionGuid))
+            {
+                continue;
+            }
+
+            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
+            actor.ValidateHasPartitionAccess(partition.Guid);
+
+            article.AddPartition(partition);
+        }
+
+        var partitionsToRemove = article.Partitions
+            .Where(p => !command.PartitionGuids.Contains(p.Guid))
+            .ToList();
+
+        foreach (var partition in partitionsToRemove)
+        {
+            actor.ValidateHasPartitionAccess(partition.Guid);
+
+            article.RemovePartition(partition);
+        }
+    }
+}
+
+#endregion Partitions
 
 #region Delete
 
@@ -114,7 +420,6 @@ public sealed record ArticleDeleteCommand(
 
 public sealed class ArticleDeleteCommandHandler(
     IArticleRepository articleRepository,
-    IUnitOfWork unitOfWork,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleDeleteCommandHandler> logger
 ) : ICommandHandler<ArticleDeleteCommand>
@@ -139,7 +444,6 @@ public sealed class ArticleDeleteCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        // TODO: move this validation to a domain service.
         var hasItems = await articleRepository.HasItemsAssociated(
             article.Guid,
             cancellationToken
@@ -155,12 +459,10 @@ public sealed class ArticleDeleteCommandHandler(
 
         articleRepository.Remove(article);
 
-        await unitOfWork.SaveChanges(cancellationToken);
-
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Article delete flow completed for article {ArticleGuid} by actor {ActorGuid}.",
+                "Article delete mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
                 actor.ActorGuid);
         }
@@ -168,121 +470,3 @@ public sealed class ArticleDeleteCommandHandler(
 }
 
 #endregion Delete
-
-#region Update
-
-public sealed record ArticleUpdateCommand(
-    Guid ArticleGuid,
-    ArticleUpdateDto Article
-) : ICommand;
-
-public sealed class ArticleUpdateCommandHandler(
-    IArticleRepository articleRepository,
-    IPartitionRepository partitionRepository,
-    ArticleService articleService,
-    IUnitOfWork unitOfWork,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<ArticleUpdateCommandHandler> logger
-) : ICommandHandler<ArticleUpdateCommand>
-{
-    public async Task Handle(
-        ArticleUpdateCommand command,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Article update flow started for article {ArticleGuid} by actor {ActorGuid}.",
-                command.ArticleGuid,
-                actor.ActorGuid);
-        }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
-
-        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
-
-        actor.ValidateHasAccess(article);
-        var articleActor = actor.ToActor();
-        article.StartEdit(articleActor);
-
-        article.Rename(command.Article.Name);
-        article.ChangeDescription(command.Article.Description);
-        article.SetShelfLife(command.Article.ShelfLife);
-        article.SetColor(command.Article.Color);
-
-        if (command.Article.Metrics is { } metrics)
-        {
-            article.SetMetrics(metrics.Mass, metrics.LengthX, metrics.LengthY, metrics.LengthZ);
-        }
-
-        if (command.Article.IsActive)
-        {
-            article.Activate();
-        }
-        else
-        {
-            article.Deactivate();
-        }
-
-        // TODO: Move this to inside a ArticleBarcodesDto to only edit the article barcodes if the dto is not null because the way it is can have some problems when more than one client tries to edit the entity at the same time.
-        await articleService.SetEan13(command.Article.Ean13, article, articleActor, cancellationToken);
-
-        await articleService.SetEan8(command.Article.Ean8, article, articleActor, cancellationToken);
-
-        await articleService.SetUpcA(command.Article.UpcA, article, articleActor, cancellationToken);
-
-        await articleService.SetUpcE(command.Article.UpcE, article, articleActor, cancellationToken);
-
-        await articleService.SetCode128(command.Article.Code128, article, articleActor, cancellationToken);
-
-        await articleService.SetCode39(command.Article.Code39, article, articleActor, cancellationToken);
-
-        await articleService.SetItf14(command.Article.Itf14, article, articleActor, cancellationToken);
-
-        await articleService.SetGs1128(command.Article.Gs1128, article, articleActor, cancellationToken);
-
-        await articleService.SetQrCode(command.Article.QrCode, article, articleActor, cancellationToken);
-
-        await articleService.SetDataMatrix(command.Article.DataMatrix, article, articleActor, cancellationToken);
-
-        if (command.Article.Partitions is { } requestedPartitions)
-        {
-            foreach (var partitionGuid in requestedPartitions)
-            {
-                if (article.Partitions.Any(p => p.Guid == partitionGuid))
-                {
-                    continue;
-                }
-
-                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-                article.AddPartition(partition);
-            }
-
-            var partitionsToRemove = article.Partitions
-                .Where(p => !requestedPartitions.Contains(p.Guid))
-                .ToList();
-
-            foreach (var partition in partitionsToRemove)
-            {
-                article.RemovePartition(partition);
-            }
-        }
-
-        await unitOfWork.SaveChanges(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Article update flow completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
-                article.Guid,
-                actor.ActorGuid,
-                article.Partitions.Count);
-        }
-    }
-}
-
-#endregion Update

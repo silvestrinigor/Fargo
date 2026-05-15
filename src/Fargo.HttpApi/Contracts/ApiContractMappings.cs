@@ -48,33 +48,28 @@ internal static class ApiContractMappings
     public static IReadOnlyCollection<ContractArticles.ArticleInfo> ToInfo(this IReadOnlyCollection<AppArticles.ArticleDto> articles)
         => articles.Select(static article => article.ToInfo()).ToArray();
 
-    public static AppArticles.ArticleCreateDto ToApplicationDto(this ContractArticles.ArticleCreateRequest request)
-        => new(
-            new Name(request.Name),
-            request.Description.ToDescription(),
-            request.ShelfLife,
-            null,
-            request.Metrics.ToApplicationDto(),
-            request.Ean13.ToEan13ApplicationDto(),
-            request.Ean8.ToEan8ApplicationDto(),
-            request.UpcA.ToUpcAApplicationDto(),
-            request.UpcE.ToUpcEApplicationDto(),
-            request.Code128.ToCode128ApplicationDto(),
-            request.Code39.ToCode39ApplicationDto(),
-            request.Itf14.ToItf14ApplicationDto(),
-            request.Gs1128.ToGs1128ApplicationDto(),
-            request.QrCode.ToQrCodeApplicationDto(),
-            request.DataMatrix.ToDataMatrixApplicationDto(),
-            request.Partitions,
-            request.IsActive);
+    public static AppArticles.ArticleCreateCommand ToApplicationCommand(this ContractArticles.ArticleCreateRequest request)
+        => new(new Name(request.Name));
 
-    public static AppArticles.ArticleUpdateDto ToApplicationDto(this ContractArticles.ArticleUpdateRequest request)
+    public static AppArticles.ArticleRenameCommand ToApplicationCommand(
+        this ContractArticles.ArticleUpdateRequest request,
+        Guid articleGuid)
+        => new(articleGuid, new Name(request.Name));
+
+    public static Description? ToApplicationDescription(this ContractArticles.ArticleCreateRequest request)
+        => request.Description.ToDescription();
+
+    public static Description ToApplicationDescription(this ContractArticles.ArticleUpdateRequest request)
+        => request.Description.ToDescription() ?? Description.Empty;
+
+    public static AppArticles.ArticleMetricsDto? ToApplicationMetricsDto(this ContractArticles.ArticleCreateRequest request)
+        => request.Metrics.ToApplicationDto();
+
+    public static AppArticles.ArticleMetricsDto ToApplicationMetricsDto(this ContractArticles.ArticleUpdateRequest request)
+        => request.Metrics.ToApplicationDto() ?? new AppArticles.ArticleMetricsDto();
+
+    public static AppArticles.ArticleBarcodesDto ToApplicationBarcodesDto(this ContractArticles.ArticleCreateRequest request)
         => new(
-            new Name(request.Name),
-            request.Description.ToDescription() ?? Description.Empty,
-            request.ShelfLife,
-            null,
-            request.Metrics.ToApplicationDto() ?? new AppArticles.ArticleMetricsDto(),
             request.Ean13.ToEan13ApplicationDto(),
             request.Ean8.ToEan8ApplicationDto(),
             request.UpcA.ToUpcAApplicationDto(),
@@ -84,9 +79,20 @@ internal static class ApiContractMappings
             request.Itf14.ToItf14ApplicationDto(),
             request.Gs1128.ToGs1128ApplicationDto(),
             request.QrCode.ToQrCodeApplicationDto(),
-            request.DataMatrix.ToDataMatrixApplicationDto(),
-            request.Partitions ?? [],
-            request.IsActive);
+            request.DataMatrix.ToDataMatrixApplicationDto());
+
+    public static AppArticles.ArticleBarcodesDto ToApplicationBarcodesDto(this ContractArticles.ArticleUpdateRequest request)
+        => new(
+            request.Ean13.ToEan13ApplicationDto(),
+            request.Ean8.ToEan8ApplicationDto(),
+            request.UpcA.ToUpcAApplicationDto(),
+            request.UpcE.ToUpcEApplicationDto(),
+            request.Code128.ToCode128ApplicationDto(),
+            request.Code39.ToCode39ApplicationDto(),
+            request.Itf14.ToItf14ApplicationDto(),
+            request.Gs1128.ToGs1128ApplicationDto(),
+            request.QrCode.ToQrCodeApplicationDto(),
+            request.DataMatrix.ToDataMatrixApplicationDto());
 
     public static AppArticles.ArticleBarcodeDto ToApplicationDto(this ContractArticles.ArticleBarcode articleBarcode)
         => new(articleBarcode.Barcode, articleBarcode.Type.ToDomain());

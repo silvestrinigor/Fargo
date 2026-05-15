@@ -105,34 +105,34 @@ public sealed class ArticleServiceTests
         switch (barcodeKind)
         {
             case "Ean13":
-                await service.SetEan13((Ean13?)value, article, TestActor.Instance);
+                await service.SetEan13((Ean13?)value, article);
                 return;
             case "Ean8":
-                await service.SetEan8((Ean8?)value, article, TestActor.Instance);
+                await service.SetEan8((Ean8?)value, article);
                 return;
             case "UpcA":
-                await service.SetUpcA((UpcA?)value, article, TestActor.Instance);
+                await service.SetUpcA((UpcA?)value, article);
                 return;
             case "UpcE":
-                await service.SetUpcE((UpcE?)value, article, TestActor.Instance);
+                await service.SetUpcE((UpcE?)value, article);
                 return;
             case "Code128":
-                await service.SetCode128((Code128?)value, article, TestActor.Instance);
+                await service.SetCode128((Code128?)value, article);
                 return;
             case "Code39":
-                await service.SetCode39((Code39?)value, article, TestActor.Instance);
+                await service.SetCode39((Code39?)value, article);
                 return;
             case "Itf14":
-                await service.SetItf14((Itf14?)value, article, TestActor.Instance);
+                await service.SetItf14((Itf14?)value, article);
                 return;
             case "Gs1128":
-                await service.SetGs1128((Gs1128?)value, article, TestActor.Instance);
+                await service.SetGs1128((Gs1128?)value, article);
                 return;
             case "QrCode":
-                await service.SetQrCode((QrCode?)value, article, TestActor.Instance);
+                await service.SetQrCode((QrCode?)value, article);
                 return;
             case "DataMatrix":
-                await service.SetDataMatrix((DataMatrix?)value, article, TestActor.Instance);
+                await service.SetDataMatrix((DataMatrix?)value, article);
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");
@@ -162,34 +162,34 @@ public sealed class ArticleServiceTests
         switch (barcodeKind)
         {
             case "Ean13":
-                await service.SetEan13((Ean13?)value, article, TestActor.Instance);
+                await service.SetEan13((Ean13?)value, article);
                 return;
             case "Ean8":
-                await service.SetEan8((Ean8?)value, article, TestActor.Instance);
+                await service.SetEan8((Ean8?)value, article);
                 return;
             case "UpcA":
-                await service.SetUpcA((UpcA?)value, article, TestActor.Instance);
+                await service.SetUpcA((UpcA?)value, article);
                 return;
             case "UpcE":
-                await service.SetUpcE((UpcE?)value, article, TestActor.Instance);
+                await service.SetUpcE((UpcE?)value, article);
                 return;
             case "Code128":
-                await service.SetCode128((Code128?)value, article, TestActor.Instance);
+                await service.SetCode128((Code128?)value, article);
                 return;
             case "Code39":
-                await service.SetCode39((Code39?)value, article, TestActor.Instance);
+                await service.SetCode39((Code39?)value, article);
                 return;
             case "Itf14":
-                await service.SetItf14((Itf14?)value, article, TestActor.Instance);
+                await service.SetItf14((Itf14?)value, article);
                 return;
             case "Gs1128":
-                await service.SetGs1128((Gs1128?)value, article, TestActor.Instance);
+                await service.SetGs1128((Gs1128?)value, article);
                 return;
             case "QrCode":
-                await service.SetQrCode((QrCode?)value, article, TestActor.Instance);
+                await service.SetQrCode((QrCode?)value, article);
                 return;
             case "DataMatrix":
-                await service.SetDataMatrix((DataMatrix?)value, article, TestActor.Instance);
+                await service.SetDataMatrix((DataMatrix?)value, article);
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");

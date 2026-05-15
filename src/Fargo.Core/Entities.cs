@@ -169,7 +169,7 @@ public abstract class ModifiedEntity : Entity, IModifiedEntity
     }
 
     /// <inheritdoc />
-    public void MarkAsEdited(Guid actorGuid)
+    public void MarkAsEditedBy(Guid actorGuid)
     {
         EditedByGuid = actorGuid;
     }
@@ -215,7 +215,7 @@ public interface IModifiedEntity
     /// When the modification is performed by the system, the caller should pass
     /// the reserved system audit guid from the infrastructure layer.
     /// </remarks>
-    void MarkAsEdited(Guid actorGuid);
+    void MarkAsEditedBy(Guid actorGuid);
 }
 /// <summary>
 /// Defines a contract for entities that belong to an audited aggregate
@@ -239,7 +239,7 @@ public interface IModifiedEntityMember
     /// <remarks>
     /// The returned entity must implement <see cref="IModifiedEntity"/> and is
     /// expected to have its audit state updated (e.g., via
-    /// <see cref="IModifiedEntity.MarkAsEdited(Guid)"/>) whenever this member
+    /// <see cref="IModifiedEntity.MarkAsEditedBy(Guid)"/>) whenever this member
     /// is modified.
     /// </remarks>
     IModifiedEntity ParentEditedEntity { get; }

@@ -158,10 +158,19 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateArticle(
         ArticleCreateRequest request,
-        ICommandHandler<ArticleCreateCommand, Guid> handler,
+        ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new ArticleCreateCommand(request.ToApplicationDto()), cancellationToken);
+        var response = await articles.Create(
+            request.ToApplicationCommand(),
+            request.ToApplicationDescription(),
+            request.ShelfLife,
+            color: null,
+            request.ToApplicationMetricsDto(),
+            request.ToApplicationBarcodesDto(),
+            request.Partitions,
+            request.IsActive,
+            cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -184,10 +193,19 @@ public static class ArticleEndpointRouteBuilderExtension
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
         ArticleUpdateRequest request,
-        ICommandHandler<ArticleUpdateCommand> handler,
+        ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ArticleUpdateCommand(articleGuid, request.ToApplicationDto()), cancellationToken);
+        await articles.Update(
+            request.ToApplicationCommand(articleGuid),
+            request.ToApplicationDescription(),
+            request.ShelfLife,
+            color: null,
+            request.ToApplicationMetricsDto(),
+            request.ToApplicationBarcodesDto(),
+            request.Partitions ?? [],
+            request.IsActive,
+            cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -209,10 +227,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteArticle(
         Guid articleGuid,
-        ICommandHandler<ArticleDeleteCommand> handler,
+        ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ArticleDeleteCommand(articleGuid), cancellationToken);
+        await articles.Delete(new ArticleDeleteCommand(articleGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

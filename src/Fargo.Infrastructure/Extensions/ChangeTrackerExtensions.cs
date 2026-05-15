@@ -51,11 +51,11 @@ internal static class ChangeTrackerExtensions
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.MarkAsEdited(actorGuid);
+                entry.Entity.MarkAsEditedBy(actorGuid);
             }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.MarkAsEdited(actorGuid);
+                entry.Entity.MarkAsEditedBy(actorGuid);
             }
         }
 
@@ -68,7 +68,7 @@ internal static class ChangeTrackerExtensions
 
         foreach (var parentEntity in parentEntitiesToUpdate)
         {
-            parentEntity.MarkAsEdited(actorGuid);
+            parentEntity.MarkAsEditedBy(actorGuid);
         }
     }
 }

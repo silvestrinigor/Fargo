@@ -82,7 +82,7 @@ public sealed class ArticleMutationTests
     }
 
     [Fact]
-    public void PartitionMutation_Should_ValidatePartitionAccess()
+    public void PartitionMutation_Should_MarkPartitionModificationType()
     {
         var partition = new Partition { Name = new Name("Restricted") };
         var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
@@ -90,8 +90,10 @@ public sealed class ArticleMutationTests
 
         article.StartEdit(actor);
 
-        Assert.Throws<ArticlePartitionAccessDeniedFargoDomainException>(
-            () => article.AddPartition(partition));
+        article.AddPartition(partition);
+
+        Assert.Contains(partition, article.Partitions);
+        Assert.Equal(ArticleModifiedType.Partition, article.ModificationTypes);
     }
 
     private static class TestActor

@@ -126,9 +126,18 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
             services.AddScoped<ICommandHandler<PasswordChangeCommand>, PasswordChangeCommandHandler>();
 
+            services.AddScoped<ArticleApplicationService>();
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleRenameCommand>, ArticleRenameCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleChangeDescriptionCommand>, ArticleChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetShelfLifeCommand>, ArticleSetShelfLifeCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetColorCommand>, ArticleSetColorCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetMetricsCommand>, ArticleSetMetricsCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetBarcodesCommand>, ArticleSetBarcodesCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetPartitionsCommand>, ArticleSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleActivateCommand>, ArticleActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleDeactivateCommand>, ArticleDeactivateCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
 
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();

@@ -1,7 +1,6 @@
 using Fargo.Core.Barcodes;
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
@@ -35,9 +34,6 @@ public enum ArticleModifiedType
 /// </remarks>
 public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModifiedEntityTypes<ArticleModifiedType>
 {
-    [NotMapped]
-    private Actor? editActor;
-
     /// <summary>
     /// Initialize a new article entity.
     /// </summary>
@@ -45,10 +41,8 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     {
     }
 
-    public Article(Name name, Actor actor)
+    public Article(Name name)
     {
-        StartEdit(actor);
-        ValidateAction(ActionType.CreateArticle);
         Rename(name);
     }
 
@@ -56,44 +50,40 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// Initialize a new article entity that is a variation of another article.
     /// </summary>
     /// <param name="variation">The variation relationship associated with the article.</param>
-    public Article(Name name, ArticleVariation variation, Actor actor)
-        : this(name, actor)
+    public Article(Name name, ArticleVariation variation)
+        : this(name)
     {
         Variation = variation;
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     /// <summary>
     /// Initialize a new article entity that is a pack of another article.
     /// </summary>
     /// <param name="pack">The pack relationship associated with the article.</param>
-    public Article(Name name, ArticlePack pack, Actor actor)
-        : this(name, actor)
+    public Article(Name name, ArticlePack pack)
+        : this(name)
     {
         Pack = pack;
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     /// <summary>
     /// Initialize a new article entity that is a kit of other articles.
     /// </summary>
     /// <param name="kit">The kit relationship associated with the article.</param>
-    public Article(Name name, ArticleKit kit, Actor actor)
-        : this(name, actor)
+    public Article(Name name, ArticleKit kit)
+        : this(name)
     {
         Kit = kit;
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Article"/> class as a container article.
     /// </summary>
     /// <param name="container">The container constraints associated with the article.</param>
-    public Article(Name name, ArticleContainer container, Actor actor)
-        : this(name, actor)
+    public Article(Name name, ArticleContainer container)
+        : this(name)
     {
         Container = container;
-        MarkModified(ArticleModifiedType.Container);
     }
 
     /// <summary>
@@ -285,7 +275,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         IsActive = true;
-        MarkModified(ArticleModifiedType.General);
     }
 
     /// <summary>
@@ -299,7 +288,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         IsActive = false;
-        MarkModified(ArticleModifiedType.General);
     }
 
     #endregion Active
@@ -322,14 +310,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
 
     #region Modified
 
-    public void StartEdit(Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-
-        editActor = actor;
-        ModificationTypes = ArticleModifiedType.None;
-    }
-
     public void Rename(Name name)
     {
         if (Name == name)
@@ -338,7 +318,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Name = name;
-        MarkModified(ArticleModifiedType.General);
     }
 
     public void ChangeDescription(Description description)
@@ -349,7 +328,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Description = description;
-        MarkModified(ArticleModifiedType.General);
     }
 
     public void SetShelfLife(TimeSpan? shelfLife)
@@ -360,7 +338,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         ShelfLife = shelfLife;
-        MarkModified(ArticleModifiedType.General);
     }
 
     public void SetColor(Color? color)
@@ -371,7 +348,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Color = color;
-        MarkModified(ArticleModifiedType.General);
     }
 
     public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
@@ -388,28 +364,27 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         LengthX = lengthX;
         LengthY = lengthY;
         LengthZ = lengthZ;
-        MarkModified(ArticleModifiedType.Metrics);
     }
 
-    internal void SetEan13(Ean13? value, Actor actor) => SetBarcode(value, Ean13, next => Ean13 = next, actor);
+    internal void SetEan13(Ean13? value) => SetBarcode(value, Ean13, next => Ean13 = next);
 
-    internal void SetEan8(Ean8? value, Actor actor) => SetBarcode(value, Ean8, next => Ean8 = next, actor);
+    internal void SetEan8(Ean8? value) => SetBarcode(value, Ean8, next => Ean8 = next);
 
-    internal void SetUpcA(UpcA? value, Actor actor) => SetBarcode(value, UpcA, next => UpcA = next, actor);
+    internal void SetUpcA(UpcA? value) => SetBarcode(value, UpcA, next => UpcA = next);
 
-    internal void SetUpcE(UpcE? value, Actor actor) => SetBarcode(value, UpcE, next => UpcE = next, actor);
+    internal void SetUpcE(UpcE? value) => SetBarcode(value, UpcE, next => UpcE = next);
 
-    internal void SetCode128(Code128? value, Actor actor) => SetBarcode(value, Code128, next => Code128 = next, actor);
+    internal void SetCode128(Code128? value) => SetBarcode(value, Code128, next => Code128 = next);
 
-    internal void SetCode39(Code39? value, Actor actor) => SetBarcode(value, Code39, next => Code39 = next, actor);
+    internal void SetCode39(Code39? value) => SetBarcode(value, Code39, next => Code39 = next);
 
-    internal void SetItf14(Itf14? value, Actor actor) => SetBarcode(value, Itf14, next => Itf14 = next, actor);
+    internal void SetItf14(Itf14? value) => SetBarcode(value, Itf14, next => Itf14 = next);
 
-    internal void SetGs1128(Gs1128? value, Actor actor) => SetBarcode(value, Gs1128, next => Gs1128 = next, actor);
+    internal void SetGs1128(Gs1128? value) => SetBarcode(value, Gs1128, next => Gs1128 = next);
 
-    internal void SetQrCode(QrCode? value, Actor actor) => SetBarcode(value, QrCode, next => QrCode = next, actor);
+    internal void SetQrCode(QrCode? value) => SetBarcode(value, QrCode, next => QrCode = next);
 
-    internal void SetDataMatrix(DataMatrix? value, Actor actor) => SetBarcode(value, DataMatrix, next => DataMatrix = next, actor);
+    internal void SetDataMatrix(DataMatrix? value) => SetBarcode(value, DataMatrix, next => DataMatrix = next);
 
     public void AddPartition(Partition partition)
     {
@@ -420,9 +395,7 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
             return;
         }
 
-        ValidatePartitionAccess(partition.Guid);
         Partitions.Add(partition);
-        MarkModified(ArticleModifiedType.Partition);
     }
 
     public void RemovePartition(Partition partition)
@@ -434,9 +407,7 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
             return;
         }
 
-        ValidatePartitionAccess(partition.Guid);
         Partitions.Remove(partition);
-        MarkModified(ArticleModifiedType.Partition);
     }
 
     public void SetContainerMaxMass(Mass? maxMass)
@@ -449,7 +420,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         if (Container is null)
         {
             Container = new ArticleContainer(maxMass);
-            MarkModified(ArticleModifiedType.Container);
             return;
         }
 
@@ -459,7 +429,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Container.SetMaxMass(maxMass);
-        MarkModified(ArticleModifiedType.Container);
     }
 
     public void SetVariationFromArticle(Article fromArticle)
@@ -472,7 +441,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Variation = new ArticleVariation(fromArticle);
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     public void SetPackFromArticle(Article fromArticle)
@@ -485,7 +453,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Pack = new ArticlePack(fromArticle, Pack?.Quantity ?? 1.Amount());
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     public void SetPackQuantity(Scalar quantity)
@@ -501,7 +468,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         }
 
         Pack.SetQuantity(quantity);
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     public void SetKitArticles(IReadOnlyCollection<ArticlePack> packs)
@@ -509,7 +475,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         ArgumentNullException.ThrowIfNull(packs);
 
         Kit = new ArticleKit(packs);
-        MarkModified(ArticleModifiedType.Relation);
     }
 
     public IReadOnlySet<ArticleModifiedType> GetModificationTypes()
@@ -537,81 +502,20 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     private void SetBarcode<TBarcode>(
         TBarcode? value,
         TBarcode? current,
-        Action<TBarcode?> setter,
-        Actor actor)
+        Action<TBarcode?> setter)
         where TBarcode : struct, IEquatable<TBarcode>
     {
-        ArgumentNullException.ThrowIfNull(actor);
-
         if (EqualityComparer<TBarcode?>.Default.Equals(current, value))
         {
             return;
         }
 
-        if (current is null && value is not null)
-        {
-            ValidateAction(actor, ActionType.AddBarcode);
-        }
-        else if (current is not null && value is null)
-        {
-            ValidateAction(actor, ActionType.RemoveBarcode);
-        }
-        else
-        {
-            ValidateAction(actor, ActionType.AddBarcode);
-            ValidateAction(actor, ActionType.RemoveBarcode);
-        }
-
         setter(value);
-        MarkModified(ArticleModifiedType.Barcode, actor);
-    }
-
-    private void MarkModified(ArticleModifiedType type)
-    {
-        var actor = GetEditActor();
-
-        MarkModified(type, actor);
     }
 
     private void MarkModified(ArticleModifiedType type, Actor actor)
     {
-        ValidateAction(actor, ActionType.EditArticle);
-
-        if (Partitions.Count > 0 && !actor.HasAccess(this))
-        {
-            throw new ArticleAccessDeniedFargoDomainException(Guid, actor.Guid);
-        }
-
-        MarkAsEdited(actor.Guid);
         ModificationTypes |= type;
-    }
-
-    private Actor GetEditActor()
-        => editActor ?? throw new ArticleEditNotStartedFargoDomainException(Guid);
-
-    private void ValidateAction(ActionType action)
-    {
-        var actor = GetEditActor();
-
-        ValidateAction(actor, action);
-    }
-
-    private void ValidateAction(Actor actor, ActionType action)
-    {
-        if (!actor.HasActionPermission(action))
-        {
-            throw new ArticleActionNotAuthorizedFargoDomainException(Guid, actor.Guid, action);
-        }
-    }
-
-    private void ValidatePartitionAccess(Guid partitionGuid)
-    {
-        var actor = GetEditActor();
-
-        if (!actor.HasPartitionAccess(partitionGuid))
-        {
-            throw new ArticlePartitionAccessDeniedFargoDomainException(Guid, partitionGuid, actor.Guid);
-        }
     }
 
     #endregion Modified

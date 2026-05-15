@@ -49,9 +49,9 @@ public sealed class PartitionedRepositoryFilterTests
         var publicEntity = CreateArticle("Public article");
         var firstPartitionEntity = CreateArticle("First article", partitions: [firstPartition]);
         var secondPartitionEntity = CreateArticle("Second article", partitions: [secondPartition]);
-        await articleService.SetCode128(new Code128("PUBLIC-123"), publicEntity, TestActor.Instance);
-        await articleService.SetEan13(new Ean13("7891234567895"), firstPartitionEntity, TestActor.Instance);
-        await articleService.SetEan13(new Ean13("7891234567896"), secondPartitionEntity, TestActor.Instance);
+        await articleService.SetCode128(new Code128("PUBLIC-123"), publicEntity);
+        await articleService.SetEan13(new Ean13("7891234567895"), firstPartitionEntity);
+        await articleService.SetEan13(new Ean13("7891234567896"), secondPartitionEntity);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
