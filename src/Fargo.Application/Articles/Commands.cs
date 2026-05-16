@@ -270,7 +270,7 @@ public sealed class ArticleDeactivateCommandHandler(
 
         article.MarkAsEditedBy(actor.ActorGuid);
 
-        article.MarkModificationType(ArticleModifiedType.Deactivate);
+        article.MarkModificationType(ArticleModifiedType.Deactivated);
     }
 }
 

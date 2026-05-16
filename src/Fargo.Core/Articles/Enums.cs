@@ -11,5 +11,5 @@ public enum ArticleModifiedType
     Container = 1 << 4,
     Relation = 1 << 5,
     Activated = 1 << 6,
-    Deactivate = 1 << 7
+    Deactivated = 1 << 7
 }
