@@ -1,4 +1,3 @@
-using Fargo.Sdk.Contracts;
 using Fargo.Sdk.Contracts.Articles;
 using System.Text.Json;
 

@@ -1,6 +1,5 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Core;
 using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.Articles;
 using Microsoft.AspNetCore.Http.HttpResults;

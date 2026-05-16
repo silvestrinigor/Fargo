@@ -1,5 +1,4 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using NSubstitute;
 

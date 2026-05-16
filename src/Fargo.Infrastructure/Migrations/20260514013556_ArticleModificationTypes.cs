@@ -1,29 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Fargo.Infrastructure.Migrations
+namespace Fargo.Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class ArticleModificationTypes : Migration
 {
     /// <inheritdoc />
-    public partial class ArticleModificationTypes : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "ModificationTypes",
-                table: "Articles",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-        }
+        migrationBuilder.AddColumn<int>(
+            name: "ModificationTypes",
+            table: "Articles",
+            type: "int",
+            nullable: false,
+            defaultValue: 0);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "ModificationTypes",
-                table: "Articles");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "ModificationTypes",
+            table: "Articles");
     }
 }

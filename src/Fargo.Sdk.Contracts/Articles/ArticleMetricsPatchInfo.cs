@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Fargo.Sdk.Contracts;
 
 namespace Fargo.Sdk.Contracts.Articles;
 

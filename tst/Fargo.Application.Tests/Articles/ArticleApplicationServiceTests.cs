@@ -1,5 +1,4 @@
 using Fargo.Application.Articles;
-using Fargo.Core;
 using Fargo.Core.Barcodes;
 using NSubstitute;
 using UnitsNet;

@@ -1,8 +1,8 @@
 using Fargo.Application.Partitions;
 using Fargo.Application.Users;
 using Fargo.Core;
-using Fargo.Core.Partitions;
 using Fargo.Core.Identity;
+using Fargo.Core.Partitions;
 using Fargo.Core.Users;
 
 namespace Fargo.Application.Identity;

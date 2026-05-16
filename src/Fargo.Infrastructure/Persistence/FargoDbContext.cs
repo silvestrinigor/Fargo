@@ -1,8 +1,8 @@
 using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
-using Fargo.Core.Identity;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Configurations;

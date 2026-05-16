@@ -1,5 +1,4 @@
 using Fargo.Sdk.Articles;
-using Fargo.Sdk.Contracts;
 using Fargo.Sdk.Contracts.Articles;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
