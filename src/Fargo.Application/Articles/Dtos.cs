@@ -62,8 +62,14 @@ public sealed record ArticlePatchDto(
     bool? IsActive = default
 );
 
+/// <summary>
+/// Provides mappings for article DTO projections.
+/// </summary>
 public static class ArticleDtoMappings
 {
+    /// <summary>
+    /// Expression used to project an article entity into an <see cref="ArticleDto"/>.
+    /// </summary>
     public static readonly Expression<Func<Article, ArticleDto>> Projection = article => new ArticleDto(
         article.Guid,
         article.Name,
