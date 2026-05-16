@@ -55,11 +55,11 @@ public static class ArticleEndpointRouteBuilderExtension
     private static async Task<Results<Ok<ArticleInfo>, NotFound>> GetSingleArticle(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
-        IQueryHandler<ArticleSingleQuery, ArticleDto?> handler,
+        IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleSingleQuery(articleGuid, temporalAsOf);
+        var query = new ArticleByGuidQuery(articleGuid, temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 

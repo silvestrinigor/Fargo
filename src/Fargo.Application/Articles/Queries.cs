@@ -5,19 +5,34 @@ namespace Fargo.Application.Articles;
 
 #region Guid
 
-public sealed record ArticleSingleQuery(
+/// <summary>
+/// Query used to retrieve an article by identifier.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="AsOfDateTime">
+/// Temporal query date.
+/// </param>
+public sealed record ArticleByGuidQuery(
     Guid ArticleGuid,
     DateTimeOffset? AsOfDateTime = null
 ) : IQuery<ArticleDto?>;
 
-public sealed class ArticleSingleQueryHandler(
+/// <summary>
+/// Handles article queries by identifier.
+/// </summary>
+/// <remarks>
+/// Retrieves an article visible to the current actor.
+/// </remarks>
+public sealed class ArticleByGuidQueryHandler(
     IArticleQueryRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<ArticleSingleQueryHandler> logger
-) : IQueryHandler<ArticleSingleQuery, ArticleDto?>
+    ILogger<ArticleByGuidQueryHandler> logger
+) : IQueryHandler<ArticleByGuidQuery, ArticleDto?>
 {
     public async Task<ArticleDto?> Handle(
-        ArticleSingleQuery query,
+        ArticleByGuidQuery query,
         CancellationToken cancellationToken = default
     )
     {
@@ -56,11 +71,26 @@ public sealed class ArticleSingleQueryHandler(
 
 #region Barcode
 
+/// <summary>
+/// Query used to retrieve an article by barcode.
+/// </summary>
+/// <param name="ArticleBarcode">
+/// Article barcode information.
+/// </param>
+/// <param name="AsOfDateTime">
+/// Temporal query date.
+/// </param>
 public sealed record ArticleByBarcodeQuery(
     ArticleBarcodeDto ArticleBarcode,
     DateTimeOffset? AsOfDateTime = null
 ) : IQuery<ArticleDto?>;
 
+/// <summary>
+/// Handles article queries by barcode.
+/// </summary>
+/// <remarks>
+/// Retrieves an article using barcode information.
+/// </remarks>
 public sealed class ArticleByBarcodeQueryHandler(
     IArticleQueryRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
@@ -107,6 +137,21 @@ public sealed class ArticleByBarcodeQueryHandler(
 
 #region Many
 
+/// <summary>
+/// Query used to retrieve multiple articles.
+/// </summary>
+/// <param name="WithPagination">
+/// Pagination configuration.
+/// </param>
+/// <param name="TemporalAsOfDateTime">
+/// Temporal query date.
+/// </param>
+/// <param name="ChildOfAnyOfThesePartitions">
+/// Filters articles inside the provided partitions.
+/// </param>
+/// <param name="NotChildOfAnyPartition">
+/// Indicates whether articles without partitions should be included.
+/// </param>
 public sealed record ArticlesQuery(
     Pagination WithPagination,
     DateTimeOffset? TemporalAsOfDateTime = null,
@@ -114,6 +159,13 @@ public sealed record ArticlesQuery(
     bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;
 
+/// <summary>
+/// Handles queries for multiple articles.
+/// </summary>
+/// <remarks>
+/// Retrieves paginated article collections visible
+/// to the current actor.
+/// </remarks>
 public sealed class ArticlesQueryHandler(
     IArticleQueryRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
