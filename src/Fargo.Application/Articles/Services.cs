@@ -85,65 +85,67 @@ public sealed class ArticleApplicationService(
         return articleGuid;
     }
 
-    private static bool HasAnyBarcode(ArticleBarcodesDto barcodes)
-        => barcodes.Ean13 is not null ||
-           barcodes.Ean8 is not null ||
-           barcodes.UpcA is not null ||
-           barcodes.UpcE is not null ||
-           barcodes.Code128 is not null ||
-           barcodes.Code39 is not null ||
-           barcodes.Itf14 is not null ||
-           barcodes.Gs1128 is not null ||
-           barcodes.QrCode is not null ||
-           barcodes.DataMatrix is not null;
-
-    public async Task Update(
+    public async Task Patch(
         Guid articleGuid,
-        Name name,
-        Description description,
-        TimeSpan? shelfLife,
-        Color? color,
-        ArticleMetricsDto metrics,
-        ArticleBarcodesDto barcodes,
-        IReadOnlyCollection<Guid> partitionGuids,
-        bool isActive,
+        ArticlePatchDto patch,
         CancellationToken cancellationToken = default)
     {
-        await renameHandler.Handle(
-            new ArticleRenameCommand(articleGuid, name),
-            cancellationToken);
-
-        await changeDescriptionHandler.Handle(
-            new ArticleChangeDescriptionCommand(articleGuid, description),
-            cancellationToken);
-
-        await setShelfLifeHandler.Handle(
-            new ArticleSetShelfLifeCommand(articleGuid, shelfLife),
-            cancellationToken);
-
-        await setColorHandler.Handle(
-            new ArticleSetColorCommand(articleGuid, color),
-            cancellationToken);
-
-        await setMetricsHandler.Handle(
-            new ArticleSetMetricsCommand(articleGuid, metrics),
-            cancellationToken);
-
-        await setBarcodesHandler.Handle(
-            new ArticleSetBarcodesCommand(articleGuid, barcodes),
-            cancellationToken);
-
-        await setPartitionsHandler.Handle(
-            new ArticleSetPartitionsCommand(articleGuid, partitionGuids),
-            cancellationToken);
-
-        if (isActive)
+        if (patch.Name is { } name)
         {
-            await activateHandler.Handle(new ArticleActivateCommand(articleGuid), cancellationToken);
+            await renameHandler.Handle(
+                new ArticleRenameCommand(articleGuid, name),
+                cancellationToken);
         }
-        else
+
+        if (patch.Description is { } description)
         {
-            await deactivateHandler.Handle(new ArticleDeactivateCommand(articleGuid), cancellationToken);
+            await changeDescriptionHandler.Handle(
+                new ArticleChangeDescriptionCommand(articleGuid, description),
+                cancellationToken);
+        }
+
+        if (patch.ShelfLife.IsSpecified)
+        {
+            await setShelfLifeHandler.Handle(
+                new ArticleSetShelfLifeCommand(articleGuid, patch.ShelfLife.Value),
+                cancellationToken);
+        }
+
+        if (patch.Metrics is { } metrics)
+        {
+            await setMetricsHandler.Handle(
+                new ArticleSetMetricsCommand(
+                    articleGuid,
+                    metrics),
+                cancellationToken);
+        }
+
+        if (HasAnyBarcodePatch(patch.Barcodes))
+        {
+            await setBarcodesHandler.Handle(
+                new ArticleSetBarcodesCommand(
+                    articleGuid,
+                    await BuildBarcodesDto(articleGuid, patch.Barcodes, cancellationToken)),
+                cancellationToken);
+        }
+
+        if (patch.Partitions.IsSpecified)
+        {
+            await setPartitionsHandler.Handle(
+                new ArticleSetPartitionsCommand(articleGuid, patch.Partitions.Value ?? []),
+                cancellationToken);
+        }
+
+        if (patch.IsActive.IsSpecified)
+        {
+            if (patch.IsActive.Value!.Value)
+            {
+                await activateHandler.Handle(new ArticleActivateCommand(articleGuid), cancellationToken);
+            }
+            else
+            {
+                await deactivateHandler.Handle(new ArticleDeactivateCommand(articleGuid), cancellationToken);
+            }
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

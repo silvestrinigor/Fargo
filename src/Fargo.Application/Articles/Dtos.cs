@@ -50,6 +50,18 @@ public sealed record ArticleBarcodesDto(
     DataMatrix? DataMatrix = null
 );
 
+public readonly record struct OptionalValue<TValue>(bool IsSpecified, TValue? Value)
+    where TValue : struct
+{
+    public static OptionalValue<TValue> FromValue(TValue? value) => new(true, value);
+}
+
+public readonly record struct OptionalReferenceValue<TValue>(bool IsSpecified, TValue? Value)
+    where TValue : class
+{
+    public static OptionalReferenceValue<TValue> FromValue(TValue? value) => new(true, value);
+}
+
 public sealed record ArticleCreateDto(
     Name Name,
     Description? Description = null,
@@ -70,24 +82,14 @@ public sealed record ArticleCreateDto(
     bool? IsActive = null
 );
 
-public sealed record ArticleUpdateDto(
-    Name Name,
-    Description Description,
-    TimeSpan? ShelfLife,
-    Color? Color,
-    ArticleMetricsDto Metrics,
-    Ean13? Ean13,
-    Ean8? Ean8,
-    UpcA? UpcA,
-    UpcE? UpcE,
-    Code128? Code128,
-    Code39? Code39,
-    Itf14? Itf14,
-    Gs1128? Gs1128,
-    QrCode? QrCode,
-    DataMatrix? DataMatrix,
-    IReadOnlyCollection<Guid> Partitions,
-    bool IsActive
+public sealed record ArticlePatchDto(
+    Name? Name = default,
+    Description? Description = default,
+    OptionalValue<TimeSpan> ShelfLife = default,
+    ArticleMetricsDto? Metrics = default,
+    ArticleBarcodeDto? Barcodes = default,
+    IReadOnlyCollection<Guid>? Partitions = default,
+    OptionalValue<bool> IsActive = default
 );
 
 public sealed record ArticleBarcodeDto(string Barcode, BarcodeFormat Type);

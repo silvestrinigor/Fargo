@@ -182,10 +182,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapUpdateArticle(this IEndpointRouteBuilder builder)
     {
-        builder.MapPut("/{articleGuid:guid}", UpdateArticle)
-            .WithName("UpdateArticle")
-            .WithSummary("Replaces an existing article")
-            .WithDescription("Replaces all article state including partitions, barcodes, and active flag.")
+        builder.MapPatch("/{articleGuid:guid}", UpdateArticle)
+            .WithName("PatchArticle")
+            .WithSummary("Updates part of an existing article")
+            .WithDescription("Updates only article fields included in the request body.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -193,20 +193,13 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticleUpdateRequest request,
+        ArticlePatchRequest request,
         ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        await articles.Update(
+        await articles.Patch(
             articleGuid,
-            new Name(request.Name),
-            request.ToApplicationDescription(),
-            request.ShelfLife,
-            color: null,
-            request.ToApplicationMetricsDto(),
-            request.ToApplicationBarcodesDto(),
-            request.Partitions ?? [],
-            request.IsActive,
+            request.ToApplicationDto(),
             cancellationToken);
 
         return TypedResults.NoContent();

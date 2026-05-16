@@ -83,10 +83,10 @@ public sealed class ArticleHttpClient : IArticleClient
     /// <inheritdoc />
     public async Task<FargoResponse> UpdateAsync(
         Guid articleGuid,
-        ArticleUpdateRequest request,
+        ArticlePatchRequest request,
         CancellationToken cancellationToken = default)
     {
-        var httpResponse = await httpClient.PutJsonAsync<ArticleUpdateRequest>(
+        var httpResponse = await httpClient.PatchJsonAsync<ArticlePatchRequest>(
             $"/articles/{articleGuid}",
             request,
             cancellationToken);

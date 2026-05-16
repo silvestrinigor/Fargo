@@ -11,10 +11,23 @@ namespace Fargo.Application.Articles;
 
 #region Create
 
+/// <summary>
+/// Command used to create a new article.
+/// </summary>
+/// <param name="Name">
+/// Article name.
+/// </param>
 public sealed record ArticleCreateCommand(
     Name Name
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles article creation.
+/// </summary>
+/// <remarks>
+/// Creates the article, validates permissions,
+/// and stores the new entity.
+/// </remarks>
 public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
@@ -58,11 +71,26 @@ public sealed class ArticleCreateCommandHandler(
 
 #region General
 
+/// <summary>
+/// Command used to rename an article.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="Name">
+/// New article name.
+/// </param>
 public sealed record ArticleRenameCommand(
     Guid ArticleGuid,
     Name Name
 ) : ICommand;
 
+/// <summary>
+/// Handles article rename.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates the article name.
+/// </remarks>
 public sealed class ArticleRenameCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -93,11 +121,26 @@ public sealed class ArticleRenameCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to change the article description.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="Description">
+/// New article description.
+/// </param>
 public sealed record ArticleChangeDescriptionCommand(
     Guid ArticleGuid,
     Description Description
 ) : ICommand;
 
+/// <summary>
+/// Handles article description changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates the description.
+/// </remarks>
 public sealed class ArticleChangeDescriptionCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -128,11 +171,27 @@ public sealed class ArticleChangeDescriptionCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to define the article shelf life.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="ShelfLife">
+/// Shelf life duration.
+/// </param>
 public sealed record ArticleSetShelfLifeCommand(
     Guid ArticleGuid,
     TimeSpan? ShelfLife
 ) : ICommand;
 
+
+/// <summary>
+/// Handles article shelf life changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates shelf life.
+/// </remarks>
 public sealed class ArticleSetShelfLifeCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -163,11 +222,26 @@ public sealed class ArticleSetShelfLifeCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to define the article color.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="Color">
+/// Article color.
+/// </param>
 public sealed record ArticleSetColorCommand(
     Guid ArticleGuid,
     Color? Color
 ) : ICommand;
 
+/// <summary>
+/// Handles article color changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates the color.
+/// </remarks>
 public sealed class ArticleSetColorCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -202,10 +276,22 @@ public sealed class ArticleSetColorCommandHandler(
 
 #region Activate
 
+/// <summary>
+/// Command used to activate an article.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
 public sealed record ArticleActivateCommand(
     Guid ArticleGuid
 ) : ICommand;
 
+/// <summary>
+/// Handles article activation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and activates the article.
+/// </remarks>
 public sealed class ArticleActivateCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -240,10 +326,22 @@ public sealed class ArticleActivateCommandHandler(
 
 #region Deactivate
 
+/// <summary>
+/// Command used to deactivate an article.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
 public sealed record ArticleDeactivateCommand(
     Guid ArticleGuid
 ) : ICommand;
 
+/// <summary>
+/// Handles article deactivation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and deactivates the article.
+/// </remarks>
 public sealed class ArticleDeactivateCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -278,11 +376,26 @@ public sealed class ArticleDeactivateCommandHandler(
 
 #region Metrics
 
+/// <summary>
+/// Command used to update article metrics.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="Metrics">
+/// Article metrics information.
+/// </param>
 public sealed record ArticleSetMetricsCommand(
     Guid ArticleGuid,
     ArticleMetricsDto Metrics
 ) : ICommand;
 
+/// <summary>
+/// Handles article metrics changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates article metrics.
+/// </remarks>
 public sealed class ArticleSetMetricsCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext
@@ -324,11 +437,26 @@ public sealed class ArticleSetMetricsCommandHandler(
 
 #region Barcodes
 
+/// <summary>
+/// Command used to update article barcodes.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="Barcodes">
+/// Article barcode information.
+/// </param>
 public sealed record ArticleSetBarcodesCommand(
     Guid ArticleGuid,
     ArticleBarcodesDto Barcodes
 ) : ICommand;
 
+/// <summary>
+/// Handles article barcode changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates article barcodes.
+/// </remarks>
 public sealed class ArticleSetBarcodesCommandHandler(
     IArticleRepository articleRepository,
     ArticleService articleService,
@@ -394,11 +522,26 @@ public sealed class ArticleSetBarcodesCommandHandler(
 
 #region Partitions
 
+/// <summary>
+/// Command used to update article partitions.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="PartitionGuids">
+/// Collection of partition identifiers.
+/// </param>
 public sealed record ArticleSetPartitionsCommand(
     Guid ArticleGuid,
     IReadOnlyCollection<Guid> PartitionGuids
 ) : ICommand;
 
+/// <summary>
+/// Handles article partition changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates article partitions.
+/// </remarks>
 public sealed class ArticleSetPartitionsCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
@@ -463,10 +606,22 @@ public sealed class ArticleSetPartitionsCommandHandler(
 
 #region Delete
 
+/// <summary>
+/// Command used to delete an article.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
 public sealed record ArticleDeleteCommand(
     Guid ArticleGuid
 ) : ICommand;
 
+/// <summary>
+/// Handles article deletion.
+/// </summary>
+/// <remarks>
+/// Validates permissions and removes the article.
+/// </remarks>
 public sealed class ArticleDeleteCommandHandler(
     IArticleRepository articleRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
