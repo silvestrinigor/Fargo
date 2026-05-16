@@ -1,3 +1,4 @@
+using Fargo.Application;
 using Fargo.Application.Identity;
 using Fargo.Core;
 using Fargo.Core.Barcodes;
@@ -62,7 +63,7 @@ internal static class ApiContractMappings
             request.Partitions,
             request.IsActive);
 
-    public static AppArticles.ArticleBarcodeDto ToApplicationDto(this ContractArticles.ArticleBarcode articleBarcode)
+    public static Barcode ToBarcode(this ContractArticles.ArticleBarcode articleBarcode)
         => new(articleBarcode.Barcode, articleBarcode.Type.ToDomain());
 
     public static ContractItems.ItemInfo ToInfo(this AppItems.ItemDto item)
@@ -269,9 +270,9 @@ internal static class ApiContractMappings
                 barcodes.QrCode.ToQrCodeApplicationDto(),
                 barcodes.DataMatrix.ToDataMatrixApplicationDto());
 
-    private static AppArticles.OptionalValue<TValue> ToApplicationOptional<TValue>(this Optional<TValue?> value)
+    private static OptionalValue<TValue> ToApplicationOptional<TValue>(this Optional<TValue?> value)
         where TValue : struct
-        => value.IsSpecified ? AppArticles.OptionalValue<TValue>.FromValue(value.Value) : default;
+        => value.IsSpecified ? OptionalValue<TValue>.FromValue(value.Value) : default;
 
     private static ContractArticles.MassInfo? ToInfo(this Mass? mass)
         => mass is not { } value ? null : new ContractArticles.MassInfo(value.Value, Mass.GetAbbreviation(value.Unit));

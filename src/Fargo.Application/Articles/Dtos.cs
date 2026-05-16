@@ -62,8 +62,6 @@ public sealed record ArticlePatchDto(
     bool? IsActive = default
 );
 
-public sealed record ArticleBarcodeDto(string Barcode, BarcodeFormat Type);
-
 public static class ArticleDtoMappings
 {
     public static readonly Expression<Func<Article, ArticleDto>> Projection = article => new ArticleDto(

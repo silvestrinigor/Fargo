@@ -1,4 +1,5 @@
 using Fargo.Application.Identity;
+using Fargo.Core.Barcodes;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
@@ -81,7 +82,7 @@ public sealed class ArticleByGuidQueryHandler(
 /// Temporal query date.
 /// </param>
 public sealed record ArticleByBarcodeQuery(
-    ArticleBarcodeDto ArticleBarcode,
+    Barcode ArticleBarcode,
     DateTimeOffset? AsOfDateTime = null
 ) : IQuery<ArticleDto?>;
 
@@ -108,7 +109,7 @@ public sealed class ArticleByBarcodeQueryHandler(
         {
             logger.LogDebug(
                 "Article barcode query started for barcode type {BarcodeType} by actor {ActorGuid}.",
-                query.ArticleBarcode.Type,
+                query.ArticleBarcode.Format,
                 actor.ActorGuid);
         }
 
@@ -124,7 +125,7 @@ public sealed class ArticleByBarcodeQueryHandler(
         {
             logger.LogDebug(
                 "Article barcode query completed for barcode type {BarcodeType} by actor {ActorGuid}. Found: {Found}.",
-                query.ArticleBarcode.Type,
+                query.ArticleBarcode.Format,
                 actor.ActorGuid,
                 article is not null);
         }

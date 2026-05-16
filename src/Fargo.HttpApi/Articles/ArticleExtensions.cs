@@ -89,7 +89,7 @@ public static class ArticleEndpointRouteBuilderExtension
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleByBarcodeQuery(articleBarcode.ToApplicationDto(), temporalAsOf);
+        var query = new ArticleByBarcodeQuery(articleBarcode.ToBarcode(), temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 

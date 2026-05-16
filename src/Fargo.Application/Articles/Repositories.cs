@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
 
 namespace Fargo.Application.Articles;
 
@@ -58,7 +59,7 @@ public interface IArticleQueryRepository
     /// Article information if found; otherwise null.
     /// </returns>
     Task<ArticleDto?> GetInfoByBarcode(
-        ArticleBarcodeDto articleBarcode,
+        Barcode barcode,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,

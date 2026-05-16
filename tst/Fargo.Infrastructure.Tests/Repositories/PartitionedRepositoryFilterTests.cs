@@ -57,15 +57,15 @@ public sealed class PartitionedRepositoryFilterTests
         var repository = new ArticleRepository(context);
 
         var accessible = await repository.GetInfoByBarcode(
-            new ArticleBarcodeDto("7891234567895", BarcodeFormat.Ean13),
+            new Barcode("7891234567895", BarcodeFormat.Ean13),
             childOfAnyOfThesePartitions: [firstPartition.Guid],
             notChildOfAnyPartition: true);
         var inaccessible = await repository.GetInfoByBarcode(
-            new ArticleBarcodeDto("7891234567896", BarcodeFormat.Ean13),
+            new Barcode("7891234567896", BarcodeFormat.Ean13),
             childOfAnyOfThesePartitions: [firstPartition.Guid],
             notChildOfAnyPartition: true);
         var publicArticle = await repository.GetInfoByBarcode(
-            new ArticleBarcodeDto("PUBLIC-123", BarcodeFormat.Code128),
+            new Barcode("PUBLIC-123", BarcodeFormat.Code128),
             childOfAnyOfThesePartitions: [firstPartition.Guid],
             notChildOfAnyPartition: true);
 
