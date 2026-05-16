@@ -19,7 +19,7 @@ public sealed class ArticleApplicationService(
 )
 {
     public async Task<Guid> Create(
-        ArticleCreateCommand command,
+        Name name,
         Description? description = null,
         TimeSpan? shelfLife = null,
         Color? color = null,
@@ -29,7 +29,9 @@ public sealed class ArticleApplicationService(
         bool? isActive = null,
         CancellationToken cancellationToken = default)
     {
-        var articleGuid = await createArticleHandler.Handle(command, cancellationToken);
+        var articleGuid = await createArticleHandler.Handle(
+            new ArticleCreateCommand(name),
+            cancellationToken);
 
         if (description is { } descriptionValue)
         {
@@ -96,7 +98,8 @@ public sealed class ArticleApplicationService(
            barcodes.DataMatrix is not null;
 
     public async Task Update(
-        ArticleRenameCommand renameCommand,
+        Guid articleGuid,
+        Name name,
         Description description,
         TimeSpan? shelfLife,
         Color? color,
@@ -106,9 +109,9 @@ public sealed class ArticleApplicationService(
         bool isActive,
         CancellationToken cancellationToken = default)
     {
-        var articleGuid = renameCommand.ArticleGuid;
-
-        await renameHandler.Handle(renameCommand, cancellationToken);
+        await renameHandler.Handle(
+            new ArticleRenameCommand(articleGuid, name),
+            cancellationToken);
 
         await changeDescriptionHandler.Handle(
             new ArticleChangeDescriptionCommand(articleGuid, description),
@@ -147,10 +150,10 @@ public sealed class ArticleApplicationService(
     }
 
     public async Task Delete(
-        ArticleDeleteCommand command,
+        Guid articleGuid,
         CancellationToken cancellationToken = default)
     {
-        await deleteHandler.Handle(command, cancellationToken);
+        await deleteHandler.Handle(new ArticleDeleteCommand(articleGuid), cancellationToken);
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

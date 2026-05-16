@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
+using Fargo.Core;
 using Fargo.HttpApi.Contracts;
 using Fargo.Sdk.Contracts.Articles;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -162,7 +163,7 @@ public static class ArticleEndpointRouteBuilderExtension
         CancellationToken cancellationToken)
     {
         var response = await articles.Create(
-            request.ToApplicationCommand(),
+            new Name(request.Name),
             request.ToApplicationDescription(),
             request.ShelfLife,
             color: null,
@@ -197,7 +198,8 @@ public static class ArticleEndpointRouteBuilderExtension
         CancellationToken cancellationToken)
     {
         await articles.Update(
-            request.ToApplicationCommand(articleGuid),
+            articleGuid,
+            new Name(request.Name),
             request.ToApplicationDescription(),
             request.ShelfLife,
             color: null,
@@ -230,7 +232,7 @@ public static class ArticleEndpointRouteBuilderExtension
         ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        await articles.Delete(new ArticleDeleteCommand(articleGuid), cancellationToken);
+        await articles.Delete(articleGuid, cancellationToken);
 
         return TypedResults.NoContent();
     }

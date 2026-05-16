@@ -49,14 +49,6 @@ internal static class ApiContractMappings
     public static IReadOnlyCollection<ContractArticles.ArticleInfo> ToInfo(this IReadOnlyCollection<AppArticles.ArticleDto> articles)
         => articles.Select(static article => article.ToInfo()).ToArray();
 
-    public static AppArticles.ArticleCreateCommand ToApplicationCommand(this ContractArticles.ArticleCreateRequest request)
-        => new(new Name(request.Name));
-
-    public static AppArticles.ArticleRenameCommand ToApplicationCommand(
-        this ContractArticles.ArticleUpdateRequest request,
-        Guid articleGuid)
-        => new(articleGuid, new Name(request.Name));
-
     public static Description? ToApplicationDescription(this ContractArticles.ArticleCreateRequest request)
         => request.Description.ToDescription();
 
