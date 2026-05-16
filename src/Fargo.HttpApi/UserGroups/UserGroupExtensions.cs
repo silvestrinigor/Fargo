@@ -126,10 +126,10 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateUserGroup(
         UserGroupCreateRequest request,
-        ICommandHandler<UserGroupCreateCommand, Guid> handler,
+        UserGroupApplicationService service,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new UserGroupCreateCommand(request.ToApplicationDto()), cancellationToken);
+        var response = await service.Create(request.ToApplicationDto(), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -152,10 +152,10 @@ public static class UserGroupEndpointRouteBuilderExtension
     private static async Task<NoContent> UpdateUserGroup(
         Guid userGroupGuid,
         UserGroupUpdateRequest request,
-        ICommandHandler<UserGroupUpdateCommand> handler,
+        UserGroupApplicationService service,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request.ToApplicationDto()), cancellationToken);
+        await service.Update(userGroupGuid, request.ToApplicationDto(), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -177,10 +177,10 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteUserGroup(
         Guid userGroupGuid,
-        ICommandHandler<UserGroupDeleteCommand> handler,
+        UserGroupApplicationService service,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserGroupDeleteCommand(userGroupGuid), cancellationToken);
+        await service.Delete(userGroupGuid, cancellationToken);
 
         return TypedResults.NoContent();
     }

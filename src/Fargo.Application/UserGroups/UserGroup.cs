@@ -107,16 +107,27 @@ public static class UserGroupRepositoryExtensions
 
 #region Create
 
+/// <summary>
+/// Command used to create a new user group.
+/// </summary>
+/// <param name="Nameid">
+/// User group login identifier.
+/// </param>
 public sealed record UserGroupCreateCommand(
-    UserGroupCreateDto UserGroup
+    Nameid Nameid
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles user group creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates domain rules,
+/// and stores the new user group.
+/// </remarks>
 public sealed class UserGroupCreateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
-    IPartitionRepository partitionRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    IUnitOfWork unitOfWork,
     ILogger<UserGroupCreateCommandHandler> logger
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
 {
@@ -133,75 +144,48 @@ public sealed class UserGroupCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
-        var nameid = ValidateNameid(command.UserGroup.Nameid);
-
-        var userGroup = new UserGroup
-        {
-            Nameid = nameid,
-            Description = command.UserGroup.Description ?? Description.Empty
-        };
-
-        #region Partition
-
-        foreach (var partitionGuid in command.UserGroup.Partitions ?? [])
-        {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            userGroup.Partitions.Add(partition);
-        }
-
-        #endregion Partition
+        var userGroup = new UserGroup(command.Nameid);
 
         await userGroupService.ValidateUserGroupCreate(userGroup, cancellationToken);
 
-        foreach (var permission in command.UserGroup.Permissions ?? [])
-        {
-            userGroup.AddPermission(permission.Action);
-        }
-
         userGroupRepository.Add(userGroup);
-
-        await unitOfWork.SaveChanges(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "User group create flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
+                "User group create mutation completed for user group {UserGroupGuid} by actor {ActorGuid}.",
                 userGroup.Guid,
-                actor.ActorGuid,
-                userGroup.Partitions.Count,
-                userGroup.Permissions.Count);
+                actor.ActorGuid);
         }
 
         return userGroup.Guid;
     }
 
-    private static Nameid ValidateNameid(string value)
-    {
-        try
-        {
-            return new Nameid(value);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidNameidFargoApplicationException(ex.Message);
-        }
-    }
 }
 
 #endregion Create
 
 #region Delete
 
+/// <summary>
+/// Command used to delete a user group.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
 public sealed record UserGroupDeleteCommand(
     Guid UserGroupGuid
 ) : ICommand;
 
+/// <summary>
+/// Handles user group deletion.
+/// </summary>
+/// <remarks>
+/// Validates permissions and user group deletion rules
+/// before removing the user group.
+/// </remarks>
 public sealed class UserGroupDeleteCommandHandler(
     IUserGroupRepository userGroupRepository,
-    IUnitOfWork unitOfWork,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupDeleteCommandHandler> logger
 ) : ICommandHandler<UserGroupDeleteCommand>
@@ -235,12 +219,10 @@ public sealed class UserGroupDeleteCommandHandler(
 
         userGroupRepository.Remove(userGroup);
 
-        await unitOfWork.SaveChanges(cancellationToken);
-
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "User group delete flow completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+                "User group delete mutation completed for user group {UserGroupGuid} by actor {ActorGuid}.",
                 userGroup.Guid,
                 actor.ActorGuid);
         }
@@ -251,16 +233,30 @@ public sealed class UserGroupDeleteCommandHandler(
 
 #region Update
 
+/// <summary>
+/// Command used to update multiple user group properties.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+/// <param name="UserGroup">
+/// User group update data.
+/// </param>
 public sealed record UserGroupUpdateCommand(
     Guid UserGroupGuid,
     UserGroupUpdateDto UserGroup
 ) : ICommand;
 
+/// <summary>
+/// Handles user group updates.
+/// </summary>
+/// <remarks>
+/// Validates permissions and applies all specified user group changes.
+/// </remarks>
 public sealed class UserGroupUpdateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    IUnitOfWork unitOfWork,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupUpdateCommandHandler> logger
 ) : ICommandHandler<UserGroupUpdateCommand>
@@ -293,13 +289,13 @@ public sealed class UserGroupUpdateCommandHandler(
             if (userGroup.Nameid != nameid)
             {
                 await userGroupService.ValidateUserGroupNameidChange(userGroup, nameid, cancellationToken);
-                userGroup.Nameid = nameid;
+                userGroup.ChangeNameid(nameid);
             }
         }
 
         if (command.UserGroup.Description is not null && userGroup.Description != command.UserGroup.Description)
         {
-            userGroup.Description = command.UserGroup.Description.Value;
+            userGroup.ChangeDescription(command.UserGroup.Description.Value);
         }
 
         if (command.UserGroup.IsActive is not null && userGroup.IsActive != command.UserGroup.IsActive.Value)
@@ -351,7 +347,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 actor.ValidateHasPartitionAccess(partition.Guid);
 
-                userGroup.Partitions.Add(partition);
+                userGroup.AddPartition(partition);
             }
 
             var partitionsToRemove = userGroup.Partitions
@@ -362,13 +358,11 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 actor.ValidateHasPartitionAccess(partition.Guid);
 
-                userGroup.Partitions.Remove(partition);
+                userGroup.RemovePartition(partition);
             }
         }
 
         #endregion Partition
-
-        await unitOfWork.SaveChanges(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -395,6 +389,233 @@ public sealed class UserGroupUpdateCommandHandler(
 }
 
 #endregion Update
+
+#region Focused Updates
+
+/// <summary>
+/// Command used to change a user group login identifier.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+/// <param name="Nameid">
+/// New user group login identifier.
+/// </param>
+public sealed record UserGroupChangeNameidCommand(Guid UserGroupGuid, Nameid Nameid) : ICommand;
+
+/// <summary>
+/// Handles user group login identifier changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and user group nameid uniqueness rules.
+/// </remarks>
+public sealed class UserGroupChangeNameidCommandHandler(
+    UserGroupService userGroupService,
+    IUserGroupRepository userGroupRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupChangeNameidCommand>
+{
+    public async Task Handle(UserGroupChangeNameidCommand command, CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+        actor.ValidateHasAccess(userGroup);
+
+        if (userGroup.Nameid == command.Nameid)
+        {
+            return;
+        }
+
+        await userGroupService.ValidateUserGroupNameidChange(userGroup, command.Nameid, cancellationToken);
+        userGroup.ChangeNameid(command.Nameid);
+    }
+}
+
+/// <summary>
+/// Command used to change a user group description.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+/// <param name="Description">
+/// New user group description.
+/// </param>
+public sealed record UserGroupChangeDescriptionCommand(Guid UserGroupGuid, Description Description) : ICommand;
+
+/// <summary>
+/// Handles user group description changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates the description.
+/// </remarks>
+public sealed class UserGroupChangeDescriptionCommandHandler(
+    IUserGroupRepository userGroupRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupChangeDescriptionCommand>
+{
+    public async Task Handle(UserGroupChangeDescriptionCommand command, CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+        actor.ValidateHasAccess(userGroup);
+        userGroup.ChangeDescription(command.Description);
+    }
+}
+
+/// <summary>
+/// Command used to replace the user group permissions.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+/// <param name="Actions">
+/// Desired permission actions.
+/// </param>
+public sealed record UserGroupSetPermissionsCommand(Guid UserGroupGuid, IReadOnlyCollection<ActionType> Actions) : ICommand;
+
+/// <summary>
+/// Handles user group permission changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and synchronizes the user group permissions
+/// with the requested set.
+/// </remarks>
+public sealed class UserGroupSetPermissionsCommandHandler(
+    IUserGroupRepository userGroupRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupSetPermissionsCommand>
+{
+    public async Task Handle(UserGroupSetPermissionsCommand command, CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+        actor.ValidateHasAccess(userGroup);
+
+        var requestedActions = command.Actions.Distinct().ToHashSet();
+        var currentActions = userGroup.Permissions.Select(x => x.Action).ToHashSet();
+
+        foreach (var action in requestedActions.Except(currentActions))
+        {
+            userGroup.AddPermission(action);
+        }
+
+        foreach (var action in currentActions.Except(requestedActions))
+        {
+            userGroup.RemovePermission(action);
+        }
+    }
+}
+
+/// <summary>
+/// Command used to replace the user group partition assignments.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+/// <param name="PartitionGuids">
+/// Desired partition unique identifiers.
+/// </param>
+public sealed record UserGroupSetPartitionsCommand(Guid UserGroupGuid, IReadOnlyCollection<Guid> PartitionGuids) : ICommand;
+
+/// <summary>
+/// Handles user group partition assignment changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and synchronizes the user group partitions
+/// with the requested set.
+/// </remarks>
+public sealed class UserGroupSetPartitionsCommandHandler(
+    IUserGroupRepository userGroupRepository,
+    IPartitionRepository partitionRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupSetPartitionsCommand>
+{
+    public async Task Handle(UserGroupSetPartitionsCommand command, CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+        actor.ValidateHasAccess(userGroup);
+
+        var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
+
+        foreach (var partitionGuid in requestedPartitions)
+        {
+            if (userGroup.Partitions.Any(p => p.Guid == partitionGuid))
+            {
+                continue;
+            }
+
+            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+            userGroup.AddPartition(partition);
+        }
+
+        var partitionsToRemove = userGroup.Partitions.Where(p => !requestedPartitions.Contains(p.Guid)).ToList();
+        foreach (var partition in partitionsToRemove)
+        {
+            actor.ValidateHasPartitionAccess(partition.Guid);
+            userGroup.RemovePartition(partition);
+        }
+    }
+}
+
+/// <summary>
+/// Command used to activate a user group.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+public sealed record UserGroupActivateCommand(Guid UserGroupGuid) : ICommand;
+
+/// <summary>
+/// Handles user group activation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and activates the user group.
+/// </remarks>
+public sealed class UserGroupActivateCommandHandler(
+    IUserGroupRepository userGroupRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupActivateCommand>
+{
+    public async Task Handle(UserGroupActivateCommand command, CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+        actor.ValidateHasAccess(userGroup);
+        userGroup.Activate();
+    }
+}
+
+/// <summary>
+/// Command used to deactivate a user group.
+/// </summary>
+/// <param name="UserGroupGuid">
+/// User group unique identifier.
+/// </param>
+public sealed record UserGroupDeactivateCommand(Guid UserGroupGuid) : ICommand;
+
+/// <summary>
+/// Handles user group deactivation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and deactivates the user group.
+/// </remarks>
+public sealed class UserGroupDeactivateCommandHandler(
+    IUserGroupRepository userGroupRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupDeactivateCommand>
+{
+    public async Task Handle(UserGroupDeactivateCommand command, CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+        actor.ValidateHasAccess(userGroup);
+        userGroup.Deactivate();
+    }
+}
+
+#endregion Focused Updates
 
 #endregion Create Delete Update
 

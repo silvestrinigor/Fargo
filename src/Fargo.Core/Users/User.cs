@@ -19,15 +19,25 @@ namespace Fargo.Core.Users;
 /// </remarks>
 public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
 {
+    private User()
+    {
+    }
+
+    public User(Nameid nameid, PasswordHash passwordHash)
+    {
+        Nameid = nameid;
+        PasswordHash = passwordHash;
+    }
+
     /// <summary>
     /// Gets or sets the unique NAMEID (username) of the user.
     /// This value identifies the user in the system and must satisfy
     /// the validation rules defined by <see cref="Nameid"/>.
     /// </summary>
-    public required Nameid Nameid
+    public Nameid Nameid
     {
         get;
-        set;
+        private set;
     }
 
     /// <summary>
@@ -43,7 +53,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     public FirstName? FirstName
     {
         get;
-        set;
+        private set;
     } = null;
 
     /// <summary>
@@ -59,7 +69,7 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     public LastName? LastName
     {
         get;
-        set;
+        private set;
     } = null;
 
     /// <summary>
@@ -69,8 +79,48 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     public Description Description
     {
         get;
-        set;
+        private set;
     } = Description.Empty;
+
+    public void ChangeNameid(Nameid nameid)
+    {
+        if (Nameid == nameid)
+        {
+            return;
+        }
+
+        Nameid = nameid;
+    }
+
+    public void ChangeFirstName(FirstName? firstName)
+    {
+        if (FirstName == firstName)
+        {
+            return;
+        }
+
+        FirstName = firstName;
+    }
+
+    public void ChangeLastName(LastName? lastName)
+    {
+        if (LastName == lastName)
+        {
+            return;
+        }
+
+        LastName = lastName;
+    }
+
+    public void ChangeDescription(Description description)
+    {
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+    }
 
     #region Active
 
@@ -99,15 +149,15 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     /// The raw password is never stored. Instead, a secure hash
     /// is persisted using the application's password hashing strategy.
     /// </summary>
-    public required PasswordHash PasswordHash
+    public PasswordHash PasswordHash
     {
         get;
-        set;
+        private set;
     }
 
-    public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
+    public TimeSpan? DefaultPasswordExpirationPeriod { get; private set; } = null;
 
-    public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
+    public DateTimeOffset? RequirePasswordChangeAt { get; private set; } = null;
 
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
 
@@ -157,6 +207,26 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     public void MarkPasswordChangeAsRequired()
     {
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
+    }
+
+    public void ChangePasswordHash(PasswordHash passwordHash)
+    {
+        if (PasswordHash == passwordHash)
+        {
+            return;
+        }
+
+        PasswordHash = passwordHash;
+    }
+
+    public void SetDefaultPasswordExpirationPeriod(TimeSpan? expirationPeriod)
+    {
+        if (DefaultPasswordExpirationPeriod == expirationPeriod)
+        {
+            return;
+        }
+
+        DefaultPasswordExpirationPeriod = expirationPeriod;
     }
 
     public void RotateAuthVersion()
@@ -319,6 +389,26 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 
     public IReadOnlyCollection<Guid> PartitionGuids => [.. Partitions.Select(p => p.Guid)];
+
+    public void AddPartition(Partition partition)
+    {
+        Partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        Partitions.Remove(partition);
+    }
+
+    public void AddUserGroup(UserGroup userGroup)
+    {
+        UserGroups.Add(userGroup);
+    }
+
+    public void RemoveUserGroup(UserGroup userGroup)
+    {
+        UserGroups.Remove(userGroup);
+    }
 
     #endregion Partition
 }

@@ -21,6 +21,16 @@ namespace Fargo.Core.UserGroups;
 /// </remarks>
 public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
+    private UserGroup()
+    {
+    }
+
+    public UserGroup(Nameid nameid, Description? description = null)
+    {
+        Nameid = nameid;
+        Description = description ?? Description.Empty;
+    }
+
     /// <summary>
     /// Gets or sets the unique NAMEID of the user group.
     /// </summary>
@@ -28,7 +38,7 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// This value identifies the group in the system and must satisfy
     /// the validation rules defined by <see cref="Nameid"/>.
     /// </remarks>
-    public required Nameid Nameid { get; set; }
+    public Nameid Nameid { get; private set; }
 
     /// <summary>
     /// Gets or sets the textual description associated with the user group.
@@ -37,7 +47,27 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// Provides additional contextual information about the group.
     /// Defaults to <see cref="Description.Empty"/> when not specified.
     /// </remarks>
-    public Description Description { get; set; } = Description.Empty;
+    public Description Description { get; private set; } = Description.Empty;
+
+    public void ChangeNameid(Nameid nameid)
+    {
+        if (Nameid == nameid)
+        {
+            return;
+        }
+
+        Nameid = nameid;
+    }
+
+    public void ChangeDescription(Description description)
+    {
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+    }
 
     #region Active
 
@@ -186,6 +216,16 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
         }
 
         partitionAccesses.Remove(userGroupPartition);
+    }
+
+    public void AddPartition(Partition partition)
+    {
+        Partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        Partitions.Remove(partition);
     }
 
     #endregion Partition

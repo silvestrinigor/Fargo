@@ -124,7 +124,7 @@ public sealed class ArticleMutationTests
     [Fact]
     public void PartitionMutation_Should_UpdatePartitions()
     {
-        var partition = new Partition { Name = new Name("Restricted") };
+        var partition = new Partition(new Name("Restricted"));
         var article = Article.CreateArticle(new Name("Test article"));
 
         article.AddPartition(partition);

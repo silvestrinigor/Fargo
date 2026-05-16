@@ -51,7 +51,7 @@ public sealed class ItemService(IItemRepository itemRepository)
     }
 
     /// <summary>
-    /// Removes an item from its current parent container.
+    /// Clears the parent container relationship, leaving the item outside any container.
     /// </summary>
     public static void RemoveFromContainer(Item item)
     {

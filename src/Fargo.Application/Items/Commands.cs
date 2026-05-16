@@ -11,16 +11,31 @@ namespace Fargo.Application.Items;
 
 #region Create
 
+/// <summary>
+/// Command used to create a new item.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier used as the item article.
+/// </param>
+/// <param name="ProductionDate">
+/// Optional item production date.
+/// </param>
 public sealed record ItemCreateCommand(
-    ItemCreateDto Item
+    Guid ArticleGuid,
+    DateTimeOffset? ProductionDate = null
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles item creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, loads the article,
+/// and stores the new item.
+/// </remarks>
 public sealed class ItemCreateCommandHandler(
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
-    IPartitionRepository partitionRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    IUnitOfWork unitOfWork,
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
@@ -34,42 +49,27 @@ public sealed class ItemCreateCommandHandler(
         {
             logger.LogInformation(
                 "Item create flow started for article {ArticleGuid} by actor {ActorGuid}.",
-                command.Item.ArticleGuid,
+                command.ArticleGuid,
                 actor.ActorGuid);
         }
 
         actor.ValidateHasPermission(ActionType.CreateItem);
 
-        var article = await articleRepository.GetFoundByGuid(command.Item.ArticleGuid, cancellationToken);
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
         actor.ValidateHasAccess(article);
 
-        var item = new Item(article)
-        {
-            ProductionDate = command.Item.ProductionDate
-        };
-
-        foreach (var partitionGuid in command.Item.Partitions ?? [])
-        {
-            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            item.Partitions.Add(partition);
-        }
+        var item = new Item(article, command.ProductionDate);
 
         itemRepository.Add(item);
-
-        await unitOfWork.SaveChanges(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Item create flow completed for item {ItemGuid} by actor {ActorGuid}. ArticleGuid: {ArticleGuid}. PartitionCount: {PartitionCount}.",
+                "Item create mutation completed for item {ItemGuid} by actor {ActorGuid}. ArticleGuid: {ArticleGuid}.",
                 item.Guid,
                 actor.ActorGuid,
-                article.Guid,
-                item.Partitions.Count);
+                article.Guid);
         }
 
         return item.Guid;
@@ -80,13 +80,24 @@ public sealed class ItemCreateCommandHandler(
 
 #region Delete
 
+/// <summary>
+/// Command used to delete an item.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
 public sealed record ItemDeleteCommand(
     Guid ItemGuid
 ) : ICommand;
 
+/// <summary>
+/// Handles item deletion.
+/// </summary>
+/// <remarks>
+/// Validates permissions and removes the item.
+/// </remarks>
 public sealed class ItemDeleteCommandHandler(
     IItemRepository itemRepository,
-    IUnitOfWork unitOfWork,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemDeleteCommandHandler> logger
 ) : ICommandHandler<ItemDeleteCommand>
@@ -113,12 +124,10 @@ public sealed class ItemDeleteCommandHandler(
 
         itemRepository.Remove(item);
 
-        await unitOfWork.SaveChanges(cancellationToken);
-
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Item delete flow completed for item {ItemGuid} by actor {ActorGuid}.",
+                "Item delete mutation completed for item {ItemGuid} by actor {ActorGuid}.",
                 item.Guid,
                 actor.ActorGuid);
         }
@@ -127,24 +136,39 @@ public sealed class ItemDeleteCommandHandler(
 
 #endregion Delete
 
-#region Update
+#region Parent Container
 
-public sealed record ItemUpdateCommand(
+/// <summary>
+/// Command used to set or clear the item parent container.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
+/// <param name="ParentContainerGuid">
+/// Parent container item unique identifier, or <see langword="null"/>
+/// to leave the item outside any container.
+/// </param>
+public sealed record ItemSetParentContainerCommand(
     Guid ItemGuid,
-    ItemUpdateDto Item
+    Guid? ParentContainerGuid
 ) : ICommand;
 
-public sealed class ItemUpdateCommandHandler(
+/// <summary>
+/// Handles item parent container changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and either moves the item into a container
+/// or clears its parent container relationship.
+/// </remarks>
+public sealed class ItemSetParentContainerCommandHandler(
     IItemRepository itemRepository,
-    IPartitionRepository partitionRepository,
     ItemService itemService,
-    IUnitOfWork unitOfWork,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<ItemUpdateCommandHandler> logger
-) : ICommandHandler<ItemUpdateCommand>
+    ILogger<ItemSetParentContainerCommandHandler> logger
+) : ICommandHandler<ItemSetParentContainerCommand>
 {
     public async Task Handle(
-        ItemUpdateCommand command,
+        ItemSetParentContainerCommand command,
         CancellationToken cancellationToken = default
     )
     {
@@ -153,7 +177,7 @@ public sealed class ItemUpdateCommandHandler(
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Item update flow started for item {ItemGuid} by actor {ActorGuid}.",
+                "Item parent container mutation started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
                 actor.ActorGuid);
         }
@@ -164,7 +188,7 @@ public sealed class ItemUpdateCommandHandler(
 
         actor.ValidateHasAccess(item);
 
-        if (command.Item.ParentContainerGuid is { } parentContainerGuid)
+        if (command.ParentContainerGuid is { } parentContainerGuid)
         {
             var parentContainerItem = await itemRepository.GetFoundByGuid(
                 parentContainerGuid,
@@ -190,53 +214,85 @@ public sealed class ItemUpdateCommandHandler(
             ItemService.RemoveFromContainer(item);
             if (logger.IsEnabled(LogLevel.Information))
             {
-                logger.LogInformation("Item update flow removed item {ItemGuid} from its parent container.", item.Guid);
+                logger.LogInformation(
+                    "Item update flow removed item {ItemGuid} from all containers; it no longer has a parent container.",
+                    item.Guid);
             }
         }
 
-        #region Partition
+    }
+}
 
-        if (command.Item.Partitions is { } requestedPartitions)
+#endregion Parent Container
+
+#region Partitions
+
+/// <summary>
+/// Command used to replace the item partition assignments.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
+/// <param name="PartitionGuids">
+/// Desired partition unique identifiers.
+/// </param>
+public sealed record ItemSetPartitionsCommand(
+    Guid ItemGuid,
+    IReadOnlyCollection<Guid> PartitionGuids
+) : ICommand;
+
+/// <summary>
+/// Handles item partition assignment changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and synchronizes the item partitions
+/// with the requested set.
+/// </remarks>
+public sealed class ItemSetPartitionsCommandHandler(
+    IItemRepository itemRepository,
+    IPartitionRepository partitionRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext
+) : ICommandHandler<ItemSetPartitionsCommand>
+{
+    public async Task Handle(
+        ItemSetPartitionsCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        actor.ValidateHasPermission(ActionType.EditItem);
+
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+
+        actor.ValidateHasAccess(item);
+
+        var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
+
+        foreach (var partitionGuid in requestedPartitions)
         {
-            foreach (var partitionGuid in requestedPartitions)
+            if (item.Partitions.Any(p => p.Guid == partitionGuid))
             {
-                if (item.Partitions.Any(p => p.Guid == partitionGuid))
-                {
-                    continue;
-                }
-
-                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                item.Partitions.Add(partition);
+                continue;
             }
 
-            var partitionsToRemove = item.Partitions
-                .Where(p => !requestedPartitions.Contains(p.Guid))
-                .ToList();
+            var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            foreach (var partition in partitionsToRemove)
-            {
-                actor.ValidateHasPartitionAccess(partition.Guid);
+            actor.ValidateHasPartitionAccess(partition.Guid);
 
-                item.Partitions.Remove(partition);
-            }
+            item.AddPartition(partition);
         }
 
-        #endregion Partition
+        var partitionsToRemove = item.Partitions
+            .Where(p => !requestedPartitions.Contains(p.Guid))
+            .ToList();
 
-        await unitOfWork.SaveChanges(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Information))
+        foreach (var partition in partitionsToRemove)
         {
-            logger.LogInformation(
-                "Item update flow completed for item {ItemGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
-                item.Guid,
-                actor.ActorGuid,
-                item.Partitions.Count);
+            actor.ValidateHasPartitionAccess(partition.Guid);
+
+            item.RemovePartition(partition);
         }
     }
 }
 
-#endregion Update
+#endregion Partitions

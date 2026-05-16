@@ -471,7 +471,7 @@ public sealed class PasswordChangeCommandHandler(
 
         ValidatePasswordPolicy(command.Passwords.NewPassword);
 
-        user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
+        user.ChangePasswordHash(passwordHasher.Hash(command.Passwords.NewPassword));
         user.ResetPasswordExpiration();
         user.RotateAuthVersion();
 

@@ -76,6 +76,16 @@ public interface IPartitionAccess
 /// </remarks>
 public class Partition : ModifiedEntity, IPartitionEntity
 {
+    private Partition()
+    {
+    }
+
+    public Partition(Name name, Description? description = null)
+    {
+        Name = name;
+        Description = description ?? Description.Empty;
+    }
+
     /// <summary>
     /// Gets or sets the name of the partition.
     /// </summary>
@@ -83,7 +93,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// The name identifies the partition and must satisfy the validation
     /// rules defined by <see cref="Name"/>.
     /// </remarks>
-    public required Name Name { get; set; }
+    public Name Name { get; private set; }
 
     /// <summary>
     /// Gets or sets the description of the partition.
@@ -93,7 +103,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// purpose or scope of the partition. If not explicitly defined,
     /// it defaults to <see cref="Description.Empty"/>.
     /// </remarks>
-    public Description Description { get; set; } = Description.Empty;
+    public Description Description { get; private set; } = Description.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the partition is active.
@@ -102,7 +112,31 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// Inactive partitions should not be considered available for new access
     /// assignments or operational use, depending on application rules.
     /// </remarks>
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
+
+    public void Rename(Name name)
+    {
+        if (Name == name)
+        {
+            return;
+        }
+
+        Name = name;
+    }
+
+    public void ChangeDescription(Description description)
+    {
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+    }
+
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
 
     #region ParentPartition
 

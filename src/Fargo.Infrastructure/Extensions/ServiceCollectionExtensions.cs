@@ -139,21 +139,45 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ArticleDeactivateCommand>, ArticleDeactivateCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
 
+            services.AddScoped<ItemApplicationService>();
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemSetParentContainerCommand>, ItemSetParentContainerCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemSetPartitionsCommand>, ItemSetPartitionsCommandHandler>();
 
+            services.AddScoped<UserApplicationService>();
             services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeNameidCommand>, UserChangeNameidCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeFirstNameCommand>, UserChangeFirstNameCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeLastNameCommand>, UserChangeLastNameCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeDescriptionCommand>, UserChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetDefaultPasswordExpirationCommand>, UserSetDefaultPasswordExpirationCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangePasswordCommand>, UserChangePasswordCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetPermissionsCommand>, UserSetPermissionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetPartitionsCommand>, UserSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetUserGroupsCommand>, UserSetUserGroupsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserActivateCommand>, UserActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserDeactivateCommand>, UserDeactivateCommandHandler>();
 
+            services.AddScoped<UserGroupApplicationService>();
             services.AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupChangeNameidCommand>, UserGroupChangeNameidCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupChangeDescriptionCommand>, UserGroupChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupSetPermissionsCommand>, UserGroupSetPermissionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupSetPartitionsCommand>, UserGroupSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupActivateCommand>, UserGroupActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupDeactivateCommand>, UserGroupDeactivateCommandHandler>();
 
+            services.AddScoped<PartitionApplicationService>();
             services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
             services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionRenameCommand>, PartitionRenameCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionChangeDescriptionCommand>, PartitionChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionSetParentCommand>, PartitionSetParentCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionActivateCommand>, PartitionActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionDeactivateCommand>, PartitionDeactivateCommandHandler>();
 
             services.AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>();
             services.AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>();

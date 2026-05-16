@@ -38,7 +38,7 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// Initializes a new item entity associated with the specified article.
     /// </summary>
     /// <param name="article">The article associated with the item.</param>
-    public Item(Article article)
+    public Item(Article article, DateTimeOffset? productionDate = null)
     {
         if (article.IsContainer)
         {
@@ -46,6 +46,7 @@ public class Item : ModifiedEntity, IPartitionedEntity
         }
 
         Article = article;
+        ProductionDate = productionDate;
     }
 
     #region Article
@@ -141,6 +142,16 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// in partition-based access evaluation.
     /// </remarks>
     public PartitionCollection Partitions { get; init; } = [];
+
+    public void AddPartition(Partition partition)
+    {
+        Partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        Partitions.Remove(partition);
+    }
 
     /// <inheritdoc />
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;

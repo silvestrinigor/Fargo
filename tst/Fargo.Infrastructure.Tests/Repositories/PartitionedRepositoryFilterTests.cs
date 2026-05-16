@@ -133,11 +133,11 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new UserGroup { Nameid = new Nameid("public-group") };
-        var firstPartitionEntity = new UserGroup { Nameid = new Nameid("first-group") };
-        firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new UserGroup { Nameid = new Nameid("second-group") };
-        secondPartitionEntity.Partitions.Add(secondPartition);
+        var publicEntity = new UserGroup(new Nameid("public-group"));
+        var firstPartitionEntity = new UserGroup(new Nameid("first-group"));
+        firstPartitionEntity.AddPartition(firstPartition);
+        var secondPartitionEntity = new UserGroup(new Nameid("second-group"));
+        secondPartitionEntity.AddPartition(secondPartition);
         context.UserGroups.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
@@ -219,16 +219,14 @@ public sealed class PartitionedRepositoryFilterTests
 
     private static (Partition First, Partition Second) AddPartitions(FargoDbContext context)
     {
-        var first = new Partition { Name = new Name("First partition") };
-        var second = new Partition { Name = new Name("Second partition") };
+        var first = new Partition(new Name("First partition"));
+        var second = new Partition(new Name("Second partition"));
         context.Partitions.AddRange(first, second);
         return (first, second);
     }
 
     private static User CreateUser(string nameid)
-        => new()
-        {
-            Nameid = new Nameid(nameid),
-            PasswordHash = new PasswordHash(new string('h', PasswordHash.MinLength))
-        };
+        => new(
+            new Nameid(nameid),
+            new PasswordHash(new string('h', PasswordHash.MinLength)));
 }
