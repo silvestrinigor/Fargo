@@ -93,6 +93,7 @@ public readonly struct Ean13 : IEquatable<Ean13>
     /// <summary>Implicitly converts an <see cref="Ean13"/> to its string representation.</summary>
     public static implicit operator string(Ean13 barcode) => barcode.Code;
 }
+
 /// <summary>EAN-8 barcode value assigned to an article. Code must be exactly 8 digits.</summary>
 public readonly struct Ean8 : IEquatable<Ean8>
 {
@@ -144,6 +145,7 @@ public readonly struct Ean8 : IEquatable<Ean8>
     /// <summary>Implicitly converts an <see cref="Ean8"/> to its string representation.</summary>
     public static implicit operator string(Ean8 barcode) => barcode.Code;
 }
+
 /// <summary>UPC-A barcode value assigned to an article. Code must be exactly 12 digits.</summary>
 public readonly struct UpcA : IEquatable<UpcA>
 {
@@ -195,6 +197,7 @@ public readonly struct UpcA : IEquatable<UpcA>
     /// <summary>Implicitly converts a <see cref="UpcA"/> to its string representation.</summary>
     public static implicit operator string(UpcA barcode) => barcode.Code;
 }
+
 /// <summary>UPC-E barcode value assigned to an article. Code must be exactly 8 digits.</summary>
 public readonly struct UpcE : IEquatable<UpcE>
 {
@@ -246,6 +249,7 @@ public readonly struct UpcE : IEquatable<UpcE>
     /// <summary>Implicitly converts a <see cref="UpcE"/> to its string representation.</summary>
     public static implicit operator string(UpcE barcode) => barcode.Code;
 }
+
 /// <summary>Code 128 barcode value assigned to an article. Code must be 1–80 printable ASCII characters.</summary>
 public readonly struct Code128 : IEquatable<Code128>
 {
@@ -298,6 +302,7 @@ public readonly struct Code128 : IEquatable<Code128>
     /// <summary>Implicitly converts a <see cref="Code128"/> to its string representation.</summary>
     public static implicit operator string(Code128 barcode) => barcode.Code;
 }
+
 /// <summary>Code 39 barcode value assigned to an article. Code must be 1–80 printable ASCII characters.</summary>
 public readonly struct Code39 : IEquatable<Code39>
 {
@@ -350,6 +355,7 @@ public readonly struct Code39 : IEquatable<Code39>
     /// <summary>Implicitly converts a <see cref="Code39"/> to its string representation.</summary>
     public static implicit operator string(Code39 barcode) => barcode.Code;
 }
+
 /// <summary>ITF-14 barcode value assigned to an article. Code must be exactly 14 digits.</summary>
 public readonly struct Itf14 : IEquatable<Itf14>
 {
@@ -401,6 +407,7 @@ public readonly struct Itf14 : IEquatable<Itf14>
     /// <summary>Implicitly converts an <see cref="Itf14"/> to its string representation.</summary>
     public static implicit operator string(Itf14 barcode) => barcode.Code;
 }
+
 /// <summary>GS1-128 barcode value assigned to an article. Code must be 1–80 printable ASCII characters.</summary>
 public readonly struct Gs1128 : IEquatable<Gs1128>
 {
@@ -453,6 +460,7 @@ public readonly struct Gs1128 : IEquatable<Gs1128>
     /// <summary>Implicitly converts a <see cref="Gs1128"/> to its string representation.</summary>
     public static implicit operator string(Gs1128 barcode) => barcode.Code;
 }
+
 /// <summary>QR Code barcode value assigned to an article. Code must be 1–2953 characters.</summary>
 public readonly struct QrCode : IEquatable<QrCode>
 {
@@ -505,6 +513,7 @@ public readonly struct QrCode : IEquatable<QrCode>
     /// <summary>Implicitly converts a <see cref="QrCode"/> to its string representation.</summary>
     public static implicit operator string(QrCode barcode) => barcode.Code;
 }
+
 /// <summary>Data Matrix barcode value assigned to an article. Code must be 1–2335 characters.</summary>
 public readonly struct DataMatrix : IEquatable<DataMatrix>
 {
