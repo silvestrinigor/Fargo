@@ -1,8 +1,12 @@
-using Fargo.Core;
-using System.Drawing;
-
 namespace Fargo.Application.Articles;
 
+/// <summary>
+/// Provides application operations for articles.
+/// </summary>
+/// <remarks>
+/// Coordinates article commands and persists changes
+/// using the unit of work.
+/// </remarks>
 public sealed class ArticleApplicationService(
     ICommandHandler<ArticleCreateCommand, Guid> createArticleHandler,
     ICommandHandler<ArticleChangeDescriptionCommand> changeDescriptionHandler,
@@ -18,64 +22,69 @@ public sealed class ArticleApplicationService(
     IUnitOfWork unitOfWork
 )
 {
+    /// <summary>
+    /// Creates a new article.
+    /// </summary>
+    /// <param name="create">
+    /// Article creation data.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Cancellation token.
+    /// </param>
+    /// <returns>
+    /// The created article identifier.
+    /// </returns>
     public async Task<Guid> Create(
-        Name name,
-        Description? description = null,
-        TimeSpan? shelfLife = null,
-        Color? color = null,
-        ArticleMetricsDto? metrics = null,
-        ArticleBarcodesDto? barcodes = null,
-        IReadOnlyCollection<Guid>? partitionGuids = null,
-        bool? isActive = null,
+        ArticleCreateDto create,
         CancellationToken cancellationToken = default)
     {
         var articleGuid = await createArticleHandler.Handle(
-            new ArticleCreateCommand(name),
+            new ArticleCreateCommand(create.Name),
             cancellationToken);
 
-        if (description is { } descriptionValue)
+        if (create.Description is { } description)
         {
             await changeDescriptionHandler.Handle(
-                new ArticleChangeDescriptionCommand(articleGuid, descriptionValue),
+                new ArticleChangeDescriptionCommand(articleGuid, description),
                 cancellationToken);
         }
 
-        if (shelfLife is not null)
+        if (create.ShelfLife is not null)
         {
             await setShelfLifeHandler.Handle(
-                new ArticleSetShelfLifeCommand(articleGuid, shelfLife),
+                new ArticleSetShelfLifeCommand(articleGuid, create.ShelfLife),
                 cancellationToken);
         }
 
-        if (color is not null)
+        if (create.Color is not null)
         {
             await setColorHandler.Handle(
-                new ArticleSetColorCommand(articleGuid, color),
+                new ArticleSetColorCommand(articleGuid, create.Color),
                 cancellationToken);
         }
 
-        if (metrics is { } metricsValue)
+        if (create.Metrics is { } metrics)
         {
             await setMetricsHandler.Handle(
-                new ArticleSetMetricsCommand(articleGuid, metricsValue),
+                new ArticleSetMetricsCommand(articleGuid, metrics),
                 cancellationToken);
         }
 
-        if (barcodes is { } barcodesValue && HasAnyBarcode(barcodesValue))
+        if (create.Barcodes is { } barcodes)
         {
             await setBarcodesHandler.Handle(
-                new ArticleSetBarcodesCommand(articleGuid, barcodesValue),
+                new ArticleSetBarcodesCommand(articleGuid, barcodes),
                 cancellationToken);
         }
 
-        if (partitionGuids is { Count: > 0 })
+        if (create.Partitions is { Count: > 0 } partitions)
         {
             await setPartitionsHandler.Handle(
-                new ArticleSetPartitionsCommand(articleGuid, partitionGuids),
+                new ArticleSetPartitionsCommand(articleGuid, partitions),
                 cancellationToken);
         }
 
-        if (isActive == false)
+        if (create.IsActive == false)
         {
             await deactivateHandler.Handle(new ArticleDeactivateCommand(articleGuid), cancellationToken);
         }
@@ -85,6 +94,18 @@ public sealed class ArticleApplicationService(
         return articleGuid;
     }
 
+    /// <summary>
+    /// Updates an existing article.
+    /// </summary>
+    /// <param name="articleGuid">
+    /// Article unique identifier.
+    /// </param>
+    /// <param name="patch">
+    /// Article update data.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Cancellation token.
+    /// </param>
     public async Task Patch(
         Guid articleGuid,
         ArticlePatchDto patch,
@@ -120,25 +141,23 @@ public sealed class ArticleApplicationService(
                 cancellationToken);
         }
 
-        if (HasAnyBarcodePatch(patch.Barcodes))
+        if (patch.Barcodes is { } barcodes)
         {
             await setBarcodesHandler.Handle(
-                new ArticleSetBarcodesCommand(
-                    articleGuid,
-                    await BuildBarcodesDto(articleGuid, patch.Barcodes, cancellationToken)),
+                new ArticleSetBarcodesCommand(articleGuid, barcodes),
                 cancellationToken);
         }
 
-        if (patch.Partitions.IsSpecified)
+        if (patch.Partitions is { } partitions)
         {
             await setPartitionsHandler.Handle(
-                new ArticleSetPartitionsCommand(articleGuid, patch.Partitions.Value ?? []),
+                new ArticleSetPartitionsCommand(articleGuid, partitions),
                 cancellationToken);
         }
 
-        if (patch.IsActive.IsSpecified)
+        if (patch.IsActive is { } isActive)
         {
-            if (patch.IsActive.Value!.Value)
+            if (isActive)
             {
                 await activateHandler.Handle(new ArticleActivateCommand(articleGuid), cancellationToken);
             }
@@ -151,6 +170,15 @@ public sealed class ArticleApplicationService(
         await unitOfWork.SaveChanges(cancellationToken);
     }
 
+    /// <summary>
+    /// Deletes an article.
+    /// </summary>
+    /// <param name="articleGuid">
+    /// Article unique identifier.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Cancellation token.
+    /// </param>
     public async Task Delete(
         Guid articleGuid,
         CancellationToken cancellationToken = default)

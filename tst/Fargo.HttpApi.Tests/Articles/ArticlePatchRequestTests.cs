@@ -13,22 +13,55 @@ public sealed class ArticlePatchRequestTests
     {
         var request = JsonSerializer.Deserialize<ArticlePatchRequest>("{}", JsonOptions)!;
 
-        Assert.False(request.Name.IsSpecified);
+        Assert.Null(request.Name);
+        Assert.False(request.ShelfLife.IsSpecified);
+        Assert.Null(request.Barcodes);
     }
 
     [Fact]
-    public void Deserialize_Should_KeepExplicitNullSpecified()
+    public void Deserialize_Should_KeepExplicitNullableDatabaseFieldSpecified()
     {
         var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
             """
             {
-              "ean13": null
+              "shelfLife": null
             }
             """,
             JsonOptions)!;
 
-        Assert.True(request.Ean13.IsSpecified);
-        Assert.Null(request.Ean13.Value);
+        Assert.True(request.ShelfLife.IsSpecified);
+        Assert.Null(request.ShelfLife.Value);
+    }
+
+    [Fact]
+    public void Deserialize_Should_TreatExplicitDescriptionNullAsNoEdit()
+    {
+        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+            """
+            {
+              "description": null
+            }
+            """,
+            JsonOptions)!;
+
+        Assert.Null(request.Description);
+    }
+
+    [Fact]
+    public void Deserialize_Should_ReadNestedBarcodes()
+    {
+        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+            """
+            {
+              "barcodes": {
+                "ean13": "1234567890123"
+              }
+            }
+            """,
+            JsonOptions)!;
+
+        Assert.NotNull(request.Barcodes);
+        Assert.Equal("1234567890123", request.Barcodes.Ean13);
     }
 
     [Fact]
@@ -36,7 +69,7 @@ public sealed class ArticlePatchRequestTests
     {
         var request = new ArticlePatchRequest
         {
-            Name = Optional<string?>.FromValue("Article")
+            Name = "Article"
         };
 
         var json = JsonSerializer.Serialize(request, JsonOptions);

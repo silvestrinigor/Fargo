@@ -3,7 +3,6 @@ using Fargo.Core;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Users;
 using Fargo.Sdk.Contracts;
-using Microsoft.AspNetCore.Http;
 using UnitsNet;
 using UnitsNet.Units;
 using AppArticles = Fargo.Application.Articles;
@@ -51,44 +50,26 @@ internal static class ApiContractMappings
     public static IReadOnlyCollection<ContractArticles.ArticleInfo> ToInfo(this IReadOnlyCollection<AppArticles.ArticleDto> articles)
         => articles.Select(static article => article.ToInfo()).ToArray();
 
-    public static Description? ToApplicationDescription(this ContractArticles.ArticleCreateRequest request)
-        => request.Description.ToDescription();
-
-    public static AppArticles.ArticleMetricsDto? ToApplicationMetricsDto(this ContractArticles.ArticleCreateRequest request)
-        => request.Metrics.ToApplicationDto();
-
-    public static AppArticles.ArticleBarcodesDto ToApplicationBarcodesDto(this ContractArticles.ArticleCreateRequest request)
+    public static AppArticles.ArticleCreateDto ToApplicationDto(this ContractArticles.ArticleCreateRequest request)
         => new(
-            request.Ean13.ToEan13ApplicationDto(),
-            request.Ean8.ToEan8ApplicationDto(),
-            request.UpcA.ToUpcAApplicationDto(),
-            request.UpcE.ToUpcEApplicationDto(),
-            request.Code128.ToCode128ApplicationDto(),
-            request.Code39.ToCode39ApplicationDto(),
-            request.Itf14.ToItf14ApplicationDto(),
-            request.Gs1128.ToGs1128ApplicationDto(),
-            request.QrCode.ToQrCodeApplicationDto(),
-            request.DataMatrix.ToDataMatrixApplicationDto());
+            new Name(request.Name),
+            request.Description.ToDescription(),
+            request.ShelfLife,
+            Color: null,
+            request.Metrics.ToApplicationDto(),
+            request.ToApplicationBarcodesDto(),
+            request.Partitions,
+            request.IsActive);
 
     public static AppArticles.ArticlePatchDto ToApplicationDto(this ContractArticles.ArticlePatchRequest request)
         => new(
-            request.Name.ToApplicationName(),
-            request.Description.ToApplicationDescription(),
+            request.Name.ToName(),
+            request.Description.ToDescription(),
             request.ShelfLife.ToApplicationOptional(),
-            request.Metrics.ToApplicationMetricsPatchDto(),
-            new AppArticles.ArticleBarcodesPatchDto(
-                request.Ean13.ToApplicationEan13(),
-                request.Ean8.ToApplicationEan8(),
-                request.UpcA.ToApplicationUpcA(),
-                request.UpcE.ToApplicationUpcE(),
-                request.Code128.ToApplicationCode128(),
-                request.Code39.ToApplicationCode39(),
-                request.Itf14.ToApplicationItf14(),
-                request.Gs1128.ToApplicationGs1128(),
-                request.QrCode.ToApplicationQrCode(),
-                request.DataMatrix.ToApplicationDataMatrix()),
-            request.Partitions.ToApplicationOptional(),
-            request.IsActive.ToApplicationRequiredBool(nameof(ContractArticles.ArticlePatchRequest.IsActive)));
+            request.Metrics.ToApplicationDto(),
+            request.Barcodes.ToApplicationDto(),
+            request.Partitions,
+            request.IsActive);
 
     public static AppArticles.ArticleBarcodeDto ToApplicationDto(this ContractArticles.ArticleBarcode articleBarcode)
         => new(articleBarcode.Barcode, articleBarcode.Type.ToDomain());
@@ -256,112 +237,37 @@ internal static class ApiContractMappings
                 metrics.LengthY.ToLength(),
                 metrics.LengthZ.ToLength());
 
-    private static AppArticles.OptionalValue<AppArticles.ArticleMetricsPatchDto> ToApplicationMetricsPatchDto(
-        this Optional<ContractArticles.ArticleMetricsPatchInfo?> metrics)
-    {
-        if (!metrics.IsSpecified)
-        {
-            return default;
-        }
+    private static AppArticles.ArticleBarcodesDto ToApplicationBarcodesDto(this ContractArticles.ArticleCreateRequest request)
+        => new(
+            request.Ean13.ToEan13ApplicationDto(),
+            request.Ean8.ToEan8ApplicationDto(),
+            request.UpcA.ToUpcAApplicationDto(),
+            request.UpcE.ToUpcEApplicationDto(),
+            request.Code128.ToCode128ApplicationDto(),
+            request.Code39.ToCode39ApplicationDto(),
+            request.Itf14.ToItf14ApplicationDto(),
+            request.Gs1128.ToGs1128ApplicationDto(),
+            request.QrCode.ToQrCodeApplicationDto(),
+            request.DataMatrix.ToDataMatrixApplicationDto());
 
-        if (metrics.Value is null)
-        {
-            return AppArticles.OptionalValue<AppArticles.ArticleMetricsPatchDto>.FromValue(null);
-        }
-
-        return AppArticles.OptionalValue<AppArticles.ArticleMetricsPatchDto>.FromValue(
-            new AppArticles.ArticleMetricsPatchDto(
-                metrics.Value.Mass.ToApplicationMass(),
-                metrics.Value.LengthX.ToApplicationLength(),
-                metrics.Value.LengthY.ToApplicationLength(),
-                metrics.Value.LengthZ.ToApplicationLength()));
-    }
-
-    private static AppArticles.OptionalValue<Name> ToApplicationName(this Optional<string?> value)
-    {
-        if (!value.IsSpecified)
-        {
-            return default;
-        }
-
-        if (value.Value is null)
-        {
-            throw new BadHttpRequestException("Name cannot be null.");
-        }
-
-        return AppArticles.OptionalValue<Name>.FromValue(new Name(value.Value));
-    }
-
-    private static AppArticles.OptionalValue<Description> ToApplicationDescription(this Optional<string?> value)
-    {
-        if (!value.IsSpecified)
-        {
-            return default;
-        }
-
-        return AppArticles.OptionalValue<Description>.FromValue(value.Value.ToDescription() ?? Description.Empty);
-    }
-
-    private static AppArticles.OptionalValue<bool> ToApplicationRequiredBool(
-        this Optional<bool?> value,
-        string propertyName)
-    {
-        if (!value.IsSpecified)
-        {
-            return default;
-        }
-
-        if (value.Value is null)
-        {
-            throw new BadHttpRequestException($"{propertyName} cannot be null.");
-        }
-
-        return AppArticles.OptionalValue<bool>.FromValue(value.Value.Value);
-    }
+    private static AppArticles.ArticleBarcodesDto? ToApplicationDto(this ContractArticles.ArticleBarcodesInfo? barcodes)
+        => barcodes is null
+            ? null
+            : new AppArticles.ArticleBarcodesDto(
+                barcodes.Ean13.ToEan13ApplicationDto(),
+                barcodes.Ean8.ToEan8ApplicationDto(),
+                barcodes.UpcA.ToUpcAApplicationDto(),
+                barcodes.UpcE.ToUpcEApplicationDto(),
+                barcodes.Code128.ToCode128ApplicationDto(),
+                barcodes.Code39.ToCode39ApplicationDto(),
+                barcodes.Itf14.ToItf14ApplicationDto(),
+                barcodes.Gs1128.ToGs1128ApplicationDto(),
+                barcodes.QrCode.ToQrCodeApplicationDto(),
+                barcodes.DataMatrix.ToDataMatrixApplicationDto());
 
     private static AppArticles.OptionalValue<TValue> ToApplicationOptional<TValue>(this Optional<TValue?> value)
         where TValue : struct
         => value.IsSpecified ? AppArticles.OptionalValue<TValue>.FromValue(value.Value) : default;
-
-    private static AppArticles.OptionalReferenceValue<IReadOnlyCollection<Guid>> ToApplicationOptional(
-        this Optional<IReadOnlyCollection<Guid>?> value)
-        => value.IsSpecified ? AppArticles.OptionalReferenceValue<IReadOnlyCollection<Guid>>.FromValue(value.Value) : default;
-
-    private static AppArticles.OptionalValue<Mass> ToApplicationMass(this Optional<ContractArticles.MassInfo?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Mass>.FromValue(value.Value.ToMass()) : default;
-
-    private static AppArticles.OptionalValue<Length> ToApplicationLength(this Optional<ContractArticles.LengthInfo?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Length>.FromValue(value.Value.ToLength()) : default;
-
-    private static AppArticles.OptionalValue<Ean13> ToApplicationEan13(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Ean13>.FromValue(value.Value.ToEan13ApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<Ean8> ToApplicationEan8(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Ean8>.FromValue(value.Value.ToEan8ApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<UpcA> ToApplicationUpcA(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<UpcA>.FromValue(value.Value.ToUpcAApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<UpcE> ToApplicationUpcE(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<UpcE>.FromValue(value.Value.ToUpcEApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<Code128> ToApplicationCode128(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Code128>.FromValue(value.Value.ToCode128ApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<Code39> ToApplicationCode39(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Code39>.FromValue(value.Value.ToCode39ApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<Itf14> ToApplicationItf14(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Itf14>.FromValue(value.Value.ToItf14ApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<Gs1128> ToApplicationGs1128(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<Gs1128>.FromValue(value.Value.ToGs1128ApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<QrCode> ToApplicationQrCode(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<QrCode>.FromValue(value.Value.ToQrCodeApplicationDto()) : default;
-
-    private static AppArticles.OptionalValue<DataMatrix> ToApplicationDataMatrix(this Optional<string?> value)
-        => value.IsSpecified ? AppArticles.OptionalValue<DataMatrix>.FromValue(value.Value.ToDataMatrixApplicationDto()) : default;
 
     private static ContractArticles.MassInfo? ToInfo(this Mass? mass)
         => mass is not { } value ? null : new ContractArticles.MassInfo(value.Value, Mass.GetAbbreviation(value.Unit));

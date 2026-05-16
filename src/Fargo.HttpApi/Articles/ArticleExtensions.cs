@@ -163,14 +163,7 @@ public static class ArticleEndpointRouteBuilderExtension
         CancellationToken cancellationToken)
     {
         var response = await articles.Create(
-            new Name(request.Name),
-            request.ToApplicationDescription(),
-            request.ShelfLife,
-            color: null,
-            request.ToApplicationMetricsDto(),
-            request.ToApplicationBarcodesDto(),
-            request.Partitions,
-            request.IsActive,
+            request.ToApplicationDto(),
             cancellationToken);
 
         return TypedResults.Ok(response);

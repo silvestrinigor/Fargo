@@ -56,28 +56,13 @@ public readonly record struct OptionalValue<TValue>(bool IsSpecified, TValue? Va
     public static OptionalValue<TValue> FromValue(TValue? value) => new(true, value);
 }
 
-public readonly record struct OptionalReferenceValue<TValue>(bool IsSpecified, TValue? Value)
-    where TValue : class
-{
-    public static OptionalReferenceValue<TValue> FromValue(TValue? value) => new(true, value);
-}
-
 public sealed record ArticleCreateDto(
     Name Name,
     Description? Description = null,
     TimeSpan? ShelfLife = null,
     Color? Color = null,
     ArticleMetricsDto? Metrics = null,
-    Ean13? Ean13 = null,
-    Ean8? Ean8 = null,
-    UpcA? UpcA = null,
-    UpcE? UpcE = null,
-    Code128? Code128 = null,
-    Code39? Code39 = null,
-    Itf14? Itf14 = null,
-    Gs1128? Gs1128 = null,
-    QrCode? QrCode = null,
-    DataMatrix? DataMatrix = null,
+    ArticleBarcodesDto? Barcodes = null,
     IReadOnlyCollection<Guid>? Partitions = null,
     bool? IsActive = null
 );
@@ -87,9 +72,9 @@ public sealed record ArticlePatchDto(
     Description? Description = default,
     OptionalValue<TimeSpan> ShelfLife = default,
     ArticleMetricsDto? Metrics = default,
-    ArticleBarcodeDto? Barcodes = default,
+    ArticleBarcodesDto? Barcodes = default,
     IReadOnlyCollection<Guid>? Partitions = default,
-    OptionalValue<bool> IsActive = default
+    bool? IsActive = default
 );
 
 public sealed record ArticleBarcodeDto(string Barcode, BarcodeFormat Type);

@@ -102,18 +102,15 @@ public sealed class ArticleTools(IArticleClient articles)
     {
         var request = new ArticlePatchRequest
         {
-            Name = name is null ? default : Optional<string?>.FromValue(name),
-            Description = description is null ? default : Optional<string?>.FromValue(description),
+            Name = name,
+            Description = description,
             Metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
-                ? default
-                : Optional<ArticleMetricsPatchInfo?>.FromValue(
-                    new ArticleMetricsPatchInfo
-                    {
-                        Mass = massValue is null ? default : Optional<MassInfo?>.FromValue(new MassInfo(massValue.Value, massUnit)),
-                        LengthX = lengthXValue is null ? default : Optional<LengthInfo?>.FromValue(new LengthInfo(lengthXValue.Value, lengthXUnit)),
-                        LengthY = lengthYValue is null ? default : Optional<LengthInfo?>.FromValue(new LengthInfo(lengthYValue.Value, lengthYUnit)),
-                        LengthZ = lengthZValue is null ? default : Optional<LengthInfo?>.FromValue(new LengthInfo(lengthZValue.Value, lengthZUnit))
-                    })
+                ? null
+                : new ArticleMetricsInfo(
+                    massValue is null ? null : new MassInfo(massValue.Value, massUnit),
+                    lengthXValue is null ? null : new LengthInfo(lengthXValue.Value, lengthXUnit),
+                    lengthYValue is null ? null : new LengthInfo(lengthYValue.Value, lengthYUnit),
+                    lengthZValue is null ? null : new LengthInfo(lengthZValue.Value, lengthZUnit))
         };
 
         var update = await articles.UpdateAsync(
