@@ -282,7 +282,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
 
     internal void SetDataMatrix(DataMatrix? value) => SetBarcode(value, DataMatrix, next => DataMatrix = next);
 
-    private void SetBarcode<TBarcode>(
+    private static void SetBarcode<TBarcode>(
         TBarcode? value,
         TBarcode? current,
         Action<TBarcode?> setter)
