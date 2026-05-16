@@ -41,6 +41,29 @@ public sealed record ArticleBarcodesDto(
     DataMatrix? DataMatrix = null
 );
 
+public static class ArticleCommandDtoMappings
+{
+    public static ArticleMetrics ToCore(this ArticleMetricsDto metrics)
+        => new(
+            metrics.Mass,
+            metrics.LengthX,
+            metrics.LengthY,
+            metrics.LengthZ);
+
+    public static ArticleBarcodesSet ToCore(this ArticleBarcodesDto barcodes)
+        => new(
+            barcodes.Ean13,
+            barcodes.Ean8,
+            barcodes.UpcA,
+            barcodes.UpcE,
+            barcodes.Code128,
+            barcodes.Code39,
+            barcodes.Itf14,
+            barcodes.Gs1128,
+            barcodes.QrCode,
+            barcodes.DataMatrix);
+}
+
 public sealed record ArticleCreateDto(
     Name Name,
     Description? Description = null,

@@ -66,14 +66,14 @@ public sealed class ArticleApplicationService(
         if (create.Metrics is { } metrics)
         {
             await setMetricsHandler.Handle(
-                new ArticleSetMetricsCommand(articleGuid, metrics),
+                new ArticleSetMetricsCommand(articleGuid, metrics.ToCore()),
                 cancellationToken);
         }
 
         if (create.Barcodes is { } barcodes)
         {
             await setBarcodesHandler.Handle(
-                new ArticleSetBarcodesCommand(articleGuid, barcodes),
+                new ArticleSetBarcodesCommand(articleGuid, barcodes.ToCore()),
                 cancellationToken);
         }
 
@@ -137,14 +137,14 @@ public sealed class ArticleApplicationService(
             await setMetricsHandler.Handle(
                 new ArticleSetMetricsCommand(
                     articleGuid,
-                    metrics),
+                    metrics.ToCore()),
                 cancellationToken);
         }
 
         if (patch.Barcodes is { } barcodes)
         {
             await setBarcodesHandler.Handle(
-                new ArticleSetBarcodesCommand(articleGuid, barcodes),
+                new ArticleSetBarcodesCommand(articleGuid, barcodes.ToCore()),
                 cancellationToken);
         }
 

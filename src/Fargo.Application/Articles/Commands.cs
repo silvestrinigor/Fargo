@@ -399,7 +399,7 @@ public sealed class ArticleDeactivateCommandHandler(
 /// </param>
 public sealed record ArticleSetMetricsCommand(
     Guid ArticleGuid,
-    ArticleMetricsDto Metrics
+    ArticleMetrics Metrics
 ) : ICommand;
 
 /// <summary>
@@ -433,11 +433,7 @@ public sealed class ArticleSetMetricsCommandHandler(
             return;
         }
 
-        article.SetMetrics(
-            command.Metrics.Mass,
-            command.Metrics.LengthX,
-            command.Metrics.LengthY,
-            command.Metrics.LengthZ);
+        article.SetMetrics(command.Metrics);
 
         article.MarkAsEditedBy(actor.ActorGuid);
 
@@ -460,7 +456,7 @@ public sealed class ArticleSetMetricsCommandHandler(
 /// </param>
 public sealed record ArticleSetBarcodesCommand(
     Guid ArticleGuid,
-    ArticleBarcodesDto Barcodes
+    ArticleBarcodesSet Barcodes
 ) : ICommand;
 
 /// <summary>

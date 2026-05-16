@@ -34,7 +34,7 @@ public sealed class ArticleApplicationServiceTests
         await fixture.SetMetricsHandler.Received(1).Handle(
             Arg.Is<ArticleSetMetricsCommand>(command =>
                 command.ArticleGuid == articleGuid &&
-                command.Metrics == metrics),
+                command.Metrics == metrics.ToCore()),
             Arg.Any<CancellationToken>());
     }
 
@@ -50,7 +50,7 @@ public sealed class ArticleApplicationServiceTests
         await fixture.SetBarcodesHandler.Received(1).Handle(
             Arg.Is<ArticleSetBarcodesCommand>(command =>
                 command.ArticleGuid == articleGuid &&
-                command.Barcodes == barcodes),
+                command.Barcodes == barcodes.ToCore()),
             Arg.Any<CancellationToken>());
     }
 

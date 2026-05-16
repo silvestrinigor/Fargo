@@ -182,20 +182,20 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
     /// </summary>
     public Mass? Mass { get; private set; }
 
-    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
+    public void SetMetrics(ArticleMetrics metrics)
     {
-        if (Nullable.Equals(Mass, mass) &&
-            Nullable.Equals(LengthX, lengthX) &&
-            Nullable.Equals(LengthY, lengthY) &&
-            Nullable.Equals(LengthZ, lengthZ))
+        if (Nullable.Equals(Mass, metrics.Mass) &&
+            Nullable.Equals(LengthX, metrics.LengthX) &&
+            Nullable.Equals(LengthY, metrics.LengthY) &&
+            Nullable.Equals(LengthZ, metrics.LengthZ))
         {
             return;
         }
 
-        Mass = mass;
-        LengthX = lengthX;
-        LengthY = lengthY;
-        LengthZ = lengthZ;
+        Mass = metrics.Mass;
+        LengthX = metrics.LengthX;
+        LengthY = metrics.LengthY;
+        LengthZ = metrics.LengthZ;
     }
 
     /// <summary>
@@ -298,48 +298,28 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
 
     #endregion Barcode
 
-    #region Relation
+    #region Variation
 
     /// <summary>
     /// Gets the variation info associated with the article.
     /// When <see langword="null"/>, no variation constraint is defined.
     /// </summary>
-    public ArticleVariation? Variation { get; private set; }
-
-    public void SetVariationFromArticle(Article fromArticle)
-    {
-        ArgumentNullException.ThrowIfNull(fromArticle);
-
-        if (Variation?.FromArticleGuid == fromArticle.Guid)
-        {
-            return;
-        }
-
-        Variation = new ArticleVariation(fromArticle);
-    }
+    public ArticleVariation? Variation { get; private init; }
 
     /// <summary>
     /// Gets a value indicating whether this article is a variation of another article.
     /// </summary>
     public bool IsVariation => Variation is not null;
 
+    #endregion Variation
+
+    #region Pack
+
     /// <summary>
     /// Gets the pack info associated with the article.
     /// When <see langword="null"/>, no pack constraint is defined.
     /// </summary>
-    public ArticlePack? Pack { get; private set; }
-
-    public void SetPackFromArticle(Article fromArticle)
-    {
-        ArgumentNullException.ThrowIfNull(fromArticle);
-
-        if (Pack?.FromArticleGuid == fromArticle.Guid)
-        {
-            return;
-        }
-
-        Pack = new ArticlePack(fromArticle, Pack?.Quantity ?? 1.Amount());
-    }
+    public ArticlePack? Pack { get; private init; }
 
     public void SetPackQuantity(Scalar quantity)
     {
@@ -361,25 +341,22 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
     /// </summary>
     public bool IsPack => Pack is not null;
 
+    #endregion Pack
+
+    #region Kit
+
     /// <summary>
     /// Gets the kit info associated with the article.
     /// When <see langword="null"/>, no kit constraint is defined.
     /// </summary>
-    public ArticleKit? Kit { get; private set; }
-
-    public void SetKitArticles(IReadOnlyCollection<ArticlePack> packs)
-    {
-        ArgumentNullException.ThrowIfNull(packs);
-
-        Kit = new ArticleKit(packs);
-    }
+    public ArticleKit? Kit { get; private init; }
 
     /// <summary>
     /// Gets a value indicating whether this article represents a kit.
     /// </summary>
     public bool IsKit => Kit is not null;
 
-    #endregion Relation
+    #endregion Kit
 
     #region Container
 

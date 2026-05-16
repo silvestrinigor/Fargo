@@ -77,7 +77,7 @@ public sealed class ArticleCommandHandlerTests
         await renameHandler.Handle(new ArticleRenameCommand(article.Guid, new Name("Renamed article")));
         await metricsHandler.Handle(new ArticleSetMetricsCommand(
             article.Guid,
-            new ArticleMetricsDto(Mass: UnitsNet.Mass.FromKilograms(1))));
+            new ArticleMetrics(mass: UnitsNet.Mass.FromKilograms(1))));
 
         Assert.Equal(actor.ActorGuid, article.EditedByGuid);
         Assert.Equal(
@@ -98,7 +98,7 @@ public sealed class ArticleCommandHandlerTests
 
         await handler.Handle(new ArticleSetBarcodesCommand(
             article.Guid,
-            new ArticleBarcodesDto(Ean13: new Ean13("1234567890123"))));
+            new ArticleBarcodesSet(Ean13: new Ean13("1234567890123"))));
 
         Assert.Equal("1234567890123", article.Ean13?.Code);
         Assert.Equal(actor.ActorGuid, article.EditedByGuid);
@@ -123,7 +123,7 @@ public sealed class ArticleCommandHandlerTests
 
         await handler.Handle(new ArticleSetBarcodesCommand(
             article.Guid,
-            new ArticleBarcodesDto(Ean13: new Ean13("1234567890123"))));
+            new ArticleBarcodesSet(Ean13: new Ean13("1234567890123"))));
 
         Assert.Equal(previousActorGuid, article.EditedByGuid);
         Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
