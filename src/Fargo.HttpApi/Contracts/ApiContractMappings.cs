@@ -32,16 +32,7 @@ internal static class ApiContractMappings
             article.Description,
             article.Metrics.ToInfo(),
             article.ShelfLife,
-            article.Ean13,
-            article.Ean8,
-            article.UpcA,
-            article.UpcE,
-            article.Code128,
-            article.Code39,
-            article.Itf14,
-            article.Gs1128,
-            article.QrCode,
-            article.DataMatrix,
+            article.Barcodes.ToInfo(),
             article.Partitions,
             article.IsActive,
             article.EditedByGuid,
@@ -227,6 +218,19 @@ internal static class ApiContractMappings
             metrics.LengthX.ToInfo(),
             metrics.LengthY.ToInfo(),
             metrics.LengthZ.ToInfo());
+
+    private static ContractArticles.ArticleBarcodesInfo ToInfo(this AppArticles.ArticleBarcodesDto barcodes)
+        => new(
+            barcodes.Ean13?.ToString(),
+            barcodes.Ean8?.ToString(),
+            barcodes.UpcA?.ToString(),
+            barcodes.UpcE?.ToString(),
+            barcodes.Code128?.ToString(),
+            barcodes.Code39?.ToString(),
+            barcodes.Itf14?.ToString(),
+            barcodes.Gs1128?.ToString(),
+            barcodes.QrCode?.ToString(),
+            barcodes.DataMatrix?.ToString());
 
     private static AppArticles.ArticleMetricsDto? ToApplicationDto(this ContractArticles.ArticleMetricsInfo? metrics)
         => metrics is null

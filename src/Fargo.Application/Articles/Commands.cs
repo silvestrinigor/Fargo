@@ -69,7 +69,7 @@ public sealed class ArticleCreateCommandHandler(
 
 #endregion Create
 
-#region General
+#region Name
 
 /// <summary>
 /// Command used to rename an article.
@@ -121,6 +121,10 @@ public sealed class ArticleRenameCommandHandler(
     }
 }
 
+#endregion Name
+
+#region Description
+
 /// <summary>
 /// Command used to change the article description.
 /// </summary>
@@ -170,6 +174,10 @@ public sealed class ArticleChangeDescriptionCommandHandler(
         article.MarkModificationType(ArticleModifiedType.General);
     }
 }
+
+#endregion Description
+
+#region ShelfLife
 
 /// <summary>
 /// Command used to define the article shelf life.
@@ -222,6 +230,10 @@ public sealed class ArticleSetShelfLifeCommandHandler(
     }
 }
 
+#endregion ShelfLife
+
+#region Color
+
 /// <summary>
 /// Command used to define the article color.
 /// </summary>
@@ -272,7 +284,7 @@ public sealed class ArticleSetColorCommandHandler(
     }
 }
 
-#endregion General
+#endregion Color
 
 #region Activate
 

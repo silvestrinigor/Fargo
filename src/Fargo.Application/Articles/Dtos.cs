@@ -14,16 +14,7 @@ public sealed record ArticleDto(
     TimeSpan? ShelfLife,
     Color? Color,
     ArticleMetricsDto Metrics,
-    Ean13? Ean13,
-    Ean8? Ean8,
-    UpcA? UpcA,
-    UpcE? UpcE,
-    Code128? Code128,
-    Code39? Code39,
-    Itf14? Itf14,
-    Gs1128? Gs1128,
-    QrCode? QrCode,
-    DataMatrix? DataMatrix,
+    ArticleBarcodesDto Barcodes,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,
     Guid? EditedByGuid,
@@ -49,12 +40,6 @@ public sealed record ArticleBarcodesDto(
     QrCode? QrCode = null,
     DataMatrix? DataMatrix = null
 );
-
-public readonly record struct OptionalValue<TValue>(bool IsSpecified, TValue? Value)
-    where TValue : struct
-{
-    public static OptionalValue<TValue> FromValue(TValue? value) => new(true, value);
-}
 
 public sealed record ArticleCreateDto(
     Name Name,
@@ -92,16 +77,17 @@ public static class ArticleDtoMappings
             article.LengthX,
             article.LengthY,
             article.LengthZ),
-        article.Ean13,
-        article.Ean8,
-        article.UpcA,
-        article.UpcE,
-        article.Code128,
-        article.Code39,
-        article.Itf14,
-        article.Gs1128,
-        article.QrCode,
-        article.DataMatrix,
+        new ArticleBarcodesDto(
+            article.Ean13,
+            article.Ean8,
+            article.UpcA,
+            article.UpcE,
+            article.Code128,
+            article.Code39,
+            article.Itf14,
+            article.Gs1128,
+            article.QrCode,
+            article.DataMatrix),
         article.Partitions.Select(partition => partition.Guid).ToArray(),
         article.IsActive,
         article.EditedByGuid,
