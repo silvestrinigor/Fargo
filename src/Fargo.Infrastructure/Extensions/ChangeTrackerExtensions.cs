@@ -1,4 +1,5 @@
 using Fargo.Core;
+using Fargo.Core.Articles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -49,6 +50,11 @@ internal static class ChangeTrackerExtensions
     {
         foreach (var entry in changeTracker.Entries<IModifiedEntity>())
         {
+            if (entry.Entity is Article)
+            {
+                continue;
+            }
+
             if (entry.State == EntityState.Added)
             {
                 entry.Entity.MarkAsEditedBy(actorGuid);

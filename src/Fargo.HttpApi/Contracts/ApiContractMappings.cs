@@ -43,7 +43,8 @@ internal static class ApiContractMappings
             article.DataMatrix,
             article.Partitions,
             article.IsActive,
-            article.EditedByGuid);
+            article.EditedByGuid,
+            (ContractArticles.ArticleModifiedType)(int)article.ModificationTypes);
 
     public static IReadOnlyCollection<ContractArticles.ArticleInfo> ToInfo(this IReadOnlyCollection<AppArticles.ArticleDto> articles)
         => articles.Select(static article => article.ToInfo()).ToArray();

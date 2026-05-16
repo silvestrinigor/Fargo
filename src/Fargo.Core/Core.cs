@@ -105,15 +105,4 @@ public enum ActionType
     /// Allows editing existing partitions.
     /// </summary>
     EditPartition = 16,
-
-    /// <summary>
-    /// Allows adding barcodes to articles.
-    /// </summary>
-    AddBarcode = 17,
-
-    /// <summary>
-    /// Allows removing barcodes from articles.
-    /// </summary>
-    RemoveBarcode = 18,
-
 }

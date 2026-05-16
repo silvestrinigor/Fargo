@@ -26,7 +26,8 @@ public sealed record ArticleDto(
     DataMatrix? DataMatrix,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,
-    Guid? EditedByGuid
+    Guid? EditedByGuid,
+    ArticleModifiedType ModificationTypes
 );
 
 public sealed record ArticleMetricsDto(
@@ -116,6 +117,7 @@ public static class ArticleDtoMappings
         article.DataMatrix,
         article.Partitions.Select(partition => partition.Guid).ToArray(),
         article.IsActive,
-        article.EditedByGuid
+        article.EditedByGuid,
+        article.ModificationTypes
     );
 }

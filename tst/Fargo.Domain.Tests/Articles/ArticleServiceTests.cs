@@ -1,6 +1,5 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
-using Fargo.Core.Identity;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Articles;
@@ -87,7 +86,7 @@ public sealed class ArticleServiceTests
 
     private static Article CreateArticle()
     {
-        var article = new Article(new Name("Test article"), TestActor.Instance);
+        var article = Article.CreateArticle(new Name("Test article"));
 
         article.ChangeDescription(new Description("Test description"));
 
@@ -100,8 +99,6 @@ public sealed class ArticleServiceTests
         string barcodeKind,
         object? value)
     {
-        article.StartEdit(TestActor.Instance);
-
         switch (barcodeKind)
         {
             case "Ean13":
@@ -157,8 +154,6 @@ public sealed class ArticleServiceTests
 
     private static async Task WriteBarcode(ArticleService service, Article article, string barcodeKind, object? value)
     {
-        article.StartEdit(TestActor.Instance);
-
         switch (barcodeKind)
         {
             case "Ean13":
@@ -255,19 +250,4 @@ public sealed class ArticleServiceTests
             _ => throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.")
         };
 
-    private static class TestActor
-    {
-        public static readonly Actor Instance = new(
-            Guid.NewGuid(),
-            isAdmin: false,
-            isActive: true,
-            permissionActions:
-            [
-                ActionType.CreateArticle,
-                ActionType.EditArticle,
-                ActionType.AddBarcode,
-                ActionType.RemoveBarcode
-            ],
-            partitionAccessesGuids: []);
-    }
 }

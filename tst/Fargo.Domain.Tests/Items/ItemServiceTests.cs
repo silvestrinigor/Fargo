@@ -110,18 +110,8 @@ public sealed class ItemServiceTests
         => new(CreateContainerArticle());
 
     private static Article CreateArticle()
-        => new(new Name("Test article"), TestActor.Instance);
+        => Article.CreateArticle(new Name("Test article"));
 
     private static Article CreateContainerArticle()
-        => new(new Name("Container article"), new ArticleContainer(null), TestActor.Instance);
-
-    private static class TestActor
-    {
-        public static readonly Actor Instance = new(
-            Guid.NewGuid(),
-            isAdmin: true,
-            isActive: true,
-            permissionActions: [],
-            partitionAccessesGuids: []);
-    }
+        => Article.CreateArticleContainer(new Name("Container article"), null);
 }

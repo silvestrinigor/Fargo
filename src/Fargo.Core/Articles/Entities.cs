@@ -1,23 +1,10 @@
 using Fargo.Core.Barcodes;
-using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.Core.Articles;
-
-[Flags]
-public enum ArticleModifiedType
-{
-    None = 0,
-    General = 1 << 0,
-    Metrics = 1 << 1,
-    Barcode = 1 << 2,
-    Partition = 1 << 3,
-    Container = 1 << 4,
-    Relation = 1 << 5
-}
 
 /// <summary>
 /// Represents an article in the system.
@@ -32,25 +19,37 @@ public enum ArticleModifiedType
 /// if they have access to at least one of its partitions, subject to any
 /// additional authorization rules.
 /// </remarks>
-public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModifiedEntityTypes<ArticleModifiedType>
+public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
 {
-    /// <summary>
-    /// Initialize a new article entity.
-    /// </summary>
-    public Article()
+    public static Article CreateArticle(Name name)
+        => new(name);
+
+    public static Article CreateArticleVariation(Name name, Article fromArticle)
+        => new(name, new ArticleVariation(fromArticle));
+
+    public static Article CreateArticlePack(Name name, Article fromArticle, Scalar quantity)
+        => new(name, new ArticlePack(fromArticle, quantity));
+
+    public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticlePack> packs)
+        => new(name, new ArticleKit(packs));
+
+    public static Article CreateArticleContainer(Name name, Mass? maxMass)
+        => new(name, new ArticleContainer(maxMass));
+
+    private Article()
     {
     }
 
-    public Article(Name name)
+    private Article(Name name)
     {
-        Rename(name);
+        Name = name;
     }
 
     /// <summary>
     /// Initialize a new article entity that is a variation of another article.
     /// </summary>
     /// <param name="variation">The variation relationship associated with the article.</param>
-    public Article(Name name, ArticleVariation variation)
+    private Article(Name name, ArticleVariation variation)
         : this(name)
     {
         Variation = variation;
@@ -60,7 +59,7 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// Initialize a new article entity that is a pack of another article.
     /// </summary>
     /// <param name="pack">The pack relationship associated with the article.</param>
-    public Article(Name name, ArticlePack pack)
+    private Article(Name name, ArticlePack pack)
         : this(name)
     {
         Pack = pack;
@@ -70,7 +69,7 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// Initialize a new article entity that is a kit of other articles.
     /// </summary>
     /// <param name="kit">The kit relationship associated with the article.</param>
-    public Article(Name name, ArticleKit kit)
+    private Article(Name name, ArticleKit kit)
         : this(name)
     {
         Kit = kit;
@@ -80,11 +79,13 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// Initializes a new instance of the <see cref="Article"/> class as a container article.
     /// </summary>
     /// <param name="container">The container constraints associated with the article.</param>
-    public Article(Name name, ArticleContainer container)
+    private Article(Name name, ArticleContainer container)
         : this(name)
     {
         Container = container;
     }
+
+    #region General
 
     /// <summary>
     /// Gets or sets the name of the article.
@@ -95,6 +96,16 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </remarks>
     public Name Name { get; private set; }
 
+    public void Rename(Name name)
+    {
+        if (Name == name)
+        {
+            return;
+        }
+
+        Name = name;
+    }
+
     /// <summary>
     /// Gets or sets the description of the article.
     /// </summary>
@@ -104,6 +115,16 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </remarks>
     public Description Description { get; private set; } = Description.Empty;
 
+    public void ChangeDescription(Description description)
+    {
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+    }
+
     /// <summary>
     /// Gets or sets the shelf life of the article.
     /// When <see langword="null"/>, no shelf life constraint is defined.
@@ -111,11 +132,33 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </summary>
     public TimeSpan? ShelfLife { get; private set; }
 
+    public void SetShelfLife(TimeSpan? shelfLife)
+    {
+        if (ShelfLife == shelfLife)
+        {
+            return;
+        }
+
+        ShelfLife = shelfLife;
+    }
+
     /// <summary>
     /// Gets or sets the color of the article.
     /// When <see langword="null"/>, no color constraint is defined.
     /// </summary>
     public Color? Color { get; private set; }
+
+    public void SetColor(Color? color)
+    {
+        if (Color == color)
+        {
+            return;
+        }
+
+        Color = color;
+    }
+
+    #endregion General
 
     #region Metrics
 
@@ -139,6 +182,22 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </summary>
     public Mass? Mass { get; private set; }
 
+    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
+    {
+        if (Nullable.Equals(Mass, mass) &&
+            Nullable.Equals(LengthX, lengthX) &&
+            Nullable.Equals(LengthY, lengthY) &&
+            Nullable.Equals(LengthZ, lengthZ))
+        {
+            return;
+        }
+
+        Mass = mass;
+        LengthX = lengthX;
+        LengthY = lengthY;
+        LengthZ = lengthZ;
+    }
+
     /// <summary>
     /// Gets the volume of the article.
     /// </summary>
@@ -158,50 +217,84 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </summary>
     public Ean13? Ean13 { get; private set; }
 
+    internal void SetEan13(Ean13? value) => SetBarcode(value, Ean13, next => Ean13 = next);
+
     /// <summary>
     /// EAN-8 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Ean8? Ean8 { get; private set; }
+
+    internal void SetEan8(Ean8? value) => SetBarcode(value, Ean8, next => Ean8 = next);
 
     /// <summary>
     /// UPC-A barcode, or <see langword="null"/> when absent.
     /// </summary>
     public UpcA? UpcA { get; private set; }
 
+    internal void SetUpcA(UpcA? value) => SetBarcode(value, UpcA, next => UpcA = next);
+
     /// <summary>
     /// UPC-E barcode, or <see langword="null"/> when absent.
     /// </summary>
     public UpcE? UpcE { get; private set; }
+
+    internal void SetUpcE(UpcE? value) => SetBarcode(value, UpcE, next => UpcE = next);
 
     /// <summary>
     /// Code 128 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Code128? Code128 { get; private set; }
 
+    internal void SetCode128(Code128? value) => SetBarcode(value, Code128, next => Code128 = next);
+
     /// <summary>
     /// Code 39 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Code39? Code39 { get; private set; }
+
+    internal void SetCode39(Code39? value) => SetBarcode(value, Code39, next => Code39 = next);
 
     /// <summary>
     /// ITF-14 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Itf14? Itf14 { get; private set; }
 
+    internal void SetItf14(Itf14? value) => SetBarcode(value, Itf14, next => Itf14 = next);
+
     /// <summary>
     /// GS1-128 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Gs1128? Gs1128 { get; private set; }
+
+    internal void SetGs1128(Gs1128? value) => SetBarcode(value, Gs1128, next => Gs1128 = next);
 
     /// <summary>
     /// QR Code barcode, or <see langword="null"/> when absent.
     /// </summary>
     public QrCode? QrCode { get; private set; }
 
+    internal void SetQrCode(QrCode? value) => SetBarcode(value, QrCode, next => QrCode = next);
+
     /// <summary>
     /// Data Matrix barcode, or <see langword="null"/> when absent.
     /// </summary>
     public DataMatrix? DataMatrix { get; private set; }
+
+    internal void SetDataMatrix(DataMatrix? value) => SetBarcode(value, DataMatrix, next => DataMatrix = next);
+
+    private void SetBarcode<TBarcode>(
+        TBarcode? value,
+        TBarcode? current,
+        Action<TBarcode?> setter)
+        where TBarcode : struct, IEquatable<TBarcode>
+    {
+        if (EqualityComparer<TBarcode?>.Default.Equals(current, value))
+        {
+            return;
+        }
+
+        setter(value);
+    }
 
     #endregion Barcode
 
@@ -212,6 +305,18 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// When <see langword="null"/>, no variation constraint is defined.
     /// </summary>
     public ArticleVariation? Variation { get; private set; }
+
+    public void SetVariationFromArticle(Article fromArticle)
+    {
+        ArgumentNullException.ThrowIfNull(fromArticle);
+
+        if (Variation?.FromArticleGuid == fromArticle.Guid)
+        {
+            return;
+        }
+
+        Variation = new ArticleVariation(fromArticle);
+    }
 
     /// <summary>
     /// Gets a value indicating whether this article is a variation of another article.
@@ -224,6 +329,33 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </summary>
     public ArticlePack? Pack { get; private set; }
 
+    public void SetPackFromArticle(Article fromArticle)
+    {
+        ArgumentNullException.ThrowIfNull(fromArticle);
+
+        if (Pack?.FromArticleGuid == fromArticle.Guid)
+        {
+            return;
+        }
+
+        Pack = new ArticlePack(fromArticle, Pack?.Quantity ?? 1.Amount());
+    }
+
+    public void SetPackQuantity(Scalar quantity)
+    {
+        if (Pack is null)
+        {
+            throw new InvalidOperationException("A pack quantity cannot be set when the article is not a pack.");
+        }
+
+        if (Pack.Quantity.Equals(quantity, 0.Amount()))
+        {
+            return;
+        }
+
+        Pack.SetQuantity(quantity);
+    }
+
     /// <summary>
     /// Gets a value indicating whether this article represents a pack.
     /// </summary>
@@ -234,6 +366,13 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// When <see langword="null"/>, no kit constraint is defined.
     /// </summary>
     public ArticleKit? Kit { get; private set; }
+
+    public void SetKitArticles(IReadOnlyCollection<ArticlePack> packs)
+    {
+        ArgumentNullException.ThrowIfNull(packs);
+
+        Kit = new ArticleKit(packs);
+    }
 
     /// <summary>
     /// Gets a value indicating whether this article represents a kit.
@@ -249,6 +388,27 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// When <see langword="null"/>, the article is not a container.
     /// </summary>
     public ArticleContainer? Container { get; private set; }
+
+    public void SetContainerMaxMass(Mass? maxMass)
+    {
+        if (Container is null && maxMass is null)
+        {
+            return;
+        }
+
+        if (Container is null)
+        {
+            Container = new ArticleContainer(maxMass);
+            return;
+        }
+
+        if (Nullable.Equals(Container.MaxMass, maxMass))
+        {
+            return;
+        }
+
+        Container.SetMaxMass(maxMass);
+    }
 
     /// <summary>
     /// Gets a value indicating whether this article represents a container.
@@ -303,89 +463,6 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
     /// </remarks>
     public PartitionCollection Partitions { get; init; } = [];
 
-    /// <inheritdoc />
-    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
-
-    #endregion Partition
-
-    #region Modified
-
-    public void Rename(Name name)
-    {
-        if (Name == name)
-        {
-            return;
-        }
-
-        Name = name;
-    }
-
-    public void ChangeDescription(Description description)
-    {
-        if (Description == description)
-        {
-            return;
-        }
-
-        Description = description;
-    }
-
-    public void SetShelfLife(TimeSpan? shelfLife)
-    {
-        if (ShelfLife == shelfLife)
-        {
-            return;
-        }
-
-        ShelfLife = shelfLife;
-    }
-
-    public void SetColor(Color? color)
-    {
-        if (Color == color)
-        {
-            return;
-        }
-
-        Color = color;
-    }
-
-    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
-    {
-        if (Nullable.Equals(Mass, mass) &&
-            Nullable.Equals(LengthX, lengthX) &&
-            Nullable.Equals(LengthY, lengthY) &&
-            Nullable.Equals(LengthZ, lengthZ))
-        {
-            return;
-        }
-
-        Mass = mass;
-        LengthX = lengthX;
-        LengthY = lengthY;
-        LengthZ = lengthZ;
-    }
-
-    internal void SetEan13(Ean13? value) => SetBarcode(value, Ean13, next => Ean13 = next);
-
-    internal void SetEan8(Ean8? value) => SetBarcode(value, Ean8, next => Ean8 = next);
-
-    internal void SetUpcA(UpcA? value) => SetBarcode(value, UpcA, next => UpcA = next);
-
-    internal void SetUpcE(UpcE? value) => SetBarcode(value, UpcE, next => UpcE = next);
-
-    internal void SetCode128(Code128? value) => SetBarcode(value, Code128, next => Code128 = next);
-
-    internal void SetCode39(Code39? value) => SetBarcode(value, Code39, next => Code39 = next);
-
-    internal void SetItf14(Itf14? value) => SetBarcode(value, Itf14, next => Itf14 = next);
-
-    internal void SetGs1128(Gs1128? value) => SetBarcode(value, Gs1128, next => Gs1128 = next);
-
-    internal void SetQrCode(QrCode? value) => SetBarcode(value, QrCode, next => QrCode = next);
-
-    internal void SetDataMatrix(DataMatrix? value) => SetBarcode(value, DataMatrix, next => DataMatrix = next);
-
     public void AddPartition(Partition partition)
     {
         ArgumentNullException.ThrowIfNull(partition);
@@ -410,72 +487,21 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         Partitions.Remove(partition);
     }
 
-    public void SetContainerMaxMass(Mass? maxMass)
+    /// <inheritdoc />
+    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+
+    #endregion Partition
+
+    #region Modified
+
+    public Guid? EditedByGuid { get; private set; }
+
+    public void MarkAsEditedBy(Guid actorGuid)
     {
-        if (Container is null && maxMass is null)
-        {
-            return;
-        }
-
-        if (Container is null)
-        {
-            Container = new ArticleContainer(maxMass);
-            return;
-        }
-
-        if (Nullable.Equals(Container.MaxMass, maxMass))
-        {
-            return;
-        }
-
-        Container.SetMaxMass(maxMass);
+        EditedByGuid = actorGuid;
     }
 
-    public void SetVariationFromArticle(Article fromArticle)
-    {
-        ArgumentNullException.ThrowIfNull(fromArticle);
-
-        if (Variation?.FromArticleGuid == fromArticle.Guid)
-        {
-            return;
-        }
-
-        Variation = new ArticleVariation(fromArticle);
-    }
-
-    public void SetPackFromArticle(Article fromArticle)
-    {
-        ArgumentNullException.ThrowIfNull(fromArticle);
-
-        if (Pack?.FromArticleGuid == fromArticle.Guid)
-        {
-            return;
-        }
-
-        Pack = new ArticlePack(fromArticle, Pack?.Quantity ?? 1.Amount());
-    }
-
-    public void SetPackQuantity(Scalar quantity)
-    {
-        if (Pack is null)
-        {
-            throw new InvalidOperationException("A pack quantity cannot be set when the article is not a pack.");
-        }
-
-        if (Pack.Quantity.Equals(quantity, 0.Amount()))
-        {
-            return;
-        }
-
-        Pack.SetQuantity(quantity);
-    }
-
-    public void SetKitArticles(IReadOnlyCollection<ArticlePack> packs)
-    {
-        ArgumentNullException.ThrowIfNull(packs);
-
-        Kit = new ArticleKit(packs);
-    }
+    public ArticleModifiedType ModificationTypes { get; private set; }
 
     public IReadOnlySet<ArticleModifiedType> GetModificationTypes()
     {
@@ -497,25 +523,17 @@ public class Article : ModifiedEntity, IPartitionedEntity, IActivable, IModified
         return result;
     }
 
-    public ArticleModifiedType ModificationTypes { get; private set; }
+    public bool IsEditStarted { get; private set; }
 
-    private void SetBarcode<TBarcode>(
-        TBarcode? value,
-        TBarcode? current,
-        Action<TBarcode?> setter)
-        where TBarcode : struct, IEquatable<TBarcode>
+    public void MarkModificationType(ArticleModifiedType modificationType)
     {
-        if (EqualityComparer<TBarcode?>.Default.Equals(current, value))
+        if (!IsEditStarted)
         {
-            return;
+            ModificationTypes = ArticleModifiedType.None;
+            IsEditStarted = true;
         }
 
-        setter(value);
-    }
-
-    private void MarkModified(ArticleModifiedType type, Actor actor)
-    {
-        ModificationTypes |= type;
+        ModificationTypes |= modificationType;
     }
 
     #endregion Modified

@@ -2,6 +2,7 @@ using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
@@ -33,9 +34,11 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var article = new Article(command.Name);
+        var article = Article.CreateArticle(command.Name);
 
         article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.General);
 
         articleRepository.Add(article);
 
@@ -77,9 +80,16 @@ public sealed class ArticleRenameCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (article.Name == command.Name)
+        {
+            return;
+        }
 
         article.Rename(command.Name);
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.General);
     }
 }
 
@@ -105,9 +115,16 @@ public sealed class ArticleChangeDescriptionCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (article.Description == command.Description)
+        {
+            return;
+        }
 
         article.ChangeDescription(command.Description);
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.General);
     }
 }
 
@@ -133,9 +150,16 @@ public sealed class ArticleSetShelfLifeCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (article.ShelfLife == command.ShelfLife)
+        {
+            return;
+        }
 
         article.SetShelfLife(command.ShelfLife);
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.General);
     }
 }
 
@@ -161,11 +185,22 @@ public sealed class ArticleSetColorCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (article.Color == command.Color)
+        {
+            return;
+        }
 
         article.SetColor(command.Color);
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.General);
     }
 }
+
+#endregion General
+
+#region Activate
 
 public sealed record ArticleActivateCommand(
     Guid ArticleGuid
@@ -188,11 +223,22 @@ public sealed class ArticleActivateCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (article.IsActive)
+        {
+            return;
+        }
 
         article.Activate();
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.Activated);
     }
 }
+
+#endregion Activate
+
+#region Deactivate
 
 public sealed record ArticleDeactivateCommand(
     Guid ArticleGuid
@@ -215,13 +261,20 @@ public sealed class ArticleDeactivateCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (!article.IsActive)
+        {
+            return;
+        }
 
         article.Deactivate();
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.Deactivate);
     }
 }
 
-#endregion General
+#endregion Deactivate
 
 #region Metrics
 
@@ -247,13 +300,23 @@ public sealed class ArticleSetMetricsCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        if (Nullable.Equals(article.Mass, command.Metrics.Mass) &&
+            Nullable.Equals(article.LengthX, command.Metrics.LengthX) &&
+            Nullable.Equals(article.LengthY, command.Metrics.LengthY) &&
+            Nullable.Equals(article.LengthZ, command.Metrics.LengthZ))
+        {
+            return;
+        }
 
         article.SetMetrics(
             command.Metrics.Mass,
             command.Metrics.LengthX,
             command.Metrics.LengthY,
             command.Metrics.LengthZ);
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.MetricsChanged);
     }
 }
 
@@ -284,27 +347,22 @@ public sealed class ArticleSetBarcodesCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        var hasChanges =
+            !EqualityComparer<Ean13?>.Default.Equals(article.Ean13, command.Barcodes.Ean13) ||
+            !EqualityComparer<Ean8?>.Default.Equals(article.Ean8, command.Barcodes.Ean8) ||
+            !EqualityComparer<UpcA?>.Default.Equals(article.UpcA, command.Barcodes.UpcA) ||
+            !EqualityComparer<UpcE?>.Default.Equals(article.UpcE, command.Barcodes.UpcE) ||
+            !EqualityComparer<Code128?>.Default.Equals(article.Code128, command.Barcodes.Code128) ||
+            !EqualityComparer<Code39?>.Default.Equals(article.Code39, command.Barcodes.Code39) ||
+            !EqualityComparer<Itf14?>.Default.Equals(article.Itf14, command.Barcodes.Itf14) ||
+            !EqualityComparer<Gs1128?>.Default.Equals(article.Gs1128, command.Barcodes.Gs1128) ||
+            !EqualityComparer<QrCode?>.Default.Equals(article.QrCode, command.Barcodes.QrCode) ||
+            !EqualityComparer<DataMatrix?>.Default.Equals(article.DataMatrix, command.Barcodes.DataMatrix);
 
-        ValidateBarcodePermissions(actor, article.Ean13, command.Barcodes.Ean13);
-
-        ValidateBarcodePermissions(actor, article.Ean8, command.Barcodes.Ean8);
-
-        ValidateBarcodePermissions(actor, article.UpcA, command.Barcodes.UpcA);
-
-        ValidateBarcodePermissions(actor, article.UpcE, command.Barcodes.UpcE);
-
-        ValidateBarcodePermissions(actor, article.Code128, command.Barcodes.Code128);
-
-        ValidateBarcodePermissions(actor, article.Code39, command.Barcodes.Code39);
-
-        ValidateBarcodePermissions(actor, article.Itf14, command.Barcodes.Itf14);
-
-        ValidateBarcodePermissions(actor, article.Gs1128, command.Barcodes.Gs1128);
-
-        ValidateBarcodePermissions(actor, article.QrCode, command.Barcodes.QrCode);
-
-        ValidateBarcodePermissions(actor, article.DataMatrix, command.Barcodes.DataMatrix);
+        if (!hasChanges)
+        {
+            return;
+        }
 
         await articleService.SetEan13(command.Barcodes.Ean13, article, cancellationToken);
 
@@ -325,32 +383,10 @@ public sealed class ArticleSetBarcodesCommandHandler(
         await articleService.SetQrCode(command.Barcodes.QrCode, article, cancellationToken);
 
         await articleService.SetDataMatrix(command.Barcodes.DataMatrix, article, cancellationToken);
-    }
 
-    private static void ValidateBarcodePermissions<TBarcode>(
-        IAuthorizationContext actor,
-        TBarcode? current,
-        TBarcode? requested)
-        where TBarcode : struct, IEquatable<TBarcode>
-    {
-        if (EqualityComparer<TBarcode?>.Default.Equals(current, requested))
-        {
-            return;
-        }
+        article.MarkAsEditedBy(actor.ActorGuid);
 
-        if (current is null && requested is not null)
-        {
-            actor.ValidateHasPermission(ActionType.AddBarcode);
-        }
-        else if (current is not null && requested is null)
-        {
-            actor.ValidateHasPermission(ActionType.RemoveBarcode);
-        }
-        else
-        {
-            actor.ValidateHasPermission(ActionType.AddBarcode);
-            actor.ValidateHasPermission(ActionType.RemoveBarcode);
-        }
+        article.MarkModificationType(ArticleModifiedType.BarcodesChanged);
     }
 }
 
@@ -381,9 +417,18 @@ public sealed class ArticleSetPartitionsCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        article.StartEdit(actor.ToActor());
+        var requestedPartitionGuids = command.PartitionGuids.Distinct().ToArray();
 
-        foreach (var partitionGuid in command.PartitionGuids)
+        var hasChanges =
+            article.Partitions.Count != requestedPartitionGuids.Length ||
+            article.Partitions.Any(p => !requestedPartitionGuids.Contains(p.Guid));
+
+        if (!hasChanges)
+        {
+            return;
+        }
+
+        foreach (var partitionGuid in requestedPartitionGuids)
         {
             if (article.Partitions.Any(p => p.Guid == partitionGuid))
             {
@@ -398,7 +443,7 @@ public sealed class ArticleSetPartitionsCommandHandler(
         }
 
         var partitionsToRemove = article.Partitions
-            .Where(p => !command.PartitionGuids.Contains(p.Guid))
+            .Where(p => !requestedPartitionGuids.Contains(p.Guid))
             .ToList();
 
         foreach (var partition in partitionsToRemove)
@@ -407,6 +452,10 @@ public sealed class ArticleSetPartitionsCommandHandler(
 
             article.RemovePartition(partition);
         }
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.PartitionsChanged);
     }
 }
 

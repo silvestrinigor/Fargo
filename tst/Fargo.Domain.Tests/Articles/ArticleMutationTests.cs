@@ -1,109 +1,141 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using UnitsNet;
+using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.Core.Tests.Articles;
 
 public sealed class ArticleMutationTests
 {
     [Fact]
-    public void Constructor_Should_SetActorAndGeneralModificationType()
+    public void CreateArticle_Should_NotSetActorOrModificationType()
     {
-        var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
+        var article = Article.CreateArticle(new Name("Test article"));
 
-        var article = new Article(new Name("Test article"), actor);
-
-        Assert.Equal(actor.Guid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+        Assert.Null(article.EditedByGuid);
+        Assert.Equal(ArticleModifiedType.None, article.ModificationTypes);
+        Assert.False(article.IsEditStarted);
     }
 
     [Fact]
-    public void Rename_Should_SetActorAndGeneralModificationType()
+    public void CreateArticleVariation_Should_SetVariation()
     {
-        var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
-        var article = new Article(new Name("Test article"), actor);
+        var fromArticle = Article.CreateArticle(new Name("Base article"));
 
-        article.StartEdit(actor);
+        var article = Article.CreateArticleVariation(new Name("Variation article"), fromArticle);
+
+        Assert.True(article.IsVariation);
+        Assert.Equal(fromArticle.Guid, article.Variation?.FromArticleGuid);
+    }
+
+    [Fact]
+    public void CreateArticlePack_Should_SetPack()
+    {
+        var fromArticle = Article.CreateArticle(new Name("Base article"));
+        var quantity = 10.Amount();
+
+        var article = Article.CreateArticlePack(new Name("Pack article"), fromArticle, quantity);
+
+        Assert.True(article.IsPack);
+        Assert.Equal(fromArticle.Guid, article.Pack?.FromArticleGuid);
+        Assert.Equal(quantity, article.Pack?.Quantity);
+    }
+
+    [Fact]
+    public void CreateArticleKit_Should_SetKit()
+    {
+        var fromArticle = Article.CreateArticle(new Name("Base article"));
+        var pack = new ArticlePack(fromArticle, 2.Amount());
+
+        var article = Article.CreateArticleKit(new Name("Kit article"), [pack]);
+
+        Assert.True(article.IsKit);
+        Assert.Same(pack, article.Kit?.FromArticles.Single());
+    }
+
+    [Fact]
+    public void CreateArticleContainer_Should_SetContainer()
+    {
+        var maxMass = Mass.FromKilograms(10);
+
+        var article = Article.CreateArticleContainer(new Name("Container article"), maxMass);
+
+        Assert.True(article.IsContainer);
+        Assert.Equal(maxMass, article.Container?.MaxMass);
+    }
+
+    [Fact]
+    public void Rename_Should_OnlyChangeName()
+    {
+        var article = Article.CreateArticle(new Name("Test article"));
+
         article.Rename(new Name("Renamed article"));
 
         Assert.Equal("Renamed article", article.Name.Value);
-        Assert.Equal(actor.Guid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+        Assert.Null(article.EditedByGuid);
+        Assert.Equal(ArticleModifiedType.None, article.ModificationTypes);
     }
 
     [Fact]
-    public void Mutations_Should_AccumulateModificationTypes()
+    public void MarkModificationType_Should_AccumulateModificationTypes()
     {
-        var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
-        var article = new Article(new Name("Test article"), actor);
+        var article = Article.CreateArticle(new Name("Test article"));
 
-        article.StartEdit(actor);
-        article.Rename(new Name("Renamed article"));
-        article.SetMetrics(Mass.FromKilograms(1), null, null, null);
+        article.MarkModificationType(ArticleModifiedType.General);
+        article.MarkModificationType(ArticleModifiedType.MetricsChanged);
 
-        Assert.Equal(ArticleModifiedType.General | ArticleModifiedType.Metrics, article.ModificationTypes);
+        Assert.Equal(ArticleModifiedType.General | ArticleModifiedType.MetricsChanged, article.ModificationTypes);
+        Assert.True(article.IsEditStarted);
     }
 
     [Fact]
-    public void StartEdit_Should_ResetPreviousModificationTypes()
+    public void MarkModificationType_Should_ResetPreviousModificationTypes_When_EditSessionStarts()
     {
-        var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
-        var article = new Article(new Name("Test article"), actor);
+        var article = Article.CreateArticle(new Name("Test article"));
 
-        article.StartEdit(actor);
-        article.Rename(new Name("Renamed article"));
-        article.StartEdit(actor);
-        article.SetMetrics(Mass.FromKilograms(1), null, null, null);
+        article.MarkModificationType(ArticleModifiedType.General);
+        SetIsEditStarted(article, false);
+        article.MarkModificationType(ArticleModifiedType.MetricsChanged);
 
-        Assert.Equal(ArticleModifiedType.Metrics, article.ModificationTypes);
+        Assert.Equal(ArticleModifiedType.MetricsChanged, article.ModificationTypes);
     }
 
     [Fact]
-    public void Mutation_Should_Throw_WhenNoActorWasEverProvided()
+    public void MarkAsEditedBy_Should_SetActor()
     {
-        var article = new Article();
+        var article = Article.CreateArticle(new Name("Test article"));
+        var actorGuid = Guid.NewGuid();
 
-        Assert.Throws<ArticleEditNotStartedFargoDomainException>(
-            () => article.Rename(new Name("Renamed article")));
+        article.MarkAsEditedBy(actorGuid);
+
+        Assert.Equal(actorGuid, article.EditedByGuid);
     }
 
     [Fact]
-    public void ContainerMutation_Should_MarkContainerModificationType()
+    public void ContainerMutation_Should_UpdateContainer()
     {
-        var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
-        var article = new Article(new Name("Test article"), actor);
+        var article = Article.CreateArticle(new Name("Test article"));
 
-        article.StartEdit(actor);
         article.SetContainerMaxMass(Mass.FromKilograms(10));
 
-        Assert.Equal(ArticleModifiedType.Container, article.ModificationTypes);
         Assert.Equal(Mass.FromKilograms(10), article.Container?.MaxMass);
     }
 
     [Fact]
-    public void PartitionMutation_Should_MarkPartitionModificationType()
+    public void PartitionMutation_Should_UpdatePartitions()
     {
         var partition = new Partition { Name = new Name("Restricted") };
-        var actor = TestActor.WithPermissions(ActionType.CreateArticle, ActionType.EditArticle);
-        var article = new Article(new Name("Test article"), actor);
-
-        article.StartEdit(actor);
+        var article = Article.CreateArticle(new Name("Test article"));
 
         article.AddPartition(partition);
 
         Assert.Contains(partition, article.Partitions);
-        Assert.Equal(ArticleModifiedType.Partition, article.ModificationTypes);
     }
 
-    private static class TestActor
+    private static void SetIsEditStarted(Article article, bool value)
     {
-        public static Actor WithPermissions(params ActionType[] permissions)
-            => new(
-                Guid.NewGuid(),
-                isAdmin: false,
-                isActive: true,
-                permissionActions: permissions,
-                partitionAccessesGuids: []);
+        var property = typeof(Article).GetProperty(nameof(Article.IsEditStarted))!;
+
+        property.SetValue(article, value);
     }
 }

@@ -3,7 +3,6 @@ using Fargo.Application.Articles;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
-using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
@@ -161,7 +160,7 @@ public sealed class PartitionedRepositoryFilterTests
         string name,
         IReadOnlyCollection<Partition>? partitions = null)
     {
-        var article = new Article(new Name(name), TestActor.Instance);
+        var article = Article.CreateArticle(new Name(name));
 
         foreach (var partition in partitions ?? [])
         {
@@ -169,16 +168,6 @@ public sealed class PartitionedRepositoryFilterTests
         }
 
         return article;
-    }
-
-    private static class TestActor
-    {
-        public static readonly Actor Instance = new(
-            Guid.NewGuid(),
-            isAdmin: true,
-            isActive: true,
-            permissionActions: [],
-            partitionAccessesGuids: []);
     }
 
     private static async Task AssertFilterCombinations<T>(

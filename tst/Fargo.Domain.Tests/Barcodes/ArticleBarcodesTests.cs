@@ -1,6 +1,5 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
-using Fargo.Core.Identity;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Barcodes;
@@ -8,14 +7,13 @@ namespace Fargo.Core.Tests.Barcodes;
 public sealed class ArticleBarcodesTests
 {
     [Fact]
-    public async Task Ean13_Should_AddBarcodeToBackingCollection()
+    public async Task Ean13_Should_SetBarcode()
     {
         // Arrange
         var article = CreateArticle();
         var service = CreateService();
 
         // Act
-        article.StartEdit(TestActor.Instance);
         await service.SetEan13(new Ean13("1234567890123"), article);
 
         // Assert
@@ -23,12 +21,11 @@ public sealed class ArticleBarcodesTests
     }
 
     [Fact]
-    public async Task SettingBarcodeToNull_Should_RemoveBarcodeFromBackingCollection()
+    public async Task SettingBarcodeToNull_Should_ClearBarcode()
     {
         // Arrange
         var article = CreateArticle();
         var service = CreateService();
-        article.StartEdit(TestActor.Instance);
         await service.SetUpcA(new UpcA("123456789012"), article);
 
         // Act
@@ -44,7 +41,6 @@ public sealed class ArticleBarcodesTests
         // Arrange
         var article = CreateArticle();
         var service = CreateService();
-        article.StartEdit(TestActor.Instance);
         await service.SetEan8(new Ean8("12345670"), article);
 
         // Act
@@ -55,12 +51,11 @@ public sealed class ArticleBarcodesTests
     }
 
     [Fact]
-    public async Task SettingToNull_Should_RemoveBarcode()
+    public async Task SettingToNull_Should_ClearBarcode()
     {
         // Arrange
         var article = CreateArticle();
         var service = CreateService();
-        article.StartEdit(TestActor.Instance);
         await service.SetCode128(new Code128("ABC-123"), article);
 
         // Act
@@ -81,7 +76,6 @@ public sealed class ArticleBarcodesTests
         var newUpcA = new UpcA("123456789012");
 
         // Act
-        article.StartEdit(TestActor.Instance);
         await service.SetEan13(newEan13, article);
         await service.SetUpcA(newUpcA, article);
 
@@ -92,7 +86,7 @@ public sealed class ArticleBarcodesTests
 
     private static Article CreateArticle()
     {
-        var article = new Article(new Name("Test article"), TestActor.Instance);
+        var article = Article.CreateArticle(new Name("Test article"));
 
         article.ChangeDescription(new Description("Test description"));
 
@@ -101,20 +95,4 @@ public sealed class ArticleBarcodesTests
 
     private static ArticleService CreateService()
         => new(Substitute.For<IArticleRepository>());
-
-    private static class TestActor
-    {
-        public static readonly Actor Instance = new(
-            Guid.NewGuid(),
-            isAdmin: false,
-            isActive: true,
-            permissionActions:
-            [
-                ActionType.CreateArticle,
-                ActionType.EditArticle,
-                ActionType.AddBarcode,
-                ActionType.RemoveBarcode
-            ],
-            partitionAccessesGuids: []);
-    }
 }

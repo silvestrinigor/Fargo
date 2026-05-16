@@ -23,6 +23,5 @@ public enum ActionType
     CreatePartition = 14,
     DeletePartition = 15,
     EditPartition = 16,
-    AddBarcode = 17,
-    RemoveBarcode = 18,
+    SetArticleBarcode = 17,
 }
