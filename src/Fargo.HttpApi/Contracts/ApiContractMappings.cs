@@ -1,11 +1,12 @@
-using Fargo.Application.Authentication;
+using Fargo.Application;
+using Fargo.Application.Identity;
 using Fargo.Core;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Users;
+using Fargo.Sdk.Contracts;
 using UnitsNet;
 using UnitsNet.Units;
 using AppArticles = Fargo.Application.Articles;
-using AppEvents = Fargo.Application.Events;
 using AppItems = Fargo.Application.Items;
 using AppPartitions = Fargo.Application.Partitions;
 using AppUserGroups = Fargo.Application.UserGroups;
@@ -13,8 +14,6 @@ using AppUsers = Fargo.Application.Users;
 using ContractActionType = Fargo.Sdk.Contracts.ActionType;
 using ContractArticles = Fargo.Sdk.Contracts.Articles;
 using ContractAuthentication = Fargo.Sdk.Contracts.Authentication;
-using ContractEntityType = Fargo.Sdk.Contracts.EntityType;
-using ContractEvents = Fargo.Sdk.Contracts.Events;
 using ContractItems = Fargo.Sdk.Contracts.Items;
 using ContractPartitions = Fargo.Sdk.Contracts.Partitions;
 using ContractPermissions = Fargo.Sdk.Contracts.Permissions;
@@ -22,8 +21,6 @@ using ContractUserGroups = Fargo.Sdk.Contracts.UserGroups;
 using ContractUsers = Fargo.Sdk.Contracts.Users;
 using DomainActionType = Fargo.Core.ActionType;
 using DomainBarcodeFormat = Fargo.Core.Barcodes.BarcodeFormat;
-using DomainEntityType = Fargo.Core.Events.EntityType;
-using DomainEventType = Fargo.Core.Events.EventType;
 
 namespace Fargo.HttpApi.Contracts;
 
@@ -36,19 +33,11 @@ internal static class ApiContractMappings
             article.Description,
             article.Metrics.ToInfo(),
             article.ShelfLife,
-            article.Ean13,
-            article.Ean8,
-            article.UpcA,
-            article.UpcE,
-            article.Code128,
-            article.Code39,
-            article.Itf14,
-            article.Gs1128,
-            article.QrCode,
-            article.DataMatrix,
+            article.Barcodes.ToInfo(),
             article.Partitions,
             article.IsActive,
-            article.EditedByGuid);
+            article.EditedByGuid,
+            (ContractArticles.ArticleModifiedType)(int)article.ModificationTypes);
 
     public static IReadOnlyCollection<ContractArticles.ArticleInfo> ToInfo(this IReadOnlyCollection<AppArticles.ArticleDto> articles)
         => articles.Select(static article => article.ToInfo()).ToArray();
@@ -58,40 +47,23 @@ internal static class ApiContractMappings
             new Name(request.Name),
             request.Description.ToDescription(),
             request.ShelfLife,
+            Color: null,
             request.Metrics.ToApplicationDto(),
-            request.Ean13.ToEan13ApplicationDto(),
-            request.Ean8.ToEan8ApplicationDto(),
-            request.UpcA.ToUpcAApplicationDto(),
-            request.UpcE.ToUpcEApplicationDto(),
-            request.Code128.ToCode128ApplicationDto(),
-            request.Code39.ToCode39ApplicationDto(),
-            request.Itf14.ToItf14ApplicationDto(),
-            request.Gs1128.ToGs1128ApplicationDto(),
-            request.QrCode.ToQrCodeApplicationDto(),
-            request.DataMatrix.ToDataMatrixApplicationDto(),
+            request.ToApplicationBarcodesDto(),
             request.Partitions,
             request.IsActive);
 
-    public static AppArticles.ArticleUpdateDto ToApplicationDto(this ContractArticles.ArticleUpdateRequest request)
+    public static AppArticles.ArticlePatchDto ToApplicationDto(this ContractArticles.ArticlePatchRequest request)
         => new(
-            new Name(request.Name),
-            request.Description.ToDescription() ?? Description.Empty,
-            request.ShelfLife,
-            request.Metrics.ToApplicationDto() ?? new AppArticles.ArticleMetricsDto(),
-            request.Ean13.ToEan13ApplicationDto(),
-            request.Ean8.ToEan8ApplicationDto(),
-            request.UpcA.ToUpcAApplicationDto(),
-            request.UpcE.ToUpcEApplicationDto(),
-            request.Code128.ToCode128ApplicationDto(),
-            request.Code39.ToCode39ApplicationDto(),
-            request.Itf14.ToItf14ApplicationDto(),
-            request.Gs1128.ToGs1128ApplicationDto(),
-            request.QrCode.ToQrCodeApplicationDto(),
-            request.DataMatrix.ToDataMatrixApplicationDto(),
-            request.Partitions ?? [],
+            request.Name.ToName(),
+            request.Description.ToDescription(),
+            request.ShelfLife.ToApplicationOptional(),
+            request.Metrics.ToApplicationDto(),
+            request.Barcodes.ToApplicationDto(),
+            request.Partitions,
             request.IsActive);
 
-    public static AppArticles.ArticleBarcodeDto ToApplicationDto(this ContractArticles.ArticleBarcode articleBarcode)
+    public static Barcode ToBarcode(this ContractArticles.ArticleBarcode articleBarcode)
         => new(articleBarcode.Barcode, articleBarcode.Type.ToDomain());
 
     public static ContractItems.ItemInfo ToInfo(this AppItems.ItemDto item)
@@ -210,24 +182,6 @@ internal static class ApiContractMappings
             result.PermissionActions.Select(static action => (ContractActionType)(int)action).ToArray(),
             result.PartitionAccesses);
 
-    public static ContractEvents.EventInfo ToInfo(this AppEvents.EventInformation eventInformation)
-        => new(
-            eventInformation.Guid,
-            (ContractEvents.EventType)(int)eventInformation.EventType,
-            (ContractEntityType)(int)eventInformation.EntityType,
-            eventInformation.EntityGuid,
-            eventInformation.ActorGuid,
-            eventInformation.OccurredAt);
-
-    public static IReadOnlyCollection<ContractEvents.EventInfo> ToInfo(this IReadOnlyCollection<AppEvents.EventInformation> events)
-        => events.Select(static eventInformation => eventInformation.ToInfo()).ToArray();
-
-    public static DomainEntityType ToDomain(this ContractEntityType entityType)
-        => (DomainEntityType)(int)entityType;
-
-    public static DomainEventType ToDomain(this ContractEvents.EventType eventType)
-        => (DomainEventType)(int)eventType;
-
     private static DomainBarcodeFormat ToDomain(this ContractArticles.ArticleBarcodeType barcodeType)
         => barcodeType switch
         {
@@ -266,6 +220,19 @@ internal static class ApiContractMappings
             metrics.LengthY.ToInfo(),
             metrics.LengthZ.ToInfo());
 
+    private static ContractArticles.ArticleBarcodesInfo ToInfo(this AppArticles.ArticleBarcodesDto barcodes)
+        => new(
+            barcodes.Ean13?.ToString(),
+            barcodes.Ean8?.ToString(),
+            barcodes.UpcA?.ToString(),
+            barcodes.UpcE?.ToString(),
+            barcodes.Code128?.ToString(),
+            barcodes.Code39?.ToString(),
+            barcodes.Itf14?.ToString(),
+            barcodes.Gs1128?.ToString(),
+            barcodes.QrCode?.ToString(),
+            barcodes.DataMatrix?.ToString());
+
     private static AppArticles.ArticleMetricsDto? ToApplicationDto(this ContractArticles.ArticleMetricsInfo? metrics)
         => metrics is null
             ? null
@@ -274,6 +241,38 @@ internal static class ApiContractMappings
                 metrics.LengthX.ToLength(),
                 metrics.LengthY.ToLength(),
                 metrics.LengthZ.ToLength());
+
+    private static AppArticles.ArticleBarcodesDto ToApplicationBarcodesDto(this ContractArticles.ArticleCreateRequest request)
+        => new(
+            request.Ean13.ToEan13ApplicationDto(),
+            request.Ean8.ToEan8ApplicationDto(),
+            request.UpcA.ToUpcAApplicationDto(),
+            request.UpcE.ToUpcEApplicationDto(),
+            request.Code128.ToCode128ApplicationDto(),
+            request.Code39.ToCode39ApplicationDto(),
+            request.Itf14.ToItf14ApplicationDto(),
+            request.Gs1128.ToGs1128ApplicationDto(),
+            request.QrCode.ToQrCodeApplicationDto(),
+            request.DataMatrix.ToDataMatrixApplicationDto());
+
+    private static AppArticles.ArticleBarcodesDto? ToApplicationDto(this ContractArticles.ArticleBarcodesInfo? barcodes)
+        => barcodes is null
+            ? null
+            : new AppArticles.ArticleBarcodesDto(
+                barcodes.Ean13.ToEan13ApplicationDto(),
+                barcodes.Ean8.ToEan8ApplicationDto(),
+                barcodes.UpcA.ToUpcAApplicationDto(),
+                barcodes.UpcE.ToUpcEApplicationDto(),
+                barcodes.Code128.ToCode128ApplicationDto(),
+                barcodes.Code39.ToCode39ApplicationDto(),
+                barcodes.Itf14.ToItf14ApplicationDto(),
+                barcodes.Gs1128.ToGs1128ApplicationDto(),
+                barcodes.QrCode.ToQrCodeApplicationDto(),
+                barcodes.DataMatrix.ToDataMatrixApplicationDto());
+
+    private static OptionalValue<TValue> ToApplicationOptional<TValue>(this Optional<TValue?> value)
+        where TValue : struct
+        => value.IsSpecified ? OptionalValue<TValue>.FromValue(value.Value) : default;
 
     private static ContractArticles.MassInfo? ToInfo(this Mass? mass)
         => mass is not { } value ? null : new ContractArticles.MassInfo(value.Value, Mass.GetAbbreviation(value.Unit));

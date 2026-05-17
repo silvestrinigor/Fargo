@@ -1,4 +1,4 @@
-using Fargo.Core.Tokens;
+using Fargo.Core.Identity;
 
 namespace Fargo.Core.Tests.ValueObjects;
 

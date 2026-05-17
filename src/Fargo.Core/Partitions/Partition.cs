@@ -76,6 +76,16 @@ public interface IPartitionAccess
 /// </remarks>
 public class Partition : ModifiedEntity, IPartitionEntity
 {
+    private Partition()
+    {
+    }
+
+    public Partition(Name name, Description? description = null)
+    {
+        Name = name;
+        Description = description ?? Description.Empty;
+    }
+
     /// <summary>
     /// Gets or sets the name of the partition.
     /// </summary>
@@ -83,7 +93,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// The name identifies the partition and must satisfy the validation
     /// rules defined by <see cref="Name"/>.
     /// </remarks>
-    public required Name Name { get; set; }
+    public Name Name { get; private set; }
 
     /// <summary>
     /// Gets or sets the description of the partition.
@@ -93,7 +103,7 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// purpose or scope of the partition. If not explicitly defined,
     /// it defaults to <see cref="Description.Empty"/>.
     /// </remarks>
-    public Description Description { get; set; } = Description.Empty;
+    public Description Description { get; private set; } = Description.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the partition is active.
@@ -102,7 +112,31 @@ public class Partition : ModifiedEntity, IPartitionEntity
     /// Inactive partitions should not be considered available for new access
     /// assignments or operational use, depending on application rules.
     /// </remarks>
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
+
+    public void Rename(Name name)
+    {
+        if (Name == name)
+        {
+            return;
+        }
+
+        Name = name;
+    }
+
+    public void ChangeDescription(Description description)
+    {
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+    }
+
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
 
     #region ParentPartition
 
@@ -322,249 +356,3 @@ public sealed class PartitionCollection : Collection<Partition>
 }
 
 #endregion Collections
-
-#region Repositories
-
-/// <summary>
-/// Defines the repository contract for managing <see cref="Partition"/> entities.
-/// </summary>
-public interface IPartitionRepository
-{
-    /// <summary>
-    /// Retrieves a partition by its unique identifier.
-    /// </summary>
-    Task<Partition?> GetByGuid(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Retrieves the unique identifiers of all descendant partitions of a given partition.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-        Guid partitionGuid,
-        bool includeRoot = true,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Retrieves the unique identifiers of all descendant partitions of the specified root partitions.
-    /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-        IReadOnlyCollection<Guid> partitionGuids,
-        bool includeRoots = true,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Adds a new partition to the persistence context.
-    /// </summary>
-    void Add(Partition partition);
-
-    /// <summary>
-    /// Removes a partition from the persistence context.
-    /// </summary>
-    void Remove(Partition partition);
-}
-
-#endregion Repositories
-
-#region Services
-
-/// <summary>
-/// Provides domain operations related to partition retrieval
-/// and partition-based access evaluation.
-/// </summary>
-/// <remarks>
-/// This service encapsulates logic for retrieving partitions while enforcing
-/// access rules based on the effective partition access of a <see cref="Fargo.Core.Users.User"/>.
-///
-/// Effective access may be granted either:
-/// <list type="bullet">
-/// <item>
-/// <description>directly to the user</description>
-/// </item>
-/// <item>
-/// <description>indirectly through one of the user's <see cref="Fargo.Core.UserGroups.UserGroup"/> memberships</description>
-/// </item>
-/// </list>
-///
-/// Access inheritance flows from parent to child. This means that a user
-/// with access to a parent partition also has access to all of its descendant
-/// partitions. Access does not flow from child to parent.
-/// </remarks>
-public class PartitionService(
-    IPartitionRepository partitionRepository)
-{
-    /// <summary>
-    /// The predefined unique identifier string representing
-    /// the global partition.
-    /// </summary>
-    /// <remarks>
-    /// The global partition is the root of the partition hierarchy
-    /// and has implicit access to all descendant partitions.
-    /// </remarks>
-    private const string GlobalPartitionGuidString =
-        "00000000-0000-0000-0000-000000000002";
-
-    /// <summary>
-    /// Gets the predefined unique identifier representing
-    /// the global partition.
-    /// </summary>
-    /// <remarks>
-    /// This GUID is reserved for the root partition of the system.
-    /// It must remain constant across environments and is used
-    /// to establish the top-level access scope for privileged users.
-    /// </remarks>
-    public static Guid GlobalPartitionGuid =>
-        new(GlobalPartitionGuidString);
-
-    /// <summary>
-    /// Deletes the specified <see cref="Partition"/> from the system.
-    /// </summary>
-    /// <param name="partition">
-    /// The partition to be deleted.
-    /// </param>
-    /// <exception cref="PartitionGlobalDeleteFargoDomainException">
-    /// Thrown when an attempt is made to delete the global partition.
-    /// </exception>
-    /// <remarks>
-    /// This operation removes the partition from the system.
-    /// The global partition cannot be deleted under any circumstances.
-    /// </remarks>
-    public void DeletePartition(Partition partition)
-    {
-        if (partition.Guid == GlobalPartitionGuid)
-        {
-            throw new PartitionGlobalDeleteFargoDomainException();
-        }
-
-        partitionRepository.Remove(partition);
-    }
-
-    /// <summary>
-    /// Sets the parent partition of a member partition.
-    /// </summary>
-    /// <param name="parentPartition">
-    /// The partition that will become the parent.
-    /// </param>
-    /// <param name="memberPartition">
-    /// The partition that will become a child of <paramref name="parentPartition"/>.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="parentPartition"/> or
-    /// <paramref name="memberPartition"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="PartitionCannotBeOwnParentFargoDomainException">
-    /// Thrown when a partition is assigned as its own parent.
-    /// </exception>
-    /// <exception cref="PartitionCircularHierarchyFargoDomainException">
-    /// Thrown when assigning the parent would create a circular hierarchy.
-    /// </exception>
-    public async Task SetParentPartition(
-        Partition parentPartition,
-        Partition memberPartition,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(parentPartition);
-        ArgumentNullException.ThrowIfNull(memberPartition);
-
-        if (parentPartition.Guid == memberPartition.Guid)
-        {
-            throw new PartitionCannotBeOwnParentFargoDomainException(
-                memberPartition.Guid
-            );
-        }
-
-        var createsCircularHierarchy =
-            await CreatesCircularHierarchy(
-                parentPartition,
-                memberPartition.Guid,
-                cancellationToken
-            );
-
-        if (createsCircularHierarchy)
-        {
-            throw new PartitionCircularHierarchyFargoDomainException(
-                parentPartition.Guid,
-                memberPartition.Guid
-            );
-        }
-
-        memberPartition.ParentPartition = parentPartition;
-    }
-
-    private async Task<bool> CreatesCircularHierarchy(
-        Partition candidateParentPartition,
-        Guid memberPartitionGuid,
-        CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(candidateParentPartition);
-
-        if (candidateParentPartition.Guid == memberPartitionGuid)
-        {
-            return true;
-        }
-
-        var descendantPartitionGuids =
-            await partitionRepository.GetDescendantGuids(
-                memberPartitionGuid,
-                false,
-                cancellationToken
-            );
-
-        return descendantPartitionGuids.Contains(candidateParentPartition.Guid);
-    }
-}
-
-#endregion Services
-
-#region Exceptions
-
-/// <summary>
-/// Exception thrown when a partition is assigned as its own parent.
-/// </summary>
-public sealed class PartitionCannotBeOwnParentFargoDomainException(
-    Guid partitionGuid
-    ) : FargoDomainException(
-        $"Partition '{partitionGuid}' cannot be its own parent.")
-{
-    /// <summary>
-    /// Gets the identifier of the partition involved in the violation.
-    /// </summary>
-    public Guid PartitionGuid { get; } = partitionGuid;
-}
-
-/// <summary>
-/// Exception thrown when an attempt is made to delete the global partition.
-/// </summary>
-public sealed class PartitionGlobalDeleteFargoDomainException()
-    : FargoDomainException("The global partition cannot be deleted.")
-{
-}
-
-/// <summary>
-/// Exception thrown when a partition hierarchy would become circular.
-/// </summary>
-public sealed class PartitionCircularHierarchyFargoDomainException(
-    Guid parentPartitionGuid,
-    Guid memberPartitionGuid
-    ) : FargoDomainException(
-        $"Partition '{memberPartitionGuid}' cannot be assigned to parent " +
-        $"'{parentPartitionGuid}' because this would create a circular hierarchy.")
-{
-    /// <summary>
-    /// Gets the identifier of the candidate parent partition.
-    /// </summary>
-    public Guid ParentPartitionGuid { get; } = parentPartitionGuid;
-
-    /// <summary>
-    /// Gets the identifier of the member partition.
-    /// </summary>
-    public Guid MemberPartitionGuid { get; } = memberPartitionGuid;
-}
-
-#endregion Exceptions

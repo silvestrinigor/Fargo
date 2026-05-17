@@ -45,13 +45,13 @@ public interface IArticleClient
         ArticleCreateRequest request,
         CancellationToken cancellationToken = default);
 
-    /// <summary>Replaces an existing article (full PUT semantics).</summary>
+    /// <summary>Updates part of an existing article.</summary>
     /// <param name="articleGuid">The unique identifier of the article to update.</param>
-    /// <param name="request">The article update request body.</param>
+    /// <param name="request">The article patch request body.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task<FargoResponse> UpdateAsync(
         Guid articleGuid,
-        ArticleUpdateRequest request,
+        ArticlePatchRequest request,
         CancellationToken cancellationToken = default);
 
     /// <summary>Deletes an article by its unique identifier.</summary>

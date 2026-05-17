@@ -20,11 +20,9 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new Article { Name = new Name("Public article") };
-        var firstPartitionEntity = new Article { Name = new Name("First article") };
-        firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new Article { Name = new Name("Second article") };
-        secondPartitionEntity.Partitions.Add(secondPartition);
+        var publicEntity = CreateArticle("Public article");
+        var firstPartitionEntity = CreateArticle("First article", partitions: [firstPartition]);
+        var secondPartitionEntity = CreateArticle("Second article", partitions: [secondPartition]);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
@@ -46,29 +44,28 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new Article { Name = new Name("Public article") };
-        publicEntity.Code128 = new Code128("PUBLIC-123");
-        var firstPartitionEntity = new Article { Name = new Name("First article") };
-        firstPartitionEntity.Ean13 = new Ean13("7891234567895");
-        firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new Article { Name = new Name("Second article") };
-        secondPartitionEntity.Ean13 = new Ean13("7891234567896");
-        secondPartitionEntity.Partitions.Add(secondPartition);
+        var articleService = new ArticleService(new ArticleRepository(context));
+        var publicEntity = CreateArticle("Public article");
+        var firstPartitionEntity = CreateArticle("First article", partitions: [firstPartition]);
+        var secondPartitionEntity = CreateArticle("Second article", partitions: [secondPartition]);
+        await articleService.SetCode128(new Code128("PUBLIC-123"), publicEntity);
+        await articleService.SetEan13(new Ean13("7891234567895"), firstPartitionEntity);
+        await articleService.SetEan13(new Ean13("7891234567896"), secondPartitionEntity);
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
         var repository = new ArticleRepository(context);
 
         var accessible = await repository.GetInfoByBarcode(
-            new ArticleBarcodeDto("7891234567895", BarcodeFormat.Ean13),
+            new Barcode("7891234567895", BarcodeFormat.Ean13),
             childOfAnyOfThesePartitions: [firstPartition.Guid],
             notChildOfAnyPartition: true);
         var inaccessible = await repository.GetInfoByBarcode(
-            new ArticleBarcodeDto("7891234567896", BarcodeFormat.Ean13),
+            new Barcode("7891234567896", BarcodeFormat.Ean13),
             childOfAnyOfThesePartitions: [firstPartition.Guid],
             notChildOfAnyPartition: true);
         var publicArticle = await repository.GetInfoByBarcode(
-            new ArticleBarcodeDto("PUBLIC-123", BarcodeFormat.Code128),
+            new Barcode("PUBLIC-123", BarcodeFormat.Code128),
             childOfAnyOfThesePartitions: [firstPartition.Guid],
             notChildOfAnyPartition: true);
 
@@ -82,7 +79,7 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var article = new Article { Name = new Name("Article") };
+        var article = CreateArticle("Article");
         var publicEntity = new Item(article);
         var firstPartitionEntity = new Item(article);
         firstPartitionEntity.Partitions.Add(firstPartition);
@@ -136,11 +133,11 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new UserGroup { Nameid = new Nameid("public-group") };
-        var firstPartitionEntity = new UserGroup { Nameid = new Nameid("first-group") };
-        firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new UserGroup { Nameid = new Nameid("second-group") };
-        secondPartitionEntity.Partitions.Add(secondPartition);
+        var publicEntity = new UserGroup(new Nameid("public-group"));
+        var firstPartitionEntity = new UserGroup(new Nameid("first-group"));
+        firstPartitionEntity.AddPartition(firstPartition);
+        var secondPartitionEntity = new UserGroup(new Nameid("second-group"));
+        secondPartitionEntity.AddPartition(secondPartition);
         context.UserGroups.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
@@ -158,6 +155,20 @@ public sealed class PartitionedRepositoryFilterTests
     }
 
     private static readonly Pagination AllRows = new(Page.FirstPage, Limit.MaxLimit);
+
+    private static Article CreateArticle(
+        string name,
+        IReadOnlyCollection<Partition>? partitions = null)
+    {
+        var article = Article.CreateArticle(new Name(name));
+
+        foreach (var partition in partitions ?? [])
+        {
+            article.AddPartition(partition);
+        }
+
+        return article;
+    }
 
     private static async Task AssertFilterCombinations<T>(
         Func<IReadOnlyCollection<Guid>?, bool?, Task<IReadOnlyCollection<T>>> query,
@@ -208,16 +219,14 @@ public sealed class PartitionedRepositoryFilterTests
 
     private static (Partition First, Partition Second) AddPartitions(FargoDbContext context)
     {
-        var first = new Partition { Name = new Name("First partition") };
-        var second = new Partition { Name = new Name("Second partition") };
+        var first = new Partition(new Name("First partition"));
+        var second = new Partition(new Name("Second partition"));
         context.Partitions.AddRange(first, second);
         return (first, second);
     }
 
     private static User CreateUser(string nameid)
-        => new()
-        {
-            Nameid = new Nameid(nameid),
-            PasswordHash = new PasswordHash(new string('h', PasswordHash.MinLength))
-        };
+        => new(
+            new Nameid(nameid),
+            new PasswordHash(new string('h', PasswordHash.MinLength)));
 }

@@ -1,4 +1,4 @@
-using Fargo.Core.Tokens;
+using Fargo.Core.Identity;
 using Fargo.Core.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

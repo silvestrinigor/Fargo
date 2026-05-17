@@ -1,0 +1,132 @@
+using Fargo.Application.Articles;
+using Fargo.Application.Identity;
+using Fargo.Application.Items;
+using Fargo.Core;
+using Fargo.Core.Articles;
+using Fargo.Core.Items;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+
+namespace Fargo.Application.Tests;
+
+public sealed class EntityEventCommandHandlerTests
+{
+    [Fact]
+    public async Task ArticleCreate_Should_RecordCreatedEvent()
+    {
+        var articleRepository = Substitute.For<IArticleRepository>();
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.CreateArticle);
+        var handler = new ArticleCreateCommandHandler(
+            articleRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
+
+        var articleGuid = await handler.Handle(new ArticleCreateCommand(new Name("Article")));
+
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EntityType == EntityType.Article &&
+            entityEvent.EventType == EntityEventType.Created &&
+            entityEvent.EntityGuid == articleGuid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+    }
+
+    [Fact]
+    public async Task ArticleDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
+    {
+        var article = Article.CreateArticle(new Name("Article"));
+        var articleRepository = CreateArticleRepository(article);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.EditArticle);
+        var handler = new ArticleDeactivateCommandHandler(
+            articleRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleDeactivateCommandHandler>>());
+
+        await handler.Handle(new ArticleDeactivateCommand(article.Guid));
+
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EntityType == EntityType.Article &&
+            entityEvent.EventType == EntityEventType.Deactivated &&
+            entityEvent.EntityGuid == article.Guid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+    }
+
+    [Fact]
+    public async Task ArticleActivate_Should_NotRecordEvent_WhenAlreadyActive()
+    {
+        var article = Article.CreateArticle(new Name("Article"));
+        var articleRepository = CreateArticleRepository(article);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.EditArticle);
+        var handler = new ArticleActivateCommandHandler(
+            articleRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleActivateCommandHandler>>());
+
+        await handler.Handle(new ArticleActivateCommand(article.Guid));
+
+        entityEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
+    }
+
+    [Fact]
+    public async Task ItemDelete_Should_RecordDeletedEvent()
+    {
+        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var itemRepository = CreateItemRepository(item);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.DeleteItem);
+        var handler = new ItemDeleteCommandHandler(
+            itemRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ItemDeleteCommandHandler>>());
+
+        await handler.Handle(new ItemDeleteCommand(item.Guid));
+
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EntityType == EntityType.Item &&
+            entityEvent.EventType == EntityEventType.Deleted &&
+            entityEvent.EntityGuid == item.Guid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+    }
+
+    private static IArticleRepository CreateArticleRepository(Article article)
+    {
+        var repository = Substitute.For<IArticleRepository>();
+        repository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
+            .Returns(article);
+
+        return repository;
+    }
+
+    private static IItemRepository CreateItemRepository(Item item)
+    {
+        var repository = Substitute.For<IItemRepository>();
+        repository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
+            .Returns(item);
+
+        return repository;
+    }
+
+    private static ICurrentAuthorizationContext CreateCurrentAuthorizationContext(IAuthorizationContext actor)
+    {
+        var currentAuthorizationContext = Substitute.For<ICurrentAuthorizationContext>();
+        currentAuthorizationContext.GetAsync(Arg.Any<CancellationToken>())
+            .Returns(actor);
+
+        return currentAuthorizationContext;
+    }
+
+    private static IAuthorizationContext CreateActor(params ActionType[] permissions)
+        => new AuthorizationContext(
+            Guid.NewGuid(),
+            IsAuthenticated: true,
+            IsAdmin: false,
+            permissions,
+            PartitionAccesses: [],
+            UserGroupGuids: []);
+}

@@ -1,4 +1,4 @@
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 
 namespace Fargo.SeedService.Extensions;
 

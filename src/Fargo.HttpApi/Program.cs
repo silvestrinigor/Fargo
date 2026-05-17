@@ -1,7 +1,5 @@
-using Fargo.Application.Events;
 using Fargo.HttpApi.Articles;
 using Fargo.HttpApi.Extensions;
-using Fargo.HttpApi.Hubs;
 using Fargo.HttpApi.Items;
 using Fargo.HttpApi.Middlewares;
 using Fargo.HttpApi.Partitions;
@@ -12,9 +10,6 @@ using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSignalR();
-builder.Services.AddScoped<IFargoEventPublisher, SignalREventPublisher>();
 
 builder.Services.AddResponseCompression(opts =>
 {
@@ -62,12 +57,8 @@ app.MapFargoUserGroup();
 
 app.MapFargoPartition();
 
-app.MapFargoEvent();
-
 app.MapFargoAuthentication();
 
 app.MapDefaultEndpoints();
-
-app.MapHub<FargoEventHub>("/hub/events");
 
 app.Run();

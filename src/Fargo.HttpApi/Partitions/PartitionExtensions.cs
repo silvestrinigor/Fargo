@@ -126,10 +126,10 @@ public static class PartitionEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreatePartition(
         PartitionCreateRequest request,
-        ICommandHandler<PartitionCreateCommand, Guid> handler,
+        PartitionApplicationService service,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new PartitionCreateCommand(request.ToApplicationDto()), cancellationToken);
+        var response = await service.Create(request.ToApplicationDto(), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -152,10 +152,10 @@ public static class PartitionEndpointRouteBuilderExtension
     private static async Task<NoContent> UpdatePartition(
         Guid partitionGuid,
         PartitionUpdateRequest request,
-        ICommandHandler<PartitionUpdateCommand> handler,
+        PartitionApplicationService service,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new PartitionUpdateCommand(partitionGuid, request.ToApplicationDto()), cancellationToken);
+        await service.Update(partitionGuid, request.ToApplicationDto(), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -177,10 +177,10 @@ public static class PartitionEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeletePartition(
         Guid partitionGuid,
-        ICommandHandler<PartitionDeleteCommand> handler,
+        PartitionApplicationService service,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new PartitionDeleteCommand(partitionGuid), cancellationToken);
+        await service.Delete(partitionGuid, cancellationToken);
 
         return TypedResults.NoContent();
     }

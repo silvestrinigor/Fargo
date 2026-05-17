@@ -1,19 +1,18 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Application.Authentication;
-using Fargo.Application.Events;
+using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
-using Fargo.Core.Tokens;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Infrastructure.Events;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
@@ -106,12 +105,12 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
-            services.AddScoped<IEventQueryRepository, EventRepository>();
-
+            services.AddScoped<IEntityEventRepository, EntityEventRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IItemQueryRepository, ItemRepository>();
+            services.AddScoped<IItemMovementRepository, ItemMovementRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserQueryRepository, UserRepository>();
             services.AddScoped<IUserGroupRepository, UserGroupRepository>();
@@ -130,27 +129,60 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>();
             services.AddScoped<ICommandHandler<PasswordChangeCommand>, PasswordChangeCommandHandler>();
 
+            services.AddScoped<ArticleApplicationService>();
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleRenameCommand>, ArticleRenameCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleChangeDescriptionCommand>, ArticleChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetShelfLifeCommand>, ArticleSetShelfLifeCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetColorCommand>, ArticleSetColorCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetMetricsCommand>, ArticleSetMetricsCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetBarcodesCommand>, ArticleSetBarcodesCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetPartitionsCommand>, ArticleSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleActivateCommand>, ArticleActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleDeactivateCommand>, ArticleDeactivateCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>();
 
+            services.AddScoped<ItemApplicationService>();
             services.AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>();
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemSetParentContainerCommand>, ItemSetParentContainerCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemSetPartitionsCommand>, ItemSetPartitionsCommandHandler>();
 
+            services.AddScoped<UserApplicationService>();
             services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeNameidCommand>, UserChangeNameidCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeFirstNameCommand>, UserChangeFirstNameCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeLastNameCommand>, UserChangeLastNameCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangeDescriptionCommand>, UserChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetDefaultPasswordExpirationCommand>, UserSetDefaultPasswordExpirationCommandHandler>();
+            services.AddScoped<ICommandHandler<UserChangePasswordCommand>, UserChangePasswordCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetPermissionsCommand>, UserSetPermissionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetPartitionsCommand>, UserSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserSetUserGroupsCommand>, UserSetUserGroupsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserActivateCommand>, UserActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserDeactivateCommand>, UserDeactivateCommandHandler>();
 
+            services.AddScoped<UserGroupApplicationService>();
             services.AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>();
             services.AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupChangeNameidCommand>, UserGroupChangeNameidCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupChangeDescriptionCommand>, UserGroupChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupSetPermissionsCommand>, UserGroupSetPermissionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupSetPartitionsCommand>, UserGroupSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupActivateCommand>, UserGroupActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<UserGroupDeactivateCommand>, UserGroupDeactivateCommandHandler>();
 
+            services.AddScoped<PartitionApplicationService>();
             services.AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>();
             services.AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>();
-            services.AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionRenameCommand>, PartitionRenameCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionChangeDescriptionCommand>, PartitionChangeDescriptionCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionSetParentCommand>, PartitionSetParentCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionActivateCommand>, PartitionActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<PartitionDeactivateCommand>, PartitionDeactivateCommandHandler>();
 
-            services.AddScoped<IQueryHandler<ArticleSingleQuery, ArticleDto?>, ArticleSingleQueryHandler>();
+            services.AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>();
             services.AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>();
             services.AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>();
 
@@ -165,8 +197,6 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>();
             services.AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
-
-            services.AddScoped<IQueryHandler<EventManyQuery, IReadOnlyCollection<EventInformation>>, EventManyQueryHandler>();
         }
 
         private void AddDomainServices()
@@ -188,7 +218,6 @@ public static class ServiceCollectionExtensions
 
         private void AddPersistence()
         {
-            services.AddScoped<IEventRecorder, DbEventRecorder>();
             services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
         }
 

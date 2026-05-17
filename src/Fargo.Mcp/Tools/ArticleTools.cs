@@ -99,42 +99,22 @@ public sealed class ArticleTools(IArticleClient articles)
         [Description("New LengthZ dimension value. Omit to leave unchanged.")] double? lengthZValue = null,
         [Description("LengthZ dimension unit (mm, cm, m, km, in, ft). Defaults to m.")] string lengthZUnit = "m")
     {
-        var get = await articles.GetAsync(Guid.Parse(articleGuid));
-        if (!get.IsSuccess)
+        var request = new ArticlePatchRequest
         {
-            return $"Error: {get.Error!.Detail}";
-        }
-
-        var current = get.Result!;
-        var currentMetrics = current.Metrics;
-        var newMetrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
-            ? currentMetrics
-            : new ArticleMetricsInfo(
-                massValue is null ? currentMetrics?.Mass : new MassInfo(massValue.Value, massUnit),
-                lengthXValue is null ? currentMetrics?.LengthX : new LengthInfo(lengthXValue.Value, lengthXUnit),
-                lengthYValue is null ? currentMetrics?.LengthY : new LengthInfo(lengthYValue.Value, lengthYUnit),
-                lengthZValue is null ? currentMetrics?.LengthZ : new LengthInfo(lengthZValue.Value, lengthZUnit),
-                currentMetrics?.Density);
+            Name = name,
+            Description = description,
+            Metrics = (massValue ?? lengthXValue ?? lengthYValue ?? lengthZValue) is null
+                ? null
+                : new ArticleMetricsInfo(
+                    massValue is null ? null : new MassInfo(massValue.Value, massUnit),
+                    lengthXValue is null ? null : new LengthInfo(lengthXValue.Value, lengthXUnit),
+                    lengthYValue is null ? null : new LengthInfo(lengthYValue.Value, lengthYUnit),
+                    lengthZValue is null ? null : new LengthInfo(lengthZValue.Value, lengthZUnit))
+        };
 
         var update = await articles.UpdateAsync(
-            current.Guid,
-            new ArticleUpdateRequest(
-                name ?? current.Name,
-                description ?? current.Description,
-                Metrics: newMetrics,
-                ShelfLife: current.ShelfLife,
-                Partitions: current.Partitions,
-                Ean13: current.Ean13,
-                Ean8: current.Ean8,
-                UpcA: current.UpcA,
-                UpcE: current.UpcE,
-                Code128: current.Code128,
-                Code39: current.Code39,
-                Itf14: current.Itf14,
-                Gs1128: current.Gs1128,
-                QrCode: current.QrCode,
-                DataMatrix: current.DataMatrix,
-                IsActive: current.IsActive));
+            Guid.Parse(articleGuid),
+            request);
 
         if (!update.IsSuccess)
         {

@@ -136,6 +136,27 @@ public sealed class FargoHttpClient : IFargoHttpClient
         return new FargoSdkHttpResponse<EmptyResult>(IsSuccess: true, Data: null, Problem: null, StatusCode: response.StatusCode);
     }
 
+    public async Task<FargoSdkHttpResponse<EmptyResult>> PatchJsonAsync<TRequest>(string path, TRequest request, CancellationToken ct = default)
+    {
+        var url = ResolveUrl(path);
+        RequestLog(logger, "PATCH", url, null);
+
+        using var requestMessage = BuildRequest(HttpMethod.Patch, url, request);
+        using var response = await SendAsync(() => httpClient.SendAsync(requestMessage, ct));
+        ResponseLog(logger, "PATCH", url, (int)response.StatusCode, null);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new FargoSdkHttpResponse<EmptyResult>(
+                IsSuccess: false,
+                Data: null,
+                Problem: await ReadProblemAsync(response.Content, ct),
+                StatusCode: response.StatusCode);
+        }
+
+        return new FargoSdkHttpResponse<EmptyResult>(IsSuccess: true, Data: null, Problem: null, StatusCode: response.StatusCode);
+    }
+
     public async Task<FargoSdkHttpResponse<EmptyResult>> DeleteAsync(string path, CancellationToken ct = default)
     {
         var url = ResolveUrl(path);

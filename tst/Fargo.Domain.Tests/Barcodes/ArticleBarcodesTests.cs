@@ -1,86 +1,98 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using NSubstitute;
 
 namespace Fargo.Core.Tests.Barcodes;
 
 public sealed class ArticleBarcodesTests
 {
     [Fact]
-    public void Ean13_Should_AddBarcodeToBackingCollection()
+    public async Task Ean13_Should_SetBarcode()
     {
         // Arrange
         var article = CreateArticle();
+        var service = CreateService();
 
         // Act
-        article.Ean13 = new Ean13("1234567890123");
+        await service.SetEan13(new Ean13("1234567890123"), article);
 
         // Assert
         Assert.Equal("1234567890123", article.Ean13?.Code);
     }
 
     [Fact]
-    public void SettingBarcodeToNull_Should_RemoveBarcodeFromBackingCollection()
+    public async Task SettingBarcodeToNull_Should_ClearBarcode()
     {
         // Arrange
         var article = CreateArticle();
-        article.UpcA = new UpcA("123456789012");
+        var service = CreateService();
+        await service.SetUpcA(new UpcA("123456789012"), article);
 
         // Act
-        article.UpcA = null;
+        await service.SetUpcA(null, article);
 
         // Assert
         Assert.Null(article.UpcA);
     }
 
     [Fact]
-    public void Setting_Should_ReplaceExistingBarcodeForSameFormat()
+    public async Task Setting_Should_ReplaceExistingBarcodeForSameFormat()
     {
         // Arrange
         var article = CreateArticle();
-        article.Ean8 = new Ean8("12345670");
+        var service = CreateService();
+        await service.SetEan8(new Ean8("12345670"), article);
 
         // Act
-        article.Ean8 = new Ean8("12345671");
+        await service.SetEan8(new Ean8("12345671"), article);
 
         // Assert
         Assert.Equal("12345671", article.Ean8?.Code);
     }
 
     [Fact]
-    public void SettingToNull_Should_RemoveBarcode()
+    public async Task SettingToNull_Should_ClearBarcode()
     {
         // Arrange
         var article = CreateArticle();
-        article.Code128 = new Code128("ABC-123");
+        var service = CreateService();
+        await service.SetCode128(new Code128("ABC-123"), article);
 
         // Act
-        article.Code128 = null;
+        await service.SetCode128(null, article);
 
         // Assert
         Assert.Null(article.Code128);
     }
 
     [Fact]
-    public void Article_Should_ReplaceBarcodes()
+    public async Task Article_Should_ReplaceBarcodes()
     {
         // Arrange
         var article = CreateArticle();
+        var service = CreateService();
 
         var newEan13 = new Ean13("1234567890123");
         var newUpcA = new UpcA("123456789012");
 
         // Act
-        article.Ean13 = newEan13;
-        article.UpcA = newUpcA;
+        await service.SetEan13(newEan13, article);
+        await service.SetUpcA(newUpcA, article);
 
         // Assert
         Assert.Equal("1234567890123", article.Ean13?.Code);
         Assert.Equal("123456789012", article.UpcA?.Code);
     }
 
-    private static Article CreateArticle() => new()
+    private static Article CreateArticle()
     {
-        Name = new Name("Test article"),
-        Description = new Description("Test description")
-    };
+        var article = Article.CreateArticle(new Name("Test article"));
+
+        article.ChangeDescription(new Description("Test description"));
+
+        return article;
+    }
+
+    private static ArticleService CreateService()
+        => new(Substitute.For<IArticleRepository>());
 }

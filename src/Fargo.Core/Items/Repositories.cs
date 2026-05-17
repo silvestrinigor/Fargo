@@ -32,3 +32,14 @@ public interface IItemRepository
     /// </summary>
     void Remove(Item item);
 }
+
+/// <summary>
+/// Defines the repository contract for managing <see cref="ItemMovement"/> ledger entries.
+/// </summary>
+public interface IItemMovementRepository
+{
+    /// <summary>
+    /// Adds a new item movement ledger entry to the persistence context.
+    /// </summary>
+    void Add(ItemMovement movement);
+}

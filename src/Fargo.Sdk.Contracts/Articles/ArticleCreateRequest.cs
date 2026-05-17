@@ -4,6 +4,7 @@ namespace Fargo.Sdk.Contracts.Articles;
 public sealed record ArticleCreateRequest(
     string Name,
     string? Description = null,
+    string? Color = null,
     ArticleMetricsInfo? Metrics = null,
     TimeSpan? ShelfLife = null,
     IReadOnlyCollection<Guid>? Partitions = null,

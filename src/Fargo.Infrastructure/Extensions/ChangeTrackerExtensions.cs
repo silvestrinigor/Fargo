@@ -1,4 +1,5 @@
 using Fargo.Core;
+using Fargo.Core.Articles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -49,13 +50,18 @@ internal static class ChangeTrackerExtensions
     {
         foreach (var entry in changeTracker.Entries<IModifiedEntity>())
         {
+            if (entry.Entity is Article)
+            {
+                continue;
+            }
+
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.MarkAsEdited(actorGuid);
+                entry.Entity.MarkAsEditedBy(actorGuid);
             }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.MarkAsEdited(actorGuid);
+                entry.Entity.MarkAsEditedBy(actorGuid);
             }
         }
 
@@ -68,7 +74,7 @@ internal static class ChangeTrackerExtensions
 
         foreach (var parentEntity in parentEntitiesToUpdate)
         {
-            parentEntity.MarkAsEdited(actorGuid);
+            parentEntity.MarkAsEditedBy(actorGuid);
         }
     }
 }

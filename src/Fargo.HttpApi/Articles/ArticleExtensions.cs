@@ -54,11 +54,11 @@ public static class ArticleEndpointRouteBuilderExtension
     private static async Task<Results<Ok<ArticleInfo>, NotFound>> GetSingleArticle(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
-        IQueryHandler<ArticleSingleQuery, ArticleDto?> handler,
+        IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleSingleQuery(articleGuid, temporalAsOf);
+        var query = new ArticleByGuidQuery(articleGuid, temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 
@@ -88,7 +88,7 @@ public static class ArticleEndpointRouteBuilderExtension
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleByBarcodeQuery(articleBarcode.ToApplicationDto(), temporalAsOf);
+        var query = new ArticleByBarcodeQuery(articleBarcode.ToBarcode(), temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 
@@ -158,10 +158,12 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateArticle(
         ArticleCreateRequest request,
-        ICommandHandler<ArticleCreateCommand, Guid> handler,
+        ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new ArticleCreateCommand(request.ToApplicationDto()), cancellationToken);
+        var response = await articles.Create(
+            request.ToApplicationDto(),
+            cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -172,10 +174,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapUpdateArticle(this IEndpointRouteBuilder builder)
     {
-        builder.MapPut("/{articleGuid:guid}", UpdateArticle)
-            .WithName("UpdateArticle")
-            .WithSummary("Replaces an existing article")
-            .WithDescription("Replaces all article state including partitions, barcodes, and active flag.")
+        builder.MapPatch("/{articleGuid:guid}", UpdateArticle)
+            .WithName("PatchArticle")
+            .WithSummary("Updates part of an existing article")
+            .WithDescription("Updates only article fields included in the request body.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -183,11 +185,14 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticleUpdateRequest request,
-        ICommandHandler<ArticleUpdateCommand> handler,
+        ArticlePatchRequest request,
+        ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ArticleUpdateCommand(articleGuid, request.ToApplicationDto()), cancellationToken);
+        await articles.Patch(
+            articleGuid,
+            request.ToApplicationDto(),
+            cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -209,10 +214,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteArticle(
         Guid articleGuid,
-        ICommandHandler<ArticleDeleteCommand> handler,
+        ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ArticleDeleteCommand(articleGuid), cancellationToken);
+        await articles.Delete(articleGuid, cancellationToken);
 
         return TypedResults.NoContent();
     }

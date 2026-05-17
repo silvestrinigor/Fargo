@@ -21,6 +21,16 @@ namespace Fargo.Core.UserGroups;
 /// </remarks>
 public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
+    private UserGroup()
+    {
+    }
+
+    public UserGroup(Nameid nameid, Description? description = null)
+    {
+        Nameid = nameid;
+        Description = description ?? Description.Empty;
+    }
+
     /// <summary>
     /// Gets or sets the unique NAMEID of the user group.
     /// </summary>
@@ -28,7 +38,7 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// This value identifies the group in the system and must satisfy
     /// the validation rules defined by <see cref="Nameid"/>.
     /// </remarks>
-    public required Nameid Nameid { get; set; }
+    public Nameid Nameid { get; private set; }
 
     /// <summary>
     /// Gets or sets the textual description associated with the user group.
@@ -37,7 +47,27 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     /// Provides additional contextual information about the group.
     /// Defaults to <see cref="Description.Empty"/> when not specified.
     /// </remarks>
-    public Description Description { get; set; } = Description.Empty;
+    public Description Description { get; private set; } = Description.Empty;
+
+    public void ChangeNameid(Nameid nameid)
+    {
+        if (Nameid == nameid)
+        {
+            return;
+        }
+
+        Nameid = nameid;
+    }
+
+    public void ChangeDescription(Description description)
+    {
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+    }
 
     #region Active
 
@@ -186,6 +216,16 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
         }
 
         partitionAccesses.Remove(userGroupPartition);
+    }
+
+    public void AddPartition(Partition partition)
+    {
+        Partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        Partitions.Remove(partition);
     }
 
     #endregion Partition
@@ -443,192 +483,3 @@ public class UserGroupPartitionAccess : Entity, IModifiedEntityMember, IPartitio
 }
 
 #endregion Partition Access
-
-#region Repositories
-
-/// <summary>
-/// Defines the repository contract for managing <see cref="UserGroup"/> entities.
-/// </summary>
-public interface IUserGroupRepository
-{
-    /// <summary>
-    /// Gets a user group by its unique identifier.
-    /// </summary>
-    Task<UserGroup?> GetByGuid(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Gets a user group by its unique <see cref="Nameid"/>.
-    /// </summary>
-    Task<UserGroup?> GetByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Determines whether a user group with the specified <see cref="Nameid"/> already exists.
-    /// </summary>
-    Task<bool> ExistsByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Adds a new user group to the persistence context.
-    /// </summary>
-    void Add(UserGroup userGroup);
-
-    /// <summary>
-    /// Removes a user group from the persistence context.
-    /// </summary>
-    void Remove(UserGroup userGroup);
-
-    /// <summary>
-    /// Determines whether any user groups exist in the system.
-    /// </summary>
-    Task<bool> Any(CancellationToken cancellationToken = default);
-}
-
-#endregion Repositories
-
-#region Services
-
-/// <summary>
-/// Provides domain validation and business rules
-/// related to <see cref="UserGroup"/> entities.
-/// </summary>
-public class UserGroupService(
-    IUserGroupRepository userGroupRepository)
-{
-    /// <summary>
-    /// Gets the predefined unique identifier representing
-    /// the default <c>Administrators</c> user group.
-    /// </summary>
-    /// <remarks>
-    /// This GUID is used to identify the built-in administrators group
-    /// and should not be reassigned or modified.
-    /// </remarks>
-    public static Guid AdministratorsUserGroupGuid => new(AdministratorsUserGroupGuidString);
-
-    private const string AdministratorsUserGroupGuidString = "00000000-0000-0000-0000-000000000003";
-
-    /// <summary>
-    /// Validates the rules required to create a new <see cref="UserGroup"/>.
-    ///
-    /// This validation ensures that the <see cref="UserGroup.Nameid"/>
-    /// is unique within the system.
-    /// </summary>
-    /// <param name="userGroup">
-    /// The user group being created.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="UserGroupNameidAlreadyExistsDomainException">
-    /// Thrown when another user group with the same
-    /// <see cref="UserGroup.Nameid"/> already exists.
-    /// </exception>
-    public async Task ValidateUserGroupCreate(
-        UserGroup userGroup,
-        CancellationToken cancellationToken = default)
-    {
-        var alreadyExistsWithName =
-            await userGroupRepository.ExistsByNameid(
-                    userGroup.Nameid,
-                    cancellationToken
-                    );
-
-        if (alreadyExistsWithName)
-        {
-            throw new UserGroupNameidAlreadyExistsDomainException(userGroup.Nameid);
-        }
-    }
-
-    public async Task ValidateUserGroupNameidChange(
-        UserGroup userGroup,
-        Nameid nameid,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(userGroup);
-
-        if (userGroup.Nameid == nameid)
-        {
-            return;
-        }
-
-        var alreadyExistsWithName =
-            await userGroupRepository.ExistsByNameid(
-                nameid,
-                cancellationToken);
-
-        if (alreadyExistsWithName)
-        {
-            throw new UserGroupNameidAlreadyExistsDomainException(nameid);
-        }
-    }
-
-    /// <summary>
-    /// Validates whether a user group can be deleted.
-    /// </summary>
-    /// <param name="userGroup">
-    /// The user group that is being deleted.
-    /// </param>
-    public static void ValidateUserGroupDelete(UserGroup userGroup)
-    {
-        if (userGroup.Guid == AdministratorsUserGroupGuid)
-        {
-            throw new DeleteDefaultAdministratorsUserGroupFargoDomainException();
-        }
-    }
-}
-
-#endregion Services
-
-#region Exceptions
-
-/// <summary>
-/// Exception thrown when an attempt is made to delete the default administrators user group.
-/// </summary>
-/// <remarks>
-/// The default administrators user group is a critical system entity and cannot be deleted.
-/// </remarks>
-public sealed class DeleteDefaultAdministratorsUserGroupFargoDomainException()
-    : FargoDomainException("The default administrators user group cannot be deleted.")
-{
-}
-/// <summary>
-/// Exception thrown when an operation requires an active user group,
-/// but the specified group is inactive.
-/// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="UserGroupInactiveFargoDomainException"/> class.
-/// </remarks>
-/// <param name="userGroupGuid">
-/// The unique identifier of the inactive user group.
-/// </param>
-public sealed class UserGroupInactiveFargoDomainException(Guid userGroupGuid)
-    : FargoDomainException($"The user group '{userGroupGuid}' is inactive.")
-{
-    /// <summary>
-    /// Gets the unique identifier of the inactive user group.
-    /// </summary>
-    public Guid UserGroupGuid { get; } = userGroupGuid;
-}
-/// <summary>
-/// Exception thrown when attempting to create a <see cref="Fargo.Core.UserGroups.UserGroup"/>
-/// with a <see cref="Nameid"/> that already exists in the system.
-/// </summary>
-public sealed class UserGroupNameidAlreadyExistsDomainException(
-    Nameid nameid
-    ) : FargoDomainException(
-        $"A user group with nameid '{nameid}' already exists.")
-{
-    /// <summary>
-    /// Gets the conflicting <see cref="Nameid"/>.
-    /// </summary>
-    public Nameid Nameid { get; } = nameid;
-}
-
-#endregion Exceptions

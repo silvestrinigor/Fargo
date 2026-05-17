@@ -27,7 +27,7 @@ public sealed class ModifiedEntityTests
         var userGuid = Guid.NewGuid();
 
         // Act
-        entity.MarkAsEdited(userGuid);
+        entity.MarkAsEditedBy(userGuid);
 
         // Assert
         Assert.Equal(userGuid, entity.EditedByGuid);
@@ -42,8 +42,8 @@ public sealed class ModifiedEntityTests
         var secondUserGuid = Guid.NewGuid();
 
         // Act
-        entity.MarkAsEdited(firstUserGuid);
-        entity.MarkAsEdited(secondUserGuid);
+        entity.MarkAsEditedBy(firstUserGuid);
+        entity.MarkAsEditedBy(secondUserGuid);
 
         // Assert
         Assert.Equal(secondUserGuid, entity.EditedByGuid);
@@ -56,7 +56,7 @@ public sealed class ModifiedEntityTests
         var entity = new TestModifiedEntity();
 
         // Act
-        entity.MarkAsEdited(Guid.Empty);
+        entity.MarkAsEditedBy(Guid.Empty);
 
         // Assert
         Assert.Equal(Guid.Empty, entity.EditedByGuid);

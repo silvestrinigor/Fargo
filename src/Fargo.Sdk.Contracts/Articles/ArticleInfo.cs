@@ -1,5 +1,18 @@
 namespace Fargo.Sdk.Contracts.Articles;
 
+/// <summary>Represents the article areas changed by the last edit operation.</summary>
+[Flags]
+public enum ArticleModifiedType
+{
+    None = 0,
+    General = 1 << 0,
+    Metrics = 1 << 1,
+    Barcode = 1 << 2,
+    Partition = 1 << 3,
+    Container = 1 << 4,
+    Relation = 1 << 5
+}
+
 /// <summary>Represents an article returned by the API.</summary>
 public sealed record ArticleInfo(
     Guid Guid,
@@ -7,16 +20,8 @@ public sealed record ArticleInfo(
     string Description,
     ArticleMetricsInfo? Metrics,
     TimeSpan? ShelfLife,
-    string? Ean13,
-    string? Ean8,
-    string? UpcA,
-    string? UpcE,
-    string? Code128,
-    string? Code39,
-    string? Itf14,
-    string? Gs1128,
-    string? QrCode,
-    string? DataMatrix,
+    ArticleBarcodesInfo? Barcodes,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,
-    Guid? EditedByGuid);
+    Guid? EditedByGuid,
+    ArticleModifiedType ModificationTypes);

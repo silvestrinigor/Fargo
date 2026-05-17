@@ -76,7 +76,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     }
 
     public async Task<ArticleDto?> GetInfoByBarcode(
-        ArticleBarcodeDto articleBarcode,
+        Barcode barcode,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
@@ -89,7 +89,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 
-        return await ApplyBarcodeFilter(query, articleBarcode)
+        return await ApplyBarcodeFilter(query, barcode)
             .Select(ArticleDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
     }
@@ -149,62 +149,62 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     private static IQueryable<Article> ApplyBarcodeFilter(
         IQueryable<Article> query,
-        ArticleBarcodeDto articleBarcode)
+        Barcode barcode)
     {
-        switch (articleBarcode.Type)
+        switch (barcode.Format)
         {
             case BarcodeFormat.Ean13:
                 {
-                    var code = new Ean13(articleBarcode.Barcode);
+                    var code = Ean13.FromBarcode(barcode);
                     return query.Where(article => article.Ean13 == code);
                 }
             case BarcodeFormat.Ean8:
                 {
-                    var code = new Ean8(articleBarcode.Barcode);
+                    var code = Ean8.FromBarcode(barcode);
                     return query.Where(article => article.Ean8 == code);
                 }
             case BarcodeFormat.UpcA:
                 {
-                    var code = new UpcA(articleBarcode.Barcode);
+                    var code = UpcA.FromBarcode(barcode);
                     return query.Where(article => article.UpcA == code);
                 }
             case BarcodeFormat.UpcE:
                 {
-                    var code = new UpcE(articleBarcode.Barcode);
+                    var code = UpcE.FromBarcode(barcode);
                     return query.Where(article => article.UpcE == code);
                 }
             case BarcodeFormat.Code128:
                 {
-                    var code = new Code128(articleBarcode.Barcode);
+                    var code = Code128.FromBarcode(barcode);
                     return query.Where(article => article.Code128 == code);
                 }
             case BarcodeFormat.Code39:
                 {
-                    var code = new Code39(articleBarcode.Barcode);
+                    var code = Code39.FromBarcode(barcode);
                     return query.Where(article => article.Code39 == code);
                 }
             case BarcodeFormat.Itf14:
                 {
-                    var code = new Itf14(articleBarcode.Barcode);
+                    var code = Itf14.FromBarcode(barcode);
                     return query.Where(article => article.Itf14 == code);
                 }
             case BarcodeFormat.Gs1128:
                 {
-                    var code = new Gs1128(articleBarcode.Barcode);
+                    var code = Gs1128.FromBarcode(barcode);
                     return query.Where(article => article.Gs1128 == code);
                 }
             case BarcodeFormat.QrCode:
                 {
-                    var code = new QrCode(articleBarcode.Barcode);
+                    var code = QrCode.FromBarcode(barcode);
                     return query.Where(article => article.QrCode == code);
                 }
             case BarcodeFormat.DataMatrix:
                 {
-                    var code = new DataMatrix(articleBarcode.Barcode);
+                    var code = DataMatrix.FromBarcode(barcode);
                     return query.Where(article => article.DataMatrix == code);
                 }
             default:
-                throw new ArgumentOutOfRangeException(nameof(articleBarcode), articleBarcode.Type, "Unsupported barcode type.");
+                throw new ArgumentOutOfRangeException(nameof(barcode), barcode.Format, "Unsupported barcode type.");
         }
     }
 

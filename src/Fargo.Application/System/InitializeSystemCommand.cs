@@ -1,4 +1,4 @@
-using Fargo.Application.Authentication;
+using Fargo.Application.Identity;
 using Fargo.Core;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
@@ -42,10 +42,9 @@ public sealed class InitializeSystemCommandHandler(
 
         if (globalPartition is null)
         {
-            globalPartition = new Partition
+            globalPartition = new Partition(new("Global"))
             {
-                Guid = PartitionService.GlobalPartitionGuid,
-                Name = new("Global")
+                Guid = PartitionService.GlobalPartitionGuid
             };
 
             partitionRepository.Add(globalPartition);
@@ -61,14 +60,13 @@ public sealed class InitializeSystemCommandHandler(
 
         if (administratorsGroup is null)
         {
-            administratorsGroup = new UserGroup
+            administratorsGroup = new UserGroup(new("administrators"))
             {
-                Guid = UserGroupService.AdministratorsUserGroupGuid,
-                Nameid = new("administrators")
+                Guid = UserGroupService.AdministratorsUserGroupGuid
             };
 
             administratorsGroup.AddPartitionAccess(globalPartition);
-            administratorsGroup.Partitions.Add(globalPartition);
+            administratorsGroup.AddPartition(globalPartition);
             userGroupRepository.Add(administratorsGroup);
 
             foreach (var a in actions)
@@ -91,16 +89,14 @@ public sealed class InitializeSystemCommandHandler(
         var adminPassword = new Password(options.Password);
         var passwordHash = passwordHasher.Hash(adminPassword);
 
-        var admin = new User
+        var admin = new User(adminNameid, passwordHash)
         {
-            Guid = UserService.DefaultAdministratorUserGuid,
-            Nameid = adminNameid,
-            PasswordHash = passwordHash
+            Guid = UserService.DefaultAdministratorUserGuid
         };
 
         admin.AddPartitionAccess(globalPartition);
-        admin.UserGroups.Add(administratorsGroup);
-        admin.Partitions.Add(globalPartition);
+        admin.AddUserGroup(administratorsGroup);
+        admin.AddPartition(globalPartition);
 
         foreach (var action in actions)
         {
