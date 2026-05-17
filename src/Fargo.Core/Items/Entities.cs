@@ -20,7 +20,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity
+public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivable
 {
     /// <summary>
     /// Initializes a new item entity.
@@ -92,6 +92,21 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
     /// When <see langword="null"/>, the expiration date is unknown.
     /// </summary>
     public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
+
+    #region Activation
+
+    /// <summary>
+    /// Gets a value indicating whether the item is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <inheritdoc />
+    public void Activate() => IsActive = true;
+
+    /// <inheritdoc />
+    public void Deactivate() => IsActive = false;
+
+    #endregion Activation
 
     #region Container
 

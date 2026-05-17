@@ -7,4 +7,6 @@ public enum ItemModifiedType
     General = 1 << 0,
     ParentContainerChanged = 1 << 1,
     PartitionsChanged = 1 << 2,
+    Activated = 1 << 3,
+    Deactivated = 1 << 4,
 }

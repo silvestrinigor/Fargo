@@ -73,6 +73,7 @@ internal static class ApiContractMappings
             item.ProductionDate,
             item.ParentContainerGuid,
             item.Partitions,
+            item.IsActive,
             item.EditedByGuid,
             (ContractItems.ItemModifiedType)(int)item.ModificationTypes);
 
@@ -80,10 +81,10 @@ internal static class ApiContractMappings
         => items.Select(static item => item.ToInfo()).ToArray();
 
     public static AppItems.ItemCreateDto ToApplicationDto(this ContractItems.ItemCreateRequest request)
-        => new(request.ArticleGuid, request.ProductionDate, request.Partitions);
+        => new(request.ArticleGuid, request.ProductionDate, request.Partitions, request.IsActive);
 
     public static AppItems.ItemUpdateDto ToApplicationDto(this ContractItems.ItemUpdateRequest request)
-        => new(request.Partitions, request.ParentContainerGuid);
+        => new(request.Partitions, request.ParentContainerGuid, request.IsActive);
 
     public static ContractPartitions.PartitionInfo ToInfo(this AppPartitions.PartitionDto partition)
         => new(

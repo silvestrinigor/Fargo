@@ -146,6 +146,8 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ItemSetParentContainerCommand>, ItemSetParentContainerCommandHandler>();
             services.AddScoped<ICommandHandler<ItemSetPartitionsCommand>, ItemSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemActivateCommand>, ItemActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemDeactivateCommand>, ItemDeactivateCommandHandler>();
 
             services.AddScoped<UserApplicationService>();
             services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();

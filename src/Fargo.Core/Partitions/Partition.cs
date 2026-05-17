@@ -74,7 +74,7 @@ public interface IPartitionAccess
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity
+public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity, IActivable
 {
     private Partition()
     {

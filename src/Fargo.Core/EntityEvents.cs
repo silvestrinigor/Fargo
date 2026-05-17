@@ -98,7 +98,7 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity
+        where TEntity : IEntity, IActivable
         => Create(entity, EntityEventType.Activated, actorGuid, occurredAt);
 
     /// <summary>
@@ -108,7 +108,7 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity
+        where TEntity : IEntity, IActivable
         => Create(entity, EntityEventType.Deactivated, actorGuid, occurredAt);
 
     internal static EntityEvent ItemMoved(

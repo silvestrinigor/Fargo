@@ -11,6 +11,8 @@ public sealed class ItemApplicationService(
     ICommandHandler<ItemCreateCommand, Guid> createHandler,
     ICommandHandler<ItemSetParentContainerCommand> setParentContainerHandler,
     ICommandHandler<ItemSetPartitionsCommand> setPartitionsHandler,
+    ICommandHandler<ItemActivateCommand> activateHandler,
+    ICommandHandler<ItemDeactivateCommand> deactivateHandler,
     ICommandHandler<ItemDeleteCommand> deleteHandler,
     IUnitOfWork unitOfWork)
 {
@@ -39,6 +41,11 @@ public sealed class ItemApplicationService(
             await setPartitionsHandler.Handle(
                 new ItemSetPartitionsCommand(itemGuid, partitions),
                 cancellationToken);
+        }
+
+        if (create.IsActive == false)
+        {
+            await deactivateHandler.Handle(new ItemDeactivateCommand(itemGuid), cancellationToken);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
@@ -70,6 +77,18 @@ public sealed class ItemApplicationService(
         await setPartitionsHandler.Handle(
             new ItemSetPartitionsCommand(itemGuid, update.Partitions),
             cancellationToken);
+
+        if (update.IsActive is { } isActive)
+        {
+            if (isActive)
+            {
+                await activateHandler.Handle(new ItemActivateCommand(itemGuid), cancellationToken);
+            }
+            else
+            {
+                await deactivateHandler.Handle(new ItemDeactivateCommand(itemGuid), cancellationToken);
+            }
+        }
 
         await unitOfWork.SaveChanges(cancellationToken);
     }

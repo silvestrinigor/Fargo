@@ -381,3 +381,157 @@ public sealed class ItemSetPartitionsCommandHandler(
 }
 
 #endregion Partitions
+
+#region Activate
+
+/// <summary>
+/// Command used to activate an item.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
+public sealed record ItemActivateCommand(
+    Guid ItemGuid
+) : ICommand;
+
+/// <summary>
+/// Handles item activation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and activates the item.
+/// </remarks>
+public sealed class ItemActivateCommandHandler(
+    IItemRepository itemRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ItemActivateCommandHandler> logger
+) : ICommandHandler<ItemActivateCommand>
+{
+    public async Task Handle(
+        ItemActivateCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item activation flow started for item {ItemGuid} by actor {ActorGuid}.",
+                command.ItemGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.EditItem);
+
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+
+        actor.ValidateHasAccess(item);
+
+        if (item.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item activation flow skipped for item {ItemGuid}; item is already active.",
+                    item.Guid);
+            }
+
+            return;
+        }
+
+        item.Activate();
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.Activated);
+
+        entityEventRepository.Add(EntityEvent.Activated<Item>(item, actor.ActorGuid));
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item activation mutation completed for item {ItemGuid} by actor {ActorGuid}.",
+                item.Guid,
+                actor.ActorGuid);
+        }
+    }
+}
+
+#endregion Activate
+
+#region Deactivate
+
+/// <summary>
+/// Command used to deactivate an item.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
+public sealed record ItemDeactivateCommand(
+    Guid ItemGuid
+) : ICommand;
+
+/// <summary>
+/// Handles item deactivation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and deactivates the item.
+/// </remarks>
+public sealed class ItemDeactivateCommandHandler(
+    IItemRepository itemRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ItemDeactivateCommandHandler> logger
+) : ICommandHandler<ItemDeactivateCommand>
+{
+    public async Task Handle(
+        ItemDeactivateCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item deactivation flow started for item {ItemGuid} by actor {ActorGuid}.",
+                command.ItemGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.EditItem);
+
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+
+        actor.ValidateHasAccess(item);
+
+        if (!item.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item deactivation flow skipped for item {ItemGuid}; item is already inactive.",
+                    item.Guid);
+            }
+
+            return;
+        }
+
+        item.Deactivate();
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.Deactivated);
+
+        entityEventRepository.Add(EntityEvent.Deactivated<Item>(item, actor.ActorGuid));
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item deactivation mutation completed for item {ItemGuid} by actor {ActorGuid}.",
+                item.Guid,
+                actor.ActorGuid);
+        }
+    }
+}
+
+#endregion Deactivate

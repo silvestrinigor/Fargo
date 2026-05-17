@@ -94,6 +94,77 @@ public sealed class EntityEventCommandHandlerTests
             entityEvent.ActorGuid == actor.ActorGuid));
     }
 
+    [Fact]
+    public async Task ItemDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
+    {
+        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var itemRepository = CreateItemRepository(item);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.EditItem);
+        var handler = new ItemDeactivateCommandHandler(
+            itemRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ItemDeactivateCommandHandler>>());
+
+        await handler.Handle(new ItemDeactivateCommand(item.Guid));
+
+        Assert.False(item.IsActive);
+        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.Deactivated, item.ModificationTypes);
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EntityType == EntityType.Item &&
+            entityEvent.EventType == EntityEventType.Deactivated &&
+            entityEvent.EntityGuid == item.Guid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+    }
+
+    [Fact]
+    public async Task ItemActivate_Should_RecordActivatedEvent_WhenStateChanges()
+    {
+        var item = new Item(Article.CreateArticle(new Name("Article")));
+        item.Deactivate();
+        var itemRepository = CreateItemRepository(item);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.EditItem);
+        var handler = new ItemActivateCommandHandler(
+            itemRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ItemActivateCommandHandler>>());
+
+        await handler.Handle(new ItemActivateCommand(item.Guid));
+
+        Assert.True(item.IsActive);
+        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.Activated, item.ModificationTypes);
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EntityType == EntityType.Item &&
+            entityEvent.EventType == EntityEventType.Activated &&
+            entityEvent.EntityGuid == item.Guid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+    }
+
+    [Fact]
+    public async Task ItemActivate_Should_NotRecordEvent_WhenAlreadyActive()
+    {
+        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var itemRepository = CreateItemRepository(item);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var actor = CreateActor(ActionType.EditItem);
+        var handler = new ItemActivateCommandHandler(
+            itemRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ItemActivateCommandHandler>>());
+
+        await handler.Handle(new ItemActivateCommand(item.Guid));
+
+        Assert.Null(item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
+        entityEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
+    }
+
     private static IArticleRepository CreateArticleRepository(Article article)
     {
         var repository = Substitute.For<IArticleRepository>();

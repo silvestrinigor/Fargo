@@ -9,6 +9,7 @@ public sealed record ItemDto(
     DateTimeOffset? ProductionDate,
     Guid? ParentContainerGuid,
     IReadOnlyCollection<Guid> Partitions,
+    bool IsActive,
     Guid? EditedByGuid,
     ItemModifiedType ModificationTypes
 );
@@ -16,12 +17,14 @@ public sealed record ItemDto(
 public sealed record ItemCreateDto(
     Guid ArticleGuid,
     DateTimeOffset? ProductionDate = null,
-    IReadOnlyCollection<Guid>? Partitions = null
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
 );
 
 public sealed record ItemUpdateDto(
     IReadOnlyCollection<Guid> Partitions,
-    Guid? ParentContainerGuid = null
+    Guid? ParentContainerGuid = null,
+    bool? IsActive = null
 );
 
 public static class ItemDtoMappings
@@ -32,6 +35,7 @@ public static class ItemDtoMappings
         item.ProductionDate,
         item.ParentContainerGuid,
         item.Partitions.Select(partition => partition.Guid).ToArray(),
+        item.IsActive,
         item.EditedByGuid,
         item.ModificationTypes);
 }
