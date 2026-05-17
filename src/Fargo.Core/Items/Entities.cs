@@ -20,7 +20,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivable
+public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivableEntity
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);

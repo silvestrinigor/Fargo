@@ -19,7 +19,7 @@ namespace Fargo.Core.Articles;
 /// if they have access to at least one of its partitions, subject to any
 /// additional authorization rules.
 /// </remarks>
-public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
+public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
 {
     public static Article CreateArticle(Name name)
         => new(name);

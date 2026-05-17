@@ -877,11 +877,6 @@ public sealed class UserSetUserGroupsCommandHandler(
 
             actor.ValidateHasAccess(userGroup);
 
-            if (!userGroup.IsActive)
-            {
-                throw new UserGroupInactiveFargoDomainException(userGroup.Guid);
-            }
-
             user.AddUserGroup(userGroup);
         }
 
@@ -890,6 +885,7 @@ public sealed class UserSetUserGroupsCommandHandler(
         foreach (var userGroup in userGroupsToRemove)
         {
             actor.ValidateHasAccess(userGroup);
+
             user.RemoveUserGroup(userGroup);
         }
 

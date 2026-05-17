@@ -7,18 +7,6 @@ using Fargo.Core.Users;
 namespace Fargo.Core;
 
 /// <summary>
-/// Represents the type of entity recorded in an entity event.
-/// </summary>
-public enum EntityType
-{
-    Article = 0,
-    Item = 1,
-    User = 2,
-    UserGroup = 3,
-    Partition = 4,
-}
-
-/// <summary>
 /// Represents a simple lifecycle event that happened to an entity.
 /// </summary>
 public enum EntityEventType
@@ -98,7 +86,7 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IActivable
+        where TEntity : IEntity, IActivableEntity
         => Create(entity, EntityEventType.Activated, actorGuid, occurredAt);
 
     /// <summary>
@@ -108,7 +96,7 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IActivable
+        where TEntity : IEntity, IActivableEntity
         => Create(entity, EntityEventType.Deactivated, actorGuid, occurredAt);
 
     internal static EntityEvent ItemMoved(

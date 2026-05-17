@@ -19,7 +19,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivableEntity
 {
     public static UserGroup CreateUserGroup(Nameid nameid, Description? description = null)
         => new(nameid, description);
