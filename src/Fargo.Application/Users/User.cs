@@ -183,6 +183,7 @@ public sealed record UserCreateCommand(
 public sealed class UserCreateCommandHandler(
     UserService userService,
     IUserRepository userRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IPasswordHasher passwordHasher,
     ILogger<UserCreateCommandHandler> logger
@@ -209,6 +210,8 @@ public sealed class UserCreateCommandHandler(
         await userService.ValidateUserCreate(user, cancellationToken);
 
         userRepository.Add(user);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<User>(user, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -246,6 +249,7 @@ public sealed record UserDeleteCommand(
 /// </remarks>
 public sealed class UserDeleteCommandHandler(
     IUserRepository userRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserDeleteCommandHandler> logger
 ) : ICommandHandler<UserDeleteCommand>
@@ -273,6 +277,8 @@ public sealed class UserDeleteCommandHandler(
         UserService.ValidateUserDelete(user, actor.ActorGuid);
 
         userRepository.Remove(user);
+
+        entityEventRepository.Add(EntityEvent.EntityDeleted<User>(user, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -315,6 +321,7 @@ public sealed class UserUpdateCommandHandler(
     IPartitionRepository partitionRepository,
     IPasswordHasher passwordHasher,
     IRefreshTokenRepository refreshTokenRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserUpdateCommandHandler> logger
 ) : ICommandHandler<UserUpdateCommand>
@@ -431,6 +438,10 @@ public sealed class UserUpdateCommandHandler(
             {
                 user.Deactivate();
             }
+
+            entityEventRepository.Add(command.User.IsActive.Value
+                ? EntityEvent.Activated<User>(user, actor.ActorGuid)
+                : EntityEvent.Deactivated<User>(user, actor.ActorGuid));
         }
 
         #region Partition
@@ -1156,6 +1167,7 @@ public sealed record UserActivateCommand(Guid UserGuid) : ICommand;
 /// </remarks>
 public sealed class UserActivateCommandHandler(
     IUserRepository userRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserActivateCommandHandler> logger) : ICommandHandler<UserActivateCommand>
 {
@@ -1183,6 +1195,7 @@ public sealed class UserActivateCommandHandler(
             return;
         }
         user.Activate();
+        entityEventRepository.Add(EntityEvent.Activated<User>(user, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1209,6 +1222,7 @@ public sealed record UserDeactivateCommand(Guid UserGuid) : ICommand;
 /// </remarks>
 public sealed class UserDeactivateCommandHandler(
     IUserRepository userRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserDeactivateCommandHandler> logger) : ICommandHandler<UserDeactivateCommand>
 {
@@ -1236,6 +1250,7 @@ public sealed class UserDeactivateCommandHandler(
             return;
         }
         user.Deactivate();
+        entityEventRepository.Add(EntityEvent.Deactivated<User>(user, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(

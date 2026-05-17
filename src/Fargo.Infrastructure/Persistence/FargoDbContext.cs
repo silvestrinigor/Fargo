@@ -13,6 +13,8 @@ namespace Fargo.Infrastructure.Persistence;
 
 public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
+    public DbSet<EntityEvent> EntityEvents { get; set; }
+
     public DbSet<Article> Articles { get; set; }
 
     public DbSet<Item> Items { get; set; }
@@ -75,6 +77,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new EntityEventConfiguration());
+
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());

@@ -30,6 +30,7 @@ public sealed record ArticleCreateCommand(
 /// </remarks>
 public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleCreateCommandHandler> logger
 ) : ICommandHandler<ArticleCreateCommand, Guid>
@@ -54,6 +55,8 @@ public sealed class ArticleCreateCommandHandler(
         article.MarkModificationType(ArticleModifiedType.General);
 
         articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -402,6 +405,7 @@ public sealed record ArticleActivateCommand(
 /// </remarks>
 public sealed class ArticleActivateCommandHandler(
     IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleActivateCommandHandler> logger
 ) : ICommandHandler<ArticleActivateCommand>
@@ -444,6 +448,8 @@ public sealed class ArticleActivateCommandHandler(
 
         article.MarkModificationType(ArticleModifiedType.Activated);
 
+        entityEventRepository.Add(EntityEvent.Activated<Article>(article, actor.ActorGuid));
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -476,6 +482,7 @@ public sealed record ArticleDeactivateCommand(
 /// </remarks>
 public sealed class ArticleDeactivateCommandHandler(
     IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleDeactivateCommandHandler> logger
 ) : ICommandHandler<ArticleDeactivateCommand>
@@ -517,6 +524,8 @@ public sealed class ArticleDeactivateCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.Deactivated);
+
+        entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -850,6 +859,7 @@ public sealed record ArticleDeleteCommand(
 /// </remarks>
 public sealed class ArticleDeleteCommandHandler(
     IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleDeleteCommandHandler> logger
 ) : ICommandHandler<ArticleDeleteCommand>
@@ -888,6 +898,8 @@ public sealed class ArticleDeleteCommandHandler(
         }
 
         articleRepository.Remove(article);
+
+        entityEventRepository.Add(EntityEvent.EntityDeleted<Article>(article, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {

@@ -35,6 +35,7 @@ public sealed record ItemCreateCommand(
 public sealed class ItemCreateCommandHandler(
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
@@ -62,6 +63,8 @@ public sealed class ItemCreateCommandHandler(
         var item = new Item(article, command.ProductionDate);
 
         itemRepository.Add(item);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Item>(item, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -98,6 +101,7 @@ public sealed record ItemDeleteCommand(
 /// </remarks>
 public sealed class ItemDeleteCommandHandler(
     IItemRepository itemRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemDeleteCommandHandler> logger
 ) : ICommandHandler<ItemDeleteCommand>
@@ -123,6 +127,8 @@ public sealed class ItemDeleteCommandHandler(
         actor.ValidateHasAccess(item);
 
         itemRepository.Remove(item);
+
+        entityEventRepository.Add(EntityEvent.EntityDeleted<Item>(item, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {

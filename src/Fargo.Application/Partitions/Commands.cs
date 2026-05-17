@@ -25,6 +25,7 @@ public sealed record PartitionCreateCommand(
 /// </remarks>
 public sealed class PartitionCreateCommandHandler(
     IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<PartitionCreateCommandHandler> logger
 ) : ICommandHandler<PartitionCreateCommand, Guid>
@@ -45,6 +46,8 @@ public sealed class PartitionCreateCommandHandler(
         var partition = new Partition(command.Name);
 
         partitionRepository.Add(partition);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Partition>(partition, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -82,6 +85,7 @@ public sealed record PartitionDeleteCommand(
 public sealed class PartitionDeleteCommandHandler(
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<PartitionDeleteCommandHandler> logger
 ) : ICommandHandler<PartitionDeleteCommand>
@@ -107,6 +111,8 @@ public sealed class PartitionDeleteCommandHandler(
         actor.ValidateHasPartitionAccess(partition.Guid);
 
         partitionService.DeletePartition(partition);
+
+        entityEventRepository.Add(EntityEvent.EntityDeleted<Partition>(partition, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -370,6 +376,7 @@ public sealed record PartitionActivateCommand(
 /// </remarks>
 public sealed class PartitionActivateCommandHandler(
     IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<PartitionActivateCommandHandler> logger
 ) : ICommandHandler<PartitionActivateCommand>
@@ -408,6 +415,8 @@ public sealed class PartitionActivateCommandHandler(
 
         partition.Activate();
 
+        entityEventRepository.Add(EntityEvent.Activated<Partition>(partition, actor.ActorGuid));
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -440,6 +449,7 @@ public sealed record PartitionDeactivateCommand(
 /// </remarks>
 public sealed class PartitionDeactivateCommandHandler(
     IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<PartitionDeactivateCommandHandler> logger
 ) : ICommandHandler<PartitionDeactivateCommand>
@@ -477,6 +487,8 @@ public sealed class PartitionDeactivateCommandHandler(
         }
 
         partition.Deactivate();
+
+        entityEventRepository.Add(EntityEvent.Deactivated<Partition>(partition, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {

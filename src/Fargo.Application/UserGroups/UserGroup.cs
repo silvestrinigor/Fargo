@@ -127,6 +127,7 @@ public sealed record UserGroupCreateCommand(
 public sealed class UserGroupCreateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupCreateCommandHandler> logger
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
@@ -149,6 +150,8 @@ public sealed class UserGroupCreateCommandHandler(
         await userGroupService.ValidateUserGroupCreate(userGroup, cancellationToken);
 
         userGroupRepository.Add(userGroup);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<UserGroup>(userGroup, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -186,6 +189,7 @@ public sealed record UserGroupDeleteCommand(
 /// </remarks>
 public sealed class UserGroupDeleteCommandHandler(
     IUserGroupRepository userGroupRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupDeleteCommandHandler> logger
 ) : ICommandHandler<UserGroupDeleteCommand>
@@ -218,6 +222,8 @@ public sealed class UserGroupDeleteCommandHandler(
         UserGroupService.ValidateUserGroupDelete(userGroup);
 
         userGroupRepository.Remove(userGroup);
+
+        entityEventRepository.Add(EntityEvent.EntityDeleted<UserGroup>(userGroup, actor.ActorGuid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -257,6 +263,7 @@ public sealed class UserGroupUpdateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupUpdateCommandHandler> logger
 ) : ICommandHandler<UserGroupUpdateCommand>
@@ -308,6 +315,10 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 userGroup.Deactivate();
             }
+
+            entityEventRepository.Add(command.UserGroup.IsActive.Value
+                ? EntityEvent.Activated<UserGroup>(userGroup, actor.ActorGuid)
+                : EntityEvent.Deactivated<UserGroup>(userGroup, actor.ActorGuid));
         }
 
         if (command.UserGroup.Permissions is not null)
@@ -683,6 +694,7 @@ public sealed record UserGroupActivateCommand(Guid UserGroupGuid) : ICommand;
 /// </remarks>
 public sealed class UserGroupActivateCommandHandler(
     IUserGroupRepository userGroupRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupActivateCommandHandler> logger) : ICommandHandler<UserGroupActivateCommand>
 {
@@ -710,6 +722,7 @@ public sealed class UserGroupActivateCommandHandler(
             return;
         }
         userGroup.Activate();
+        entityEventRepository.Add(EntityEvent.Activated<UserGroup>(userGroup, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -736,6 +749,7 @@ public sealed record UserGroupDeactivateCommand(Guid UserGroupGuid) : ICommand;
 /// </remarks>
 public sealed class UserGroupDeactivateCommandHandler(
     IUserGroupRepository userGroupRepository,
+    IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupDeactivateCommandHandler> logger) : ICommandHandler<UserGroupDeactivateCommand>
 {
@@ -763,6 +777,7 @@ public sealed class UserGroupDeactivateCommandHandler(
             return;
         }
         userGroup.Deactivate();
+        entityEventRepository.Add(EntityEvent.Deactivated<UserGroup>(userGroup, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(

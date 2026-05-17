@@ -17,6 +17,7 @@ public sealed class ArticleCommandHandlerTests
         var actor = CreateActor(ActionType.CreateArticle);
         var handler = new ArticleCreateCommandHandler(
             repository,
+            Substitute.For<IEntityEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<ILogger<ArticleCreateCommandHandler>>());
 

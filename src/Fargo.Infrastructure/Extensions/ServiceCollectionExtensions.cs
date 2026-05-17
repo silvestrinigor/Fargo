@@ -6,6 +6,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
@@ -104,6 +105,7 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
+            services.AddScoped<IEntityEventRepository, EntityEventRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
