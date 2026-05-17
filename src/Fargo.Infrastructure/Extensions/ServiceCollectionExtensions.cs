@@ -218,7 +218,7 @@ public static class ServiceCollectionExtensions
 
         private void AddPersistence()
         {
-            services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         private static void ConfigureSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)

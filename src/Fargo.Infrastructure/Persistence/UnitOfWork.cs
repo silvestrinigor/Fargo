@@ -2,6 +2,7 @@ using Fargo.Application;
 using Fargo.Application.Identity;
 using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Infrastructure.Persistence;
 
@@ -23,9 +24,11 @@ namespace Fargo.Infrastructure.Persistence;
 /// to modified auditable entities tracked by the context.
 /// </para>
 /// </remarks>
-public sealed class FargoUnitOfWork(
+public sealed class UnitOfWork(
     FargoDbContext fargoContext,
-    IAuditPrincipal auditPrincipal) : IUnitOfWork
+    IAuditPrincipal auditPrincipal,
+    ILogger<UnitOfWork> logger
+) : IUnitOfWork
 {
     /// <summary>
     /// The write database context used to persist changes.
