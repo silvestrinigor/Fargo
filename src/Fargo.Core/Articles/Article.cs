@@ -33,8 +33,8 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticlePack> packs)
         => new(name, new ArticleKit(packs));
 
-    public static Article CreateArticleContainer(Name name, Mass? maxMass)
-        => new(name, new ArticleContainer(maxMass));
+    public static Article CreateArticleContainer(Name name)
+        => new(name, new ArticleContainer(null));
 
     private Article()
     {
@@ -671,6 +671,41 @@ public sealed class ArticlePack
 #endregion Pack
 
 #region Kit
+
+/// <summary>
+/// Identifies an article and quantity used as a component of a kit article.
+/// </summary>
+public readonly record struct ArticleKitComponent
+{
+    public ArticleKitComponent(Guid articleGuid, Scalar quantity)
+    {
+        if (articleGuid == Guid.Empty)
+        {
+            throw new ArgumentException("A kit component article guid cannot be empty.", nameof(articleGuid));
+        }
+
+        if (quantity <= 0.Amount())
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(quantity),
+                quantity,
+                "A kit component quantity must be greater than zero.");
+        }
+
+        ArticleGuid = articleGuid;
+        Quantity = quantity;
+    }
+
+    /// <summary>
+    /// Gets the unique identifier of the source article included in the kit.
+    /// </summary>
+    public Guid ArticleGuid { get; }
+
+    /// <summary>
+    /// Gets the quantity of the source article included in the kit.
+    /// </summary>
+    public Scalar Quantity { get; }
+}
 
 /// <summary>
 /// Defines an article kit relationship.

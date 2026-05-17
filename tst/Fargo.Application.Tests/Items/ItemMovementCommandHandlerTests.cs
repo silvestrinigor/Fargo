@@ -133,5 +133,5 @@ public sealed class ItemMovementCommandHandlerTests
         => Item.CreateItem(Article.CreateArticle(new Name("Article")));
 
     private static Item CreateContainerItem()
-        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article"), null));
+        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article")));
 }

@@ -5,6 +5,7 @@ using Fargo.Core.Barcodes;
 using Fargo.Core.Users;
 using Fargo.Sdk.Contracts;
 using UnitsNet;
+using UnitsNet.NumberExtensions.NumberToScalar;
 using UnitsNet.Units;
 using AppArticles = Fargo.Application.Articles;
 using AppItems = Fargo.Application.Items;
@@ -51,7 +52,14 @@ internal static class ApiContractMappings
             request.Metrics.ToApplicationDto(),
             request.ToApplicationBarcodesDto(),
             request.Partitions,
-            request.IsActive);
+            request.IsActive,
+            (AppArticles.ArticleCreateKind)(int)request.Kind,
+            request.FromArticleGuid,
+            request.Quantity?.Amount(),
+            request.KitPacks?.Select(static pack => new AppArticles.ArticleCreateKitPackDto(
+                pack.ArticleGuid,
+                pack.Quantity.Amount())).ToArray(),
+            request.ContainerMaxMass.ToMass());
 
     public static AppArticles.ArticlePatchDto ToApplicationDto(this ContractArticles.ArticlePatchRequest request)
         => new(

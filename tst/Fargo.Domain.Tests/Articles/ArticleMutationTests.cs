@@ -54,20 +54,44 @@ public sealed class ArticleMutationTests
     }
 
     [Fact]
+    public void ArticleKitComponent_Should_RejectEmptyArticleGuid()
+    {
+        Assert.Throws<ArgumentException>(
+            () => new ArticleKitComponent(Guid.Empty, 2.Amount()));
+    }
+
+    [Fact]
+    public void ArticleKitComponent_Should_RejectNonPositiveQuantity()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new ArticleKitComponent(Guid.NewGuid(), 0.Amount()));
+    }
+
+    [Fact]
+    public void ArticleKitComponent_Should_SetArticleGuidAndQuantity()
+    {
+        var articleGuid = Guid.NewGuid();
+        var quantity = 2.Amount();
+
+        var component = new ArticleKitComponent(articleGuid, quantity);
+
+        Assert.Equal(articleGuid, component.ArticleGuid);
+        Assert.Equal(quantity, component.Quantity);
+    }
+
+    [Fact]
     public void CreateArticleContainer_Should_SetContainer()
     {
-        var maxMass = Mass.FromKilograms(10);
-
-        var article = Article.CreateArticleContainer(new Name("Container article"), maxMass);
+        var article = Article.CreateArticleContainer(new Name("Container article"));
 
         Assert.True(article.IsContainer);
-        Assert.Equal(maxMass, article.Container?.MaxMass);
+        Assert.Null(article.Container?.MaxMass);
     }
 
     [Fact]
     public void Rename_Should_OnlyChangeName()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticleContainer(new Name("Test article"));
 
         article.Rename(new Name("Renamed article"));
 

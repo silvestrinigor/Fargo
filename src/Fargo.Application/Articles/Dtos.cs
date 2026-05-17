@@ -7,6 +7,15 @@ using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
+public enum ArticleCreateKind
+{
+    Article = 0,
+    Variation = 1,
+    Pack = 2,
+    Kit = 3,
+    Container = 4,
+}
+
 public sealed record ArticleDto(
     Guid Guid,
     Name Name,
@@ -41,6 +50,11 @@ public sealed record ArticleBarcodesDto(
     DataMatrix? DataMatrix = null
 );
 
+public sealed record ArticleCreateKitPackDto(
+    Guid ArticleGuid,
+    Scalar Quantity
+);
+
 public static class ArticleCommandDtoMappings
 {
     public static ArticleMetrics ToCore(this ArticleMetricsDto metrics)
@@ -72,7 +86,12 @@ public sealed record ArticleCreateDto(
     ArticleMetricsDto? Metrics = null,
     ArticleBarcodesDto? Barcodes = null,
     IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
+    bool? IsActive = null,
+    ArticleCreateKind Kind = ArticleCreateKind.Article,
+    Guid? FromArticleGuid = null,
+    Scalar? Quantity = null,
+    IReadOnlyCollection<ArticleCreateKitPackDto>? KitPacks = null,
+    Mass? ContainerMaxMass = null
 );
 
 public sealed record ArticlePatchDto(

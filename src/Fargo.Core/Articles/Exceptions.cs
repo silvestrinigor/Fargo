@@ -27,3 +27,15 @@ public sealed class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat
     /// <summary>Gets the barcode code that conflicts.</summary>
     public string Code { get; } = code;
 }
+
+/// <summary>
+/// Exception thrown when a container-only article operation is requested for a non-container article.
+/// </summary>
+public sealed class ArticleIsNotContainerFargoDomainException(Guid articleGuid)
+    : FargoDomainException($"Article '{articleGuid}' is not a container.")
+{
+    /// <summary>
+    /// Gets the identifier of the article that is not a container.
+    /// </summary>
+    public Guid ArticleGuid { get; } = articleGuid;
+}

@@ -130,6 +130,11 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<ArticleApplicationService>();
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreateVariationCommand, Guid>, ArticleCreateVariationCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreatePackCommand, Guid>, ArticleCreatePackCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreateKitCommand, Guid>, ArticleCreateKitCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreateContainerCommand, Guid>, ArticleCreateContainerCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetContainerMaxMassCommand>, ArticleSetContainerMaxMassCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleRenameCommand>, ArticleRenameCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleChangeDescriptionCommand>, ArticleChangeDescriptionCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleSetShelfLifeCommand>, ArticleSetShelfLifeCommandHandler>();

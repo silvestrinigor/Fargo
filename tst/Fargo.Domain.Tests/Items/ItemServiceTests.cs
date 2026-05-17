@@ -112,5 +112,5 @@ public sealed class ItemServiceTests
         => Article.CreateArticle(new Name("Test article"));
 
     private static Article CreateContainerArticle()
-        => Article.CreateArticleContainer(new Name("Container article"), null);
+        => Article.CreateArticleContainer(new Name("Container article"));
 }

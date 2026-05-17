@@ -95,6 +95,28 @@ public sealed class EntityEventCommandHandlerTests
     }
 
     [Fact]
+    public async Task ItemCreate_Should_Throw_WhenArticleIsInactive()
+    {
+        var article = Article.CreateArticle(new Name("Article"));
+        article.Deactivate();
+        var itemRepository = Substitute.For<IItemRepository>();
+        var articleRepository = Substitute.For<IArticleRepository>();
+        articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
+            .Returns(article);
+        var handler = new ItemCreateCommandHandler(
+            itemRepository,
+            articleRepository,
+            Substitute.For<IEntityEventRepository>(),
+            CreateCurrentAuthorizationContext(CreateActor(ActionType.CreateItem)),
+            Substitute.For<ILogger<ItemCreateCommandHandler>>());
+
+        await Assert.ThrowsAsync<EntityNotActiveFargoDomainException<Article>>(
+            () => handler.Handle(new ItemCreateCommand(article.Guid)));
+
+        itemRepository.DidNotReceiveWithAnyArgs().Add(default!);
+    }
+
+    [Fact]
     public async Task ItemDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
     {
         var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));

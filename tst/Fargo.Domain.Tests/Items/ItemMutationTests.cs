@@ -29,7 +29,7 @@ public sealed class ItemMutationTests
     [Fact]
     public void CreateItem_Should_SetContainer_WhenArticleIsContainer()
     {
-        var article = Article.CreateArticleContainer(new Name("Container article"), null);
+        var article = Article.CreateArticleContainer(new Name("Container article"));
 
         var item = Item.CreateItem(article);
 

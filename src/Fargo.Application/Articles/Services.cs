@@ -1,3 +1,5 @@
+using Fargo.Core.Articles;
+
 namespace Fargo.Application.Articles;
 
 /// <summary>
@@ -9,6 +11,11 @@ namespace Fargo.Application.Articles;
 /// </remarks>
 public sealed class ArticleApplicationService(
     ICommandHandler<ArticleCreateCommand, Guid> createArticleHandler,
+    ICommandHandler<ArticleCreateVariationCommand, Guid> createVariationHandler,
+    ICommandHandler<ArticleCreatePackCommand, Guid> createPackHandler,
+    ICommandHandler<ArticleCreateKitCommand, Guid> createKitHandler,
+    ICommandHandler<ArticleCreateContainerCommand, Guid> createContainerHandler,
+    ICommandHandler<ArticleSetContainerMaxMassCommand> setContainerMaxMassHandler,
     ICommandHandler<ArticleChangeDescriptionCommand> changeDescriptionHandler,
     ICommandHandler<ArticleSetShelfLifeCommand> setShelfLifeHandler,
     ICommandHandler<ArticleSetColorCommand> setColorHandler,
@@ -38,9 +45,7 @@ public sealed class ArticleApplicationService(
         ArticleCreateDto create,
         CancellationToken cancellationToken = default)
     {
-        var articleGuid = await createArticleHandler.Handle(
-            new ArticleCreateCommand(create.Name),
-            cancellationToken);
+        var articleGuid = await CreateArticleByKind(create, cancellationToken);
 
         if (create.Description is { } description)
         {
@@ -77,6 +82,14 @@ public sealed class ArticleApplicationService(
                 cancellationToken);
         }
 
+        if (create.Kind == ArticleCreateKind.Container &&
+            create.ContainerMaxMass is { } containerMaxMass)
+        {
+            await setContainerMaxMassHandler.Handle(
+                new ArticleSetContainerMaxMassCommand(articleGuid, containerMaxMass),
+                cancellationToken);
+        }
+
         if (create.Partitions is { Count: > 0 } partitions)
         {
             await setPartitionsHandler.Handle(
@@ -93,6 +106,48 @@ public sealed class ArticleApplicationService(
 
         return articleGuid;
     }
+
+    private async Task<Guid> CreateArticleByKind(
+        ArticleCreateDto create,
+        CancellationToken cancellationToken)
+        => create.Kind switch
+        {
+            ArticleCreateKind.Article => await createArticleHandler.Handle(
+                new ArticleCreateCommand(create.Name),
+                cancellationToken),
+            ArticleCreateKind.Variation => await createVariationHandler.Handle(
+                new ArticleCreateVariationCommand(
+                    create.Name,
+                    create.FromArticleGuid ?? throw new ArgumentException(
+                        "Variation article creation requires a source article guid.",
+                        nameof(create))),
+                cancellationToken),
+            ArticleCreateKind.Pack => await createPackHandler.Handle(
+                new ArticleCreatePackCommand(
+                    create.Name,
+                    create.FromArticleGuid ?? throw new ArgumentException(
+                        "Pack article creation requires a source article guid.",
+                        nameof(create)),
+                    create.Quantity ?? throw new ArgumentException(
+                        "Pack article creation requires a quantity.",
+                        nameof(create))),
+                cancellationToken),
+            ArticleCreateKind.Kit => await createKitHandler.Handle(
+                new ArticleCreateKitCommand(
+                    create.Name,
+                    create.KitPacks is { Count: > 0 } kitPacks
+                        ? kitPacks
+                            .Select(static pack => new ArticleKitComponent(pack.ArticleGuid, pack.Quantity))
+                            .ToArray()
+                        : throw new ArgumentException(
+                            "Kit article creation requires at least one pack.",
+                            nameof(create))),
+                cancellationToken),
+            ArticleCreateKind.Container => await createContainerHandler.Handle(
+                new ArticleCreateContainerCommand(create.Name),
+                cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(create), create.Kind, "Unsupported article create kind.")
+        };
 
     /// <summary>
     /// Updates an existing article.

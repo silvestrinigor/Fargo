@@ -5,6 +5,7 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -105,6 +106,18 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(ArticleBarcodeAlreadyInUseFargoDomainException),
                 new ProblemDetailsDefinition(409, "Conflict", "barcode/already-exists")
+            },
+            {
+                typeof(ArticleIsNotContainerFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "article/not-container")
+            },
+            {
+                typeof(EntityNotActiveFargoDomainException<Article>),
+                new ProblemDetailsDefinition(400, "Invalid operation", "article/inactive")
+            },
+            {
+                typeof(EntityNotActiveFargoDomainException<>),
+                new ProblemDetailsDefinition(400, "Invalid operation", "entity/inactive")
             },
             {
                 typeof(UserNameidAlreadyExistsDomainException),
@@ -220,7 +233,18 @@ public static class FargoProblemDetailsRegistry
         Type exceptionType,
         out ProblemDetailsDefinition definition)
     {
-        return map.TryGetValue(exceptionType, out definition!);
+        if (map.TryGetValue(exceptionType, out definition!))
+        {
+            return true;
+        }
+
+        if (exceptionType.IsGenericType &&
+            map.TryGetValue(exceptionType.GetGenericTypeDefinition(), out definition!))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
