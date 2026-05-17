@@ -19,11 +19,20 @@ namespace Fargo.Core.Users;
 /// </remarks>
 public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
 {
+    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
+        => new(nameid, passwordHash);
+
+    public static User CreateUser(Guid guid, Nameid nameid, PasswordHash passwordHash)
+        => new(nameid, passwordHash)
+        {
+            Guid = guid
+        };
+
     private User()
     {
     }
 
-    public User(Nameid nameid, PasswordHash passwordHash)
+    private User(Nameid nameid, PasswordHash passwordHash)
     {
         Nameid = nameid;
         PasswordHash = passwordHash;

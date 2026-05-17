@@ -20,7 +20,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
     public async Task ArticleSetPartitions_Should_RecordInsertedPartitionEvent()
     {
         var article = Article.CreateArticle(new Name("Article"));
-        var partition = new Partition(new Name("Partition"));
+        var partition = Partition.CreatePartition(new Name("Partition"));
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
@@ -47,9 +47,9 @@ public sealed class EntityPartitionEventCommandHandlerTests
     [Fact]
     public async Task ItemSetPartitions_Should_RecordRemovedAndInsertedPartitionEvents()
     {
-        var oldPartition = new Partition(new Name("Old partition"));
-        var newPartition = new Partition(new Name("New partition"));
-        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var oldPartition = Partition.CreatePartition(new Name("Old partition"));
+        var newPartition = Partition.CreatePartition(new Name("New partition"));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
         item.AddPartition(oldPartition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
@@ -83,9 +83,9 @@ public sealed class EntityPartitionEventCommandHandlerTests
     [Fact]
     public async Task UserSetPartitions_Should_RecordRemovedAndInsertedPartitionEvents()
     {
-        var oldPartition = new Partition(new Name("Old partition"));
-        var newPartition = new Partition(new Name("New partition"));
-        var user = new User(new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
+        var oldPartition = Partition.CreatePartition(new Name("Old partition"));
+        var newPartition = Partition.CreatePartition(new Name("New partition"));
+        var user = User.CreateUser(new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
         user.AddPartition(oldPartition);
         var userRepository = Substitute.For<IUserRepository>();
         userRepository.GetByGuid(user.Guid, Arg.Any<CancellationToken>())
@@ -119,9 +119,9 @@ public sealed class EntityPartitionEventCommandHandlerTests
     [Fact]
     public async Task UserGroupSetPartitions_Should_RecordRemovedAndInsertedPartitionEvents()
     {
-        var oldPartition = new Partition(new Name("Old partition"));
-        var newPartition = new Partition(new Name("New partition"));
-        var userGroup = new UserGroup(new Nameid("valid-group"));
+        var oldPartition = Partition.CreatePartition(new Name("Old partition"));
+        var newPartition = Partition.CreatePartition(new Name("New partition"));
+        var userGroup = UserGroup.CreateUserGroup(new Nameid("valid-group"));
         userGroup.AddPartition(oldPartition);
         var userGroupRepository = Substitute.For<IUserGroupRepository>();
         userGroupRepository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())

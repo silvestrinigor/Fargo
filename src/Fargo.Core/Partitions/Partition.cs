@@ -76,11 +76,20 @@ public interface IPartitionAccess
 /// </remarks>
 public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity, IActivable
 {
+    public static Partition CreatePartition(Name name, Description? description = null)
+        => new(name, description);
+
+    public static Partition CreatePartition(Guid guid, Name name, Description? description = null)
+        => new(name, description)
+        {
+            Guid = guid
+        };
+
     private Partition()
     {
     }
 
-    public Partition(Name name, Description? description = null)
+    private Partition(Name name, Description? description = null)
     {
         Name = name;
         Description = description ?? Description.Empty;

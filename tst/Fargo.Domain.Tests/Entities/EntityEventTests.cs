@@ -45,7 +45,7 @@ public sealed class EntityEventTests
     public void InsertedIntoPartition_Should_SetDetailsAndEventProperties()
     {
         var article = Article.CreateArticle(new Name("Article"));
-        var partition = new Partition(new Name("Partition"));
+        var partition = Partition.CreatePartition(new Name("Partition"));
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
 
@@ -68,7 +68,7 @@ public sealed class EntityEventTests
     public void RemovedFromPartition_Should_SetDetailsAndEventProperties()
     {
         var article = Article.CreateArticle(new Name("Article"));
-        var partition = new Partition(new Name("Partition"));
+        var partition = Partition.CreatePartition(new Name("Partition"));
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
 
@@ -91,7 +91,7 @@ public sealed class EntityEventTests
     public void EntityPartitionEventFactories_Should_Throw_WhenRequiredArgumentsAreInvalid()
     {
         var article = Article.CreateArticle(new Name("Article"));
-        var partition = new Partition(new Name("Partition"));
+        var partition = Partition.CreatePartition(new Name("Partition"));
         var occurredAt = DateTimeOffset.UtcNow;
 
         Assert.Throws<ArgumentNullException>(() => EntityPartitionEvent.InsertedIntoPartition<Article>(

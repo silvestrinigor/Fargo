@@ -43,7 +43,7 @@ public sealed class PartitionCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreatePartition);
 
-        var partition = new Partition(command.Name);
+        var partition = Partition.CreatePartition(command.Name);
 
         partition.MarkAsEditedBy(actor.ActorGuid);
 

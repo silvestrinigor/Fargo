@@ -43,7 +43,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
     [Fact]
     public async Task PartitionRename_Should_MarkActorAndGeneralModificationType()
     {
-        var partition = new Partition(new Name("Partition"));
+        var partition = Partition.CreatePartition(new Name("Partition"));
         var repository = Substitute.For<IPartitionRepository>();
         repository.GetByGuid(partition.Guid, Arg.Any<CancellationToken>())
             .Returns(partition);
@@ -62,7 +62,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
     [Fact]
     public async Task UserChangePassword_Should_MarkActorAndPasswordModificationType()
     {
-        var user = new User(new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
+        var user = User.CreateUser(new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
         var userRepository = Substitute.For<IUserRepository>();
         userRepository.GetByGuid(user.Guid, Arg.Any<CancellationToken>())
             .Returns(user);
@@ -89,7 +89,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
     [Fact]
     public async Task UserGroupSetPermissions_Should_MarkActorAndPermissionsModificationType()
     {
-        var userGroup = new UserGroup(new Nameid("valid-group"));
+        var userGroup = UserGroup.CreateUserGroup(new Nameid("valid-group"));
         var repository = Substitute.For<IUserGroupRepository>();
         repository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(userGroup);

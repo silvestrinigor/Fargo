@@ -48,7 +48,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
-        var userGroup = new UserGroup(command.Nameid);
+        var userGroup = UserGroup.CreateUserGroup(command.Nameid);
 
         userGroup.MarkAsEditedBy(actor.ActorGuid);
 

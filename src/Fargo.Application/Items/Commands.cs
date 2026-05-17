@@ -60,7 +60,7 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        var item = new Item(article, command.ProductionDate);
+        var item = Item.CreateItem(article, command.ProductionDate);
 
         item.MarkAsEditedBy(actor.ActorGuid);
 

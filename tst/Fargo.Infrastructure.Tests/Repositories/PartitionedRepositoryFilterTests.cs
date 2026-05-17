@@ -80,10 +80,10 @@ public sealed class PartitionedRepositoryFilterTests
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
         var article = CreateArticle("Article");
-        var publicEntity = new Item(article);
-        var firstPartitionEntity = new Item(article);
+        var publicEntity = Item.CreateItem(article);
+        var firstPartitionEntity = Item.CreateItem(article);
         firstPartitionEntity.Partitions.Add(firstPartition);
-        var secondPartitionEntity = new Item(article);
+        var secondPartitionEntity = Item.CreateItem(article);
         secondPartitionEntity.Partitions.Add(secondPartition);
         context.Articles.Add(article);
         context.Items.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
@@ -133,10 +133,10 @@ public sealed class PartitionedRepositoryFilterTests
     {
         await using var context = CreateContext();
         var (firstPartition, secondPartition) = AddPartitions(context);
-        var publicEntity = new UserGroup(new Nameid("public-group"));
-        var firstPartitionEntity = new UserGroup(new Nameid("first-group"));
+        var publicEntity = UserGroup.CreateUserGroup(new Nameid("public-group"));
+        var firstPartitionEntity = UserGroup.CreateUserGroup(new Nameid("first-group"));
         firstPartitionEntity.AddPartition(firstPartition);
-        var secondPartitionEntity = new UserGroup(new Nameid("second-group"));
+        var secondPartitionEntity = UserGroup.CreateUserGroup(new Nameid("second-group"));
         secondPartitionEntity.AddPartition(secondPartition);
         context.UserGroups.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
@@ -219,14 +219,14 @@ public sealed class PartitionedRepositoryFilterTests
 
     private static (Partition First, Partition Second) AddPartitions(FargoDbContext context)
     {
-        var first = new Partition(new Name("First partition"));
-        var second = new Partition(new Name("Second partition"));
+        var first = Partition.CreatePartition(new Name("First partition"));
+        var second = Partition.CreatePartition(new Name("Second partition"));
         context.Partitions.AddRange(first, second);
         return (first, second);
     }
 
     private static User CreateUser(string nameid)
-        => new(
+        => User.CreateUser(
             new Nameid(nameid),
             new PasswordHash(new string('h', PasswordHash.MinLength)));
 }

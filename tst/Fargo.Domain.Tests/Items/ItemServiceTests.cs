@@ -103,10 +103,10 @@ public sealed class ItemServiceTests
     }
 
     private static Item CreateItem()
-        => new(CreateArticle());
+        => Item.CreateItem(CreateArticle());
 
     private static Item CreateContainerItem()
-        => new(CreateContainerArticle());
+        => Item.CreateItem(CreateContainerArticle());
 
     private static Article CreateArticle()
         => Article.CreateArticle(new Name("Test article"));

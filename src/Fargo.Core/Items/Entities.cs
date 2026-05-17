@@ -22,6 +22,9 @@ namespace Fargo.Core.Items;
 /// </remarks>
 public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivable
 {
+    public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
+        => new(article, productionDate);
+
     /// <summary>
     /// Initializes a new item entity.
     /// </summary>
@@ -38,7 +41,7 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
     /// Initializes a new item entity associated with the specified article.
     /// </summary>
     /// <param name="article">The article associated with the item.</param>
-    public Item(Article article, DateTimeOffset? productionDate = null)
+    private Item(Article article, DateTimeOffset? productionDate = null)
     {
         if (article.IsContainer)
         {

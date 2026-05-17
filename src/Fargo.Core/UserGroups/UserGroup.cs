@@ -21,11 +21,20 @@ namespace Fargo.Core.UserGroups;
 /// </remarks>
 public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
+    public static UserGroup CreateUserGroup(Nameid nameid, Description? description = null)
+        => new(nameid, description);
+
+    public static UserGroup CreateUserGroup(Guid guid, Nameid nameid, Description? description = null)
+        => new(nameid, description)
+        {
+            Guid = guid
+        };
+
     private UserGroup()
     {
     }
 
-    public UserGroup(Nameid nameid, Description? description = null)
+    private UserGroup(Nameid nameid, Description? description = null)
     {
         Nameid = nameid;
         Description = description ?? Description.Empty;

@@ -75,7 +75,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemDelete_Should_RecordDeletedEvent()
     {
-        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.DeleteItem);
@@ -97,7 +97,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
     {
-        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);
@@ -122,7 +122,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemActivate_Should_RecordActivatedEvent_WhenStateChanges()
     {
-        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
         item.Deactivate();
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
@@ -148,7 +148,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemActivate_Should_NotRecordEvent_WhenAlreadyActive()
     {
-        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);

@@ -42,10 +42,7 @@ public sealed class InitializeSystemCommandHandler(
 
         if (globalPartition is null)
         {
-            globalPartition = new Partition(new("Global"))
-            {
-                Guid = PartitionService.GlobalPartitionGuid
-            };
+            globalPartition = Partition.CreatePartition(PartitionService.GlobalPartitionGuid, new("Global"));
 
             partitionRepository.Add(globalPartition);
             if (logger.IsEnabled(LogLevel.Information))
@@ -60,10 +57,9 @@ public sealed class InitializeSystemCommandHandler(
 
         if (administratorsGroup is null)
         {
-            administratorsGroup = new UserGroup(new("administrators"))
-            {
-                Guid = UserGroupService.AdministratorsUserGroupGuid
-            };
+            administratorsGroup = UserGroup.CreateUserGroup(
+                UserGroupService.AdministratorsUserGroupGuid,
+                new("administrators"));
 
             administratorsGroup.AddPartitionAccess(globalPartition);
             administratorsGroup.AddPartition(globalPartition);
@@ -89,10 +85,10 @@ public sealed class InitializeSystemCommandHandler(
         var adminPassword = new Password(options.Password);
         var passwordHash = passwordHasher.Hash(adminPassword);
 
-        var admin = new User(adminNameid, passwordHash)
-        {
-            Guid = UserService.DefaultAdministratorUserGuid
-        };
+        var admin = User.CreateUser(
+            UserService.DefaultAdministratorUserGuid,
+            adminNameid,
+            passwordHash);
 
         admin.AddPartitionAccess(globalPartition);
         admin.AddUserGroup(administratorsGroup);

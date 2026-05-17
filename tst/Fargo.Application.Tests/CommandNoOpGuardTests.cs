@@ -18,8 +18,8 @@ public sealed class CommandNoOpGuardTests
     [Fact]
     public async Task ItemSetPartitions_Should_Skip_WhenPartitionsAreUnchanged()
     {
-        var partition = new Partition(new Name("Partition"));
-        var item = new Item(Article.CreateArticle(new Name("Article")));
+        var partition = Partition.CreatePartition(new Name("Partition"));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
         item.AddPartition(partition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
@@ -44,10 +44,7 @@ public sealed class CommandNoOpGuardTests
     public async Task UserSetPermissions_Should_Skip_BeforeOwnPermissionValidation_WhenPermissionsAreUnchanged()
     {
         var actorGuid = Guid.NewGuid();
-        var user = new User(new Nameid("valid-user"), new PasswordHash(new string('a', 60)))
-        {
-            Guid = actorGuid
-        };
+        var user = User.CreateUser(actorGuid, new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
         user.AddPermission(ActionType.EditUser);
         var userRepository = Substitute.For<IUserRepository>();
         userRepository.GetByGuid(user.Guid, Arg.Any<CancellationToken>())
@@ -65,8 +62,8 @@ public sealed class CommandNoOpGuardTests
     [Fact]
     public async Task UserGroupSetPartitions_Should_Skip_WhenPartitionsAreUnchanged()
     {
-        var partition = new Partition(new Name("Partition"));
-        var userGroup = new UserGroup(new Nameid("valid-group"));
+        var partition = Partition.CreatePartition(new Name("Partition"));
+        var userGroup = UserGroup.CreateUserGroup(new Nameid("valid-group"));
         userGroup.AddPartition(partition);
         var userGroupRepository = Substitute.For<IUserGroupRepository>();
         userGroupRepository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())

@@ -57,7 +57,7 @@ public sealed class UserCreateCommandHandler(
 
         var userPasswordHash = passwordHasher.Hash(command.Password);
 
-        var user = new User(command.Nameid, userPasswordHash);
+        var user = User.CreateUser(command.Nameid, userPasswordHash);
         user.MarkPasswordChangeAsRequired();
 
         user.MarkAsEditedBy(actor.ActorGuid);
