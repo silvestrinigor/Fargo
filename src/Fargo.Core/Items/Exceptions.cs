@@ -44,3 +44,19 @@ public sealed class ItemCircularContainerHierarchyFargoDomainException(
     /// </summary>
     public Guid MemberItemGuid { get; } = memberItemGuid;
 }
+
+/// <summary>
+/// Thrown when attempting to create an <see cref="Item"/>
+/// for an inactive <see cref="Article"/>.
+/// </summary>
+public sealed class ItemCannotBeCreatedWhenArticleNotActiveFargoDomainException(
+    Guid articleGuid
+) : FargoDomainException(
+    $"Item cannot be created because article {articleGuid} is not active."
+)
+{
+    /// <summary>
+    /// Gets the identifier of the inactive article that prevented item creation.
+    /// </summary>
+    public Guid ArticleGuid { get; } = articleGuid;
+}
