@@ -412,22 +412,43 @@ public sealed record UserGroupChangeNameidCommand(Guid UserGroupGuid, Nameid Nam
 public sealed class UserGroupChangeNameidCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupChangeNameidCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserGroupChangeNameidCommandHandler> logger) : ICommandHandler<UserGroupChangeNameidCommand>
 {
     public async Task Handle(UserGroupChangeNameidCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group nameid change flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                command.UserGroupGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUserGroup);
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
         actor.ValidateHasAccess(userGroup);
 
         if (userGroup.Nameid == command.Nameid)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group nameid change flow skipped for user group {UserGroupGuid}; nameid is already requested value.",
+                    userGroup.Guid);
+            }
             return;
         }
 
         await userGroupService.ValidateUserGroupNameidChange(userGroup, command.Nameid, cancellationToken);
         userGroup.ChangeNameid(command.Nameid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group nameid change mutation completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+                userGroup.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -450,15 +471,40 @@ public sealed record UserGroupChangeDescriptionCommand(Guid UserGroupGuid, Descr
 /// </remarks>
 public sealed class UserGroupChangeDescriptionCommandHandler(
     IUserGroupRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupChangeDescriptionCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserGroupChangeDescriptionCommandHandler> logger) : ICommandHandler<UserGroupChangeDescriptionCommand>
 {
     public async Task Handle(UserGroupChangeDescriptionCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group description change flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                command.UserGroupGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUserGroup);
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
         actor.ValidateHasAccess(userGroup);
+        if (userGroup.Description == command.Description)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group description change flow skipped for user group {UserGroupGuid}; description is already requested value.",
+                    userGroup.Guid);
+            }
+            return;
+        }
         userGroup.ChangeDescription(command.Description);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group description change mutation completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+                userGroup.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -482,17 +528,37 @@ public sealed record UserGroupSetPermissionsCommand(Guid UserGroupGuid, IReadOnl
 /// </remarks>
 public sealed class UserGroupSetPermissionsCommandHandler(
     IUserGroupRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupSetPermissionsCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserGroupSetPermissionsCommandHandler> logger) : ICommandHandler<UserGroupSetPermissionsCommand>
 {
     public async Task Handle(UserGroupSetPermissionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group permission mutation started for user group {UserGroupGuid} by actor {ActorGuid}. RequestedPermissionCount: {RequestedPermissionCount}.",
+                command.UserGroupGuid,
+                actor.ActorGuid,
+                command.Actions.Count);
+        }
         actor.ValidateHasPermission(ActionType.EditUserGroup);
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
         actor.ValidateHasAccess(userGroup);
 
         var requestedActions = command.Actions.Distinct().ToHashSet();
         var currentActions = userGroup.Permissions.Select(x => x.Action).ToHashSet();
+
+        if (requestedActions.SetEquals(currentActions))
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group permission mutation skipped for user group {UserGroupGuid}; permissions are already requested values.",
+                    userGroup.Guid);
+            }
+            return;
+        }
 
         foreach (var action in requestedActions.Except(currentActions))
         {
@@ -502,6 +568,15 @@ public sealed class UserGroupSetPermissionsCommandHandler(
         foreach (var action in currentActions.Except(requestedActions))
         {
             userGroup.RemovePermission(action);
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group permission mutation completed for user group {UserGroupGuid} by actor {ActorGuid}. PermissionCount: {PermissionCount}.",
+                userGroup.Guid,
+                actor.ActorGuid,
+                userGroup.Permissions.Count);
         }
     }
 }
@@ -527,16 +602,40 @@ public sealed record UserGroupSetPartitionsCommand(Guid UserGroupGuid, IReadOnly
 public sealed class UserGroupSetPartitionsCommandHandler(
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupSetPartitionsCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserGroupSetPartitionsCommandHandler> logger) : ICommandHandler<UserGroupSetPartitionsCommand>
 {
     public async Task Handle(UserGroupSetPartitionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group partition mutation started for user group {UserGroupGuid} by actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}.",
+                command.UserGroupGuid,
+                actor.ActorGuid,
+                command.PartitionGuids.Count);
+        }
         actor.ValidateHasPermission(ActionType.EditUserGroup);
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
         actor.ValidateHasAccess(userGroup);
 
         var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
+
+        var hasChanges =
+            userGroup.Partitions.Count != requestedPartitions.Length ||
+            userGroup.Partitions.Any(p => !requestedPartitions.Contains(p.Guid));
+
+        if (!hasChanges)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group partition mutation skipped for user group {UserGroupGuid}; partitions are already requested values.",
+                    userGroup.Guid);
+            }
+            return;
+        }
 
         foreach (var partitionGuid in requestedPartitions)
         {
@@ -555,6 +654,15 @@ public sealed class UserGroupSetPartitionsCommandHandler(
         {
             actor.ValidateHasPartitionAccess(partition.Guid);
             userGroup.RemovePartition(partition);
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group partition mutation completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                userGroup.Guid,
+                actor.ActorGuid,
+                userGroup.Partitions.Count);
         }
     }
 }
@@ -575,15 +683,40 @@ public sealed record UserGroupActivateCommand(Guid UserGroupGuid) : ICommand;
 /// </remarks>
 public sealed class UserGroupActivateCommandHandler(
     IUserGroupRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupActivateCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserGroupActivateCommandHandler> logger) : ICommandHandler<UserGroupActivateCommand>
 {
     public async Task Handle(UserGroupActivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group activation flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                command.UserGroupGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUserGroup);
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
         actor.ValidateHasAccess(userGroup);
+        if (userGroup.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group activation flow skipped for user group {UserGroupGuid}; user group is already active.",
+                    userGroup.Guid);
+            }
+            return;
+        }
         userGroup.Activate();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group activation mutation completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+                userGroup.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -603,15 +736,40 @@ public sealed record UserGroupDeactivateCommand(Guid UserGroupGuid) : ICommand;
 /// </remarks>
 public sealed class UserGroupDeactivateCommandHandler(
     IUserGroupRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserGroupDeactivateCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserGroupDeactivateCommandHandler> logger) : ICommandHandler<UserGroupDeactivateCommand>
 {
     public async Task Handle(UserGroupDeactivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group deactivation flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                command.UserGroupGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUserGroup);
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
         actor.ValidateHasAccess(userGroup);
+        if (!userGroup.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group deactivation flow skipped for user group {UserGroupGuid}; user group is already inactive.",
+                    userGroup.Guid);
+            }
+            return;
+        }
         userGroup.Deactivate();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group deactivation mutation completed for user group {UserGroupGuid} by actor {ActorGuid}.",
+                userGroup.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 

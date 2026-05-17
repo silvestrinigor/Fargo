@@ -563,22 +563,43 @@ public sealed record UserChangeNameidCommand(Guid UserGuid, Nameid Nameid) : ICo
 public sealed class UserChangeNameidCommandHandler(
     UserService userService,
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserChangeNameidCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserChangeNameidCommandHandler> logger) : ICommandHandler<UserChangeNameidCommand>
 {
     public async Task Handle(UserChangeNameidCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User nameid change flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
 
         if (user.Nameid == command.Nameid)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User nameid change flow skipped for user {UserGuid}; nameid is already requested value.",
+                    user.Guid);
+            }
             return;
         }
 
         await userService.ValidateUserNameidChange(user, command.Nameid, cancellationToken);
         user.ChangeNameid(command.Nameid);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User nameid change mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -601,15 +622,40 @@ public sealed record UserChangeFirstNameCommand(Guid UserGuid, FirstName? FirstN
 /// </remarks>
 public sealed class UserChangeFirstNameCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserChangeFirstNameCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserChangeFirstNameCommandHandler> logger) : ICommandHandler<UserChangeFirstNameCommand>
 {
     public async Task Handle(UserChangeFirstNameCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User first name change flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
+        if (user.FirstName == command.FirstName)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User first name change flow skipped for user {UserGuid}; first name is already requested value.",
+                    user.Guid);
+            }
+            return;
+        }
         user.ChangeFirstName(command.FirstName);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User first name change mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -632,15 +678,40 @@ public sealed record UserChangeLastNameCommand(Guid UserGuid, LastName? LastName
 /// </remarks>
 public sealed class UserChangeLastNameCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserChangeLastNameCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserChangeLastNameCommandHandler> logger) : ICommandHandler<UserChangeLastNameCommand>
 {
     public async Task Handle(UserChangeLastNameCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User last name change flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
+        if (user.LastName == command.LastName)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User last name change flow skipped for user {UserGuid}; last name is already requested value.",
+                    user.Guid);
+            }
+            return;
+        }
         user.ChangeLastName(command.LastName);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User last name change mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -663,15 +734,40 @@ public sealed record UserChangeDescriptionCommand(Guid UserGuid, Description Des
 /// </remarks>
 public sealed class UserChangeDescriptionCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserChangeDescriptionCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserChangeDescriptionCommandHandler> logger) : ICommandHandler<UserChangeDescriptionCommand>
 {
     public async Task Handle(UserChangeDescriptionCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User description change flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
+        if (user.Description == command.Description)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User description change flow skipped for user {UserGuid}; description is already requested value.",
+                    user.Guid);
+            }
+            return;
+        }
         user.ChangeDescription(command.Description);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User description change mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -694,15 +790,40 @@ public sealed record UserSetDefaultPasswordExpirationCommand(Guid UserGuid, Time
 /// </remarks>
 public sealed class UserSetDefaultPasswordExpirationCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserSetDefaultPasswordExpirationCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserSetDefaultPasswordExpirationCommandHandler> logger) : ICommandHandler<UserSetDefaultPasswordExpirationCommand>
 {
     public async Task Handle(UserSetDefaultPasswordExpirationCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User default password expiration mutation started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
+        if (user.DefaultPasswordExpirationPeriod == command.Period)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User default password expiration mutation skipped for user {UserGuid}; period is already requested value.",
+                    user.Guid);
+            }
+            return;
+        }
         user.SetDefaultPasswordExpirationPeriod(command.Period);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User default password expiration mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -728,11 +849,19 @@ public sealed class UserChangePasswordCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IRefreshTokenRepository refreshTokenRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserChangePasswordCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserChangePasswordCommandHandler> logger) : ICommandHandler<UserChangePasswordCommand>
 {
     public async Task Handle(UserChangePasswordCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User password change flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
@@ -741,9 +870,19 @@ public sealed class UserChangePasswordCommandHandler(
         user.MarkPasswordChangeAsRequired();
 
         var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
-        foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
+        var usableRefreshTokens = refreshTokens.Where(refreshToken => refreshToken.IsUsable).ToArray();
+        foreach (var refreshToken in usableRefreshTokens)
         {
             refreshToken.Revoke();
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User password change mutation completed for user {UserGuid} by actor {ActorGuid}. RevokedRefreshTokenCount: {RevokedRefreshTokenCount}.",
+                user.Guid,
+                actor.ActorGuid,
+                usableRefreshTokens.Length);
         }
     }
 }
@@ -768,18 +907,39 @@ public sealed record UserSetPermissionsCommand(Guid UserGuid, IReadOnlyCollectio
 /// </remarks>
 public sealed class UserSetPermissionsCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserSetPermissionsCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserSetPermissionsCommandHandler> logger) : ICommandHandler<UserSetPermissionsCommand>
 {
     public async Task Handle(UserSetPermissionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User permission mutation started for user {UserGuid} by actor {ActorGuid}. RequestedPermissionCount: {RequestedPermissionCount}.",
+                command.UserGuid,
+                actor.ActorGuid,
+                command.Actions.Count);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
-        UserService.ValidateUserPermissionChange(user, actor.ActorGuid);
 
         var requestedActions = command.Actions.Distinct().ToHashSet();
         var currentActions = user.Permissions.Select(x => x.Action).ToHashSet();
+
+        if (requestedActions.SetEquals(currentActions))
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User permission mutation skipped for user {UserGuid}; permissions are already requested values.",
+                    user.Guid);
+            }
+            return;
+        }
+
+        UserService.ValidateUserPermissionChange(user, actor.ActorGuid);
 
         foreach (var action in requestedActions.Except(currentActions))
         {
@@ -789,6 +949,15 @@ public sealed class UserSetPermissionsCommandHandler(
         foreach (var action in currentActions.Except(requestedActions))
         {
             user.RemovePermission(action);
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User permission mutation completed for user {UserGuid} by actor {ActorGuid}. PermissionCount: {PermissionCount}.",
+                user.Guid,
+                actor.ActorGuid,
+                user.Permissions.Count);
         }
     }
 }
@@ -814,16 +983,40 @@ public sealed record UserSetPartitionsCommand(Guid UserGuid, IReadOnlyCollection
 public sealed class UserSetPartitionsCommandHandler(
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserSetPartitionsCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserSetPartitionsCommandHandler> logger) : ICommandHandler<UserSetPartitionsCommand>
 {
     public async Task Handle(UserSetPartitionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User partition mutation started for user {UserGuid} by actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}.",
+                command.UserGuid,
+                actor.ActorGuid,
+                command.PartitionGuids.Count);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
 
         var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
+
+        var hasChanges =
+            user.Partitions.Count != requestedPartitions.Length ||
+            user.Partitions.Any(p => !requestedPartitions.Contains(p.Guid));
+
+        if (!hasChanges)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User partition mutation skipped for user {UserGuid}; partitions are already requested values.",
+                    user.Guid);
+            }
+            return;
+        }
 
         foreach (var partitionGuid in requestedPartitions)
         {
@@ -842,6 +1035,15 @@ public sealed class UserSetPartitionsCommandHandler(
         {
             actor.ValidateHasPartitionAccess(partition.Guid);
             user.RemovePartition(partition);
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User partition mutation completed for user {UserGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                user.Guid,
+                actor.ActorGuid,
+                user.Partitions.Count);
         }
     }
 }
@@ -867,16 +1069,40 @@ public sealed record UserSetUserGroupsCommand(Guid UserGuid, IReadOnlyCollection
 public sealed class UserSetUserGroupsCommandHandler(
     IUserRepository userRepository,
     IUserGroupRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserSetUserGroupsCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserSetUserGroupsCommandHandler> logger) : ICommandHandler<UserSetUserGroupsCommand>
 {
     public async Task Handle(UserSetUserGroupsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group assignment mutation started for user {UserGuid} by actor {ActorGuid}. RequestedUserGroupCount: {RequestedUserGroupCount}.",
+                command.UserGuid,
+                actor.ActorGuid,
+                command.UserGroupGuids.Count);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
 
         var requestedUserGroups = command.UserGroupGuids.Distinct().ToArray();
+
+        var hasChanges =
+            user.UserGroups.Count != requestedUserGroups.Length ||
+            user.UserGroups.Any(g => !requestedUserGroups.Contains(g.Guid));
+
+        if (!hasChanges)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User group assignment mutation skipped for user {UserGuid}; user groups are already requested values.",
+                    user.Guid);
+            }
+            return;
+        }
 
         foreach (var userGroupGuid in requestedUserGroups)
         {
@@ -902,6 +1128,15 @@ public sealed class UserSetUserGroupsCommandHandler(
             actor.ValidateHasAccess(userGroup);
             user.RemoveUserGroup(userGroup);
         }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User group assignment mutation completed for user {UserGuid} by actor {ActorGuid}. UserGroupCount: {UserGroupCount}.",
+                user.Guid,
+                actor.ActorGuid,
+                user.UserGroups.Count);
+        }
     }
 }
 
@@ -921,15 +1156,40 @@ public sealed record UserActivateCommand(Guid UserGuid) : ICommand;
 /// </remarks>
 public sealed class UserActivateCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserActivateCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserActivateCommandHandler> logger) : ICommandHandler<UserActivateCommand>
 {
     public async Task Handle(UserActivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User activation flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
+        if (user.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User activation flow skipped for user {UserGuid}; user is already active.",
+                    user.Guid);
+            }
+            return;
+        }
         user.Activate();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User activation mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -949,15 +1209,40 @@ public sealed record UserDeactivateCommand(Guid UserGuid) : ICommand;
 /// </remarks>
 public sealed class UserDeactivateCommandHandler(
     IUserRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext) : ICommandHandler<UserDeactivateCommand>
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<UserDeactivateCommandHandler> logger) : ICommandHandler<UserDeactivateCommand>
 {
     public async Task Handle(UserDeactivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User deactivation flow started for user {UserGuid} by actor {ActorGuid}.",
+                command.UserGuid,
+                actor.ActorGuid);
+        }
         actor.ValidateHasPermission(ActionType.EditUser);
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
         actor.ValidateHasAccess(user);
+        if (!user.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "User deactivation flow skipped for user {UserGuid}; user is already inactive.",
+                    user.Guid);
+            }
+            return;
+        }
         user.Deactivate();
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "User deactivation mutation completed for user {UserGuid} by actor {ActorGuid}.",
+                user.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 

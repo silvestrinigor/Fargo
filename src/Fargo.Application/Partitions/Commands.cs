@@ -144,7 +144,8 @@ public sealed record PartitionRenameCommand(
 /// </remarks>
 public sealed class PartitionRenameCommandHandler(
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<PartitionRenameCommandHandler> logger
 ) : ICommandHandler<PartitionRenameCommand>
 {
     public async Task Handle(
@@ -153,13 +154,41 @@ public sealed class PartitionRenameCommandHandler(
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition rename flow started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actor.ActorGuid);
+        }
+
         actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        if (partition.Name == command.Name)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Partition rename flow skipped for partition {PartitionGuid}; name is already requested value.",
+                    partition.Guid);
+            }
+
+            return;
+        }
+
         partition.Rename(command.Name);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition rename mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
+                partition.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -189,7 +218,8 @@ public sealed record PartitionChangeDescriptionCommand(
 /// </remarks>
 public sealed class PartitionChangeDescriptionCommandHandler(
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<PartitionChangeDescriptionCommandHandler> logger
 ) : ICommandHandler<PartitionChangeDescriptionCommand>
 {
     public async Task Handle(
@@ -198,13 +228,41 @@ public sealed class PartitionChangeDescriptionCommandHandler(
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition description change flow started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actor.ActorGuid);
+        }
+
         actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        if (partition.Description == command.Description)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Partition description change flow skipped for partition {PartitionGuid}; description is already requested value.",
+                    partition.Guid);
+            }
+
+            return;
+        }
+
         partition.ChangeDescription(command.Description);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition description change mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
+                partition.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -236,7 +294,8 @@ public sealed record PartitionSetParentCommand(
 public sealed class PartitionSetParentCommandHandler(
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<PartitionSetParentCommandHandler> logger
 ) : ICommandHandler<PartitionSetParentCommand>
 {
     public async Task Handle(
@@ -244,6 +303,14 @@ public sealed class PartitionSetParentCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition parent mutation started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditPartition);
 
@@ -253,6 +320,14 @@ public sealed class PartitionSetParentCommandHandler(
 
         if (partition.ParentPartitionGuid == command.ParentPartitionGuid)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Partition parent mutation skipped for partition {PartitionGuid}; parent partition is already {ParentPartitionGuid}.",
+                    partition.Guid,
+                    partition.ParentPartitionGuid);
+            }
+
             return;
         }
 
@@ -261,6 +336,15 @@ public sealed class PartitionSetParentCommandHandler(
         actor.ValidateHasPartitionAccess(parentPartition.Guid);
 
         await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition parent mutation completed for partition {PartitionGuid} by actor {ActorGuid}. ParentPartitionGuid: {ParentPartitionGuid}.",
+                partition.Guid,
+                actor.ActorGuid,
+                partition.ParentPartitionGuid);
+        }
     }
 }
 
@@ -286,7 +370,8 @@ public sealed record PartitionActivateCommand(
 /// </remarks>
 public sealed class PartitionActivateCommandHandler(
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<PartitionActivateCommandHandler> logger
 ) : ICommandHandler<PartitionActivateCommand>
 {
     public async Task Handle(
@@ -295,13 +380,41 @@ public sealed class PartitionActivateCommandHandler(
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition activation flow started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actor.ActorGuid);
+        }
+
         actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        if (partition.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Partition activation flow skipped for partition {PartitionGuid}; partition is already active.",
+                    partition.Guid);
+            }
+
+            return;
+        }
+
         partition.Activate();
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition activation mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
+                partition.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -327,7 +440,8 @@ public sealed record PartitionDeactivateCommand(
 /// </remarks>
 public sealed class PartitionDeactivateCommandHandler(
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<PartitionDeactivateCommandHandler> logger
 ) : ICommandHandler<PartitionDeactivateCommand>
 {
     public async Task Handle(
@@ -336,13 +450,41 @@ public sealed class PartitionDeactivateCommandHandler(
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition deactivation flow started for partition {PartitionGuid} by actor {ActorGuid}.",
+                command.PartitionGuid,
+                actor.ActorGuid);
+        }
+
         actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
         actor.ValidateHasPartitionAccess(partition.Guid);
 
+        if (!partition.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Partition deactivation flow skipped for partition {PartitionGuid}; partition is already inactive.",
+                    partition.Guid);
+            }
+
+            return;
+        }
+
         partition.Deactivate();
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Partition deactivation mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
+                partition.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 

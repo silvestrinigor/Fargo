@@ -273,7 +273,8 @@ public sealed record ItemSetPartitionsCommand(
 public sealed class ItemSetPartitionsCommandHandler(
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ItemSetPartitionsCommandHandler> logger
 ) : ICommandHandler<ItemSetPartitionsCommand>
 {
     public async Task Handle(
@@ -282,6 +283,15 @@ public sealed class ItemSetPartitionsCommandHandler(
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
 
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item partition mutation started for item {ItemGuid} by actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}.",
+                command.ItemGuid,
+                actor.ActorGuid,
+                command.PartitionGuids.Count);
+        }
+
         actor.ValidateHasPermission(ActionType.EditItem);
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
@@ -289,6 +299,22 @@ public sealed class ItemSetPartitionsCommandHandler(
         actor.ValidateHasAccess(item);
 
         var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
+
+        var hasChanges =
+            item.Partitions.Count != requestedPartitions.Length ||
+            item.Partitions.Any(p => !requestedPartitions.Contains(p.Guid));
+
+        if (!hasChanges)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item partition mutation skipped for item {ItemGuid}; partitions are already requested values.",
+                    item.Guid);
+            }
+
+            return;
+        }
 
         foreach (var partitionGuid in requestedPartitions)
         {
@@ -313,6 +339,15 @@ public sealed class ItemSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             item.RemovePartition(partition);
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item partition mutation completed for item {ItemGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                item.Guid,
+                actor.ActorGuid,
+                item.Partitions.Count);
         }
     }
 }

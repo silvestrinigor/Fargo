@@ -93,7 +93,8 @@ public sealed record ArticleRenameCommand(
 /// </remarks>
 public sealed class ArticleRenameCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleRenameCommandHandler> logger
 ) : ICommandHandler<ArticleRenameCommand>
 {
     public async Task Handle(
@@ -101,6 +102,14 @@ public sealed class ArticleRenameCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article rename flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -110,6 +119,13 @@ public sealed class ArticleRenameCommandHandler(
 
         if (article.Name == command.Name)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article rename flow skipped for article {ArticleGuid}; name is already requested value.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -118,6 +134,14 @@ public sealed class ArticleRenameCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.General);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article rename mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -147,7 +171,8 @@ public sealed record ArticleChangeDescriptionCommand(
 /// </remarks>
 public sealed class ArticleChangeDescriptionCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleChangeDescriptionCommandHandler> logger
 ) : ICommandHandler<ArticleChangeDescriptionCommand>
 {
     public async Task Handle(
@@ -155,6 +180,14 @@ public sealed class ArticleChangeDescriptionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article description change flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -164,6 +197,13 @@ public sealed class ArticleChangeDescriptionCommandHandler(
 
         if (article.Description == command.Description)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article description change flow skipped for article {ArticleGuid}; description is already requested value.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -172,6 +212,14 @@ public sealed class ArticleChangeDescriptionCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.General);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article description change mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -202,7 +250,8 @@ public sealed record ArticleSetShelfLifeCommand(
 /// </remarks>
 public sealed class ArticleSetShelfLifeCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleSetShelfLifeCommandHandler> logger
 ) : ICommandHandler<ArticleSetShelfLifeCommand>
 {
     public async Task Handle(
@@ -210,6 +259,14 @@ public sealed class ArticleSetShelfLifeCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article shelf life mutation started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -219,6 +276,13 @@ public sealed class ArticleSetShelfLifeCommandHandler(
 
         if (article.ShelfLife == command.ShelfLife)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article shelf life mutation skipped for article {ArticleGuid}; shelf life is already requested value.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -227,6 +291,14 @@ public sealed class ArticleSetShelfLifeCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.General);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article shelf life mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -256,7 +328,8 @@ public sealed record ArticleSetColorCommand(
 /// </remarks>
 public sealed class ArticleSetColorCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleSetColorCommandHandler> logger
 ) : ICommandHandler<ArticleSetColorCommand>
 {
     public async Task Handle(
@@ -264,6 +337,14 @@ public sealed class ArticleSetColorCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article color mutation started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -273,6 +354,13 @@ public sealed class ArticleSetColorCommandHandler(
 
         if (article.Color == command.Color)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article color mutation skipped for article {ArticleGuid}; color is already requested value.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -281,6 +369,14 @@ public sealed class ArticleSetColorCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.General);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article color mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -306,7 +402,8 @@ public sealed record ArticleActivateCommand(
 /// </remarks>
 public sealed class ArticleActivateCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleActivateCommandHandler> logger
 ) : ICommandHandler<ArticleActivateCommand>
 {
     public async Task Handle(
@@ -314,6 +411,14 @@ public sealed class ArticleActivateCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article activation flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -323,6 +428,13 @@ public sealed class ArticleActivateCommandHandler(
 
         if (article.IsActive)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article activation flow skipped for article {ArticleGuid}; article is already active.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -331,6 +443,14 @@ public sealed class ArticleActivateCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.Activated);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article activation mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -356,7 +476,8 @@ public sealed record ArticleDeactivateCommand(
 /// </remarks>
 public sealed class ArticleDeactivateCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleDeactivateCommandHandler> logger
 ) : ICommandHandler<ArticleDeactivateCommand>
 {
     public async Task Handle(
@@ -364,6 +485,14 @@ public sealed class ArticleDeactivateCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article deactivation flow started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -373,6 +502,13 @@ public sealed class ArticleDeactivateCommandHandler(
 
         if (!article.IsActive)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article deactivation flow skipped for article {ArticleGuid}; article is already inactive.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -381,6 +517,14 @@ public sealed class ArticleDeactivateCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.Deactivated);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article deactivation mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -410,7 +554,8 @@ public sealed record ArticleSetMetricsCommand(
 /// </remarks>
 public sealed class ArticleSetMetricsCommandHandler(
     IArticleRepository articleRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleSetMetricsCommandHandler> logger
 ) : ICommandHandler<ArticleSetMetricsCommand>
 {
     public async Task Handle(
@@ -418,6 +563,14 @@ public sealed class ArticleSetMetricsCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article metrics mutation started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -430,6 +583,13 @@ public sealed class ArticleSetMetricsCommandHandler(
             Nullable.Equals(article.LengthY, command.Metrics.LengthY) &&
             Nullable.Equals(article.LengthZ, command.Metrics.LengthZ))
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article metrics mutation skipped for article {ArticleGuid}; metrics are already requested values.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -438,6 +598,14 @@ public sealed class ArticleSetMetricsCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.MetricsChanged);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article metrics mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -468,7 +636,8 @@ public sealed record ArticleSetBarcodesCommand(
 public sealed class ArticleSetBarcodesCommandHandler(
     IArticleRepository articleRepository,
     ArticleService articleService,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleSetBarcodesCommandHandler> logger
 ) : ICommandHandler<ArticleSetBarcodesCommand>
 {
     public async Task Handle(
@@ -476,6 +645,14 @@ public sealed class ArticleSetBarcodesCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article barcode mutation started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -497,6 +674,13 @@ public sealed class ArticleSetBarcodesCommandHandler(
 
         if (!hasChanges)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article barcode mutation skipped for article {ArticleGuid}; barcodes are already requested values.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -523,6 +707,14 @@ public sealed class ArticleSetBarcodesCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.BarcodesChanged);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article barcode mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
     }
 }
 
@@ -553,7 +745,8 @@ public sealed record ArticleSetPartitionsCommand(
 public sealed class ArticleSetPartitionsCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleSetPartitionsCommandHandler> logger
 ) : ICommandHandler<ArticleSetPartitionsCommand>
 {
     public async Task Handle(
@@ -561,6 +754,15 @@ public sealed class ArticleSetPartitionsCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article partition mutation started for article {ArticleGuid} by actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}.",
+                command.ArticleGuid,
+                actor.ActorGuid,
+                command.PartitionGuids.Count);
+        }
 
         actor.ValidateHasPermission(ActionType.EditArticle);
 
@@ -576,6 +778,13 @@ public sealed class ArticleSetPartitionsCommandHandler(
 
         if (!hasChanges)
         {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article partition mutation skipped for article {ArticleGuid}; partitions are already requested values.",
+                    article.Guid);
+            }
+
             return;
         }
 
@@ -607,6 +816,15 @@ public sealed class ArticleSetPartitionsCommandHandler(
         article.MarkAsEditedBy(actor.ActorGuid);
 
         article.MarkModificationType(ArticleModifiedType.PartitionsChanged);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article partition mutation completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
+                article.Guid,
+                actor.ActorGuid,
+                article.Partitions.Count);
+        }
     }
 }
 

@@ -35,7 +35,8 @@ public sealed class ArticleCommandHandlerTests
         var actor = CreateActor(ActionType.EditArticle);
         var handler = new ArticleRenameCommandHandler(
             repository,
-            CreateCurrentAuthorizationContext(actor));
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleRenameCommandHandler>>());
 
         await handler.Handle(new ArticleRenameCommand(article.Guid, new Name("Renamed article")));
 
@@ -56,7 +57,8 @@ public sealed class ArticleCommandHandlerTests
         var actor = CreateActor(ActionType.EditArticle);
         var handler = new ArticleRenameCommandHandler(
             repository,
-            CreateCurrentAuthorizationContext(actor));
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleRenameCommandHandler>>());
 
         await handler.Handle(new ArticleRenameCommand(article.Guid, new Name("Article")));
 
@@ -71,8 +73,14 @@ public sealed class ArticleCommandHandlerTests
         var repository = CreateArticleRepository(article);
         var actor = CreateActor(ActionType.EditArticle);
         var currentAuthorizationContext = CreateCurrentAuthorizationContext(actor);
-        var renameHandler = new ArticleRenameCommandHandler(repository, currentAuthorizationContext);
-        var metricsHandler = new ArticleSetMetricsCommandHandler(repository, currentAuthorizationContext);
+        var renameHandler = new ArticleRenameCommandHandler(
+            repository,
+            currentAuthorizationContext,
+            Substitute.For<ILogger<ArticleRenameCommandHandler>>());
+        var metricsHandler = new ArticleSetMetricsCommandHandler(
+            repository,
+            currentAuthorizationContext,
+            Substitute.For<ILogger<ArticleSetMetricsCommandHandler>>());
 
         await renameHandler.Handle(new ArticleRenameCommand(article.Guid, new Name("Renamed article")));
         await metricsHandler.Handle(new ArticleSetMetricsCommand(
@@ -94,7 +102,8 @@ public sealed class ArticleCommandHandlerTests
         var handler = new ArticleSetBarcodesCommandHandler(
             repository,
             new ArticleService(repository),
-            CreateCurrentAuthorizationContext(actor));
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleSetBarcodesCommandHandler>>());
 
         await handler.Handle(new ArticleSetBarcodesCommand(
             article.Guid,
@@ -119,7 +128,8 @@ public sealed class ArticleCommandHandlerTests
         var handler = new ArticleSetBarcodesCommandHandler(
             repository,
             new ArticleService(repository),
-            CreateCurrentAuthorizationContext(actor));
+            CreateCurrentAuthorizationContext(actor),
+            Substitute.For<ILogger<ArticleSetBarcodesCommandHandler>>());
 
         await handler.Handle(new ArticleSetBarcodesCommand(
             article.Guid,
