@@ -244,7 +244,6 @@ public sealed record ArticleSetShelfLifeCommand(
     TimeSpan? ShelfLife
 ) : ICommand;
 
-
 /// <summary>
 /// Handles article shelf life changes.
 /// </summary>
