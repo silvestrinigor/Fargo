@@ -43,3 +43,17 @@ public class EntityNotActiveFargoDomainException<TEntity> : FargoDomainException
     /// </summary>
     public Guid EntityGuid { get; }
 }
+
+public static class ActivableExtensions
+{
+    extension<TEntity>(TEntity entity) where TEntity : IActivableEntity
+    {
+        public void ValidateIsActive()
+        {
+            if (!entity.IsActive)
+            {
+                throw new EntityNotActiveFargoDomainException<TEntity>(entity);
+            }
+        }
+    }
+}
