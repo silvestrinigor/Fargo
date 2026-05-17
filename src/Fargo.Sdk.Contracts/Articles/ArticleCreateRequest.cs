@@ -1,19 +1,26 @@
 namespace Fargo.Sdk.Contracts.Articles;
 
-/// <summary>Represents the kind of article to create.</summary>
-public enum ArticleCreateKind
-{
-    Article = 0,
-    Variation = 1,
-    Pack = 2,
-    Kit = 3,
-    Container = 4,
-}
-
 /// <summary>Represents an article pack entry used when creating a kit article.</summary>
 public sealed record ArticleCreateKitPackRequest(
     Guid ArticleGuid,
     double Quantity);
+
+/// <summary>Represents variation article creation details.</summary>
+public sealed record ArticleCreateVariationRequest(
+    Guid FromArticleGuid);
+
+/// <summary>Represents pack article creation details.</summary>
+public sealed record ArticleCreatePackRequest(
+    Guid FromArticleGuid,
+    double Quantity);
+
+/// <summary>Represents kit article creation details.</summary>
+public sealed record ArticleCreateKitRequest(
+    IReadOnlyCollection<ArticleCreateKitPackRequest> Packs);
+
+/// <summary>Represents container article creation details.</summary>
+public sealed record ArticleCreateContainerRequest(
+    MassInfo? MaxMass = null);
 
 /// <summary>Represents the article payload inside an article create request.</summary>
 public sealed record ArticleCreateRequest(
@@ -34,8 +41,7 @@ public sealed record ArticleCreateRequest(
     string? QrCode = null,
     string? DataMatrix = null,
     bool? IsActive = null,
-    ArticleCreateKind Kind = ArticleCreateKind.Article,
-    Guid? FromArticleGuid = null,
-    double? Quantity = null,
-    IReadOnlyCollection<ArticleCreateKitPackRequest>? KitPacks = null,
-    MassInfo? ContainerMaxMass = null);
+    ArticleCreateVariationRequest? Variation = null,
+    ArticleCreatePackRequest? Pack = null,
+    ArticleCreateKitRequest? Kit = null,
+    ArticleCreateContainerRequest? Container = null);

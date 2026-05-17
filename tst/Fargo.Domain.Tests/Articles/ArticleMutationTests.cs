@@ -45,37 +45,59 @@ public sealed class ArticleMutationTests
     public void CreateArticleKit_Should_SetKit()
     {
         var fromArticle = Article.CreateArticle(new Name("Base article"));
-        var pack = new ArticlePack(fromArticle, 2.Amount());
+        var component = new ArticleKitComponent(fromArticle, 2.Amount());
 
-        var article = Article.CreateArticleKit(new Name("Kit article"), [pack]);
+        var article = Article.CreateArticleKit(new Name("Kit article"), [component]);
 
         Assert.True(article.IsKit);
-        Assert.Same(pack, article.Kit?.FromArticles.Single());
+        Assert.Same(component, article.Kit?.Components.Single());
     }
 
     [Fact]
-    public void ArticleKitComponent_Should_RejectEmptyArticleGuid()
+    public void ArticleKitComponentRequest_Should_RejectEmptyArticleGuid()
     {
         Assert.Throws<ArgumentException>(
-            () => new ArticleKitComponent(Guid.Empty, 2.Amount()));
+            () => new ArticleKitComponentRequest(Guid.Empty, 2.Amount()));
+    }
+
+    [Fact]
+    public void ArticleKitComponentRequest_Should_RejectNonPositiveQuantity()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new ArticleKitComponentRequest(Guid.NewGuid(), 0.Amount()));
+    }
+
+    [Fact]
+    public void ArticleKitComponentRequest_Should_SetArticleGuidAndQuantity()
+    {
+        var articleGuid = Guid.NewGuid();
+        var quantity = 2.Amount();
+
+        var component = new ArticleKitComponentRequest(articleGuid, quantity);
+
+        Assert.Equal(articleGuid, component.ArticleGuid);
+        Assert.Equal(quantity, component.Quantity);
     }
 
     [Fact]
     public void ArticleKitComponent_Should_RejectNonPositiveQuantity()
     {
+        var article = Article.CreateArticle(new Name("Base article"));
+
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => new ArticleKitComponent(Guid.NewGuid(), 0.Amount()));
+            () => new ArticleKitComponent(article, 0.Amount()));
     }
 
     [Fact]
-    public void ArticleKitComponent_Should_SetArticleGuidAndQuantity()
+    public void ArticleKitComponent_Should_SetArticleAndQuantity()
     {
-        var articleGuid = Guid.NewGuid();
+        var article = Article.CreateArticle(new Name("Base article"));
         var quantity = 2.Amount();
 
-        var component = new ArticleKitComponent(articleGuid, quantity);
+        var component = new ArticleKitComponent(article, quantity);
 
-        Assert.Equal(articleGuid, component.ArticleGuid);
+        Assert.Same(article, component.Article);
+        Assert.Equal(article.Guid, component.ArticleGuid);
         Assert.Equal(quantity, component.Quantity);
     }
 

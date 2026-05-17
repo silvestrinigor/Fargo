@@ -92,13 +92,13 @@ public sealed class ArticleCommandHandlerTests
         await handler.Handle(new ArticleCreateKitCommand(
             new Name("Kit article"),
             [
-                new ArticleKitComponent(firstArticle.Guid, 2.Amount()),
-                new ArticleKitComponent(secondArticle.Guid, 3.Amount()),
+                new ArticleKitComponentRequest(firstArticle.Guid, 2.Amount()),
+                new ArticleKitComponentRequest(secondArticle.Guid, 3.Amount()),
             ]));
 
         repository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsKit &&
-            article.Kit!.FromArticles.Count == 2 &&
+            article.Kit!.Components.Count == 2 &&
             article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Relation)));
     }
 

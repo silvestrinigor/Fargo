@@ -96,29 +96,31 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
             kit.WithOwner().HasForeignKey("ArticleGuid");
 
-            kit.OwnsMany(x => x.FromArticles, pack =>
+            kit.OwnsMany(x => x.Components, component =>
             {
-                pack.ToTable("ArticleKitPacks");
+                component.ToTable("ArticleKitPacks");
 
-                pack.WithOwner().HasForeignKey("KitArticleGuid");
+                component.WithOwner().HasForeignKey("KitArticleGuid");
 
-                pack.Property<Guid>("Guid");
-                pack.HasKey("Guid");
+                component.Property<Guid>("Guid");
+                component.HasKey("Guid");
 
-                pack.Property(x => x.FromArticleGuid).IsRequired();
+                component.Property(x => x.ArticleGuid)
+                    .HasColumnName("FromArticleGuid")
+                    .IsRequired();
 
-                pack.HasOne(x => x.FromArticle)
+                component.HasOne(x => x.Article)
                     .WithMany()
-                    .HasForeignKey(x => x.FromArticleGuid)
+                    .HasForeignKey(x => x.ArticleGuid)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                pack.Property(x => x.Quantity)
+                component.Property(x => x.Quantity)
                     .HasConversion(
                         x => x.Amount,
                         x => Scalar.FromAmount(x))
                     .IsRequired();
 
-                pack.HasIndex("KitArticleGuid", nameof(ArticlePack.FromArticleGuid))
+                component.HasIndex("KitArticleGuid", nameof(ArticleKitComponent.ArticleGuid))
                     .IsUnique();
             });
 

@@ -45,7 +45,50 @@ public sealed class ArticleApplicationService(
         ArticleCreateDto create,
         CancellationToken cancellationToken = default)
     {
-        var articleGuid = await CreateArticleByKind(create, cancellationToken);
+        var createTypeCount =
+            (create.Variation is null ? 0 : 1) +
+            (create.Pack is null ? 0 : 1) +
+            (create.Kit is null ? 0 : 1) +
+            (create.Container is null ? 0 : 1);
+
+        if (createTypeCount > 1)
+        {
+            throw new ArgumentException(
+                "Article creation accepts only one specialized article type.",
+                nameof(create));
+        }
+
+        var articleGuid = create switch
+        {
+            { Variation: { } variation } => await createVariationHandler.Handle(
+                new ArticleCreateVariationCommand(
+                    create.Name,
+                    variation.FromArticleGuid),
+                cancellationToken),
+            { Pack: { } pack } => await createPackHandler.Handle(
+                new ArticleCreatePackCommand(
+                    create.Name,
+                    pack.FromArticleGuid,
+                    pack.Quantity),
+                cancellationToken),
+            { Kit: { } kit } => await createKitHandler.Handle(
+                new ArticleCreateKitCommand(
+                    create.Name,
+                    kit.Packs is { Count: > 0 } packs
+                        ? packs
+                            .Select(static pack => new ArticleKitComponentRequest(pack.ArticleGuid, pack.Quantity))
+                            .ToArray()
+                        : throw new ArgumentException(
+                            "Kit article creation requires at least one pack.",
+                            nameof(create))),
+                cancellationToken),
+            { Container: not null } => await createContainerHandler.Handle(
+                new ArticleCreateContainerCommand(create.Name),
+                cancellationToken),
+            _ => await createArticleHandler.Handle(
+                new ArticleCreateCommand(create.Name),
+                cancellationToken)
+        };
 
         if (create.Description is { } description)
         {
@@ -82,8 +125,7 @@ public sealed class ArticleApplicationService(
                 cancellationToken);
         }
 
-        if (create.Kind == ArticleCreateKind.Container &&
-            create.ContainerMaxMass is { } containerMaxMass)
+        if (create.Container?.MaxMass is { } containerMaxMass)
         {
             await setContainerMaxMassHandler.Handle(
                 new ArticleSetContainerMaxMassCommand(articleGuid, containerMaxMass),
@@ -106,48 +148,6 @@ public sealed class ArticleApplicationService(
 
         return articleGuid;
     }
-
-    private async Task<Guid> CreateArticleByKind(
-        ArticleCreateDto create,
-        CancellationToken cancellationToken)
-        => create.Kind switch
-        {
-            ArticleCreateKind.Article => await createArticleHandler.Handle(
-                new ArticleCreateCommand(create.Name),
-                cancellationToken),
-            ArticleCreateKind.Variation => await createVariationHandler.Handle(
-                new ArticleCreateVariationCommand(
-                    create.Name,
-                    create.FromArticleGuid ?? throw new ArgumentException(
-                        "Variation article creation requires a source article guid.",
-                        nameof(create))),
-                cancellationToken),
-            ArticleCreateKind.Pack => await createPackHandler.Handle(
-                new ArticleCreatePackCommand(
-                    create.Name,
-                    create.FromArticleGuid ?? throw new ArgumentException(
-                        "Pack article creation requires a source article guid.",
-                        nameof(create)),
-                    create.Quantity ?? throw new ArgumentException(
-                        "Pack article creation requires a quantity.",
-                        nameof(create))),
-                cancellationToken),
-            ArticleCreateKind.Kit => await createKitHandler.Handle(
-                new ArticleCreateKitCommand(
-                    create.Name,
-                    create.KitPacks is { Count: > 0 } kitPacks
-                        ? kitPacks
-                            .Select(static pack => new ArticleKitComponent(pack.ArticleGuid, pack.Quantity))
-                            .ToArray()
-                        : throw new ArgumentException(
-                            "Kit article creation requires at least one pack.",
-                            nameof(create))),
-                cancellationToken),
-            ArticleCreateKind.Container => await createContainerHandler.Handle(
-                new ArticleCreateContainerCommand(create.Name),
-                cancellationToken),
-            _ => throw new ArgumentOutOfRangeException(nameof(create), create.Kind, "Unsupported article create kind.")
-        };
 
     /// <summary>
     /// Updates an existing article.

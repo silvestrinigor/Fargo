@@ -53,13 +53,23 @@ internal static class ApiContractMappings
             request.ToApplicationBarcodesDto(),
             request.Partitions,
             request.IsActive,
-            (AppArticles.ArticleCreateKind)(int)request.Kind,
-            request.FromArticleGuid,
-            request.Quantity?.Amount(),
-            request.KitPacks?.Select(static pack => new AppArticles.ArticleCreateKitPackDto(
-                pack.ArticleGuid,
-                pack.Quantity.Amount())).ToArray(),
-            request.ContainerMaxMass.ToMass());
+            request.Variation is null
+                ? null
+                : new AppArticles.ArticleCreateVariationDto(request.Variation.FromArticleGuid),
+            request.Pack is null
+                ? null
+                : new AppArticles.ArticleCreatePackDto(
+                    request.Pack.FromArticleGuid,
+                    request.Pack.Quantity.Amount()),
+            request.Kit is null
+                ? null
+                : new AppArticles.ArticleCreateKitDto(
+                    request.Kit.Packs.Select(static pack => new AppArticles.ArticleCreateKitPackDto(
+                        pack.ArticleGuid,
+                        pack.Quantity.Amount())).ToArray()),
+            request.Container is null
+                ? null
+                : new AppArticles.ArticleCreateContainerDto(request.Container.MaxMass.ToMass()));
 
     public static AppArticles.ArticlePatchDto ToApplicationDto(this ContractArticles.ArticlePatchRequest request)
         => new(

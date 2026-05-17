@@ -71,11 +71,27 @@ public sealed class ArticleCreateCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to create an article variation from another article.
+/// </summary>
+/// <param name="Name">
+/// Variation article name.
+/// </param>
+/// <param name="FromArticleGuid">
+/// Unique identifier of the source article.
+/// </param>
 public sealed record ArticleCreateVariationCommand(
     Name Name,
     Guid FromArticleGuid
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles article variation creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates access to the source article,
+/// and creates a variation linked to the specified article.
+/// </remarks>
 public sealed class ArticleCreateVariationCommandHandler(
     IArticleRepository articleRepository,
     IEntityEventRepository entityEventRepository,
@@ -120,12 +136,31 @@ public sealed class ArticleCreateVariationCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to create an article pack.
+/// </summary>
+/// <param name="Name">
+/// Pack article name.
+/// </param>
+/// <param name="FromArticleGuid">
+/// Unique identifier of the article contained in the pack.
+/// </param>
+/// <param name="Quantity">
+/// Quantity of articles contained in the pack.
+/// </param>
 public sealed record ArticleCreatePackCommand(
     Name Name,
     Guid FromArticleGuid,
     Scalar Quantity
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles article pack creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates access to the source article,
+/// and creates a pack article with the specified quantity.
+/// </remarks>
 public sealed class ArticleCreatePackCommandHandler(
     IArticleRepository articleRepository,
     IEntityEventRepository entityEventRepository,
@@ -170,11 +205,27 @@ public sealed class ArticleCreatePackCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to create an article kit.
+/// </summary>
+/// <param name="Name">
+/// Kit article name.
+/// </param>
+/// <param name="Components">
+/// Collection of articles that compose the kit.
+/// </param>
 public sealed record ArticleCreateKitCommand(
     Name Name,
-    IReadOnlyCollection<ArticleKitComponent> Components
+    IReadOnlyCollection<ArticleKitComponentRequest> Components
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles article kit creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates access to all component articles,
+/// and creates a kit article composed of multiple articles.
+/// </remarks>
 public sealed class ArticleCreateKitCommandHandler(
     IArticleRepository articleRepository,
     IEntityEventRepository entityEventRepository,
@@ -198,7 +249,7 @@ public sealed class ArticleCreateKitCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var packs = new List<ArticlePack>(command.Components.Count);
+        var components = new List<ArticleKitComponent>(command.Components.Count);
 
         foreach (var component in command.Components)
         {
@@ -208,10 +259,10 @@ public sealed class ArticleCreateKitCommandHandler(
 
             fromArticle.ValidateIsActive();
 
-            packs.Add(new ArticlePack(fromArticle, component.Quantity));
+            components.Add(new ArticleKitComponent(fromArticle, component.Quantity));
         }
 
-        var article = Article.CreateArticleKit(command.Name, packs);
+        var article = Article.CreateArticleKit(command.Name, components);
 
         ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
             article,
@@ -226,10 +277,22 @@ public sealed class ArticleCreateKitCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to create a container article.
+/// </summary>
+/// <param name="Name">
+/// Container article name.
+/// </param>
 public sealed record ArticleCreateContainerCommand(
     Name Name
 ) : ICommand<Guid>;
 
+/// <summary>
+/// Handles container article creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and creates a container article.
+/// </remarks>
 public sealed class ArticleCreateContainerCommandHandler(
     IArticleRepository articleRepository,
     IEntityEventRepository entityEventRepository,

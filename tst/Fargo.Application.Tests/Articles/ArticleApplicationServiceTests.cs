@@ -84,7 +84,7 @@ public sealed class ArticleApplicationServiceTests
     }
 
     [Fact]
-    public async Task Create_Should_InvokeVariationCreateHandler_WhenKindIsVariation()
+    public async Task Create_Should_InvokeVariationCreateHandler_WhenVariationIsProvided()
     {
         var fixture = new Fixture();
         var fromArticleGuid = Guid.NewGuid();
@@ -92,8 +92,7 @@ public sealed class ArticleApplicationServiceTests
         await fixture.Sut.Create(
             new ArticleCreateDto(
                 new Name("Variation"),
-                Kind: ArticleCreateKind.Variation,
-                FromArticleGuid: fromArticleGuid));
+                Variation: new ArticleCreateVariationDto(fromArticleGuid)));
 
         await fixture.CreateVariationHandler.Received(1).Handle(
             Arg.Is<ArticleCreateVariationCommand>(command =>
@@ -103,7 +102,7 @@ public sealed class ArticleApplicationServiceTests
     }
 
     [Fact]
-    public async Task Create_Should_InvokePackCreateHandler_WhenKindIsPack()
+    public async Task Create_Should_InvokePackCreateHandler_WhenPackIsProvided()
     {
         var fixture = new Fixture();
         var fromArticleGuid = Guid.NewGuid();
@@ -111,9 +110,7 @@ public sealed class ArticleApplicationServiceTests
         await fixture.Sut.Create(
             new ArticleCreateDto(
                 new Name("Pack"),
-                Kind: ArticleCreateKind.Pack,
-                FromArticleGuid: fromArticleGuid,
-                Quantity: 3.Amount()));
+                Pack: new ArticleCreatePackDto(fromArticleGuid, 3.Amount())));
 
         await fixture.CreatePackHandler.Received(1).Handle(
             Arg.Is<ArticleCreatePackCommand>(command =>
@@ -124,7 +121,7 @@ public sealed class ArticleApplicationServiceTests
     }
 
     [Fact]
-    public async Task Create_Should_InvokeKitCreateHandler_WhenKindIsKit()
+    public async Task Create_Should_InvokeKitCreateHandler_WhenKitIsProvided()
     {
         var fixture = new Fixture();
         var pack = new ArticleCreateKitPackDto(Guid.NewGuid(), 2.Amount());
@@ -132,18 +129,17 @@ public sealed class ArticleApplicationServiceTests
         await fixture.Sut.Create(
             new ArticleCreateDto(
                 new Name("Kit"),
-                Kind: ArticleCreateKind.Kit,
-                KitPacks: [pack]));
+                Kit: new ArticleCreateKitDto([pack])));
 
         await fixture.CreateKitHandler.Received(1).Handle(
             Arg.Is<ArticleCreateKitCommand>(command =>
                 command.Name == new Name("Kit") &&
-                command.Components.Single() == new ArticleKitComponent(pack.ArticleGuid, pack.Quantity)),
+                command.Components.Single() == new ArticleKitComponentRequest(pack.ArticleGuid, pack.Quantity)),
             Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Create_Should_InvokeContainerCreateHandler_WhenKindIsContainer()
+    public async Task Create_Should_InvokeContainerCreateHandler_WhenContainerIsProvided()
     {
         var fixture = new Fixture();
         var maxMass = Mass.FromKilograms(10);
@@ -151,8 +147,7 @@ public sealed class ArticleApplicationServiceTests
         await fixture.Sut.Create(
             new ArticleCreateDto(
                 new Name("Container"),
-                Kind: ArticleCreateKind.Container,
-                ContainerMaxMass: maxMass));
+                Container: new ArticleCreateContainerDto(maxMass)));
 
         await fixture.CreateContainerHandler.Received(1).Handle(
             Arg.Is<ArticleCreateContainerCommand>(command =>
@@ -162,6 +157,19 @@ public sealed class ArticleApplicationServiceTests
             Arg.Is<ArticleSetContainerMaxMassCommand>(command =>
                 command.MaxMass!.Value.Equals(maxMass, Mass.Zero)),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Create_Should_Throw_WhenMoreThanOneSpecializedTypeIsProvided()
+    {
+        var fixture = new Fixture();
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => fixture.Sut.Create(
+                new ArticleCreateDto(
+                    new Name("Invalid"),
+                    Variation: new ArticleCreateVariationDto(Guid.NewGuid()),
+                    Container: new ArticleCreateContainerDto())));
     }
 
     private sealed class Fixture
