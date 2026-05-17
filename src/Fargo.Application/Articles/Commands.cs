@@ -753,6 +753,7 @@ public sealed record ArticleSetPartitionsCommand(
 public sealed class ArticleSetPartitionsCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleSetPartitionsCommandHandler> logger
 ) : ICommandHandler<ArticleSetPartitionsCommand>
@@ -808,6 +809,11 @@ public sealed class ArticleSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             article.AddPartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                article,
+                partition,
+                actor.ActorGuid));
         }
 
         var partitionsToRemove = article.Partitions
@@ -819,6 +825,11 @@ public sealed class ArticleSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             article.RemovePartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                article,
+                partition,
+                actor.ActorGuid));
         }
 
         article.MarkAsEditedBy(actor.ActorGuid);

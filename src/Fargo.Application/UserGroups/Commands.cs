@@ -407,6 +407,7 @@ public sealed record UserGroupSetPartitionsCommand(Guid UserGroupGuid, IReadOnly
 public sealed class UserGroupSetPartitionsCommandHandler(
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<UserGroupSetPartitionsCommandHandler> logger) : ICommandHandler<UserGroupSetPartitionsCommand>
 {
@@ -459,6 +460,11 @@ public sealed class UserGroupSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             userGroup.AddPartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                userGroup,
+                partition,
+                actor.ActorGuid));
         }
 
         var partitionsToRemove = userGroup.Partitions.Where(p => !requestedPartitions.Contains(p.Guid)).ToList();
@@ -467,6 +473,11 @@ public sealed class UserGroupSetPartitionsCommandHandler(
         {
             actor.ValidateHasPartitionAccess(partition.Guid);
             userGroup.RemovePartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                userGroup,
+                partition,
+                actor.ActorGuid));
         }
 
         userGroup.MarkAsEditedBy(actor.ActorGuid);

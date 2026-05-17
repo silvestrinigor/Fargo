@@ -15,6 +15,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 {
     public DbSet<EntityEvent> EntityEvents { get; set; }
 
+    public DbSet<EntityPartitionEvent> EntityPartitionEvents { get; set; }
+
     public DbSet<Article> Articles { get; set; }
 
     public DbSet<Item> Items { get; set; }
@@ -78,6 +80,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new EntityEventConfiguration());
+
+        modelBuilder.ApplyConfiguration(new EntityPartitionEventConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 

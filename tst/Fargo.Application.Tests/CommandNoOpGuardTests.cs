@@ -25,9 +25,11 @@ public sealed class CommandNoOpGuardTests
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
         var partitionRepository = Substitute.For<IPartitionRepository>();
+        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
         var handler = new ItemSetPartitionsCommandHandler(
             itemRepository,
             partitionRepository,
+            entityPartitionEventRepository,
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditItem)),
             Substitute.For<ILogger<ItemSetPartitionsCommandHandler>>());
 
@@ -35,6 +37,7 @@ public sealed class CommandNoOpGuardTests
 
         await partitionRepository.DidNotReceiveWithAnyArgs()
             .GetByGuid(default, default);
+        entityPartitionEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
     [Fact]
@@ -69,9 +72,11 @@ public sealed class CommandNoOpGuardTests
         userGroupRepository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(userGroup);
         var partitionRepository = Substitute.For<IPartitionRepository>();
+        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
         var handler = new UserGroupSetPartitionsCommandHandler(
             userGroupRepository,
             partitionRepository,
+            entityPartitionEventRepository,
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditUserGroup)),
             Substitute.For<ILogger<UserGroupSetPartitionsCommandHandler>>());
 
@@ -79,6 +84,7 @@ public sealed class CommandNoOpGuardTests
 
         await partitionRepository.DidNotReceiveWithAnyArgs()
             .GetByGuid(default, default);
+        entityPartitionEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
     private static ICurrentAuthorizationContext CreateCurrentAuthorizationContext(IAuthorizationContext actor)
