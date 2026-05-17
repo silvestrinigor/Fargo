@@ -1,4 +1,3 @@
-using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 

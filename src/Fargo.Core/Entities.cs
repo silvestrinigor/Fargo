@@ -139,51 +139,14 @@ public abstract class Entity : IEntity
         => !(a == b);
 }
 /// <summary>
-/// Represents a base entity that tracks last modification metadata.
-/// </summary>
-/// <remarks>
-/// This entity extends <see cref="Entity"/> and implements
-/// <see cref="IModifiedEntity"/> to provide information about
-/// the last modification performed on the entity.
-///
-/// The modification metadata is expected to be managed automatically
-/// by the application or infrastructure layer (for example, the EF Core
-/// change tracker).
-///
-/// <para>
-/// <strong>Important:</strong>
-/// <see cref="EditedByGuid"/> is expected to be <see langword="null"/>
-/// only during the entity creation phase. After the entity is tracked
-/// and persisted, this value should normally be populated.
-/// A <see langword="null"/> value outside this scenario typically
-/// indicates a misconfiguration or a missing auditing operation.
-/// </para>
-/// </remarks>
-public abstract class ModifiedEntity : Entity, IModifiedEntity
-{
-    /// <inheritdoc />
-    public Guid? EditedByGuid
-    {
-        get;
-        private set;
-    }
-
-    /// <inheritdoc />
-    public void MarkAsEditedBy(Guid actorGuid)
-    {
-        EditedByGuid = actorGuid;
-    }
-}
-/// <summary>
 /// Defines the contract for entities that track last modification metadata.
 /// </summary>
 /// <remarks>
 /// Implementations of this interface expose information about the last
 /// modification performed on the entity, including the actor responsible
 /// for the change.
-///
-/// The auditing values are typically assigned by the application or
-/// infrastructure layer during persistence operations.
+/// Command handlers are responsible for assigning the modification metadata
+/// when they apply a change.
 /// </remarks>
 public interface IModifiedEntity
 {
@@ -195,8 +158,7 @@ public interface IModifiedEntity
     /// been modified since its creation.
     ///
     /// When the modification is performed by an internal system process,
-    /// implementations should use the reserved audit-origin guid used by
-    /// the infrastructure layer.
+    /// callers should pass the actor guid that represents that process.
     /// </remarks>
     Guid? EditedByGuid { get; }
 
@@ -211,9 +173,6 @@ public interface IModifiedEntity
     /// Implementations are expected to set the identifier of the actor
     /// responsible for the change and any related modification metadata
     /// (such as timestamps, if applicable).
-    ///
-    /// When the modification is performed by the system, the caller should pass
-    /// the reserved system audit guid from the infrastructure layer.
     /// </remarks>
     void MarkAsEditedBy(Guid actorGuid);
 }

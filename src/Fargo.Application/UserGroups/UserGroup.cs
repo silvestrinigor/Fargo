@@ -18,7 +18,8 @@ public sealed record UserGroupDto(
     IReadOnlyCollection<Permission> Permissions,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,
-    Guid? EditedByGuid
+    Guid? EditedByGuid,
+    UserGroupModifiedType ModificationTypes
 );
 
 public sealed record UserGroupCreateDto(
@@ -49,7 +50,8 @@ public static class UserGroupDtoMappings
         userGroup.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
         userGroup.Partitions.Select(partition => partition.Guid).ToArray(),
         userGroup.IsActive,
-        userGroup.EditedByGuid);
+        userGroup.EditedByGuid,
+        userGroup.ModificationTypes);
 }
 
 #endregion DTOs
@@ -146,6 +148,10 @@ public sealed class UserGroupCreateCommandHandler(
         actor.ValidateHasPermission(ActionType.CreateUserGroup);
 
         var userGroup = new UserGroup(command.Nameid);
+
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+
+        userGroup.MarkModificationType(UserGroupModifiedType.General);
 
         await userGroupService.ValidateUserGroupCreate(userGroup, cancellationToken);
 
@@ -297,12 +303,14 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 await userGroupService.ValidateUserGroupNameidChange(userGroup, nameid, cancellationToken);
                 userGroup.ChangeNameid(nameid);
+                userGroup.MarkModificationType(UserGroupModifiedType.General);
             }
         }
 
         if (command.UserGroup.Description is not null && userGroup.Description != command.UserGroup.Description)
         {
             userGroup.ChangeDescription(command.UserGroup.Description.Value);
+            userGroup.MarkModificationType(UserGroupModifiedType.General);
         }
 
         if (command.UserGroup.IsActive is not null && userGroup.IsActive != command.UserGroup.IsActive.Value)
@@ -315,6 +323,10 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 userGroup.Deactivate();
             }
+
+            userGroup.MarkModificationType(command.UserGroup.IsActive.Value
+                ? UserGroupModifiedType.Activated
+                : UserGroupModifiedType.Deactivated);
 
             entityEventRepository.Add(command.UserGroup.IsActive.Value
                 ? EntityEvent.Activated<UserGroup>(userGroup, actor.ActorGuid)
@@ -332,14 +344,22 @@ public sealed class UserGroupUpdateCommandHandler(
                 .Select(x => x.Action)
                 .ToHashSet();
 
-            foreach (var action in requestedActions.Except(currentActions))
+            var actionsToAdd = requestedActions.Except(currentActions).ToArray();
+            var actionsToRemove = currentActions.Except(requestedActions).ToArray();
+
+            foreach (var action in actionsToAdd)
             {
                 userGroup.AddPermission(action);
             }
 
-            foreach (var action in currentActions.Except(requestedActions))
+            foreach (var action in actionsToRemove)
             {
                 userGroup.RemovePermission(action);
+            }
+
+            if (actionsToAdd.Length > 0 || actionsToRemove.Length > 0)
+            {
+                userGroup.MarkModificationType(UserGroupModifiedType.PermissionsChanged);
             }
         }
 
@@ -347,6 +367,11 @@ public sealed class UserGroupUpdateCommandHandler(
 
         if (command.UserGroup.Partitions is { } requestedPartitions)
         {
+            var requestedPartitionGuids = requestedPartitions.Distinct().ToArray();
+            var hadPartitionChanges =
+                userGroup.Partitions.Count != requestedPartitionGuids.Length ||
+                userGroup.Partitions.Any(p => !requestedPartitionGuids.Contains(p.Guid));
+
             foreach (var partitionGuid in requestedPartitions)
             {
                 if (userGroup.Partitions.Any(p => p.Guid == partitionGuid))
@@ -362,7 +387,7 @@ public sealed class UserGroupUpdateCommandHandler(
             }
 
             var partitionsToRemove = userGroup.Partitions
-                .Where(p => !requestedPartitions.Contains(p.Guid))
+                .Where(p => !requestedPartitionGuids.Contains(p.Guid))
                 .ToList();
 
             foreach (var partition in partitionsToRemove)
@@ -371,9 +396,19 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.RemovePartition(partition);
             }
+
+            if (hadPartitionChanges)
+            {
+                userGroup.MarkModificationType(UserGroupModifiedType.PartitionsChanged);
+            }
         }
 
         #endregion Partition
+
+        if (userGroup.IsEditStarted)
+        {
+            userGroup.MarkAsEditedBy(actor.ActorGuid);
+        }
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -453,6 +488,8 @@ public sealed class UserGroupChangeNameidCommandHandler(
 
         await userGroupService.ValidateUserGroupNameidChange(userGroup, command.Nameid, cancellationToken);
         userGroup.ChangeNameid(command.Nameid);
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+        userGroup.MarkModificationType(UserGroupModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -509,6 +546,8 @@ public sealed class UserGroupChangeDescriptionCommandHandler(
             return;
         }
         userGroup.ChangeDescription(command.Description);
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+        userGroup.MarkModificationType(UserGroupModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -580,6 +619,8 @@ public sealed class UserGroupSetPermissionsCommandHandler(
         {
             userGroup.RemovePermission(action);
         }
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+        userGroup.MarkModificationType(UserGroupModifiedType.PermissionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -666,6 +707,8 @@ public sealed class UserGroupSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
             userGroup.RemovePartition(partition);
         }
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+        userGroup.MarkModificationType(UserGroupModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -722,6 +765,8 @@ public sealed class UserGroupActivateCommandHandler(
             return;
         }
         userGroup.Activate();
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+        userGroup.MarkModificationType(UserGroupModifiedType.Activated);
         entityEventRepository.Add(EntityEvent.Activated<UserGroup>(userGroup, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -777,6 +822,8 @@ public sealed class UserGroupDeactivateCommandHandler(
             return;
         }
         userGroup.Deactivate();
+        userGroup.MarkAsEditedBy(actor.ActorGuid);
+        userGroup.MarkModificationType(UserGroupModifiedType.Deactivated);
         entityEventRepository.Add(EntityEvent.Deactivated<UserGroup>(userGroup, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {

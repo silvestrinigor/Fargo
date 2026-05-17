@@ -9,7 +9,8 @@ public sealed record ItemDto(
     DateTimeOffset? ProductionDate,
     Guid? ParentContainerGuid,
     IReadOnlyCollection<Guid> Partitions,
-    Guid? EditedByGuid
+    Guid? EditedByGuid,
+    ItemModifiedType ModificationTypes
 );
 
 public sealed record ItemCreateDto(
@@ -31,5 +32,6 @@ public static class ItemDtoMappings
         item.ProductionDate,
         item.ParentContainerGuid,
         item.Partitions.Select(partition => partition.Guid).ToArray(),
-        item.EditedByGuid);
+        item.EditedByGuid,
+        item.ModificationTypes);
 }

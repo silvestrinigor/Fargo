@@ -23,6 +23,9 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.Property(x => x.EditedByGuid);
 
+        builder.Property(x => x.ModificationTypes)
+            .HasDefaultValue(ItemModifiedType.None);
+
         builder.Property(x => x.ProductionDate).IsRequired(false);
 
         builder.Property(x => x.ParentContainerGuid).IsRequired(false);

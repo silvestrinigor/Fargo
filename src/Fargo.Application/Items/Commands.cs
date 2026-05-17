@@ -62,6 +62,10 @@ public sealed class ItemCreateCommandHandler(
 
         var item = new Item(article, command.ProductionDate);
 
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.General);
+
         itemRepository.Add(item);
 
         entityEventRepository.Add(EntityEvent.EntityCreated<Item>(item, actor.ActorGuid));
@@ -247,6 +251,10 @@ public sealed class ItemSetParentContainerCommandHandler(
             previousParentContainerGuid,
             item.ParentContainerGuid,
             actor.ActorGuid));
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.ParentContainerChanged);
     }
 }
 
@@ -345,6 +353,10 @@ public sealed class ItemSetPartitionsCommandHandler(
 
             item.RemovePartition(partition);
         }
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {

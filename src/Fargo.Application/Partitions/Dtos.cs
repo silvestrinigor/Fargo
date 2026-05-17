@@ -12,7 +12,8 @@ public sealed record PartitionDto(
     Description Description,
     Guid? ParentPartitionGuid,
     bool IsActive,
-    Guid? EditedByGuid
+    Guid? EditedByGuid,
+    PartitionModifiedType ModificationTypes
 );
 
 public sealed record PartitionCreateDto(
@@ -36,7 +37,8 @@ public static class PartitionDtoMappings
         partition.Description,
         partition.ParentPartitionGuid,
         partition.IsActive,
-        partition.EditedByGuid);
+        partition.EditedByGuid,
+        partition.ModificationTypes);
 }
 
 #endregion DTOs

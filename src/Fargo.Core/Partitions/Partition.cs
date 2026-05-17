@@ -74,7 +74,7 @@ public interface IPartitionAccess
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : ModifiedEntity, IPartitionEntity
+public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity
 {
     private Partition()
     {
@@ -282,6 +282,52 @@ public class Partition : ModifiedEntity, IPartitionEntity
     private readonly List<UserGroup> userGroupMembers = [];
 
     #endregion UserGroup
+
+    #region Modified
+
+    public Guid? EditedByGuid { get; private set; }
+
+    public void MarkAsEditedBy(Guid actorGuid)
+    {
+        EditedByGuid = actorGuid;
+    }
+
+    public PartitionModifiedType ModificationTypes { get; private set; }
+
+    public IReadOnlySet<PartitionModifiedType> GetModificationTypes()
+    {
+        HashSet<PartitionModifiedType> result = [];
+
+        foreach (PartitionModifiedType value in Enum.GetValues<PartitionModifiedType>())
+        {
+            if (value == PartitionModifiedType.None)
+            {
+                continue;
+            }
+
+            if ((ModificationTypes & value) != 0)
+            {
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+
+    public bool IsEditStarted { get; private set; }
+
+    public void MarkModificationType(PartitionModifiedType modificationType)
+    {
+        if (!IsEditStarted)
+        {
+            ModificationTypes = PartitionModifiedType.None;
+            IsEditStarted = true;
+        }
+
+        ModificationTypes |= modificationType;
+    }
+
+    #endregion Modified
 }
 
 #endregion Entity

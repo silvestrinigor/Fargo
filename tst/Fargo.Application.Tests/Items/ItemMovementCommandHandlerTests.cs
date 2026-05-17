@@ -30,6 +30,8 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
 
+        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
             movement.Event.EntityType == EntityType.Item &&
             movement.Event.EventType == EntityEventType.Moved &&
@@ -59,6 +61,8 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
 
+        Assert.Null(item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
         movementRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
@@ -83,6 +87,8 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, null));
 
+        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
             movement.Event.EntityType == EntityType.Item &&
             movement.Event.EventType == EntityEventType.Moved &&

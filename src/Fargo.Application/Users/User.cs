@@ -25,7 +25,8 @@ public sealed record UserDto(
     IReadOnlyCollection<Guid> Partitions,
     IReadOnlyCollection<Guid> UserGroups,
     bool IsActive,
-    Guid? EditedByGuid
+    Guid? EditedByGuid,
+    UserModifiedType ModificationTypes
 );
 
 public sealed record UserCreateDto(
@@ -76,7 +77,8 @@ public static class UserDtoMappings
         user.Partitions.Select(partition => partition.Guid).ToArray(),
         user.UserGroups.Select(group => group.Guid).ToArray(),
         user.IsActive,
-        user.EditedByGuid);
+        user.EditedByGuid,
+        user.ModificationTypes);
 }
 
 #endregion DTOs
@@ -206,6 +208,10 @@ public sealed class UserCreateCommandHandler(
 
         var user = new User(command.Nameid, userPasswordHash);
         user.MarkPasswordChangeAsRequired();
+
+        user.MarkAsEditedBy(actor.ActorGuid);
+
+        user.MarkModificationType(UserModifiedType.General);
 
         await userService.ValidateUserCreate(user, cancellationToken);
 
@@ -355,28 +361,33 @@ public sealed class UserUpdateCommandHandler(
             {
                 await userService.ValidateUserNameidChange(user, nameid, cancellationToken);
                 user.ChangeNameid(nameid);
+                user.MarkModificationType(UserModifiedType.General);
             }
         }
 
         if (command.User.FirstName is not null && user.FirstName != command.User.FirstName)
         {
             user.ChangeFirstName(command.User.FirstName);
+            user.MarkModificationType(UserModifiedType.General);
         }
 
         if (command.User.LastName is not null && user.LastName != command.User.LastName)
         {
             user.ChangeLastName(command.User.LastName);
+            user.MarkModificationType(UserModifiedType.General);
         }
 
         if (command.User.Description is not null && user.Description != command.User.Description)
         {
             user.ChangeDescription(command.User.Description.Value);
+            user.MarkModificationType(UserModifiedType.General);
         }
 
         if (command.User.DefaultPasswordExpirationPeriod is not null &&
             user.DefaultPasswordExpirationPeriod != command.User.DefaultPasswordExpirationPeriod.Value)
         {
             user.SetDefaultPasswordExpirationPeriod(command.User.DefaultPasswordExpirationPeriod.Value);
+            user.MarkModificationType(UserModifiedType.General);
         }
 
         if (command.User.Password is not null)
@@ -388,6 +399,8 @@ public sealed class UserUpdateCommandHandler(
             user.ChangePasswordHash(passwordHasher.Hash(command.User.Password));
 
             user.MarkPasswordChangeAsRequired();
+
+            user.MarkModificationType(UserModifiedType.PasswordChanged);
 
             var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
             foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
@@ -417,14 +430,22 @@ public sealed class UserUpdateCommandHandler(
                 .Select(x => x.Action)
                 .ToHashSet();
 
-            foreach (var action in requestedActions.Except(currentActions))
+            var actionsToAdd = requestedActions.Except(currentActions).ToArray();
+            var actionsToRemove = currentActions.Except(requestedActions).ToArray();
+
+            foreach (var action in actionsToAdd)
             {
                 user.AddPermission(action);
             }
 
-            foreach (var action in currentActions.Except(requestedActions))
+            foreach (var action in actionsToRemove)
             {
                 user.RemovePermission(action);
+            }
+
+            if (actionsToAdd.Length > 0 || actionsToRemove.Length > 0)
+            {
+                user.MarkModificationType(UserModifiedType.PermissionsChanged);
             }
         }
 
@@ -439,6 +460,10 @@ public sealed class UserUpdateCommandHandler(
                 user.Deactivate();
             }
 
+            user.MarkModificationType(command.User.IsActive.Value
+                ? UserModifiedType.Activated
+                : UserModifiedType.Deactivated);
+
             entityEventRepository.Add(command.User.IsActive.Value
                 ? EntityEvent.Activated<User>(user, actor.ActorGuid)
                 : EntityEvent.Deactivated<User>(user, actor.ActorGuid));
@@ -448,6 +473,11 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.Partitions is { } requestedPartitions)
         {
+            var requestedPartitionGuids = requestedPartitions.Distinct().ToArray();
+            var hadPartitionChanges =
+                user.Partitions.Count != requestedPartitionGuids.Length ||
+                user.Partitions.Any(p => !requestedPartitionGuids.Contains(p.Guid));
+
             foreach (var partitionGuid in requestedPartitions)
             {
                 if (user.Partitions.Any(p => p.Guid == partitionGuid))
@@ -463,7 +493,7 @@ public sealed class UserUpdateCommandHandler(
             }
 
             var partitionsToRemove = user.Partitions
-                .Where(p => !requestedPartitions.Contains(p.Guid))
+                .Where(p => !requestedPartitionGuids.Contains(p.Guid))
                 .ToList();
 
             foreach (var partition in partitionsToRemove)
@@ -471,6 +501,11 @@ public sealed class UserUpdateCommandHandler(
                 actor.ValidateHasPartitionAccess(partition.Guid);
 
                 user.RemovePartition(partition);
+            }
+
+            if (hadPartitionChanges)
+            {
+                user.MarkModificationType(UserModifiedType.PartitionsChanged);
             }
         }
 
@@ -480,6 +515,11 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.User.UserGroups is { } requestedUserGroups)
         {
+            var requestedUserGroupGuids = requestedUserGroups.Distinct().ToArray();
+            var hadUserGroupChanges =
+                user.UserGroups.Count != requestedUserGroupGuids.Length ||
+                user.UserGroups.Any(g => !requestedUserGroupGuids.Contains(g.Guid));
+
             foreach (var userGroupGuid in requestedUserGroups)
             {
                 if (user.UserGroups.Any(g => g.Guid == userGroupGuid))
@@ -500,7 +540,7 @@ public sealed class UserUpdateCommandHandler(
             }
 
             var userGroupsToRemove = user.UserGroups
-                .Where(g => !requestedUserGroups.Contains(g.Guid))
+                .Where(g => !requestedUserGroupGuids.Contains(g.Guid))
                 .ToList();
 
             foreach (var userGroup in userGroupsToRemove)
@@ -509,9 +549,19 @@ public sealed class UserUpdateCommandHandler(
 
                 user.RemoveUserGroup(userGroup);
             }
+
+            if (hadUserGroupChanges)
+            {
+                user.MarkModificationType(UserModifiedType.UserGroupsChanged);
+            }
         }
 
         #endregion UserGroup
+
+        if (user.IsEditStarted)
+        {
+            user.MarkAsEditedBy(actor.ActorGuid);
+        }
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -604,6 +654,8 @@ public sealed class UserChangeNameidCommandHandler(
 
         await userService.ValidateUserNameidChange(user, command.Nameid, cancellationToken);
         user.ChangeNameid(command.Nameid);
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -660,6 +712,8 @@ public sealed class UserChangeFirstNameCommandHandler(
             return;
         }
         user.ChangeFirstName(command.FirstName);
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -716,6 +770,8 @@ public sealed class UserChangeLastNameCommandHandler(
             return;
         }
         user.ChangeLastName(command.LastName);
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -772,6 +828,8 @@ public sealed class UserChangeDescriptionCommandHandler(
             return;
         }
         user.ChangeDescription(command.Description);
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -828,6 +886,8 @@ public sealed class UserSetDefaultPasswordExpirationCommandHandler(
             return;
         }
         user.SetDefaultPasswordExpirationPeriod(command.Period);
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.General);
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -879,6 +939,8 @@ public sealed class UserChangePasswordCommandHandler(
         actor.ValidateHasAccess(user);
         user.ChangePasswordHash(passwordHasher.Hash(command.Password));
         user.MarkPasswordChangeAsRequired();
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.PasswordChanged);
 
         var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
         var usableRefreshTokens = refreshTokens.Where(refreshToken => refreshToken.IsUsable).ToArray();
@@ -961,6 +1023,8 @@ public sealed class UserSetPermissionsCommandHandler(
         {
             user.RemovePermission(action);
         }
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.PermissionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -1047,6 +1111,8 @@ public sealed class UserSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
             user.RemovePartition(partition);
         }
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -1139,6 +1205,8 @@ public sealed class UserSetUserGroupsCommandHandler(
             actor.ValidateHasAccess(userGroup);
             user.RemoveUserGroup(userGroup);
         }
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.UserGroupsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -1195,6 +1263,8 @@ public sealed class UserActivateCommandHandler(
             return;
         }
         user.Activate();
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.Activated);
         entityEventRepository.Add(EntityEvent.Activated<User>(user, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -1250,6 +1320,8 @@ public sealed class UserDeactivateCommandHandler(
             return;
         }
         user.Deactivate();
+        user.MarkAsEditedBy(actor.ActorGuid);
+        user.MarkModificationType(UserModifiedType.Deactivated);
         entityEventRepository.Add(EntityEvent.Deactivated<User>(user, actor.ActorGuid));
         if (logger.IsEnabled(LogLevel.Information))
         {

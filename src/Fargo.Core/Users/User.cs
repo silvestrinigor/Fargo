@@ -17,7 +17,7 @@ namespace Fargo.Core.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
+public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
 {
     private User()
     {
@@ -411,6 +411,52 @@ public class User : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPartiti
     }
 
     #endregion Partition
+
+    #region Modified
+
+    public Guid? EditedByGuid { get; private set; }
+
+    public void MarkAsEditedBy(Guid actorGuid)
+    {
+        EditedByGuid = actorGuid;
+    }
+
+    public UserModifiedType ModificationTypes { get; private set; }
+
+    public IReadOnlySet<UserModifiedType> GetModificationTypes()
+    {
+        HashSet<UserModifiedType> result = [];
+
+        foreach (UserModifiedType value in Enum.GetValues<UserModifiedType>())
+        {
+            if (value == UserModifiedType.None)
+            {
+                continue;
+            }
+
+            if ((ModificationTypes & value) != 0)
+            {
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+
+    public bool IsEditStarted { get; private set; }
+
+    public void MarkModificationType(UserModifiedType modificationType)
+    {
+        if (!IsEditStarted)
+        {
+            ModificationTypes = UserModifiedType.None;
+            IsEditStarted = true;
+        }
+
+        ModificationTypes |= modificationType;
+    }
+
+    #endregion Modified
 }
 
 #endregion Entity

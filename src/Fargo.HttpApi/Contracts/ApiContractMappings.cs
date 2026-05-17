@@ -73,7 +73,8 @@ internal static class ApiContractMappings
             item.ProductionDate,
             item.ParentContainerGuid,
             item.Partitions,
-            item.EditedByGuid);
+            item.EditedByGuid,
+            (ContractItems.ItemModifiedType)(int)item.ModificationTypes);
 
     public static IReadOnlyCollection<ContractItems.ItemInfo> ToInfo(this IReadOnlyCollection<AppItems.ItemDto> items)
         => items.Select(static item => item.ToInfo()).ToArray();
@@ -91,7 +92,8 @@ internal static class ApiContractMappings
             partition.Description,
             partition.ParentPartitionGuid,
             partition.IsActive,
-            partition.EditedByGuid);
+            partition.EditedByGuid,
+            (ContractPartitions.PartitionModifiedType)(int)partition.ModificationTypes);
 
     public static IReadOnlyCollection<ContractPartitions.PartitionInfo> ToInfo(this IReadOnlyCollection<AppPartitions.PartitionDto> partitions)
         => partitions.Select(static partition => partition.ToInfo()).ToArray();
@@ -115,7 +117,8 @@ internal static class ApiContractMappings
             user.Permissions.ToInfo(),
             user.Partitions,
             user.UserGroups,
-            user.EditedByGuid);
+            user.EditedByGuid,
+            (ContractUsers.UserModifiedType)(int)user.ModificationTypes);
 
     public static IReadOnlyCollection<ContractUsers.UserInfo> ToInfo(this IReadOnlyCollection<AppUsers.UserDto> users)
         => users.Select(static user => user.ToInfo()).ToArray();
@@ -153,7 +156,8 @@ internal static class ApiContractMappings
             userGroup.IsActive,
             userGroup.Permissions.ToInfo(),
             userGroup.Partitions,
-            userGroup.EditedByGuid);
+            userGroup.EditedByGuid,
+            (ContractUserGroups.UserGroupModifiedType)(int)userGroup.ModificationTypes);
 
     public static IReadOnlyCollection<ContractUserGroups.UserGroupInfo> ToInfo(this IReadOnlyCollection<AppUserGroups.UserGroupDto> userGroups)
         => userGroups.Select(static userGroup => userGroup.ToInfo()).ToArray();

@@ -20,7 +20,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : ModifiedEntity, IPartitionedEntity
+public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity
 {
     /// <summary>
     /// Initializes a new item entity.
@@ -157,6 +157,52 @@ public class Item : ModifiedEntity, IPartitionedEntity
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 
     #endregion  Partition
+
+    #region Modified
+
+    public Guid? EditedByGuid { get; private set; }
+
+    public void MarkAsEditedBy(Guid actorGuid)
+    {
+        EditedByGuid = actorGuid;
+    }
+
+    public ItemModifiedType ModificationTypes { get; private set; }
+
+    public IReadOnlySet<ItemModifiedType> GetModificationTypes()
+    {
+        HashSet<ItemModifiedType> result = [];
+
+        foreach (ItemModifiedType value in Enum.GetValues<ItemModifiedType>())
+        {
+            if (value == ItemModifiedType.None)
+            {
+                continue;
+            }
+
+            if ((ModificationTypes & value) != 0)
+            {
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+
+    public bool IsEditStarted { get; private set; }
+
+    public void MarkModificationType(ItemModifiedType modificationType)
+    {
+        if (!IsEditStarted)
+        {
+            ModificationTypes = ItemModifiedType.None;
+            IsEditStarted = true;
+        }
+
+        ModificationTypes |= modificationType;
+    }
+
+    #endregion Modified
 }
 
 /// <summary>

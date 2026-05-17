@@ -45,6 +45,10 @@ public sealed class PartitionCreateCommandHandler(
 
         var partition = new Partition(command.Name);
 
+        partition.MarkAsEditedBy(actor.ActorGuid);
+
+        partition.MarkModificationType(PartitionModifiedType.General);
+
         partitionRepository.Add(partition);
 
         entityEventRepository.Add(EntityEvent.EntityCreated<Partition>(partition, actor.ActorGuid));
@@ -188,6 +192,10 @@ public sealed class PartitionRenameCommandHandler(
 
         partition.Rename(command.Name);
 
+        partition.MarkAsEditedBy(actor.ActorGuid);
+
+        partition.MarkModificationType(PartitionModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -261,6 +269,10 @@ public sealed class PartitionChangeDescriptionCommandHandler(
         }
 
         partition.ChangeDescription(command.Description);
+
+        partition.MarkAsEditedBy(actor.ActorGuid);
+
+        partition.MarkModificationType(PartitionModifiedType.General);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -343,6 +355,10 @@ public sealed class PartitionSetParentCommandHandler(
 
         await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
 
+        partition.MarkAsEditedBy(actor.ActorGuid);
+
+        partition.MarkModificationType(PartitionModifiedType.ParentChanged);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -414,6 +430,10 @@ public sealed class PartitionActivateCommandHandler(
         }
 
         partition.Activate();
+
+        partition.MarkAsEditedBy(actor.ActorGuid);
+
+        partition.MarkModificationType(PartitionModifiedType.Activated);
 
         entityEventRepository.Add(EntityEvent.Activated<Partition>(partition, actor.ActorGuid));
 
@@ -487,6 +507,10 @@ public sealed class PartitionDeactivateCommandHandler(
         }
 
         partition.Deactivate();
+
+        partition.MarkAsEditedBy(actor.ActorGuid);
+
+        partition.MarkModificationType(PartitionModifiedType.Deactivated);
 
         entityEventRepository.Add(EntityEvent.Deactivated<Partition>(partition, actor.ActorGuid));
 
