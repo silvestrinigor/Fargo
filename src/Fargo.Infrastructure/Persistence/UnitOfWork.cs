@@ -26,8 +26,7 @@ namespace Fargo.Infrastructure.Persistence;
 /// </remarks>
 public sealed class UnitOfWork(
     FargoDbContext fargoContext,
-    IAuditPrincipal auditPrincipal,
-    ILogger<UnitOfWork> logger
+    IAuditPrincipal auditPrincipal
 ) : IUnitOfWork
 {
     /// <summary>
