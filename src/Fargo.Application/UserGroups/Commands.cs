@@ -5,107 +5,8 @@ using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace Fargo.Application.UserGroups;
-
-#region DTOs
-
-public sealed record UserGroupDto(
-    Guid Guid,
-    Nameid Nameid,
-    Description Description,
-    IReadOnlyCollection<Permission> Permissions,
-    IReadOnlyCollection<Guid> Partitions,
-    bool IsActive,
-    Guid? EditedByGuid,
-    UserGroupModifiedType ModificationTypes
-);
-
-public sealed record UserGroupCreateDto(
-    string Nameid,
-    Description? Description = null,
-    IReadOnlyCollection<UserGroupPermissionUpdateDto>? Permissions = null,
-    IReadOnlyCollection<Guid>? Partitions = null
-);
-
-public sealed record UserGroupUpdateDto(
-    string? Nameid,
-    Description? Description,
-    bool? IsActive,
-    IReadOnlyCollection<UserGroupPermissionUpdateDto>? Permissions,
-    IReadOnlyCollection<Guid>? Partitions
-);
-
-public sealed record UserGroupPermissionUpdateDto(
-    ActionType Action
-);
-
-public static class UserGroupDtoMappings
-{
-    public static readonly Expression<Func<UserGroup, UserGroupDto>> Projection = userGroup => new UserGroupDto(
-        userGroup.Guid,
-        userGroup.Nameid,
-        userGroup.Description,
-        userGroup.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
-        userGroup.Partitions.Select(partition => partition.Guid).ToArray(),
-        userGroup.IsActive,
-        userGroup.EditedByGuid,
-        userGroup.ModificationTypes);
-}
-
-#endregion DTOs
-
-#region Exceptions
-
-public sealed class UserGroupNotFoundFargoApplicationException(Guid userGroupGuid)
-    : FargoApplicationException($"User group '{userGroupGuid}' was not found.")
-{
-    public Guid UserGroupGuid { get; } = userGroupGuid;
-}
-
-#endregion Exceptions
-
-#region Repositories
-
-public interface IUserGroupQueryRepository
-{
-    Task<UserGroupDto?> GetInfoByGuid(
-        Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
-
-    Task<IReadOnlyCollection<UserGroupDto>> GetManyInfo(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
-}
-public static class UserGroupRepositoryExtensions
-{
-    extension(IUserGroupRepository repository)
-    {
-        public async Task<UserGroup> GetFoundByGuid(
-            Guid userGroupGuid,
-            CancellationToken cancellationToken = default
-        )
-        {
-            var group = await repository.GetByGuid(userGroupGuid, cancellationToken)
-                ?? throw new UserGroupNotFoundFargoApplicationException(userGroupGuid);
-
-            return group;
-        }
-    }
-}
-
-#endregion Repositories
-
-#region Create Delete Update
 
 #region Create
 
@@ -243,200 +144,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
 #endregion Delete
 
-#region Update
-
-/// <summary>
-/// Command used to update multiple user group properties.
-/// </summary>
-/// <param name="UserGroupGuid">
-/// User group unique identifier.
-/// </param>
-/// <param name="UserGroup">
-/// User group update data.
-/// </param>
-public sealed record UserGroupUpdateCommand(
-    Guid UserGroupGuid,
-    UserGroupUpdateDto UserGroup
-) : ICommand;
-
-/// <summary>
-/// Handles user group updates.
-/// </summary>
-/// <remarks>
-/// Validates permissions and applies all specified user group changes.
-/// </remarks>
-public sealed class UserGroupUpdateCommandHandler(
-    UserGroupService userGroupService,
-    IUserGroupRepository userGroupRepository,
-    IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserGroupUpdateCommandHandler> logger
-) : ICommandHandler<UserGroupUpdateCommand>
-{
-    public async Task Handle(
-        UserGroupUpdateCommand command,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group update flow started for user group {UserGroupGuid} by actor {ActorGuid}.",
-                command.UserGroupGuid,
-                actor.ActorGuid);
-        }
-
-        actor.ValidateHasPermission(ActionType.EditUserGroup);
-
-        var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
-
-        actor.ValidateHasAccess(userGroup);
-
-        if (command.UserGroup.Nameid is not null)
-        {
-            var nameid = ValidateNameid(command.UserGroup.Nameid);
-
-            if (userGroup.Nameid != nameid)
-            {
-                await userGroupService.ValidateUserGroupNameidChange(userGroup, nameid, cancellationToken);
-                userGroup.ChangeNameid(nameid);
-                userGroup.MarkModificationType(UserGroupModifiedType.General);
-            }
-        }
-
-        if (command.UserGroup.Description is not null && userGroup.Description != command.UserGroup.Description)
-        {
-            userGroup.ChangeDescription(command.UserGroup.Description.Value);
-            userGroup.MarkModificationType(UserGroupModifiedType.General);
-        }
-
-        if (command.UserGroup.IsActive is not null && userGroup.IsActive != command.UserGroup.IsActive.Value)
-        {
-            if (command.UserGroup.IsActive.Value)
-            {
-                userGroup.Activate();
-            }
-            else
-            {
-                userGroup.Deactivate();
-            }
-
-            userGroup.MarkModificationType(command.UserGroup.IsActive.Value
-                ? UserGroupModifiedType.Activated
-                : UserGroupModifiedType.Deactivated);
-
-            entityEventRepository.Add(command.UserGroup.IsActive.Value
-                ? EntityEvent.Activated<UserGroup>(userGroup, actor.ActorGuid)
-                : EntityEvent.Deactivated<UserGroup>(userGroup, actor.ActorGuid));
-        }
-
-        if (command.UserGroup.Permissions is not null)
-        {
-            var requestedActions = command.UserGroup.Permissions
-                .Select(x => x.Action)
-                .Distinct()
-                .ToHashSet();
-
-            var currentActions = userGroup.Permissions
-                .Select(x => x.Action)
-                .ToHashSet();
-
-            var actionsToAdd = requestedActions.Except(currentActions).ToArray();
-            var actionsToRemove = currentActions.Except(requestedActions).ToArray();
-
-            foreach (var action in actionsToAdd)
-            {
-                userGroup.AddPermission(action);
-            }
-
-            foreach (var action in actionsToRemove)
-            {
-                userGroup.RemovePermission(action);
-            }
-
-            if (actionsToAdd.Length > 0 || actionsToRemove.Length > 0)
-            {
-                userGroup.MarkModificationType(UserGroupModifiedType.PermissionsChanged);
-            }
-        }
-
-        #region Partition
-
-        if (command.UserGroup.Partitions is { } requestedPartitions)
-        {
-            var requestedPartitionGuids = requestedPartitions.Distinct().ToArray();
-            var hadPartitionChanges =
-                userGroup.Partitions.Count != requestedPartitionGuids.Length ||
-                userGroup.Partitions.Any(p => !requestedPartitionGuids.Contains(p.Guid));
-
-            foreach (var partitionGuid in requestedPartitions)
-            {
-                if (userGroup.Partitions.Any(p => p.Guid == partitionGuid))
-                {
-                    continue;
-                }
-
-                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                userGroup.AddPartition(partition);
-            }
-
-            var partitionsToRemove = userGroup.Partitions
-                .Where(p => !requestedPartitionGuids.Contains(p.Guid))
-                .ToList();
-
-            foreach (var partition in partitionsToRemove)
-            {
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                userGroup.RemovePartition(partition);
-            }
-
-            if (hadPartitionChanges)
-            {
-                userGroup.MarkModificationType(UserGroupModifiedType.PartitionsChanged);
-            }
-        }
-
-        #endregion Partition
-
-        if (userGroup.IsEditStarted)
-        {
-            userGroup.MarkAsEditedBy(actor.ActorGuid);
-        }
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group update flow completed for user group {UserGroupGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}.",
-                userGroup.Guid,
-                actor.ActorGuid,
-                userGroup.Partitions.Count,
-                userGroup.Permissions.Count);
-        }
-    }
-
-    private static Nameid ValidateNameid(string value)
-    {
-        try
-        {
-            return new Nameid(value);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidNameidFargoApplicationException(ex.Message);
-        }
-    }
-}
-
-#endregion Update
-
-#region Focused Updates
+#region Nameid
 
 /// <summary>
 /// Command used to change a user group login identifier.
@@ -464,6 +172,7 @@ public sealed class UserGroupChangeNameidCommandHandler(
     public async Task Handle(UserGroupChangeNameidCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -471,8 +180,11 @@ public sealed class UserGroupChangeNameidCommandHandler(
                 command.UserGroupGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUserGroup);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
         actor.ValidateHasAccess(userGroup);
 
         if (userGroup.Nameid == command.Nameid)
@@ -483,13 +195,18 @@ public sealed class UserGroupChangeNameidCommandHandler(
                     "User group nameid change flow skipped for user group {UserGroupGuid}; nameid is already requested value.",
                     userGroup.Guid);
             }
+
             return;
         }
 
         await userGroupService.ValidateUserGroupNameidChange(userGroup, command.Nameid, cancellationToken);
+
         userGroup.ChangeNameid(command.Nameid);
+
         userGroup.MarkAsEditedBy(actor.ActorGuid);
+
         userGroup.MarkModificationType(UserGroupModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -500,6 +217,10 @@ public sealed class UserGroupChangeNameidCommandHandler(
     }
 }
 
+#endregion Nameid
+
+#region Description
+
 /// <summary>
 /// Command used to change a user group description.
 /// </summary>
@@ -509,7 +230,10 @@ public sealed class UserGroupChangeNameidCommandHandler(
 /// <param name="Description">
 /// New user group description.
 /// </param>
-public sealed record UserGroupChangeDescriptionCommand(Guid UserGroupGuid, Description Description) : ICommand;
+public sealed record UserGroupChangeDescriptionCommand(
+    Guid UserGroupGuid,
+    Description Description
+) : ICommand;
 
 /// <summary>
 /// Handles user group description changes.
@@ -520,11 +244,13 @@ public sealed record UserGroupChangeDescriptionCommand(Guid UserGroupGuid, Descr
 public sealed class UserGroupChangeDescriptionCommandHandler(
     IUserGroupRepository userGroupRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserGroupChangeDescriptionCommandHandler> logger) : ICommandHandler<UserGroupChangeDescriptionCommand>
+    ILogger<UserGroupChangeDescriptionCommandHandler> logger
+) : ICommandHandler<UserGroupChangeDescriptionCommand>
 {
     public async Task Handle(UserGroupChangeDescriptionCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -532,9 +258,13 @@ public sealed class UserGroupChangeDescriptionCommandHandler(
                 command.UserGroupGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUserGroup);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
         actor.ValidateHasAccess(userGroup);
+
         if (userGroup.Description == command.Description)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -543,11 +273,16 @@ public sealed class UserGroupChangeDescriptionCommandHandler(
                     "User group description change flow skipped for user group {UserGroupGuid}; description is already requested value.",
                     userGroup.Guid);
             }
+
             return;
         }
+
         userGroup.ChangeDescription(command.Description);
+
         userGroup.MarkAsEditedBy(actor.ActorGuid);
+
         userGroup.MarkModificationType(UserGroupModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -558,6 +293,10 @@ public sealed class UserGroupChangeDescriptionCommandHandler(
     }
 }
 
+#endregion Description
+
+#region Permission
+
 /// <summary>
 /// Command used to replace the user group permissions.
 /// </summary>
@@ -567,7 +306,10 @@ public sealed class UserGroupChangeDescriptionCommandHandler(
 /// <param name="Actions">
 /// Desired permission actions.
 /// </param>
-public sealed record UserGroupSetPermissionsCommand(Guid UserGroupGuid, IReadOnlyCollection<ActionType> Actions) : ICommand;
+public sealed record UserGroupSetPermissionsCommand(
+    Guid UserGroupGuid,
+    IReadOnlyCollection<ActionType> Actions
+) : ICommand;
 
 /// <summary>
 /// Handles user group permission changes.
@@ -584,6 +326,7 @@ public sealed class UserGroupSetPermissionsCommandHandler(
     public async Task Handle(UserGroupSetPermissionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -592,11 +335,15 @@ public sealed class UserGroupSetPermissionsCommandHandler(
                 actor.ActorGuid,
                 command.Actions.Count);
         }
+
         actor.ValidateHasPermission(ActionType.EditUserGroup);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
         actor.ValidateHasAccess(userGroup);
 
         var requestedActions = command.Actions.Distinct().ToHashSet();
+
         var currentActions = userGroup.Permissions.Select(x => x.Action).ToHashSet();
 
         if (requestedActions.SetEquals(currentActions))
@@ -619,7 +366,9 @@ public sealed class UserGroupSetPermissionsCommandHandler(
         {
             userGroup.RemovePermission(action);
         }
+
         userGroup.MarkAsEditedBy(actor.ActorGuid);
+
         userGroup.MarkModificationType(UserGroupModifiedType.PermissionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
@@ -632,6 +381,10 @@ public sealed class UserGroupSetPermissionsCommandHandler(
         }
     }
 }
+
+#endregion Permission
+
+#region Partition
 
 /// <summary>
 /// Command used to replace the user group partition assignments.
@@ -660,6 +413,7 @@ public sealed class UserGroupSetPartitionsCommandHandler(
     public async Task Handle(UserGroupSetPartitionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -668,8 +422,11 @@ public sealed class UserGroupSetPartitionsCommandHandler(
                 actor.ActorGuid,
                 command.PartitionGuids.Count);
         }
+
         actor.ValidateHasPermission(ActionType.EditUserGroup);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
         actor.ValidateHasAccess(userGroup);
 
         var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
@@ -686,6 +443,7 @@ public sealed class UserGroupSetPartitionsCommandHandler(
                     "User group partition mutation skipped for user group {UserGroupGuid}; partitions are already requested values.",
                     userGroup.Guid);
             }
+
             return;
         }
 
@@ -697,17 +455,22 @@ public sealed class UserGroupSetPartitionsCommandHandler(
             }
 
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
             actor.ValidateHasPartitionAccess(partition.Guid);
+
             userGroup.AddPartition(partition);
         }
 
         var partitionsToRemove = userGroup.Partitions.Where(p => !requestedPartitions.Contains(p.Guid)).ToList();
+
         foreach (var partition in partitionsToRemove)
         {
             actor.ValidateHasPartitionAccess(partition.Guid);
             userGroup.RemovePartition(partition);
         }
+
         userGroup.MarkAsEditedBy(actor.ActorGuid);
+
         userGroup.MarkModificationType(UserGroupModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
@@ -720,6 +483,10 @@ public sealed class UserGroupSetPartitionsCommandHandler(
         }
     }
 }
+
+#endregion Partition
+
+#region Activate
 
 /// <summary>
 /// Command used to activate a user group.
@@ -744,6 +511,7 @@ public sealed class UserGroupActivateCommandHandler(
     public async Task Handle(UserGroupActivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -751,9 +519,13 @@ public sealed class UserGroupActivateCommandHandler(
                 command.UserGroupGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUserGroup);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
         actor.ValidateHasAccess(userGroup);
+
         if (userGroup.IsActive)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -762,12 +534,18 @@ public sealed class UserGroupActivateCommandHandler(
                     "User group activation flow skipped for user group {UserGroupGuid}; user group is already active.",
                     userGroup.Guid);
             }
+
             return;
         }
+
         userGroup.Activate();
+
         userGroup.MarkAsEditedBy(actor.ActorGuid);
+
         userGroup.MarkModificationType(UserGroupModifiedType.Activated);
+
         entityEventRepository.Add(EntityEvent.Activated<UserGroup>(userGroup, actor.ActorGuid));
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -777,6 +555,10 @@ public sealed class UserGroupActivateCommandHandler(
         }
     }
 }
+
+#endregion Activate
+
+#region Deactivate
 
 /// <summary>
 /// Command used to deactivate a user group.
@@ -801,6 +583,7 @@ public sealed class UserGroupDeactivateCommandHandler(
     public async Task Handle(UserGroupDeactivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -808,9 +591,13 @@ public sealed class UserGroupDeactivateCommandHandler(
                 command.UserGroupGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUserGroup);
+
         var userGroup = await userGroupRepository.GetFoundByGuid(command.UserGroupGuid, cancellationToken);
+
         actor.ValidateHasAccess(userGroup);
+
         if (!userGroup.IsActive)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -821,10 +608,15 @@ public sealed class UserGroupDeactivateCommandHandler(
             }
             return;
         }
+
         userGroup.Deactivate();
+
         userGroup.MarkAsEditedBy(actor.ActorGuid);
+
         userGroup.MarkModificationType(UserGroupModifiedType.Deactivated);
+
         entityEventRepository.Add(EntityEvent.Deactivated<UserGroup>(userGroup, actor.ActorGuid));
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -835,123 +627,4 @@ public sealed class UserGroupDeactivateCommandHandler(
     }
 }
 
-#endregion Focused Updates
-
-#endregion Create Delete Update
-
-#region Queries
-
-#region Single
-
-public sealed record UserGroupSingleQuery(
-    Guid UserGroupGuid,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<UserGroupDto?>;
-
-public sealed class UserGroupSingleQueryHandler(
-    IUserGroupQueryRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserGroupSingleQueryHandler> logger
-) : IQueryHandler<UserGroupSingleQuery, UserGroupDto?>
-{
-    public async Task<UserGroupDto?> Handle(
-        UserGroupSingleQuery query,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User group single query started for user group {UserGroupGuid} by actor {ActorGuid}.",
-                query.UserGroupGuid,
-                actor.ActorGuid);
-        }
-
-        var userGroup = await userGroupRepository.GetInfoByGuid(
-            query.UserGroupGuid,
-            query.AsOfDateTime,
-            actor.PartitionAccesses,
-            notChildOfAnyPartition: true,
-            cancellationToken
-        );
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User group single query completed for user group {UserGroupGuid} by actor {ActorGuid}. Found: {Found}.",
-                query.UserGroupGuid,
-                actor.ActorGuid,
-                userGroup is not null);
-        }
-
-        return userGroup;
-    }
-}
-
-#endregion Single
-
-#region Many
-
-public sealed record UserGroupsQuery(
-    Pagination WithPagination,
-    DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
-    bool? NotChildOfAnyPartition = null
-) : IQuery<IReadOnlyCollection<UserGroupDto>>;
-
-public sealed class UserGroupsQueryHandler(
-    IUserGroupQueryRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserGroupsQueryHandler> logger
-) : IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>
-{
-    public async Task<IReadOnlyCollection<UserGroupDto>> Handle(
-        UserGroupsQuery query,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-        var pagination = query.WithPagination;
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User groups query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actor.ActorGuid,
-                pagination.Page,
-                pagination.Limit);
-        }
-
-        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
-            PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccesses,
-                query.ChildOfAnyOfThesePartitions,
-                query.NotChildOfAnyPartition);
-
-        var userGroups = await userGroupRepository.GetManyInfo(
-            pagination,
-            query.TemporalAsOfDateTime,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
-            cancellationToken
-        );
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User groups query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.ActorGuid,
-                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-                childOfAnyOfThesePartitions?.Count ?? 0,
-                userGroups.Count);
-        }
-
-        return userGroups;
-    }
-}
-
-#endregion Many
-
-#endregion Queries
+#endregion Deactivate

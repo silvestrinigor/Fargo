@@ -7,157 +7,8 @@ using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace Fargo.Application.Users;
-
-#region DTOs
-
-public sealed record UserDto(
-    Guid Guid,
-    Nameid Nameid,
-    FirstName? FirstName,
-    LastName? LastName,
-    Description Description,
-    TimeSpan? DefaultPasswordExpirationPeriod,
-    DateTimeOffset? RequirePasswordChangeAt,
-    IReadOnlyCollection<Permission> Permissions,
-    IReadOnlyCollection<Guid> Partitions,
-    IReadOnlyCollection<Guid> UserGroups,
-    bool IsActive,
-    Guid? EditedByGuid,
-    UserModifiedType ModificationTypes
-);
-
-public sealed record UserCreateDto(
-    string Nameid,
-    string Password,
-    FirstName? FirstName = null,
-    LastName? LastName = null,
-    Description? Description = null,
-    IReadOnlyCollection<UserPermissionUpdateDto>? Permissions = null,
-    TimeSpan? DefaultPasswordExpirationTimeSpan = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    IReadOnlyCollection<Guid>? UserGroups = null
-);
-
-public sealed record UserUpdateDto(
-    string? Nameid = null,
-    FirstName? FirstName = null,
-    LastName? LastName = null,
-    Description? Description = null,
-    string? Password = null,
-    bool? IsActive = null,
-    IReadOnlyCollection<UserPermissionUpdateDto>? Permissions = null,
-    TimeSpan? DefaultPasswordExpirationPeriod = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    IReadOnlyCollection<Guid>? UserGroups = null
-);
-
-public sealed record UserPermissionUpdateDto(
-    ActionType Action
-);
-
-public sealed record UserPasswordUpdateDto(
-    string NewPassword,
-    string? CurrentPassword = null
-);
-
-public static class UserDtoMappings
-{
-    public static readonly Expression<Func<User, UserDto>> Projection = user => new UserDto(
-        user.Guid,
-        user.Nameid,
-        user.FirstName,
-        user.LastName,
-        user.Description,
-        user.DefaultPasswordExpirationPeriod,
-        user.RequirePasswordChangeAt,
-        user.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
-        user.Partitions.Select(partition => partition.Guid).ToArray(),
-        user.UserGroups.Select(group => group.Guid).ToArray(),
-        user.IsActive,
-        user.EditedByGuid,
-        user.ModificationTypes);
-}
-
-#endregion DTOs
-
-#region Exceptions
-
-public class UserNotFoundFargoApplicationException
-    : FargoApplicationException
-{
-    public UserNotFoundFargoApplicationException(Guid userGuid)
-        : base($"User with guid '{userGuid}' was not found.")
-    {
-        UserGuid = userGuid;
-    }
-
-    public UserNotFoundFargoApplicationException(Nameid nameid)
-        : base($"User with nameid '{nameid}' was not found.")
-    {
-        Nameid = nameid;
-    }
-
-    public Guid? UserGuid { get; }
-
-    public Nameid? Nameid { get; }
-}
-
-public sealed class UserNotAuthorizedFargoApplicationException(
-    Guid userGuid,
-    ActionType actionType
-) : FargoApplicationException(
-    $"User '{userGuid}' is not authorized to perform action '{actionType}'.")
-{
-    public Guid UserGuid { get; } = userGuid;
-
-    public ActionType ActionType { get; } = actionType;
-}
-
-#endregion Exceptions
-
-#region Repositories
-
-public interface IUserQueryRepository
-{
-    Task<UserDto?> GetInfoByGuid(
-        Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
-
-    Task<IReadOnlyCollection<UserDto>> GetManyInfo(
-        Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
-}
-public static class UserRepositoryExtensions
-{
-    extension(IUserRepository repository)
-    {
-        public async Task<User> GetFoundByGuid(
-            Guid userGuid,
-            CancellationToken cancellationToken = default
-        )
-        {
-            var user = await repository.GetByGuid(userGuid, cancellationToken)
-                ?? throw new UserNotFoundFargoApplicationException(userGuid);
-
-            return user;
-        }
-    }
-}
-
-#endregion Repositories
-
-#region Create Delete Update
 
 #region Create
 
@@ -298,311 +149,7 @@ public sealed class UserDeleteCommandHandler(
 
 #endregion Delete
 
-#region Update
-
-/// <summary>
-/// Command used to update multiple user properties.
-/// </summary>
-/// <param name="UserGuid">
-/// User unique identifier.
-/// </param>
-/// <param name="User">
-/// User update data.
-/// </param>
-public sealed record UserUpdateCommand(
-    Guid UserGuid,
-    UserUpdateDto User
-) : ICommand;
-
-/// <summary>
-/// Handles user updates.
-/// </summary>
-/// <remarks>
-/// Validates permissions and applies all specified user changes.
-/// </remarks>
-public sealed class UserUpdateCommandHandler(
-    UserService userService,
-    IUserRepository userRepository,
-    IUserGroupRepository userGroupRepository,
-    IPartitionRepository partitionRepository,
-    IPasswordHasher passwordHasher,
-    IRefreshTokenRepository refreshTokenRepository,
-    IEntityEventRepository entityEventRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserUpdateCommandHandler> logger
-) : ICommandHandler<UserUpdateCommand>
-{
-    public async Task Handle(
-        UserUpdateCommand command,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User update flow started for user {UserGuid} by actor {ActorGuid}.",
-                command.UserGuid,
-                actor.ActorGuid);
-        }
-
-        actor.ValidateHasPermission(ActionType.EditUser);
-
-        var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
-
-        actor.ValidateHasAccess(user);
-
-        if (command.User.Nameid is not null)
-        {
-            var nameid = ValidateNameid(command.User.Nameid);
-
-            if (user.Nameid != nameid)
-            {
-                await userService.ValidateUserNameidChange(user, nameid, cancellationToken);
-                user.ChangeNameid(nameid);
-                user.MarkModificationType(UserModifiedType.General);
-            }
-        }
-
-        if (command.User.FirstName is not null && user.FirstName != command.User.FirstName)
-        {
-            user.ChangeFirstName(command.User.FirstName);
-            user.MarkModificationType(UserModifiedType.General);
-        }
-
-        if (command.User.LastName is not null && user.LastName != command.User.LastName)
-        {
-            user.ChangeLastName(command.User.LastName);
-            user.MarkModificationType(UserModifiedType.General);
-        }
-
-        if (command.User.Description is not null && user.Description != command.User.Description)
-        {
-            user.ChangeDescription(command.User.Description.Value);
-            user.MarkModificationType(UserModifiedType.General);
-        }
-
-        if (command.User.DefaultPasswordExpirationPeriod is not null &&
-            user.DefaultPasswordExpirationPeriod != command.User.DefaultPasswordExpirationPeriod.Value)
-        {
-            user.SetDefaultPasswordExpirationPeriod(command.User.DefaultPasswordExpirationPeriod.Value);
-            user.MarkModificationType(UserModifiedType.General);
-        }
-
-        if (command.User.Password is not null)
-        {
-            actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
-
-            ValidatePasswordPolicy(command.User.Password);
-
-            user.ChangePasswordHash(passwordHasher.Hash(command.User.Password));
-
-            user.MarkPasswordChangeAsRequired();
-
-            user.MarkModificationType(UserModifiedType.PasswordChanged);
-
-            var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
-            foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
-            {
-                refreshToken.Revoke();
-            }
-
-            if (logger.IsEnabled(LogLevel.Information))
-            {
-                logger.LogInformation(
-                    "User update flow changed password for user {UserGuid} by actor {ActorGuid}; password change is required.",
-                    user.Guid,
-                    actor.ActorGuid);
-            }
-        }
-
-        if (command.User.Permissions is not null)
-        {
-            UserService.ValidateUserPermissionChange(user, actor.ActorGuid);
-
-            var requestedActions = command.User.Permissions
-                .Select(x => x.Action)
-                .Distinct()
-                .ToHashSet();
-
-            var currentActions = user.Permissions
-                .Select(x => x.Action)
-                .ToHashSet();
-
-            var actionsToAdd = requestedActions.Except(currentActions).ToArray();
-            var actionsToRemove = currentActions.Except(requestedActions).ToArray();
-
-            foreach (var action in actionsToAdd)
-            {
-                user.AddPermission(action);
-            }
-
-            foreach (var action in actionsToRemove)
-            {
-                user.RemovePermission(action);
-            }
-
-            if (actionsToAdd.Length > 0 || actionsToRemove.Length > 0)
-            {
-                user.MarkModificationType(UserModifiedType.PermissionsChanged);
-            }
-        }
-
-        if (command.User.IsActive is not null && user.IsActive != command.User.IsActive.Value)
-        {
-            if (command.User.IsActive.Value)
-            {
-                user.Activate();
-            }
-            else
-            {
-                user.Deactivate();
-            }
-
-            user.MarkModificationType(command.User.IsActive.Value
-                ? UserModifiedType.Activated
-                : UserModifiedType.Deactivated);
-
-            entityEventRepository.Add(command.User.IsActive.Value
-                ? EntityEvent.Activated<User>(user, actor.ActorGuid)
-                : EntityEvent.Deactivated<User>(user, actor.ActorGuid));
-        }
-
-        #region Partition
-
-        if (command.User.Partitions is { } requestedPartitions)
-        {
-            var requestedPartitionGuids = requestedPartitions.Distinct().ToArray();
-            var hadPartitionChanges =
-                user.Partitions.Count != requestedPartitionGuids.Length ||
-                user.Partitions.Any(p => !requestedPartitionGuids.Contains(p.Guid));
-
-            foreach (var partitionGuid in requestedPartitions)
-            {
-                if (user.Partitions.Any(p => p.Guid == partitionGuid))
-                {
-                    continue;
-                }
-
-                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
-
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                user.AddPartition(partition);
-            }
-
-            var partitionsToRemove = user.Partitions
-                .Where(p => !requestedPartitionGuids.Contains(p.Guid))
-                .ToList();
-
-            foreach (var partition in partitionsToRemove)
-            {
-                actor.ValidateHasPartitionAccess(partition.Guid);
-
-                user.RemovePartition(partition);
-            }
-
-            if (hadPartitionChanges)
-            {
-                user.MarkModificationType(UserModifiedType.PartitionsChanged);
-            }
-        }
-
-        #endregion Partition
-
-        #region UserGroup
-
-        if (command.User.UserGroups is { } requestedUserGroups)
-        {
-            var requestedUserGroupGuids = requestedUserGroups.Distinct().ToArray();
-            var hadUserGroupChanges =
-                user.UserGroups.Count != requestedUserGroupGuids.Length ||
-                user.UserGroups.Any(g => !requestedUserGroupGuids.Contains(g.Guid));
-
-            foreach (var userGroupGuid in requestedUserGroups)
-            {
-                if (user.UserGroups.Any(g => g.Guid == userGroupGuid))
-                {
-                    continue;
-                }
-
-                var userGroup = await userGroupRepository.GetFoundByGuid(userGroupGuid, cancellationToken);
-
-                actor.ValidateHasAccess(userGroup);
-
-                if (!userGroup.IsActive)
-                {
-                    throw new UserGroupInactiveFargoDomainException(userGroup.Guid);
-                }
-
-                user.AddUserGroup(userGroup);
-            }
-
-            var userGroupsToRemove = user.UserGroups
-                .Where(g => !requestedUserGroupGuids.Contains(g.Guid))
-                .ToList();
-
-            foreach (var userGroup in userGroupsToRemove)
-            {
-                actor.ValidateHasAccess(userGroup);
-
-                user.RemoveUserGroup(userGroup);
-            }
-
-            if (hadUserGroupChanges)
-            {
-                user.MarkModificationType(UserModifiedType.UserGroupsChanged);
-            }
-        }
-
-        #endregion UserGroup
-
-        if (user.IsEditStarted)
-        {
-            user.MarkAsEditedBy(actor.ActorGuid);
-        }
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User update flow completed for user {UserGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}. PermissionCount: {PermissionCount}. UserGroupCount: {UserGroupCount}.",
-                user.Guid,
-                actor.ActorGuid,
-                user.Partitions.Count,
-                user.Permissions.Count,
-                user.UserGroups.Count);
-        }
-    }
-
-    private static Nameid ValidateNameid(string value)
-    {
-        try
-        {
-            return new Nameid(value);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidNameidFargoApplicationException(ex.Message);
-        }
-    }
-
-    private static void ValidatePasswordPolicy(string password)
-    {
-        try
-        {
-            _ = new Password(password);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new WeakPasswordFargoApplicationException(ex.Message);
-        }
-    }
-}
-
-#endregion Update
-
-#region Focused Updates
+#region Nameid
 
 /// <summary>
 /// Command used to change a user login identifier.
@@ -613,7 +160,10 @@ public sealed class UserUpdateCommandHandler(
 /// <param name="Nameid">
 /// New user login identifier.
 /// </param>
-public sealed record UserChangeNameidCommand(Guid UserGuid, Nameid Nameid) : ICommand;
+public sealed record UserChangeNameidCommand(
+    Guid UserGuid,
+    Nameid Nameid
+) : ICommand;
 
 /// <summary>
 /// Handles user login identifier changes.
@@ -625,11 +175,13 @@ public sealed class UserChangeNameidCommandHandler(
     UserService userService,
     IUserRepository userRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserChangeNameidCommandHandler> logger) : ICommandHandler<UserChangeNameidCommand>
+    ILogger<UserChangeNameidCommandHandler> logger
+) : ICommandHandler<UserChangeNameidCommand>
 {
     public async Task Handle(UserChangeNameidCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -637,8 +189,11 @@ public sealed class UserChangeNameidCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
 
         if (user.Nameid == command.Nameid)
@@ -649,13 +204,18 @@ public sealed class UserChangeNameidCommandHandler(
                     "User nameid change flow skipped for user {UserGuid}; nameid is already requested value.",
                     user.Guid);
             }
+
             return;
         }
 
         await userService.ValidateUserNameidChange(user, command.Nameid, cancellationToken);
+
         user.ChangeNameid(command.Nameid);
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -666,6 +226,10 @@ public sealed class UserChangeNameidCommandHandler(
     }
 }
 
+#endregion Nameid
+
+#region FirstName
+
 /// <summary>
 /// Command used to change a user first name.
 /// </summary>
@@ -675,7 +239,10 @@ public sealed class UserChangeNameidCommandHandler(
 /// <param name="FirstName">
 /// New user first name.
 /// </param>
-public sealed record UserChangeFirstNameCommand(Guid UserGuid, FirstName? FirstName) : ICommand;
+public sealed record UserChangeFirstNameCommand(
+    Guid UserGuid,
+    FirstName? FirstName
+) : ICommand;
 
 /// <summary>
 /// Handles user first name changes.
@@ -691,6 +258,7 @@ public sealed class UserChangeFirstNameCommandHandler(
     public async Task Handle(UserChangeFirstNameCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -698,9 +266,13 @@ public sealed class UserChangeFirstNameCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         if (user.FirstName == command.FirstName)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -711,9 +283,13 @@ public sealed class UserChangeFirstNameCommandHandler(
             }
             return;
         }
+
         user.ChangeFirstName(command.FirstName);
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -724,6 +300,10 @@ public sealed class UserChangeFirstNameCommandHandler(
     }
 }
 
+#endregion FirstName
+
+#region LastName
+
 /// <summary>
 /// Command used to change a user last name.
 /// </summary>
@@ -733,7 +313,10 @@ public sealed class UserChangeFirstNameCommandHandler(
 /// <param name="LastName">
 /// New user last name.
 /// </param>
-public sealed record UserChangeLastNameCommand(Guid UserGuid, LastName? LastName) : ICommand;
+public sealed record UserChangeLastNameCommand(
+    Guid UserGuid,
+    LastName? LastName
+) : ICommand;
 
 /// <summary>
 /// Handles user last name changes.
@@ -749,6 +332,7 @@ public sealed class UserChangeLastNameCommandHandler(
     public async Task Handle(UserChangeLastNameCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -756,9 +340,13 @@ public sealed class UserChangeLastNameCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         if (user.LastName == command.LastName)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -767,11 +355,16 @@ public sealed class UserChangeLastNameCommandHandler(
                     "User last name change flow skipped for user {UserGuid}; last name is already requested value.",
                     user.Guid);
             }
+
             return;
         }
+
         user.ChangeLastName(command.LastName);
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -782,6 +375,10 @@ public sealed class UserChangeLastNameCommandHandler(
     }
 }
 
+#endregion LastName
+
+#region Description
+
 /// <summary>
 /// Command used to change a user description.
 /// </summary>
@@ -791,7 +388,10 @@ public sealed class UserChangeLastNameCommandHandler(
 /// <param name="Description">
 /// New user description.
 /// </param>
-public sealed record UserChangeDescriptionCommand(Guid UserGuid, Description Description) : ICommand;
+public sealed record UserChangeDescriptionCommand(
+    Guid UserGuid,
+    Description Description
+) : ICommand;
 
 /// <summary>
 /// Handles user description changes.
@@ -807,6 +407,7 @@ public sealed class UserChangeDescriptionCommandHandler(
     public async Task Handle(UserChangeDescriptionCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -814,9 +415,13 @@ public sealed class UserChangeDescriptionCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         if (user.Description == command.Description)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -825,11 +430,16 @@ public sealed class UserChangeDescriptionCommandHandler(
                     "User description change flow skipped for user {UserGuid}; description is already requested value.",
                     user.Guid);
             }
+
             return;
         }
+
         user.ChangeDescription(command.Description);
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -839,6 +449,10 @@ public sealed class UserChangeDescriptionCommandHandler(
         }
     }
 }
+
+#endregion Description
+
+#region DefaultPasswordExpiration
 
 /// <summary>
 /// Command used to set the default user password expiration period.
@@ -865,6 +479,7 @@ public sealed class UserSetDefaultPasswordExpirationCommandHandler(
     public async Task Handle(UserSetDefaultPasswordExpirationCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -872,9 +487,13 @@ public sealed class UserSetDefaultPasswordExpirationCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         if (user.DefaultPasswordExpirationPeriod == command.Period)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -883,11 +502,16 @@ public sealed class UserSetDefaultPasswordExpirationCommandHandler(
                     "User default password expiration mutation skipped for user {UserGuid}; period is already requested value.",
                     user.Guid);
             }
+
             return;
         }
+
         user.SetDefaultPasswordExpirationPeriod(command.Period);
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.General);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -897,6 +521,10 @@ public sealed class UserSetDefaultPasswordExpirationCommandHandler(
         }
     }
 }
+
+#endregion DefaultPasswordExpiration
+
+#region Password
 
 /// <summary>
 /// Command used to change a user password.
@@ -926,6 +554,7 @@ public sealed class UserChangePasswordCommandHandler(
     public async Task Handle(UserChangePasswordCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -933,17 +562,27 @@ public sealed class UserChangePasswordCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         user.ChangePasswordHash(passwordHasher.Hash(command.Password));
+
         user.MarkPasswordChangeAsRequired();
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.PasswordChanged);
 
         var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
+
         var usableRefreshTokens = refreshTokens.Where(refreshToken => refreshToken.IsUsable).ToArray();
+
         foreach (var refreshToken in usableRefreshTokens)
         {
             refreshToken.Revoke();
@@ -959,6 +598,10 @@ public sealed class UserChangePasswordCommandHandler(
         }
     }
 }
+
+#endregion Password
+
+#region Permission
 
 /// <summary>
 /// Command used to replace the user permissions.
@@ -986,6 +629,7 @@ public sealed class UserSetPermissionsCommandHandler(
     public async Task Handle(UserSetPermissionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -994,11 +638,15 @@ public sealed class UserSetPermissionsCommandHandler(
                 actor.ActorGuid,
                 command.Actions.Count);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
 
         var requestedActions = command.Actions.Distinct().ToHashSet();
+
         var currentActions = user.Permissions.Select(x => x.Action).ToHashSet();
 
         if (requestedActions.SetEquals(currentActions))
@@ -1023,7 +671,9 @@ public sealed class UserSetPermissionsCommandHandler(
         {
             user.RemovePermission(action);
         }
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.PermissionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
@@ -1037,6 +687,10 @@ public sealed class UserSetPermissionsCommandHandler(
     }
 }
 
+#endregion Permission
+
+#region Partition
+
 /// <summary>
 /// Command used to replace the user partition assignments.
 /// </summary>
@@ -1046,7 +700,10 @@ public sealed class UserSetPermissionsCommandHandler(
 /// <param name="PartitionGuids">
 /// Desired partition unique identifiers.
 /// </param>
-public sealed record UserSetPartitionsCommand(Guid UserGuid, IReadOnlyCollection<Guid> PartitionGuids) : ICommand;
+public sealed record UserSetPartitionsCommand(
+    Guid UserGuid,
+    IReadOnlyCollection<Guid> PartitionGuids
+) : ICommand;
 
 /// <summary>
 /// Handles user partition assignment changes.
@@ -1064,6 +721,7 @@ public sealed class UserSetPartitionsCommandHandler(
     public async Task Handle(UserSetPartitionsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1072,8 +730,11 @@ public sealed class UserSetPartitionsCommandHandler(
                 actor.ActorGuid,
                 command.PartitionGuids.Count);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
 
         var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
@@ -1101,17 +762,22 @@ public sealed class UserSetPartitionsCommandHandler(
             }
 
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
             actor.ValidateHasPartitionAccess(partition.Guid);
+
             user.AddPartition(partition);
         }
 
         var partitionsToRemove = user.Partitions.Where(p => !requestedPartitions.Contains(p.Guid)).ToList();
+
         foreach (var partition in partitionsToRemove)
         {
             actor.ValidateHasPartitionAccess(partition.Guid);
             user.RemovePartition(partition);
         }
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
@@ -1124,6 +790,10 @@ public sealed class UserSetPartitionsCommandHandler(
         }
     }
 }
+
+#endregion Partition
+
+#region UserGroup
 
 /// <summary>
 /// Command used to replace the user group assignments for a user.
@@ -1152,6 +822,7 @@ public sealed class UserSetUserGroupsCommandHandler(
     public async Task Handle(UserSetUserGroupsCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1160,8 +831,11 @@ public sealed class UserSetUserGroupsCommandHandler(
                 actor.ActorGuid,
                 command.UserGroupGuids.Count);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
 
         var requestedUserGroups = command.UserGroupGuids.Distinct().ToArray();
@@ -1189,6 +863,7 @@ public sealed class UserSetUserGroupsCommandHandler(
             }
 
             var userGroup = await userGroupRepository.GetFoundByGuid(userGroupGuid, cancellationToken);
+
             actor.ValidateHasAccess(userGroup);
 
             if (!userGroup.IsActive)
@@ -1200,12 +875,15 @@ public sealed class UserSetUserGroupsCommandHandler(
         }
 
         var userGroupsToRemove = user.UserGroups.Where(g => !requestedUserGroups.Contains(g.Guid)).ToList();
+
         foreach (var userGroup in userGroupsToRemove)
         {
             actor.ValidateHasAccess(userGroup);
             user.RemoveUserGroup(userGroup);
         }
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.UserGroupsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
@@ -1218,6 +896,10 @@ public sealed class UserSetUserGroupsCommandHandler(
         }
     }
 }
+
+#endregion UserGroup
+
+#region Activate
 
 /// <summary>
 /// Command used to activate a user.
@@ -1242,6 +924,7 @@ public sealed class UserActivateCommandHandler(
     public async Task Handle(UserActivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1249,9 +932,13 @@ public sealed class UserActivateCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         if (user.IsActive)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -1262,10 +949,15 @@ public sealed class UserActivateCommandHandler(
             }
             return;
         }
+
         user.Activate();
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.Activated);
+
         entityEventRepository.Add(EntityEvent.Activated<User>(user, actor.ActorGuid));
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1275,6 +967,10 @@ public sealed class UserActivateCommandHandler(
         }
     }
 }
+
+#endregion Activate
+
+#region Deactivate
 
 /// <summary>
 /// Command used to deactivate a user.
@@ -1299,6 +995,7 @@ public sealed class UserDeactivateCommandHandler(
     public async Task Handle(UserDeactivateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1306,9 +1003,13 @@ public sealed class UserDeactivateCommandHandler(
                 command.UserGuid,
                 actor.ActorGuid);
         }
+
         actor.ValidateHasPermission(ActionType.EditUser);
+
         var user = await userRepository.GetFoundByGuid(command.UserGuid, cancellationToken);
+
         actor.ValidateHasAccess(user);
+
         if (!user.IsActive)
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -1319,10 +1020,15 @@ public sealed class UserDeactivateCommandHandler(
             }
             return;
         }
+
         user.Deactivate();
+
         user.MarkAsEditedBy(actor.ActorGuid);
+
         user.MarkModificationType(UserModifiedType.Deactivated);
+
         entityEventRepository.Add(EntityEvent.Deactivated<User>(user, actor.ActorGuid));
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
@@ -1333,123 +1039,4 @@ public sealed class UserDeactivateCommandHandler(
     }
 }
 
-#endregion Focused Updates
-
-#endregion Create Delete Update
-
-#region Queries
-
-#region Single
-
-public sealed record UserSingleQuery(
-    Guid UserGuid,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<UserDto?>;
-
-public sealed class UserSingleQueryHandler(
-    IUserQueryRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UserSingleQueryHandler> logger
-) : IQueryHandler<UserSingleQuery, UserDto?>
-{
-    public async Task<UserDto?> Handle(
-        UserSingleQuery query,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User single query started for user {UserGuid} by actor {ActorGuid}.",
-                query.UserGuid,
-                actor.ActorGuid);
-        }
-
-        var user = await userRepository.GetInfoByGuid(
-            query.UserGuid,
-            query.AsOfDateTime,
-            actor.PartitionAccesses,
-            notChildOfAnyPartition: true,
-            cancellationToken
-        );
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User single query completed for user {UserGuid} by actor {ActorGuid}. Found: {Found}.",
-                query.UserGuid,
-                actor.ActorGuid,
-                user is not null);
-        }
-
-        return user;
-    }
-}
-
-#endregion Single
-
-#region Many
-
-public sealed record UsersQuery(
-    Pagination WithPagination,
-    DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
-    bool? NotChildOfAnyPartition = null
-) : IQuery<IReadOnlyCollection<UserDto>>;
-
-public sealed class UsersQueryHandler(
-    IUserQueryRepository userRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    ILogger<UsersQueryHandler> logger
-) : IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>
-{
-    public async Task<IReadOnlyCollection<UserDto>> Handle(
-        UsersQuery query,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-        var pagination = query.WithPagination;
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Users query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actor.ActorGuid,
-                pagination.Page,
-                pagination.Limit);
-        }
-
-        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
-            PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccesses,
-                query.ChildOfAnyOfThesePartitions,
-                query.NotChildOfAnyPartition);
-
-        var users = await userRepository.GetManyInfo(
-            pagination,
-            query.TemporalAsOfDateTime,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
-            cancellationToken
-        );
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Users query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.ActorGuid,
-                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-                childOfAnyOfThesePartitions?.Count ?? 0,
-                users.Count);
-        }
-
-        return users;
-    }
-}
-
-#endregion Many
-
-#endregion Queries
+#endregion Deactivate

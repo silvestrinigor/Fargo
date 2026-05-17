@@ -357,7 +357,7 @@ public sealed class PartitionSetParentCommandHandler(
 
         partition.MarkAsEditedBy(actor.ActorGuid);
 
-        partition.MarkModificationType(PartitionModifiedType.ParentChanged);
+        partition.MarkModificationType(PartitionModifiedType.ParentPartitionChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
