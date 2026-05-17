@@ -40,20 +40,6 @@ public interface ICurrentUser
 }
 
 /// <summary>
-/// Provides the audit origin used when persisting changes and events.
-/// </summary>
-public interface IAuditPrincipal
-{
-    /// <summary>
-    /// Gets the actor identifier that should be written to audit columns.
-    /// </summary>
-    Guid ActorGuid
-    {
-        get;
-    }
-}
-
-/// <summary>
 /// Represents the resolved authorization snapshot for a request or user.
 /// </summary>
 public interface IAuthorizationContext

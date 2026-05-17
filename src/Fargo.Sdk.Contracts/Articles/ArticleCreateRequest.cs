@@ -1,5 +1,27 @@
 namespace Fargo.Sdk.Contracts.Articles;
 
+/// <summary>Represents an article pack entry used when creating a kit article.</summary>
+public sealed record ArticleCreateKitPackRequest(
+    Guid ArticleGuid,
+    double Quantity);
+
+/// <summary>Represents variation article creation details.</summary>
+public sealed record ArticleCreateVariationRequest(
+    Guid FromArticleGuid);
+
+/// <summary>Represents pack article creation details.</summary>
+public sealed record ArticleCreatePackRequest(
+    Guid FromArticleGuid,
+    double Quantity);
+
+/// <summary>Represents kit article creation details.</summary>
+public sealed record ArticleCreateKitRequest(
+    IReadOnlyCollection<ArticleCreateKitPackRequest> Packs);
+
+/// <summary>Represents container article creation details.</summary>
+public sealed record ArticleCreateContainerRequest(
+    MassInfo? MaxMass = null);
+
 /// <summary>Represents the article payload inside an article create request.</summary>
 public sealed record ArticleCreateRequest(
     string Name,
@@ -18,4 +40,8 @@ public sealed record ArticleCreateRequest(
     string? Gs1128 = null,
     string? QrCode = null,
     string? DataMatrix = null,
-    bool? IsActive = null);
+    bool? IsActive = null,
+    ArticleCreateVariationRequest? Variation = null,
+    ArticleCreatePackRequest? Pack = null,
+    ArticleCreateKitRequest? Kit = null,
+    ArticleCreateContainerRequest? Container = null);

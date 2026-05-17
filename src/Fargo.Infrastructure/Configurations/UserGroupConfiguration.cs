@@ -24,6 +24,9 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.Property(x => x.EditedByGuid).IsRequired(false);
 
+        builder.Property(x => x.ModificationTypes)
+            .HasDefaultValue(UserGroupModifiedType.None);
+
         builder.HasMany(x => x.Permissions)
             .WithOne(x => x.UserGroup)
             .HasForeignKey(x => x.UserGroupGuid)

@@ -4,4 +4,5 @@ namespace Fargo.Sdk.Contracts.Items;
 public sealed record ItemCreateRequest(
     Guid ArticleGuid,
     DateTimeOffset? ProductionDate = null,
-    IReadOnlyCollection<Guid>? Partitions = null);
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null);

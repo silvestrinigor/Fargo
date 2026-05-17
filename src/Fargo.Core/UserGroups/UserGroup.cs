@@ -19,13 +19,22 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivableEntity
 {
+    public static UserGroup CreateUserGroup(Nameid nameid, Description? description = null)
+        => new(nameid, description);
+
+    public static UserGroup CreateUserGroup(Guid guid, Nameid nameid, Description? description = null)
+        => new(nameid, description)
+        {
+            Guid = guid
+        };
+
     private UserGroup()
     {
     }
 
-    public UserGroup(Nameid nameid, Description? description = null)
+    private UserGroup(Nameid nameid, Description? description = null)
     {
         Nameid = nameid;
         Description = description ?? Description.Empty;
@@ -249,6 +258,52 @@ public class UserGroup : ModifiedEntity, IPartitionedEntity, IPartitionUser, IPe
     private readonly List<User> users = [];
 
     #endregion User
+
+    #region Modified
+
+    public Guid? EditedByGuid { get; private set; }
+
+    public void MarkAsEditedBy(Guid actorGuid)
+    {
+        EditedByGuid = actorGuid;
+    }
+
+    public UserGroupModifiedType ModificationTypes { get; private set; }
+
+    public IReadOnlySet<UserGroupModifiedType> GetModificationTypes()
+    {
+        HashSet<UserGroupModifiedType> result = [];
+
+        foreach (UserGroupModifiedType value in Enum.GetValues<UserGroupModifiedType>())
+        {
+            if (value == UserGroupModifiedType.None)
+            {
+                continue;
+            }
+
+            if ((ModificationTypes & value) != 0)
+            {
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+
+    public bool IsEditStarted { get; private set; }
+
+    public void MarkModificationType(UserGroupModifiedType modificationType)
+    {
+        if (!IsEditStarted)
+        {
+            ModificationTypes = UserGroupModifiedType.None;
+            IsEditStarted = true;
+        }
+
+        ModificationTypes |= modificationType;
+    }
+
+    #endregion Modified
 }
 
 #endregion Entity

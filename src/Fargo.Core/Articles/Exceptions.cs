@@ -18,7 +18,7 @@ public sealed class ArticleDeleteWithItemsAssociatedFargoDomainException(Guid ar
 /// <summary>
 /// Exception thrown when a barcode is already assigned to a different article.
 /// </summary>
-public class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat format, string code)
+public sealed class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat format, string code)
     : FargoDomainException($"Barcode '{code}' ({format}) is already assigned to another article.")
 {
     /// <summary>Gets the barcode format that conflicts.</summary>
@@ -28,47 +28,14 @@ public class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat format
     public string Code { get; } = code;
 }
 
-public sealed class ArticleEditNotStartedFargoDomainException(Guid articleGuid)
-    : FargoDomainException($"Article '{articleGuid}' cannot be edited before an edit session is started.")
+/// <summary>
+/// Exception thrown when a container-only article operation is requested for a non-container article.
+/// </summary>
+public sealed class ArticleIsNotContainerFargoDomainException(Guid articleGuid)
+    : FargoDomainException($"Article '{articleGuid}' is not a container.")
 {
+    /// <summary>
+    /// Gets the identifier of the article that is not a container.
+    /// </summary>
     public Guid ArticleGuid { get; } = articleGuid;
-}
-
-public sealed class ArticleActionNotAuthorizedFargoDomainException(
-    Guid articleGuid,
-    Guid actorGuid,
-    ActionType action
-) : FargoDomainException(
-    $"Actor '{actorGuid}' is not authorized to perform action '{action}' on article '{articleGuid}'.")
-{
-    public Guid ArticleGuid { get; } = articleGuid;
-
-    public Guid ActorGuid { get; } = actorGuid;
-
-    public ActionType Action { get; } = action;
-}
-
-public sealed class ArticleAccessDeniedFargoDomainException(
-    Guid articleGuid,
-    Guid actorGuid
-) : FargoDomainException(
-    $"Actor '{actorGuid}' does not have access to article '{articleGuid}'.")
-{
-    public Guid ArticleGuid { get; } = articleGuid;
-
-    public Guid ActorGuid { get; } = actorGuid;
-}
-
-public sealed class ArticlePartitionAccessDeniedFargoDomainException(
-    Guid articleGuid,
-    Guid partitionGuid,
-    Guid actorGuid
-) : FargoDomainException(
-    $"Actor '{actorGuid}' does not have access to partition '{partitionGuid}' for article '{articleGuid}'.")
-{
-    public Guid ArticleGuid { get; } = articleGuid;
-
-    public Guid PartitionGuid { get; } = partitionGuid;
-
-    public Guid ActorGuid { get; } = actorGuid;
 }

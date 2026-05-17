@@ -14,18 +14,21 @@ public sealed class ApplicationServiceBoundaryTests
     {
         var setParent = Substitute.For<ICommandHandler<ItemSetParentContainerCommand>>();
         var setPartitions = Substitute.For<ICommandHandler<ItemSetPartitionsCommand>>();
+        var deactivate = Substitute.For<ICommandHandler<ItemDeactivateCommand>>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var sut = new ItemApplicationService(
             Substitute.For<ICommandHandler<ItemCreateCommand, Guid>>(),
             setParent,
             setPartitions,
+            Substitute.For<ICommandHandler<ItemActivateCommand>>(),
+            deactivate,
             Substitute.For<ICommandHandler<ItemDeleteCommand>>(),
             unitOfWork);
         var itemGuid = Guid.NewGuid();
         var parentGuid = Guid.NewGuid();
         IReadOnlyCollection<Guid> partitions = [Guid.NewGuid()];
 
-        await sut.Update(itemGuid, new ItemUpdateDto(partitions, parentGuid));
+        await sut.Update(itemGuid, new ItemUpdateDto(partitions, parentGuid, false));
 
         await setParent.Received(1).Handle(
             Arg.Is<ItemSetParentContainerCommand>(command =>
@@ -36,6 +39,9 @@ public sealed class ApplicationServiceBoundaryTests
             Arg.Is<ItemSetPartitionsCommand>(command =>
                 command.ItemGuid == itemGuid &&
                 command.PartitionGuids == partitions),
+            Arg.Any<CancellationToken>());
+        await deactivate.Received(1).Handle(
+            Arg.Is<ItemDeactivateCommand>(command => command.ItemGuid == itemGuid),
             Arg.Any<CancellationToken>());
         await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }

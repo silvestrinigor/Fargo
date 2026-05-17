@@ -20,8 +20,11 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : ModifiedEntity, IPartitionedEntity
+public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivableEntity
 {
+    public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
+        => new(article, productionDate);
+
     /// <summary>
     /// Initializes a new item entity.
     /// </summary>
@@ -38,7 +41,7 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// Initializes a new item entity associated with the specified article.
     /// </summary>
     /// <param name="article">The article associated with the item.</param>
-    public Item(Article article, DateTimeOffset? productionDate = null)
+    private Item(Article article, DateTimeOffset? productionDate = null)
     {
         if (article.IsContainer)
         {
@@ -92,6 +95,21 @@ public class Item : ModifiedEntity, IPartitionedEntity
     /// When <see langword="null"/>, the expiration date is unknown.
     /// </summary>
     public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
+
+    #region Activation
+
+    /// <summary>
+    /// Gets a value indicating whether the item is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <inheritdoc />
+    public void Activate() => IsActive = true;
+
+    /// <inheritdoc />
+    public void Deactivate() => IsActive = false;
+
+    #endregion Activation
 
     #region Container
 
@@ -157,6 +175,52 @@ public class Item : ModifiedEntity, IPartitionedEntity
     IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
 
     #endregion  Partition
+
+    #region Modified
+
+    public Guid? EditedByGuid { get; private set; }
+
+    public void MarkAsEditedBy(Guid actorGuid)
+    {
+        EditedByGuid = actorGuid;
+    }
+
+    public ItemModifiedType ModificationTypes { get; private set; }
+
+    public IReadOnlySet<ItemModifiedType> GetModificationTypes()
+    {
+        HashSet<ItemModifiedType> result = [];
+
+        foreach (ItemModifiedType value in Enum.GetValues<ItemModifiedType>())
+        {
+            if (value == ItemModifiedType.None)
+            {
+                continue;
+            }
+
+            if ((ModificationTypes & value) != 0)
+            {
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+
+    public bool IsEditStarted { get; private set; }
+
+    public void MarkModificationType(ItemModifiedType modificationType)
+    {
+        if (!IsEditStarted)
+        {
+            ModificationTypes = ItemModifiedType.None;
+            IsEditStarted = true;
+        }
+
+        ModificationTypes |= modificationType;
+    }
+
+    #endregion Modified
 }
 
 /// <summary>
@@ -193,11 +257,11 @@ public sealed class ItemBatch : Entity
 }
 
 /// <summary>
-/// Represents an item movement registered in the movement ledger.
+/// Represents item movement details attached to an entity event.
 /// </summary>
 /// <remarks>
-/// This entity is append-only business history. The item row stores the current
-/// location, while this ledger stores each movement that happened.
+/// The related <see cref="EntityEvent"/> stores the moved item, actor, and occurrence time.
+/// This row stores only the movement-specific location details.
 /// </remarks>
 public sealed class ItemMovement : Entity
 {
@@ -211,42 +275,40 @@ public sealed class ItemMovement : Entity
     {
     }
 
+    private ItemMovement(
+        EntityEvent entityEvent,
+        Guid? fromParentContainerGuid,
+        Guid? toParentContainerGuid)
+    {
+        Event = entityEvent;
+        Guid = entityEvent.Guid;
+        FromParentContainerGuid = fromParentContainerGuid;
+        ToParentContainerGuid = toParentContainerGuid;
+    }
+
     /// <summary>
-    /// Initializes a new item movement ledger row.
+    /// Creates a new item movement detail and its related movement event.
     /// </summary>
-    /// <param name="itemGuid">Moved item unique identifier.</param>
-    /// <param name="fromParentContainerGuid">Previous parent container item unique identifier.</param>
-    /// <param name="toParentContainerGuid">New parent container item unique identifier.</param>
-    /// <param name="actorGuid">Actor unique identifier.</param>
-    /// <param name="occurredAt">Date and time when the movement occurred.</param>
-    public ItemMovement(
-        Guid itemGuid,
+    public static ItemMovement Moved(
+        Item item,
         Guid? fromParentContainerGuid,
         Guid? toParentContainerGuid,
         Guid actorGuid,
-        DateTimeOffset occurredAt)
-    {
-        if (itemGuid == Guid.Empty)
-        {
-            throw new ArgumentException("Item movement item guid cannot be empty.", nameof(itemGuid));
-        }
+        DateTimeOffset? occurredAt = null)
+        => new(
+            EntityEvent.ItemMoved(item, actorGuid, occurredAt),
+            fromParentContainerGuid,
+            toParentContainerGuid);
 
-        if (actorGuid == Guid.Empty)
-        {
-            throw new ArgumentException("Item movement actor guid cannot be empty.", nameof(actorGuid));
-        }
-
-        ItemGuid = itemGuid;
-        FromParentContainerGuid = fromParentContainerGuid;
-        ToParentContainerGuid = toParentContainerGuid;
-        ActorGuid = actorGuid;
-        OccurredAt = occurredAt;
-    }
+    /// <summary>
+    /// Gets the related entity event.
+    /// </summary>
+    public EntityEvent Event { get; private init; } = null!;
 
     /// <summary>
     /// Gets the moved item unique identifier.
     /// </summary>
-    public Guid ItemGuid { get; private init; }
+    public Guid ItemGuid => Event.EntityGuid;
 
     /// <summary>
     /// Gets the previous parent container item unique identifier.
@@ -261,10 +323,10 @@ public sealed class ItemMovement : Entity
     /// <summary>
     /// Gets the actor unique identifier that performed the movement.
     /// </summary>
-    public Guid ActorGuid { get; private init; }
+    public Guid ActorGuid => Event.ActorGuid;
 
     /// <summary>
     /// Gets the date and time when the movement occurred.
     /// </summary>
-    public DateTimeOffset OccurredAt { get; private init; }
+    public DateTimeOffset OccurredAt => Event.OccurredAt;
 }

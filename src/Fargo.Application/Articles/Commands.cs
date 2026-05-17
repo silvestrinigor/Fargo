@@ -6,6 +6,7 @@ using Fargo.Core.Barcodes;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
+using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
@@ -70,7 +71,360 @@ public sealed class ArticleCreateCommandHandler(
     }
 }
 
+/// <summary>
+/// Command used to create an article variation from another article.
+/// </summary>
+/// <param name="Name">
+/// Variation article name.
+/// </param>
+/// <param name="FromArticleGuid">
+/// Unique identifier of the source article.
+/// </param>
+public sealed record ArticleCreateVariationCommand(
+    Name Name,
+    Guid FromArticleGuid
+) : ICommand<Guid>;
+
+/// <summary>
+/// Handles article variation creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates access to the source article,
+/// and creates a variation linked to the specified article.
+/// </remarks>
+public sealed class ArticleCreateVariationCommandHandler(
+    IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleCreateVariationCommandHandler> logger
+) : ICommandHandler<ArticleCreateVariationCommand, Guid>
+{
+    public async Task<Guid> Handle(
+        ArticleCreateVariationCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article variation create flow started from article {FromArticleGuid} by actor {ActorGuid}.",
+                command.FromArticleGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+
+        var fromArticle = await articleRepository.GetFoundByGuid(command.FromArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(fromArticle);
+
+        fromArticle.ValidateIsActive();
+
+        var article = Article.CreateArticleVariation(command.Name, fromArticle);
+
+        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
+            article,
+            actor.ActorGuid,
+            ArticleModifiedType.General | ArticleModifiedType.Relation);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+
+        return article.Guid;
+    }
+}
+
+/// <summary>
+/// Command used to create an article pack.
+/// </summary>
+/// <param name="Name">
+/// Pack article name.
+/// </param>
+/// <param name="FromArticleGuid">
+/// Unique identifier of the article contained in the pack.
+/// </param>
+/// <param name="Quantity">
+/// Quantity of articles contained in the pack.
+/// </param>
+public sealed record ArticleCreatePackCommand(
+    Name Name,
+    Guid FromArticleGuid,
+    Scalar Quantity
+) : ICommand<Guid>;
+
+/// <summary>
+/// Handles article pack creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates access to the source article,
+/// and creates a pack article with the specified quantity.
+/// </remarks>
+public sealed class ArticleCreatePackCommandHandler(
+    IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleCreatePackCommandHandler> logger
+) : ICommandHandler<ArticleCreatePackCommand, Guid>
+{
+    public async Task<Guid> Handle(
+        ArticleCreatePackCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article pack create flow started from article {FromArticleGuid} by actor {ActorGuid}.",
+                command.FromArticleGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+
+        var fromArticle = await articleRepository.GetFoundByGuid(command.FromArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(fromArticle);
+
+        fromArticle.ValidateIsActive();
+
+        var article = Article.CreateArticlePack(command.Name, fromArticle, command.Quantity);
+
+        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
+            article,
+            actor.ActorGuid,
+            ArticleModifiedType.General | ArticleModifiedType.Relation);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+
+        return article.Guid;
+    }
+}
+
+/// <summary>
+/// Command used to create an article kit.
+/// </summary>
+/// <param name="Name">
+/// Kit article name.
+/// </param>
+/// <param name="Components">
+/// Collection of articles that compose the kit.
+/// </param>
+public sealed record ArticleCreateKitCommand(
+    Name Name,
+    IReadOnlyCollection<ArticleKitComponentRequest> Components
+) : ICommand<Guid>;
+
+/// <summary>
+/// Handles article kit creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions, validates access to all component articles,
+/// and creates a kit article composed of multiple articles.
+/// </remarks>
+public sealed class ArticleCreateKitCommandHandler(
+    IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleCreateKitCommandHandler> logger
+) : ICommandHandler<ArticleCreateKitCommand, Guid>
+{
+    public async Task<Guid> Handle(
+        ArticleCreateKitCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article kit create flow started by actor {ActorGuid}. PackCount: {PackCount}.",
+                actor.ActorGuid,
+                command.Components.Count);
+        }
+
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+
+        var components = new List<ArticleKitComponent>(command.Components.Count);
+
+        foreach (var component in command.Components)
+        {
+            var fromArticle = await articleRepository.GetFoundByGuid(component.ArticleGuid, cancellationToken);
+
+            actor.ValidateHasAccess(fromArticle);
+
+            fromArticle.ValidateIsActive();
+
+            components.Add(new ArticleKitComponent(fromArticle, component.Quantity));
+        }
+
+        var article = Article.CreateArticleKit(command.Name, components);
+
+        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
+            article,
+            actor.ActorGuid,
+            ArticleModifiedType.General | ArticleModifiedType.Relation);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+
+        return article.Guid;
+    }
+}
+
+/// <summary>
+/// Command used to create a container article.
+/// </summary>
+/// <param name="Name">
+/// Container article name.
+/// </param>
+public sealed record ArticleCreateContainerCommand(
+    Name Name
+) : ICommand<Guid>;
+
+/// <summary>
+/// Handles container article creation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and creates a container article.
+/// </remarks>
+public sealed class ArticleCreateContainerCommandHandler(
+    IArticleRepository articleRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleCreateContainerCommandHandler> logger
+) : ICommandHandler<ArticleCreateContainerCommand, Guid>
+{
+    public async Task<Guid> Handle(
+        ArticleCreateContainerCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Article container create flow started by actor {ActorGuid}.", actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+
+        var article = Article.CreateArticleContainer(command.Name);
+
+        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
+            article,
+            actor.ActorGuid,
+            ArticleModifiedType.General | ArticleModifiedType.Container);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+
+        return article.Guid;
+    }
+}
+
+internal static class ArticleCreateCommandHandlerHelpers
+{
+    public static void MarkCreatedArticle(
+        Article article,
+        Guid actorGuid,
+        ArticleModifiedType modificationType)
+    {
+        article.MarkAsEditedBy(actorGuid);
+
+        article.MarkModificationType(modificationType);
+    }
+}
+
 #endregion Create
+
+#region Container
+
+/// <summary>
+/// Command used to update a container article maximum mass.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+/// <param name="MaxMass">
+/// Maximum mass allowed by the container, or <see langword="null"/> when unconstrained.
+/// </param>
+public sealed record ArticleSetContainerMaxMassCommand(
+    Guid ArticleGuid,
+    Mass? MaxMass
+) : ICommand;
+
+/// <summary>
+/// Handles container maximum mass changes.
+/// </summary>
+/// <remarks>
+/// Validates permissions and updates the maximum mass constraint of a container article.
+/// </remarks>
+public sealed class ArticleSetContainerMaxMassCommandHandler(
+    IArticleRepository articleRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ArticleSetContainerMaxMassCommandHandler> logger
+) : ICommandHandler<ArticleSetContainerMaxMassCommand>
+{
+    public async Task Handle(
+        ArticleSetContainerMaxMassCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article container max mass mutation started for article {ArticleGuid} by actor {ActorGuid}.",
+                command.ArticleGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+
+        var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
+
+        actor.ValidateHasAccess(article);
+
+        if (!article.IsContainer)
+        {
+            throw new ArticleIsNotContainerFargoDomainException(article.Guid);
+        }
+
+        if (Nullable.Equals(article.Container!.MaxMass, command.MaxMass))
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Article container max mass mutation skipped for article {ArticleGuid}; max mass is already requested value.",
+                    article.Guid);
+            }
+
+            return;
+        }
+
+        article.SetContainerMaxMass(command.MaxMass);
+
+        article.MarkAsEditedBy(actor.ActorGuid);
+
+        article.MarkModificationType(ArticleModifiedType.Container);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article container max mass mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                article.Guid,
+                actor.ActorGuid);
+        }
+    }
+}
+
+#endregion Container
 
 #region Name
 
@@ -243,7 +597,6 @@ public sealed record ArticleSetShelfLifeCommand(
     Guid ArticleGuid,
     TimeSpan? ShelfLife
 ) : ICommand;
-
 
 /// <summary>
 /// Handles article shelf life changes.
@@ -754,6 +1107,7 @@ public sealed record ArticleSetPartitionsCommand(
 public sealed class ArticleSetPartitionsCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ArticleSetPartitionsCommandHandler> logger
 ) : ICommandHandler<ArticleSetPartitionsCommand>
@@ -809,6 +1163,11 @@ public sealed class ArticleSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             article.AddPartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                article,
+                partition,
+                actor.ActorGuid));
         }
 
         var partitionsToRemove = article.Partitions
@@ -820,6 +1179,11 @@ public sealed class ArticleSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             article.RemovePartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                article,
+                partition,
+                actor.ActorGuid));
         }
 
         article.MarkAsEditedBy(actor.ActorGuid);

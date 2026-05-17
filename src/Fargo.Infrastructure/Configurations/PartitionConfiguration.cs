@@ -27,5 +27,8 @@ public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(x => x.EditedByGuid);
+
+        builder.Property(x => x.ModificationTypes)
+            .HasDefaultValue(PartitionModifiedType.None);
     }
 }

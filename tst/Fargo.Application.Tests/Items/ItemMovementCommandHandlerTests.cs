@@ -30,7 +30,11 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
 
+        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
+            movement.Event.EntityType == EntityType.Item &&
+            movement.Event.EventType == EntityEventType.Moved &&
             movement.ItemGuid == item.Guid &&
             movement.FromParentContainerGuid == null &&
             movement.ToParentContainerGuid == parent.Guid &&
@@ -57,6 +61,8 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
 
+        Assert.Null(item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
         movementRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
@@ -81,7 +87,11 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, null));
 
+        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
+            movement.Event.EntityType == EntityType.Item &&
+            movement.Event.EventType == EntityEventType.Moved &&
             movement.ItemGuid == item.Guid &&
             movement.FromParentContainerGuid == parent.Guid &&
             movement.ToParentContainerGuid == null &&
@@ -120,8 +130,8 @@ public sealed class ItemMovementCommandHandlerTests
             UserGroupGuids: []);
 
     private static Item CreateItem()
-        => new(Article.CreateArticle(new Name("Article")));
+        => Item.CreateItem(Article.CreateArticle(new Name("Article")));
 
     private static Item CreateContainerItem()
-        => new(Article.CreateArticleContainer(new Name("Container article"), null));
+        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article")));
 }

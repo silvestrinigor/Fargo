@@ -7,18 +7,6 @@ using Fargo.Core.Users;
 namespace Fargo.Core;
 
 /// <summary>
-/// Represents the type of entity recorded in an entity event.
-/// </summary>
-public enum EntityType
-{
-    Article = 0,
-    Item = 1,
-    User = 2,
-    UserGroup = 3,
-    Partition = 4,
-}
-
-/// <summary>
 /// Represents a simple lifecycle event that happened to an entity.
 /// </summary>
 public enum EntityEventType
@@ -27,6 +15,9 @@ public enum EntityEventType
     Deleted = 1,
     Activated = 2,
     Deactivated = 3,
+    Moved = 4,
+    InsertedIntoPartition = 5,
+    RemovedFromPartition = 6,
 }
 
 /// <summary>
@@ -95,7 +86,7 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity
+        where TEntity : IEntity, IActivableEntity
         => Create(entity, EntityEventType.Activated, actorGuid, occurredAt);
 
     /// <summary>
@@ -105,8 +96,28 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity
+        where TEntity : IEntity, IActivableEntity
         => Create(entity, EntityEventType.Deactivated, actorGuid, occurredAt);
+
+    internal static EntityEvent ItemMoved(
+        Item item,
+        Guid actorGuid,
+        DateTimeOffset? occurredAt = null)
+        => Create(item, EntityEventType.Moved, actorGuid, occurredAt);
+
+    internal static EntityEvent InsertedIntoPartition<TEntity>(
+        TEntity entity,
+        Guid actorGuid,
+        DateTimeOffset? occurredAt = null)
+        where TEntity : IEntity, IPartitionedEntity
+        => Create(entity, EntityEventType.InsertedIntoPartition, actorGuid, occurredAt);
+
+    internal static EntityEvent RemovedFromPartition<TEntity>(
+        TEntity entity,
+        Guid actorGuid,
+        DateTimeOffset? occurredAt = null)
+        where TEntity : IEntity, IPartitionedEntity
+        => Create(entity, EntityEventType.RemovedFromPartition, actorGuid, occurredAt);
 
     private static EntityEvent Create<TEntity>(
         TEntity entity,
@@ -174,4 +185,108 @@ public interface IEntityEventRepository
     /// Adds a new entity event ledger entry to the persistence context.
     /// </summary>
     void Add(EntityEvent entityEvent);
+}
+
+/// <summary>
+/// Represents partition assignment details attached to an entity event.
+/// </summary>
+/// <remarks>
+/// The related <see cref="EntityEvent"/> stores the affected entity, actor, and occurrence time.
+/// This row stores only the affected partition.
+/// </remarks>
+public sealed class EntityPartitionEvent : Entity
+{
+    /// <summary>
+    /// Initializes a new entity partition event.
+    /// </summary>
+    /// <remarks>
+    /// Required by Entity Framework.
+    /// </remarks>
+    private EntityPartitionEvent()
+    {
+    }
+
+    private EntityPartitionEvent(
+        EntityEvent entityEvent,
+        Guid partitionGuid)
+    {
+        Event = entityEvent;
+        Guid = entityEvent.Guid;
+        PartitionGuid = partitionGuid;
+    }
+
+    /// <summary>
+    /// Creates a partition insertion detail and its related entity event.
+    /// </summary>
+    public static EntityPartitionEvent InsertedIntoPartition<TEntity>(
+        TEntity entity,
+        Partition partition,
+        Guid actorGuid,
+        DateTimeOffset? occurredAt = null)
+        where TEntity : IEntity, IPartitionedEntity
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        return new(
+            EntityEvent.InsertedIntoPartition(entity, actorGuid, occurredAt),
+            partition.Guid);
+    }
+
+    /// <summary>
+    /// Creates a partition removal detail and its related entity event.
+    /// </summary>
+    public static EntityPartitionEvent RemovedFromPartition<TEntity>(
+        TEntity entity,
+        Partition partition,
+        Guid actorGuid,
+        DateTimeOffset? occurredAt = null)
+        where TEntity : IEntity, IPartitionedEntity
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        return new(
+            EntityEvent.RemovedFromPartition(entity, actorGuid, occurredAt),
+            partition.Guid);
+    }
+
+    /// <summary>
+    /// Gets the related entity event.
+    /// </summary>
+    public EntityEvent Event { get; private init; } = null!;
+
+    /// <summary>
+    /// Gets the affected entity type.
+    /// </summary>
+    public EntityType EntityType => Event.EntityType;
+
+    /// <summary>
+    /// Gets the affected entity unique identifier.
+    /// </summary>
+    public Guid EntityGuid => Event.EntityGuid;
+
+    /// <summary>
+    /// Gets the affected partition unique identifier.
+    /// </summary>
+    public Guid PartitionGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the actor unique identifier that performed the partition assignment change.
+    /// </summary>
+    public Guid ActorGuid => Event.ActorGuid;
+
+    /// <summary>
+    /// Gets the date and time when the partition assignment changed.
+    /// </summary>
+    public DateTimeOffset OccurredAt => Event.OccurredAt;
+}
+
+/// <summary>
+/// Defines the repository contract for managing <see cref="EntityPartitionEvent"/> ledger entries.
+/// </summary>
+public interface IEntityPartitionEventRepository
+{
+    /// <summary>
+    /// Adds a new entity partition event ledger entry to the persistence context.
+    /// </summary>
+    void Add(EntityPartitionEvent entityPartitionEvent);
 }

@@ -49,6 +49,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.EditedByGuid)
             .IsRequired(false);
 
+        builder.Property(x => x.ModificationTypes)
+            .HasDefaultValue(UserModifiedType.None);
+
         builder.HasMany(x => x.Permissions)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserGuid)

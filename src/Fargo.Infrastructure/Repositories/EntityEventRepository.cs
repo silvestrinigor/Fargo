@@ -10,3 +10,10 @@ public sealed class EntityEventRepository(FargoDbContext context) : IEntityEvent
 
     public void Add(EntityEvent entityEvent) => entityEvents.Add(entityEvent);
 }
+
+public sealed class EntityPartitionEventRepository(FargoDbContext context) : IEntityPartitionEventRepository
+{
+    private readonly DbSet<EntityPartitionEvent> entityPartitionEvents = context.EntityPartitionEvents;
+
+    public void Add(EntityPartitionEvent entityPartitionEvent) => entityPartitionEvents.Add(entityPartitionEvent);
+}

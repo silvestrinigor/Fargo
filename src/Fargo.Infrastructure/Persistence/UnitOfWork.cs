@@ -1,7 +1,4 @@
 using Fargo.Application;
-using Fargo.Application.Identity;
-using Fargo.Infrastructure.Extensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence;
 
@@ -18,24 +15,15 @@ namespace Fargo.Infrastructure.Persistence;
 /// The unit of work ensures that multiple repository operations are committed
 /// as a single atomic database transaction handled internally by Entity Framework Core.
 /// </para>
-/// <para>
-/// Before persisting changes, this unit of work applies auditing metadata
-/// to modified auditable entities tracked by the context.
-/// </para>
 /// </remarks>
-public sealed class FargoUnitOfWork(
-    FargoDbContext fargoContext,
-    IAuditPrincipal auditPrincipal) : IUnitOfWork
+public sealed class UnitOfWork(
+    FargoDbContext fargoContext
+) : IUnitOfWork
 {
     /// <summary>
     /// The write database context used to persist changes.
     /// </summary>
     private readonly FargoDbContext fargoContext = fargoContext;
-
-    /// <summary>
-    /// Provides the audit origin for persistence writes.
-    /// </summary>
-    private readonly IAuditPrincipal auditPrincipal = auditPrincipal;
 
     /// <summary>
     /// Persists all pending changes tracked by the <see cref="FargoDbContext"/>.
@@ -46,15 +34,6 @@ public sealed class FargoUnitOfWork(
     /// <returns>
     /// The number of state entries written to the database.
     /// </returns>
-    /// <remarks>
-    /// This method applies auditing metadata to modified entities before
-    /// delegating the persistence operation to
-    /// <see cref="DbContext.SaveChangesAsync(CancellationToken)"/>.
-    /// </remarks>
     public async Task<int> SaveChanges(CancellationToken cancellationToken = default)
-    {
-        fargoContext.ChangeTracker.ApplyAuditing(auditPrincipal.ActorGuid);
-
-        return await fargoContext.SaveChangesAsync(cancellationToken);
-    }
+        => await fargoContext.SaveChangesAsync(cancellationToken);
 }

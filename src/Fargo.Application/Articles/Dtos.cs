@@ -41,6 +41,28 @@ public sealed record ArticleBarcodesDto(
     DataMatrix? DataMatrix = null
 );
 
+public sealed record ArticleCreateKitPackDto(
+    Guid ArticleGuid,
+    Scalar Quantity
+);
+
+public sealed record ArticleCreateVariationDto(
+    Guid FromArticleGuid
+);
+
+public sealed record ArticleCreatePackDto(
+    Guid FromArticleGuid,
+    Scalar Quantity
+);
+
+public sealed record ArticleCreateKitDto(
+    IReadOnlyCollection<ArticleCreateKitPackDto> Packs
+);
+
+public sealed record ArticleCreateContainerDto(
+    Mass? MaxMass = null
+);
+
 public static class ArticleCommandDtoMappings
 {
     public static ArticleMetrics ToCore(this ArticleMetricsDto metrics)
@@ -72,7 +94,11 @@ public sealed record ArticleCreateDto(
     ArticleMetricsDto? Metrics = null,
     ArticleBarcodesDto? Barcodes = null,
     IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
+    bool? IsActive = null,
+    ArticleCreateVariationDto? Variation = null,
+    ArticleCreatePackDto? Pack = null,
+    ArticleCreateKitDto? Kit = null,
+    ArticleCreateContainerDto? Container = null
 );
 
 public sealed record ArticlePatchDto(

@@ -1,3 +1,5 @@
+using Fargo.Core.Articles;
+
 namespace Fargo.Application.Articles;
 
 /// <summary>
@@ -9,6 +11,11 @@ namespace Fargo.Application.Articles;
 /// </remarks>
 public sealed class ArticleApplicationService(
     ICommandHandler<ArticleCreateCommand, Guid> createArticleHandler,
+    ICommandHandler<ArticleCreateVariationCommand, Guid> createVariationHandler,
+    ICommandHandler<ArticleCreatePackCommand, Guid> createPackHandler,
+    ICommandHandler<ArticleCreateKitCommand, Guid> createKitHandler,
+    ICommandHandler<ArticleCreateContainerCommand, Guid> createContainerHandler,
+    ICommandHandler<ArticleSetContainerMaxMassCommand> setContainerMaxMassHandler,
     ICommandHandler<ArticleChangeDescriptionCommand> changeDescriptionHandler,
     ICommandHandler<ArticleSetShelfLifeCommand> setShelfLifeHandler,
     ICommandHandler<ArticleSetColorCommand> setColorHandler,
@@ -38,9 +45,50 @@ public sealed class ArticleApplicationService(
         ArticleCreateDto create,
         CancellationToken cancellationToken = default)
     {
-        var articleGuid = await createArticleHandler.Handle(
-            new ArticleCreateCommand(create.Name),
-            cancellationToken);
+        var createTypeCount =
+            (create.Variation is null ? 0 : 1) +
+            (create.Pack is null ? 0 : 1) +
+            (create.Kit is null ? 0 : 1) +
+            (create.Container is null ? 0 : 1);
+
+        if (createTypeCount > 1)
+        {
+            throw new ArgumentException(
+                "Article creation accepts only one specialized article type.",
+                nameof(create));
+        }
+
+        var articleGuid = create switch
+        {
+            { Variation: { } variation } => await createVariationHandler.Handle(
+                new ArticleCreateVariationCommand(
+                    create.Name,
+                    variation.FromArticleGuid),
+                cancellationToken),
+            { Pack: { } pack } => await createPackHandler.Handle(
+                new ArticleCreatePackCommand(
+                    create.Name,
+                    pack.FromArticleGuid,
+                    pack.Quantity),
+                cancellationToken),
+            { Kit: { } kit } => await createKitHandler.Handle(
+                new ArticleCreateKitCommand(
+                    create.Name,
+                    kit.Packs is { Count: > 0 } packs
+                        ? packs
+                            .Select(static pack => new ArticleKitComponentRequest(pack.ArticleGuid, pack.Quantity))
+                            .ToArray()
+                        : throw new ArgumentException(
+                            "Kit article creation requires at least one pack.",
+                            nameof(create))),
+                cancellationToken),
+            { Container: not null } => await createContainerHandler.Handle(
+                new ArticleCreateContainerCommand(create.Name),
+                cancellationToken),
+            _ => await createArticleHandler.Handle(
+                new ArticleCreateCommand(create.Name),
+                cancellationToken)
+        };
 
         if (create.Description is { } description)
         {
@@ -74,6 +122,13 @@ public sealed class ArticleApplicationService(
         {
             await setBarcodesHandler.Handle(
                 new ArticleSetBarcodesCommand(articleGuid, barcodes.ToCore()),
+                cancellationToken);
+        }
+
+        if (create.Container?.MaxMass is { } containerMaxMass)
+        {
+            await setContainerMaxMassHandler.Handle(
+                new ArticleSetContainerMaxMassCommand(articleGuid, containerMaxMass),
                 cancellationToken);
         }
 

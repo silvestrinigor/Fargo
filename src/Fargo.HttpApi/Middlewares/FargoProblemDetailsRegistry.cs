@@ -5,6 +5,7 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -107,20 +108,16 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(409, "Conflict", "barcode/already-exists")
             },
             {
-                typeof(ArticleEditNotStartedFargoDomainException),
-                new ProblemDetailsDefinition(400, "Invalid operation", "article/edit-not-started")
+                typeof(ArticleIsNotContainerFargoDomainException),
+                new ProblemDetailsDefinition(400, "Invalid operation", "article/not-container")
             },
             {
-                typeof(ArticleActionNotAuthorizedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Forbidden", "article/forbidden")
+                typeof(EntityNotActiveFargoDomainException<Article>),
+                new ProblemDetailsDefinition(400, "Invalid operation", "article/inactive")
             },
             {
-                typeof(ArticleAccessDeniedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Access denied", "article/access-denied")
-            },
-            {
-                typeof(ArticlePartitionAccessDeniedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Access denied", "article/partition-access-denied")
+                typeof(EntityNotActiveFargoDomainException<>),
+                new ProblemDetailsDefinition(400, "Invalid operation", "entity/inactive")
             },
             {
                 typeof(UserNameidAlreadyExistsDomainException),
@@ -161,10 +158,6 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(EntityAccessViolationFargoApplicationException),
                 new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
-            },
-            {
-                typeof(UserGroupInactiveFargoDomainException),
-                new ProblemDetailsDefinition(403, "User group inactive", "user-group/inactive")
             },
             {
                 typeof(PartitionCircularHierarchyFargoDomainException),
@@ -240,7 +233,18 @@ public static class FargoProblemDetailsRegistry
         Type exceptionType,
         out ProblemDetailsDefinition definition)
     {
-        return map.TryGetValue(exceptionType, out definition!);
+        if (map.TryGetValue(exceptionType, out definition!))
+        {
+            return true;
+        }
+
+        if (exceptionType.IsGenericType &&
+            map.TryGetValue(exceptionType.GetGenericTypeDefinition(), out definition!))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

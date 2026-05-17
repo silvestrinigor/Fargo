@@ -251,6 +251,21 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("EntityEvents", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.EntityPartitionEvent", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Guid");
+
+                    b.HasIndex("PartitionGuid");
+
+                    b.ToTable("EntityPartitionEvents", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -318,6 +333,19 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid?>("EditedByGuid")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsEditStarted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ModificationTypes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<Guid?>("ParentContainerGuid")
                         .HasColumnType("uniqueidentifier");
 
@@ -357,29 +385,19 @@ namespace Fargo.Infrastructure.Migrations
             modelBuilder.Entity("Fargo.Core.Items.ItemMovement", b =>
                 {
                     b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ActorGuid")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("FromParentContainerGuid")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ItemGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("ToParentContainerGuid")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Guid");
 
-                    b.HasIndex("ActorGuid");
+                    b.HasIndex("FromParentContainerGuid");
 
-                    b.HasIndex("ItemGuid", "OccurredAt");
+                    b.HasIndex("ToParentContainerGuid");
 
                     b.ToTable("ItemMovements", (string)null);
                 });
@@ -400,6 +418,14 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsEditStarted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ModificationTypes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -452,6 +478,14 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsEditStarted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ModificationTypes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Nameid")
                         .IsRequired()
@@ -596,9 +630,17 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsEditStarted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ModificationTypes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Nameid")
                         .IsRequired()
@@ -885,35 +927,6 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Articles.Article", b =>
                 {
-                    b.OwnsOne("Fargo.Core.Articles.ArticlePack", "Pack", b1 =>
-                        {
-                            b1.Property<Guid>("ArticleGuid")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<Guid>("FromArticleGuid")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<double>("Quantity")
-                                .HasColumnType("float");
-
-                            b1.HasKey("ArticleGuid");
-
-                            b1.HasIndex("FromArticleGuid");
-
-                            b1.ToTable("ArticlePacks", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("ArticleGuid");
-
-                            b1.HasOne("Fargo.Core.Articles.Article", "FromArticle")
-                                .WithMany()
-                                .HasForeignKey("FromArticleGuid")
-                                .OnDelete(DeleteBehavior.Restrict)
-                                .IsRequired();
-
-                            b1.Navigation("FromArticle");
-                        });
-
                     b.OwnsOne("Fargo.Core.Articles.ArticleContainer", "Container", b1 =>
                         {
                             b1.Property<Guid>("ArticleGuid")
@@ -943,14 +956,15 @@ namespace Fargo.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("ArticleGuid");
 
-                            b1.OwnsMany("Fargo.Core.Articles.ArticlePack", "FromArticles", b2 =>
+                            b1.OwnsMany("Fargo.Core.Articles.ArticleKitComponent", "Components", b2 =>
                                 {
                                     b2.Property<Guid>("Guid")
                                         .ValueGeneratedOnAdd()
                                         .HasColumnType("uniqueidentifier");
 
-                                    b2.Property<Guid>("FromArticleGuid")
-                                        .HasColumnType("uniqueidentifier");
+                                    b2.Property<Guid>("ArticleGuid")
+                                        .HasColumnType("uniqueidentifier")
+                                        .HasColumnName("FromArticleGuid");
 
                                     b2.Property<Guid>("KitArticleGuid")
                                         .HasColumnType("uniqueidentifier");
@@ -960,26 +974,55 @@ namespace Fargo.Infrastructure.Migrations
 
                                     b2.HasKey("Guid");
 
-                                    b2.HasIndex("FromArticleGuid");
+                                    b2.HasIndex("ArticleGuid");
 
-                                    b2.HasIndex("KitArticleGuid", "FromArticleGuid")
+                                    b2.HasIndex("KitArticleGuid", "ArticleGuid")
                                         .IsUnique();
 
                                     b2.ToTable("ArticleKitPacks", (string)null);
 
-                                    b2.HasOne("Fargo.Core.Articles.Article", "FromArticle")
+                                    b2.HasOne("Fargo.Core.Articles.Article", "Article")
                                         .WithMany()
-                                        .HasForeignKey("FromArticleGuid")
+                                        .HasForeignKey("ArticleGuid")
                                         .OnDelete(DeleteBehavior.Restrict)
                                         .IsRequired();
 
                                     b2.WithOwner()
                                         .HasForeignKey("KitArticleGuid");
 
-                                    b2.Navigation("FromArticle");
+                                    b2.Navigation("Article");
                                 });
 
-                            b1.Navigation("FromArticles");
+                            b1.Navigation("Components");
+                        });
+
+                    b.OwnsOne("Fargo.Core.Articles.ArticlePack", "Pack", b1 =>
+                        {
+                            b1.Property<Guid>("ArticleGuid")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("FromArticleGuid")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<double>("Quantity")
+                                .HasColumnType("float");
+
+                            b1.HasKey("ArticleGuid");
+
+                            b1.HasIndex("FromArticleGuid");
+
+                            b1.ToTable("ArticlePacks", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ArticleGuid");
+
+                            b1.HasOne("Fargo.Core.Articles.Article", "FromArticle")
+                                .WithMany()
+                                .HasForeignKey("FromArticleGuid")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired();
+
+                            b1.Navigation("FromArticle");
                         });
 
                     b.OwnsOne("Fargo.Core.Articles.ArticleVariation", "Variation", b1 =>
@@ -1017,6 +1060,17 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Variation");
                 });
 
+            modelBuilder.Entity("Fargo.Core.EntityPartitionEvent", b =>
+                {
+                    b.HasOne("Fargo.Core.EntityEvent", "Event")
+                        .WithOne()
+                        .HasForeignKey("Fargo.Core.EntityPartitionEvent", "Guid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
                 {
                     b.HasOne("Fargo.Core.Users.User", null)
@@ -1040,6 +1094,17 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Items.ItemMovement", b =>
+                {
+                    b.HasOne("Fargo.Core.EntityEvent", "Event")
+                        .WithOne()
+                        .HasForeignKey("Fargo.Core.Items.ItemMovement", "Guid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>

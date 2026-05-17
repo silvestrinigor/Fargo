@@ -1,7 +1,10 @@
 using Fargo.Application.Articles;
+using Fargo.Core;
+using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
 using NSubstitute;
 using UnitsNet;
+using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.Application.Tests.Articles;
 
@@ -80,10 +83,114 @@ public sealed class ArticleApplicationServiceTests
         await fixture.SetPartitionsHandler.DidNotReceiveWithAnyArgs().Handle(default!, default);
     }
 
+    [Fact]
+    public async Task Create_Should_InvokeVariationCreateHandler_WhenVariationIsProvided()
+    {
+        var fixture = new Fixture();
+        var fromArticleGuid = Guid.NewGuid();
+
+        await fixture.Sut.Create(
+            new ArticleCreateDto(
+                new Name("Variation"),
+                Variation: new ArticleCreateVariationDto(fromArticleGuid)));
+
+        await fixture.CreateVariationHandler.Received(1).Handle(
+            Arg.Is<ArticleCreateVariationCommand>(command =>
+                command.Name == new Name("Variation") &&
+                command.FromArticleGuid == fromArticleGuid),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Create_Should_InvokePackCreateHandler_WhenPackIsProvided()
+    {
+        var fixture = new Fixture();
+        var fromArticleGuid = Guid.NewGuid();
+
+        await fixture.Sut.Create(
+            new ArticleCreateDto(
+                new Name("Pack"),
+                Pack: new ArticleCreatePackDto(fromArticleGuid, 3.Amount())));
+
+        await fixture.CreatePackHandler.Received(1).Handle(
+            Arg.Is<ArticleCreatePackCommand>(command =>
+                command.Name == new Name("Pack") &&
+                command.FromArticleGuid == fromArticleGuid &&
+                command.Quantity.Equals(3.Amount(), 0.Amount())),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Create_Should_InvokeKitCreateHandler_WhenKitIsProvided()
+    {
+        var fixture = new Fixture();
+        var pack = new ArticleCreateKitPackDto(Guid.NewGuid(), 2.Amount());
+
+        await fixture.Sut.Create(
+            new ArticleCreateDto(
+                new Name("Kit"),
+                Kit: new ArticleCreateKitDto([pack])));
+
+        await fixture.CreateKitHandler.Received(1).Handle(
+            Arg.Is<ArticleCreateKitCommand>(command =>
+                command.Name == new Name("Kit") &&
+                command.Components.Single() == new ArticleKitComponentRequest(pack.ArticleGuid, pack.Quantity)),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Create_Should_InvokeContainerCreateHandler_WhenContainerIsProvided()
+    {
+        var fixture = new Fixture();
+        var maxMass = Mass.FromKilograms(10);
+
+        await fixture.Sut.Create(
+            new ArticleCreateDto(
+                new Name("Container"),
+                Container: new ArticleCreateContainerDto(maxMass)));
+
+        await fixture.CreateContainerHandler.Received(1).Handle(
+            Arg.Is<ArticleCreateContainerCommand>(command =>
+                command.Name == new Name("Container")),
+            Arg.Any<CancellationToken>());
+        await fixture.SetContainerMaxMassHandler.Received(1).Handle(
+            Arg.Is<ArticleSetContainerMaxMassCommand>(command =>
+                command.MaxMass!.Value.Equals(maxMass, Mass.Zero)),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Create_Should_Throw_WhenMoreThanOneSpecializedTypeIsProvided()
+    {
+        var fixture = new Fixture();
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => fixture.Sut.Create(
+                new ArticleCreateDto(
+                    new Name("Invalid"),
+                    Variation: new ArticleCreateVariationDto(Guid.NewGuid()),
+                    Container: new ArticleCreateContainerDto())));
+    }
+
     private sealed class Fixture
     {
         public ICommandHandler<ArticleCreateCommand, Guid> CreateArticleHandler { get; } =
             Substitute.For<ICommandHandler<ArticleCreateCommand, Guid>>();
+
+        public ICommandHandler<ArticleCreateVariationCommand, Guid> CreateVariationHandler { get; } =
+            Substitute.For<ICommandHandler<ArticleCreateVariationCommand, Guid>>();
+
+        public ICommandHandler<ArticleCreatePackCommand, Guid> CreatePackHandler { get; } =
+            Substitute.For<ICommandHandler<ArticleCreatePackCommand, Guid>>();
+
+        public ICommandHandler<ArticleCreateKitCommand, Guid> CreateKitHandler { get; } =
+            Substitute.For<ICommandHandler<ArticleCreateKitCommand, Guid>>();
+
+        public ICommandHandler<ArticleCreateContainerCommand, Guid> CreateContainerHandler { get; } =
+            Substitute.For<ICommandHandler<ArticleCreateContainerCommand, Guid>>();
+
+        public ICommandHandler<ArticleSetContainerMaxMassCommand> SetContainerMaxMassHandler { get; } =
+            Substitute.For<ICommandHandler<ArticleSetContainerMaxMassCommand>>();
 
         public ICommandHandler<ArticleChangeDescriptionCommand> ChangeDescriptionHandler { get; } =
             Substitute.For<ICommandHandler<ArticleChangeDescriptionCommand>>();
@@ -123,9 +230,22 @@ public sealed class ArticleApplicationServiceTests
         {
             CreateArticleHandler.Handle(Arg.Any<ArticleCreateCommand>(), Arg.Any<CancellationToken>())
                 .Returns(Guid.NewGuid());
+            CreateVariationHandler.Handle(Arg.Any<ArticleCreateVariationCommand>(), Arg.Any<CancellationToken>())
+                .Returns(Guid.NewGuid());
+            CreatePackHandler.Handle(Arg.Any<ArticleCreatePackCommand>(), Arg.Any<CancellationToken>())
+                .Returns(Guid.NewGuid());
+            CreateKitHandler.Handle(Arg.Any<ArticleCreateKitCommand>(), Arg.Any<CancellationToken>())
+                .Returns(Guid.NewGuid());
+            CreateContainerHandler.Handle(Arg.Any<ArticleCreateContainerCommand>(), Arg.Any<CancellationToken>())
+                .Returns(Guid.NewGuid());
 
             Sut = new ArticleApplicationService(
                 CreateArticleHandler,
+                CreateVariationHandler,
+                CreatePackHandler,
+                CreateKitHandler,
+                CreateContainerHandler,
+                SetContainerMaxMassHandler,
                 ChangeDescriptionHandler,
                 SetShelfLifeHandler,
                 SetColorHandler,

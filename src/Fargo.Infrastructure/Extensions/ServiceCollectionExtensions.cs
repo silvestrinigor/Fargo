@@ -41,7 +41,6 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IAuthorizationContextFactory, AuthorizationContextFactory>();
             services.AddScoped<ICurrentAuthorizationContext, CurrentAuthorizationContext>();
-            services.AddScoped<IAuditPrincipal, CurrentAuditPrincipal>();
 
             return services;
         }
@@ -64,7 +63,6 @@ public static class ServiceCollectionExtensions
             AddDomainServices(services);
 
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
-            services.AddScoped<IAuditPrincipal, SystemAuditPrincipal>();
 
             return services;
         }
@@ -106,6 +104,7 @@ public static class ServiceCollectionExtensions
         private void AddRepositories()
         {
             services.AddScoped<IEntityEventRepository, EntityEventRepository>();
+            services.AddScoped<IEntityPartitionEventRepository, EntityPartitionEventRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
@@ -131,6 +130,11 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<ArticleApplicationService>();
             services.AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreateVariationCommand, Guid>, ArticleCreateVariationCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreatePackCommand, Guid>, ArticleCreatePackCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreateKitCommand, Guid>, ArticleCreateKitCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleCreateContainerCommand, Guid>, ArticleCreateContainerCommandHandler>();
+            services.AddScoped<ICommandHandler<ArticleSetContainerMaxMassCommand>, ArticleSetContainerMaxMassCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleRenameCommand>, ArticleRenameCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleChangeDescriptionCommand>, ArticleChangeDescriptionCommandHandler>();
             services.AddScoped<ICommandHandler<ArticleSetShelfLifeCommand>, ArticleSetShelfLifeCommandHandler>();
@@ -147,6 +151,8 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>();
             services.AddScoped<ICommandHandler<ItemSetParentContainerCommand>, ItemSetParentContainerCommandHandler>();
             services.AddScoped<ICommandHandler<ItemSetPartitionsCommand>, ItemSetPartitionsCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemActivateCommand>, ItemActivateCommandHandler>();
+            services.AddScoped<ICommandHandler<ItemDeactivateCommand>, ItemDeactivateCommandHandler>();
 
             services.AddScoped<UserApplicationService>();
             services.AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>();
@@ -218,7 +224,7 @@ public static class ServiceCollectionExtensions
 
         private void AddPersistence()
         {
-            services.AddScoped<IUnitOfWork, FargoUnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         private static void ConfigureSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)

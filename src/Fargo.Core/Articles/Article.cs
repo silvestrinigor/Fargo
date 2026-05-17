@@ -19,7 +19,7 @@ namespace Fargo.Core.Articles;
 /// if they have access to at least one of its partitions, subject to any
 /// additional authorization rules.
 /// </remarks>
-public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
+public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
 {
     public static Article CreateArticle(Name name)
         => new(name);
@@ -30,11 +30,11 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
     public static Article CreateArticlePack(Name name, Article fromArticle, Scalar quantity)
         => new(name, new ArticlePack(fromArticle, quantity));
 
-    public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticlePack> packs)
-        => new(name, new ArticleKit(packs));
+    public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> components)
+        => new(name, new ArticleKit(components));
 
-    public static Article CreateArticleContainer(Name name, Mass? maxMass)
-        => new(name, new ArticleContainer(maxMass));
+    public static Article CreateArticleContainer(Name name)
+        => new(name, new ArticleContainer(null));
 
     private Article()
     {
@@ -673,11 +673,98 @@ public sealed class ArticlePack
 #region Kit
 
 /// <summary>
+/// Identifies a source article and quantity requested for a kit article.
+/// </summary>
+public readonly record struct ArticleKitComponentRequest
+{
+    public ArticleKitComponentRequest(Guid articleGuid, Scalar quantity)
+    {
+        if (articleGuid == Guid.Empty)
+        {
+            throw new ArgumentException("A kit component article guid cannot be empty.", nameof(articleGuid));
+        }
+
+        if (quantity <= 0.Amount())
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(quantity),
+                quantity,
+                "A kit component quantity must be greater than zero.");
+        }
+
+        ArticleGuid = articleGuid;
+        Quantity = quantity;
+    }
+
+    /// <summary>
+    /// Gets the unique identifier of the source article included in the kit.
+    /// </summary>
+    public Guid ArticleGuid { get; }
+
+    /// <summary>
+    /// Gets the quantity of the source article included in the kit.
+    /// </summary>
+    public Scalar Quantity { get; }
+}
+
+/// <summary>
+/// Defines one component of a kit article.
+/// </summary>
+public sealed class ArticleKitComponent
+{
+    private ArticleKitComponent()
+    {
+    }
+
+    public ArticleKitComponent(Article article, Scalar quantity)
+    {
+        Article = article;
+        SetQuantity(quantity);
+    }
+
+    /// <summary>
+    /// Gets the unique identifier of the source article included in the kit.
+    /// </summary>
+    public Guid ArticleGuid { get; private set; }
+
+    /// <summary>
+    /// Gets the source article included in the kit.
+    /// </summary>
+    public Article Article
+    {
+        get;
+        private set
+        {
+            ArticleGuid = value.Guid;
+            field = value;
+        }
+    } = null!;
+
+    /// <summary>
+    /// Gets the quantity of the source article included in the kit.
+    /// </summary>
+    public Scalar Quantity { get; private set; }
+
+    public void SetQuantity(Scalar quantity)
+    {
+        if (quantity <= 0.Amount())
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(quantity),
+                quantity,
+                "A kit component quantity must be greater than zero.");
+        }
+
+        Quantity = quantity;
+    }
+}
+
+/// <summary>
 /// Defines an article kit relationship.
 /// </summary>
 /// <remarks>
-/// A kit article is composed of one or more article packs.
-/// Each pack defines the source article and the quantity included in the kit.
+/// A kit article is composed of one or more components.
+/// Each component defines the source article and the quantity included in the kit.
 /// </remarks>
 public sealed class ArticleKit
 {
@@ -685,38 +772,38 @@ public sealed class ArticleKit
     {
     }
 
-    public ArticleKit(IReadOnlyCollection<ArticlePack> fromArticles)
+    public ArticleKit(IReadOnlyCollection<ArticleKitComponent> components)
     {
-        SetFromArticles(fromArticles);
+        SetComponents(components);
     }
 
     /// <summary>
-    /// Gets the article packs that compose the kit.
+    /// Gets the components that compose the kit.
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when the collection contains null packs, or contains duplicated source articles.
+    /// Thrown when the collection contains null components, or contains duplicated source articles.
     /// </exception>
-    public IReadOnlyCollection<ArticlePack> FromArticles { get; private set; } = [];
+    public IReadOnlyCollection<ArticleKitComponent> Components { get; private set; } = [];
 
-    private void SetFromArticles(IReadOnlyCollection<ArticlePack> fromArticles)
+    private void SetComponents(IReadOnlyCollection<ArticleKitComponent> components)
     {
-        if (fromArticles.Any(articlePack => articlePack is null))
+        if (components.Any(component => component is null))
         {
             throw new ArgumentException(
-                "A kit cannot contain null article packs.",
-                nameof(fromArticles));
+                "A kit cannot contain null components.",
+                nameof(components));
         }
 
-        if (fromArticles
-            .GroupBy(articlePack => articlePack.FromArticleGuid)
+        if (components
+            .GroupBy(component => component.ArticleGuid)
             .Any(group => group.Count() > 1))
         {
             throw new ArgumentException(
                 "A kit cannot contain duplicated source articles.",
-                nameof(fromArticles));
+                nameof(components));
         }
 
-        FromArticles = fromArticles;
+        Components = components;
     }
 }
 

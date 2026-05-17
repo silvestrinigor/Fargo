@@ -10,7 +10,9 @@ public enum ArticleModifiedType
     Barcode = 1 << 2,
     Partition = 1 << 3,
     Container = 1 << 4,
-    Relation = 1 << 5
+    Relation = 1 << 5,
+    Activated = 1 << 6,
+    Deactivated = 1 << 7,
 }
 
 /// <summary>Represents an article returned by the API.</summary>

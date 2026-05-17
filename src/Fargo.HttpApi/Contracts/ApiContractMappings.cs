@@ -5,6 +5,7 @@ using Fargo.Core.Barcodes;
 using Fargo.Core.Users;
 using Fargo.Sdk.Contracts;
 using UnitsNet;
+using UnitsNet.NumberExtensions.NumberToScalar;
 using UnitsNet.Units;
 using AppArticles = Fargo.Application.Articles;
 using AppItems = Fargo.Application.Items;
@@ -51,7 +52,24 @@ internal static class ApiContractMappings
             request.Metrics.ToApplicationDto(),
             request.ToApplicationBarcodesDto(),
             request.Partitions,
-            request.IsActive);
+            request.IsActive,
+            request.Variation is null
+                ? null
+                : new AppArticles.ArticleCreateVariationDto(request.Variation.FromArticleGuid),
+            request.Pack is null
+                ? null
+                : new AppArticles.ArticleCreatePackDto(
+                    request.Pack.FromArticleGuid,
+                    request.Pack.Quantity.Amount()),
+            request.Kit is null
+                ? null
+                : new AppArticles.ArticleCreateKitDto(
+                    request.Kit.Packs.Select(static pack => new AppArticles.ArticleCreateKitPackDto(
+                        pack.ArticleGuid,
+                        pack.Quantity.Amount())).ToArray()),
+            request.Container is null
+                ? null
+                : new AppArticles.ArticleCreateContainerDto(request.Container.MaxMass.ToMass()));
 
     public static AppArticles.ArticlePatchDto ToApplicationDto(this ContractArticles.ArticlePatchRequest request)
         => new(
@@ -73,16 +91,18 @@ internal static class ApiContractMappings
             item.ProductionDate,
             item.ParentContainerGuid,
             item.Partitions,
-            item.EditedByGuid);
+            item.IsActive,
+            item.EditedByGuid,
+            (ContractItems.ItemModifiedType)(int)item.ModificationTypes);
 
     public static IReadOnlyCollection<ContractItems.ItemInfo> ToInfo(this IReadOnlyCollection<AppItems.ItemDto> items)
         => items.Select(static item => item.ToInfo()).ToArray();
 
     public static AppItems.ItemCreateDto ToApplicationDto(this ContractItems.ItemCreateRequest request)
-        => new(request.ArticleGuid, request.ProductionDate, request.Partitions);
+        => new(request.ArticleGuid, request.ProductionDate, request.Partitions, request.IsActive);
 
     public static AppItems.ItemUpdateDto ToApplicationDto(this ContractItems.ItemUpdateRequest request)
-        => new(request.Partitions, request.ParentContainerGuid);
+        => new(request.Partitions, request.ParentContainerGuid, request.IsActive);
 
     public static ContractPartitions.PartitionInfo ToInfo(this AppPartitions.PartitionDto partition)
         => new(
@@ -91,7 +111,8 @@ internal static class ApiContractMappings
             partition.Description,
             partition.ParentPartitionGuid,
             partition.IsActive,
-            partition.EditedByGuid);
+            partition.EditedByGuid,
+            (ContractPartitions.PartitionModifiedType)(int)partition.ModificationTypes);
 
     public static IReadOnlyCollection<ContractPartitions.PartitionInfo> ToInfo(this IReadOnlyCollection<AppPartitions.PartitionDto> partitions)
         => partitions.Select(static partition => partition.ToInfo()).ToArray();
@@ -115,7 +136,8 @@ internal static class ApiContractMappings
             user.Permissions.ToInfo(),
             user.Partitions,
             user.UserGroups,
-            user.EditedByGuid);
+            user.EditedByGuid,
+            (ContractUsers.UserModifiedType)(int)user.ModificationTypes);
 
     public static IReadOnlyCollection<ContractUsers.UserInfo> ToInfo(this IReadOnlyCollection<AppUsers.UserDto> users)
         => users.Select(static user => user.ToInfo()).ToArray();
@@ -153,7 +175,8 @@ internal static class ApiContractMappings
             userGroup.IsActive,
             userGroup.Permissions.ToInfo(),
             userGroup.Partitions,
-            userGroup.EditedByGuid);
+            userGroup.EditedByGuid,
+            (ContractUserGroups.UserGroupModifiedType)(int)userGroup.ModificationTypes);
 
     public static IReadOnlyCollection<ContractUserGroups.UserGroupInfo> ToInfo(this IReadOnlyCollection<AppUserGroups.UserGroupDto> userGroups)
         => userGroups.Select(static userGroup => userGroup.ToInfo()).ToArray();

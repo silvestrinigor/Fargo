@@ -60,7 +60,13 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ValidateHasAccess(article);
 
-        var item = new Item(article, command.ProductionDate);
+        article.ValidateIsActive();
+
+        var item = Item.CreateItem(article, command.ProductionDate);
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.General);
 
         itemRepository.Add(item);
 
@@ -242,12 +248,15 @@ public sealed class ItemSetParentContainerCommandHandler(
             }
         }
 
-        itemMovementRepository.Add(new ItemMovement(
-            item.Guid,
+        itemMovementRepository.Add(ItemMovement.Moved(
+            item,
             previousParentContainerGuid,
             item.ParentContainerGuid,
-            actor.ActorGuid,
-            DateTimeOffset.UtcNow));
+            actor.ActorGuid));
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.ParentContainerChanged);
     }
 }
 
@@ -279,6 +288,7 @@ public sealed record ItemSetPartitionsCommand(
 public sealed class ItemSetPartitionsCommandHandler(
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemSetPartitionsCommandHandler> logger
 ) : ICommandHandler<ItemSetPartitionsCommand>
@@ -334,6 +344,11 @@ public sealed class ItemSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             item.AddPartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                item,
+                partition,
+                actor.ActorGuid));
         }
 
         var partitionsToRemove = item.Partitions
@@ -345,7 +360,16 @@ public sealed class ItemSetPartitionsCommandHandler(
             actor.ValidateHasPartitionAccess(partition.Guid);
 
             item.RemovePartition(partition);
+
+            entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                item,
+                partition,
+                actor.ActorGuid));
         }
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -359,3 +383,157 @@ public sealed class ItemSetPartitionsCommandHandler(
 }
 
 #endregion Partitions
+
+#region Activate
+
+/// <summary>
+/// Command used to activate an item.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
+public sealed record ItemActivateCommand(
+    Guid ItemGuid
+) : ICommand;
+
+/// <summary>
+/// Handles item activation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and activates the item.
+/// </remarks>
+public sealed class ItemActivateCommandHandler(
+    IItemRepository itemRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ItemActivateCommandHandler> logger
+) : ICommandHandler<ItemActivateCommand>
+{
+    public async Task Handle(
+        ItemActivateCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item activation flow started for item {ItemGuid} by actor {ActorGuid}.",
+                command.ItemGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.EditItem);
+
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+
+        actor.ValidateHasAccess(item);
+
+        if (item.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item activation flow skipped for item {ItemGuid}; item is already active.",
+                    item.Guid);
+            }
+
+            return;
+        }
+
+        item.Activate();
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.Activated);
+
+        entityEventRepository.Add(EntityEvent.Activated<Item>(item, actor.ActorGuid));
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item activation mutation completed for item {ItemGuid} by actor {ActorGuid}.",
+                item.Guid,
+                actor.ActorGuid);
+        }
+    }
+}
+
+#endregion Activate
+
+#region Deactivate
+
+/// <summary>
+/// Command used to deactivate an item.
+/// </summary>
+/// <param name="ItemGuid">
+/// Item unique identifier.
+/// </param>
+public sealed record ItemDeactivateCommand(
+    Guid ItemGuid
+) : ICommand;
+
+/// <summary>
+/// Handles item deactivation.
+/// </summary>
+/// <remarks>
+/// Validates permissions and deactivates the item.
+/// </remarks>
+public sealed class ItemDeactivateCommandHandler(
+    IItemRepository itemRepository,
+    IEntityEventRepository entityEventRepository,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    ILogger<ItemDeactivateCommandHandler> logger
+) : ICommandHandler<ItemDeactivateCommand>
+{
+    public async Task Handle(
+        ItemDeactivateCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item deactivation flow started for item {ItemGuid} by actor {ActorGuid}.",
+                command.ItemGuid,
+                actor.ActorGuid);
+        }
+
+        actor.ValidateHasPermission(ActionType.EditItem);
+
+        var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
+
+        actor.ValidateHasAccess(item);
+
+        if (!item.IsActive)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item deactivation flow skipped for item {ItemGuid}; item is already inactive.",
+                    item.Guid);
+            }
+
+            return;
+        }
+
+        item.Deactivate();
+
+        item.MarkAsEditedBy(actor.ActorGuid);
+
+        item.MarkModificationType(ItemModifiedType.Deactivated);
+
+        entityEventRepository.Add(EntityEvent.Deactivated<Item>(item, actor.ActorGuid));
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Item deactivation mutation completed for item {ItemGuid} by actor {ActorGuid}.",
+                item.Guid,
+                actor.ActorGuid);
+        }
+    }
+}
+
+#endregion Deactivate

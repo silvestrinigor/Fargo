@@ -1,5 +1,17 @@
 namespace Fargo.Sdk.Contracts.Items;
 
+/// <summary>Represents the item areas changed by the last edit operation.</summary>
+[Flags]
+public enum ItemModifiedType
+{
+    None = 0,
+    General = 1 << 0,
+    ParentContainerChanged = 1 << 1,
+    PartitionsChanged = 1 << 2,
+    Activated = 1 << 3,
+    Deactivated = 1 << 4,
+}
+
 /// <summary>Represents an item returned by the API.</summary>
 public sealed record ItemInfo(
     Guid Guid,
@@ -7,4 +19,6 @@ public sealed record ItemInfo(
     DateTimeOffset? ProductionDate = null,
     Guid? ParentContainerGuid = null,
     IReadOnlyCollection<Guid> Partitions = null!,
-    Guid? EditedByGuid = null);
+    bool IsActive = true,
+    Guid? EditedByGuid = null,
+    ItemModifiedType ModificationTypes = ItemModifiedType.None);
