@@ -128,3 +128,10 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     }
 
 }
+
+public sealed class ItemMovementRepository(FargoDbContext context) : IItemMovementRepository
+{
+    private readonly DbSet<ItemMovement> movements = context.ItemMovements;
+
+    public void Add(ItemMovement movement) => movements.Add(movement);
+}

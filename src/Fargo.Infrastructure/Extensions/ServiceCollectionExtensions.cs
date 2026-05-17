@@ -108,6 +108,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IItemQueryRepository, ItemRepository>();
+            services.AddScoped<IItemMovementRepository, ItemMovementRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserQueryRepository, UserRepository>();
             services.AddScoped<IUserGroupRepository, UserGroupRepository>();

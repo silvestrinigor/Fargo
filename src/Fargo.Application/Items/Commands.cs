@@ -162,6 +162,7 @@ public sealed record ItemSetParentContainerCommand(
 /// </remarks>
 public sealed class ItemSetParentContainerCommandHandler(
     IItemRepository itemRepository,
+    IItemMovementRepository itemMovementRepository,
     ItemService itemService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ILogger<ItemSetParentContainerCommandHandler> logger
@@ -187,6 +188,21 @@ public sealed class ItemSetParentContainerCommandHandler(
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
         actor.ValidateHasAccess(item);
+
+        var previousParentContainerGuid = item.ParentContainerGuid;
+
+        if (previousParentContainerGuid == command.ParentContainerGuid)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "Item parent container mutation skipped for item {ItemGuid}; parent container is already {ParentContainerGuid}.",
+                    item.Guid,
+                    previousParentContainerGuid);
+            }
+
+            return;
+        }
 
         if (command.ParentContainerGuid is { } parentContainerGuid)
         {
@@ -220,6 +236,12 @@ public sealed class ItemSetParentContainerCommandHandler(
             }
         }
 
+        itemMovementRepository.Add(new ItemMovement(
+            item.Guid,
+            previousParentContainerGuid,
+            item.ParentContainerGuid,
+            actor.ActorGuid,
+            DateTimeOffset.UtcNow));
     }
 }
 

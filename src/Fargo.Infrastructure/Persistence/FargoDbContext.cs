@@ -17,6 +17,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<Item> Items { get; set; }
 
+    public DbSet<ItemMovement> ItemMovements { get; set; }
+
     public DbSet<User> Users { get; set; }
 
     public DbSet<UserPermission> UserPermission { get; set; }
@@ -76,6 +78,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ItemMovementConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 

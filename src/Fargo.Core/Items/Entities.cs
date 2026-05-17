@@ -191,3 +191,80 @@ public sealed class ItemBatch : Entity
     /// </summary>
     public DateTimeOffset? ProductionDate { get; init; }
 }
+
+/// <summary>
+/// Represents an item movement registered in the movement ledger.
+/// </summary>
+/// <remarks>
+/// This entity is append-only business history. The item row stores the current
+/// location, while this ledger stores each movement that happened.
+/// </remarks>
+public sealed class ItemMovement : Entity
+{
+    /// <summary>
+    /// Initializes a new item movement entity.
+    /// </summary>
+    /// <remarks>
+    /// Required by Entity Framework.
+    /// </remarks>
+    private ItemMovement()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new item movement ledger row.
+    /// </summary>
+    /// <param name="itemGuid">Moved item unique identifier.</param>
+    /// <param name="fromParentContainerGuid">Previous parent container item unique identifier.</param>
+    /// <param name="toParentContainerGuid">New parent container item unique identifier.</param>
+    /// <param name="actorGuid">Actor unique identifier.</param>
+    /// <param name="occurredAt">Date and time when the movement occurred.</param>
+    public ItemMovement(
+        Guid itemGuid,
+        Guid? fromParentContainerGuid,
+        Guid? toParentContainerGuid,
+        Guid actorGuid,
+        DateTimeOffset occurredAt)
+    {
+        if (itemGuid == Guid.Empty)
+        {
+            throw new ArgumentException("Item movement item guid cannot be empty.", nameof(itemGuid));
+        }
+
+        if (actorGuid == Guid.Empty)
+        {
+            throw new ArgumentException("Item movement actor guid cannot be empty.", nameof(actorGuid));
+        }
+
+        ItemGuid = itemGuid;
+        FromParentContainerGuid = fromParentContainerGuid;
+        ToParentContainerGuid = toParentContainerGuid;
+        ActorGuid = actorGuid;
+        OccurredAt = occurredAt;
+    }
+
+    /// <summary>
+    /// Gets the moved item unique identifier.
+    /// </summary>
+    public Guid ItemGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the previous parent container item unique identifier.
+    /// </summary>
+    public Guid? FromParentContainerGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the new parent container item unique identifier.
+    /// </summary>
+    public Guid? ToParentContainerGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the actor unique identifier that performed the movement.
+    /// </summary>
+    public Guid ActorGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the date and time when the movement occurred.
+    /// </summary>
+    public DateTimeOffset OccurredAt { get; private init; }
+}
