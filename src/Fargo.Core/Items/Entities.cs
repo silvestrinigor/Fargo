@@ -43,11 +43,6 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
     /// <param name="article">The article associated with the item.</param>
     private Item(Article article, DateTimeOffset? productionDate = null)
     {
-        if (!article.IsActive)
-        {
-            throw new ItemCannotBeCreatedWhenArticleNotActiveFargoDomainException(article.Guid);
-        }
-
         if (article.IsContainer)
         {
             Container = new ItemContainer(this);
