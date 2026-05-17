@@ -27,6 +27,7 @@ public enum EntityEventType
     Deleted = 1,
     Activated = 2,
     Deactivated = 3,
+    Moved = 4,
 }
 
 /// <summary>
@@ -107,6 +108,12 @@ public sealed class EntityEvent : Entity
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity
         => Create(entity, EntityEventType.Deactivated, actorGuid, occurredAt);
+
+    internal static EntityEvent ItemMoved(
+        Item item,
+        Guid actorGuid,
+        DateTimeOffset? occurredAt = null)
+        => Create(item, EntityEventType.Moved, actorGuid, occurredAt);
 
     private static EntityEvent Create<TEntity>(
         TEntity entity,

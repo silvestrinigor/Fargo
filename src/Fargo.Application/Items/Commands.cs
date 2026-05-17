@@ -242,12 +242,11 @@ public sealed class ItemSetParentContainerCommandHandler(
             }
         }
 
-        itemMovementRepository.Add(new ItemMovement(
-            item.Guid,
+        itemMovementRepository.Add(ItemMovement.Moved(
+            item,
             previousParentContainerGuid,
             item.ParentContainerGuid,
-            actor.ActorGuid,
-            DateTimeOffset.UtcNow));
+            actor.ActorGuid));
     }
 }
 

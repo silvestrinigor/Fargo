@@ -31,6 +31,8 @@ public sealed class ItemMovementCommandHandlerTests
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
 
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
+            movement.Event.EntityType == EntityType.Item &&
+            movement.Event.EventType == EntityEventType.Moved &&
             movement.ItemGuid == item.Guid &&
             movement.FromParentContainerGuid == null &&
             movement.ToParentContainerGuid == parent.Guid &&
@@ -82,6 +84,8 @@ public sealed class ItemMovementCommandHandlerTests
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, null));
 
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
+            movement.Event.EntityType == EntityType.Item &&
+            movement.Event.EventType == EntityEventType.Moved &&
             movement.ItemGuid == item.Guid &&
             movement.FromParentContainerGuid == parent.Guid &&
             movement.ToParentContainerGuid == null &&
