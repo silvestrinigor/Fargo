@@ -33,7 +33,7 @@ public sealed class ItemApplicationService(
         CancellationToken cancellationToken = default)
     {
         var itemGuid = await createHandler.Handle(
-            new ItemCreateCommand(Guid.NewGuid(), create.ArticleGuid, create.ProductionDate),
+            new ItemCreateCommand(create.ArticleGuid, create.ProductionDate),
             cancellationToken);
 
         if (create.Partitions is { Count: > 0 } partitions)

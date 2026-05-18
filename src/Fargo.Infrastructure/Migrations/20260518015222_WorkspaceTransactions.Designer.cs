@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    [Migration("20260518010214_WorkspaceTransactions")]
+    [Migration("20260518015222_WorkspaceTransactions")]
     partial class WorkspaceTransactions
     {
         /// <inheritdoc />
@@ -832,6 +832,9 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid?>("ReservedEntityGuid")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ReservedEntityKind")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Sequence")
                         .HasColumnType("int");
 
@@ -846,7 +849,9 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.HasIndex("CommandType");
 
-                    b.HasIndex("ReservedEntityGuid");
+                    b.HasIndex("ReservedEntityGuid")
+                        .IsUnique()
+                        .HasFilter("[ReservedEntityGuid] IS NOT NULL");
 
                     b.HasIndex("WorkspaceGuid", "CommandId")
                         .IsUnique();

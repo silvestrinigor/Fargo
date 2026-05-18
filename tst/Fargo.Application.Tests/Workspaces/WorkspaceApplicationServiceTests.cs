@@ -28,6 +28,7 @@ public sealed class WorkspaceApplicationServiceTests
 
         Assert.NotNull(result.ReservedEntityGuid);
         Assert.Equal(result.ReservedEntityGuid, command.ReservedEntityGuid);
+        Assert.Equal(WorkspaceReservedEntityKind.Article, command.ReservedEntityKind);
         Assert.Contains(result.ReservedEntityGuid!.Value.ToString("D"), command.PayloadJson);
         Assert.Empty(fixture.Dispatcher.DispatchedCommands);
     }
@@ -61,6 +62,7 @@ public sealed class WorkspaceApplicationServiceTests
             fixture.Dispatcher.DispatchedCommands.Select(static command => command.GetType().Name).ToArray());
         Assert.Equal(6, fixture.UnitOfWork.SaveChangesCount);
         Assert.True(fixture.UnitOfWork.TransactionCommitted);
+        fixture.ReservedGuidSession.ValidateArticleGuid(article.ReservedEntityGuid!.Value);
         Assert.Collection(
             result.Commands,
             command =>
@@ -93,6 +95,7 @@ public sealed class WorkspaceApplicationServiceTests
                 Repository,
                 CurrentAuthorizationContext,
                 Dispatcher,
+                ReservedGuidSession,
                 UnitOfWork);
         }
 
@@ -102,6 +105,8 @@ public sealed class WorkspaceApplicationServiceTests
             Substitute.For<ICurrentAuthorizationContext>();
 
         public RecordingCommandDispatcher Dispatcher { get; } = new();
+
+        public IReservedGuidSession ReservedGuidSession { get; } = new ReservedGuidSession();
 
         public RecordingUnitOfWork UnitOfWork { get; } = new();
 

@@ -1,6 +1,7 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
@@ -21,9 +22,9 @@ namespace Fargo.Application.Items;
 /// Optional item production date.
 /// </param>
 public sealed record ItemCreateCommand(
-    Guid ItemGuid,
     Guid ArticleGuid,
-    DateTimeOffset? ProductionDate = null
+    DateTimeOffset? ProductionDate = null,
+    ReservedItemGuid? ItemGuid = null
 ) : ICommand<Guid>;
 
 /// <summary>
@@ -38,6 +39,7 @@ public sealed class ItemCreateCommandHandler(
     IArticleRepository articleRepository,
     IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
+    IReservedGuidSession reservedGuidSession,
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
@@ -57,13 +59,15 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateItem);
 
+        var itemGuid = reservedGuidSession.ResolveItemGuid(command.ItemGuid);
+
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
         actor.ValidateHasAccess(article);
 
         article.ValidateIsActive();
 
-        var item = Item.CreateItem(command.ItemGuid, article, command.ProductionDate);
+        var item = Item.CreateItem(itemGuid, article, command.ProductionDate);
 
         item.MarkAsEditedBy(actor.ActorGuid);
 

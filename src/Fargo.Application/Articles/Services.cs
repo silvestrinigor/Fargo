@@ -86,7 +86,7 @@ public sealed class ArticleApplicationService(
                 new ArticleCreateContainerCommand(create.Name),
                 cancellationToken),
             _ => await createArticleHandler.Handle(
-                new ArticleCreateCommand(Guid.NewGuid(), create.Name),
+                new ArticleCreateCommand(create.Name),
                 cancellationToken)
         };
 

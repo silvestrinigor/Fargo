@@ -829,6 +829,9 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid?>("ReservedEntityGuid")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ReservedEntityKind")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Sequence")
                         .HasColumnType("int");
 
@@ -843,7 +846,9 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.HasIndex("CommandType");
 
-                    b.HasIndex("ReservedEntityGuid");
+                    b.HasIndex("ReservedEntityGuid")
+                        .IsUnique()
+                        .HasFilter("[ReservedEntityGuid] IS NOT NULL");
 
                     b.HasIndex("WorkspaceGuid", "CommandId")
                         .IsUnique();

@@ -1,5 +1,6 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
@@ -19,8 +20,8 @@ namespace Fargo.Application.Articles;
 /// Article name.
 /// </param>
 public sealed record ArticleCreateCommand(
-    Guid ArticleGuid,
-    Name Name
+    Name Name,
+    ReservedArticleGuid? ArticleGuid = null
 ) : ICommand<Guid>;
 
 /// <summary>
@@ -34,6 +35,7 @@ public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
     IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
+    IReservedGuidSession reservedGuidSession,
     ILogger<ArticleCreateCommandHandler> logger
 ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
@@ -50,7 +52,9 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var article = Article.CreateArticle(command.ArticleGuid, command.Name);
+        var articleGuid = reservedGuidSession.ResolveArticleGuid(command.ArticleGuid);
+
+        var article = Article.CreateArticle(articleGuid, command.Name);
 
         article.MarkAsEditedBy(actor.ActorGuid);
 

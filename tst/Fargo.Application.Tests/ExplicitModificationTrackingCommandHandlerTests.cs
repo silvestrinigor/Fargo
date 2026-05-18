@@ -1,6 +1,7 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
+using Fargo.Application.Workspaces;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core;
@@ -26,14 +27,17 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
         var actor = CreateActor(ActionType.CreateItem);
+        var reservedGuidSession = new ReservedGuidSession();
+        var reservedItemGuid = reservedGuidSession.ReserveItemGuid();
         var handler = new ItemCreateCommandHandler(
             itemRepository,
             articleRepository,
             Substitute.For<IEntityEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
+            reservedGuidSession,
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
-        await handler.Handle(new ItemCreateCommand(Guid.NewGuid(), article.Guid));
+        await handler.Handle(new ItemCreateCommand(article.Guid, ItemGuid: reservedItemGuid));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(item =>
             item.EditedByGuid == actor.ActorGuid &&

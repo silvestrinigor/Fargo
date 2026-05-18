@@ -16,6 +16,7 @@ public sealed class WorkspaceApplicationService(
     IWorkspaceRepository workspaceRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     ICommandDispatcher commandDispatcher,
+    IReservedGuidSession reservedGuidSession,
     IUnitOfWork unitOfWork)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -52,7 +53,8 @@ public sealed class WorkspaceApplicationService(
             draft.CommandType,
             draft.CommandVersion,
             normalized.PayloadJson,
-            normalized.ReservedEntityGuid);
+            normalized.ReservedEntityGuid,
+            normalized.ReservedEntityKind);
 
         await unitOfWork.SaveChanges(cancellationToken);
 
@@ -77,9 +79,11 @@ public sealed class WorkspaceApplicationService(
 
         try
         {
+            RegisterReservedGuids(workspace.Commands);
+
             foreach (var command in workspace.Commands.OrderBy(static c => c.Sequence))
             {
-                var applicationCommand = ToApplicationCommand(command.CommandType, command.PayloadJson);
+                var applicationCommand = ToApplicationCommand(command);
 
                 var response = await commandDispatcher.Dispatch(applicationCommand, cancellationToken);
 
@@ -129,21 +133,48 @@ public sealed class WorkspaceApplicationService(
             WorkspaceCommandTypes.ArticleRename or
             WorkspaceCommandTypes.ItemMoveToContainer or
             WorkspaceCommandTypes.PartitionRename or
-            WorkspaceCommandTypes.PartitionMove => new NormalizedQueuedCommand(draft.PayloadJson, null),
+            WorkspaceCommandTypes.PartitionMove => new NormalizedQueuedCommand(draft.PayloadJson, null, null),
             _ => throw new ArgumentException($"Unsupported workspace command type '{draft.CommandType}'.", nameof(draft))
         };
 
-    private static ICommand ToApplicationCommand(string commandType, string payloadJson)
-        => commandType switch
+    private void RegisterReservedGuids(IEnumerable<WorkspaceCommand> commands)
+    {
+        foreach (var command in commands)
         {
-            WorkspaceCommandTypes.ArticleCreate => ToArticleCreateCommand(payloadJson),
-            WorkspaceCommandTypes.ArticleRename => ToArticleRenameCommand(payloadJson),
-            WorkspaceCommandTypes.ItemCreate => ToItemCreateCommand(payloadJson),
-            WorkspaceCommandTypes.ItemMoveToContainer => ToItemMoveToContainerCommand(payloadJson),
-            WorkspaceCommandTypes.PartitionCreate => ToPartitionCreateCommand(payloadJson),
-            WorkspaceCommandTypes.PartitionRename => ToPartitionRenameCommand(payloadJson),
-            WorkspaceCommandTypes.PartitionMove => ToPartitionMoveCommand(payloadJson),
-            _ => throw new ArgumentException($"Unsupported workspace command type '{commandType}'.", nameof(commandType))
+            if (command.ReservedEntityGuid is not { } reservedEntityGuid)
+            {
+                continue;
+            }
+
+            switch (command.ReservedEntityKind)
+            {
+                case WorkspaceReservedEntityKind.Article:
+                    reservedGuidSession.RegisterArticleGuid(reservedEntityGuid);
+                    break;
+                case WorkspaceReservedEntityKind.Item:
+                    reservedGuidSession.RegisterItemGuid(reservedEntityGuid);
+                    break;
+                case WorkspaceReservedEntityKind.Partition:
+                    reservedGuidSession.RegisterPartitionGuid(reservedEntityGuid);
+                    break;
+                default:
+                    throw new ArgumentException(
+                        $"Workspace command '{command.CommandId}' has reserved GUID '{reservedEntityGuid}' without a reserved entity kind.");
+            }
+        }
+    }
+
+    private static ICommand ToApplicationCommand(WorkspaceCommand command)
+        => command.CommandType switch
+        {
+            WorkspaceCommandTypes.ArticleCreate => ToArticleCreateCommand(command),
+            WorkspaceCommandTypes.ArticleRename => ToArticleRenameCommand(command.PayloadJson),
+            WorkspaceCommandTypes.ItemCreate => ToItemCreateCommand(command),
+            WorkspaceCommandTypes.ItemMoveToContainer => ToItemMoveToContainerCommand(command.PayloadJson),
+            WorkspaceCommandTypes.PartitionCreate => ToPartitionCreateCommand(command),
+            WorkspaceCommandTypes.PartitionRename => ToPartitionRenameCommand(command.PayloadJson),
+            WorkspaceCommandTypes.PartitionMove => ToPartitionMoveCommand(command.PayloadJson),
+            _ => throw new ArgumentException($"Unsupported workspace command type '{command.CommandType}'.", nameof(command))
         };
 
     private static NormalizedQueuedCommand ReserveArticleGuid(string payloadJson)
@@ -151,7 +182,7 @@ public sealed class WorkspaceApplicationService(
         var input = Deserialize<ArticleCreateWorkspaceCommandInput>(payloadJson);
         var payload = new ArticleCreateWorkspaceCommand(Guid.NewGuid(), input.Name);
 
-        return new NormalizedQueuedCommand(Serialize(payload), payload.ArticleGuid);
+        return new NormalizedQueuedCommand(Serialize(payload), payload.ArticleGuid, WorkspaceReservedEntityKind.Article);
     }
 
     private static NormalizedQueuedCommand ReserveItemGuid(string payloadJson)
@@ -159,7 +190,7 @@ public sealed class WorkspaceApplicationService(
         var input = Deserialize<ItemCreateWorkspaceCommandInput>(payloadJson);
         var payload = new ItemCreateWorkspaceCommand(Guid.NewGuid(), input.ArticleGuid, input.ProductionDate);
 
-        return new NormalizedQueuedCommand(Serialize(payload), payload.ItemGuid);
+        return new NormalizedQueuedCommand(Serialize(payload), payload.ItemGuid, WorkspaceReservedEntityKind.Item);
     }
 
     private static NormalizedQueuedCommand ReservePartitionGuid(string payloadJson)
@@ -167,13 +198,15 @@ public sealed class WorkspaceApplicationService(
         var input = Deserialize<PartitionCreateWorkspaceCommandInput>(payloadJson);
         var payload = new PartitionCreateWorkspaceCommand(Guid.NewGuid(), input.Name);
 
-        return new NormalizedQueuedCommand(Serialize(payload), payload.PartitionGuid);
+        return new NormalizedQueuedCommand(Serialize(payload), payload.PartitionGuid, WorkspaceReservedEntityKind.Partition);
     }
 
-    private static AppArticleCreateCommand ToArticleCreateCommand(string payloadJson)
+    private static AppArticleCreateCommand ToArticleCreateCommand(WorkspaceCommand command)
     {
-        var payload = Deserialize<ArticleCreateWorkspaceCommand>(payloadJson);
-        return new AppArticleCreateCommand(payload.ArticleGuid, new Name(payload.Name));
+        var payload = Deserialize<ArticleCreateWorkspaceCommand>(command.PayloadJson);
+        ValidateReservedEntityGuid(command, payload.ArticleGuid, WorkspaceReservedEntityKind.Article);
+
+        return new AppArticleCreateCommand(new Name(payload.Name), new ReservedArticleGuid(payload.ArticleGuid));
     }
 
     private static AppArticleRenameCommand ToArticleRenameCommand(string payloadJson)
@@ -182,10 +215,12 @@ public sealed class WorkspaceApplicationService(
         return new AppArticleRenameCommand(payload.ArticleGuid, new Name(payload.Name));
     }
 
-    private static AppItemCreateCommand ToItemCreateCommand(string payloadJson)
+    private static AppItemCreateCommand ToItemCreateCommand(WorkspaceCommand command)
     {
-        var payload = Deserialize<ItemCreateWorkspaceCommand>(payloadJson);
-        return new AppItemCreateCommand(payload.ItemGuid, payload.ArticleGuid, payload.ProductionDate);
+        var payload = Deserialize<ItemCreateWorkspaceCommand>(command.PayloadJson);
+        ValidateReservedEntityGuid(command, payload.ItemGuid, WorkspaceReservedEntityKind.Item);
+
+        return new AppItemCreateCommand(payload.ArticleGuid, payload.ProductionDate, new ReservedItemGuid(payload.ItemGuid));
     }
 
     private static AppItemMoveToContainerCommand ToItemMoveToContainerCommand(string payloadJson)
@@ -194,10 +229,12 @@ public sealed class WorkspaceApplicationService(
         return new AppItemMoveToContainerCommand(payload.ItemGuid, payload.ParentContainerGuid);
     }
 
-    private static AppPartitionCreateCommand ToPartitionCreateCommand(string payloadJson)
+    private static AppPartitionCreateCommand ToPartitionCreateCommand(WorkspaceCommand command)
     {
-        var payload = Deserialize<PartitionCreateWorkspaceCommand>(payloadJson);
-        return new AppPartitionCreateCommand(payload.PartitionGuid, new Name(payload.Name));
+        var payload = Deserialize<PartitionCreateWorkspaceCommand>(command.PayloadJson);
+        ValidateReservedEntityGuid(command, payload.PartitionGuid, WorkspaceReservedEntityKind.Partition);
+
+        return new AppPartitionCreateCommand(new Name(payload.Name), new ReservedPartitionGuid(payload.PartitionGuid));
     }
 
     private static AppPartitionRenameCommand ToPartitionRenameCommand(string payloadJson)
@@ -219,9 +256,22 @@ public sealed class WorkspaceApplicationService(
     private static string Serialize<T>(T payload)
         => JsonSerializer.Serialize(payload, JsonOptions);
 
+    private static void ValidateReservedEntityGuid(
+        WorkspaceCommand command,
+        Guid payloadGuid,
+        WorkspaceReservedEntityKind expectedKind)
+    {
+        if (command.ReservedEntityGuid != payloadGuid || command.ReservedEntityKind != expectedKind)
+        {
+            throw new ArgumentException(
+                $"Workspace command '{command.CommandId}' payload GUID does not match its reserved {expectedKind} GUID.");
+        }
+    }
+
     private sealed record NormalizedQueuedCommand(
         string PayloadJson,
-        Guid? ReservedEntityGuid);
+        Guid? ReservedEntityGuid,
+        WorkspaceReservedEntityKind? ReservedEntityKind);
 
     private sealed record ArticleCreateWorkspaceCommandInput(string Name);
 

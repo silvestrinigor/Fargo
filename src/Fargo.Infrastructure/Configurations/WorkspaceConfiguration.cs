@@ -47,6 +47,7 @@ public sealed class WorkspaceCommandConfiguration : IEntityTypeConfiguration<Wor
         builder.Property(x => x.CommandVersion).IsRequired();
         builder.Property(x => x.PayloadJson).IsRequired();
         builder.Property(x => x.ReservedEntityGuid);
+        builder.Property(x => x.ReservedEntityKind).HasConversion<string>();
         builder.Property(x => x.Status).HasConversion<string>().IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.ExecutedAt);
@@ -54,6 +55,8 @@ public sealed class WorkspaceCommandConfiguration : IEntityTypeConfiguration<Wor
         builder.HasIndex(x => new { x.WorkspaceGuid, x.Sequence }).IsUnique();
         builder.HasIndex(x => new { x.WorkspaceGuid, x.CommandId }).IsUnique();
         builder.HasIndex(x => x.CommandType);
-        builder.HasIndex(x => x.ReservedEntityGuid);
+        builder.HasIndex(x => x.ReservedEntityGuid)
+            .IsUnique()
+            .HasFilter("[ReservedEntityGuid] IS NOT NULL");
     }
 }

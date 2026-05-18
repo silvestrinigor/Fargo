@@ -1,5 +1,6 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
@@ -16,17 +17,34 @@ public sealed class ArticleCommandHandlerTests
     {
         var repository = Substitute.For<IArticleRepository>();
         var actor = CreateActor(ActionType.CreateArticle);
+        var reservedGuidSession = new ReservedGuidSession();
+        var articleGuid = reservedGuidSession.ReserveArticleGuid();
         var handler = new ArticleCreateCommandHandler(
             repository,
             Substitute.For<IEntityEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
+            reservedGuidSession,
             Substitute.For<ILogger<ArticleCreateCommandHandler>>());
 
-        await handler.Handle(new ArticleCreateCommand(Guid.NewGuid(), new Name("Article")));
+        await handler.Handle(new ArticleCreateCommand(new Name("Article"), articleGuid));
 
         repository.Received(1).Add(Arg.Is<Article>(article =>
             article.EditedByGuid == actor.ActorGuid &&
             article.ModificationTypes == ArticleModifiedType.General));
+    }
+
+    [Fact]
+    public async Task Create_Should_RejectUnreservedArticleGuid()
+    {
+        var handler = new ArticleCreateCommandHandler(
+            Substitute.For<IArticleRepository>(),
+            Substitute.For<IEntityEventRepository>(),
+            CreateCurrentAuthorizationContext(CreateActor(ActionType.CreateArticle)),
+            new ReservedGuidSession(),
+            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
+
+        await Assert.ThrowsAsync<UnreservedGuidFargoApplicationException>(
+            () => handler.Handle(new ArticleCreateCommand(new Name("Article"), new ReservedArticleGuid(Guid.NewGuid()))));
     }
 
     [Fact]

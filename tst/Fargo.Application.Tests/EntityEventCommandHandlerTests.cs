@@ -1,6 +1,7 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
@@ -17,13 +18,16 @@ public sealed class EntityEventCommandHandlerTests
         var articleRepository = Substitute.For<IArticleRepository>();
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.CreateArticle);
+        var reservedGuidSession = new ReservedGuidSession();
+        var reservedArticleGuid = reservedGuidSession.ReserveArticleGuid();
         var handler = new ArticleCreateCommandHandler(
             articleRepository,
             entityEventRepository,
             CreateCurrentAuthorizationContext(actor),
+            reservedGuidSession,
             Substitute.For<ILogger<ArticleCreateCommandHandler>>());
 
-        var articleGuid = await handler.Handle(new ArticleCreateCommand(Guid.NewGuid(), new Name("Article")));
+        var articleGuid = await handler.Handle(new ArticleCreateCommand(new Name("Article"), reservedArticleGuid));
 
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
@@ -103,15 +107,18 @@ public sealed class EntityEventCommandHandlerTests
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
+        var reservedGuidSession = new ReservedGuidSession();
+        var reservedItemGuid = reservedGuidSession.ReserveItemGuid();
         var handler = new ItemCreateCommandHandler(
             itemRepository,
             articleRepository,
             Substitute.For<IEntityEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.CreateItem)),
+            reservedGuidSession,
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
         await Assert.ThrowsAsync<EntityNotActiveFargoDomainException<Article>>(
-            () => handler.Handle(new ItemCreateCommand(Guid.NewGuid(), article.Guid)));
+            () => handler.Handle(new ItemCreateCommand(article.Guid, ItemGuid: reservedItemGuid)));
 
         itemRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }

@@ -125,6 +125,7 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
             services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+            services.AddScoped<IReservedGuidSession, ReservedGuidSession>();
 
             services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
             services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();

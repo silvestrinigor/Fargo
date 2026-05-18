@@ -13,6 +13,13 @@ public enum WorkspaceCommandStatus
     Executed = 1
 }
 
+public enum WorkspaceReservedEntityKind
+{
+    Article = 0,
+    Item = 1,
+    Partition = 2
+}
+
 public sealed class Workspace : Entity
 {
     private readonly List<WorkspaceCommand> commands = [];
@@ -49,7 +56,8 @@ public sealed class Workspace : Entity
         string commandType,
         int commandVersion,
         string payloadJson,
-        Guid? reservedEntityGuid)
+        Guid? reservedEntityGuid,
+        WorkspaceReservedEntityKind? reservedEntityKind)
     {
         ValidateIsPending();
 
@@ -70,7 +78,8 @@ public sealed class Workspace : Entity
             commandType,
             commandVersion,
             payloadJson,
-            reservedEntityGuid);
+            reservedEntityGuid,
+            reservedEntityKind);
 
         commands.Add(command);
 
@@ -113,7 +122,8 @@ public sealed class WorkspaceCommand : Entity
         string commandType,
         int commandVersion,
         string payloadJson,
-        Guid? reservedEntityGuid)
+        Guid? reservedEntityGuid,
+        WorkspaceReservedEntityKind? reservedEntityKind)
     {
         Workspace = workspace;
         WorkspaceGuid = workspace.Guid;
@@ -123,6 +133,7 @@ public sealed class WorkspaceCommand : Entity
         CommandVersion = commandVersion;
         PayloadJson = payloadJson;
         ReservedEntityGuid = reservedEntityGuid;
+        ReservedEntityKind = reservedEntityKind;
         Status = WorkspaceCommandStatus.Pending;
         CreatedAt = DateTimeOffset.UtcNow;
     }
@@ -143,6 +154,8 @@ public sealed class WorkspaceCommand : Entity
 
     public Guid? ReservedEntityGuid { get; private init; }
 
+    public WorkspaceReservedEntityKind? ReservedEntityKind { get; private init; }
+
     public WorkspaceCommandStatus Status { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private init; }
@@ -156,7 +169,8 @@ public sealed class WorkspaceCommand : Entity
         string commandType,
         int commandVersion,
         string payloadJson,
-        Guid? reservedEntityGuid)
+        Guid? reservedEntityGuid,
+        WorkspaceReservedEntityKind? reservedEntityKind)
         => new(
             workspace,
             commandId,
@@ -164,7 +178,8 @@ public sealed class WorkspaceCommand : Entity
             commandType,
             commandVersion,
             payloadJson,
-            reservedEntityGuid);
+            reservedEntityGuid,
+            reservedEntityKind);
 
     public void MarkExecuted()
     {

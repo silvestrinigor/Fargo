@@ -1,4 +1,5 @@
 using Fargo.Application.Identity;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
@@ -14,8 +15,8 @@ namespace Fargo.Application.Partitions;
 /// Partition name.
 /// </param>
 public sealed record PartitionCreateCommand(
-    Guid PartitionGuid,
-    Name Name
+    Name Name,
+    ReservedPartitionGuid? PartitionGuid = null
 ) : ICommand<Guid>;
 
 /// <summary>
@@ -28,6 +29,7 @@ public sealed class PartitionCreateCommandHandler(
     IPartitionRepository partitionRepository,
     IEntityEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
+    IReservedGuidSession reservedGuidSession,
     ILogger<PartitionCreateCommandHandler> logger
 ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
@@ -44,7 +46,9 @@ public sealed class PartitionCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreatePartition);
 
-        var partition = Partition.CreatePartition(command.PartitionGuid, command.Name);
+        var partitionGuid = reservedGuidSession.ResolvePartitionGuid(command.PartitionGuid);
+
+        var partition = Partition.CreatePartition(partitionGuid, command.Name);
 
         partition.MarkAsEditedBy(actor.ActorGuid);
 

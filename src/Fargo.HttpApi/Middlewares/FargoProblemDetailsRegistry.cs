@@ -149,6 +149,10 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(404, "Workspace not found", "workspace/not-found")
             },
             {
+                typeof(UnreservedGuidFargoApplicationException),
+                new ProblemDetailsDefinition(400, "Invalid reserved GUID", "workspace/unreserved-guid")
+            },
+            {
                 typeof(UserNotAuthorizedFargoApplicationException),
                 new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
             },
