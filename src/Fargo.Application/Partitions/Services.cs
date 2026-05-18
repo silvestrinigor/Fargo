@@ -36,7 +36,7 @@ public sealed class PartitionApplicationService(
         CancellationToken cancellationToken = default)
     {
         var partitionGuid = await createHandler.Handle(
-            new PartitionCreateCommand(create.Name),
+            new PartitionCreateCommand(Guid.NewGuid(), create.Name),
             cancellationToken);
 
         if (create.Description is { } description)

@@ -5,6 +5,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Workspaces;
 using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,10 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<UserPartitionAccess> UserPartitionAccesses { get; set; }
 
     public DbSet<UserGroupPartitionAccess> UserGroupPartitionAccesses { get; set; }
+
+    public DbSet<Workspace> Workspaces { get; set; }
+
+    public DbSet<WorkspaceCommand> WorkspaceCommands { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -104,5 +109,9 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
+
+        modelBuilder.ApplyConfiguration(new WorkspaceConfiguration());
+
+        modelBuilder.ApplyConfiguration(new WorkspaceCommandConfiguration());
     }
 }

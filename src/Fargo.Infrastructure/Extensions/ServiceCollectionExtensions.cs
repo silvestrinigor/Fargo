@@ -6,6 +6,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Identity;
@@ -117,11 +118,13 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IPartitionRepository, PartitionRepository>();
             services.AddScoped<IPartitionQueryRepository, PartitionRepository>();
+            services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
         }
 
         private void AddHandlers()
         {
             services.AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
+            services.AddScoped<ICommandDispatcher, CommandDispatcher>();
 
             services.AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>();
             services.AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>();
@@ -203,6 +206,8 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>();
             services.AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
+
+            services.AddScoped<WorkspaceApplicationService>();
         }
 
         private void AddDomainServices()

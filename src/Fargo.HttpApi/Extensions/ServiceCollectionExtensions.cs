@@ -1,11 +1,7 @@
 using Fargo.Application;
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
-using Fargo.Infrastructure.Security;
 using Fargo.Sdk.Contracts.Articles;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using System.Text.Json.Nodes;
 
 namespace Fargo.HttpApi.Extensions;
@@ -44,49 +40,6 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new LengthJsonConverter());
                 options.SerializerOptions.Converters.Add(new DensityJsonConverter());
             });
-
-            return services;
-        }
-
-        /// <summary>
-        /// Configures JWT Bearer authentication and authorization services.
-        ///
-        /// The token validation setup ensures that the issuer, audience,
-        /// lifetime, and signing key are validated for all incoming JWTs.
-        /// </summary>
-        /// <param name="configuration">
-        /// The application configuration used to retrieve JWT settings such as
-        /// issuer, audience, and signing key.
-        /// </param>
-        /// <returns>
-        /// The same <see cref="IServiceCollection"/> instance so that additional
-        /// calls can be chained.
-        /// </returns>
-        public IServiceCollection AddFargoAuthentication(IConfiguration configuration)
-        {
-            var jwt = configuration
-                .GetSection(JwtOptions.SectionName)
-                .Get<JwtOptions>()
-                ?? throw new InvalidOperationException("Jwt configuration is missing.");
-
-            services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwt.Issuer,
-                        ValidAudience = jwt.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(jwt.Key))
-                    };
-
-                    options.UseFargoTokenValidation();
-                });
 
             return services;
         }

@@ -5,6 +5,7 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
@@ -142,6 +143,10 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(PartitionNotFoundFargoApplicationException),
                 new ProblemDetailsDefinition(404, "Partition not found", "partition/not-found")
+            },
+            {
+                typeof(WorkspaceNotFoundFargoApplicationException),
+                new ProblemDetailsDefinition(404, "Workspace not found", "workspace/not-found")
             },
             {
                 typeof(UserNotAuthorizedFargoApplicationException),

@@ -24,6 +24,12 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     public static Article CreateArticle(Name name)
         => new(name);
 
+    public static Article CreateArticle(Guid guid, Name name)
+        => new(name)
+        {
+            Guid = guid
+        };
+
     public static Article CreateArticleVariation(Name name, Article fromArticle)
         => new(name, new ArticleVariation(fromArticle));
 

@@ -19,6 +19,7 @@ namespace Fargo.Application.Articles;
 /// Article name.
 /// </param>
 public sealed record ArticleCreateCommand(
+    Guid ArticleGuid,
     Name Name
 ) : ICommand<Guid>;
 
@@ -49,7 +50,7 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreateArticle);
 
-        var article = Article.CreateArticle(command.Name);
+        var article = Article.CreateArticle(command.ArticleGuid, command.Name);
 
         article.MarkAsEditedBy(actor.ActorGuid);
 

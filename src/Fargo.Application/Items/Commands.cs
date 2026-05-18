@@ -21,6 +21,7 @@ namespace Fargo.Application.Items;
 /// Optional item production date.
 /// </param>
 public sealed record ItemCreateCommand(
+    Guid ItemGuid,
     Guid ArticleGuid,
     DateTimeOffset? ProductionDate = null
 ) : ICommand<Guid>;
@@ -62,7 +63,7 @@ public sealed class ItemCreateCommandHandler(
 
         article.ValidateIsActive();
 
-        var item = Item.CreateItem(article, command.ProductionDate);
+        var item = Item.CreateItem(command.ItemGuid, article, command.ProductionDate);
 
         item.MarkAsEditedBy(actor.ActorGuid);
 

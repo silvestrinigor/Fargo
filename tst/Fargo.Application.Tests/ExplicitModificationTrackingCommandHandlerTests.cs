@@ -33,7 +33,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
-        await handler.Handle(new ItemCreateCommand(article.Guid));
+        await handler.Handle(new ItemCreateCommand(Guid.NewGuid(), article.Guid));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(item =>
             item.EditedByGuid == actor.ActorGuid &&

@@ -23,7 +23,7 @@ public sealed class EntityEventCommandHandlerTests
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<ILogger<ArticleCreateCommandHandler>>());
 
-        var articleGuid = await handler.Handle(new ArticleCreateCommand(new Name("Article")));
+        var articleGuid = await handler.Handle(new ArticleCreateCommand(Guid.NewGuid(), new Name("Article")));
 
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
@@ -111,7 +111,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
         await Assert.ThrowsAsync<EntityNotActiveFargoDomainException<Article>>(
-            () => handler.Handle(new ItemCreateCommand(article.Guid)));
+            () => handler.Handle(new ItemCreateCommand(Guid.NewGuid(), article.Guid)));
 
         itemRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }

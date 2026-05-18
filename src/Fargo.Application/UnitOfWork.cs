@@ -11,6 +11,8 @@ namespace Fargo.Application;
 /// </remarks>
 public interface IUnitOfWork
 {
+    Task<IUnitOfWorkTransaction> BeginTransaction(CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Persists all changes made within the current unit of work.
     /// </summary>
@@ -21,4 +23,11 @@ public interface IUnitOfWork
     /// The number of state entries written to the database.
     /// </returns>
     Task<int> SaveChanges(CancellationToken cancellationToken = default);
+}
+
+public interface IUnitOfWorkTransaction : IAsyncDisposable
+{
+    Task Commit(CancellationToken cancellationToken = default);
+
+    Task Rollback(CancellationToken cancellationToken = default);
 }

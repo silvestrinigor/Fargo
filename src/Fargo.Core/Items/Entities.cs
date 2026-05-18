@@ -25,6 +25,12 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
 
+    public static Item CreateItem(Guid guid, Article article, DateTimeOffset? productionDate = null)
+        => new(article, productionDate)
+        {
+            Guid = guid
+        };
+
     /// <summary>
     /// Initializes a new item entity.
     /// </summary>

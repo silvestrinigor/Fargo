@@ -14,6 +14,7 @@ namespace Fargo.Application.Partitions;
 /// Partition name.
 /// </param>
 public sealed record PartitionCreateCommand(
+    Guid PartitionGuid,
     Name Name
 ) : ICommand<Guid>;
 
@@ -43,7 +44,7 @@ public sealed class PartitionCreateCommandHandler(
 
         actor.ValidateHasPermission(ActionType.CreatePartition);
 
-        var partition = Partition.CreatePartition(command.Name);
+        var partition = Partition.CreatePartition(command.PartitionGuid, command.Name);
 
         partition.MarkAsEditedBy(actor.ActorGuid);
 

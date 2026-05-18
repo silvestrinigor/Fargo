@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>20e98c1c-6921-4d58-92bb-535265b3ab04</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
+    <ProjectReference Include="..\Fargo.GrpcContracts\Fargo.GrpcContracts.csproj" />
+    <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

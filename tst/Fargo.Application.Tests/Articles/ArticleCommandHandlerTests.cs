@@ -22,7 +22,7 @@ public sealed class ArticleCommandHandlerTests
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<ILogger<ArticleCreateCommandHandler>>());
 
-        await handler.Handle(new ArticleCreateCommand(new Name("Article")));
+        await handler.Handle(new ArticleCreateCommand(Guid.NewGuid(), new Name("Article")));
 
         repository.Received(1).Add(Arg.Is<Article>(article =>
             article.EditedByGuid == actor.ActorGuid &&
