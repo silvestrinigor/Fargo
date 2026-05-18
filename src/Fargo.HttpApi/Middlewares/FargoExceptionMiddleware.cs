@@ -1,5 +1,3 @@
-using Fargo.Sdk.Contracts.Errors;
-
 namespace Fargo.HttpApi.Middlewares;
 
 /// <summary>
@@ -106,4 +104,19 @@ public sealed class FargoExceptionMiddleware
 
         await context.Response.WriteAsJsonAsync(problemDetails);
     }
+}
+
+public sealed class FargoProblemDetails
+{
+    public int Status { get; init; }
+
+    public string Title { get; init; } = string.Empty;
+
+    public string Detail { get; init; } = string.Empty;
+
+    public string Type { get; init; } = string.Empty;
+
+    public string Instance { get; init; } = string.Empty;
+
+    public string TraceId { get; init; } = string.Empty;
 }

@@ -1,7 +1,6 @@
 using Fargo.Application;
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
-using Fargo.Sdk.Contracts.Articles;
 using System.Text.Json.Nodes;
 
 namespace Fargo.HttpApi.Extensions;
@@ -39,6 +38,18 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new MassJsonConverter());
                 options.SerializerOptions.Converters.Add(new LengthJsonConverter());
                 options.SerializerOptions.Converters.Add(new DensityJsonConverter());
+                options.SerializerOptions.Converters.Add(new ColorJsonConverter());
+                options.SerializerOptions.Converters.Add(new Ean13JsonConverter());
+                options.SerializerOptions.Converters.Add(new Ean8JsonConverter());
+                options.SerializerOptions.Converters.Add(new UpcAJsonConverter());
+                options.SerializerOptions.Converters.Add(new UpcEJsonConverter());
+                options.SerializerOptions.Converters.Add(new Code128JsonConverter());
+                options.SerializerOptions.Converters.Add(new Code39JsonConverter());
+                options.SerializerOptions.Converters.Add(new Itf14JsonConverter());
+                options.SerializerOptions.Converters.Add(new Gs1128JsonConverter());
+                options.SerializerOptions.Converters.Add(new QrCodeJsonConverter());
+                options.SerializerOptions.Converters.Add(new DataMatrixJsonConverter());
+                options.SerializerOptions.Converters.Add(new OptionalValueJsonConverterFactory());
             });
 
             return services;
@@ -75,7 +86,7 @@ public static class ServiceCollectionExtension
             {
                 options.AddSchemaTransformer((schema, context, _) =>
                 {
-                    if (context.ParameterDescription?.Type == typeof(ArticleBarcode))
+                    if (context.ParameterDescription?.Type == typeof(ArticleBarcodeRouteValue))
                     {
                         schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
                         schema.Pattern = @".+:(Ean13|Ean8|UpcA|UpcE|Code128|Code39|Itf14|Gs1128|QrCode|DataMatrix)$";

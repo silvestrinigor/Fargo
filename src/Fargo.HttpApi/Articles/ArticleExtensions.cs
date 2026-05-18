@@ -1,7 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.HttpApi.Contracts;
-using Fargo.Sdk.Contracts.Articles;
+using Fargo.Core.Barcodes;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,14 +43,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticle")
             .WithSummary("Gets a single article")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<ArticleInfo>(StatusCodes.Status200OK)
+            .Produces<ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ArticleInfo>, NotFound>> GetSingleArticle(
+    private static async Task<Results<Ok<ArticleDto>, NotFound>> GetSingleArticle(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
@@ -62,7 +61,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
     #endregion Get Single
@@ -75,24 +74,24 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticleByBarcode")
             .WithSummary("Gets a single article by barcode")
             .WithDescription("Retrieves a single article by barcode and barcode type using the {barcode}:{type} route value.")
-            .Produces<ArticleInfo>(StatusCodes.Status200OK)
+            .Produces<ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ArticleInfo>, NotFound>> GetArticleByBarcode(
-        ArticleBarcode articleBarcode,
+    private static async Task<Results<Ok<ArticleDto>, NotFound>> GetArticleByBarcode(
+        ArticleBarcodeRouteValue articleBarcode,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleByBarcodeQuery(articleBarcode.ToBarcode(), temporalAsOf);
+        var query = new ArticleByBarcodeQuery(articleBarcode.ToDomainBarcode(), temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
     #endregion Get By Barcode
@@ -105,14 +104,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
             .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.")
-            .Produces<IReadOnlyCollection<ArticleInfo>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ArticleInfo>>, NoContent>> GetManyArticle(
+    private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticle(
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
@@ -138,7 +137,7 @@ public static class ArticleEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response.ToInfo());
+        return TypedResults.Ok(response);
     }
 
     #endregion Get Many
@@ -157,12 +156,12 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateArticle(
-        ArticleCreateRequest request,
+        ArticleCreateDto request,
         ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
         var response = await articles.Create(
-            request.ToApplicationDto(),
+            request,
             cancellationToken);
 
         return TypedResults.Ok(response);
@@ -185,13 +184,13 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticlePatchRequest request,
+        ArticlePatchDto request,
         ArticleApplicationService articles,
         CancellationToken cancellationToken)
     {
         await articles.Patch(
             articleGuid,
-            request.ToApplicationDto(),
+            request,
             cancellationToken);
 
         return TypedResults.NoContent();
@@ -223,4 +222,51 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     #endregion Delete
+}
+
+/// <summary>Represents an article barcode route value in the format <c>{barcode}:{type}</c>.</summary>
+public readonly record struct ArticleBarcodeRouteValue(string Barcode, BarcodeFormat Type)
+    : IParsable<ArticleBarcodeRouteValue>
+{
+    public override string ToString() => $"{Barcode}:{Type}";
+
+    public Barcode ToDomainBarcode() => new(Barcode, Type);
+
+    public static ArticleBarcodeRouteValue Parse(string s, IFormatProvider? provider)
+    {
+        if (TryParse(s, provider, out var result))
+        {
+            return result;
+        }
+
+        throw new FormatException($"Invalid article barcode value: '{s}'. Expected '{{barcode}}:{{type}}'.");
+    }
+
+    public static bool TryParse(string? s, IFormatProvider? provider, out ArticleBarcodeRouteValue result)
+    {
+        result = default;
+
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return false;
+        }
+
+        var separator = s.LastIndexOf(':');
+        if (separator <= 0 || separator == s.Length - 1)
+        {
+            return false;
+        }
+
+        var barcode = s[..separator];
+        var typeText = s[(separator + 1)..];
+
+        if (string.IsNullOrWhiteSpace(barcode) ||
+            !Enum.TryParse<BarcodeFormat>(typeText, ignoreCase: true, out var type))
+        {
+            return false;
+        }
+
+        result = new ArticleBarcodeRouteValue(barcode, type);
+        return true;
+    }
 }

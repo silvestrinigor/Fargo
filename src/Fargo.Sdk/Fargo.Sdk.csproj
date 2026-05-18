@@ -8,7 +8,7 @@
 
   <PropertyGroup>
     <PackageId>Fargo.Sdk</PackageId>
-    <Description>Typed .NET HTTP client SDK for the Fargo inventory and resource management API. Provides simple per-feature HTTP clients for Articles, Items, Partitions, Users, UserGroups, and Authentication.</Description>
+    <Description>Command-oriented .NET SDK for Fargo over gRPC workspace transactions.</Description>
     <PackageTags>fargo;inventory;sdk;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
@@ -19,12 +19,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.Sdk.Contracts\Fargo.Sdk.Contracts.csproj" />
+    <ProjectReference Include="..\Fargo.GrpcClient\Fargo.GrpcClient.csproj" />
+    <ProjectReference Include="..\Fargo.GrpcContracts\Fargo.GrpcContracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

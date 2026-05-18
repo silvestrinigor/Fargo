@@ -1,19 +1,16 @@
 namespace Fargo.Sdk;
 
 /// <summary>
-/// Configuration options for the Fargo SDK. Set <see cref="Server"/> before making any requests.
+/// Configuration options for the Fargo SDK gRPC transport.
 /// </summary>
 public sealed class FargoSdkOptions
 {
-    /// <summary>The base URL of the Fargo API server (e.g. <c>http://localhost:5000</c>).</summary>
-    public string Server { get; set; } = string.Empty;
+    /// <summary>The Fargo gRPC service address.</summary>
+    public Uri? Address { get; set; }
 
-    /// <summary>Optional API key sent as <c>X-Api-Key</c> on every request to identify this application.</summary>
-    public string? ApiKey { get; set; }
+    /// <summary>Optional default deadline applied to SDK gRPC calls.</summary>
+    public TimeSpan? DefaultTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
-    /// <summary>
-    /// Optional bearer access token attached as <c>Authorization: Bearer</c> on every request.
-    /// The caller is responsible for assigning the token after a successful login and clearing it on logout.
-    /// </summary>
-    public string? AccessToken { get; set; }
+    /// <summary>Optional bearer token provider used to add authorization metadata to gRPC calls.</summary>
+    public Func<CancellationToken, ValueTask<string?>>? BearerTokenProvider { get; set; }
 }

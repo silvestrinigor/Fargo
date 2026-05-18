@@ -1,23 +1,16 @@
-using Fargo.Sdk.Articles;
-using Fargo.Sdk.Authentication;
-using Fargo.Sdk.Http;
-using Fargo.Sdk.Items;
-using Fargo.Sdk.Partitions;
-using Fargo.Sdk.UserGroups;
-using Fargo.Sdk.Users;
+using Fargo.GrpcClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Fargo.Sdk.Extensions;
 
 /// <summary>
-/// Extension methods to register the Fargo SDK simple HTTP clients in a DI container.
+/// Extension methods to register the Fargo command SDK.
 /// </summary>
 public static class FargoSdkServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="FargoSdkOptions"/>, the underlying <see cref="HttpClient"/>,
-    /// and one typed HTTP client per Fargo API feature.
+    /// Registers the Fargo gRPC workspace transport and command client.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configure">Delegate to configure <see cref="FargoSdkOptions"/>.</param>
@@ -35,26 +28,18 @@ public static class FargoSdkServiceCollectionExtensions
         configure(options);
         services.TryAddSingleton(options);
 
-        services.AddHttpClient("fargo-sdk");
+        services.AddFargoGrpcClient(grpc =>
+        {
+            grpc.Address = options.Address;
+            grpc.DefaultTimeout = options.DefaultTimeout;
+            grpc.BearerTokenProvider = options.BearerTokenProvider;
+        }, lifetime);
 
         services.Add(ServiceDescriptor.Describe(
-            typeof(IFargoHttpClient),
-            sp => new FargoHttpClient(
-                sp.GetRequiredService<IHttpClientFactory>().CreateClient("fargo-sdk"),
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<FargoHttpClient>>(),
-                sp.GetRequiredService<FargoSdkOptions>()),
+            typeof(IFargoCommandClient),
+            typeof(FargoCommandClient),
             lifetime));
 
-        Add<IAuthenticationClient, AuthenticationHttpClient>();
-        Add<IArticleClient, ArticleHttpClient>();
-        Add<IUserClient, UserHttpClient>();
-        Add<IItemClient, ItemHttpClient>();
-        Add<IPartitionClient, PartitionHttpClient>();
-        Add<IUserGroupClient, UserGroupHttpClient>();
-
         return services;
-
-        void Add<TService, TImpl>() where TService : class where TImpl : class, TService
-            => services.Add(ServiceDescriptor.Describe(typeof(TService), typeof(TImpl), lifetime));
     }
 }

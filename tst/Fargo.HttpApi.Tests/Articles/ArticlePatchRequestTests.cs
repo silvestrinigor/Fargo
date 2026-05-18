@@ -1,16 +1,18 @@
-using Fargo.Sdk.Contracts.Articles;
+using Fargo.Application.Articles;
+using Fargo.Core;
+using Fargo.Infrastructure.Converters;
 using System.Text.Json;
 
 namespace Fargo.HttpApi.Tests.Articles;
 
-public sealed class ArticlePatchRequestTests
+public sealed class ArticlePatchDtoTests
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerOptions.Web);
+    private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
     [Fact]
     public void Deserialize_Should_KeepOmittedFieldUnspecified()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchRequest>("{}", JsonOptions)!;
+        var request = JsonSerializer.Deserialize<ArticlePatchDto>("{}", JsonOptions)!;
 
         Assert.Null(request.Name);
         Assert.False(request.ShelfLife.IsSpecified);
@@ -20,7 +22,7 @@ public sealed class ArticlePatchRequestTests
     [Fact]
     public void Deserialize_Should_KeepExplicitNullableDatabaseFieldSpecified()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
             """
             {
               "shelfLife": null
@@ -35,7 +37,7 @@ public sealed class ArticlePatchRequestTests
     [Fact]
     public void Deserialize_Should_TreatExplicitDescriptionNullAsNoEdit()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
             """
             {
               "description": null
@@ -49,31 +51,42 @@ public sealed class ArticlePatchRequestTests
     [Fact]
     public void Deserialize_Should_ReadNestedBarcodes()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
             """
             {
               "barcodes": {
-                "ean13": "1234567890123"
+                "ean13": "7891234567895"
               }
             }
             """,
             JsonOptions)!;
 
         Assert.NotNull(request.Barcodes);
-        Assert.Equal("1234567890123", request.Barcodes.Ean13);
+        Assert.Equal("7891234567895", request.Barcodes.Ean13?.Code);
     }
 
     [Fact]
-    public void Serialize_Should_OmitUnspecifiedFields()
+    public void Deserialize_Should_ReadName()
     {
-        var request = new ArticlePatchRequest
-        {
-            Name = "Article"
-        };
+        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
+            """
+            {
+              "name": "Article"
+            }
+            """,
+            JsonOptions)!;
 
-        var json = JsonSerializer.Serialize(request, JsonOptions);
+        Assert.Equal(new Name("Article"), request.Name);
+    }
 
-        Assert.Contains("\"name\":\"Article\"", json);
-        Assert.DoesNotContain("description", json);
+    private static JsonSerializerOptions CreateJsonOptions()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerOptions.Web);
+        options.Converters.Add(new NameJsonConverter());
+        options.Converters.Add(new DescriptionJsonConverter());
+        options.Converters.Add(new Ean13JsonConverter());
+        options.Converters.Add(new OptionalValueJsonConverterFactory());
+
+        return options;
     }
 }

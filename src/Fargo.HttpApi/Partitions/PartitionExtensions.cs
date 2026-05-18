@@ -1,7 +1,5 @@
 using Fargo.Application;
 using Fargo.Application.Partitions;
-using Fargo.HttpApi.Contracts;
-using Fargo.Sdk.Contracts.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,14 +40,14 @@ public static class PartitionEndpointRouteBuilderExtension
             .WithName("GetPartition")
             .WithSummary("Gets a single partition")
             .WithDescription("Retrieves a single partition by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<PartitionInfo>(StatusCodes.Status200OK)
+            .Produces<PartitionDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<PartitionInfo>, NotFound>> GetSinglePartition(
+    private static async Task<Results<Ok<PartitionDto>, NotFound>> GetSinglePartition(
         Guid partitionGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<PartitionSingleQuery, PartitionDto?> handler,
@@ -60,7 +58,7 @@ public static class PartitionEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
     #endregion Get Single
@@ -73,14 +71,14 @@ public static class PartitionEndpointRouteBuilderExtension
             .WithName("GetPartitions")
             .WithSummary("Gets multiple partitions")
             .WithDescription("Retrieves a paginated list of partitions. Supports optional temporal queries.")
-            .Produces<IReadOnlyCollection<PartitionInfo>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<PartitionInfo>>, NoContent>> GetManyPartition(
+    private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NoContent>> GetManyPartition(
         DateTimeOffset? temporalAsOfDateTime,
         Page? page,
         Limit? limit,
@@ -106,7 +104,7 @@ public static class PartitionEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response.ToInfo());
+        return TypedResults.Ok(response);
     }
 
     #endregion Get Many
@@ -125,11 +123,11 @@ public static class PartitionEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreatePartition(
-        PartitionCreateRequest request,
+        PartitionCreateDto request,
         PartitionApplicationService service,
         CancellationToken cancellationToken)
     {
-        var response = await service.Create(request.ToApplicationDto(), cancellationToken);
+        var response = await service.Create(request, cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -151,11 +149,11 @@ public static class PartitionEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdatePartition(
         Guid partitionGuid,
-        PartitionUpdateRequest request,
+        PartitionUpdateDto request,
         PartitionApplicationService service,
         CancellationToken cancellationToken)
     {
-        await service.Update(partitionGuid, request.ToApplicationDto(), cancellationToken);
+        await service.Update(partitionGuid, request, cancellationToken);
 
         return TypedResults.NoContent();
     }
