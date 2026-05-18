@@ -41,7 +41,7 @@ public sealed class CommandDispatcher(IServiceProvider serviceProvider) : IComma
     }
 
     public async Task<object?> Dispatch(
-        object command,
+        ICommand command,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -70,13 +70,6 @@ public sealed class CommandDispatcher(IServiceProvider serviceProvider) : IComma
                 .GetType()
                 .GetProperty(nameof(Task<object>.Result))!
                 .GetValue(task);
-        }
-
-        if (command is not ICommand)
-        {
-            throw new ArgumentException(
-                $"Command type '{commandType.FullName}' does not implement ICommand.",
-                nameof(command));
         }
 
         var noResultMethod = typeof(CommandDispatcher)

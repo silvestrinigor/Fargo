@@ -14,7 +14,7 @@ public interface ICommand;
 /// <typeparam name="TResponse">
 /// The type of response returned by the command.
 /// </typeparam>
-public interface ICommand<out TResponse>;
+public interface ICommand<out TResponse> : ICommand;
 
 /// <summary>
 /// Defines a handler responsible for executing a command.
@@ -74,7 +74,7 @@ public interface ICommandDispatcher
         where TCommand : ICommand<TResponse>;
 
     Task<object?> Dispatch(
-        object command,
+        ICommand command,
         CancellationToken cancellationToken = default);
 }
 

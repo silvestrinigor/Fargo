@@ -133,7 +133,7 @@ public sealed class WorkspaceApplicationServiceTests
 
     private sealed class RecordingCommandDispatcher : ICommandDispatcher
     {
-        public List<object> DispatchedCommands { get; } = [];
+        public List<ICommand> DispatchedCommands { get; } = [];
 
         public Task Dispatch<TCommand>(TCommand command, CancellationToken cancellationToken = default)
             where TCommand : ICommand
@@ -152,7 +152,7 @@ public sealed class WorkspaceApplicationServiceTests
                 : Task.FromResult(default(TResponse)!);
         }
 
-        public Task<object?> Dispatch(object command, CancellationToken cancellationToken = default)
+        public Task<object?> Dispatch(ICommand command, CancellationToken cancellationToken = default)
         {
             DispatchedCommands.Add(command);
 

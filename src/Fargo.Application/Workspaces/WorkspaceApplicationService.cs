@@ -133,7 +133,7 @@ public sealed class WorkspaceApplicationService(
             _ => throw new ArgumentException($"Unsupported workspace command type '{draft.CommandType}'.", nameof(draft))
         };
 
-    private static object ToApplicationCommand(string commandType, string payloadJson)
+    private static ICommand ToApplicationCommand(string commandType, string payloadJson)
         => commandType switch
         {
             WorkspaceCommandTypes.ArticleCreate => ToArticleCreateCommand(payloadJson),
