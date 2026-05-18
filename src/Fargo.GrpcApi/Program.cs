@@ -34,5 +34,3 @@ app.MapGet("/", () => "Fargo gRPC API. Use a gRPC client to call services.");
 app.MapDefaultEndpoints();
 
 app.Run();
-
-public partial class Program;
