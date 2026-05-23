@@ -29,20 +29,10 @@ var httpApi = builder
     .WithReference(migrations)
     .WaitForCompletion(migrations);
 
-var grpcApi = builder
-    .AddProject<Projects.Fargo_GrpcApi>("grpcservice")
-    .WithHttpHealthCheck("/health")
-    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
-    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
-    .WithReference(fargodb)
-    .WithReference(migrations)
-    .WaitForCompletion(migrations);
-
 builder
     .AddProject<Projects.Fargo_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(httpApi)
-    .WithReference(grpcApi)
     .WaitFor(httpApi);
 
 builder.Build().Run();

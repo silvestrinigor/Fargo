@@ -124,10 +124,10 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateUser(
         UserCreateDto request,
-        UserApplicationService service,
+        ICommandHandler<UserCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await service.Create(request, cancellationToken);
+        var response = await handler.Handle(new UserCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -150,10 +150,10 @@ public static class UserEndpointRouteBuilderExtension
     private static async Task<NoContent> UpdateUser(
         Guid userGuid,
         UserUpdateDto request,
-        UserApplicationService service,
+        ICommandHandler<UserUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Update(userGuid, request, cancellationToken);
+        await handler.Handle(new UserUpdateCommand(userGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -175,10 +175,10 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteUser(
         Guid userGuid,
-        UserApplicationService service,
+        ICommandHandler<UserDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Delete(userGuid, cancellationToken);
+        await handler.Handle(new UserDeleteCommand(userGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

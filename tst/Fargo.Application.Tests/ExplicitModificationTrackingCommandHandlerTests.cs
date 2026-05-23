@@ -3,7 +3,6 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
-using Fargo.Application.Workspaces;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Identity;
@@ -27,17 +26,17 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
         var actor = CreateActor(ActionType.CreateItem);
-        var reservedGuidSession = new ReservedGuidSession();
-        var reservedItemGuid = reservedGuidSession.ReserveItemGuid();
         var handler = new ItemCreateCommandHandler(
             itemRepository,
             articleRepository,
+            Substitute.For<IPartitionRepository>(),
             Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
-            reservedGuidSession,
+            Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
-        await handler.Handle(new ItemCreateCommand(article.Guid, ItemGuid: reservedItemGuid));
+        await handler.Handle(new ItemCreateCommand(new ItemCreateDto(article.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(item =>
             item.EditedByGuid == actor.ActorGuid &&
@@ -45,26 +44,31 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
     }
 
     [Fact]
-    public async Task PartitionRename_Should_MarkActorAndGeneralModificationType()
+    public async Task PartitionUpdateName_Should_MarkActorAndGeneralModificationType()
     {
         var partition = Partition.CreatePartition(new Name("Partition"));
         var repository = Substitute.For<IPartitionRepository>();
         repository.GetByGuid(partition.Guid, Arg.Any<CancellationToken>())
             .Returns(partition);
         var actor = CreateActor(ActionType.EditPartition);
-        var handler = new PartitionRenameCommandHandler(
+        var handler = new PartitionUpdateCommandHandler(
+            new PartitionService(repository),
             repository,
+            Substitute.For<IEntityEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<PartitionRenameCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<PartitionUpdateCommandHandler>>());
 
-        await handler.Handle(new PartitionRenameCommand(partition.Guid, new Name("Renamed")));
+        await handler.Handle(new PartitionUpdateCommand(
+            partition.Guid,
+            new PartitionUpdateDto(Name: new Name("Renamed"))));
 
         Assert.Equal(actor.ActorGuid, partition.EditedByGuid);
         Assert.Equal(PartitionModifiedType.General, partition.ModificationTypes);
     }
 
     [Fact]
-    public async Task UserChangePassword_Should_MarkActorAndPasswordModificationType()
+    public async Task UserUpdatePassword_Should_MarkActorAndPasswordModificationType()
     {
         var user = User.CreateUser(new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
         var userRepository = Substitute.For<IUserRepository>();
@@ -77,33 +81,46 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         refreshTokenRepository.GetByUserGuid(user.Guid, Arg.Any<CancellationToken>())
             .Returns([]);
         var actor = CreateActor(ActionType.EditUser, ActionType.ChangeOtherUserPassword);
-        var handler = new UserChangePasswordCommandHandler(
+        var handler = new UserUpdateCommandHandler(
+            new UserService(userRepository),
             userRepository,
-            passwordHasher,
+            Substitute.For<IPartitionRepository>(),
+            Substitute.For<IUserGroupRepository>(),
             refreshTokenRepository,
+            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<UserChangePasswordCommandHandler>>());
+            passwordHasher,
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<UserUpdateCommandHandler>>());
 
-        await handler.Handle(new UserChangePasswordCommand(user.Guid, new Password("ValidPass1!")));
+        await handler.Handle(new UserUpdateCommand(user.Guid, new UserUpdateDto(Password: "ValidPass1!")));
 
         Assert.Equal(actor.ActorGuid, user.EditedByGuid);
         Assert.Equal(UserModifiedType.PasswordChanged, user.ModificationTypes);
     }
 
     [Fact]
-    public async Task UserGroupSetPermissions_Should_MarkActorAndPermissionsModificationType()
+    public async Task UserGroupUpdatePermissions_Should_MarkActorAndPermissionsModificationType()
     {
         var userGroup = UserGroup.CreateUserGroup(new Nameid("valid-group"));
         var repository = Substitute.For<IUserGroupRepository>();
         repository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(userGroup);
         var actor = CreateActor(ActionType.EditUserGroup);
-        var handler = new UserGroupSetPermissionsCommandHandler(
+        var handler = new UserGroupUpdateCommandHandler(
+            new UserGroupService(repository),
             repository,
+            Substitute.For<IPartitionRepository>(),
+            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<UserGroupSetPermissionsCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());
 
-        await handler.Handle(new UserGroupSetPermissionsCommand(userGroup.Guid, [ActionType.CreateUser]));
+        await handler.Handle(new UserGroupUpdateCommand(
+            userGroup.Guid,
+            new UserGroupUpdateDto(null, null, null, [new UserGroupPermissionUpdateDto(ActionType.CreateUser)], null)));
 
         Assert.Equal(actor.ActorGuid, userGroup.EditedByGuid);
         Assert.Equal(UserGroupModifiedType.PermissionsChanged, userGroup.ModificationTypes);

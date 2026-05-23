@@ -469,7 +469,14 @@ public sealed class PasswordChangeCommandHandler(
             throw new InvalidPasswordFargoApplicationException();
         }
 
-        ValidatePasswordPolicy(command.Passwords.NewPassword);
+        try
+        {
+            _ = new Password(command.Passwords.NewPassword);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new WeakPasswordFargoApplicationException(ex.Message);
+        }
 
         user.ChangePasswordHash(passwordHasher.Hash(command.Passwords.NewPassword));
         user.ResetPasswordExpiration();
@@ -486,18 +493,6 @@ public sealed class PasswordChangeCommandHandler(
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation("Password change flow completed for user {UserGuid}.", user.Guid);
-        }
-    }
-
-    private static void ValidatePasswordPolicy(string password)
-    {
-        try
-        {
-            _ = new Password(password);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new WeakPasswordFargoApplicationException(ex.Message);
         }
     }
 }

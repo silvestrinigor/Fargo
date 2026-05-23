@@ -124,10 +124,10 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateItem(
         ItemCreateDto request,
-        ItemApplicationService service,
+        ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await service.Create(request, cancellationToken);
+        var response = await handler.Handle(new ItemCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -150,10 +150,10 @@ public static class ItemEndpointRouteBuilderExtension
     private static async Task<NoContent> UpdateItem(
         Guid itemGuid,
         ItemUpdateDto request,
-        ItemApplicationService service,
+        ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Update(itemGuid, request, cancellationToken);
+        await handler.Handle(new ItemUpdateCommand(itemGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -175,10 +175,10 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteItem(
         Guid itemGuid,
-        ItemApplicationService service,
+        ICommandHandler<ItemDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Delete(itemGuid, cancellationToken);
+        await handler.Handle(new ItemDeleteCommand(itemGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

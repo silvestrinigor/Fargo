@@ -157,12 +157,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateArticle(
         ArticleCreateDto request,
-        ArticleApplicationService articles,
+        ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await articles.Create(
-            request,
-            cancellationToken);
+        var response = await handler.Handle(new ArticleCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -185,13 +183,10 @@ public static class ArticleEndpointRouteBuilderExtension
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
         ArticlePatchDto request,
-        ArticleApplicationService articles,
+        ICommandHandler<ArticlePatchCommand> handler,
         CancellationToken cancellationToken)
     {
-        await articles.Patch(
-            articleGuid,
-            request,
-            cancellationToken);
+        await handler.Handle(new ArticlePatchCommand(articleGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -213,10 +208,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteArticle(
         Guid articleGuid,
-        ArticleApplicationService articles,
+        ICommandHandler<ArticleDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await articles.Delete(articleGuid, cancellationToken);
+        await handler.Handle(new ArticleDeleteCommand(articleGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

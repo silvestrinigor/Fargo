@@ -1,8 +1,5 @@
 <Solution>
     <Project Path="src/Fargo.AppHost/Fargo.AppHost.csproj" />
-    <Project Path="src/Fargo.GrpcApi/Fargo.GrpcApi.csproj" />
-    <Project Path="src/Fargo.GrpcClient/Fargo.GrpcClient.csproj" />
-    <Project Path="src/Fargo.GrpcContracts/Fargo.GrpcContracts.csproj" />
     <Project Path="src/Fargo.HttpApi/Fargo.HttpApi.csproj" />
     <Project Path="src/Fargo.MigrationService/Fargo.MigrationService.csproj" />
     <Project Path="src/Fargo.SeedService/Fargo.SeedService.csproj" />
@@ -12,11 +9,8 @@
     <Project Path="src/Fargo.Application/Fargo.Application.csproj" />
     <Project Path="src/Fargo.Core/Fargo.Core.csproj" />
     <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
-    <Project Path="src/Fargo.Sdk/Fargo.Sdk.csproj" />
     <Project Path="tst/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
-    <Project Path="tst/Fargo.GrpcApi.Tests/Fargo.GrpcApi.Tests.csproj" />
     <Project Path="tst/Fargo.HttpApi.Tests/Fargo.HttpApi.Tests.csproj" />
-    <Project Path="tst/Fargo.Sdk.Tests/Fargo.Sdk.Tests.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tst/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
 </Solution>
