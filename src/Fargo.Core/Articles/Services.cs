@@ -1,8 +1,6 @@
 using Fargo.Core.Barcodes;
 namespace Fargo.Core.Articles;
 
-#region Services
-
 /// <summary>
 /// Provides domain operations for article barcode assignment and validation.
 /// </summary>
@@ -63,5 +61,3 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         setter(article, value);
     }
 }
-
-#endregion Services

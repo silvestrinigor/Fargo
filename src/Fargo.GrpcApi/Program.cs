@@ -1,3 +1,5 @@
+using Fargo.Application;
+using Fargo.GrpcApi;
 using Fargo.GrpcApi.Interceptors;
 using Fargo.GrpcApi.Services;
 using Fargo.Infrastructure.Extensions;
@@ -13,6 +15,8 @@ builder.Services.AddGrpc(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 

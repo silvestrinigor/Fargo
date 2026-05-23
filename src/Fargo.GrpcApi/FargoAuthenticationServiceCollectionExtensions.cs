@@ -1,11 +1,9 @@
 using Fargo.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Fargo.Infrastructure.Extensions;
+namespace Fargo.GrpcApi;
 
 public static class FargoAuthenticationServiceCollectionExtensions
 {

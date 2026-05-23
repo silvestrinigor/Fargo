@@ -1,3 +1,5 @@
+using Fargo.Application;
+using Fargo.HttpApi;
 using Fargo.HttpApi.Articles;
 using Fargo.HttpApi.Extensions;
 using Fargo.HttpApi.Items;
@@ -5,6 +7,7 @@ using Fargo.HttpApi.Middlewares;
 using Fargo.HttpApi.Partitions;
 using Fargo.HttpApi.UserGroups;
 using Fargo.HttpApi.Users;
+using Fargo.HttpAPi.Extensions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -25,6 +28,8 @@ builder.Services.AddFargoOpenApi();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.ConfigureFargoHttpJsonOptions();
+
+builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
