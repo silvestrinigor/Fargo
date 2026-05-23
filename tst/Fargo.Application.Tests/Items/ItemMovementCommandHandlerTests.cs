@@ -50,7 +50,9 @@ public sealed class ItemMovementCommandHandlerTests
         itemRepository
             .GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
-        await new ItemService(itemRepository).MoveToContainer(parent, item);
+        await new ItemService(itemRepository).MoveToContainer(parent, item, CreateDomainActor());
+        var originalEditedByGuid = item.EditedByGuid;
+        var originalModificationTypes = item.ModificationTypes;
         var movementRepository = Substitute.For<IItemMovementRepository>();
         var handler = new ItemSetParentContainerCommandHandler(
             itemRepository,
@@ -61,8 +63,8 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
 
-        Assert.Null(item.EditedByGuid);
-        Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
+        Assert.Equal(originalEditedByGuid, item.EditedByGuid);
+        Assert.Equal(originalModificationTypes, item.ModificationTypes);
         movementRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
@@ -75,7 +77,7 @@ public sealed class ItemMovementCommandHandlerTests
         itemRepository
             .GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
-        await new ItemService(itemRepository).MoveToContainer(parent, item);
+        await new ItemService(itemRepository).MoveToContainer(parent, item, CreateDomainActor());
         var movementRepository = Substitute.For<IItemMovementRepository>();
         var actor = CreateActor(ActionType.EditItem);
         var handler = new ItemSetParentContainerCommandHandler(
@@ -130,8 +132,8 @@ public sealed class ItemMovementCommandHandlerTests
             UserGroupGuids: []);
 
     private static Item CreateItem()
-        => Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        => Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
 
     private static Item CreateContainerItem()
-        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article")));
+        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor()));
 }

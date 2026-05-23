@@ -37,33 +37,28 @@ public sealed class PartitionCreateCommandHandler(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("Partition create flow started by actor {ActorGuid}.", actor.ActorGuid);
+            logger.LogInformation("Partition create flow started by actor {ActorGuid}.", actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.CreatePartition);
 
         var partitionGuid = reservedGuidSession.ResolvePartitionGuid(command.PartitionGuid);
 
-        var partition = Partition.CreatePartition(partitionGuid, command.Name);
-
-        partition.MarkAsEditedBy(actor.ActorGuid);
-
-        partition.MarkModificationType(PartitionModifiedType.General);
+        var partition = Partition.CreatePartition(partitionGuid, command.Name, actor);
 
         partitionRepository.Add(partition);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Partition>(partition, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Partition>(partition, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition create mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
 
         return partition.Guid;
@@ -103,32 +98,29 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition delete flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.DeletePartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        partitionService.DeletePartition(partition, actor);
 
-        partitionService.DeletePartition(partition);
-
-        entityEventRepository.Add(EntityEvent.EntityDeleted<Partition>(partition, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityDeleted<Partition>(partition, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition delete mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -167,21 +159,20 @@ public sealed class PartitionRenameCommandHandler(
         PartitionRenameCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition rename flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        partition.ValidateCanEdit(actor);
 
         if (partition.Name == command.Name)
         {
@@ -195,18 +186,14 @@ public sealed class PartitionRenameCommandHandler(
             return;
         }
 
-        partition.Rename(command.Name);
-
-        partition.MarkAsEditedBy(actor.ActorGuid);
-
-        partition.MarkModificationType(PartitionModifiedType.General);
+        partition.Rename(command.Name, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition rename mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -245,21 +232,20 @@ public sealed class PartitionChangeDescriptionCommandHandler(
         PartitionChangeDescriptionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition description change flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        partition.ValidateCanEdit(actor);
 
         if (partition.Description == command.Description)
         {
@@ -273,18 +259,14 @@ public sealed class PartitionChangeDescriptionCommandHandler(
             return;
         }
 
-        partition.ChangeDescription(command.Description);
-
-        partition.MarkAsEditedBy(actor.ActorGuid);
-
-        partition.MarkModificationType(PartitionModifiedType.General);
+        partition.ChangeDescription(command.Description, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition description change mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -325,21 +307,20 @@ public sealed class PartitionSetParentCommandHandler(
         PartitionSetParentCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition parent mutation started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        partition.ValidateCanEdit(actor);
 
         if (partition.ParentPartitionGuid == command.ParentPartitionGuid)
         {
@@ -356,20 +337,14 @@ public sealed class PartitionSetParentCommandHandler(
 
         var parentPartition = await partitionRepository.GetFoundByGuid(command.ParentPartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(parentPartition.Guid);
-
-        await partitionService.SetParentPartition(parentPartition, partition, cancellationToken);
-
-        partition.MarkAsEditedBy(actor.ActorGuid);
-
-        partition.MarkModificationType(PartitionModifiedType.ParentPartitionChanged);
+        await partitionService.SetParentPartition(parentPartition, partition, actor, cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition parent mutation completed for partition {PartitionGuid} by actor {ActorGuid}. ParentPartitionGuid: {ParentPartitionGuid}.",
                 partition.Guid,
-                actor.ActorGuid,
+                actor.Guid,
                 partition.ParentPartitionGuid);
         }
     }
@@ -406,21 +381,20 @@ public sealed class PartitionActivateCommandHandler(
         PartitionActivateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition activation flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        partition.ValidateCanEdit(actor);
 
         if (partition.IsActive)
         {
@@ -434,20 +408,16 @@ public sealed class PartitionActivateCommandHandler(
             return;
         }
 
-        partition.Activate();
+        partition.Activate(actor);
 
-        partition.MarkAsEditedBy(actor.ActorGuid);
-
-        partition.MarkModificationType(PartitionModifiedType.Activated);
-
-        entityEventRepository.Add(EntityEvent.Activated<Partition>(partition, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.Activated<Partition>(partition, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition activation mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -483,21 +453,20 @@ public sealed class PartitionDeactivateCommandHandler(
         PartitionDeactivateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition deactivation flow started for partition {PartitionGuid} by actor {ActorGuid}.",
                 command.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetFoundByGuid(command.PartitionGuid, cancellationToken);
 
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        partition.ValidateCanEdit(actor);
 
         if (!partition.IsActive)
         {
@@ -511,20 +480,16 @@ public sealed class PartitionDeactivateCommandHandler(
             return;
         }
 
-        partition.Deactivate();
+        partition.Deactivate(actor);
 
-        partition.MarkAsEditedBy(actor.ActorGuid);
-
-        partition.MarkModificationType(PartitionModifiedType.Deactivated);
-
-        entityEventRepository.Add(EntityEvent.Deactivated<Partition>(partition, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.Deactivated<Partition>(partition, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Partition deactivation mutation completed for partition {PartitionGuid} by actor {ActorGuid}.",
                 partition.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }

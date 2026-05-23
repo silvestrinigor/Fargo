@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="Fargo.Infrastructure.Tests.DomainTestActors" Static="true" />
   </ItemGroup>
 
   <ItemGroup>

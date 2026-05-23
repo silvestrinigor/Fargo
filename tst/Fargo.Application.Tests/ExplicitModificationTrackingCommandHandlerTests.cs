@@ -21,7 +21,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
     [Fact]
     public async Task ItemCreate_Should_MarkActorAndGeneralModificationType()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var itemRepository = Substitute.For<IItemRepository>();
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())

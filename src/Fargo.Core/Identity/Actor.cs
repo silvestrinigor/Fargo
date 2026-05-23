@@ -1,4 +1,5 @@
 using Fargo.Core.Partitions;
+using Fargo.Core.Users;
 
 namespace Fargo.Core.Identity;
 
@@ -139,5 +140,32 @@ public sealed class Actor
         }
 
         return partitioned.PartitionGuids.Any(p => PartitionAccessesGuids.Contains(p));
+    }
+
+    public void ValidateHasPermission(ActionType action)
+    {
+        if (!HasActionPermission(action))
+        {
+            throw new UserNotAuthorizedFargoDomainException(Guid, action);
+        }
+    }
+
+    public void ValidateHasPartitionAccess(Guid partitionGuid)
+    {
+        if (!HasPartitionAccess(partitionGuid))
+        {
+            throw new UserPartitionAccessNotAuthorizedFargoDomainException(Guid, partitionGuid);
+        }
+    }
+
+    public void ValidateHasAccess<TEntity>(TEntity partitioned)
+        where TEntity : IEntity, IPartitionedEntity
+    {
+        ArgumentNullException.ThrowIfNull(partitioned);
+
+        if (!HasAccess(partitioned))
+        {
+            throw new UserEntityAccessNotAuthorizedFargoDomainException(Guid, partitioned.Guid);
+        }
     }
 }

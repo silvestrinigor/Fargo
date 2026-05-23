@@ -47,42 +47,33 @@ public sealed class ItemCreateCommandHandler(
         ItemCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item create flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.CreateItem);
 
         var itemGuid = reservedGuidSession.ResolveItemGuid(command.ItemGuid);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
-
-        article.ValidateIsActive();
-
-        var item = Item.CreateItem(itemGuid, article, command.ProductionDate);
-
-        item.MarkAsEditedBy(actor.ActorGuid);
-
-        item.MarkModificationType(ItemModifiedType.General);
+        var item = Item.CreateItem(itemGuid, article, actor, command.ProductionDate);
 
         itemRepository.Add(item);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Item>(item, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Item>(item, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item create mutation completed for item {ItemGuid} by actor {ActorGuid}. ArticleGuid: {ArticleGuid}.",
                 item.Guid,
-                actor.ActorGuid,
+                actor.Guid,
                 article.Guid);
         }
 
@@ -121,32 +112,31 @@ public sealed class ItemDeleteCommandHandler(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item delete flow started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.DeleteItem);
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(item);
+        item.ValidateCanDelete(actor);
 
         itemRepository.Remove(item);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<Item>(item, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityDeleted<Item>(item, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item delete mutation completed for item {ItemGuid} by actor {ActorGuid}.",
                 item.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -190,21 +180,20 @@ public sealed class ItemSetParentContainerCommandHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item parent container mutation started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditItem);
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(item);
+        item.ValidateCanEdit(actor);
 
         var previousParentContainerGuid = item.ParentContainerGuid;
 
@@ -227,11 +216,10 @@ public sealed class ItemSetParentContainerCommandHandler(
                 parentContainerGuid,
                 cancellationToken);
 
-            actor.ValidateHasAccess(parentContainerItem);
-
             await itemService.MoveToContainer(
                 parentContainerItem,
                 item,
+                actor,
                 cancellationToken);
 
             if (logger.IsEnabled(LogLevel.Information))
@@ -244,7 +232,7 @@ public sealed class ItemSetParentContainerCommandHandler(
         }
         else
         {
-            ItemService.RemoveFromContainer(item);
+            ItemService.RemoveFromContainer(item, actor);
             if (logger.IsEnabled(LogLevel.Information))
             {
                 logger.LogInformation(
@@ -257,11 +245,7 @@ public sealed class ItemSetParentContainerCommandHandler(
             item,
             previousParentContainerGuid,
             item.ParentContainerGuid,
-            actor.ActorGuid));
-
-        item.MarkAsEditedBy(actor.ActorGuid);
-
-        item.MarkModificationType(ItemModifiedType.ParentContainerChanged);
+            actor.Guid));
     }
 }
 
@@ -302,22 +286,21 @@ public sealed class ItemSetPartitionsCommandHandler(
         ItemSetPartitionsCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item partition mutation started for item {ItemGuid} by actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}.",
                 command.ItemGuid,
-                actor.ActorGuid,
+                actor.Guid,
                 command.PartitionGuids.Count);
         }
 
-        actor.ValidateHasPermission(ActionType.EditItem);
-
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(item);
+        item.ValidateCanEdit(actor);
 
         var requestedPartitions = command.PartitionGuids.Distinct().ToArray();
 
@@ -346,14 +329,12 @@ public sealed class ItemSetPartitionsCommandHandler(
 
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            item.AddPartition(partition);
+            item.AddPartition(partition, actor);
 
             entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
                 item,
                 partition,
-                actor.ActorGuid));
+                actor.Guid));
         }
 
         var partitionsToRemove = item.Partitions
@@ -362,26 +343,20 @@ public sealed class ItemSetPartitionsCommandHandler(
 
         foreach (var partition in partitionsToRemove)
         {
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            item.RemovePartition(partition);
+            item.RemovePartition(partition, actor);
 
             entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
                 item,
                 partition,
-                actor.ActorGuid));
+                actor.Guid));
         }
-
-        item.MarkAsEditedBy(actor.ActorGuid);
-
-        item.MarkModificationType(ItemModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item partition mutation completed for item {ItemGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
                 item.Guid,
-                actor.ActorGuid,
+                actor.Guid,
                 item.Partitions.Count);
         }
     }
@@ -418,21 +393,20 @@ public sealed class ItemActivateCommandHandler(
         ItemActivateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item activation flow started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditItem);
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(item);
+        item.ValidateCanEdit(actor);
 
         if (item.IsActive)
         {
@@ -446,20 +420,16 @@ public sealed class ItemActivateCommandHandler(
             return;
         }
 
-        item.Activate();
+        item.Activate(actor);
 
-        item.MarkAsEditedBy(actor.ActorGuid);
-
-        item.MarkModificationType(ItemModifiedType.Activated);
-
-        entityEventRepository.Add(EntityEvent.Activated<Item>(item, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.Activated<Item>(item, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item activation mutation completed for item {ItemGuid} by actor {ActorGuid}.",
                 item.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -495,21 +465,20 @@ public sealed class ItemDeactivateCommandHandler(
         ItemDeactivateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item deactivation flow started for item {ItemGuid} by actor {ActorGuid}.",
                 command.ItemGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditItem);
 
         var item = await itemRepository.GetFoundByGuid(command.ItemGuid, cancellationToken);
 
-        actor.ValidateHasAccess(item);
+        item.ValidateCanEdit(actor);
 
         if (!item.IsActive)
         {
@@ -523,20 +492,16 @@ public sealed class ItemDeactivateCommandHandler(
             return;
         }
 
-        item.Deactivate();
+        item.Deactivate(actor);
 
-        item.MarkAsEditedBy(actor.ActorGuid);
-
-        item.MarkModificationType(ItemModifiedType.Deactivated);
-
-        entityEventRepository.Add(EntityEvent.Deactivated<Item>(item, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.Deactivated<Item>(item, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Item deactivation mutation completed for item {ItemGuid} by actor {ActorGuid}.",
                 item.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }

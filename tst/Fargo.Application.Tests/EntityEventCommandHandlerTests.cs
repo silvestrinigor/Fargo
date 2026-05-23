@@ -39,7 +39,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ArticleDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(article);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditArticle);
@@ -61,7 +61,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ArticleActivate_Should_NotRecordEvent_WhenAlreadyActive()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(article);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditArticle);
@@ -79,7 +79,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemDelete_Should_RecordDeletedEvent()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.DeleteItem);
@@ -101,8 +101,8 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemCreate_Should_Throw_WhenArticleIsInactive()
     {
-        var article = Article.CreateArticle(new Name("Article"));
-        article.Deactivate();
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        article.Deactivate(CreateDomainActor());
         var itemRepository = Substitute.For<IItemRepository>();
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -126,7 +126,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);
@@ -151,7 +151,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemActivate_Should_RecordActivatedEvent_WhenStateChanges()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         item.Deactivate();
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
@@ -177,7 +177,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemActivate_Should_NotRecordEvent_WhenAlreadyActive()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);

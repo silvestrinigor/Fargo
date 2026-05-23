@@ -43,33 +43,28 @@ public sealed class ArticleCreateCommandHandler(
         ArticleCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("Article create flow started for actor {ActorGuid}.", actor.ActorGuid);
+            logger.LogInformation("Article create flow started for actor {ActorGuid}.", actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.CreateArticle);
 
         var articleGuid = reservedGuidSession.ResolveArticleGuid(command.ArticleGuid);
 
-        var article = Article.CreateArticle(articleGuid, command.Name);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.General);
+        var article = Article.CreateArticle(articleGuid, command.Name, actor);
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
 
         return article.Guid;
@@ -108,34 +103,24 @@ public sealed class ArticleCreateVariationCommandHandler(
         ArticleCreateVariationCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article variation create flow started from article {FromArticleGuid} by actor {ActorGuid}.",
                 command.FromArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.CreateArticle);
 
         var fromArticle = await articleRepository.GetFoundByGuid(command.FromArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(fromArticle);
-
-        fromArticle.ValidateIsActive();
-
-        var article = Article.CreateArticleVariation(command.Name, fromArticle);
-
-        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
-            article,
-            actor.ActorGuid,
-            ArticleModifiedType.General | ArticleModifiedType.Relation);
+        var article = Article.CreateArticleVariation(command.Name, fromArticle, actor);
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
         return article.Guid;
     }
@@ -177,34 +162,24 @@ public sealed class ArticleCreatePackCommandHandler(
         ArticleCreatePackCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article pack create flow started from article {FromArticleGuid} by actor {ActorGuid}.",
                 command.FromArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.CreateArticle);
 
         var fromArticle = await articleRepository.GetFoundByGuid(command.FromArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(fromArticle);
-
-        fromArticle.ValidateIsActive();
-
-        var article = Article.CreateArticlePack(command.Name, fromArticle, command.Quantity);
-
-        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
-            article,
-            actor.ActorGuid,
-            ArticleModifiedType.General | ArticleModifiedType.Relation);
+        var article = Article.CreateArticlePack(command.Name, fromArticle, command.Quantity, actor);
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
         return article.Guid;
     }
@@ -242,17 +217,16 @@ public sealed class ArticleCreateKitCommandHandler(
         ArticleCreateKitCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article kit create flow started by actor {ActorGuid}. PackCount: {PackCount}.",
-                actor.ActorGuid,
+                actor.Guid,
                 command.Components.Count);
         }
-
-        actor.ValidateHasPermission(ActionType.CreateArticle);
 
         var components = new List<ArticleKitComponent>(command.Components.Count);
 
@@ -260,23 +234,14 @@ public sealed class ArticleCreateKitCommandHandler(
         {
             var fromArticle = await articleRepository.GetFoundByGuid(component.ArticleGuid, cancellationToken);
 
-            actor.ValidateHasAccess(fromArticle);
-
-            fromArticle.ValidateIsActive();
-
             components.Add(new ArticleKitComponent(fromArticle, component.Quantity));
         }
 
-        var article = Article.CreateArticleKit(command.Name, components);
-
-        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
-            article,
-            actor.ActorGuid,
-            ArticleModifiedType.General | ArticleModifiedType.Relation);
+        var article = Article.CreateArticleKit(command.Name, components, actor);
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
         return article.Guid;
     }
@@ -309,40 +274,21 @@ public sealed class ArticleCreateContainerCommandHandler(
         ArticleCreateContainerCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("Article container create flow started by actor {ActorGuid}.", actor.ActorGuid);
+            logger.LogInformation("Article container create flow started by actor {ActorGuid}.", actor.Guid);
         }
 
-        actor.ValidateHasPermission(ActionType.CreateArticle);
-
-        var article = Article.CreateArticleContainer(command.Name);
-
-        ArticleCreateCommandHandlerHelpers.MarkCreatedArticle(
-            article,
-            actor.ActorGuid,
-            ArticleModifiedType.General | ArticleModifiedType.Container);
+        var article = Article.CreateArticleContainer(command.Name, actor);
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
         return article.Guid;
-    }
-}
-
-internal static class ArticleCreateCommandHandlerHelpers
-{
-    public static void MarkCreatedArticle(
-        Article article,
-        Guid actorGuid,
-        ArticleModifiedType modificationType)
-    {
-        article.MarkAsEditedBy(actorGuid);
-
-        article.MarkModificationType(modificationType);
     }
 }
 
@@ -380,21 +326,20 @@ public sealed class ArticleSetContainerMaxMassCommandHandler(
         ArticleSetContainerMaxMassCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article container max mass mutation started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (!article.IsContainer)
         {
@@ -413,18 +358,14 @@ public sealed class ArticleSetContainerMaxMassCommandHandler(
             return;
         }
 
-        article.SetContainerMaxMass(command.MaxMass);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.Container);
+        article.SetContainerMaxMass(command.MaxMass, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article container max mass mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -463,21 +404,20 @@ public sealed class ArticleRenameCommandHandler(
         ArticleRenameCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article rename flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (article.Name == command.Name)
         {
@@ -491,18 +431,14 @@ public sealed class ArticleRenameCommandHandler(
             return;
         }
 
-        article.Rename(command.Name);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.General);
+        article.Rename(command.Name, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article rename mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -541,21 +477,20 @@ public sealed class ArticleChangeDescriptionCommandHandler(
         ArticleChangeDescriptionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article description change flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (article.Description == command.Description)
         {
@@ -569,18 +504,14 @@ public sealed class ArticleChangeDescriptionCommandHandler(
             return;
         }
 
-        article.ChangeDescription(command.Description);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.General);
+        article.ChangeDescription(command.Description, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article description change mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -619,21 +550,20 @@ public sealed class ArticleSetShelfLifeCommandHandler(
         ArticleSetShelfLifeCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article shelf life mutation started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (article.ShelfLife == command.ShelfLife)
         {
@@ -647,18 +577,14 @@ public sealed class ArticleSetShelfLifeCommandHandler(
             return;
         }
 
-        article.SetShelfLife(command.ShelfLife);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.General);
+        article.SetShelfLife(command.ShelfLife, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article shelf life mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -697,21 +623,20 @@ public sealed class ArticleSetColorCommandHandler(
         ArticleSetColorCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article color mutation started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (article.Color == command.Color)
         {
@@ -725,18 +650,14 @@ public sealed class ArticleSetColorCommandHandler(
             return;
         }
 
-        article.SetColor(command.Color);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.General);
+        article.SetColor(command.Color, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article color mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -772,21 +693,20 @@ public sealed class ArticleActivateCommandHandler(
         ArticleActivateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article activation flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (article.IsActive)
         {
@@ -800,20 +720,16 @@ public sealed class ArticleActivateCommandHandler(
             return;
         }
 
-        article.Activate();
+        article.Activate(actor);
 
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.Activated);
-
-        entityEventRepository.Add(EntityEvent.Activated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.Activated<Article>(article, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article activation mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -849,21 +765,20 @@ public sealed class ArticleDeactivateCommandHandler(
         ArticleDeactivateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article deactivation flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (!article.IsActive)
         {
@@ -877,20 +792,16 @@ public sealed class ArticleDeactivateCommandHandler(
             return;
         }
 
-        article.Deactivate();
+        article.Deactivate(actor);
 
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.Deactivated);
-
-        entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article deactivation mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -929,21 +840,20 @@ public sealed class ArticleSetMetricsCommandHandler(
         ArticleSetMetricsCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article metrics mutation started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         if (Nullable.Equals(article.Mass, command.Metrics.Mass) &&
             Nullable.Equals(article.LengthX, command.Metrics.LengthX) &&
@@ -960,18 +870,14 @@ public sealed class ArticleSetMetricsCommandHandler(
             return;
         }
 
-        article.SetMetrics(command.Metrics);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.MetricsChanged);
+        article.SetMetrics(command.Metrics, actor);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article metrics mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -1011,21 +917,20 @@ public sealed class ArticleSetBarcodesCommandHandler(
         ArticleSetBarcodesCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article barcode mutation started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.EditArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         var hasChanges =
             !EqualityComparer<Ean13?>.Default.Equals(article.Ean13, command.Barcodes.Ean13) ||
@@ -1051,36 +956,32 @@ public sealed class ArticleSetBarcodesCommandHandler(
             return;
         }
 
-        await articleService.SetEan13(command.Barcodes.Ean13, article, cancellationToken);
+        await articleService.SetEan13(command.Barcodes.Ean13, article, actor, cancellationToken);
 
-        await articleService.SetEan8(command.Barcodes.Ean8, article, cancellationToken);
+        await articleService.SetEan8(command.Barcodes.Ean8, article, actor, cancellationToken);
 
-        await articleService.SetUpcA(command.Barcodes.UpcA, article, cancellationToken);
+        await articleService.SetUpcA(command.Barcodes.UpcA, article, actor, cancellationToken);
 
-        await articleService.SetUpcE(command.Barcodes.UpcE, article, cancellationToken);
+        await articleService.SetUpcE(command.Barcodes.UpcE, article, actor, cancellationToken);
 
-        await articleService.SetCode128(command.Barcodes.Code128, article, cancellationToken);
+        await articleService.SetCode128(command.Barcodes.Code128, article, actor, cancellationToken);
 
-        await articleService.SetCode39(command.Barcodes.Code39, article, cancellationToken);
+        await articleService.SetCode39(command.Barcodes.Code39, article, actor, cancellationToken);
 
-        await articleService.SetItf14(command.Barcodes.Itf14, article, cancellationToken);
+        await articleService.SetItf14(command.Barcodes.Itf14, article, actor, cancellationToken);
 
-        await articleService.SetGs1128(command.Barcodes.Gs1128, article, cancellationToken);
+        await articleService.SetGs1128(command.Barcodes.Gs1128, article, actor, cancellationToken);
 
-        await articleService.SetQrCode(command.Barcodes.QrCode, article, cancellationToken);
+        await articleService.SetQrCode(command.Barcodes.QrCode, article, actor, cancellationToken);
 
-        await articleService.SetDataMatrix(command.Barcodes.DataMatrix, article, cancellationToken);
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.BarcodesChanged);
+        await articleService.SetDataMatrix(command.Barcodes.DataMatrix, article, actor, cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article barcode mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }
@@ -1121,22 +1022,21 @@ public sealed class ArticleSetPartitionsCommandHandler(
         ArticleSetPartitionsCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article partition mutation started for article {ArticleGuid} by actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}.",
                 command.ArticleGuid,
-                actor.ActorGuid,
+                actor.Guid,
                 command.PartitionGuids.Count);
         }
 
-        actor.ValidateHasPermission(ActionType.EditArticle);
-
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanEdit(actor);
 
         var requestedPartitionGuids = command.PartitionGuids.Distinct().ToArray();
 
@@ -1165,14 +1065,12 @@ public sealed class ArticleSetPartitionsCommandHandler(
 
             var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            article.AddPartition(partition);
+            article.AddPartition(partition, actor);
 
             entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
                 article,
                 partition,
-                actor.ActorGuid));
+                actor.Guid));
         }
 
         var partitionsToRemove = article.Partitions
@@ -1181,26 +1079,20 @@ public sealed class ArticleSetPartitionsCommandHandler(
 
         foreach (var partition in partitionsToRemove)
         {
-            actor.ValidateHasPartitionAccess(partition.Guid);
-
-            article.RemovePartition(partition);
+            article.RemovePartition(partition, actor);
 
             entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
                 article,
                 partition,
-                actor.ActorGuid));
+                actor.Guid));
         }
-
-        article.MarkAsEditedBy(actor.ActorGuid);
-
-        article.MarkModificationType(ArticleModifiedType.PartitionsChanged);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article partition mutation completed for article {ArticleGuid} by actor {ActorGuid}. PartitionCount: {PartitionCount}.",
                 article.Guid,
-                actor.ActorGuid,
+                actor.Guid,
                 article.Partitions.Count);
         }
     }
@@ -1237,21 +1129,20 @@ public sealed class ArticleDeleteCommandHandler(
         ArticleDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article delete flow started for article {ArticleGuid} by actor {ActorGuid}.",
                 command.ArticleGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
-
-        actor.ValidateHasPermission(ActionType.DeleteArticle);
 
         var article = await articleRepository.GetFoundByGuid(command.ArticleGuid, cancellationToken);
 
-        actor.ValidateHasAccess(article);
+        article.ValidateCanDelete(actor);
 
         var hasItems = await articleRepository.HasItemsAssociated(
             article.Guid,
@@ -1268,14 +1159,14 @@ public sealed class ArticleDeleteCommandHandler(
 
         articleRepository.Remove(article);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<Article>(article, actor.ActorGuid));
+        entityEventRepository.Add(EntityEvent.EntityDeleted<Article>(article, actor.Guid));
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
                 "Article delete mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
-                actor.ActorGuid);
+                actor.Guid);
         }
     }
 }

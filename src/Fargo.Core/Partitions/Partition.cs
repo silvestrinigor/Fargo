@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
@@ -85,6 +86,35 @@ public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<Partition
             Guid = guid
         };
 
+    public static Partition CreatePartition(Name name, Actor actor, Description? description = null)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreatePartition);
+
+        var partition = new Partition(name, description);
+
+        partition.MarkAsEditedBy(actor.Guid);
+        partition.MarkModificationType(PartitionModifiedType.General);
+
+        return partition;
+    }
+
+    public static Partition CreatePartition(Guid guid, Name name, Actor actor, Description? description = null)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreatePartition);
+
+        var partition = new Partition(name, description)
+        {
+            Guid = guid
+        };
+
+        partition.MarkAsEditedBy(actor.Guid);
+        partition.MarkModificationType(PartitionModifiedType.General);
+
+        return partition;
+    }
+
     private Partition()
     {
     }
@@ -133,6 +163,21 @@ public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<Partition
         Name = name;
     }
 
+    public void Rename(Name name, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (Name == name)
+        {
+            return;
+        }
+
+        Name = name;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(PartitionModifiedType.General);
+    }
+
     public void ChangeDescription(Description description)
     {
         if (Description == description)
@@ -143,9 +188,54 @@ public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<Partition
         Description = description;
     }
 
+    public void ChangeDescription(Description description, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(PartitionModifiedType.General);
+    }
+
     public void Activate() => IsActive = true;
 
     public void Deactivate() => IsActive = false;
+
+    public void Activate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(PartitionModifiedType.Activated);
+    }
+
+    public void Deactivate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(PartitionModifiedType.Deactivated);
+    }
 
     #region ParentPartition
 
@@ -293,6 +383,22 @@ public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<Partition
     #endregion UserGroup
 
     #region Modified
+
+    public void ValidateCanEdit(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.EditPartition);
+        actor.ValidateHasPartitionAccess(Guid);
+    }
+
+    public void ValidateCanDelete(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.DeletePartition);
+        actor.ValidateHasPartitionAccess(Guid);
+    }
 
     public Guid? EditedByGuid { get; private set; }
 

@@ -1,3 +1,5 @@
+using Fargo.Core.Identity;
+
 namespace Fargo.Core.Items;
 
 /// <summary>
@@ -20,10 +22,15 @@ public sealed class ItemService(IItemRepository itemRepository)
     public async Task MoveToContainer(
         Item parentContainerItem,
         Item memberItem,
+        Actor actor,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(parentContainerItem);
         ArgumentNullException.ThrowIfNull(memberItem);
+        ArgumentNullException.ThrowIfNull(actor);
+
+        memberItem.ValidateCanEdit(actor);
+        actor.ValidateHasAccess(parentContainerItem);
 
         if (parentContainerItem.Guid == memberItem.Guid)
         {
@@ -48,6 +55,8 @@ public sealed class ItemService(IItemRepository itemRepository)
         }
 
         memberItem.ParentContainer = new ItemContainer(parentContainerItem);
+        memberItem.MarkAsEditedBy(actor.Guid);
+        memberItem.MarkModificationType(ItemModifiedType.ParentContainerChanged);
     }
 
     /// <summary>
@@ -58,5 +67,25 @@ public sealed class ItemService(IItemRepository itemRepository)
         ArgumentNullException.ThrowIfNull(item);
 
         item.ParentContainer = null;
+    }
+
+    /// <summary>
+    /// Clears the parent container relationship, leaving the item outside any container.
+    /// </summary>
+    public static void RemoveFromContainer(Item item, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(actor);
+
+        item.ValidateCanEdit(actor);
+
+        if (item.ParentContainerGuid is null)
+        {
+            return;
+        }
+
+        item.ParentContainer = null;
+        item.MarkAsEditedBy(actor.Guid);
+        item.MarkModificationType(ItemModifiedType.ParentContainerChanged);
     }
 }

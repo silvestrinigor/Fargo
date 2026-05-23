@@ -50,7 +50,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task CreateVariation_Should_CreateVariationAndMarkRelationModificationType()
     {
-        var fromArticle = Article.CreateArticle(new Name("Source article"));
+        var fromArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
         var repository = CreateArticleRepository(fromArticle);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.CreateArticle);
@@ -76,7 +76,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task CreatePack_Should_CreatePackAndMarkRelationModificationType()
     {
-        var fromArticle = Article.CreateArticle(new Name("Source article"));
+        var fromArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
         var repository = CreateArticleRepository(fromArticle);
         var actor = CreateActor(ActionType.CreateArticle);
         var handler = new ArticleCreatePackCommandHandler(
@@ -97,8 +97,8 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task CreateKit_Should_CreateKitAndMarkRelationModificationType()
     {
-        var firstArticle = Article.CreateArticle(new Name("First source article"));
-        var secondArticle = Article.CreateArticle(new Name("Second source article"));
+        var firstArticle = Article.CreateArticle(new Name("First source article"), CreateDomainActor());
+        var secondArticle = Article.CreateArticle(new Name("Second source article"), CreateDomainActor());
         var repository = CreateArticleRepository(firstArticle, secondArticle);
         var actor = CreateActor(ActionType.CreateArticle);
         var handler = new ArticleCreateKitCommandHandler(
@@ -142,7 +142,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task SetContainerMaxMass_Should_SetMaxMassAndMarkContainerModificationType()
     {
-        var article = Article.CreateArticleContainer(new Name("Container article"));
+        var article = Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor());
         var repository = CreateArticleRepository(article);
         var actor = CreateActor(ActionType.EditArticle);
         var handler = new ArticleSetContainerMaxMassCommandHandler(
@@ -164,10 +164,11 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task SetContainerMaxMass_Should_NotMark_WhenMaxMassIsUnchanged()
     {
-        var article = Article.CreateArticleContainer(new Name("Container article"));
-        article.SetContainerMaxMass(UnitsNet.Mass.FromKilograms(10));
+        var article = Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor());
+        article.SetContainerMaxMass(UnitsNet.Mass.FromKilograms(10), CreateDomainActor());
         var previousActorGuid = Guid.NewGuid();
         article.MarkAsEditedBy(previousActorGuid);
+        SetIsEditStarted(article, false);
         article.MarkModificationType(ArticleModifiedType.General);
         SetIsEditStarted(article, false);
         var repository = CreateArticleRepository(article);
@@ -187,7 +188,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task SetContainerMaxMass_Should_Throw_WhenArticleIsNotContainer()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var repository = CreateArticleRepository(article);
         var handler = new ArticleSetContainerMaxMassCommandHandler(
             repository,
@@ -203,8 +204,8 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task CreateVariation_Should_Throw_WhenSourceArticleIsInactive()
     {
-        var fromArticle = Article.CreateArticle(new Name("Source article"));
-        fromArticle.Deactivate();
+        var fromArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
+        fromArticle.Deactivate(CreateDomainActor());
         var repository = CreateArticleRepository(fromArticle);
         var handler = new ArticleCreateVariationCommandHandler(
             repository,
@@ -219,7 +220,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task Rename_Should_MarkActorAndGeneralModificationType()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var repository = CreateArticleRepository(article);
         var actor = CreateActor(ActionType.EditArticle);
         var handler = new ArticleRenameCommandHandler(
@@ -238,8 +239,9 @@ public sealed class ArticleCommandHandlerTests
     public async Task Rename_Should_NotMark_WhenNameIsUnchanged()
     {
         var previousActorGuid = Guid.NewGuid();
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         article.MarkAsEditedBy(previousActorGuid);
+        SetIsEditStarted(article, false);
         article.MarkModificationType(ArticleModifiedType.BarcodesChanged);
         SetIsEditStarted(article, false);
         var repository = CreateArticleRepository(article);
@@ -258,7 +260,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task MultipleCommands_Should_AccumulateModificationTypesInSameSession()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var repository = CreateArticleRepository(article);
         var actor = CreateActor(ActionType.EditArticle);
         var currentAuthorizationContext = CreateCurrentAuthorizationContext(actor);
@@ -285,7 +287,7 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task SetBarcodes_Should_MarkActorAndBarcodeModificationType()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var repository = CreateArticleRepository(article);
         var actor = CreateActor(ActionType.EditArticle);
         var handler = new ArticleSetBarcodesCommandHandler(
@@ -306,11 +308,12 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task SetBarcodes_Should_NotRequireSetArticleBarcode_WhenPayloadIsUnchanged()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var repository = CreateArticleRepository(article);
-        await new ArticleService(repository).SetEan13(new Ean13("1234567890123"), article);
+        await new ArticleService(repository).SetEan13(new Ean13("1234567890123"), article, CreateDomainActor());
         var previousActorGuid = Guid.NewGuid();
         article.MarkAsEditedBy(previousActorGuid);
+        SetIsEditStarted(article, false);
         article.MarkModificationType(ArticleModifiedType.General);
         SetIsEditStarted(article, false);
         var actor = CreateActor(ActionType.EditArticle);
@@ -333,6 +336,7 @@ public sealed class ArticleCommandHandlerTests
         var repository = Substitute.For<IArticleRepository>();
         foreach (var article in articles)
         {
+            SetIsEditStarted(article, false);
             repository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
                 .Returns(article);
         }

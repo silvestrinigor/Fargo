@@ -8,7 +8,7 @@ public sealed class EntityEventTests
     [Fact]
     public void Constructor_Should_SetProperties()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
 
@@ -27,7 +27,7 @@ public sealed class EntityEventTests
     [Fact]
     public void Factory_Should_Throw_WhenRequiredArgumentsAreInvalid()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var occurredAt = DateTimeOffset.UtcNow;
 
         Assert.Throws<ArgumentNullException>(() => EntityEvent.EntityCreated<Article>(
@@ -44,7 +44,7 @@ public sealed class EntityEventTests
     [Fact]
     public void InsertedIntoPartition_Should_SetDetailsAndEventProperties()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
@@ -67,7 +67,7 @@ public sealed class EntityEventTests
     [Fact]
     public void RemovedFromPartition_Should_SetDetailsAndEventProperties()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
@@ -90,7 +90,7 @@ public sealed class EntityEventTests
     [Fact]
     public void EntityPartitionEventFactories_Should_Throw_WhenRequiredArgumentsAreInvalid()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var occurredAt = DateTimeOffset.UtcNow;
 

@@ -19,7 +19,7 @@ public sealed class CommandNoOpGuardTests
     public async Task ItemSetPartitions_Should_Skip_WhenPartitionsAreUnchanged()
     {
         var partition = Partition.CreatePartition(new Name("Partition"));
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(partition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())

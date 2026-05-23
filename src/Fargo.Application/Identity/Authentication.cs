@@ -1,8 +1,5 @@
-using Fargo.Application.Partitions;
-using Fargo.Application.Users;
 using Fargo.Core;
 using Fargo.Core.Identity;
-using Fargo.Core.Partitions;
 using Fargo.Core.Users;
 
 namespace Fargo.Application.Identity;
@@ -206,14 +203,9 @@ public sealed class DefaultAdminOptions
 #region Authorization Helpers
 
 /// <summary>
-/// Provides extension methods for <see cref="IAuthorizationContext"/> to enforce
-/// authorization and partition-based access control rules.
+/// Provides conversion helpers from application authorization snapshots
+/// to domain actors.
 /// </summary>
-/// <remarks>
-/// These methods centralize validation logic used across the application layer,
-/// ensuring that authorization checks are consistently applied before executing
-/// domain operations.
-/// </remarks>
 public static class AuthorizationContextExtensions
 {
     public static Actor ToActor(this IAuthorizationContext context)
@@ -223,79 +215,6 @@ public static class AuthorizationContextExtensions
             context.IsAuthenticated,
             context.PermissionActions,
             context.PartitionAccesses);
-
-    extension(IAuthorizationContext context)
-    {
-        /// <summary>
-        /// Ensures that the actor has permission to execute the specified action.
-        /// </summary>
-        /// <param name="action">
-        /// The action that requires authorization.
-        /// </param>
-        /// <exception cref="UserNotAuthorizedFargoApplicationException">
-        /// Thrown when the actor does not have permission to perform the specified action.
-        /// </exception>
-        /// <remarks>
-        /// This validation enforces action-level authorization rules defined by the domain.
-        /// </remarks>
-        public void ValidateHasPermission(ActionType action)
-        {
-            if (!context.IsAdmin && !context.PermissionActions.Contains(action))
-            {
-                throw new UserNotAuthorizedFargoApplicationException(context.ActorGuid, action);
-            }
-        }
-
-        /// <summary>
-        /// Ensures that the actor has access to the specified partition.
-        /// </summary>
-        /// <param name="partitionGuid">
-        /// The unique identifier of the partition to validate access for.
-        /// </param>
-        /// <exception cref="PartitionAccessDeniedFargoApplicationException">
-        /// Thrown when the actor does not have access to the specified partition.
-        /// </exception>
-        /// <remarks>
-        /// This validation enforces partition-level isolation, ensuring that actors
-        /// can only interact with data within their authorized partitions.
-        /// </remarks>
-        public void ValidateHasPartitionAccess(Guid partitionGuid)
-        {
-            if (!context.IsAdmin && !context.PartitionAccesses.Contains(partitionGuid))
-            {
-                throw new PartitionAccessDeniedFargoApplicationException(partitionGuid, context.ActorGuid);
-            }
-        }
-
-        /// <summary>
-        /// Ensures that the actor has access to the specified partitioned entity.
-        /// </summary>
-        /// <typeparam name="TEntity">
-        /// The type of the partitioned entity.
-        /// </typeparam>
-        /// <param name="partitioned">
-        /// The entity whose access should be validated.
-        /// </param>
-        /// <exception cref="PartitionedEntityAccessDeniedFargoApplicationException">
-        /// Thrown when the actor does not have access to the specified entity.
-        /// </exception>
-        /// <remarks>
-        /// This validation combines entity-level and partition-level checks,
-        /// ensuring that the actor can access the given entity based on its
-        /// partition associations.
-        /// </remarks>
-        public void ValidateHasAccess<TEntity>(TEntity partitioned)
-            where TEntity : IEntity, IPartitionedEntity
-        {
-            if (!context.IsAdmin &&
-                partitioned.Partitions.Count > 0 &&
-                !partitioned.Partitions.Any(p => context.PartitionAccesses.Contains(p.Guid)))
-            {
-                throw new PartitionedEntityAccessDeniedFargoApplicationException(partitioned.Guid, context.ActorGuid);
-            }
-        }
-
-    }
 }
 
 #endregion Authorization Helpers

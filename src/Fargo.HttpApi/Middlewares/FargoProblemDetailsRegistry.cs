@@ -101,6 +101,14 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
             },
             {
+                typeof(UserEntityAccessNotAuthorizedFargoDomainException),
+                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
+            },
+            {
+                typeof(UserPartitionAccessNotAuthorizedFargoDomainException),
+                new ProblemDetailsDefinition(403, "Access denied", "partition/access-denied")
+            },
+            {
                 typeof(ArticleDeleteWithItemsAssociatedFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "article/delete-with-items")
             },

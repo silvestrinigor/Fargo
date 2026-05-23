@@ -21,14 +21,15 @@ public sealed class PartitionSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Partition single query started for partition {PartitionGuid} by actor {ActorGuid}.",
                 query.PartitionGuid,
-                actor.ActorGuid);
+                actor.Guid);
         }
 
         var partition = await partitionRepository.GetInfoByGuid(
@@ -49,7 +50,7 @@ public sealed class PartitionSingleQueryHandler(
             logger.LogDebug(
                 "Partition single query completed for partition {PartitionGuid} by actor {ActorGuid}. Found: {Found}.",
                 query.PartitionGuid,
-                actor.ActorGuid,
+                actor.Guid,
                 partition is not null);
         }
 
@@ -79,21 +80,22 @@ public sealed class PartitionsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "Partitions query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actor.ActorGuid,
+                actor.Guid,
                 pagination.Page,
                 pagination.Limit);
         }
 
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccesses,
+                actor.PartitionAccessesGuids,
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
@@ -109,7 +111,7 @@ public sealed class PartitionsQueryHandler(
         {
             logger.LogDebug(
                 "Partitions query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.ActorGuid,
+                actor.Guid,
                 query.ChildOfAnyOfThesePartitions?.Count ?? 0,
                 childOfAnyOfThesePartitions?.Count ?? 0,
                 partitions.Count);

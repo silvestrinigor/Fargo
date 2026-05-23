@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 
 namespace Fargo.Core.Items;
@@ -30,6 +31,43 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
         {
             Guid = guid
         };
+
+    public static Item CreateItem(Article article, Actor actor, DateTimeOffset? productionDate = null)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.CreateItem);
+        actor.ValidateHasAccess(article);
+        article.ValidateIsActive();
+
+        var item = new Item(article, productionDate);
+
+        item.MarkAsEditedBy(actor.Guid);
+        item.MarkModificationType(ItemModifiedType.General);
+
+        return item;
+    }
+
+    public static Item CreateItem(Guid guid, Article article, Actor actor, DateTimeOffset? productionDate = null)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.CreateItem);
+        actor.ValidateHasAccess(article);
+        article.ValidateIsActive();
+
+        var item = new Item(article, productionDate)
+        {
+            Guid = guid
+        };
+
+        item.MarkAsEditedBy(actor.Guid);
+        item.MarkModificationType(ItemModifiedType.General);
+
+        return item;
+    }
 
     /// <summary>
     /// Initializes a new item entity.
@@ -112,8 +150,38 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
     /// <inheritdoc />
     public void Activate() => IsActive = true;
 
+    public void Activate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ItemModifiedType.Activated);
+    }
+
     /// <inheritdoc />
     public void Deactivate() => IsActive = false;
+
+    public void Deactivate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ItemModifiedType.Deactivated);
+    }
 
     #endregion Activation
 
@@ -172,9 +240,45 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
         Partitions.Add(partition);
     }
 
+    public void AddPartition(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (Partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        Partitions.Add(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ItemModifiedType.PartitionsChanged);
+    }
+
     public void RemovePartition(Partition partition)
     {
         Partitions.Remove(partition);
+    }
+
+    public void RemovePartition(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (!Partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        Partitions.Remove(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ItemModifiedType.PartitionsChanged);
     }
 
     /// <inheritdoc />
@@ -183,6 +287,22 @@ public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedTy
     #endregion  Partition
 
     #region Modified
+
+    public void ValidateCanEdit(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.EditItem);
+        actor.ValidateHasAccess(this);
+    }
+
+    public void ValidateCanDelete(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.DeleteItem);
+        actor.ValidateHasAccess(this);
+    }
 
     public Guid? EditedByGuid { get; private set; }
 

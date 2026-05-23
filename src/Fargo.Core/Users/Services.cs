@@ -1,3 +1,5 @@
+using Fargo.Core.Identity;
+
 namespace Fargo.Core.Users;
 
 /// <summary>
@@ -126,13 +128,16 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot delete their own account.
     /// </remarks>
-    public static void ValidateUserDelete(User user, Guid actorGuid)
+    public static void ValidateUserDelete(User user, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(actor);
 
-        if (user.Guid == actorGuid)
+        user.ValidateCanDelete(actor);
+
+        if (user.Guid == actor.Guid)
         {
-            throw new UserCannotDeleteSelfFargoDomainException(actorGuid);
+            throw new UserCannotDeleteSelfFargoDomainException(actor.Guid);
         }
 
         if (user.Guid == DefaultAdministratorUserGuid)
@@ -159,13 +164,16 @@ public class UserService(
     /// <remarks>
     /// This validation ensures that a user cannot modify their own permissions.
     /// </remarks>
-    public static void ValidateUserPermissionChange(User user, Guid actorGuid)
+    public static void ValidateUserPermissionChange(User user, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(actor);
 
-        if (user.Guid == actorGuid)
+        user.ValidateCanEdit(actor);
+
+        if (user.Guid == actor.Guid)
         {
-            throw new UserCannotChangeOwnPermissionsFargoDomainException(actorGuid);
+            throw new UserCannotChangeOwnPermissionsFargoDomainException(actor.Guid);
         }
 
         if (user.Guid == DefaultAdministratorUserGuid)

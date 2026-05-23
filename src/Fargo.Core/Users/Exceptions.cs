@@ -127,3 +127,31 @@ public sealed class UserNotAuthorizedFargoDomainException(
     /// </summary>
     public ActionType ActionType { get; } = actionType;
 }
+
+public sealed class UserEntityAccessNotAuthorizedFargoDomainException(
+    Guid userGuid,
+    Guid entityGuid
+    ) : FargoDomainException(
+        $"User '{userGuid}' is not authorized to access entity '{entityGuid}'.")
+{
+    /// <summary>
+    /// Gets the identifier of the user that attempted the action.
+    /// </summary>
+    public Guid UserGuid { get; } = userGuid;
+
+    public Guid EntityGuid { get; } = entityGuid;
+}
+
+public sealed class UserPartitionAccessNotAuthorizedFargoDomainException(
+    Guid userGuid,
+    Guid partitionGuid
+    ) : FargoDomainException(
+        $"User '{userGuid}' is not authorized to access partition '{partitionGuid}'.")
+{
+    /// <summary>
+    /// Gets the identifier of the user that attempted the action.
+    /// </summary>
+    public Guid UserGuid { get; } = userGuid;
+
+    public Guid PartitionGuid { get; } = partitionGuid;
+}

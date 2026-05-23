@@ -19,7 +19,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
     [Fact]
     public async Task ArticleSetPartitions_Should_RecordInsertedPartitionEvent()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -49,7 +49,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
     {
         var oldPartition = Partition.CreatePartition(new Name("Old partition"));
         var newPartition = Partition.CreatePartition(new Name("New partition"));
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(oldPartition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
