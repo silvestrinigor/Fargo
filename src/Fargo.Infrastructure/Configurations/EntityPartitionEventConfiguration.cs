@@ -1,4 +1,4 @@
-using Fargo.Core;
+using Fargo.Core.Events;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

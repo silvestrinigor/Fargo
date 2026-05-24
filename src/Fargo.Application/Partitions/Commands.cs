@@ -1,5 +1,5 @@
 using Fargo.Application.Identity;
-using Fargo.Core;
+using Fargo.Core.Events;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 

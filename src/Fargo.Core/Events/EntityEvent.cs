@@ -4,7 +4,7 @@ using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 
-namespace Fargo.Core;
+namespace Fargo.Core.Events;
 
 /// <summary>
 /// Represents a simple lifecycle event that happened to an entity.
@@ -21,7 +21,7 @@ public enum EntityEventType
 }
 
 /// <summary>
-/// Represents an append-only lifecycle event for an entity.
+/// Represents event for an entity.
 /// </summary>
 public sealed class EntityEvent : Entity
 {
@@ -177,17 +177,6 @@ public sealed class EntityEvent : Entity
 }
 
 /// <summary>
-/// Defines the repository contract for managing <see cref="EntityEvent"/> ledger entries.
-/// </summary>
-public interface IEntityEventRepository
-{
-    /// <summary>
-    /// Adds a new entity event ledger entry to the persistence context.
-    /// </summary>
-    void Add(EntityEvent entityEvent);
-}
-
-/// <summary>
 /// Represents partition assignment details attached to an entity event.
 /// </summary>
 /// <remarks>
@@ -278,15 +267,4 @@ public sealed class EntityPartitionEvent : Entity
     /// Gets the date and time when the partition assignment changed.
     /// </summary>
     public DateTimeOffset OccurredAt => Event.OccurredAt;
-}
-
-/// <summary>
-/// Defines the repository contract for managing <see cref="EntityPartitionEvent"/> ledger entries.
-/// </summary>
-public interface IEntityPartitionEventRepository
-{
-    /// <summary>
-    /// Adds a new entity partition event ledger entry to the persistence context.
-    /// </summary>
-    void Add(EntityPartitionEvent entityPartitionEvent);
 }

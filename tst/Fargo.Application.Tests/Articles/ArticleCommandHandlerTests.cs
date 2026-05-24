@@ -4,6 +4,7 @@ using Fargo.Application.Partitions;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Events;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

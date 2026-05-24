@@ -1,4 +1,4 @@
-using Fargo.Core;
+using Fargo.Core.Events;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

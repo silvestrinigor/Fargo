@@ -1,8 +1,8 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
-using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Events;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
