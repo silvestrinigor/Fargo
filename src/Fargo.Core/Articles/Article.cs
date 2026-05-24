@@ -536,16 +536,6 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         }
     }
 
-    void IActivableEntity.Activate()
-    {
-        ActivateCore();
-    }
-
-    void IActivableEntity.Deactivate()
-    {
-        DeactivateCore();
-    }
-
     private bool ActivateCore()
     {
         if (IsActive)
