@@ -24,6 +24,43 @@ public sealed class BarcodeTests
         => Assert.Throws<ArgumentException>(() => new Barcode(code, format));
 
     [Fact]
+    public void Parse_Should_ReadCodeAndFormat()
+    {
+        var barcode = Barcode.Parse("1234567890123:Ean13", null);
+
+        Assert.Equal("1234567890123", barcode.Code);
+        Assert.Equal(BarcodeFormat.Ean13, barcode.Format);
+    }
+
+    [Fact]
+    public void TryParse_Should_ReadCaseInsensitiveFormat()
+    {
+        var parsed = Barcode.TryParse("12345670:upce", null, out var barcode);
+
+        Assert.True(parsed);
+        Assert.Equal("12345670", barcode.Code);
+        Assert.Equal(BarcodeFormat.UpcE, barcode.Format);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("1234567890123")]
+    [InlineData("1234567890123:")]
+    [InlineData(":Ean13")]
+    [InlineData("1234567890123:Unknown")]
+    [InlineData("123:Ean13")]
+    public void TryParse_Should_RejectInvalidRouteValues(string value)
+    {
+        var parsed = Barcode.TryParse(value, null, out _);
+
+        Assert.False(parsed);
+    }
+
+    [Fact]
+    public void Parse_Should_Throw_WhenRouteValueIsInvalid()
+        => Assert.Throws<FormatException>(() => Barcode.Parse("123:Ean13", null));
+
+    [Fact]
     public void Ean13_Should_RoundTripThroughBarcode()
     {
         var ean13 = new Ean13("1234567890123");

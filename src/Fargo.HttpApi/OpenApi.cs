@@ -1,5 +1,5 @@
 using Fargo.Application;
-using Fargo.HttpApi.Articles;
+using Fargo.Core.Barcodes;
 using System.Text.Json.Nodes;
 
 namespace Fargo.HttpApi;
@@ -18,7 +18,7 @@ public static class OpenApiServiceCollectionExtensions
             {
                 options.AddSchemaTransformer((schema, context, _) =>
                 {
-                    if (context.ParameterDescription?.Type == typeof(ArticleBarcodeRouteValue))
+                    if (context.ParameterDescription?.Type == typeof(Barcode))
                     {
                         schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
                         schema.Pattern = @".+:(Ean13|Ean8|UpcA|UpcE|Code128|Code39|Itf14|Gs1128|QrCode|DataMatrix)$";

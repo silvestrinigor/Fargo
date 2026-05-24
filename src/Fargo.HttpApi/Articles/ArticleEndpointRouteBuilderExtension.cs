@@ -82,13 +82,13 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<ArticleDto>, NotFound>> GetArticleByBarcode(
-        ArticleBarcodeRouteValue articleBarcode,
+        Barcode articleBarcode,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleByBarcodeQuery(articleBarcode.ToDomainBarcode(), temporalAsOf);
+        var query = new ArticleByBarcodeQuery(articleBarcode, temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 
@@ -377,51 +377,4 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     #endregion Delete
-}
-
-/// <summary>Represents an article barcode route value in the format <c>{barcode}:{type}</c>.</summary>
-public readonly record struct ArticleBarcodeRouteValue(string Barcode, BarcodeFormat Type)
-    : IParsable<ArticleBarcodeRouteValue>
-{
-    public override string ToString() => $"{Barcode}:{Type}";
-
-    public Barcode ToDomainBarcode() => new(Barcode, Type);
-
-    public static ArticleBarcodeRouteValue Parse(string s, IFormatProvider? provider)
-    {
-        if (TryParse(s, provider, out var result))
-        {
-            return result;
-        }
-
-        throw new FormatException($"Invalid article barcode value: '{s}'. Expected '{{barcode}}:{{type}}'.");
-    }
-
-    public static bool TryParse(string? s, IFormatProvider? provider, out ArticleBarcodeRouteValue result)
-    {
-        result = default;
-
-        if (string.IsNullOrWhiteSpace(s))
-        {
-            return false;
-        }
-
-        var separator = s.LastIndexOf(':');
-        if (separator <= 0 || separator == s.Length - 1)
-        {
-            return false;
-        }
-
-        var barcode = s[..separator];
-        var typeText = s[(separator + 1)..];
-
-        if (string.IsNullOrWhiteSpace(barcode) ||
-            !Enum.TryParse<BarcodeFormat>(typeText, ignoreCase: true, out var type))
-        {
-            return false;
-        }
-
-        result = new ArticleBarcodeRouteValue(barcode, type);
-        return true;
-    }
 }

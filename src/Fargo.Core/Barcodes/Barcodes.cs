@@ -43,7 +43,7 @@ public enum BarcodeFormat
 #region Common
 
 /// <summary>Barcode value with its symbology.</summary>
-public readonly struct Barcode : IEquatable<Barcode>
+public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
 {
     private readonly string code;
     private readonly BarcodeFormat format;
@@ -85,6 +85,53 @@ public readonly struct Barcode : IEquatable<Barcode>
 
     /// <inheritdoc />
     public override string ToString() => Code;
+
+    /// <summary>Parses a barcode route value in the format <c>{code}:{format}</c>.</summary>
+    public static Barcode Parse(string s, IFormatProvider? provider)
+    {
+        if (TryParse(s, provider, out var result))
+        {
+            return result;
+        }
+
+        throw new FormatException($"Invalid barcode value: '{s}'. Expected '{{code}}:{{format}}'.");
+    }
+
+    /// <summary>Tries to parse a barcode route value in the format <c>{code}:{format}</c>.</summary>
+    public static bool TryParse(string? s, IFormatProvider? provider, out Barcode result)
+    {
+        result = default;
+
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return false;
+        }
+
+        var separator = s.LastIndexOf(':');
+        if (separator <= 0 || separator == s.Length - 1)
+        {
+            return false;
+        }
+
+        var code = s[..separator];
+        var formatText = s[(separator + 1)..];
+
+        if (string.IsNullOrWhiteSpace(code) ||
+            !Enum.TryParse<BarcodeFormat>(formatText, ignoreCase: true, out var format))
+        {
+            return false;
+        }
+
+        try
+        {
+            result = new Barcode(code, format);
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+    }
 
     /// <summary>Determines whether two <see cref="Barcode"/> instances are equal.</summary>
     public static bool operator ==(Barcode left, Barcode right) => left.Equals(right);

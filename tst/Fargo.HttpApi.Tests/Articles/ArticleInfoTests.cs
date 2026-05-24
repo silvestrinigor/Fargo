@@ -4,6 +4,7 @@ using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
+using Microsoft.AspNetCore.Routing;
 using System.Text.Json;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
@@ -89,6 +90,47 @@ public sealed class ArticleDtoTests
 
         Assert.Equal(new Name("Container"), command.Name);
         Assert.Equal(Mass.FromKilograms(10), command.MaxMass);
+    }
+
+    [Fact]
+    public void BarcodeRouteConstraint_Should_AcceptBarcodeRouteValue()
+    {
+        var constraint = new ArticleBarcodeRouteConstraint();
+        var values = new RouteValueDictionary
+        {
+            ["articleBarcode"] = "7891234567895:Ean13"
+        };
+
+        var matched = constraint.Match(
+            null,
+            null,
+            "articleBarcode",
+            values,
+            RouteDirection.IncomingRequest);
+
+        Assert.True(matched);
+    }
+
+    [Theory]
+    [InlineData("7891234567895")]
+    [InlineData("7891234567895:Unknown")]
+    [InlineData("123:Ean13")]
+    public void BarcodeRouteConstraint_Should_RejectInvalidBarcodeRouteValue(string value)
+    {
+        var constraint = new ArticleBarcodeRouteConstraint();
+        var values = new RouteValueDictionary
+        {
+            ["articleBarcode"] = value
+        };
+
+        var matched = constraint.Match(
+            null,
+            null,
+            "articleBarcode",
+            values,
+            RouteDirection.IncomingRequest);
+
+        Assert.False(matched);
     }
 
     [Fact]
