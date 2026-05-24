@@ -4,22 +4,22 @@ using Fargo.Application.Users;
 using Fargo.Core.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Extensions;
+namespace Fargo.HttpApi.Identity;
 
 /// <summary>
-/// Extension responsible for mapping authentication endpoints.
+/// Extension responsible for mapping identity endpoints.
 /// </summary>
-public static class AuthenticationEndpointRouteBuilderExtension
+public static class IdentityEndpointRouteBuilderExtension
 {
     /// <summary>
-    /// Maps all authentication routes.
+    /// Maps all identity routes.
     /// </summary>
     /// <param name="builder">The endpoint route builder.</param>
-    public static void MapFargoAuthentication(this IEndpointRouteBuilder builder)
+    public static void MapFargoIdentity(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/authentication")
-            .WithTags("Authentication");
+            .MapGroup("/identity")
+            .WithTags("Identity");
 
         group.MapPost("/login", Login)
             .WithName("Login")

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Fargo.HttpAPi.Extensions;
+namespace Fargo.HttpApi.Identity;
 
 public static class FargoAuthenticationServiceCollectionExtensions
 {

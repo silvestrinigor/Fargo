@@ -12,7 +12,7 @@ using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 
-namespace Fargo.HttpApi.Middlewares;
+namespace Fargo.HttpApi;
 
 /// <summary>
 /// Central registry that maps application and domain exceptions

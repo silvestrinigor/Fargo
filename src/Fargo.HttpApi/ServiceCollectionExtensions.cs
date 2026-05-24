@@ -1,7 +1,7 @@
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
 
-namespace Fargo.HttpApi.Extensions;
+namespace Fargo.HttpApi;
 
 /// <summary>
 /// Provides extension methods for configuring HTTP API services.

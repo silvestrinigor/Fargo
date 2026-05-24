@@ -1,4 +1,4 @@
-namespace Fargo.HttpApi.Middlewares;
+namespace Fargo.HttpApi;
 
 /// <summary>
 /// Middleware responsible for handling exceptions thrown during HTTP request processing.

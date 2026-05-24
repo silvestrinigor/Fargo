@@ -13,7 +13,7 @@ public static class ArticleEndpointRouteBuilderExtension
     {
         var group = builder.MapArticleGroup();
 
-        group.MapGetArticle();
+        group.MapGetArticleByGuid();
 
         group.MapGetArticleByBarcode();
 
@@ -36,9 +36,9 @@ public static class ArticleEndpointRouteBuilderExtension
         return group;
     }
 
-    #region Get Single
+    #region Get By Guid
 
-    private static IEndpointRouteBuilder MapGetArticle(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapGetArticleByGuid(this IEndpointRouteBuilder builder)
     {
         builder.MapGet("/{articleGuid:guid}", GetSingleArticle)
             .WithName("GetArticle")
@@ -65,7 +65,7 @@ public static class ArticleEndpointRouteBuilderExtension
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
-    #endregion Get Single
+    #endregion
 
     #region Get By Barcode
 
@@ -95,7 +95,7 @@ public static class ArticleEndpointRouteBuilderExtension
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
-    #endregion Get By Barcode
+    #endregion
 
     #region Get Many
 
@@ -141,7 +141,7 @@ public static class ArticleEndpointRouteBuilderExtension
         return TypedResults.Ok(response);
     }
 
-    #endregion Get Many
+    #endregion
 
     #region Create
 
