@@ -2,8 +2,11 @@ using Fargo.Application.Articles;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
 using System.Text.Json;
+using UnitsNet;
+using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.HttpApi.Tests.Articles;
 
@@ -24,6 +27,68 @@ public sealed class ArticleDtoTests
         var root = document.RootElement;
 
         Assert.Equal((int)ArticleType.Container, root.GetProperty("articleType").GetInt32());
+    }
+
+    [Fact]
+    public void CreateVariationCommand_Should_RequireVariationPayload()
+    {
+        var request = new ArticleCreateDto(
+            new Name("Variation"),
+            ArticleType.Variation);
+
+        Assert.Throws<ArgumentException>(
+            () => ArticleEndpointRouteBuilderExtension.CreateVariationCommand(request));
+    }
+
+    [Fact]
+    public void CreatePackCommand_Should_MapTypeSpecificInputs()
+    {
+        var fromArticleGuid = Guid.NewGuid();
+
+        var command = ArticleEndpointRouteBuilderExtension.CreatePackCommand(
+            new ArticleCreateDto(
+                new Name("Pack"),
+                ArticleType.Pack,
+                Pack: new ArticleCreatePackDto(fromArticleGuid, 4.Amount())));
+
+        Assert.Equal(new Name("Pack"), command.Name);
+        Assert.Equal(fromArticleGuid, command.FromArticleGuid);
+        Assert.True(command.Quantity.Equals(4.Amount(), 0.Amount()));
+    }
+
+    [Fact]
+    public void CreateKitCommand_Should_MapPacks()
+    {
+        var firstArticleGuid = Guid.NewGuid();
+        var secondArticleGuid = Guid.NewGuid();
+
+        var command = ArticleEndpointRouteBuilderExtension.CreateKitCommand(
+            new ArticleCreateDto(
+                new Name("Kit"),
+                ArticleType.Kit,
+                Kit: new ArticleCreateKitDto(
+                [
+                    new ArticleCreateKitPackDto(firstArticleGuid, 2.Amount()),
+                    new ArticleCreateKitPackDto(secondArticleGuid, 3.Amount())
+                ])));
+
+        Assert.Collection(
+            command.Packs,
+            first => Assert.Equal(firstArticleGuid, first.ArticleGuid),
+            second => Assert.Equal(secondArticleGuid, second.ArticleGuid));
+    }
+
+    [Fact]
+    public void CreateContainerCommand_Should_MapMaxMass()
+    {
+        var command = ArticleEndpointRouteBuilderExtension.CreateContainerCommand(
+            new ArticleCreateDto(
+                new Name("Container"),
+                ArticleType.Container,
+                Container: new ArticleCreateContainerDto(Mass.FromKilograms(10))));
+
+        Assert.Equal(new Name("Container"), command.Name);
+        Assert.Equal(Mass.FromKilograms(10), command.MaxMass);
     }
 
     [Fact]

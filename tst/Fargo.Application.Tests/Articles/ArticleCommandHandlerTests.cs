@@ -38,16 +38,14 @@ public sealed class ArticleCommandHandlerTests
             Substitute.For<ILogger<ArticleCreateContainerCommandHandler>>());
 
         var articleGuid = await handler.Handle(new ArticleCreateContainerCommand(
-            new ArticleCreateDto(
-                new Name("Container"),
-                ArticleType.Container,
-                Description: new Description("Description"),
-                ShelfLife: TimeSpan.FromDays(7),
-                Metrics: new ArticleMetricsDto(Mass.FromKilograms(2), Length.FromCentimeters(10)),
-                Barcodes: new ArticleBarcodesDto(Ean13: new Ean13("1234567890123")),
-                Partitions: [partition.Guid],
-                IsActive: false,
-                Container: new ArticleCreateContainerDto(Mass.FromKilograms(10)))));
+            new Name("Container"),
+            MaxMass: Mass.FromKilograms(10),
+            Description: new Description("Description"),
+            ShelfLife: TimeSpan.FromDays(7),
+            Metrics: new ArticleMetricsDto(Mass.FromKilograms(2), Length.FromCentimeters(10)),
+            Barcodes: new ArticleBarcodesDto(Ean13: new Ean13("1234567890123")),
+            Partitions: [partition.Guid],
+            IsActive: false));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.Guid == articleGuid &&
@@ -90,7 +88,7 @@ public sealed class ArticleCommandHandlerTests
             actor: CreateActor([ActionType.CreateArticle]));
 
         await handler.Handle(new ArticleCreateDefaultCommand(
-            new ArticleCreateDto(new Name("Default"), ArticleType.Default)));
+            new Name("Default")));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.ArticleType == ArticleType.Default &&
@@ -110,10 +108,8 @@ public sealed class ArticleCommandHandlerTests
             actor: CreateActor([ActionType.CreateArticle]));
 
         await handler.Handle(new ArticleCreateVariationCommand(
-            new ArticleCreateDto(
-                new Name("Variation"),
-                ArticleType.Variation,
-                Variation: new ArticleCreateVariationDto(sourceArticle.Guid))));
+            new Name("Variation"),
+            sourceArticle.Guid));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsVariation &&
@@ -132,10 +128,9 @@ public sealed class ArticleCommandHandlerTests
             actor: CreateActor([ActionType.CreateArticle]));
 
         await handler.Handle(new ArticleCreatePackCommand(
-            new ArticleCreateDto(
-                new Name("Pack"),
-                ArticleType.Pack,
-                Pack: new ArticleCreatePackDto(sourceArticle.Guid, 4.Amount()))));
+            new Name("Pack"),
+            sourceArticle.Guid,
+            4.Amount()));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsPack &&
@@ -155,14 +150,11 @@ public sealed class ArticleCommandHandlerTests
             actor: CreateActor([ActionType.CreateArticle]));
 
         await handler.Handle(new ArticleCreateKitCommand(
-            new ArticleCreateDto(
-                new Name("Kit"),
-                ArticleType.Kit,
-                Kit: new ArticleCreateKitDto(
-                [
-                    new ArticleCreateKitPackDto(firstArticle.Guid, 2.Amount()),
-                    new ArticleCreateKitPackDto(secondArticle.Guid, 3.Amount())
-                ]))));
+            new Name("Kit"),
+            [
+                new ArticleCreateKitPackDto(firstArticle.Guid, 2.Amount()),
+                new ArticleCreateKitPackDto(secondArticle.Guid, 3.Amount())
+            ]));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsKit &&
@@ -172,30 +164,14 @@ public sealed class ArticleCommandHandlerTests
     }
 
     [Fact]
-    public async Task Create_Should_Throw_WhenMoreThanOneSpecializedTypeIsProvided()
-    {
-        var handler = CreateVariationCreateHandler();
-
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => handler.Handle(new ArticleCreateVariationCommand(
-                new ArticleCreateDto(
-                    new Name("Invalid"),
-                    ArticleType.Variation,
-                    Variation: new ArticleCreateVariationDto(Guid.NewGuid()),
-                    Container: new ArticleCreateContainerDto()))));
-    }
-
-    [Fact]
     public async Task Create_Should_Throw_WhenKitHasNoPacks()
     {
         var handler = CreateKitCreateHandler();
 
         await Assert.ThrowsAsync<ArgumentException>(
             () => handler.Handle(new ArticleCreateKitCommand(
-                new ArticleCreateDto(
-                    new Name("Invalid kit"),
-                    ArticleType.Kit,
-                    Kit: new ArticleCreateKitDto([])))));
+                new Name("Invalid kit"),
+                [])));
     }
 
     [Fact]

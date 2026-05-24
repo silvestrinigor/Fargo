@@ -30,7 +30,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<ILogger<ArticleCreateDefaultCommandHandler>>());
 
         var articleGuid = await handler.Handle(new ArticleCreateDefaultCommand(
-            new ArticleCreateDto(new Name("Article"), ArticleType.Default)));
+            new Name("Article")));
 
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&

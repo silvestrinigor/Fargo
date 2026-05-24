@@ -168,19 +168,19 @@ public static class ArticleEndpointRouteBuilderExtension
         var response = request.ArticleType switch
         {
             ArticleType.Default => await defaultHandler.Handle(
-                new ArticleCreateDefaultCommand(request),
+                CreateDefaultCommand(request),
                 cancellationToken),
             ArticleType.Variation => await variationHandler.Handle(
-                new ArticleCreateVariationCommand(request),
+                CreateVariationCommand(request),
                 cancellationToken),
             ArticleType.Pack => await packHandler.Handle(
-                new ArticleCreatePackCommand(request),
+                CreatePackCommand(request),
                 cancellationToken),
             ArticleType.Kit => await kitHandler.Handle(
-                new ArticleCreateKitCommand(request),
+                CreateKitCommand(request),
                 cancellationToken),
             ArticleType.Container => await containerHandler.Handle(
-                new ArticleCreateContainerCommand(request),
+                CreateContainerCommand(request),
                 cancellationToken),
             _ => throw new ArgumentException(
                 $"Unsupported article type '{request.ArticleType}'.",
@@ -188,6 +188,141 @@ public static class ArticleEndpointRouteBuilderExtension
         };
 
         return TypedResults.Ok(response);
+    }
+
+    internal static ArticleCreateDefaultCommand CreateDefaultCommand(ArticleCreateDto request)
+    {
+        RejectPayload(
+            request.Variation is not null,
+            request.Pack is not null,
+            request.Kit is not null,
+            request.Container is not null,
+            request.ArticleType);
+
+        return new ArticleCreateDefaultCommand(
+            request.Name,
+            Description: request.Description,
+            ShelfLife: request.ShelfLife,
+            Color: request.Color,
+            Metrics: request.Metrics,
+            Barcodes: request.Barcodes,
+            Partitions: request.Partitions,
+            IsActive: request.IsActive);
+    }
+
+    internal static ArticleCreateVariationCommand CreateVariationCommand(ArticleCreateDto request)
+    {
+        RequirePayload(request.Variation is not null, request.ArticleType);
+        RejectPayload(
+            false,
+            request.Pack is not null,
+            request.Kit is not null,
+            request.Container is not null,
+            request.ArticleType);
+
+        return new ArticleCreateVariationCommand(
+            request.Name,
+            request.Variation!.FromArticleGuid,
+            Description: request.Description,
+            ShelfLife: request.ShelfLife,
+            Color: request.Color,
+            Metrics: request.Metrics,
+            Barcodes: request.Barcodes,
+            Partitions: request.Partitions,
+            IsActive: request.IsActive);
+    }
+
+    internal static ArticleCreatePackCommand CreatePackCommand(ArticleCreateDto request)
+    {
+        RequirePayload(request.Pack is not null, request.ArticleType);
+        RejectPayload(
+            request.Variation is not null,
+            false,
+            request.Kit is not null,
+            request.Container is not null,
+            request.ArticleType);
+
+        return new ArticleCreatePackCommand(
+            request.Name,
+            request.Pack!.FromArticleGuid,
+            request.Pack.Quantity,
+            Description: request.Description,
+            ShelfLife: request.ShelfLife,
+            Color: request.Color,
+            Metrics: request.Metrics,
+            Barcodes: request.Barcodes,
+            Partitions: request.Partitions,
+            IsActive: request.IsActive);
+    }
+
+    internal static ArticleCreateKitCommand CreateKitCommand(ArticleCreateDto request)
+    {
+        RequirePayload(request.Kit is not null, request.ArticleType);
+        RejectPayload(
+            request.Variation is not null,
+            request.Pack is not null,
+            false,
+            request.Container is not null,
+            request.ArticleType);
+
+        return new ArticleCreateKitCommand(
+            request.Name,
+            request.Kit!.Packs,
+            Description: request.Description,
+            ShelfLife: request.ShelfLife,
+            Color: request.Color,
+            Metrics: request.Metrics,
+            Barcodes: request.Barcodes,
+            Partitions: request.Partitions,
+            IsActive: request.IsActive);
+    }
+
+    internal static ArticleCreateContainerCommand CreateContainerCommand(ArticleCreateDto request)
+    {
+        RejectPayload(
+            request.Variation is not null,
+            request.Pack is not null,
+            request.Kit is not null,
+            false,
+            request.ArticleType);
+
+        return new ArticleCreateContainerCommand(
+            request.Name,
+            MaxMass: request.Container?.MaxMass,
+            Description: request.Description,
+            ShelfLife: request.ShelfLife,
+            Color: request.Color,
+            Metrics: request.Metrics,
+            Barcodes: request.Barcodes,
+            Partitions: request.Partitions,
+            IsActive: request.IsActive);
+    }
+
+    private static void RequirePayload(
+        bool payloadProvided,
+        ArticleType articleType)
+    {
+        if (!payloadProvided)
+        {
+            throw new ArgumentException(
+                $"Article type '{articleType}' requires its matching create payload.",
+                nameof(articleType));
+        }
+    }
+
+    private static void RejectPayload(
+        bool variationProvided,
+        bool packProvided,
+        bool kitProvided,
+        bool containerProvided,
+        ArticleType articleType)
+    {
+        if (variationProvided || packProvided || kitProvided || containerProvided)
+        {
+            throw new ArgumentException(
+                $"Article type '{articleType}' cannot include payloads for another article type.",
+                nameof(articleType));
+        }
     }
 
     #endregion Create

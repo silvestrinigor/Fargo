@@ -1,70 +1,111 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
+using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
-using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
+using System.Drawing;
+using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
 #region Create
 
 /// <summary>
-/// Command used to create a default article from an API creation payload.
+/// Command used to create a default article.
 /// </summary>
 public sealed record ArticleCreateDefaultCommand(
-    ArticleCreateDto Create
+    Name Name,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
 ) : ICommand<Guid>;
 
 /// <summary>
-/// Command used to create a variation article from an API creation payload.
+/// Command used to create a variation article.
 /// </summary>
 public sealed record ArticleCreateVariationCommand(
-    ArticleCreateDto Create
+    Name Name,
+    Guid FromArticleGuid,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
 ) : ICommand<Guid>;
 
 /// <summary>
-/// Command used to create a pack article from an API creation payload.
+/// Command used to create a pack article.
 /// </summary>
 public sealed record ArticleCreatePackCommand(
-    ArticleCreateDto Create
+    Name Name,
+    Guid FromArticleGuid,
+    Scalar Quantity,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
 ) : ICommand<Guid>;
 
 /// <summary>
-/// Command used to create a kit article from an API creation payload.
+/// Command used to create a kit article.
 /// </summary>
 public sealed record ArticleCreateKitCommand(
-    ArticleCreateDto Create
+    Name Name,
+    IReadOnlyCollection<ArticleCreateKitPackDto> Packs,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
 ) : ICommand<Guid>;
 
 /// <summary>
-/// Command used to create a container article from an API creation payload.
+/// Command used to create a container article.
 /// </summary>
 public sealed record ArticleCreateContainerCommand(
-    ArticleCreateDto Create
+    Name Name,
+    Mass? MaxMass = null,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
 ) : ICommand<Guid>;
 
-public abstract class ArticleCreateCommandHandlerBase(
+/// <summary>
+/// Handles default article creation.
+/// </summary>
+public sealed class ArticleCreateDefaultCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IEntityEventRepository entityEventRepository,
     IEntityPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    IUnitOfWork unitOfWork
-)
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreateDefaultCommandHandler> logger
+) : ICommandHandler<ArticleCreateDefaultCommand, Guid>
 {
-    protected IArticleRepository ArticleRepository { get; } = articleRepository;
-
-    protected async Task<Guid> HandleCreate(
-        ArticleCreateDto create,
-        ArticleType expectedArticleType,
-        Func<ArticleCreateDto, Actor, CancellationToken, Task<Article>> articleFactory,
-        ILogger logger,
+    public async Task<Guid> Handle(
+        ArticleCreateDefaultCommand command,
         CancellationToken cancellationToken = default)
     {
-        ArticleCreateRequestValidator.Validate(create, expectedArticleType);
+        const ArticleType expectedArticleType = ArticleType.Default;
 
         var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
         var actor = authorizationContext.ToActor();
@@ -77,33 +118,33 @@ public abstract class ArticleCreateCommandHandlerBase(
                 actor.Guid);
         }
 
-        var article = await articleFactory(create, actor, cancellationToken);
+        var article = Article.CreateArticle(command.Name, actor);
 
-        ArticleRepository.Add(article);
+        articleRepository.Add(article);
 
         entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
-        if (create.Description is { } description)
+        if (command.Description is { } description)
         {
             article.ChangeDescription(description, actor);
         }
 
-        if (create.ShelfLife is not null)
+        if (command.ShelfLife is not null)
         {
-            article.SetShelfLife(create.ShelfLife, actor);
+            article.SetShelfLife(command.ShelfLife, actor);
         }
 
-        if (create.Color is not null)
+        if (command.Color is not null)
         {
-            article.SetColor(create.Color, actor);
+            article.SetColor(command.Color, actor);
         }
 
-        if (create.Metrics is { } metrics)
+        if (command.Metrics is { } metrics)
         {
             article.SetMetrics(metrics.ToCore(), actor);
         }
 
-        if (create.Barcodes is { } barcodes)
+        if (command.Barcodes is { } barcodes)
         {
             var articleBarcodes = barcodes.ToCore();
 
@@ -119,7 +160,7 @@ public abstract class ArticleCreateCommandHandlerBase(
             await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
         }
 
-        if (create.Partitions is { Count: > 0 } partitions)
+        if (command.Partitions is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
             {
@@ -134,7 +175,7 @@ public abstract class ArticleCreateCommandHandlerBase(
             }
         }
 
-        if (create.IsActive == false)
+        if (command.IsActive == false)
         {
             article.Deactivate(actor);
 
@@ -157,39 +198,6 @@ public abstract class ArticleCreateCommandHandlerBase(
 }
 
 /// <summary>
-/// Handles default article creation.
-/// </summary>
-public sealed class ArticleCreateDefaultCommandHandler(
-    IArticleRepository articleRepository,
-    IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
-    ArticleService articleService,
-    ICurrentAuthorizationContext currentAuthorizationContext,
-    IUnitOfWork unitOfWork,
-    ILogger<ArticleCreateDefaultCommandHandler> logger
-) : ArticleCreateCommandHandlerBase(
-        articleRepository,
-        partitionRepository,
-        entityEventRepository,
-        entityPartitionEventRepository,
-        articleService,
-        currentAuthorizationContext,
-        unitOfWork),
-    ICommandHandler<ArticleCreateDefaultCommand, Guid>
-{
-    public Task<Guid> Handle(
-        ArticleCreateDefaultCommand command,
-        CancellationToken cancellationToken = default)
-        => HandleCreate(
-            command.Create,
-            ArticleType.Default,
-            (create, actor, _) => Task.FromResult(Article.CreateArticle(create.Name, actor)),
-            logger,
-            cancellationToken);
-}
-
-/// <summary>
 /// Handles variation article creation.
 /// </summary>
 public sealed class ArticleCreateVariationCommandHandler(
@@ -201,32 +209,106 @@ public sealed class ArticleCreateVariationCommandHandler(
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreateVariationCommandHandler> logger
-) : ArticleCreateCommandHandlerBase(
-        articleRepository,
-        partitionRepository,
-        entityEventRepository,
-        entityPartitionEventRepository,
-        articleService,
-        currentAuthorizationContext,
-        unitOfWork),
-    ICommandHandler<ArticleCreateVariationCommand, Guid>
+) : ICommandHandler<ArticleCreateVariationCommand, Guid>
 {
-    public Task<Guid> Handle(
+    public async Task<Guid> Handle(
         ArticleCreateVariationCommand command,
         CancellationToken cancellationToken = default)
-        => HandleCreate(
-            command.Create,
-            ArticleType.Variation,
-            async (create, actor, ct) =>
-            {
-                var fromArticle = await ArticleRepository.GetFoundByGuid(
-                    create.Variation!.FromArticleGuid,
-                    ct);
+    {
+        const ArticleType expectedArticleType = ArticleType.Variation;
 
-                return Article.CreateArticleVariation(create.Name, fromArticle, actor);
-            },
-            logger,
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create flow started for actor {ActorGuid}.",
+                expectedArticleType,
+                actor.Guid);
+        }
+
+        var fromArticle = await articleRepository.GetFoundByGuid(
+            command.FromArticleGuid,
             cancellationToken);
+
+        var article = Article.CreateArticleVariation(command.Name, fromArticle, actor);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+
+        if (command.Description is { } description)
+        {
+            article.ChangeDescription(description, actor);
+        }
+
+        if (command.ShelfLife is not null)
+        {
+            article.SetShelfLife(command.ShelfLife, actor);
+        }
+
+        if (command.Color is not null)
+        {
+            article.SetColor(command.Color, actor);
+        }
+
+        if (command.Metrics is { } metrics)
+        {
+            article.SetMetrics(metrics.ToCore(), actor);
+        }
+
+        if (command.Barcodes is { } barcodes)
+        {
+            var articleBarcodes = barcodes.ToCore();
+
+            await articleService.SetEan13(articleBarcodes.Ean13, article, actor, cancellationToken);
+            await articleService.SetEan8(articleBarcodes.Ean8, article, actor, cancellationToken);
+            await articleService.SetUpcA(articleBarcodes.UpcA, article, actor, cancellationToken);
+            await articleService.SetUpcE(articleBarcodes.UpcE, article, actor, cancellationToken);
+            await articleService.SetCode128(articleBarcodes.Code128, article, actor, cancellationToken);
+            await articleService.SetCode39(articleBarcodes.Code39, article, actor, cancellationToken);
+            await articleService.SetItf14(articleBarcodes.Itf14, article, actor, cancellationToken);
+            await articleService.SetGs1128(articleBarcodes.Gs1128, article, actor, cancellationToken);
+            await articleService.SetQrCode(articleBarcodes.QrCode, article, actor, cancellationToken);
+            await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
+        }
+
+        if (command.Partitions is { Count: > 0 } partitions)
+        {
+            foreach (var partitionGuid in partitions.Distinct())
+            {
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
+                article.AddPartition(partition, actor);
+
+                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                    article,
+                    partition,
+                    actor.Guid));
+            }
+        }
+
+        if (command.IsActive == false)
+        {
+            article.Deactivate(actor);
+
+            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+        }
+
+        await unitOfWork.SaveChanges(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                expectedArticleType,
+                article.Guid,
+                actor.Guid);
+        }
+
+        return article.Guid;
+    }
 }
 
 /// <summary>
@@ -241,32 +323,106 @@ public sealed class ArticleCreatePackCommandHandler(
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreatePackCommandHandler> logger
-) : ArticleCreateCommandHandlerBase(
-        articleRepository,
-        partitionRepository,
-        entityEventRepository,
-        entityPartitionEventRepository,
-        articleService,
-        currentAuthorizationContext,
-        unitOfWork),
-    ICommandHandler<ArticleCreatePackCommand, Guid>
+) : ICommandHandler<ArticleCreatePackCommand, Guid>
 {
-    public Task<Guid> Handle(
+    public async Task<Guid> Handle(
         ArticleCreatePackCommand command,
         CancellationToken cancellationToken = default)
-        => HandleCreate(
-            command.Create,
-            ArticleType.Pack,
-            async (create, actor, ct) =>
-            {
-                var fromArticle = await ArticleRepository.GetFoundByGuid(
-                    create.Pack!.FromArticleGuid,
-                    ct);
+    {
+        const ArticleType expectedArticleType = ArticleType.Pack;
 
-                return Article.CreateArticlePack(create.Name, fromArticle, create.Pack.Quantity, actor);
-            },
-            logger,
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create flow started for actor {ActorGuid}.",
+                expectedArticleType,
+                actor.Guid);
+        }
+
+        var fromArticle = await articleRepository.GetFoundByGuid(
+            command.FromArticleGuid,
             cancellationToken);
+
+        var article = Article.CreateArticlePack(command.Name, fromArticle, command.Quantity, actor);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+
+        if (command.Description is { } description)
+        {
+            article.ChangeDescription(description, actor);
+        }
+
+        if (command.ShelfLife is not null)
+        {
+            article.SetShelfLife(command.ShelfLife, actor);
+        }
+
+        if (command.Color is not null)
+        {
+            article.SetColor(command.Color, actor);
+        }
+
+        if (command.Metrics is { } metrics)
+        {
+            article.SetMetrics(metrics.ToCore(), actor);
+        }
+
+        if (command.Barcodes is { } barcodes)
+        {
+            var articleBarcodes = barcodes.ToCore();
+
+            await articleService.SetEan13(articleBarcodes.Ean13, article, actor, cancellationToken);
+            await articleService.SetEan8(articleBarcodes.Ean8, article, actor, cancellationToken);
+            await articleService.SetUpcA(articleBarcodes.UpcA, article, actor, cancellationToken);
+            await articleService.SetUpcE(articleBarcodes.UpcE, article, actor, cancellationToken);
+            await articleService.SetCode128(articleBarcodes.Code128, article, actor, cancellationToken);
+            await articleService.SetCode39(articleBarcodes.Code39, article, actor, cancellationToken);
+            await articleService.SetItf14(articleBarcodes.Itf14, article, actor, cancellationToken);
+            await articleService.SetGs1128(articleBarcodes.Gs1128, article, actor, cancellationToken);
+            await articleService.SetQrCode(articleBarcodes.QrCode, article, actor, cancellationToken);
+            await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
+        }
+
+        if (command.Partitions is { Count: > 0 } partitions)
+        {
+            foreach (var partitionGuid in partitions.Distinct())
+            {
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
+
+                article.AddPartition(partition, actor);
+
+                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                    article,
+                    partition,
+                    actor.Guid));
+            }
+        }
+
+        if (command.IsActive == false)
+        {
+            article.Deactivate(actor);
+
+            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+        }
+
+        await unitOfWork.SaveChanges(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                expectedArticleType,
+                article.Guid,
+                actor.Guid);
+        }
+
+        return article.Guid;
+    }
 }
 
 /// <summary>
@@ -281,40 +437,115 @@ public sealed class ArticleCreateKitCommandHandler(
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreateKitCommandHandler> logger
-) : ArticleCreateCommandHandlerBase(
-        articleRepository,
-        partitionRepository,
-        entityEventRepository,
-        entityPartitionEventRepository,
-        articleService,
-        currentAuthorizationContext,
-        unitOfWork),
-    ICommandHandler<ArticleCreateKitCommand, Guid>
+) : ICommandHandler<ArticleCreateKitCommand, Guid>
 {
-    public Task<Guid> Handle(
+    public async Task<Guid> Handle(
         ArticleCreateKitCommand command,
         CancellationToken cancellationToken = default)
-        => HandleCreate(
-            command.Create,
-            ArticleType.Kit,
-            async (create, actor, ct) =>
+    {
+        const ArticleType expectedArticleType = ArticleType.Kit;
+
+        ArticleCreateRequestValidator.ValidateKitPacks(command.Packs);
+
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create flow started for actor {ActorGuid}.",
+                expectedArticleType,
+                actor.Guid);
+        }
+
+        var components = new List<ArticleKitComponent>(command.Packs.Count);
+
+        foreach (var componentPack in command.Packs)
+        {
+            var fromArticle = await articleRepository.GetFoundByGuid(
+                componentPack.ArticleGuid,
+                cancellationToken);
+
+            components.Add(new ArticleKitComponent(fromArticle, componentPack.Quantity));
+        }
+
+        var article = Article.CreateArticleKit(command.Name, components, actor);
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+
+        if (command.Description is { } description)
+        {
+            article.ChangeDescription(description, actor);
+        }
+
+        if (command.ShelfLife is not null)
+        {
+            article.SetShelfLife(command.ShelfLife, actor);
+        }
+
+        if (command.Color is not null)
+        {
+            article.SetColor(command.Color, actor);
+        }
+
+        if (command.Metrics is { } metrics)
+        {
+            article.SetMetrics(metrics.ToCore(), actor);
+        }
+
+        if (command.Barcodes is { } barcodes)
+        {
+            var articleBarcodes = barcodes.ToCore();
+
+            await articleService.SetEan13(articleBarcodes.Ean13, article, actor, cancellationToken);
+            await articleService.SetEan8(articleBarcodes.Ean8, article, actor, cancellationToken);
+            await articleService.SetUpcA(articleBarcodes.UpcA, article, actor, cancellationToken);
+            await articleService.SetUpcE(articleBarcodes.UpcE, article, actor, cancellationToken);
+            await articleService.SetCode128(articleBarcodes.Code128, article, actor, cancellationToken);
+            await articleService.SetCode39(articleBarcodes.Code39, article, actor, cancellationToken);
+            await articleService.SetItf14(articleBarcodes.Itf14, article, actor, cancellationToken);
+            await articleService.SetGs1128(articleBarcodes.Gs1128, article, actor, cancellationToken);
+            await articleService.SetQrCode(articleBarcodes.QrCode, article, actor, cancellationToken);
+            await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
+        }
+
+        if (command.Partitions is { Count: > 0 } partitions)
+        {
+            foreach (var partitionGuid in partitions.Distinct())
             {
-                var kit = create.Kit!;
-                var components = new List<ArticleKitComponent>(kit.Packs.Count);
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-                foreach (var componentPack in kit.Packs)
-                {
-                    var fromArticle = await ArticleRepository.GetFoundByGuid(
-                        componentPack.ArticleGuid,
-                        ct);
+                article.AddPartition(partition, actor);
 
-                    components.Add(new ArticleKitComponent(fromArticle, componentPack.Quantity));
-                }
+                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                    article,
+                    partition,
+                    actor.Guid));
+            }
+        }
 
-                return Article.CreateArticleKit(create.Name, components, actor);
-            },
-            logger,
-            cancellationToken);
+        if (command.IsActive == false)
+        {
+            article.Deactivate(actor);
+
+            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+        }
+
+        await unitOfWork.SaveChanges(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                expectedArticleType,
+                article.Guid,
+                actor.Guid);
+        }
+
+        return article.Guid;
+    }
 }
 
 /// <summary>
@@ -329,146 +560,120 @@ public sealed class ArticleCreateContainerCommandHandler(
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreateContainerCommandHandler> logger
-) : ArticleCreateCommandHandlerBase(
-        articleRepository,
-        partitionRepository,
-        entityEventRepository,
-        entityPartitionEventRepository,
-        articleService,
-        currentAuthorizationContext,
-        unitOfWork),
-    ICommandHandler<ArticleCreateContainerCommand, Guid>
+) : ICommandHandler<ArticleCreateContainerCommand, Guid>
 {
-    public Task<Guid> Handle(
+    public async Task<Guid> Handle(
         ArticleCreateContainerCommand command,
         CancellationToken cancellationToken = default)
-        => HandleCreate(
-            command.Create,
-            ArticleType.Container,
-            (create, actor, _) =>
+    {
+        const ArticleType expectedArticleType = ArticleType.Container;
+
+        var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+        var actor = authorizationContext.ToActor();
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create flow started for actor {ActorGuid}.",
+                expectedArticleType,
+                actor.Guid);
+        }
+
+        var article = Article.CreateArticleContainer(command.Name, actor);
+
+        if (command.MaxMass is { } maxMass)
+        {
+            article.SetContainerMaxMass(maxMass, actor);
+        }
+
+        articleRepository.Add(article);
+
+        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+
+        if (command.Description is { } description)
+        {
+            article.ChangeDescription(description, actor);
+        }
+
+        if (command.ShelfLife is not null)
+        {
+            article.SetShelfLife(command.ShelfLife, actor);
+        }
+
+        if (command.Color is not null)
+        {
+            article.SetColor(command.Color, actor);
+        }
+
+        if (command.Metrics is { } metrics)
+        {
+            article.SetMetrics(metrics.ToCore(), actor);
+        }
+
+        if (command.Barcodes is { } barcodes)
+        {
+            var articleBarcodes = barcodes.ToCore();
+
+            await articleService.SetEan13(articleBarcodes.Ean13, article, actor, cancellationToken);
+            await articleService.SetEan8(articleBarcodes.Ean8, article, actor, cancellationToken);
+            await articleService.SetUpcA(articleBarcodes.UpcA, article, actor, cancellationToken);
+            await articleService.SetUpcE(articleBarcodes.UpcE, article, actor, cancellationToken);
+            await articleService.SetCode128(articleBarcodes.Code128, article, actor, cancellationToken);
+            await articleService.SetCode39(articleBarcodes.Code39, article, actor, cancellationToken);
+            await articleService.SetItf14(articleBarcodes.Itf14, article, actor, cancellationToken);
+            await articleService.SetGs1128(articleBarcodes.Gs1128, article, actor, cancellationToken);
+            await articleService.SetQrCode(articleBarcodes.QrCode, article, actor, cancellationToken);
+            await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
+        }
+
+        if (command.Partitions is { Count: > 0 } partitions)
+        {
+            foreach (var partitionGuid in partitions.Distinct())
             {
-                var article = Article.CreateArticleContainer(create.Name, actor);
+                var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-                if (create.Container?.MaxMass is { } maxMass)
-                {
-                    article.SetContainerMaxMass(maxMass, actor);
-                }
+                article.AddPartition(partition, actor);
 
-                return Task.FromResult(article);
-            },
-            logger,
-            cancellationToken);
+                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                    article,
+                    partition,
+                    actor.Guid));
+            }
+        }
+
+        if (command.IsActive == false)
+        {
+            article.Deactivate(actor);
+
+            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+        }
+
+        await unitOfWork.SaveChanges(cancellationToken);
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Article {ArticleType} create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                expectedArticleType,
+                article.Guid,
+                actor.Guid);
+        }
+
+        return article.Guid;
+    }
 }
 
 internal static class ArticleCreateRequestValidator
 {
-    public static void Validate(ArticleCreateDto create, ArticleType expectedArticleType)
+    public static void ValidateKitPacks(IReadOnlyCollection<ArticleCreateKitPackDto> packs)
     {
-        if (!Enum.IsDefined(create.ArticleType))
+        ArgumentNullException.ThrowIfNull(packs);
+
+        if (packs.Count == 0)
         {
             throw new ArgumentException(
-                $"Unsupported article type '{create.ArticleType}'.",
-                nameof(create));
-        }
-
-        if (create.ArticleType != expectedArticleType)
-        {
-            throw new ArgumentException(
-                $"Article creation command for '{expectedArticleType}' cannot create '{create.ArticleType}' articles.",
-                nameof(create));
-        }
-
-        switch (expectedArticleType)
-        {
-            case ArticleType.Default:
-                RejectPayload(
-                    create.Variation is not null,
-                    create.Pack is not null,
-                    create.Kit is not null,
-                    create.Container is not null,
-                    expectedArticleType,
-                    create);
-                break;
-            case ArticleType.Variation:
-                RequirePayload(create.Variation is not null, expectedArticleType, create);
-                RejectPayload(
-                    false,
-                    create.Pack is not null,
-                    create.Kit is not null,
-                    create.Container is not null,
-                    expectedArticleType,
-                    create);
-                break;
-            case ArticleType.Pack:
-                RequirePayload(create.Pack is not null, expectedArticleType, create);
-                RejectPayload(
-                    create.Variation is not null,
-                    false,
-                    create.Kit is not null,
-                    create.Container is not null,
-                    expectedArticleType,
-                    create);
-                break;
-            case ArticleType.Kit:
-                RequirePayload(create.Kit is not null, expectedArticleType, create);
-                RejectPayload(
-                    create.Variation is not null,
-                    create.Pack is not null,
-                    false,
-                    create.Container is not null,
-                    expectedArticleType,
-                    create);
-
-                if (create.Kit!.Packs.Count == 0)
-                {
-                    throw new ArgumentException(
-                        "Kit article creation requires at least one pack.",
-                        nameof(create));
-                }
-
-                break;
-            case ArticleType.Container:
-                RejectPayload(
-                    create.Variation is not null,
-                    create.Pack is not null,
-                    create.Kit is not null,
-                    false,
-                    expectedArticleType,
-                    create);
-                break;
-            default:
-                throw new ArgumentException(
-                    $"Unsupported article type '{expectedArticleType}'.",
-                    nameof(expectedArticleType));
-        }
-    }
-
-    private static void RequirePayload(
-        bool payloadProvided,
-        ArticleType expectedArticleType,
-        ArticleCreateDto create)
-    {
-        if (!payloadProvided)
-        {
-            throw new ArgumentException(
-                $"Article type '{expectedArticleType}' requires its matching create payload.",
-                nameof(create));
-        }
-    }
-
-    private static void RejectPayload(
-        bool variationProvided,
-        bool packProvided,
-        bool kitProvided,
-        bool containerProvided,
-        ArticleType expectedArticleType,
-        ArticleCreateDto create)
-    {
-        if (variationProvided || packProvided || kitProvided || containerProvided)
-        {
-            throw new ArgumentException(
-                $"Article type '{expectedArticleType}' cannot include payloads for another article type.",
-                nameof(create));
+                "Kit article creation requires at least one pack.",
+                nameof(packs));
         }
     }
 }
