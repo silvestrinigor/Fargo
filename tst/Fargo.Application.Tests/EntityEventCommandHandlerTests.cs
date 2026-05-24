@@ -19,7 +19,7 @@ public sealed class EntityEventCommandHandlerTests
         var articleRepository = Substitute.For<IArticleRepository>();
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreateCommandHandler(
+        var handler = new ArticleCreateDefaultCommandHandler(
             articleRepository,
             Substitute.For<IPartitionRepository>(),
             entityEventRepository,
@@ -27,10 +27,10 @@ public sealed class EntityEventCommandHandlerTests
             new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IUnitOfWork>(),
-            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
+            Substitute.For<ILogger<ArticleCreateDefaultCommandHandler>>());
 
-        var articleGuid = await handler.Handle(new ArticleCreateCommand(
-            new ArticleCreateDto(new Name("Article"))));
+        var articleGuid = await handler.Handle(new ArticleCreateDefaultCommand(
+            new ArticleCreateDto(new Name("Article"), ArticleType.Default)));
 
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&

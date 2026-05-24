@@ -160,6 +160,34 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </remarks>
     public Name Name { get; private set; }
 
+    public ArticleType ArticleType
+    {
+        get
+        {
+            if (Variation is not null)
+            {
+                return ArticleType.Variation;
+            }
+
+            if (Pack is not null)
+            {
+                return ArticleType.Pack;
+            }
+
+            if (Kit is not null)
+            {
+                return ArticleType.Kit;
+            }
+
+            if (Container is not null)
+            {
+                return ArticleType.Container;
+            }
+
+            return ArticleType.Default;
+        }
+    }
+
     public void Rename(Name name, Actor actor)
     {
         ValidateCanEdit(actor);

@@ -27,6 +27,7 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.HasKey(x => x.Guid);
 
         builder.Ignore(x => x.IsEditStarted);
+        builder.Ignore(x => x.ArticleType);
 
         builder.Property(x => x.Name).IsRequired();
 

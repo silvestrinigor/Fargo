@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
+using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -157,10 +158,34 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateArticle(
         ArticleCreateDto request,
-        ICommandHandler<ArticleCreateCommand, Guid> handler,
+        ICommandHandler<ArticleCreateDefaultCommand, Guid> defaultHandler,
+        ICommandHandler<ArticleCreateVariationCommand, Guid> variationHandler,
+        ICommandHandler<ArticleCreatePackCommand, Guid> packHandler,
+        ICommandHandler<ArticleCreateKitCommand, Guid> kitHandler,
+        ICommandHandler<ArticleCreateContainerCommand, Guid> containerHandler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new ArticleCreateCommand(request), cancellationToken);
+        var response = request.ArticleType switch
+        {
+            ArticleType.Default => await defaultHandler.Handle(
+                new ArticleCreateDefaultCommand(request),
+                cancellationToken),
+            ArticleType.Variation => await variationHandler.Handle(
+                new ArticleCreateVariationCommand(request),
+                cancellationToken),
+            ArticleType.Pack => await packHandler.Handle(
+                new ArticleCreatePackCommand(request),
+                cancellationToken),
+            ArticleType.Kit => await kitHandler.Handle(
+                new ArticleCreateKitCommand(request),
+                cancellationToken),
+            ArticleType.Container => await containerHandler.Handle(
+                new ArticleCreateContainerCommand(request),
+                cancellationToken),
+            _ => throw new ArgumentException(
+                $"Unsupported article type '{request.ArticleType}'.",
+                nameof(request))
+        };
 
         return TypedResults.Ok(response);
     }

@@ -15,6 +15,7 @@ public sealed class ArticleMutationTests
 
         var article = Article.CreateArticle(new Name("Test article"), actor);
 
+        Assert.Equal(ArticleType.Default, article.ArticleType);
         Assert.Equal(actor.Guid, article.EditedByGuid);
         Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
         Assert.True(article.IsEditStarted);
@@ -35,6 +36,7 @@ public sealed class ArticleMutationTests
         var article = Article.CreateArticleVariation(new Name("Variation article"), fromArticle, CreateDomainActor());
 
         Assert.True(article.IsVariation);
+        Assert.Equal(ArticleType.Variation, article.ArticleType);
         Assert.Equal(fromArticle.Guid, article.Variation?.FromArticleGuid);
     }
 
@@ -47,6 +49,7 @@ public sealed class ArticleMutationTests
         var article = Article.CreateArticlePack(new Name("Pack article"), fromArticle, quantity, CreateDomainActor());
 
         Assert.True(article.IsPack);
+        Assert.Equal(ArticleType.Pack, article.ArticleType);
         Assert.Equal(fromArticle.Guid, article.Pack?.FromArticleGuid);
         Assert.Equal(quantity, article.Pack?.Quantity);
     }
@@ -60,6 +63,7 @@ public sealed class ArticleMutationTests
         var article = Article.CreateArticleKit(new Name("Kit article"), [component], CreateDomainActor());
 
         Assert.True(article.IsKit);
+        Assert.Equal(ArticleType.Kit, article.ArticleType);
         Assert.Same(component, article.Kit?.Components.Single());
     }
 
@@ -117,6 +121,7 @@ public sealed class ArticleMutationTests
         var article = Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor());
 
         Assert.True(article.IsContainer);
+        Assert.Equal(ArticleType.Container, article.ArticleType);
         Assert.Null(article.Container?.MaxMass);
     }
 

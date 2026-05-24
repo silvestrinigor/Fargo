@@ -10,6 +10,7 @@ namespace Fargo.Application.Articles;
 public sealed record ArticleDto(
     Guid Guid,
     Name Name,
+    ArticleType ArticleType,
     Description Description,
     TimeSpan? ShelfLife,
     Color? Color,
@@ -88,6 +89,7 @@ public static class ArticleCommandDtoMappings
 
 public sealed record ArticleCreateDto(
     Name Name,
+    ArticleType ArticleType,
     Description? Description = null,
     TimeSpan? ShelfLife = null,
     Color? Color = null,
@@ -122,6 +124,15 @@ public static class ArticleDtoMappings
     public static readonly Expression<Func<Article, ArticleDto>> Projection = article => new ArticleDto(
         article.Guid,
         article.Name,
+        article.Variation != null
+            ? ArticleType.Variation
+            : article.Pack != null
+                ? ArticleType.Pack
+                : article.Kit != null
+                    ? ArticleType.Kit
+                    : article.Container != null
+                        ? ArticleType.Container
+                        : ArticleType.Default,
         article.Description,
         article.ShelfLife,
         article.Color,

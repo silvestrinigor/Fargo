@@ -64,7 +64,11 @@ public static class FargoApplicationDependencyInjection
             .AddScoped<IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>, UserGroupsQueryHandler>();
 
         private IServiceCollection AddFargoArticleApplication() => services
-            .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleCreateDefaultCommand, Guid>, ArticleCreateDefaultCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleCreateVariationCommand, Guid>, ArticleCreateVariationCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleCreatePackCommand, Guid>, ArticleCreatePackCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleCreateKitCommand, Guid>, ArticleCreateKitCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleCreateContainerCommand, Guid>, ArticleCreateContainerCommandHandler>()
             .AddScoped<ICommandHandler<ArticlePatchCommand>, ArticlePatchCommandHandler>()
             .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()

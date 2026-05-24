@@ -2,6 +2,7 @@ using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
+using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 
@@ -10,102 +11,75 @@ namespace Fargo.Application.Articles;
 #region Create
 
 /// <summary>
-/// Command used to create a new article from an API creation payload.
+/// Command used to create a default article from an API creation payload.
 /// </summary>
-public sealed record ArticleCreateCommand(
+public sealed record ArticleCreateDefaultCommand(
     ArticleCreateDto Create
 ) : ICommand<Guid>;
 
 /// <summary>
-/// Handles article creation, including optional create-time state.
+/// Command used to create a variation article from an API creation payload.
 /// </summary>
-public sealed class ArticleCreateCommandHandler(
+public sealed record ArticleCreateVariationCommand(
+    ArticleCreateDto Create
+) : ICommand<Guid>;
+
+/// <summary>
+/// Command used to create a pack article from an API creation payload.
+/// </summary>
+public sealed record ArticleCreatePackCommand(
+    ArticleCreateDto Create
+) : ICommand<Guid>;
+
+/// <summary>
+/// Command used to create a kit article from an API creation payload.
+/// </summary>
+public sealed record ArticleCreateKitCommand(
+    ArticleCreateDto Create
+) : ICommand<Guid>;
+
+/// <summary>
+/// Command used to create a container article from an API creation payload.
+/// </summary>
+public sealed record ArticleCreateContainerCommand(
+    ArticleCreateDto Create
+) : ICommand<Guid>;
+
+public abstract class ArticleCreateCommandHandlerBase(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IEntityEventRepository entityEventRepository,
     IEntityPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
-    IUnitOfWork unitOfWork,
-    ILogger<ArticleCreateCommandHandler> logger
-) : ICommandHandler<ArticleCreateCommand, Guid>
+    IUnitOfWork unitOfWork
+)
 {
-    public async Task<Guid> Handle(
-        ArticleCreateCommand command,
+    protected IArticleRepository ArticleRepository { get; } = articleRepository;
+
+    protected async Task<Guid> HandleCreate(
+        ArticleCreateDto create,
+        ArticleType expectedArticleType,
+        Func<ArticleCreateDto, Actor, CancellationToken, Task<Article>> articleFactory,
+        ILogger logger,
         CancellationToken cancellationToken = default)
     {
+        ArticleCreateRequestValidator.Validate(create, expectedArticleType);
+
         var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
         var actor = authorizationContext.ToActor();
-        var create = command.Create;
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation("Article create flow started for actor {ActorGuid}.", actor.Guid);
+            logger.LogInformation(
+                "Article {ArticleType} create flow started for actor {ActorGuid}.",
+                expectedArticleType,
+                actor.Guid);
         }
 
-        var createTypeCount =
-            (create.Variation is null ? 0 : 1) +
-            (create.Pack is null ? 0 : 1) +
-            (create.Kit is null ? 0 : 1) +
-            (create.Container is null ? 0 : 1);
+        var article = await articleFactory(create, actor, cancellationToken);
 
-        if (createTypeCount > 1)
-        {
-            throw new ArgumentException(
-                "Article creation accepts only one specialized article type.",
-                nameof(command));
-        }
-
-        Article article;
-
-        if (create.Variation is { } variation)
-        {
-            var fromArticle = await articleRepository.GetFoundByGuid(
-                variation.FromArticleGuid,
-                cancellationToken);
-
-            article = Article.CreateArticleVariation(create.Name, fromArticle, actor);
-        }
-        else if (create.Pack is { } pack)
-        {
-            var fromArticle = await articleRepository.GetFoundByGuid(
-                pack.FromArticleGuid,
-                cancellationToken);
-
-            article = Article.CreateArticlePack(create.Name, fromArticle, pack.Quantity, actor);
-        }
-        else if (create.Kit is { } kit)
-        {
-            if (kit.Packs.Count == 0)
-            {
-                throw new ArgumentException(
-                    "Kit article creation requires at least one pack.",
-                    nameof(create));
-            }
-
-            var components = new List<ArticleKitComponent>(kit.Packs.Count);
-
-            foreach (var componentPack in kit.Packs)
-            {
-                var fromArticle = await articleRepository.GetFoundByGuid(
-                    componentPack.ArticleGuid,
-                    cancellationToken);
-
-                components.Add(new ArticleKitComponent(fromArticle, componentPack.Quantity));
-            }
-
-            article = Article.CreateArticleKit(create.Name, components, actor);
-        }
-        else if (create.Container is not null)
-        {
-            article = Article.CreateArticleContainer(create.Name, actor);
-        }
-        else
-        {
-            article = Article.CreateArticle(create.Name, actor);
-        }
-
-        articleRepository.Add(article);
+        ArticleRepository.Add(article);
 
         entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
 
@@ -145,11 +119,6 @@ public sealed class ArticleCreateCommandHandler(
             await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
         }
 
-        if (create.Container?.MaxMass is { } containerMaxMass)
-        {
-            article.SetContainerMaxMass(containerMaxMass, actor);
-        }
-
         if (create.Partitions is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
@@ -177,12 +146,330 @@ public sealed class ArticleCreateCommandHandler(
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Article create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                "Article {ArticleType} create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
+                expectedArticleType,
                 article.Guid,
                 actor.Guid);
         }
 
         return article.Guid;
+    }
+}
+
+/// <summary>
+/// Handles default article creation.
+/// </summary>
+public sealed class ArticleCreateDefaultCommandHandler(
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
+    ArticleService articleService,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreateDefaultCommandHandler> logger
+) : ArticleCreateCommandHandlerBase(
+        articleRepository,
+        partitionRepository,
+        entityEventRepository,
+        entityPartitionEventRepository,
+        articleService,
+        currentAuthorizationContext,
+        unitOfWork),
+    ICommandHandler<ArticleCreateDefaultCommand, Guid>
+{
+    public Task<Guid> Handle(
+        ArticleCreateDefaultCommand command,
+        CancellationToken cancellationToken = default)
+        => HandleCreate(
+            command.Create,
+            ArticleType.Default,
+            (create, actor, _) => Task.FromResult(Article.CreateArticle(create.Name, actor)),
+            logger,
+            cancellationToken);
+}
+
+/// <summary>
+/// Handles variation article creation.
+/// </summary>
+public sealed class ArticleCreateVariationCommandHandler(
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
+    ArticleService articleService,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreateVariationCommandHandler> logger
+) : ArticleCreateCommandHandlerBase(
+        articleRepository,
+        partitionRepository,
+        entityEventRepository,
+        entityPartitionEventRepository,
+        articleService,
+        currentAuthorizationContext,
+        unitOfWork),
+    ICommandHandler<ArticleCreateVariationCommand, Guid>
+{
+    public Task<Guid> Handle(
+        ArticleCreateVariationCommand command,
+        CancellationToken cancellationToken = default)
+        => HandleCreate(
+            command.Create,
+            ArticleType.Variation,
+            async (create, actor, ct) =>
+            {
+                var fromArticle = await ArticleRepository.GetFoundByGuid(
+                    create.Variation!.FromArticleGuid,
+                    ct);
+
+                return Article.CreateArticleVariation(create.Name, fromArticle, actor);
+            },
+            logger,
+            cancellationToken);
+}
+
+/// <summary>
+/// Handles pack article creation.
+/// </summary>
+public sealed class ArticleCreatePackCommandHandler(
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
+    ArticleService articleService,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreatePackCommandHandler> logger
+) : ArticleCreateCommandHandlerBase(
+        articleRepository,
+        partitionRepository,
+        entityEventRepository,
+        entityPartitionEventRepository,
+        articleService,
+        currentAuthorizationContext,
+        unitOfWork),
+    ICommandHandler<ArticleCreatePackCommand, Guid>
+{
+    public Task<Guid> Handle(
+        ArticleCreatePackCommand command,
+        CancellationToken cancellationToken = default)
+        => HandleCreate(
+            command.Create,
+            ArticleType.Pack,
+            async (create, actor, ct) =>
+            {
+                var fromArticle = await ArticleRepository.GetFoundByGuid(
+                    create.Pack!.FromArticleGuid,
+                    ct);
+
+                return Article.CreateArticlePack(create.Name, fromArticle, create.Pack.Quantity, actor);
+            },
+            logger,
+            cancellationToken);
+}
+
+/// <summary>
+/// Handles kit article creation.
+/// </summary>
+public sealed class ArticleCreateKitCommandHandler(
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
+    ArticleService articleService,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreateKitCommandHandler> logger
+) : ArticleCreateCommandHandlerBase(
+        articleRepository,
+        partitionRepository,
+        entityEventRepository,
+        entityPartitionEventRepository,
+        articleService,
+        currentAuthorizationContext,
+        unitOfWork),
+    ICommandHandler<ArticleCreateKitCommand, Guid>
+{
+    public Task<Guid> Handle(
+        ArticleCreateKitCommand command,
+        CancellationToken cancellationToken = default)
+        => HandleCreate(
+            command.Create,
+            ArticleType.Kit,
+            async (create, actor, ct) =>
+            {
+                var kit = create.Kit!;
+                var components = new List<ArticleKitComponent>(kit.Packs.Count);
+
+                foreach (var componentPack in kit.Packs)
+                {
+                    var fromArticle = await ArticleRepository.GetFoundByGuid(
+                        componentPack.ArticleGuid,
+                        ct);
+
+                    components.Add(new ArticleKitComponent(fromArticle, componentPack.Quantity));
+                }
+
+                return Article.CreateArticleKit(create.Name, components, actor);
+            },
+            logger,
+            cancellationToken);
+}
+
+/// <summary>
+/// Handles container article creation.
+/// </summary>
+public sealed class ArticleCreateContainerCommandHandler(
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    IEntityEventRepository entityEventRepository,
+    IEntityPartitionEventRepository entityPartitionEventRepository,
+    ArticleService articleService,
+    ICurrentAuthorizationContext currentAuthorizationContext,
+    IUnitOfWork unitOfWork,
+    ILogger<ArticleCreateContainerCommandHandler> logger
+) : ArticleCreateCommandHandlerBase(
+        articleRepository,
+        partitionRepository,
+        entityEventRepository,
+        entityPartitionEventRepository,
+        articleService,
+        currentAuthorizationContext,
+        unitOfWork),
+    ICommandHandler<ArticleCreateContainerCommand, Guid>
+{
+    public Task<Guid> Handle(
+        ArticleCreateContainerCommand command,
+        CancellationToken cancellationToken = default)
+        => HandleCreate(
+            command.Create,
+            ArticleType.Container,
+            (create, actor, _) =>
+            {
+                var article = Article.CreateArticleContainer(create.Name, actor);
+
+                if (create.Container?.MaxMass is { } maxMass)
+                {
+                    article.SetContainerMaxMass(maxMass, actor);
+                }
+
+                return Task.FromResult(article);
+            },
+            logger,
+            cancellationToken);
+}
+
+internal static class ArticleCreateRequestValidator
+{
+    public static void Validate(ArticleCreateDto create, ArticleType expectedArticleType)
+    {
+        if (!Enum.IsDefined(create.ArticleType))
+        {
+            throw new ArgumentException(
+                $"Unsupported article type '{create.ArticleType}'.",
+                nameof(create));
+        }
+
+        if (create.ArticleType != expectedArticleType)
+        {
+            throw new ArgumentException(
+                $"Article creation command for '{expectedArticleType}' cannot create '{create.ArticleType}' articles.",
+                nameof(create));
+        }
+
+        switch (expectedArticleType)
+        {
+            case ArticleType.Default:
+                RejectPayload(
+                    create.Variation is not null,
+                    create.Pack is not null,
+                    create.Kit is not null,
+                    create.Container is not null,
+                    expectedArticleType,
+                    create);
+                break;
+            case ArticleType.Variation:
+                RequirePayload(create.Variation is not null, expectedArticleType, create);
+                RejectPayload(
+                    false,
+                    create.Pack is not null,
+                    create.Kit is not null,
+                    create.Container is not null,
+                    expectedArticleType,
+                    create);
+                break;
+            case ArticleType.Pack:
+                RequirePayload(create.Pack is not null, expectedArticleType, create);
+                RejectPayload(
+                    create.Variation is not null,
+                    false,
+                    create.Kit is not null,
+                    create.Container is not null,
+                    expectedArticleType,
+                    create);
+                break;
+            case ArticleType.Kit:
+                RequirePayload(create.Kit is not null, expectedArticleType, create);
+                RejectPayload(
+                    create.Variation is not null,
+                    create.Pack is not null,
+                    false,
+                    create.Container is not null,
+                    expectedArticleType,
+                    create);
+
+                if (create.Kit!.Packs.Count == 0)
+                {
+                    throw new ArgumentException(
+                        "Kit article creation requires at least one pack.",
+                        nameof(create));
+                }
+
+                break;
+            case ArticleType.Container:
+                RejectPayload(
+                    create.Variation is not null,
+                    create.Pack is not null,
+                    create.Kit is not null,
+                    false,
+                    expectedArticleType,
+                    create);
+                break;
+            default:
+                throw new ArgumentException(
+                    $"Unsupported article type '{expectedArticleType}'.",
+                    nameof(expectedArticleType));
+        }
+    }
+
+    private static void RequirePayload(
+        bool payloadProvided,
+        ArticleType expectedArticleType,
+        ArticleCreateDto create)
+    {
+        if (!payloadProvided)
+        {
+            throw new ArgumentException(
+                $"Article type '{expectedArticleType}' requires its matching create payload.",
+                nameof(create));
+        }
+    }
+
+    private static void RejectPayload(
+        bool variationProvided,
+        bool packProvided,
+        bool kitProvided,
+        bool containerProvided,
+        ArticleType expectedArticleType,
+        ArticleCreateDto create)
+    {
+        if (variationProvided || packProvided || kitProvided || containerProvided)
+        {
+            throw new ArgumentException(
+                $"Article type '{expectedArticleType}' cannot include payloads for another article type.",
+                nameof(create));
+        }
     }
 }
 

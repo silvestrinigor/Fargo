@@ -27,7 +27,7 @@ public sealed class ArticleCommandHandlerTests
         var actor = CreateActor(
             [ActionType.CreateArticle, ActionType.EditArticle],
             [partition.Guid]);
-        var handler = new ArticleCreateCommandHandler(
+        var handler = new ArticleCreateContainerCommandHandler(
             articleRepository,
             partitionRepository,
             entityEventRepository,
@@ -35,11 +35,12 @@ public sealed class ArticleCommandHandlerTests
             new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
             unitOfWork,
-            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
+            Substitute.For<ILogger<ArticleCreateContainerCommandHandler>>());
 
-        var articleGuid = await handler.Handle(new ArticleCreateCommand(
+        var articleGuid = await handler.Handle(new ArticleCreateContainerCommand(
             new ArticleCreateDto(
                 new Name("Container"),
+                ArticleType.Container,
                 Description: new Description("Description"),
                 ShelfLife: TimeSpan.FromDays(7),
                 Metrics: new ArticleMetricsDto(Mass.FromKilograms(2), Length.FromCentimeters(10)),
@@ -51,6 +52,7 @@ public sealed class ArticleCommandHandlerTests
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.Guid == articleGuid &&
             article.IsContainer &&
+            article.ArticleType == ArticleType.Container &&
             article.Description == new Description("Description") &&
             article.ShelfLife == TimeSpan.FromDays(7) &&
             article.Ean13 == new Ean13("1234567890123") &&
@@ -80,21 +82,42 @@ public sealed class ArticleCommandHandlerTests
     }
 
     [Fact]
+    public async Task Create_Should_CreateDefaultArticle()
+    {
+        var articleRepository = Substitute.For<IArticleRepository>();
+        var handler = CreateDefaultCreateHandler(
+            articleRepository,
+            actor: CreateActor([ActionType.CreateArticle]));
+
+        await handler.Handle(new ArticleCreateDefaultCommand(
+            new ArticleCreateDto(new Name("Default"), ArticleType.Default)));
+
+        articleRepository.Received(1).Add(Arg.Is<Article>(article =>
+            article.ArticleType == ArticleType.Default &&
+            !article.IsVariation &&
+            !article.IsPack &&
+            !article.IsKit &&
+            !article.IsContainer));
+    }
+
+    [Fact]
     public async Task Create_Should_CreateVariationFromSourceArticle()
     {
         var sourceArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(sourceArticle);
-        var handler = CreateCreateHandler(
+        var handler = CreateVariationCreateHandler(
             articleRepository,
             actor: CreateActor([ActionType.CreateArticle]));
 
-        await handler.Handle(new ArticleCreateCommand(
+        await handler.Handle(new ArticleCreateVariationCommand(
             new ArticleCreateDto(
                 new Name("Variation"),
+                ArticleType.Variation,
                 Variation: new ArticleCreateVariationDto(sourceArticle.Guid))));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsVariation &&
+            article.ArticleType == ArticleType.Variation &&
             article.Variation!.FromArticleGuid == sourceArticle.Guid &&
             article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Relation)));
     }
@@ -104,17 +127,19 @@ public sealed class ArticleCommandHandlerTests
     {
         var sourceArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(sourceArticle);
-        var handler = CreateCreateHandler(
+        var handler = CreatePackCreateHandler(
             articleRepository,
             actor: CreateActor([ActionType.CreateArticle]));
 
-        await handler.Handle(new ArticleCreateCommand(
+        await handler.Handle(new ArticleCreatePackCommand(
             new ArticleCreateDto(
                 new Name("Pack"),
+                ArticleType.Pack,
                 Pack: new ArticleCreatePackDto(sourceArticle.Guid, 4.Amount()))));
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsPack &&
+            article.ArticleType == ArticleType.Pack &&
             article.Pack!.FromArticleGuid == sourceArticle.Guid &&
             article.Pack.Quantity.Equals(4.Amount(), 0.Amount())));
     }
@@ -125,13 +150,14 @@ public sealed class ArticleCommandHandlerTests
         var firstArticle = Article.CreateArticle(new Name("First article"), CreateDomainActor());
         var secondArticle = Article.CreateArticle(new Name("Second article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(firstArticle, secondArticle);
-        var handler = CreateCreateHandler(
+        var handler = CreateKitCreateHandler(
             articleRepository,
             actor: CreateActor([ActionType.CreateArticle]));
 
-        await handler.Handle(new ArticleCreateCommand(
+        await handler.Handle(new ArticleCreateKitCommand(
             new ArticleCreateDto(
                 new Name("Kit"),
+                ArticleType.Kit,
                 Kit: new ArticleCreateKitDto(
                 [
                     new ArticleCreateKitPackDto(firstArticle.Guid, 2.Amount()),
@@ -140,6 +166,7 @@ public sealed class ArticleCommandHandlerTests
 
         articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsKit &&
+            article.ArticleType == ArticleType.Kit &&
             article.Kit!.Components.Count == 2 &&
             article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Relation)));
     }
@@ -147,12 +174,13 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task Create_Should_Throw_WhenMoreThanOneSpecializedTypeIsProvided()
     {
-        var handler = CreateCreateHandler();
+        var handler = CreateVariationCreateHandler();
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => handler.Handle(new ArticleCreateCommand(
+            () => handler.Handle(new ArticleCreateVariationCommand(
                 new ArticleCreateDto(
                     new Name("Invalid"),
+                    ArticleType.Variation,
                     Variation: new ArticleCreateVariationDto(Guid.NewGuid()),
                     Container: new ArticleCreateContainerDto()))));
     }
@@ -160,12 +188,13 @@ public sealed class ArticleCommandHandlerTests
     [Fact]
     public async Task Create_Should_Throw_WhenKitHasNoPacks()
     {
-        var handler = CreateCreateHandler();
+        var handler = CreateKitCreateHandler();
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => handler.Handle(new ArticleCreateCommand(
+            () => handler.Handle(new ArticleCreateKitCommand(
                 new ArticleCreateDto(
                     new Name("Invalid kit"),
+                    ArticleType.Kit,
                     Kit: new ArticleCreateKitDto([])))));
     }
 
@@ -275,7 +304,7 @@ public sealed class ArticleCommandHandlerTests
         await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
 
-    private static ArticleCreateCommandHandler CreateCreateHandler(
+    private static ArticleCreateDefaultCommandHandler CreateDefaultCreateHandler(
         IArticleRepository? articleRepository = null,
         IPartitionRepository? partitionRepository = null,
         IEntityEventRepository? entityEventRepository = null,
@@ -285,7 +314,7 @@ public sealed class ArticleCommandHandlerTests
     {
         articleRepository ??= Substitute.For<IArticleRepository>();
 
-        return new ArticleCreateCommandHandler(
+        return new ArticleCreateDefaultCommandHandler(
             articleRepository,
             partitionRepository ?? Substitute.For<IPartitionRepository>(),
             entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
@@ -293,7 +322,70 @@ public sealed class ArticleCommandHandlerTests
             new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
             unitOfWork ?? Substitute.For<IUnitOfWork>(),
-            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
+            Substitute.For<ILogger<ArticleCreateDefaultCommandHandler>>());
+    }
+
+    private static ArticleCreateVariationCommandHandler CreateVariationCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
+    {
+        articleRepository ??= Substitute.For<IArticleRepository>();
+
+        return new ArticleCreateVariationCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreateVariationCommandHandler>>());
+    }
+
+    private static ArticleCreatePackCommandHandler CreatePackCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
+    {
+        articleRepository ??= Substitute.For<IArticleRepository>();
+
+        return new ArticleCreatePackCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreatePackCommandHandler>>());
+    }
+
+    private static ArticleCreateKitCommandHandler CreateKitCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
+    {
+        articleRepository ??= Substitute.For<IArticleRepository>();
+
+        return new ArticleCreateKitCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreateKitCommandHandler>>());
     }
 
     private static IArticleRepository CreateArticleRepository(params Article[] articles)
