@@ -1,3 +1,5 @@
+using global::Fargo.HttpContracts;
+
 namespace Fargo.HttpApi;
 
 /// <summary>
@@ -92,7 +94,7 @@ public sealed class FargoExceptionMiddleware
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/problem+json";
 
-        var problemDetails = new FargoProblemDetails
+        var problemDetails = new FargoProblemDetailsDto
         {
             Status = statusCode,
             Title = title,
@@ -104,19 +106,4 @@ public sealed class FargoExceptionMiddleware
 
         await context.Response.WriteAsJsonAsync(problemDetails);
     }
-}
-
-public sealed class FargoProblemDetails
-{
-    public int Status { get; init; }
-
-    public string Title { get; init; } = string.Empty;
-
-    public string Detail { get; init; } = string.Empty;
-
-    public string Type { get; init; } = string.Empty;
-
-    public string Instance { get; init; } = string.Empty;
-
-    public string TraceId { get; init; } = string.Empty;
 }

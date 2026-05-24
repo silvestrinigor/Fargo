@@ -1,5 +1,7 @@
 <Solution>
     <Project Path="src/Fargo.AppHost/Fargo.AppHost.csproj" />
+    <Project Path="src/Fargo.HttpClient/Fargo.HttpClient.csproj" />
+    <Project Path="src/Fargo.HttpContracts/Fargo.HttpContracts.csproj" />
     <Project Path="src/Fargo.HttpApi/Fargo.HttpApi.csproj" />
     <Project Path="src/Fargo.MigrationService/Fargo.MigrationService.csproj" />
     <Project Path="src/Fargo.SeedService/Fargo.SeedService.csproj" />
@@ -10,6 +12,7 @@
     <Project Path="src/Fargo.Core/Fargo.Core.csproj" />
     <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
     <Project Path="tst/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
+    <Project Path="tst/Fargo.HttpClient.Tests/Fargo.HttpClient.Tests.csproj" />
     <Project Path="tst/Fargo.HttpApi.Tests/Fargo.HttpApi.Tests.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tst/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />

@@ -2,8 +2,11 @@ using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.Articles;
 
@@ -44,14 +47,14 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticle")
             .WithSummary("Gets a single article")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<ArticleDto>(StatusCodes.Status200OK)
+            .Produces<HttpContracts.ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ArticleDto>, NotFound>> GetSingleArticle(
+    private static async Task<Results<Ok<HttpContracts.ArticleDto>, NotFound>> GetSingleArticle(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
@@ -62,7 +65,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
     #endregion
@@ -75,24 +78,26 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticleByBarcode")
             .WithSummary("Gets a single article by barcode")
             .WithDescription("Retrieves a single article by barcode and barcode type using the {barcode}:{type} route value.")
-            .Produces<ArticleDto>(StatusCodes.Status200OK)
+            .Produces<HttpContracts.ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ArticleDto>, NotFound>> GetArticleByBarcode(
-        Barcode articleBarcode,
+    private static async Task<Results<Ok<HttpContracts.ArticleDto>, NotFound>> GetArticleByBarcode(
+        string articleBarcode,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new ArticleByBarcodeQuery(articleBarcode, temporalAsOf);
+        var query = new ArticleByBarcodeQuery(
+            Barcode.Parse(articleBarcode, CultureInfo.InvariantCulture),
+            temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
     #endregion
@@ -105,24 +110,26 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
             .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.")
-            .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<HttpContracts.ArticleDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticle(
+    private static async Task<Results<Ok<IReadOnlyCollection<HttpContracts.ArticleDto>>, NoContent>> GetManyArticle(
         DateTimeOffset? temporalAsOfDateTime,
-        Page? page,
-        Limit? limit,
+        int? page,
+        int? limit,
         [FromQuery] Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken
     )
     {
-        var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
+        var withPagination = new Pagination(
+            new Page(page ?? Page.FirstPage.Value),
+            new Limit(limit ?? Limit.MaxLimit.Value));
 
         var query = new ArticlesQuery(
             withPagination,
@@ -138,7 +145,10 @@ public static class ArticleEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response);
+        IReadOnlyCollection<HttpContracts.ArticleDto> contractResponse =
+            response.Select(static article => article.ToContract()).ToArray();
+
+        return TypedResults.Ok(contractResponse);
     }
 
     #endregion
@@ -157,7 +167,7 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateArticle(
-        ArticleCreateDto request,
+        HttpContracts.ArticleCreateRequest request,
         ICommandHandler<ArticleCreateDefaultCommand, Guid> defaultHandler,
         ICommandHandler<ArticleCreateVariationCommand, Guid> variationHandler,
         ICommandHandler<ArticleCreatePackCommand, Guid> packHandler,
@@ -165,25 +175,27 @@ public static class ArticleEndpointRouteBuilderExtension
         ICommandHandler<ArticleCreateContainerCommand, Guid> containerHandler,
         CancellationToken cancellationToken)
     {
-        var response = request.ArticleType switch
+        var create = request.ToApplication();
+
+        var response = create.ArticleType switch
         {
             ArticleType.Default => await defaultHandler.Handle(
-                CreateDefaultCommand(request),
+                CreateDefaultCommand(create),
                 cancellationToken),
             ArticleType.Variation => await variationHandler.Handle(
-                CreateVariationCommand(request),
+                CreateVariationCommand(create),
                 cancellationToken),
             ArticleType.Pack => await packHandler.Handle(
-                CreatePackCommand(request),
+                CreatePackCommand(create),
                 cancellationToken),
             ArticleType.Kit => await kitHandler.Handle(
-                CreateKitCommand(request),
+                CreateKitCommand(create),
                 cancellationToken),
             ArticleType.Container => await containerHandler.Handle(
-                CreateContainerCommand(request),
+                CreateContainerCommand(create),
                 cancellationToken),
             _ => throw new ArgumentException(
-                $"Unsupported article type '{request.ArticleType}'.",
+                $"Unsupported article type '{create.ArticleType}'.",
                 nameof(request))
         };
 
@@ -342,11 +354,11 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateArticle(
         Guid articleGuid,
-        ArticlePatchDto request,
+        HttpContracts.ArticlePatchRequest request,
         ICommandHandler<ArticlePatchCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ArticlePatchCommand(articleGuid, request), cancellationToken);
+        await handler.Handle(new ArticlePatchCommand(articleGuid, request.ToApplication()), cancellationToken);
 
         return TypedResults.NoContent();
     }

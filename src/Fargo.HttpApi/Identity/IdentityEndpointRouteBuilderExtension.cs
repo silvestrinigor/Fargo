@@ -2,6 +2,8 @@ using Fargo.Application;
 using Fargo.Application.Identity;
 using Fargo.Application.Users;
 using Fargo.Core.Identity;
+using Fargo.HttpApi.Contracts;
+using global::Fargo.HttpContracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Identity;
@@ -25,7 +27,7 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithName("Login")
             .WithSummary("Authenticates a user")
             .WithDescription("Validates user credentials and returns an access token and refresh token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces<AuthDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPost("/logout", Logout)
@@ -39,7 +41,7 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithName("RefreshToken")
             .WithSummary("Refreshes the access token")
             .WithDescription("Uses a valid refresh token to generate a new access token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces<AuthDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/password", ChangePassword)
@@ -52,14 +54,14 @@ public static class IdentityEndpointRouteBuilderExtension
             .Produces(StatusCodes.Status401Unauthorized);
     }
 
-    private static async Task<Ok<AuthResult>> Login(
+    private static async Task<Ok<AuthDto>> Login(
         LoginRequest request,
         ICommandHandler<LoginCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new LoginCommand(request.Nameid, request.Password), cancellationToken);
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<Ok> Logout(
@@ -72,14 +74,14 @@ public static class IdentityEndpointRouteBuilderExtension
         return TypedResults.Ok();
     }
 
-    private static async Task<Ok<AuthResult>> Refresh(
+    private static async Task<Ok<AuthDto>> Refresh(
         RefreshRequest request,
         ICommandHandler<RefreshCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.Handle(new RefreshCommand(new Token(request.RefreshToken)), cancellationToken);
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.ToContract());
     }
 
     private static async Task<NoContent> ChangePassword(
@@ -92,9 +94,3 @@ public static class IdentityEndpointRouteBuilderExtension
         return TypedResults.NoContent();
     }
 }
-
-public sealed record LoginRequest(string Nameid, string Password);
-
-public sealed record RefreshRequest(string RefreshToken);
-
-public sealed record PasswordUpdateRequest(string NewPassword, string CurrentPassword);

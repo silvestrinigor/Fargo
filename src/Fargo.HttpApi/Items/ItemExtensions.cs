@@ -1,7 +1,9 @@
 using Fargo.Application;
 using Fargo.Application.Items;
+using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.Items;
 
@@ -40,14 +42,14 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItem")
             .WithSummary("Gets a single item")
             .WithDescription("Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces<HttpContracts.ItemDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<ItemDto>, NotFound>> GetSingleItem(
+    private static async Task<Results<Ok<HttpContracts.ItemDto>, NotFound>> GetSingleItem(
         Guid itemGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ItemSingleQuery, ItemDto?> handler,
@@ -58,7 +60,7 @@ public static class ItemEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
     #endregion Get Single
@@ -71,24 +73,26 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
             .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.")
-            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<HttpContracts.ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItem(
+    private static async Task<Results<Ok<IReadOnlyCollection<HttpContracts.ItemDto>>, NoContent>> GetManyItem(
         DateTimeOffset? temporalAsOfDateTime,
-        Page? page,
-        Limit? limit,
+        int? page,
+        int? limit,
         [FromQuery] Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>> handler,
         CancellationToken cancellationToken
     )
     {
-        var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
+        var withPagination = new Pagination(
+            new Page(page ?? Page.FirstPage.Value),
+            new Limit(limit ?? Limit.MaxLimit.Value));
 
         var query = new ItemsQuery(
             withPagination,
@@ -104,7 +108,10 @@ public static class ItemEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response);
+        IReadOnlyCollection<HttpContracts.ItemDto> contractResponse =
+            response.Select(static item => item.ToContract()).ToArray();
+
+        return TypedResults.Ok(contractResponse);
     }
 
     #endregion Get Many
@@ -123,11 +130,11 @@ public static class ItemEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateItem(
-        ItemCreateDto request,
+        HttpContracts.ItemCreateRequest request,
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new ItemCreateCommand(request), cancellationToken);
+        var response = await handler.Handle(new ItemCreateCommand(request.ToApplication()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -149,11 +156,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateItem(
         Guid itemGuid,
-        ItemUpdateDto request,
+        HttpContracts.ItemUpdateRequest request,
         ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ItemUpdateCommand(itemGuid, request), cancellationToken);
+        await handler.Handle(new ItemUpdateCommand(itemGuid, request.ToApplication()), cancellationToken);
 
         return TypedResults.NoContent();
     }

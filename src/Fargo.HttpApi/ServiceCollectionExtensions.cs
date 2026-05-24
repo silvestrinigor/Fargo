@@ -1,4 +1,5 @@
 using Fargo.HttpApi.Articles;
+using global::Fargo.HttpContracts;
 using Fargo.Infrastructure.Converters;
 
 namespace Fargo.HttpApi;
@@ -48,6 +49,7 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new QrCodeJsonConverter());
                 options.SerializerOptions.Converters.Add(new DataMatrixJsonConverter());
                 options.SerializerOptions.Converters.Add(new OptionalValueJsonConverterFactory());
+                options.SerializerOptions.Converters.Add(new OptionalFieldJsonConverterFactory());
             });
 
             return services;
