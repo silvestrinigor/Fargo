@@ -9,7 +9,7 @@ namespace Fargo.Application.Identity;
 #region Login
 
 /// <summary>
-/// Command used to authenticate a user with a NAMEID and password.
+/// Command used to authenticate a user with a nameid and password.
 /// </summary>
 /// <param name="Nameid">
 /// The unique user identifier used for login.
@@ -25,10 +25,6 @@ public sealed record LoginCommand(
 /// <summary>
 /// Handles the execution of <see cref="LoginCommand"/>.
 /// </summary>
-/// <remarks>
-/// This handler validates the provided credentials, checks whether the
-/// user is allowed to sign in, and issues new access and refresh tokens.
-/// </remarks>
 public sealed class LoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -75,7 +71,7 @@ public sealed class LoginCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.LogWarning("Login flow rejected because the provided NAMEID format is invalid.");
+            logger.LogWarning("Login flow rejected because the provided nameid format is invalid.");
             throw new InvalidCredentialsFargoApplicationException();
         }
 
@@ -314,10 +310,6 @@ public sealed record LogoutCommand(
 /// <summary>
 /// Handles the execution of <see cref="LogoutCommand"/>.
 /// </summary>
-/// <remarks>
-/// This handler invalidates the provided refresh token if it exists.
-/// If the token is not found, the operation completes silently.
-/// </remarks>
 public sealed class LogoutCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ITokenHasher tokenHasher,
@@ -334,13 +326,6 @@ public sealed class LogoutCommandHandler(
     /// <param name="cancellationToken">
     /// Token used to cancel the operation.
     /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous logout operation.
-    /// </returns>
-    /// <remarks>
-    /// If the refresh token does not exist in storage, the method returns
-    /// without throwing an exception.
-    /// </remarks>
     public async Task Handle(
         LogoutCommand command,
         CancellationToken cancellationToken = default)
@@ -388,11 +373,6 @@ public sealed record PasswordChangeCommand(
 /// <summary>
 /// Handles the execution of <see cref="PasswordChangeCommand"/>.
 /// </summary>
-/// <remarks>
-/// This handler validates the current authenticated user, verifies the
-/// provided current password, updates the password hash, and resets the
-/// password expiration date.
-/// </remarks>
 public sealed class PasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -475,9 +455,11 @@ public sealed class PasswordChangeCommandHandler(
         }
         catch (ArgumentException ex)
         {
+            // TODO: not aways the reason is weak password.
             throw new WeakPasswordFargoApplicationException(ex.Message);
         }
 
+        // TODO: ChangePasswordHash should validate if the actor is the user or the actor has access to change another user password.
         user.ChangePasswordHash(passwordHasher.Hash(command.Passwords.NewPassword));
         user.ResetPasswordExpiration();
         user.RotateAuthVersion();
