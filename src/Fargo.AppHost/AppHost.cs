@@ -11,11 +11,13 @@ var environmentName = builder.Environment.EnvironmentName;
 
 var migrations = builder
     .AddProject<Projects.Fargo_MigrationService>("migrations")
+    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WaitFor(fargodb);
 
-builder
+var seeds = builder
     .AddProject<Projects.Fargo_SeedService>("seeds")
+    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WithReference(migrations)
     .WaitForCompletion(migrations);
@@ -27,12 +29,21 @@ var httpApi = builder
     .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WithReference(migrations)
-    .WaitForCompletion(migrations);
+    .WithReference(seeds)
+    .WaitForCompletion(migrations)
+    .WaitForCompletion(seeds);
 
 builder
     .AddProject<Projects.Fargo_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(httpApi)
+    .WaitFor(httpApi);
+
+builder
+    .AddProject<Projects.Fargo_Web_Identity>("identityfrontend")
+    .WithExternalHttpEndpoints()
+    .WithReference(httpApi)
+    .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
     .WaitFor(httpApi);
 
 builder.Build().Run();

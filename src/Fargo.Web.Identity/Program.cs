@@ -1,3 +1,5 @@
+using Fargo.HttpClient;
+using Fargo.Web.Identity;
 using Fargo.Web.Identity.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -7,6 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
+builder.Services.AddScoped<IdentitySession>();
+builder.Services.AddFargoHttpClient(options =>
+{
+    var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
+        ?? "http://localhost:5534";
+
+    options.BaseAddress = new Uri(baseAddress);
+});
 
 var app = builder.Build();
 
