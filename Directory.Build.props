@@ -6,8 +6,4 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MinVer" Version="7.*" PrivateAssets="all" />
-  </ItemGroup>
-
 </Project>
