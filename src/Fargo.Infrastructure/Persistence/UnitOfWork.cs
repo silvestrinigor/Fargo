@@ -1,4 +1,5 @@
 using Fargo.Application;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fargo.Infrastructure.Persistence;
 
@@ -25,6 +26,9 @@ public sealed class UnitOfWork(
     /// </summary>
     private readonly FargoDbContext fargoContext = fargoContext;
 
+    public async Task<IUnitOfWorkTransaction> BeginTransaction(CancellationToken cancellationToken = default)
+        => new UnitOfWorkTransaction(await fargoContext.Database.BeginTransactionAsync(cancellationToken));
+
     /// <summary>
     /// Persists all pending changes tracked by the <see cref="FargoDbContext"/>.
     /// </summary>
@@ -36,4 +40,16 @@ public sealed class UnitOfWork(
     /// </returns>
     public async Task<int> SaveChanges(CancellationToken cancellationToken = default)
         => await fargoContext.SaveChangesAsync(cancellationToken);
+
+    private sealed class UnitOfWorkTransaction(IDbContextTransaction transaction) : IUnitOfWorkTransaction
+    {
+        public async Task Commit(CancellationToken cancellationToken = default)
+            => await transaction.CommitAsync(cancellationToken);
+
+        public async Task Rollback(CancellationToken cancellationToken = default)
+            => await transaction.RollbackAsync(cancellationToken);
+
+        public async ValueTask DisposeAsync()
+            => await transaction.DisposeAsync();
+    }
 }

@@ -21,7 +21,7 @@ public sealed class ItemServiceTests
             .Returns([]);
 
         // Act
-        await sut.MoveToContainer(parent, member);
+        await sut.MoveToContainer(parent, member, CreateDomainActor());
 
         // Assert
         Assert.Equal(parent.Guid, member.ParentContainerGuid);
@@ -37,7 +37,7 @@ public sealed class ItemServiceTests
 
         // Act
         var exception = await Assert.ThrowsAsync<ItemCannotBeOwnContainerFargoDomainException>(
-            () => sut.MoveToContainer(item, item));
+            () => sut.MoveToContainer(item, item, CreateDomainActor()));
 
         // Assert
         Assert.Equal(item.Guid, exception.ItemGuid);
@@ -53,7 +53,7 @@ public sealed class ItemServiceTests
 
         // Act
         var exception = await Assert.ThrowsAsync<ItemParentIsNotContainerFargoDomainException>(
-            () => sut.MoveToContainer(parent, member));
+            () => sut.MoveToContainer(parent, member, CreateDomainActor()));
 
         // Assert
         Assert.Equal(parent.Guid, exception.ParentItemGuid);
@@ -73,7 +73,7 @@ public sealed class ItemServiceTests
 
         // Act
         var exception = await Assert.ThrowsAsync<ItemCircularContainerHierarchyFargoDomainException>(
-            () => sut.MoveToContainer(parent, member));
+            () => sut.MoveToContainer(parent, member, CreateDomainActor()));
 
         // Assert
         Assert.Equal(parent.Guid, exception.ParentContainerItemGuid);
@@ -92,10 +92,10 @@ public sealed class ItemServiceTests
             .GetContainerDescendantGuids(member.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
 
-        await sut.MoveToContainer(parent, member);
+        await sut.MoveToContainer(parent, member, CreateDomainActor());
 
         // Act
-        ItemService.RemoveFromContainer(member);
+        ItemService.RemoveFromContainer(member, CreateDomainActor());
 
         // Assert
         Assert.Null(member.ParentContainerGuid);
@@ -109,8 +109,8 @@ public sealed class ItemServiceTests
         => Item.CreateItem(CreateContainerArticle());
 
     private static Article CreateArticle()
-        => Article.CreateArticle(new Name("Test article"));
+        => Article.CreateArticle(new Name("Test article"), CreateDomainActor());
 
     private static Article CreateContainerArticle()
-        => Article.CreateArticleContainer(new Name("Container article"));
+        => Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor());
 }

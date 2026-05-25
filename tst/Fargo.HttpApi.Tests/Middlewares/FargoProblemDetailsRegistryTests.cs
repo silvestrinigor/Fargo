@@ -1,7 +1,6 @@
 using Fargo.Application;
 using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.HttpApi.Middlewares;
 
 namespace Fargo.HttpApi.Tests.Middlewares;
 

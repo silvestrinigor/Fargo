@@ -3,7 +3,9 @@ using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Events;
 using Fargo.Core.Items;
+using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -17,13 +19,18 @@ public sealed class EntityEventCommandHandlerTests
         var articleRepository = Substitute.For<IArticleRepository>();
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreateCommandHandler(
+        var handler = new ArticleCreateDefaultCommandHandler(
             articleRepository,
+            Substitute.For<IPartitionRepository>(),
             entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreateDefaultCommandHandler>>());
 
-        var articleGuid = await handler.Handle(new ArticleCreateCommand(new Name("Article")));
+        var articleGuid = await handler.Handle(new ArticleCreateDefaultCommand(
+            new Name("Article")));
 
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
@@ -35,17 +42,21 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ArticleDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(article);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleDeactivateCommandHandler(
+        var handler = new ArticlePatchCommandHandler(
             articleRepository,
+            Substitute.For<IPartitionRepository>(),
             entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleDeactivateCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticleDeactivateCommand(article.Guid));
+        await handler.Handle(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: false)));
 
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
@@ -57,17 +68,21 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ArticleActivate_Should_NotRecordEvent_WhenAlreadyActive()
     {
-        var article = Article.CreateArticle(new Name("Article"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
         var articleRepository = CreateArticleRepository(article);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleActivateCommandHandler(
+        var handler = new ArticlePatchCommandHandler(
             articleRepository,
+            Substitute.For<IPartitionRepository>(),
             entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleActivateCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticleActivateCommand(article.Guid));
+        await handler.Handle(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: true)));
 
         entityEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
@@ -75,7 +90,7 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemDelete_Should_RecordDeletedEvent()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.DeleteItem);
@@ -83,6 +98,7 @@ public sealed class EntityEventCommandHandlerTests
             itemRepository,
             entityEventRepository,
             CreateCurrentAuthorizationContext(actor),
+            Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemDeleteCommandHandler>>());
 
         await handler.Handle(new ItemDeleteCommand(item.Guid));
@@ -97,8 +113,8 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemCreate_Should_Throw_WhenArticleIsInactive()
     {
-        var article = Article.CreateArticle(new Name("Article"));
-        article.Deactivate();
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        article.Deactivate(CreateDomainActor());
         var itemRepository = Substitute.For<IItemRepository>();
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -106,12 +122,15 @@ public sealed class EntityEventCommandHandlerTests
         var handler = new ItemCreateCommandHandler(
             itemRepository,
             articleRepository,
+            Substitute.For<IPartitionRepository>(),
             Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.CreateItem)),
+            Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
         await Assert.ThrowsAsync<EntityNotActiveFargoDomainException<Article>>(
-            () => handler.Handle(new ItemCreateCommand(article.Guid)));
+            () => handler.Handle(new ItemCreateCommand(new ItemCreateDto(article.Guid))));
 
         itemRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
@@ -119,17 +138,22 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemDeactivate_Should_RecordDeactivatedEvent_WhenStateChanges()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);
-        var handler = new ItemDeactivateCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
+            Substitute.For<IPartitionRepository>(),
             entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IItemMovementRepository>(),
+            new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ItemDeactivateCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemDeactivateCommand(item.Guid));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: false)));
 
         Assert.False(item.IsActive);
         Assert.Equal(actor.ActorGuid, item.EditedByGuid);
@@ -144,18 +168,23 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemActivate_Should_RecordActivatedEvent_WhenStateChanges()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         item.Deactivate();
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);
-        var handler = new ItemActivateCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
+            Substitute.For<IPartitionRepository>(),
             entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IItemMovementRepository>(),
+            new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ItemActivateCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemActivateCommand(item.Guid));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
 
         Assert.True(item.IsActive);
         Assert.Equal(actor.ActorGuid, item.EditedByGuid);
@@ -170,17 +199,22 @@ public sealed class EntityEventCommandHandlerTests
     [Fact]
     public async Task ItemActivate_Should_NotRecordEvent_WhenAlreadyActive()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         var itemRepository = CreateItemRepository(item);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var actor = CreateActor(ActionType.EditItem);
-        var handler = new ItemActivateCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
+            Substitute.For<IPartitionRepository>(),
             entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IItemMovementRepository>(),
+            new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ItemActivateCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemActivateCommand(item.Guid));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
 
         Assert.Null(item.EditedByGuid);
         Assert.Equal(ItemModifiedType.None, item.ModificationTypes);

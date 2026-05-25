@@ -1,4 +1,4 @@
-using Fargo.Sdk.Contracts.Articles;
+using Fargo.Core.Barcodes;
 using System.Globalization;
 
 namespace Fargo.HttpApi.Articles;
@@ -12,5 +12,5 @@ public sealed class ArticleBarcodeRouteConstraint : IRouteConstraint
         RouteValueDictionary values,
         RouteDirection routeDirection)
         => values.TryGetValue(routeKey, out var value) &&
-            ArticleBarcode.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out _);
+            Barcode.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out _);
 }

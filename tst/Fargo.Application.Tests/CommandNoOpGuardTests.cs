@@ -4,6 +4,8 @@ using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Events;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
@@ -16,24 +18,29 @@ namespace Fargo.Application.Tests;
 public sealed class CommandNoOpGuardTests
 {
     [Fact]
-    public async Task ItemSetPartitions_Should_Skip_WhenPartitionsAreUnchanged()
+    public async Task ItemUpdate_Should_SkipPartitions_WhenPartitionsAreUnchanged()
     {
         var partition = Partition.CreatePartition(new Name("Partition"));
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(partition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
         var partitionRepository = Substitute.For<IPartitionRepository>();
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
-        var handler = new ItemSetPartitionsCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
             partitionRepository,
+            entityEventRepository,
             entityPartitionEventRepository,
+            Substitute.For<IItemMovementRepository>(),
+            new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditItem)),
-            Substitute.For<ILogger<ItemSetPartitionsCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemSetPartitionsCommand(item.Guid, [partition.Guid]));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([partition.Guid])));
 
         await partitionRepository.DidNotReceiveWithAnyArgs()
             .GetByGuid(default, default);
@@ -41,7 +48,7 @@ public sealed class CommandNoOpGuardTests
     }
 
     [Fact]
-    public async Task UserSetPermissions_Should_Skip_BeforeOwnPermissionValidation_WhenPermissionsAreUnchanged()
+    public async Task UserUpdate_Should_SkipOwnPermissionValidation_WhenPermissionsAreUnchanged()
     {
         var actorGuid = Guid.NewGuid();
         var user = User.CreateUser(actorGuid, new Nameid("valid-user"), new PasswordHash(new string('a', 60)));
@@ -49,18 +56,28 @@ public sealed class CommandNoOpGuardTests
         var userRepository = Substitute.For<IUserRepository>();
         userRepository.GetByGuid(user.Guid, Arg.Any<CancellationToken>())
             .Returns(user);
-        var handler = new UserSetPermissionsCommandHandler(
+        var handler = new UserUpdateCommandHandler(
+            new UserService(userRepository),
             userRepository,
+            Substitute.For<IPartitionRepository>(),
+            Substitute.For<IUserGroupRepository>(),
+            Substitute.For<IRefreshTokenRepository>(),
+            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(actorGuid, ActionType.EditUser)),
-            Substitute.For<ILogger<UserSetPermissionsCommandHandler>>());
+            Substitute.For<IPasswordHasher>(),
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<UserUpdateCommandHandler>>());
 
-        await handler.Handle(new UserSetPermissionsCommand(user.Guid, [ActionType.EditUser]));
+        await handler.Handle(new UserUpdateCommand(
+            user.Guid,
+            new UserUpdateDto(Permissions: [new UserPermissionUpdateDto(ActionType.EditUser)])));
 
         Assert.Single(user.Permissions);
     }
 
     [Fact]
-    public async Task UserGroupSetPartitions_Should_Skip_WhenPartitionsAreUnchanged()
+    public async Task UserGroupUpdate_Should_SkipPartitions_WhenPartitionsAreUnchanged()
     {
         var partition = Partition.CreatePartition(new Name("Partition"));
         var userGroup = UserGroup.CreateUserGroup(new Nameid("valid-group"));
@@ -69,15 +86,21 @@ public sealed class CommandNoOpGuardTests
         userGroupRepository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(userGroup);
         var partitionRepository = Substitute.For<IPartitionRepository>();
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
         var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
-        var handler = new UserGroupSetPartitionsCommandHandler(
+        var handler = new UserGroupUpdateCommandHandler(
+            new UserGroupService(userGroupRepository),
             userGroupRepository,
             partitionRepository,
+            entityEventRepository,
             entityPartitionEventRepository,
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditUserGroup)),
-            Substitute.For<ILogger<UserGroupSetPartitionsCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());
 
-        await handler.Handle(new UserGroupSetPartitionsCommand(userGroup.Guid, [partition.Guid]));
+        await handler.Handle(new UserGroupUpdateCommand(
+            userGroup.Guid,
+            new UserGroupUpdateDto(null, null, null, null, [partition.Guid])));
 
         await partitionRepository.DidNotReceiveWithAnyArgs()
             .GetByGuid(default, default);

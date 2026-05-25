@@ -1,17 +1,96 @@
 @page "/login"
 @rendermode InteractiveServer
+@inject IFargoIdentityClient IdentityClient
+@inject IdentitySession Session
 
 <PageTitle>Login</PageTitle>
 
 <h1>Login</h1>
 
-<div><FluentTextField @bind-Value=nameid TextFieldType="TextFieldType.Text">Nameid</FluentTextField></div>
+<EditForm Model=form OnValidSubmit=LoginAsync>
+    <DataAnnotationsValidator />
 
-<div><FluentTextField @bind-Value=password TextFieldType="TextFieldType.Password">Password</FluentTextField></div>
+    <FluentStack Orientation="Orientation.Vertical" Width="320px">
+        <FluentTextField
+            @bind-Value=form.Nameid
+            Disabled=isSubmitting
+            TextFieldType="TextFieldType.Text"
+            Required>
+            Nameid
+        </FluentTextField>
 
-<div><FluentButton>Login</FluentButton></div>
+        <FluentTextField
+            @bind-Value=form.Password
+            Disabled=isSubmitting
+            TextFieldType="TextFieldType.Password"
+            Required>
+            Password
+        </FluentTextField>
+
+        <FluentButton
+            Appearance="Appearance.Accent"
+            Disabled=isSubmitting
+            Type="ButtonType.Submit">
+            @(isSubmitting ? "Logging in" : "Login")
+        </FluentButton>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <FluentMessageBar Intent=messageIntent>
+                @message
+            </FluentMessageBar>
+        }
+    </FluentStack>
+</EditForm>
+
+@if (Session.IsAuthenticated)
+{
+    <p>Authenticated until @Session.CurrentAuth!.ExpiresAt.LocalDateTime.</p>
+}
 
 @code {
-    string nameid = "";
-    string password = "";
+    private readonly LoginForm form = new();
+    private bool isSubmitting;
+    private string? message;
+    private MessageIntent messageIntent = MessageIntent.Info;
+
+    private async Task LoginAsync()
+    {
+        isSubmitting = true;
+        message = null;
+        Session.Clear();
+
+        try
+        {
+            var auth = await IdentityClient.LoginAsync(
+                new LoginRequest(form.Nameid, form.Password));
+
+            Session.Set(auth);
+            form.Password = string.Empty;
+            messageIntent = MessageIntent.Success;
+            message = "Logged in.";
+        }
+        catch (FargoHttpApiException exception)
+        {
+            messageIntent = MessageIntent.Error;
+            message = exception.ProblemDetails?.Detail
+                ?? exception.Message;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            messageIntent = MessageIntent.Error;
+            message = "The Fargo HTTP API is unavailable.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed class LoginForm
+    {
+        public string Nameid { get; set; } = string.Empty;
+
+        public string Password { get; set; } = string.Empty;
+    }
 }

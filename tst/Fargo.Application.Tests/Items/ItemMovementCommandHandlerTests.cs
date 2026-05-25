@@ -2,7 +2,9 @@ using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Events;
 using Fargo.Core.Items;
+using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -11,7 +13,7 @@ namespace Fargo.Application.Tests.Items;
 public sealed class ItemMovementCommandHandlerTests
 {
     [Fact]
-    public async Task SetParentContainer_Should_RecordMovement_WhenParentChanges()
+    public async Task ItemUpdate_Should_RecordMovement_WhenParentChanges()
     {
         var item = CreateItem();
         var parent = CreateContainerItem();
@@ -21,14 +23,18 @@ public sealed class ItemMovementCommandHandlerTests
             .Returns([]);
         var movementRepository = Substitute.For<IItemMovementRepository>();
         var actor = CreateActor(ActionType.EditItem);
-        var handler = new ItemSetParentContainerCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
+            Substitute.For<IPartitionRepository>(),
+            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             movementRepository,
             new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ItemSetParentContainerCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
 
         Assert.Equal(actor.ActorGuid, item.EditedByGuid);
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
@@ -42,7 +48,7 @@ public sealed class ItemMovementCommandHandlerTests
     }
 
     [Fact]
-    public async Task SetParentContainer_Should_NotRecordMovement_WhenParentIsUnchanged()
+    public async Task ItemUpdate_Should_NotRecordMovement_WhenParentIsUnchanged()
     {
         var item = CreateItem();
         var parent = CreateContainerItem();
@@ -50,24 +56,30 @@ public sealed class ItemMovementCommandHandlerTests
         itemRepository
             .GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
-        await new ItemService(itemRepository).MoveToContainer(parent, item);
+        await new ItemService(itemRepository).MoveToContainer(parent, item, CreateDomainActor());
+        var originalEditedByGuid = item.EditedByGuid;
+        var originalModificationTypes = item.ModificationTypes;
         var movementRepository = Substitute.For<IItemMovementRepository>();
-        var handler = new ItemSetParentContainerCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
+            Substitute.For<IPartitionRepository>(),
+            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             movementRepository,
             new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditItem)),
-            Substitute.For<ILogger<ItemSetParentContainerCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemSetParentContainerCommand(item.Guid, parent.Guid));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
 
-        Assert.Null(item.EditedByGuid);
-        Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
+        Assert.Equal(originalEditedByGuid, item.EditedByGuid);
+        Assert.Equal(originalModificationTypes, item.ModificationTypes);
         movementRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
     [Fact]
-    public async Task SetParentContainer_Should_RecordMovement_WhenItemIsRemovedFromContainer()
+    public async Task ItemUpdate_Should_RecordMovement_WhenItemIsRemovedFromContainer()
     {
         var item = CreateItem();
         var parent = CreateContainerItem();
@@ -75,17 +87,21 @@ public sealed class ItemMovementCommandHandlerTests
         itemRepository
             .GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
-        await new ItemService(itemRepository).MoveToContainer(parent, item);
+        await new ItemService(itemRepository).MoveToContainer(parent, item, CreateDomainActor());
         var movementRepository = Substitute.For<IItemMovementRepository>();
         var actor = CreateActor(ActionType.EditItem);
-        var handler = new ItemSetParentContainerCommandHandler(
+        var handler = new ItemUpdateCommandHandler(
             itemRepository,
+            Substitute.For<IPartitionRepository>(),
+            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEntityPartitionEventRepository>(),
             movementRepository,
             new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ItemSetParentContainerCommandHandler>>());
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemSetParentContainerCommand(item.Guid, null));
+        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], null)));
 
         Assert.Equal(actor.ActorGuid, item.EditedByGuid);
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
@@ -130,8 +146,8 @@ public sealed class ItemMovementCommandHandlerTests
             UserGroupGuids: []);
 
     private static Item CreateItem()
-        => Item.CreateItem(Article.CreateArticle(new Name("Article")));
+        => Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
 
     private static Item CreateContainerItem()
-        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article")));
+        => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor()));
 }

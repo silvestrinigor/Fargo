@@ -1,3 +1,4 @@
+using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.Users;
 using System.Collections.ObjectModel;
@@ -29,6 +30,35 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         {
             Guid = guid
         };
+
+    public static UserGroup CreateUserGroup(Nameid nameid, Actor actor, Description? description = null)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateUserGroup);
+
+        var userGroup = new UserGroup(nameid, description);
+
+        userGroup.MarkAsEditedBy(actor.Guid);
+        userGroup.MarkModificationType(UserGroupModifiedType.General);
+
+        return userGroup;
+    }
+
+    public static UserGroup CreateUserGroup(Guid guid, Nameid nameid, Actor actor, Description? description = null)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateUserGroup);
+
+        var userGroup = new UserGroup(nameid, description)
+        {
+            Guid = guid
+        };
+
+        userGroup.MarkAsEditedBy(actor.Guid);
+        userGroup.MarkModificationType(UserGroupModifiedType.General);
+
+        return userGroup;
+    }
 
     private UserGroup()
     {
@@ -68,6 +98,21 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         Nameid = nameid;
     }
 
+    public void ChangeNameid(Nameid nameid, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (Nameid == nameid)
+        {
+            return;
+        }
+
+        Nameid = nameid;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.General);
+    }
+
     public void ChangeDescription(Description description)
     {
         if (Description == description)
@@ -76,6 +121,21 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         }
 
         Description = description;
+    }
+
+    public void ChangeDescription(Description description, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.General);
     }
 
     #region Active
@@ -90,10 +150,40 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
     /// </summary>
     public void Activate() => IsActive = true;
 
+    public void Activate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.Activated);
+    }
+
     /// <summary>
     /// Deactivates the user group.
     /// </summary>
     public void Deactivate() => IsActive = false;
+
+    public void Deactivate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.Deactivated);
+    }
 
     #endregion Active
 
@@ -137,6 +227,27 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         userGroupPermissions.Add(userGroupPermission);
     }
 
+    public void AddPermission(ActionType action, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (userGroupPermissions.Any(x => x.Action == action))
+        {
+            return;
+        }
+
+        var userGroupPermission = new UserGroupPermission
+        {
+            Action = action,
+            UserGroup = this
+        };
+
+        userGroupPermissions.Add(userGroupPermission);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.PermissionsChanged);
+    }
+
     /// <summary>
     /// Removes a permission from the user group if it exists.
     /// </summary>
@@ -152,6 +263,24 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         }
 
         userGroupPermissions.Remove(userGroupPermission);
+    }
+
+    public void RemovePermission(ActionType action, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        var userGroupPermission = userGroupPermissions
+            .SingleOrDefault(x => x.Action == action);
+
+        if (userGroupPermission == null)
+        {
+            return;
+        }
+
+        userGroupPermissions.Remove(userGroupPermission);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.PermissionsChanged);
     }
 
     #endregion Permission
@@ -210,6 +339,30 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         partitionAccesses.Add(partitionAccess);
     }
 
+    public void AddPartitionAccess(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
+        {
+            return;
+        }
+
+        var partitionAccess = new UserGroupPartitionAccess
+        {
+            UserGroup = this,
+            Partition = partition
+        };
+
+        partitionAccesses.Add(partitionAccess);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.PartitionsChanged);
+    }
+
     /// <summary>
     /// Removes partition access from the user group if it exists.
     /// </summary>
@@ -227,14 +380,69 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         partitionAccesses.Remove(userGroupPartition);
     }
 
+    public void RemovePartitionAccess(Guid partitionGuid, Actor actor)
+    {
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partitionGuid);
+
+        var userGroupPartition =
+            partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
+
+        if (userGroupPartition == null)
+        {
+            return;
+        }
+
+        partitionAccesses.Remove(userGroupPartition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.PartitionsChanged);
+    }
+
     public void AddPartition(Partition partition)
     {
         Partitions.Add(partition);
     }
 
+    public void AddPartition(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (Partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        Partitions.Add(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.PartitionsChanged);
+    }
+
     public void RemovePartition(Partition partition)
     {
         Partitions.Remove(partition);
+    }
+
+    public void RemovePartition(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (!Partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        Partitions.Remove(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserGroupModifiedType.PartitionsChanged);
     }
 
     #endregion Partition
@@ -260,6 +468,22 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
     #endregion User
 
     #region Modified
+
+    public void ValidateCanEdit(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.EditUserGroup);
+        actor.ValidateHasAccess(this);
+    }
+
+    public void ValidateCanDelete(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.DeleteUserGroup);
+        actor.ValidateHasAccess(this);
+    }
 
     public Guid? EditedByGuid { get; private set; }
 

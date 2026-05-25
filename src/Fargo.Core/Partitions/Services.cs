@@ -1,3 +1,5 @@
+using Fargo.Core.Identity;
+
 namespace Fargo.Core.Partitions;
 
 /// <summary>
@@ -61,8 +63,12 @@ public class PartitionService(
     /// This operation removes the partition from the system.
     /// The global partition cannot be deleted under any circumstances.
     /// </remarks>
-    public void DeletePartition(Partition partition)
+    public void DeletePartition(Partition partition, Actor actor)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        partition.ValidateCanDelete(actor);
+
         if (partition.Guid == GlobalPartitionGuid)
         {
             throw new PartitionGlobalDeleteFargoDomainException();
@@ -96,10 +102,15 @@ public class PartitionService(
     public async Task SetParentPartition(
         Partition parentPartition,
         Partition memberPartition,
+        Actor actor,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(parentPartition);
         ArgumentNullException.ThrowIfNull(memberPartition);
+        ArgumentNullException.ThrowIfNull(actor);
+
+        memberPartition.ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(parentPartition.Guid);
 
         if (parentPartition.Guid == memberPartition.Guid)
         {
@@ -124,6 +135,8 @@ public class PartitionService(
         }
 
         memberPartition.ParentPartition = parentPartition;
+        memberPartition.MarkAsEditedBy(actor.Guid);
+        memberPartition.MarkModificationType(PartitionModifiedType.ParentPartitionChanged);
     }
 
     private async Task<bool> CreatesCircularHierarchy(

@@ -1,3 +1,4 @@
+using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 
@@ -27,6 +28,35 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         {
             Guid = guid
         };
+
+    public static User CreateUser(Nameid nameid, PasswordHash passwordHash, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateUser);
+
+        var user = new User(nameid, passwordHash);
+
+        user.MarkAsEditedBy(actor.Guid);
+        user.MarkModificationType(UserModifiedType.General);
+
+        return user;
+    }
+
+    public static User CreateUser(Guid guid, Nameid nameid, PasswordHash passwordHash, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateUser);
+
+        var user = new User(nameid, passwordHash)
+        {
+            Guid = guid
+        };
+
+        user.MarkAsEditedBy(actor.Guid);
+        user.MarkModificationType(UserModifiedType.General);
+
+        return user;
+    }
 
     private User()
     {
@@ -101,6 +131,21 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         Nameid = nameid;
     }
 
+    public void ChangeNameid(Nameid nameid, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (Nameid == nameid)
+        {
+            return;
+        }
+
+        Nameid = nameid;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.General);
+    }
+
     public void ChangeFirstName(FirstName? firstName)
     {
         if (FirstName == firstName)
@@ -109,6 +154,21 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         }
 
         FirstName = firstName;
+    }
+
+    public void ChangeFirstName(FirstName? firstName, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (FirstName == firstName)
+        {
+            return;
+        }
+
+        FirstName = firstName;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.General);
     }
 
     public void ChangeLastName(LastName? lastName)
@@ -121,6 +181,21 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         LastName = lastName;
     }
 
+    public void ChangeLastName(LastName? lastName, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (LastName == lastName)
+        {
+            return;
+        }
+
+        LastName = lastName;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.General);
+    }
+
     public void ChangeDescription(Description description)
     {
         if (Description == description)
@@ -129,6 +204,21 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         }
 
         Description = description;
+    }
+
+    public void ChangeDescription(Description description, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (Description == description)
+        {
+            return;
+        }
+
+        Description = description;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.General);
     }
 
     #region Active
@@ -143,10 +233,40 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
     /// </summary>
     public void Activate() => IsActive = true;
 
+    public void Activate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.Activated);
+    }
+
     /// <summary>
     /// Deactivates the user.
     /// </summary>
     public void Deactivate() => IsActive = false;
+
+    public void Deactivate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.Deactivated);
+    }
 
     #endregion Active
 
@@ -228,6 +348,21 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         PasswordHash = passwordHash;
     }
 
+    public void ChangePasswordHash(PasswordHash passwordHash, Actor actor)
+    {
+        ValidateCanChangePassword(actor);
+
+        if (PasswordHash == passwordHash)
+        {
+            return;
+        }
+
+        PasswordHash = passwordHash;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PasswordChanged);
+    }
+
     public void SetDefaultPasswordExpirationPeriod(TimeSpan? expirationPeriod)
     {
         if (DefaultPasswordExpirationPeriod == expirationPeriod)
@@ -236,6 +371,21 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         }
 
         DefaultPasswordExpirationPeriod = expirationPeriod;
+    }
+
+    public void SetDefaultPasswordExpirationPeriod(TimeSpan? expirationPeriod, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (DefaultPasswordExpirationPeriod == expirationPeriod)
+        {
+            return;
+        }
+
+        DefaultPasswordExpirationPeriod = expirationPeriod;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.General);
     }
 
     public void RotateAuthVersion()
@@ -284,6 +434,27 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         permissions.Add(userPermission);
     }
 
+    public void AddPermission(ActionType action, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (permissions.Any(x => x.Action == action))
+        {
+            return;
+        }
+
+        var userPermission = new UserPermission
+        {
+            Action = action,
+            User = this
+        };
+
+        permissions.Add(userPermission);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PermissionsChanged);
+    }
+
     /// <summary>
     /// Removes a permission from the user if it exists.
     /// </summary>
@@ -298,6 +469,23 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         }
 
         permissions.Remove(userPermission);
+    }
+
+    public void RemovePermission(ActionType action, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        var userPermission = permissions.SingleOrDefault(x => x.Action == action);
+
+        if (userPermission == null)
+        {
+            return;
+        }
+
+        permissions.Remove(userPermission);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PermissionsChanged);
     }
 
     #endregion Permission
@@ -361,6 +549,30 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         partitionAccesses.Add(partitionAccess);
     }
 
+    public void AddPartitionAccess(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
+        {
+            return;
+        }
+
+        var partitionAccess = new UserPartitionAccess
+        {
+            User = this,
+            Partition = partition
+        };
+
+        partitionAccesses.Add(partitionAccess);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PartitionsChanged);
+    }
+
     /// <summary>
     /// Removes access to the specified partition from the user.
     /// </summary>
@@ -376,6 +588,25 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         }
 
         partitionAccesses.Remove(userPartition);
+    }
+
+    public void RemovePartitionAccess(Guid partitionGuid, Actor actor)
+    {
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partitionGuid);
+
+        var userPartition =
+            partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
+
+        if (userPartition == null)
+        {
+            return;
+        }
+
+        partitionAccesses.Remove(userPartition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PartitionsChanged);
     }
 
     /// <summary>
@@ -404,9 +635,45 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         Partitions.Add(partition);
     }
 
+    public void AddPartition(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (Partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        Partitions.Add(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PartitionsChanged);
+    }
+
     public void RemovePartition(Partition partition)
     {
         Partitions.Remove(partition);
+    }
+
+    public void RemovePartition(Partition partition, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
+
+        if (!Partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        Partitions.Remove(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.PartitionsChanged);
     }
 
     public void AddUserGroup(UserGroup userGroup)
@@ -414,14 +681,72 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
         UserGroups.Add(userGroup);
     }
 
+    public void AddUserGroup(UserGroup userGroup, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(userGroup);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasAccess(userGroup);
+
+        if (UserGroups.Any(g => g.Guid == userGroup.Guid))
+        {
+            return;
+        }
+
+        UserGroups.Add(userGroup);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.UserGroupsChanged);
+    }
+
     public void RemoveUserGroup(UserGroup userGroup)
     {
         UserGroups.Remove(userGroup);
     }
 
+    public void RemoveUserGroup(UserGroup userGroup, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(userGroup);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasAccess(userGroup);
+
+        if (!UserGroups.Any(g => g.Guid == userGroup.Guid))
+        {
+            return;
+        }
+
+        UserGroups.Remove(userGroup);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(UserModifiedType.UserGroupsChanged);
+    }
+
     #endregion Partition
 
     #region Modified
+
+    public void ValidateCanEdit(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.EditUser);
+        actor.ValidateHasAccess(this);
+    }
+
+    public void ValidateCanDelete(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.DeleteUser);
+        actor.ValidateHasAccess(this);
+    }
+
+    public void ValidateCanChangePassword(Actor actor)
+    {
+        ValidateCanEdit(actor);
+        actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
+    }
 
     public Guid? EditedByGuid { get; private set; }
 

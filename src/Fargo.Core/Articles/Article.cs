@@ -1,4 +1,5 @@
 using Fargo.Core.Barcodes;
+using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using System.Drawing;
 using UnitsNet;
@@ -21,21 +22,100 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
 {
-    public static Article CreateArticle(Name name)
-        => new(name);
+    public static Article CreateArticle(Name name, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateArticle);
 
-    public static Article CreateArticleVariation(Name name, Article fromArticle)
-        => new(name, new ArticleVariation(fromArticle));
+        var article = new Article(name);
 
-    public static Article CreateArticlePack(Name name, Article fromArticle, Scalar quantity)
-        => new(name, new ArticlePack(fromArticle, quantity));
+        article.MarkAsEditedBy(actor.Guid);
+        article.MarkModificationType(ArticleModifiedType.General);
 
-    public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> components)
-        => new(name, new ArticleKit(components));
+        return article;
+    }
 
-    public static Article CreateArticleContainer(Name name)
-        => new(name, new ArticleContainer(null));
+    public static Article CreateArticle(Guid guid, Name name, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateArticle);
 
+        var article = new Article(name)
+        {
+            Guid = guid
+        };
+
+        article.MarkAsEditedBy(actor.Guid);
+        article.MarkModificationType(ArticleModifiedType.General);
+
+        return article;
+    }
+
+    public static Article CreateArticleVariation(Name name, Article fromArticle, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        ArgumentNullException.ThrowIfNull(fromArticle);
+
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+        actor.ValidateHasAccess(fromArticle);
+        fromArticle.ValidateIsActive();
+
+        var article = new Article(name, new ArticleVariation(fromArticle));
+
+        article.MarkAsEditedBy(actor.Guid);
+        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
+
+        return article;
+    }
+
+    public static Article CreateArticlePack(Name name, Article fromArticle, Scalar quantity, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        ArgumentNullException.ThrowIfNull(fromArticle);
+
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+        actor.ValidateHasAccess(fromArticle);
+        fromArticle.ValidateIsActive();
+
+        var article = new Article(name, new ArticlePack(fromArticle, quantity));
+
+        article.MarkAsEditedBy(actor.Guid);
+        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
+
+        return article;
+    }
+
+    public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> components, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+
+        foreach (var component in components)
+        {
+            actor.ValidateHasAccess(component.Article);
+            component.Article.ValidateIsActive();
+        }
+
+        var article = new Article(name, new ArticleKit(components));
+
+        article.MarkAsEditedBy(actor.Guid);
+        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
+
+        return article;
+    }
+
+    public static Article CreateArticleContainer(Name name, Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        actor.ValidateHasPermission(ActionType.CreateArticle);
+
+        var article = new Article(name, new ArticleContainer(null));
+
+        article.MarkAsEditedBy(actor.Guid);
+        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Container);
+
+        return article;
+    }
     private Article()
     {
     }
@@ -45,40 +125,24 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         Name = name;
     }
 
-    /// <summary>
-    /// Initialize a new article entity that is a variation of another article.
-    /// </summary>
-    /// <param name="variation">The variation relationship associated with the article.</param>
     private Article(Name name, ArticleVariation variation)
         : this(name)
     {
         Variation = variation;
     }
 
-    /// <summary>
-    /// Initialize a new article entity that is a pack of another article.
-    /// </summary>
-    /// <param name="pack">The pack relationship associated with the article.</param>
     private Article(Name name, ArticlePack pack)
         : this(name)
     {
         Pack = pack;
     }
 
-    /// <summary>
-    /// Initialize a new article entity that is a kit of other articles.
-    /// </summary>
-    /// <param name="kit">The kit relationship associated with the article.</param>
     private Article(Name name, ArticleKit kit)
         : this(name)
     {
         Kit = kit;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Article"/> class as a container article.
-    /// </summary>
-    /// <param name="container">The container constraints associated with the article.</param>
     private Article(Name name, ArticleContainer container)
         : this(name)
     {
@@ -96,14 +160,47 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </remarks>
     public Name Name { get; private set; }
 
-    public void Rename(Name name)
+    public ArticleType ArticleType
     {
+        get
+        {
+            if (Variation is not null)
+            {
+                return ArticleType.Variation;
+            }
+
+            if (Pack is not null)
+            {
+                return ArticleType.Pack;
+            }
+
+            if (Kit is not null)
+            {
+                return ArticleType.Kit;
+            }
+
+            if (Container is not null)
+            {
+                return ArticleType.Container;
+            }
+
+            return ArticleType.Default;
+        }
+    }
+
+    public void Rename(Name name, Actor actor)
+    {
+        ValidateCanEdit(actor);
+
         if (Name == name)
         {
             return;
         }
 
         Name = name;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.General);
     }
 
     /// <summary>
@@ -115,14 +212,19 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </remarks>
     public Description Description { get; private set; } = Description.Empty;
 
-    public void ChangeDescription(Description description)
+    public void ChangeDescription(Description description, Actor actor)
     {
+        ValidateCanEdit(actor);
+
         if (Description == description)
         {
             return;
         }
 
         Description = description;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.General);
     }
 
     /// <summary>
@@ -132,14 +234,19 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </summary>
     public TimeSpan? ShelfLife { get; private set; }
 
-    public void SetShelfLife(TimeSpan? shelfLife)
+    public void SetShelfLife(TimeSpan? shelfLife, Actor actor)
     {
+        ValidateCanEdit(actor);
+
         if (ShelfLife == shelfLife)
         {
             return;
         }
 
         ShelfLife = shelfLife;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.General);
     }
 
     /// <summary>
@@ -148,14 +255,19 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </summary>
     public Color? Color { get; private set; }
 
-    public void SetColor(Color? color)
+    public void SetColor(Color? color, Actor actor)
     {
+        ValidateCanEdit(actor);
+
         if (Color == color)
         {
             return;
         }
 
         Color = color;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.General);
     }
 
     #endregion General
@@ -182,8 +294,10 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </summary>
     public Mass? Mass { get; private set; }
 
-    public void SetMetrics(ArticleMetrics metrics)
+    public void SetMetrics(ArticleMetrics metrics, Actor actor)
     {
+        ValidateCanEdit(actor);
+
         if (Nullable.Equals(Mass, metrics.Mass) &&
             Nullable.Equals(LengthX, metrics.LengthX) &&
             Nullable.Equals(LengthY, metrics.LengthY) &&
@@ -196,6 +310,9 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         LengthX = metrics.LengthX;
         LengthY = metrics.LengthY;
         LengthZ = metrics.LengthZ;
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.MetricsChanged);
     }
 
     /// <summary>
@@ -217,83 +334,89 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </summary>
     public Ean13? Ean13 { get; private set; }
 
-    internal void SetEan13(Ean13? value) => SetBarcode(value, Ean13, next => Ean13 = next);
+    internal void SetEan13(Ean13? value, Actor actor) => SetBarcode(value, Ean13, next => Ean13 = next, actor);
 
     /// <summary>
     /// EAN-8 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Ean8? Ean8 { get; private set; }
 
-    internal void SetEan8(Ean8? value) => SetBarcode(value, Ean8, next => Ean8 = next);
+    internal void SetEan8(Ean8? value, Actor actor) => SetBarcode(value, Ean8, next => Ean8 = next, actor);
 
     /// <summary>
     /// UPC-A barcode, or <see langword="null"/> when absent.
     /// </summary>
     public UpcA? UpcA { get; private set; }
 
-    internal void SetUpcA(UpcA? value) => SetBarcode(value, UpcA, next => UpcA = next);
+    internal void SetUpcA(UpcA? value, Actor actor) => SetBarcode(value, UpcA, next => UpcA = next, actor);
 
     /// <summary>
     /// UPC-E barcode, or <see langword="null"/> when absent.
     /// </summary>
     public UpcE? UpcE { get; private set; }
 
-    internal void SetUpcE(UpcE? value) => SetBarcode(value, UpcE, next => UpcE = next);
+    internal void SetUpcE(UpcE? value, Actor actor) => SetBarcode(value, UpcE, next => UpcE = next, actor);
 
     /// <summary>
     /// Code 128 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Code128? Code128 { get; private set; }
 
-    internal void SetCode128(Code128? value) => SetBarcode(value, Code128, next => Code128 = next);
+    internal void SetCode128(Code128? value, Actor actor) => SetBarcode(value, Code128, next => Code128 = next, actor);
 
     /// <summary>
     /// Code 39 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Code39? Code39 { get; private set; }
 
-    internal void SetCode39(Code39? value) => SetBarcode(value, Code39, next => Code39 = next);
+    internal void SetCode39(Code39? value, Actor actor) => SetBarcode(value, Code39, next => Code39 = next, actor);
 
     /// <summary>
     /// ITF-14 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Itf14? Itf14 { get; private set; }
 
-    internal void SetItf14(Itf14? value) => SetBarcode(value, Itf14, next => Itf14 = next);
+    internal void SetItf14(Itf14? value, Actor actor) => SetBarcode(value, Itf14, next => Itf14 = next, actor);
 
     /// <summary>
     /// GS1-128 barcode, or <see langword="null"/> when absent.
     /// </summary>
     public Gs1128? Gs1128 { get; private set; }
 
-    internal void SetGs1128(Gs1128? value) => SetBarcode(value, Gs1128, next => Gs1128 = next);
+    internal void SetGs1128(Gs1128? value, Actor actor) => SetBarcode(value, Gs1128, next => Gs1128 = next, actor);
 
     /// <summary>
     /// QR Code barcode, or <see langword="null"/> when absent.
     /// </summary>
     public QrCode? QrCode { get; private set; }
 
-    internal void SetQrCode(QrCode? value) => SetBarcode(value, QrCode, next => QrCode = next);
+    internal void SetQrCode(QrCode? value, Actor actor) => SetBarcode(value, QrCode, next => QrCode = next, actor);
 
     /// <summary>
     /// Data Matrix barcode, or <see langword="null"/> when absent.
     /// </summary>
     public DataMatrix? DataMatrix { get; private set; }
 
-    internal void SetDataMatrix(DataMatrix? value) => SetBarcode(value, DataMatrix, next => DataMatrix = next);
+    internal void SetDataMatrix(DataMatrix? value, Actor actor) => SetBarcode(value, DataMatrix, next => DataMatrix = next, actor);
 
-    private static void SetBarcode<TBarcode>(
+    private void SetBarcode<TBarcode>(
         TBarcode? value,
         TBarcode? current,
-        Action<TBarcode?> setter)
+        Action<TBarcode?> setter,
+        Actor actor)
         where TBarcode : struct, IEquatable<TBarcode>
     {
+        ValidateCanEdit(actor);
+
         if (EqualityComparer<TBarcode?>.Default.Equals(current, value))
         {
             return;
         }
 
         setter(value);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.BarcodesChanged);
     }
 
     #endregion Barcode
@@ -321,8 +444,10 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </summary>
     public ArticlePack? Pack { get; private init; }
 
-    public void SetPackQuantity(Scalar quantity)
+    public void SetPackQuantity(Scalar quantity, Actor actor)
     {
+        ValidateCanEdit(actor);
+
         if (Pack is null)
         {
             throw new InvalidOperationException("A pack quantity cannot be set when the article is not a pack.");
@@ -334,6 +459,9 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         }
 
         Pack.SetQuantity(quantity);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.Relation);
     }
 
     /// <summary>
@@ -366,8 +494,10 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </summary>
     public ArticleContainer? Container { get; private set; }
 
-    public void SetContainerMaxMass(Mass? maxMass)
+    public void SetContainerMaxMass(Mass? maxMass, Actor actor)
     {
+        ValidateCanEdit(actor);
+
         if (Container is null && maxMass is null)
         {
             return;
@@ -376,6 +506,8 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         if (Container is null)
         {
             Container = new ArticleContainer(maxMass);
+            MarkAsEditedBy(actor.Guid);
+            MarkModificationType(ArticleModifiedType.Container);
             return;
         }
 
@@ -385,6 +517,9 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         }
 
         Container.SetMaxMass(maxMass);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.Container);
     }
 
     /// <summary>
@@ -404,27 +539,53 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// <summary>
     /// Activates the article.
     /// </summary>
-    public void Activate()
+    public void Activate(Actor actor)
     {
-        if (IsActive)
-        {
-            return;
-        }
+        ValidateCanEdit(actor);
 
-        IsActive = true;
+        if (ActivateCore())
+        {
+            MarkAsEditedBy(actor.Guid);
+            MarkModificationType(ArticleModifiedType.Activated);
+        }
     }
 
     /// <summary>
     /// Deactivates the article.
     /// </summary>
-    public void Deactivate()
+    public void Deactivate(Actor actor)
+    {
+        ValidateCanEdit(actor);
+
+        if (DeactivateCore())
+        {
+            MarkAsEditedBy(actor.Guid);
+            MarkModificationType(ArticleModifiedType.Deactivated);
+        }
+    }
+
+    private bool ActivateCore()
+    {
+        if (IsActive)
+        {
+            return false;
+        }
+
+        IsActive = true;
+
+        return true;
+    }
+
+    private bool DeactivateCore()
     {
         if (!IsActive)
         {
-            return;
+            return false;
         }
 
         IsActive = false;
+
+        return true;
     }
 
     #endregion Active
@@ -440,9 +601,12 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     /// </remarks>
     public PartitionCollection Partitions { get; init; } = [];
 
-    public void AddPartition(Partition partition)
+    public void AddPartition(Partition partition, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
 
         if (Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -450,11 +614,17 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         }
 
         Partitions.Add(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.PartitionsChanged);
     }
 
-    public void RemovePartition(Partition partition)
+    public void RemovePartition(Partition partition, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(partition);
+
+        ValidateCanEdit(actor);
+        actor.ValidateHasPartitionAccess(partition.Guid);
 
         if (!Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -462,6 +632,9 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         }
 
         Partitions.Remove(partition);
+
+        MarkAsEditedBy(actor.Guid);
+        MarkModificationType(ArticleModifiedType.PartitionsChanged);
     }
 
     /// <inheritdoc />
@@ -470,6 +643,22 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
     #endregion Partition
 
     #region Modified
+
+    public void ValidateCanEdit(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.EditArticle);
+        actor.ValidateHasAccess(this);
+    }
+
+    public void ValidateCanDelete(Actor actor)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+
+        actor.ValidateHasPermission(ActionType.DeleteArticle);
+        actor.ValidateHasAccess(this);
+    }
 
     public Guid? EditedByGuid { get; private set; }
 

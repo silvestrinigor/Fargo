@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.1" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.14.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fargo.HttpClient\Fargo.HttpClient.csproj" />
+    <ProjectReference Include="..\Fargo.HttpContracts\Fargo.HttpContracts.csproj" />
+  </ItemGroup>
 </Project>

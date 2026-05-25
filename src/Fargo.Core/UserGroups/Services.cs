@@ -1,3 +1,6 @@
+using Fargo.Core.Identity;
+using Fargo.Core.Users;
+
 namespace Fargo.Core.UserGroups;
 
 /// <summary>
@@ -80,8 +83,22 @@ public class UserGroupService(
     /// <param name="userGroup">
     /// The user group that is being deleted.
     /// </param>
-    public static void ValidateUserGroupDelete(UserGroup userGroup)
+    public static void ValidateUserGroupDelete(
+        UserGroup userGroup,
+        Actor actor,
+        IReadOnlyCollection<Guid> actorUserGroupGuids)
     {
+        ArgumentNullException.ThrowIfNull(userGroup);
+        ArgumentNullException.ThrowIfNull(actor);
+        ArgumentNullException.ThrowIfNull(actorUserGroupGuids);
+
+        userGroup.ValidateCanDelete(actor);
+
+        if (actorUserGroupGuids.Contains(userGroup.Guid))
+        {
+            throw new UserCannotDeleteParentUserGroupFargoDomainException(userGroup.Guid);
+        }
+
         if (userGroup.Guid == AdministratorsUserGroupGuid)
         {
             throw new DeleteDefaultAdministratorsUserGroupFargoDomainException();

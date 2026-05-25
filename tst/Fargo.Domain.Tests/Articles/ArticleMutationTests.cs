@@ -1,5 +1,6 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
+using Fargo.Core.Users;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
@@ -8,35 +9,47 @@ namespace Fargo.Core.Tests.Articles;
 public sealed class ArticleMutationTests
 {
     [Fact]
-    public void CreateArticle_Should_NotSetActorOrModificationType()
+    public void CreateArticle_Should_SetActorAndModificationType()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var actor = CreateDomainActor();
 
-        Assert.Null(article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.None, article.ModificationTypes);
-        Assert.False(article.IsEditStarted);
+        var article = Article.CreateArticle(new Name("Test article"), actor);
+
+        Assert.Equal(ArticleType.Default, article.ArticleType);
+        Assert.Equal(actor.Guid, article.EditedByGuid);
+        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+        Assert.True(article.IsEditStarted);
+    }
+
+    [Fact]
+    public void CreateArticle_Should_RejectActorWithoutCreatePermission()
+    {
+        Assert.Throws<UserNotAuthorizedFargoDomainException>(
+            () => Article.CreateArticle(new Name("Test article"), CreateDomainActorWithoutPermissions()));
     }
 
     [Fact]
     public void CreateArticleVariation_Should_SetVariation()
     {
-        var fromArticle = Article.CreateArticle(new Name("Base article"));
+        var fromArticle = Article.CreateArticle(new Name("Base article"), CreateDomainActor());
 
-        var article = Article.CreateArticleVariation(new Name("Variation article"), fromArticle);
+        var article = Article.CreateArticleVariation(new Name("Variation article"), fromArticle, CreateDomainActor());
 
         Assert.True(article.IsVariation);
+        Assert.Equal(ArticleType.Variation, article.ArticleType);
         Assert.Equal(fromArticle.Guid, article.Variation?.FromArticleGuid);
     }
 
     [Fact]
     public void CreateArticlePack_Should_SetPack()
     {
-        var fromArticle = Article.CreateArticle(new Name("Base article"));
+        var fromArticle = Article.CreateArticle(new Name("Base article"), CreateDomainActor());
         var quantity = 10.Amount();
 
-        var article = Article.CreateArticlePack(new Name("Pack article"), fromArticle, quantity);
+        var article = Article.CreateArticlePack(new Name("Pack article"), fromArticle, quantity, CreateDomainActor());
 
         Assert.True(article.IsPack);
+        Assert.Equal(ArticleType.Pack, article.ArticleType);
         Assert.Equal(fromArticle.Guid, article.Pack?.FromArticleGuid);
         Assert.Equal(quantity, article.Pack?.Quantity);
     }
@@ -44,12 +57,13 @@ public sealed class ArticleMutationTests
     [Fact]
     public void CreateArticleKit_Should_SetKit()
     {
-        var fromArticle = Article.CreateArticle(new Name("Base article"));
+        var fromArticle = Article.CreateArticle(new Name("Base article"), CreateDomainActor());
         var component = new ArticleKitComponent(fromArticle, 2.Amount());
 
-        var article = Article.CreateArticleKit(new Name("Kit article"), [component]);
+        var article = Article.CreateArticleKit(new Name("Kit article"), [component], CreateDomainActor());
 
         Assert.True(article.IsKit);
+        Assert.Equal(ArticleType.Kit, article.ArticleType);
         Assert.Same(component, article.Kit?.Components.Single());
     }
 
@@ -82,7 +96,7 @@ public sealed class ArticleMutationTests
     [Fact]
     public void ArticleKitComponent_Should_RejectNonPositiveQuantity()
     {
-        var article = Article.CreateArticle(new Name("Base article"));
+        var article = Article.CreateArticle(new Name("Base article"), CreateDomainActor());
 
         Assert.Throws<ArgumentOutOfRangeException>(
             () => new ArticleKitComponent(article, 0.Amount()));
@@ -91,7 +105,7 @@ public sealed class ArticleMutationTests
     [Fact]
     public void ArticleKitComponent_Should_SetArticleAndQuantity()
     {
-        var article = Article.CreateArticle(new Name("Base article"));
+        var article = Article.CreateArticle(new Name("Base article"), CreateDomainActor());
         var quantity = 2.Amount();
 
         var component = new ArticleKitComponent(article, quantity);
@@ -104,28 +118,40 @@ public sealed class ArticleMutationTests
     [Fact]
     public void CreateArticleContainer_Should_SetContainer()
     {
-        var article = Article.CreateArticleContainer(new Name("Container article"));
+        var article = Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor());
 
         Assert.True(article.IsContainer);
+        Assert.Equal(ArticleType.Container, article.ArticleType);
         Assert.Null(article.Container?.MaxMass);
     }
 
     [Fact]
-    public void Rename_Should_OnlyChangeName()
+    public void Rename_Should_SetActorAndModificationType()
     {
-        var article = Article.CreateArticleContainer(new Name("Test article"));
+        var article = Article.CreateArticleContainer(new Name("Test article"), CreateDomainActor());
+        SetIsEditStarted(article, false);
+        var actor = CreateDomainActor();
 
-        article.Rename(new Name("Renamed article"));
+        article.Rename(new Name("Renamed article"), actor);
 
         Assert.Equal("Renamed article", article.Name.Value);
-        Assert.Null(article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.None, article.ModificationTypes);
+        Assert.Equal(actor.Guid, article.EditedByGuid);
+        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+    }
+
+    [Fact]
+    public void Rename_Should_RejectActorWithoutEditPermission()
+    {
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
+
+        Assert.Throws<UserNotAuthorizedFargoDomainException>(
+            () => article.Rename(new Name("Renamed article"), CreateDomainActorWithoutPermissions()));
     }
 
     [Fact]
     public void MarkModificationType_Should_AccumulateModificationTypes()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
 
         article.MarkModificationType(ArticleModifiedType.General);
         article.MarkModificationType(ArticleModifiedType.MetricsChanged);
@@ -137,7 +163,7 @@ public sealed class ArticleMutationTests
     [Fact]
     public void MarkModificationType_Should_ResetPreviousModificationTypes_When_EditSessionStarts()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
 
         article.MarkModificationType(ArticleModifiedType.General);
         SetIsEditStarted(article, false);
@@ -149,7 +175,7 @@ public sealed class ArticleMutationTests
     [Fact]
     public void MarkAsEditedBy_Should_SetActor()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
         var actorGuid = Guid.NewGuid();
 
         article.MarkAsEditedBy(actorGuid);
@@ -160,9 +186,9 @@ public sealed class ArticleMutationTests
     [Fact]
     public void ContainerMutation_Should_UpdateContainer()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
 
-        article.SetContainerMaxMass(Mass.FromKilograms(10));
+        article.SetContainerMaxMass(Mass.FromKilograms(10), CreateDomainActor());
 
         Assert.Equal(Mass.FromKilograms(10), article.Container?.MaxMass);
     }
@@ -171,9 +197,9 @@ public sealed class ArticleMutationTests
     public void PartitionMutation_Should_UpdatePartitions()
     {
         var partition = Partition.CreatePartition(new Name("Restricted"));
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
 
-        article.AddPartition(partition);
+        article.AddPartition(partition, CreateDomainActor());
 
         Assert.Contains(partition, article.Partitions);
     }

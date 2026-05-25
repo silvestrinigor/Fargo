@@ -1,9 +1,9 @@
 using Fargo.Application;
 using Fargo.Application.UserGroups;
 using Fargo.HttpApi.Contracts;
-using Fargo.Sdk.Contracts.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.UserGroups;
 
@@ -42,14 +42,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroup")
             .WithSummary("Gets a single user group")
             .WithDescription("Retrieves a single user group by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<UserGroupInfo>(StatusCodes.Status200OK)
+            .Produces<HttpContracts.UserGroupDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<UserGroupInfo>, NotFound>> GetSingleUserGroup(
+    private static async Task<Results<Ok<HttpContracts.UserGroupDto>, NotFound>> GetSingleUserGroup(
         Guid userGroupGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<UserGroupSingleQuery, UserGroupDto?> handler,
@@ -60,7 +60,7 @@ public static class UserGroupEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
     #endregion Get Single
@@ -73,24 +73,26 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroups")
             .WithSummary("Gets multiple user groups")
             .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.")
-            .Produces<IReadOnlyCollection<UserGroupInfo>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<HttpContracts.UserGroupDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<UserGroupInfo>>, NoContent>> GetManyUserGroup(
+    private static async Task<Results<Ok<IReadOnlyCollection<HttpContracts.UserGroupDto>>, NoContent>> GetManyUserGroup(
         DateTimeOffset? temporalAsOfDateTime,
-        Page? page,
-        Limit? limit,
+        int? page,
+        int? limit,
         [FromQuery] Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>> handler,
         CancellationToken cancellationToken
     )
     {
-        var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
+        var withPagination = new Pagination(
+            new Page(page ?? Page.FirstPage.Value),
+            new Limit(limit ?? Limit.MaxLimit.Value));
 
         var query = new UserGroupsQuery(
             withPagination,
@@ -106,7 +108,10 @@ public static class UserGroupEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response.ToInfo());
+        IReadOnlyCollection<HttpContracts.UserGroupDto> contractResponse =
+            response.Select(static userGroup => userGroup.ToContract()).ToArray();
+
+        return TypedResults.Ok(contractResponse);
     }
 
     #endregion Get Many
@@ -125,11 +130,11 @@ public static class UserGroupEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUserGroup(
-        UserGroupCreateRequest request,
-        UserGroupApplicationService service,
+        HttpContracts.UserGroupCreateRequest request,
+        ICommandHandler<UserGroupCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await service.Create(request.ToApplicationDto(), cancellationToken);
+        var response = await handler.Handle(new UserGroupCreateCommand(request.ToApplication()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -151,11 +156,11 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUserGroup(
         Guid userGroupGuid,
-        UserGroupUpdateRequest request,
-        UserGroupApplicationService service,
+        HttpContracts.UserGroupUpdateRequest request,
+        ICommandHandler<UserGroupUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Update(userGroupGuid, request.ToApplicationDto(), cancellationToken);
+        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request.ToApplication()), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -177,10 +182,10 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteUserGroup(
         Guid userGroupGuid,
-        UserGroupApplicationService service,
+        ICommandHandler<UserGroupDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Delete(userGroupGuid, cancellationToken);
+        await handler.Handle(new UserGroupDeleteCommand(userGroupGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

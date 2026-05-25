@@ -1,5 +1,6 @@
 using Fargo.Core;
 using Fargo.Core.Articles;
+using Fargo.Core.Events;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -104,5 +105,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
+
     }
 }

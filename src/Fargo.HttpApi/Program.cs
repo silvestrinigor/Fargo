@@ -1,7 +1,8 @@
+using Fargo.Application;
+using Fargo.HttpApi;
 using Fargo.HttpApi.Articles;
-using Fargo.HttpApi.Extensions;
+using Fargo.HttpApi.Identity;
 using Fargo.HttpApi.Items;
-using Fargo.HttpApi.Middlewares;
 using Fargo.HttpApi.Partitions;
 using Fargo.HttpApi.UserGroups;
 using Fargo.HttpApi.Users;
@@ -25,6 +26,8 @@ builder.Services.AddFargoOpenApi();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.ConfigureFargoHttpJsonOptions();
+
+builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
@@ -57,7 +60,7 @@ app.MapFargoUserGroup();
 
 app.MapFargoPartition();
 
-app.MapFargoAuthentication();
+app.MapFargoIdentity();
 
 app.MapDefaultEndpoints();
 

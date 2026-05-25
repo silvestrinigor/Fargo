@@ -1,10 +1,14 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
+using Fargo.Application.Partitions;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Events;
+using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.Application.Tests.Articles;
@@ -12,302 +16,352 @@ namespace Fargo.Application.Tests.Articles;
 public sealed class ArticleCommandHandlerTests
 {
     [Fact]
-    public async Task Create_Should_MarkActorAndGeneralModificationType()
+    public async Task Create_Should_CreateArticleWithOptionalStateAndSave()
     {
-        var repository = Substitute.For<IArticleRepository>();
-        var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreateCommandHandler(
-            repository,
-            Substitute.For<IEntityEventRepository>(),
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
-
-        await handler.Handle(new ArticleCreateCommand(new Name("Article")));
-
-        repository.Received(1).Add(Arg.Is<Article>(article =>
-            article.EditedByGuid == actor.ActorGuid &&
-            article.ModificationTypes == ArticleModifiedType.General));
-    }
-
-    [Fact]
-    public async Task CreateVariation_Should_CreateVariationAndMarkRelationModificationType()
-    {
-        var fromArticle = Article.CreateArticle(new Name("Source article"));
-        var repository = CreateArticleRepository(fromArticle);
+        var partition = Partition.CreatePartition(new Name("Partition"));
+        var articleRepository = Substitute.For<IArticleRepository>();
+        var partitionRepository = CreatePartitionRepository(partition);
         var entityEventRepository = Substitute.For<IEntityEventRepository>();
-        var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreateVariationCommandHandler(
-            repository,
+        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var actor = CreateActor(
+            [ActionType.CreateArticle, ActionType.EditArticle],
+            [partition.Guid]);
+        var handler = new ArticleCreateContainerCommandHandler(
+            articleRepository,
+            partitionRepository,
             entityEventRepository,
+            entityPartitionEventRepository,
+            new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleCreateVariationCommandHandler>>());
+            unitOfWork,
+            Substitute.For<ILogger<ArticleCreateContainerCommandHandler>>());
 
-        await handler.Handle(new ArticleCreateVariationCommand(new Name("Variation article"), fromArticle.Guid));
+        var articleGuid = await handler.Handle(new ArticleCreateContainerCommand(
+            new Name("Container"),
+            MaxMass: Mass.FromKilograms(10),
+            Description: new Description("Description"),
+            ShelfLife: TimeSpan.FromDays(7),
+            Metrics: new ArticleMetricsDto(Mass.FromKilograms(2), Length.FromCentimeters(10)),
+            Barcodes: new ArticleBarcodesDto(Ean13: new Ean13("1234567890123")),
+            Partitions: [partition.Guid],
+            IsActive: false));
 
-        repository.Received(1).Add(Arg.Is<Article>(article =>
-            article.IsVariation &&
-            article.Variation!.FromArticleGuid == fromArticle.Guid &&
+        articleRepository.Received(1).Add(Arg.Is<Article>(article =>
+            article.Guid == articleGuid &&
+            article.IsContainer &&
+            article.ArticleType == ArticleType.Container &&
+            article.Description == new Description("Description") &&
+            article.ShelfLife == TimeSpan.FromDays(7) &&
+            article.Ean13 == new Ean13("1234567890123") &&
+            article.Partitions.Single().Guid == partition.Guid &&
+            !article.IsActive &&
             article.EditedByGuid == actor.ActorGuid &&
-            article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Relation)));
+            article.ModificationTypes.HasFlag(ArticleModifiedType.General) &&
+            article.ModificationTypes.HasFlag(ArticleModifiedType.Container) &&
+            article.ModificationTypes.HasFlag(ArticleModifiedType.BarcodesChanged) &&
+            article.ModificationTypes.HasFlag(ArticleModifiedType.PartitionsChanged)));
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EventType == EntityEventType.Created &&
             entityEvent.EntityType == EntityType.Article &&
+            entityEvent.EntityGuid == articleGuid &&
             entityEvent.ActorGuid == actor.ActorGuid));
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EventType == EntityEventType.Deactivated &&
+            entityEvent.EntityType == EntityType.Article &&
+            entityEvent.EntityGuid == articleGuid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(partitionEvent =>
+            partitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            partitionEvent.EntityGuid == articleGuid &&
+            partitionEvent.PartitionGuid == partition.Guid &&
+            partitionEvent.ActorGuid == actor.ActorGuid));
+        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task CreatePack_Should_CreatePackAndMarkRelationModificationType()
+    public async Task Create_Should_CreateDefaultArticle()
     {
-        var fromArticle = Article.CreateArticle(new Name("Source article"));
-        var repository = CreateArticleRepository(fromArticle);
-        var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreatePackCommandHandler(
-            repository,
-            Substitute.For<IEntityEventRepository>(),
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleCreatePackCommandHandler>>());
+        var articleRepository = Substitute.For<IArticleRepository>();
+        var handler = CreateDefaultCreateHandler(
+            articleRepository,
+            actor: CreateActor([ActionType.CreateArticle]));
 
-        await handler.Handle(new ArticleCreatePackCommand(new Name("Pack article"), fromArticle.Guid, 4.Amount()));
+        await handler.Handle(new ArticleCreateDefaultCommand(
+            new Name("Default")));
 
-        repository.Received(1).Add(Arg.Is<Article>(article =>
-            article.IsPack &&
-            article.Pack!.FromArticleGuid == fromArticle.Guid &&
-            article.Pack.Quantity.Equals(4.Amount(), 0.Amount()) &&
+        articleRepository.Received(1).Add(Arg.Is<Article>(article =>
+            article.ArticleType == ArticleType.Default &&
+            !article.IsVariation &&
+            !article.IsPack &&
+            !article.IsKit &&
+            !article.IsContainer));
+    }
+
+    [Fact]
+    public async Task Create_Should_CreateVariationFromSourceArticle()
+    {
+        var sourceArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
+        var articleRepository = CreateArticleRepository(sourceArticle);
+        var handler = CreateVariationCreateHandler(
+            articleRepository,
+            actor: CreateActor([ActionType.CreateArticle]));
+
+        await handler.Handle(new ArticleCreateVariationCommand(
+            new Name("Variation"),
+            sourceArticle.Guid));
+
+        articleRepository.Received(1).Add(Arg.Is<Article>(article =>
+            article.IsVariation &&
+            article.ArticleType == ArticleType.Variation &&
+            article.Variation!.FromArticleGuid == sourceArticle.Guid &&
             article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Relation)));
     }
 
     [Fact]
-    public async Task CreateKit_Should_CreateKitAndMarkRelationModificationType()
+    public async Task Create_Should_CreatePackFromSourceArticle()
     {
-        var firstArticle = Article.CreateArticle(new Name("First source article"));
-        var secondArticle = Article.CreateArticle(new Name("Second source article"));
-        var repository = CreateArticleRepository(firstArticle, secondArticle);
-        var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreateKitCommandHandler(
-            repository,
-            Substitute.For<IEntityEventRepository>(),
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleCreateKitCommandHandler>>());
+        var sourceArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
+        var articleRepository = CreateArticleRepository(sourceArticle);
+        var handler = CreatePackCreateHandler(
+            articleRepository,
+            actor: CreateActor([ActionType.CreateArticle]));
+
+        await handler.Handle(new ArticleCreatePackCommand(
+            new Name("Pack"),
+            sourceArticle.Guid,
+            4.Amount()));
+
+        articleRepository.Received(1).Add(Arg.Is<Article>(article =>
+            article.IsPack &&
+            article.ArticleType == ArticleType.Pack &&
+            article.Pack!.FromArticleGuid == sourceArticle.Guid &&
+            article.Pack.Quantity.Equals(4.Amount(), 0.Amount())));
+    }
+
+    [Fact]
+    public async Task Create_Should_CreateKitFromSourceArticles()
+    {
+        var firstArticle = Article.CreateArticle(new Name("First article"), CreateDomainActor());
+        var secondArticle = Article.CreateArticle(new Name("Second article"), CreateDomainActor());
+        var articleRepository = CreateArticleRepository(firstArticle, secondArticle);
+        var handler = CreateKitCreateHandler(
+            articleRepository,
+            actor: CreateActor([ActionType.CreateArticle]));
 
         await handler.Handle(new ArticleCreateKitCommand(
-            new Name("Kit article"),
+            new Name("Kit"),
             [
-                new ArticleKitComponentRequest(firstArticle.Guid, 2.Amount()),
-                new ArticleKitComponentRequest(secondArticle.Guid, 3.Amount()),
+                new ArticleCreateKitPackDto(firstArticle.Guid, 2.Amount()),
+                new ArticleCreateKitPackDto(secondArticle.Guid, 3.Amount())
             ]));
 
-        repository.Received(1).Add(Arg.Is<Article>(article =>
+        articleRepository.Received(1).Add(Arg.Is<Article>(article =>
             article.IsKit &&
+            article.ArticleType == ArticleType.Kit &&
             article.Kit!.Components.Count == 2 &&
             article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Relation)));
     }
 
     [Fact]
-    public async Task CreateContainer_Should_CreateContainerAndMarkContainerModificationType()
+    public async Task Create_Should_Throw_WhenKitHasNoPacks()
     {
-        var repository = Substitute.For<IArticleRepository>();
-        var actor = CreateActor(ActionType.CreateArticle);
-        var handler = new ArticleCreateContainerCommandHandler(
-            repository,
-            Substitute.For<IEntityEventRepository>(),
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleCreateContainerCommandHandler>>());
+        var handler = CreateKitCreateHandler();
 
-        await handler.Handle(new ArticleCreateContainerCommand(new Name("Container article")));
-
-        repository.Received(1).Add(Arg.Is<Article>(article =>
-            article.IsContainer &&
-            !article.Container!.MaxMass.HasValue &&
-            article.ModificationTypes == (ArticleModifiedType.General | ArticleModifiedType.Container)));
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => handler.Handle(new ArticleCreateKitCommand(
+                new Name("Invalid kit"),
+                [])));
     }
 
     [Fact]
-    public async Task SetContainerMaxMass_Should_SetMaxMassAndMarkContainerModificationType()
+    public async Task Patch_Should_ApplySpecifiedFieldsAndSave()
     {
-        var article = Article.CreateArticleContainer(new Name("Container article"));
-        var repository = CreateArticleRepository(article);
-        var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleSetContainerMaxMassCommandHandler(
-            repository,
+        var oldPartition = Partition.CreatePartition(new Name("Old partition"));
+        var newPartition = Partition.CreatePartition(new Name("New partition"));
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        article.AddPartition(oldPartition, CreateDomainActor());
+        var articleRepository = CreateArticleRepository(article);
+        var partitionRepository = CreatePartitionRepository(newPartition);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var actor = CreateActor(
+            [ActionType.EditArticle],
+            [oldPartition.Guid, newPartition.Guid]);
+        var handler = new ArticlePatchCommandHandler(
+            articleRepository,
+            partitionRepository,
+            entityEventRepository,
+            entityPartitionEventRepository,
+            new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleSetContainerMaxMassCommandHandler>>());
+            unitOfWork,
+            Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticleSetContainerMaxMassCommand(
+        await handler.Handle(new ArticlePatchCommand(
             article.Guid,
-            UnitsNet.Mass.FromKilograms(10)));
+            new ArticlePatchDto(
+                Name: new Name("Renamed"),
+                Description: new Description("Description"),
+                Metrics: new ArticleMetricsDto(Mass.FromKilograms(1)),
+                Barcodes: new ArticleBarcodesDto(Ean8: new Ean8("12345670")),
+                Partitions: [newPartition.Guid],
+                IsActive: false)));
 
-        Assert.True(article.Container!.MaxMass!.Value.Equals(
-            UnitsNet.Mass.FromKilograms(10),
-            UnitsNet.Mass.Zero));
+        Assert.Equal("Renamed", article.Name.Value);
+        Assert.Equal(new Description("Description"), article.Description);
+        Assert.Equal(Mass.FromKilograms(1), article.Mass);
+        Assert.Equal(new Ean8("12345670"), article.Ean8);
+        Assert.Single(article.Partitions);
+        Assert.Equal(newPartition.Guid, article.Partitions.Single().Guid);
+        Assert.False(article.IsActive);
         Assert.Equal(actor.ActorGuid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.Container, article.ModificationTypes);
+        Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.General));
+        Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.MetricsChanged));
+        Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.BarcodesChanged));
+        Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.PartitionsChanged));
+        Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.Deactivated));
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EventType == EntityEventType.Deactivated &&
+            entityEvent.EntityGuid == article.Guid));
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(partitionEvent =>
+            partitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            partitionEvent.PartitionGuid == newPartition.Guid));
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(partitionEvent =>
+            partitionEvent.Event.EventType == EntityEventType.RemovedFromPartition &&
+            partitionEvent.PartitionGuid == oldPartition.Guid));
+        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task SetContainerMaxMass_Should_NotMark_WhenMaxMassIsUnchanged()
+    public async Task Patch_Should_NotRecordActivationEvent_WhenAlreadyActive()
     {
-        var article = Article.CreateArticleContainer(new Name("Container article"));
-        article.SetContainerMaxMass(UnitsNet.Mass.FromKilograms(10));
-        var previousActorGuid = Guid.NewGuid();
-        article.MarkAsEditedBy(previousActorGuid);
-        article.MarkModificationType(ArticleModifiedType.General);
-        SetIsEditStarted(article, false);
-        var repository = CreateArticleRepository(article);
-        var handler = new ArticleSetContainerMaxMassCommandHandler(
-            repository,
-            CreateCurrentAuthorizationContext(CreateActor(ActionType.EditArticle)),
-            Substitute.For<ILogger<ArticleSetContainerMaxMassCommandHandler>>());
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var handler = new ArticlePatchCommandHandler(
+            CreateArticleRepository(article),
+            Substitute.For<IPartitionRepository>(),
+            entityEventRepository,
+            Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(Substitute.For<IArticleRepository>()),
+            CreateCurrentAuthorizationContext(CreateActor([ActionType.EditArticle])),
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticleSetContainerMaxMassCommand(
-            article.Guid,
-            UnitsNet.Mass.FromKilograms(10)));
+        await handler.Handle(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: true)));
 
-        Assert.Equal(previousActorGuid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+        entityEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
 
     [Fact]
-    public async Task SetContainerMaxMass_Should_Throw_WhenArticleIsNotContainer()
+    public async Task Delete_Should_RemoveArticleRecordDeletedEventAndSave()
     {
-        var article = Article.CreateArticle(new Name("Article"));
-        var repository = CreateArticleRepository(article);
-        var handler = new ArticleSetContainerMaxMassCommandHandler(
-            repository,
-            CreateCurrentAuthorizationContext(CreateActor(ActionType.EditArticle)),
-            Substitute.For<ILogger<ArticleSetContainerMaxMassCommandHandler>>());
+        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var articleRepository = CreateArticleRepository(article);
+        var entityEventRepository = Substitute.For<IEntityEventRepository>();
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var actor = CreateActor([ActionType.DeleteArticle]);
+        var handler = new ArticleDeleteCommandHandler(
+            articleRepository,
+            entityEventRepository,
+            CreateCurrentAuthorizationContext(actor),
+            unitOfWork,
+            Substitute.For<ILogger<ArticleDeleteCommandHandler>>());
 
-        await Assert.ThrowsAsync<ArticleIsNotContainerFargoDomainException>(
-            () => handler.Handle(new ArticleSetContainerMaxMassCommand(
-                article.Guid,
-                UnitsNet.Mass.FromKilograms(10))));
+        await handler.Handle(new ArticleDeleteCommand(article.Guid));
+
+        articleRepository.Received(1).Remove(article);
+        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+            entityEvent.EventType == EntityEventType.Deleted &&
+            entityEvent.EntityType == EntityType.Article &&
+            entityEvent.EntityGuid == article.Guid &&
+            entityEvent.ActorGuid == actor.ActorGuid));
+        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task CreateVariation_Should_Throw_WhenSourceArticleIsInactive()
+    private static ArticleCreateDefaultCommandHandler CreateDefaultCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
     {
-        var fromArticle = Article.CreateArticle(new Name("Source article"));
-        fromArticle.Deactivate();
-        var repository = CreateArticleRepository(fromArticle);
-        var handler = new ArticleCreateVariationCommandHandler(
-            repository,
-            Substitute.For<IEntityEventRepository>(),
-            CreateCurrentAuthorizationContext(CreateActor(ActionType.CreateArticle)),
+        articleRepository ??= Substitute.For<IArticleRepository>();
+
+        return new ArticleCreateDefaultCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreateDefaultCommandHandler>>());
+    }
+
+    private static ArticleCreateVariationCommandHandler CreateVariationCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
+    {
+        articleRepository ??= Substitute.For<IArticleRepository>();
+
+        return new ArticleCreateVariationCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ArticleCreateVariationCommandHandler>>());
-
-        await Assert.ThrowsAsync<EntityNotActiveFargoDomainException<Article>>(
-            () => handler.Handle(new ArticleCreateVariationCommand(new Name("Variation article"), fromArticle.Guid)));
     }
 
-    [Fact]
-    public async Task Rename_Should_MarkActorAndGeneralModificationType()
+    private static ArticleCreatePackCommandHandler CreatePackCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
     {
-        var article = Article.CreateArticle(new Name("Article"));
-        var repository = CreateArticleRepository(article);
-        var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleRenameCommandHandler(
-            repository,
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleRenameCommandHandler>>());
+        articleRepository ??= Substitute.For<IArticleRepository>();
 
-        await handler.Handle(new ArticleRenameCommand(article.Guid, new Name("Renamed article")));
-
-        Assert.Equal("Renamed article", article.Name.Value);
-        Assert.Equal(actor.ActorGuid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+        return new ArticleCreatePackCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreatePackCommandHandler>>());
     }
 
-    [Fact]
-    public async Task Rename_Should_NotMark_WhenNameIsUnchanged()
+    private static ArticleCreateKitCommandHandler CreateKitCreateHandler(
+        IArticleRepository? articleRepository = null,
+        IPartitionRepository? partitionRepository = null,
+        IEntityEventRepository? entityEventRepository = null,
+        IEntityPartitionEventRepository? entityPartitionEventRepository = null,
+        IAuthorizationContext? actor = null,
+        IUnitOfWork? unitOfWork = null)
     {
-        var previousActorGuid = Guid.NewGuid();
-        var article = Article.CreateArticle(new Name("Article"));
-        article.MarkAsEditedBy(previousActorGuid);
-        article.MarkModificationType(ArticleModifiedType.BarcodesChanged);
-        SetIsEditStarted(article, false);
-        var repository = CreateArticleRepository(article);
-        var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleRenameCommandHandler(
-            repository,
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleRenameCommandHandler>>());
+        articleRepository ??= Substitute.For<IArticleRepository>();
 
-        await handler.Handle(new ArticleRenameCommand(article.Guid, new Name("Article")));
-
-        Assert.Equal(previousActorGuid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.BarcodesChanged, article.ModificationTypes);
-    }
-
-    [Fact]
-    public async Task MultipleCommands_Should_AccumulateModificationTypesInSameSession()
-    {
-        var article = Article.CreateArticle(new Name("Article"));
-        var repository = CreateArticleRepository(article);
-        var actor = CreateActor(ActionType.EditArticle);
-        var currentAuthorizationContext = CreateCurrentAuthorizationContext(actor);
-        var renameHandler = new ArticleRenameCommandHandler(
-            repository,
-            currentAuthorizationContext,
-            Substitute.For<ILogger<ArticleRenameCommandHandler>>());
-        var metricsHandler = new ArticleSetMetricsCommandHandler(
-            repository,
-            currentAuthorizationContext,
-            Substitute.For<ILogger<ArticleSetMetricsCommandHandler>>());
-
-        await renameHandler.Handle(new ArticleRenameCommand(article.Guid, new Name("Renamed article")));
-        await metricsHandler.Handle(new ArticleSetMetricsCommand(
-            article.Guid,
-            new ArticleMetrics(mass: UnitsNet.Mass.FromKilograms(1))));
-
-        Assert.Equal(actor.ActorGuid, article.EditedByGuid);
-        Assert.Equal(
-            ArticleModifiedType.General | ArticleModifiedType.MetricsChanged,
-            article.ModificationTypes);
-    }
-
-    [Fact]
-    public async Task SetBarcodes_Should_MarkActorAndBarcodeModificationType()
-    {
-        var article = Article.CreateArticle(new Name("Article"));
-        var repository = CreateArticleRepository(article);
-        var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleSetBarcodesCommandHandler(
-            repository,
-            new ArticleService(repository),
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleSetBarcodesCommandHandler>>());
-
-        await handler.Handle(new ArticleSetBarcodesCommand(
-            article.Guid,
-            new ArticleBarcodesSet(Ean13: new Ean13("1234567890123"))));
-
-        Assert.Equal("1234567890123", article.Ean13?.Code);
-        Assert.Equal(actor.ActorGuid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.BarcodesChanged, article.ModificationTypes);
-    }
-
-    [Fact]
-    public async Task SetBarcodes_Should_NotRequireSetArticleBarcode_WhenPayloadIsUnchanged()
-    {
-        var article = Article.CreateArticle(new Name("Article"));
-        var repository = CreateArticleRepository(article);
-        await new ArticleService(repository).SetEan13(new Ean13("1234567890123"), article);
-        var previousActorGuid = Guid.NewGuid();
-        article.MarkAsEditedBy(previousActorGuid);
-        article.MarkModificationType(ArticleModifiedType.General);
-        SetIsEditStarted(article, false);
-        var actor = CreateActor(ActionType.EditArticle);
-        var handler = new ArticleSetBarcodesCommandHandler(
-            repository,
-            new ArticleService(repository),
-            CreateCurrentAuthorizationContext(actor),
-            Substitute.For<ILogger<ArticleSetBarcodesCommandHandler>>());
-
-        await handler.Handle(new ArticleSetBarcodesCommand(
-            article.Guid,
-            new ArticleBarcodesSet(Ean13: new Ean13("1234567890123"))));
-
-        Assert.Equal(previousActorGuid, article.EditedByGuid);
-        Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
+        return new ArticleCreateKitCommandHandler(
+            articleRepository,
+            partitionRepository ?? Substitute.For<IPartitionRepository>(),
+            entityEventRepository ?? Substitute.For<IEntityEventRepository>(),
+            entityPartitionEventRepository ?? Substitute.For<IEntityPartitionEventRepository>(),
+            new ArticleService(articleRepository),
+            CreateCurrentAuthorizationContext(actor ?? CreateActor([ActionType.CreateArticle])),
+            unitOfWork ?? Substitute.For<IUnitOfWork>(),
+            Substitute.For<ILogger<ArticleCreateKitCommandHandler>>());
     }
 
     private static IArticleRepository CreateArticleRepository(params Article[] articles)
@@ -315,8 +369,21 @@ public sealed class ArticleCommandHandlerTests
         var repository = Substitute.For<IArticleRepository>();
         foreach (var article in articles)
         {
+            SetIsEditStarted(article, false);
             repository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
                 .Returns(article);
+        }
+
+        return repository;
+    }
+
+    private static IPartitionRepository CreatePartitionRepository(params Partition[] partitions)
+    {
+        var repository = Substitute.For<IPartitionRepository>();
+        foreach (var partition in partitions)
+        {
+            repository.GetByGuid(partition.Guid, Arg.Any<CancellationToken>())
+                .Returns(partition);
         }
 
         return repository;
@@ -331,13 +398,15 @@ public sealed class ArticleCommandHandlerTests
         return currentAuthorizationContext;
     }
 
-    private static IAuthorizationContext CreateActor(params ActionType[] permissions)
+    private static IAuthorizationContext CreateActor(
+        IReadOnlyCollection<ActionType> permissions,
+        IReadOnlyCollection<Guid>? partitionAccesses = null)
         => new AuthorizationContext(
             Guid.NewGuid(),
             IsAuthenticated: true,
             IsAdmin: false,
             permissions,
-            PartitionAccesses: [],
+            partitionAccesses ?? [],
             UserGroupGuids: []);
 
     private static void SetIsEditStarted(Article article, bool value)

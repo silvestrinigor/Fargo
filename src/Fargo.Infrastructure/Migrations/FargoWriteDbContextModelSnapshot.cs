@@ -217,7 +217,7 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("Fargo.Core.EntityEvent", b =>
+            modelBuilder.Entity("Fargo.Core.Events.EntityEvent", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
@@ -251,7 +251,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("EntityEvents", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.EntityPartitionEvent", b =>
+            modelBuilder.Entity("Fargo.Core.Events.EntityPartitionEvent", b =>
                 {
                     b.Property<Guid>("Guid")
                         .HasColumnType("uniqueidentifier");
@@ -1060,11 +1060,11 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Variation");
                 });
 
-            modelBuilder.Entity("Fargo.Core.EntityPartitionEvent", b =>
+            modelBuilder.Entity("Fargo.Core.Events.EntityPartitionEvent", b =>
                 {
-                    b.HasOne("Fargo.Core.EntityEvent", "Event")
+                    b.HasOne("Fargo.Core.Events.EntityEvent", "Event")
                         .WithOne()
-                        .HasForeignKey("Fargo.Core.EntityPartitionEvent", "Guid")
+                        .HasForeignKey("Fargo.Core.Events.EntityPartitionEvent", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1098,7 +1098,7 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Items.ItemMovement", b =>
                 {
-                    b.HasOne("Fargo.Core.EntityEvent", "Event")
+                    b.HasOne("Fargo.Core.Events.EntityEvent", "Event")
                         .WithOne()
                         .HasForeignKey("Fargo.Core.Items.ItemMovement", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)

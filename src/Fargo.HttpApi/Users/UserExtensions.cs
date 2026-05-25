@@ -1,9 +1,9 @@
 using Fargo.Application;
 using Fargo.Application.Users;
 using Fargo.HttpApi.Contracts;
-using Fargo.Sdk.Contracts.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.Users;
 
@@ -42,14 +42,14 @@ public static class UserEndpointRouteBuilderExtension
             .WithName("GetUser")
             .WithSummary("Gets a single user")
             .WithDescription("Retrieves a single user by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<UserInfo>(StatusCodes.Status200OK)
+            .Produces<HttpContracts.UserDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<UserInfo>, NotFound>> GetSingleUser(
+    private static async Task<Results<Ok<HttpContracts.UserDto>, NotFound>> GetSingleUser(
         Guid userGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<UserSingleQuery, UserDto?> handler,
@@ -60,7 +60,7 @@ public static class UserEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToInfo());
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
     }
 
     #endregion Get Single
@@ -73,24 +73,26 @@ public static class UserEndpointRouteBuilderExtension
             .WithName("GetUsers")
             .WithSummary("Gets multiple users")
             .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.")
-            .Produces<IReadOnlyCollection<UserInfo>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<HttpContracts.UserDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<UserInfo>>, NoContent>> GetManyUser(
+    private static async Task<Results<Ok<IReadOnlyCollection<HttpContracts.UserDto>>, NoContent>> GetManyUser(
         DateTimeOffset? temporalAsOfDateTime,
-        Page? page,
-        Limit? limit,
+        int? page,
+        int? limit,
         [FromQuery] Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>> handler,
         CancellationToken cancellationToken
     )
     {
-        var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
+        var withPagination = new Pagination(
+            new Page(page ?? Page.FirstPage.Value),
+            new Limit(limit ?? Limit.MaxLimit.Value));
 
         var query = new UsersQuery(
             withPagination,
@@ -106,7 +108,10 @@ public static class UserEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        return TypedResults.Ok(response.ToInfo());
+        IReadOnlyCollection<HttpContracts.UserDto> contractResponse =
+            response.Select(static user => user.ToContract()).ToArray();
+
+        return TypedResults.Ok(contractResponse);
     }
 
     #endregion Get Many
@@ -125,11 +130,11 @@ public static class UserEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUser(
-        UserCreateRequest request,
-        UserApplicationService service,
+        HttpContracts.UserCreateRequest request,
+        ICommandHandler<UserCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await service.Create(request.ToApplicationDto(), cancellationToken);
+        var response = await handler.Handle(new UserCreateCommand(request.ToApplication()), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -151,11 +156,11 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUser(
         Guid userGuid,
-        UserUpdateRequest request,
-        UserApplicationService service,
+        HttpContracts.UserUpdateRequest request,
+        ICommandHandler<UserUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Update(userGuid, request.ToApplicationDto(), cancellationToken);
+        await handler.Handle(new UserUpdateCommand(userGuid, request.ToApplication()), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -177,10 +182,10 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<NoContent> DeleteUser(
         Guid userGuid,
-        UserApplicationService service,
+        ICommandHandler<UserDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await service.Delete(userGuid, cancellationToken);
+        await handler.Handle(new UserDeleteCommand(userGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

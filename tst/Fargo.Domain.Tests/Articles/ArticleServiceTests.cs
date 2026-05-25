@@ -86,9 +86,9 @@ public sealed class ArticleServiceTests
 
     private static Article CreateArticle()
     {
-        var article = Article.CreateArticle(new Name("Test article"));
+        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
 
-        article.ChangeDescription(new Description("Test description"));
+        article.ChangeDescription(new Description("Test description"), CreateDomainActor());
 
         return article;
     }
@@ -102,34 +102,34 @@ public sealed class ArticleServiceTests
         switch (barcodeKind)
         {
             case "Ean13":
-                await service.SetEan13((Ean13?)value, article);
+                await service.SetEan13((Ean13?)value, article, CreateDomainActor());
                 return;
             case "Ean8":
-                await service.SetEan8((Ean8?)value, article);
+                await service.SetEan8((Ean8?)value, article, CreateDomainActor());
                 return;
             case "UpcA":
-                await service.SetUpcA((UpcA?)value, article);
+                await service.SetUpcA((UpcA?)value, article, CreateDomainActor());
                 return;
             case "UpcE":
-                await service.SetUpcE((UpcE?)value, article);
+                await service.SetUpcE((UpcE?)value, article, CreateDomainActor());
                 return;
             case "Code128":
-                await service.SetCode128((Code128?)value, article);
+                await service.SetCode128((Code128?)value, article, CreateDomainActor());
                 return;
             case "Code39":
-                await service.SetCode39((Code39?)value, article);
+                await service.SetCode39((Code39?)value, article, CreateDomainActor());
                 return;
             case "Itf14":
-                await service.SetItf14((Itf14?)value, article);
+                await service.SetItf14((Itf14?)value, article, CreateDomainActor());
                 return;
             case "Gs1128":
-                await service.SetGs1128((Gs1128?)value, article);
+                await service.SetGs1128((Gs1128?)value, article, CreateDomainActor());
                 return;
             case "QrCode":
-                await service.SetQrCode((QrCode?)value, article);
+                await service.SetQrCode((QrCode?)value, article, CreateDomainActor());
                 return;
             case "DataMatrix":
-                await service.SetDataMatrix((DataMatrix?)value, article);
+                await service.SetDataMatrix((DataMatrix?)value, article, CreateDomainActor());
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");
@@ -157,34 +157,34 @@ public sealed class ArticleServiceTests
         switch (barcodeKind)
         {
             case "Ean13":
-                await service.SetEan13((Ean13?)value, article);
+                await service.SetEan13((Ean13?)value, article, CreateDomainActor());
                 return;
             case "Ean8":
-                await service.SetEan8((Ean8?)value, article);
+                await service.SetEan8((Ean8?)value, article, CreateDomainActor());
                 return;
             case "UpcA":
-                await service.SetUpcA((UpcA?)value, article);
+                await service.SetUpcA((UpcA?)value, article, CreateDomainActor());
                 return;
             case "UpcE":
-                await service.SetUpcE((UpcE?)value, article);
+                await service.SetUpcE((UpcE?)value, article, CreateDomainActor());
                 return;
             case "Code128":
-                await service.SetCode128((Code128?)value, article);
+                await service.SetCode128((Code128?)value, article, CreateDomainActor());
                 return;
             case "Code39":
-                await service.SetCode39((Code39?)value, article);
+                await service.SetCode39((Code39?)value, article, CreateDomainActor());
                 return;
             case "Itf14":
-                await service.SetItf14((Itf14?)value, article);
+                await service.SetItf14((Itf14?)value, article, CreateDomainActor());
                 return;
             case "Gs1128":
-                await service.SetGs1128((Gs1128?)value, article);
+                await service.SetGs1128((Gs1128?)value, article, CreateDomainActor());
                 return;
             case "QrCode":
-                await service.SetQrCode((QrCode?)value, article);
+                await service.SetQrCode((QrCode?)value, article, CreateDomainActor());
                 return;
             case "DataMatrix":
-                await service.SetDataMatrix((DataMatrix?)value, article);
+                await service.SetDataMatrix((DataMatrix?)value, article, CreateDomainActor());
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");

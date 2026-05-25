@@ -48,9 +48,9 @@ public sealed class PartitionedRepositoryFilterTests
         var publicEntity = CreateArticle("Public article");
         var firstPartitionEntity = CreateArticle("First article", partitions: [firstPartition]);
         var secondPartitionEntity = CreateArticle("Second article", partitions: [secondPartition]);
-        await articleService.SetCode128(new Code128("PUBLIC-123"), publicEntity);
-        await articleService.SetEan13(new Ean13("7891234567895"), firstPartitionEntity);
-        await articleService.SetEan13(new Ean13("7891234567896"), secondPartitionEntity);
+        await articleService.SetCode128(new Code128("PUBLIC-123"), publicEntity, CreateDomainActor());
+        await articleService.SetEan13(new Ean13("7891234567895"), firstPartitionEntity, CreateDomainActor());
+        await articleService.SetEan13(new Ean13("7891234567896"), secondPartitionEntity, CreateDomainActor());
         context.Articles.AddRange(publicEntity, firstPartitionEntity, secondPartitionEntity);
         await context.SaveChangesAsync();
 
@@ -160,11 +160,11 @@ public sealed class PartitionedRepositoryFilterTests
         string name,
         IReadOnlyCollection<Partition>? partitions = null)
     {
-        var article = Article.CreateArticle(new Name(name));
+        var article = Article.CreateArticle(new Name(name), CreateDomainActor());
 
         foreach (var partition in partitions ?? [])
         {
-            article.AddPartition(partition);
+            article.AddPartition(partition, CreateDomainActor());
         }
 
         return article;
