@@ -16,6 +16,7 @@ using Fargo.Core.Users;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +30,6 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddFargoInfrastructure(IConfiguration configuration)
         {
-            AddFargoJwt(services, configuration);
             AddFargoConnectionStrings(services, configuration);
             AddDbContexts(services);
             AddRepositories(services);
@@ -39,6 +39,19 @@ public static class ServiceCollectionExtensions
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IAuthorizationContextFactory, AuthorizationContextFactory>();
             services.AddScoped<ICurrentAuthorizationContext, CurrentAuthorizationContext>();
+
+            return services;
+        }
+
+        public IServiceCollection AddFargoAuthentication(IConfiguration configuration)
+        {
+            AddFargoJwt(services, configuration);
+
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer();
+
+            services.ConfigureOptions<JwtBearerOptionsSetup>();
 
             return services;
         }
@@ -68,14 +81,27 @@ public static class ServiceCollectionExtensions
                 IConfiguration configuration
                 )
         {
-            services
+            var optionsBuilder = services
                 .AddOptions<JwtOptions>()
                 .Bind(configuration.GetSection(JwtOptions.SectionName))
                 .ValidateDataAnnotations()
                 .Validate(
-                        o => o.Key.Length >= 32,
-                        "Jwt:Key must be at least 32 characters long.")
-                .ValidateOnStart();
+                    options => !string.IsNullOrWhiteSpace(options.Key),
+                    "Jwt:Key is required.")
+                .Validate(
+                    options => !string.IsNullOrWhiteSpace(options.Key) && options.Key.Length >= 32,
+                    "Jwt:Key must be at least 32 characters long.")
+                .Validate(
+                    options => !string.IsNullOrWhiteSpace(options.Issuer),
+                    "Jwt:Issuer is required.")
+                .Validate(
+                    options => !string.IsNullOrWhiteSpace(options.Audience),
+                    "Jwt:Audience is required.");
+
+            if (!IsOpenApiDocumentGeneration())
+            {
+                optionsBuilder.ValidateOnStart();
+            }
 
             return services;
         }
@@ -83,12 +109,16 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddFargoConnectionStrings(
                 IConfiguration configuration)
         {
-            services
+            var optionsBuilder = services
                 .AddOptions<ConnectionStringOptions>()
                 .Bind(configuration.GetSection(ConnectionStringOptions.SectionName))
                 .Validate(o => !string.IsNullOrWhiteSpace(o.Fargo),
-                        "ConnectionStrings:Fargo must be provided.")
-                .ValidateOnStart();
+                        "ConnectionStrings:Fargo must be provided.");
+
+            if (!IsOpenApiDocumentGeneration())
+            {
+                optionsBuilder.ValidateOnStart();
+            }
 
             return services;
         }
@@ -137,5 +167,15 @@ public static class ServiceCollectionExtensions
 
             opt.UseSqlServer(options.Fargo);
         }
+    }
+
+    private static bool IsOpenApiDocumentGeneration()
+    {
+        // The build-time OpenAPI tool starts the app without runtime secrets or connection strings.
+        return AppDomain.CurrentDomain.GetAssemblies()
+            .Any(assembly => string.Equals(
+                assembly.GetName().Name,
+                "GetDocument.Insider",
+                StringComparison.OrdinalIgnoreCase));
     }
 }
