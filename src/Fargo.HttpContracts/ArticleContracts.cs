@@ -75,13 +75,53 @@ public sealed record ArticleCreateRequest(
     ArticleCreateContainerRequest? Container = null
 );
 
-public sealed record ArticlePatchRequest(
-    string? Name = null,
-    string? Description = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    OptionalField<TimeSpan> ShelfLife = default,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
-);
+public sealed record ArticlePatchRequest
+{
+    public ArticlePatchRequest()
+    {
+    }
+
+    public ArticlePatchRequest(
+        string? Name = null,
+        string? Description = null,
+        ArticleMetricsDto? Metrics = null,
+        ArticleBarcodesDto? Barcodes = null,
+        IReadOnlyCollection<Guid>? Partitions = null,
+        bool? IsActive = null)
+    {
+        this.Name = Name;
+        this.Description = Description;
+        this.Metrics = Metrics;
+        this.Barcodes = Barcodes;
+        this.Partitions = Partitions;
+        this.IsActive = IsActive;
+    }
+
+    public ArticlePatchRequest(
+        OptionalField<TimeSpan> ShelfLife,
+        string? Name = null,
+        string? Description = null,
+        ArticleMetricsDto? Metrics = null,
+        ArticleBarcodesDto? Barcodes = null,
+        IReadOnlyCollection<Guid>? Partitions = null,
+        bool? IsActive = null)
+        : this(Name, Description, Metrics, Barcodes, Partitions, IsActive)
+    {
+        this.ShelfLife = ShelfLife;
+    }
+
+    public string? Name { get; init; }
+
+    public string? Description { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public OptionalField<TimeSpan> ShelfLife { get; init; } = default;
+
+    public ArticleMetricsDto? Metrics { get; init; }
+
+    public ArticleBarcodesDto? Barcodes { get; init; }
+
+    public IReadOnlyCollection<Guid>? Partitions { get; init; }
+
+    public bool? IsActive { get; init; }
+}

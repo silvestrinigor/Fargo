@@ -53,6 +53,42 @@ public sealed class ContractJsonTests
     }
 
     [Fact]
+    public void ArticlePatchRequest_Should_WriteExplicitTimeSpanField()
+    {
+        var request = new ArticlePatchRequest(
+            ShelfLife: OptionalField<TimeSpan>.FromValue(TimeSpan.FromDays(7)));
+
+        var json = JsonSerializer.Serialize(request, JsonOptions);
+        using var document = JsonDocument.Parse(json);
+
+        Assert.Equal("7.00:00:00", document.RootElement.GetProperty("shelfLife").GetString());
+    }
+
+    [Fact]
+    public void ArticlePatchRequest_Should_ReadOmittedOptionalFieldAsUnspecified()
+    {
+        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+            """{"name":"Article"}""",
+            JsonOptions);
+
+        Assert.NotNull(request);
+        Assert.Equal("Article", request.Name);
+        Assert.False(request.ShelfLife.IsSpecified);
+    }
+
+    [Fact]
+    public void ArticlePatchRequest_Should_ReadExplicitNullOptionalFieldAsSpecifiedNull()
+    {
+        var request = JsonSerializer.Deserialize<ArticlePatchRequest>(
+            """{"shelfLife":null}""",
+            JsonOptions);
+
+        Assert.NotNull(request);
+        Assert.True(request.ShelfLife.IsSpecified);
+        Assert.Null(request.ShelfLife.Value);
+    }
+
+    [Fact]
     public void ContractEnums_Should_PreserveCurrentNumericValues()
     {
         Assert.Equal(0, (int)ActionType.CreateArticle);
