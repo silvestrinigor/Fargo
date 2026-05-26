@@ -3,7 +3,7 @@ using Fargo.Application.Identity;
 using Fargo.Application.Users;
 using Fargo.Core.Identity;
 using Fargo.HttpApi.Contracts;
-using global::Fargo.HttpContracts;
+using Fargo.HttpContracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Identity;
