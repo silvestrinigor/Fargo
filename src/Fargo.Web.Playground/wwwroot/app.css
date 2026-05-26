@@ -8,19 +8,33 @@ body {
     margin: 0;
 }
 
+.playground-layout {
+    min-height: calc(100dvh - 50px);
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+}
+
+.playground-nav {
+    border-right: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
+    background: var(--neutral-layer-1);
+    overflow: hidden;
+}
+
 .body-content {
-    min-height: calc(100dvh - 48px);
+    min-height: calc(100dvh - 50px);
     display: flex;
+    min-width: 0;
 }
 
 .content {
     width: 100%;
+    min-width: 0;
     padding: 24px;
 }
 
 .playground-panel,
 .playground-shell {
-    max-width: 920px;
+    max-width: 1180px;
 }
 
 .playground-panel {
@@ -87,6 +101,157 @@ body {
     overflow-wrap: anywhere;
 }
 
+.api-workspace {
+    margin-top: 26px;
+}
+
+.resource-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.resource-panel h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.25;
+}
+
+.operation-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.operation-grid details {
+    border: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
+    border-radius: 8px;
+    background: var(--neutral-layer-1);
+    padding: 12px;
+}
+
+.operation-grid summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.field,
+.check-field {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.field span,
+.inline-fieldset legend,
+.form-section legend,
+.permission-grid legend {
+    color: var(--neutral-foreground-hint);
+    font-size: 12px;
+}
+
+.field-wide,
+.form-section,
+.permission-grid {
+    grid-column: 1 / -1;
+}
+
+.text-input {
+    width: 100%;
+    min-height: 34px;
+    border: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-rest);
+    border-radius: 4px;
+    background: var(--neutral-fill-input-rest);
+    color: var(--neutral-foreground-rest);
+    padding: 6px 8px;
+    font: inherit;
+}
+
+.textarea-input {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.check-field {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+}
+
+.inline-fieldset,
+.form-section,
+.permission-grid {
+    border: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.inline-fieldset {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+}
+
+.form-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.permission-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 12px;
+}
+
+.operation-result {
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
+}
+
+.operation-result.success {
+    border-color: var(--success);
+}
+
+.operation-result.error {
+    border-color: var(--error);
+}
+
+.operation-result p {
+    margin: 4px 0 0;
+}
+
+pre {
+    max-width: 100%;
+    overflow: auto;
+    background: var(--neutral-layer-2);
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.table-wrap {
+    max-width: 100%;
+    overflow: auto;
+    margin-top: 14px;
+}
+
+.link-button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--accent-foreground-rest);
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -107,6 +272,17 @@ body {
 }
 
 @media (max-width: 720px) {
+    .playground-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .playground-nav {
+        border-right: 0;
+        border-bottom: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
+        overflow-x: auto;
+    }
+
     .content {
         padding: 16px;
     }
@@ -121,6 +297,13 @@ body {
 
     .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid,
+    .form-section,
+    .inline-fieldset,
+    .permission-grid {
+        grid-template-columns: 1fr;
     }
 }
 

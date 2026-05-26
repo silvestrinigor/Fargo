@@ -1,0 +1,127 @@
+﻿@using Microsoft.AspNetCore.WebUtilities
+@inject PlaygroundAuthSession Session
+@inject NavigationManager NavigationManager
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+@if (!isReady)
+{
+    <section class="playground-panel" data-testid="playground-auth-loading">
+        <FluentProgressRing />
+        <div>
+            <h1>Preparing authenticated playground</h1>
+            <p>Checking the browser test session.</p>
+        </div>
+    </section>
+}
+else if (!string.IsNullOrWhiteSpace(RedirectAuthenticatedTo))
+{
+    <section class="playground-panel" data-testid="playground-auth-redirect">
+        <FluentProgressRing />
+        <div>
+            <h1>Opening playground</h1>
+            <p>Loading the selected workspace.</p>
+        </div>
+    </section>
+}
+else
+{
+    <section class="playground-shell">
+        <div class="playground-title">
+            <div>
+                <h1>@Title</h1>
+                <p>@Description</p>
+            </div>
+            <div class="auth-ready" data-testid="playground-auth-ready" data-auth-storage="localStorage" data-auth-storage-key="@PlaygroundAuthSession.AuthStorageKey">
+                <FluentBadge Appearance="Appearance.Neutral">Authenticated</FluentBadge>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span>Expires</span>
+                <strong data-testid="playground-auth-expires">@Session.CurrentAuth!.ExpiresAt.LocalDateTime</strong>
+            </div>
+            <div class="summary-item">
+                <span>Admin</span>
+                <strong data-testid="playground-auth-admin">@Session.CurrentAuth!.IsAdmin</strong>
+            </div>
+            <div class="summary-item">
+                <span>Permissions</span>
+                <strong data-testid="playground-auth-permissions">@Session.CurrentAuth!.PermissionActions.Count</strong>
+            </div>
+            <div class="summary-item">
+                <span>Partitions</span>
+                <strong data-testid="playground-auth-partitions">@Session.CurrentAuth!.PartitionAccesses.Count</strong>
+            </div>
+        </div>
+
+        @ChildContent
+    </section>
+}
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Authenticated Playground";
+
+    [Parameter]
+    public string Description { get; set; } = "This browser has a Fargo API auth result ready for tests.";
+
+    [Parameter]
+    public string? RedirectAuthenticatedTo { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool isReady;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var auth = await Session.LoadAsync();
+        if (auth is null || !Session.IsAuthenticated)
+        {
+            await RedirectToIdentityAsync();
+            return;
+        }
+
+        isReady = true;
+        await InvokeAsync(StateHasChanged);
+
+        if (!string.IsNullOrWhiteSpace(RedirectAuthenticatedTo))
+        {
+            NavigationManager.NavigateTo(RedirectAuthenticatedTo, forceLoad: true);
+        }
+    }
+
+    private async Task RedirectToIdentityAsync()
+    {
+        var state = Guid.NewGuid().ToString("N");
+        await Session.SetLoginStateAsync(state);
+
+        var identityBaseAddress = Configuration["FargoWebIdentity:BaseAddress"]
+            ?? "http://localhost:5098";
+        var loginUri = new Uri(new Uri(EnsureTrailingSlash(identityBaseAddress)), "login").ToString();
+        var returnTo = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var callbackUri = QueryHelpers.AddQueryString(
+            new Uri(new Uri(NavigationManager.BaseUri), "auth/callback").ToString(),
+            "returnTo",
+            string.IsNullOrWhiteSpace(returnTo) ? "articles" : returnTo);
+
+        var redirectUri = QueryHelpers.AddQueryString(
+            loginUri,
+            new Dictionary<string, string?>
+            {
+                ["returnUrl"] = callbackUri,
+                ["state"] = state
+            });
+
+        NavigationManager.NavigateTo(redirectUri, forceLoad: true);
+    }
+
+    private static string EnsureTrailingSlash(string value)
+        => value.EndsWith('/') ? value : $"{value}/";
+}

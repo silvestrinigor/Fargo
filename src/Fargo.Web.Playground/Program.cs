@@ -14,12 +14,20 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 builder.Services.AddScoped<PlaygroundAuthSession>();
+builder.Services.AddScoped<PlaygroundApiClientFactory>();
 builder.Services.AddFargoHttpClient(options =>
 {
     var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
         ?? "http://localhost:5534";
 
     options.BaseAddress = new Uri(baseAddress);
+});
+builder.Services.AddHttpClient(PlaygroundApiClientFactory.HttpClientName, httpClient =>
+{
+    var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
+        ?? "http://localhost:5534";
+
+    httpClient.BaseAddress = new Uri(baseAddress);
 });
 
 var app = builder.Build();
