@@ -65,12 +65,6 @@ body {
     margin-bottom: 22px;
 }
 
-.auth-ready {
-    display: flex;
-    min-width: 132px;
-    justify-content: flex-end;
-}
-
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -289,10 +283,6 @@ pre {
 
     .playground-title {
         flex-direction: column;
-    }
-
-    .auth-ready {
-        justify-content: flex-start;
     }
 
     .summary-grid {

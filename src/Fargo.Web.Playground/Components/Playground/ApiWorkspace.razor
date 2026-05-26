@@ -255,10 +255,10 @@
                     @if (Session.CurrentAuth is not null)
                     {
                         <div class="summary-grid">
-                            <div class="summary-item"><span>Expires</span><strong>@Session.CurrentAuth.ExpiresAt.LocalDateTime</strong></div>
-                            <div class="summary-item"><span>Admin</span><strong>@Session.CurrentAuth.IsAdmin</strong></div>
-                            <div class="summary-item"><span>Permissions</span><strong>@Session.CurrentAuth.PermissionActions.Count</strong></div>
-                            <div class="summary-item"><span>Partitions</span><strong>@Session.CurrentAuth.PartitionAccesses.Count</strong></div>
+                            <div class="summary-item"><span>Expires</span><strong data-testid="playground-auth-expires">@Session.CurrentAuth.ExpiresAt.LocalDateTime</strong></div>
+                            <div class="summary-item"><span>Admin</span><strong data-testid="playground-auth-admin">@Session.CurrentAuth.IsAdmin</strong></div>
+                            <div class="summary-item"><span>Permissions</span><strong data-testid="playground-auth-permissions">@Session.CurrentAuth.PermissionActions.Count</strong></div>
+                            <div class="summary-item"><span>Partitions</span><strong data-testid="playground-auth-partitions">@Session.CurrentAuth.PartitionAccesses.Count</strong></div>
                         </div>
                     }
                     <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="RefreshAuthAsync">Refresh token</FluentButton>
