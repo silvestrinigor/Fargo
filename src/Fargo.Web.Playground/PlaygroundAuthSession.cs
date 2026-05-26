@@ -1,3 +1,4 @@
+using Fargo.HttpClient;
 using Fargo.HttpContracts;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.JSInterop;
@@ -5,7 +6,9 @@ using System.Text.Json;
 
 namespace Fargo.Web.Playground;
 
-public sealed class PlaygroundAuthSession(IJSRuntime jsRuntime)
+public sealed class PlaygroundAuthSession(
+    IJSRuntime jsRuntime,
+    IFargoIdentityClient identityClient)
 {
     public const string AuthStorageKey = "fargo.playground.auth";
 
@@ -20,9 +23,7 @@ public sealed class PlaygroundAuthSession(IJSRuntime jsRuntime)
 
     public async ValueTask<AuthDto?> LoadAsync()
     {
-        var rawAuth = await jsRuntime.InvokeAsync<string?>(
-            "sessionStorage.getItem",
-            AuthStorageKey);
+        var rawAuth = await GetPersistedAuthAsync();
 
         if (string.IsNullOrWhiteSpace(rawAuth))
         {
@@ -40,10 +41,15 @@ public sealed class PlaygroundAuthSession(IJSRuntime jsRuntime)
             return null;
         }
 
-        if (!IsAuthenticated)
+        if (CurrentAuth is null)
         {
             await ClearAsync();
             return null;
+        }
+
+        if (!IsAuthenticated)
+        {
+            return await TryRefreshAsync(CurrentAuth.RefreshToken);
         }
 
         return CurrentAuth;
@@ -55,15 +61,21 @@ public sealed class PlaygroundAuthSession(IJSRuntime jsRuntime)
         var rawAuth = JsonSerializer.Serialize(auth, JsonOptions);
 
         await jsRuntime.InvokeVoidAsync(
-            "sessionStorage.setItem",
+            "localStorage.setItem",
             AuthStorageKey,
             rawAuth);
+        await jsRuntime.InvokeVoidAsync(
+            "sessionStorage.removeItem",
+            AuthStorageKey);
     }
 
     public async ValueTask ClearAsync()
     {
         CurrentAuth = null;
 
+        await jsRuntime.InvokeVoidAsync(
+            "localStorage.removeItem",
+            AuthStorageKey);
         await jsRuntime.InvokeVoidAsync(
             "sessionStorage.removeItem",
             AuthStorageKey);
@@ -107,6 +119,59 @@ public sealed class PlaygroundAuthSession(IJSRuntime jsRuntime)
         {
             auth = null;
             return false;
+        }
+    }
+
+    private async ValueTask<string?> GetPersistedAuthAsync()
+    {
+        var rawAuth = await jsRuntime.InvokeAsync<string?>(
+            "localStorage.getItem",
+            AuthStorageKey);
+
+        if (!string.IsNullOrWhiteSpace(rawAuth))
+        {
+            return rawAuth;
+        }
+
+        var legacyRawAuth = await jsRuntime.InvokeAsync<string?>(
+            "sessionStorage.getItem",
+            AuthStorageKey);
+
+        if (!string.IsNullOrWhiteSpace(legacyRawAuth))
+        {
+            await jsRuntime.InvokeVoidAsync(
+                "localStorage.setItem",
+                AuthStorageKey,
+                legacyRawAuth);
+            await jsRuntime.InvokeVoidAsync(
+                "sessionStorage.removeItem",
+                AuthStorageKey);
+        }
+
+        return legacyRawAuth;
+    }
+
+    private async ValueTask<AuthDto?> TryRefreshAsync(string? refreshToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            await ClearAsync();
+            return null;
+        }
+
+        try
+        {
+            var refreshedAuth = await identityClient.RefreshAsync(
+                new RefreshRequest(refreshToken));
+
+            await StoreAsync(refreshedAuth);
+            return CurrentAuth;
+        }
+        catch (Exception exception) when (
+            exception is FargoHttpApiException or HttpRequestException or TaskCanceledException)
+        {
+            await ClearAsync();
+            return null;
         }
     }
 }

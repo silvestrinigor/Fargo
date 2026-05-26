@@ -23,9 +23,9 @@ else
         <div class="playground-title">
             <div>
                 <h1>Authenticated Playground</h1>
-                <p>The current browser tab has a Fargo API auth result ready for tests.</p>
+                <p>This browser has a Fargo API auth result ready for tests.</p>
             </div>
-            <div class="auth-ready" data-testid="playground-auth-ready" data-auth-storage-key="@PlaygroundAuthSession.AuthStorageKey">
+            <div class="auth-ready" data-testid="playground-auth-ready" data-auth-storage="localStorage" data-auth-storage-key="@PlaygroundAuthSession.AuthStorageKey">
                 <FluentBadge Appearance="Appearance.Neutral">Authenticated</FluentBadge>
             </div>
         </div>
@@ -50,7 +50,7 @@ else
         </div>
 
         <FluentButton Appearance="Appearance.Outline" @onclick="ClearSessionAsync">
-            Clear session
+            Clear saved auth
         </FluentButton>
     </section>
 }
