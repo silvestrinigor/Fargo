@@ -1,0 +1,131 @@
+@import '_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css';
+
+body {
+    --body-font: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-family: var(--body-font);
+    font-size: var(--type-ramp-base-font-size);
+    line-height: var(--type-ramp-base-line-height);
+    margin: 0;
+}
+
+.body-content {
+    min-height: calc(100dvh - 48px);
+    display: flex;
+}
+
+.content {
+    width: 100%;
+    padding: 24px;
+}
+
+.playground-panel,
+.playground-shell {
+    max-width: 920px;
+}
+
+.playground-panel {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-height: 240px;
+}
+
+.playground-panel h1,
+.playground-shell h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+.playground-panel p,
+.playground-shell p {
+    margin: 0;
+    color: var(--neutral-foreground-hint);
+}
+
+.playground-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.auth-ready {
+    display: flex;
+    min-width: 132px;
+    justify-content: flex-end;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0 0 22px;
+}
+
+.summary-item {
+    border: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
+    border-radius: 8px;
+    padding: 14px;
+    min-width: 0;
+    background: var(--neutral-layer-1);
+}
+
+.summary-item span,
+.summary-item strong {
+    display: block;
+}
+
+.summary-item span {
+    color: var(--neutral-foreground-hint);
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.summary-item strong {
+    overflow-wrap: anywhere;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+@media (max-width: 720px) {
+    .content {
+        padding: 16px;
+    }
+
+    .playground-title {
+        flex-direction: column;
+    }
+
+    .auth-ready {
+        justify-content: flex-start;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 460px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}

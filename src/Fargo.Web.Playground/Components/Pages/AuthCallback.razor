@@ -1,0 +1,59 @@
+﻿@page "/auth/callback"
+@rendermode InteractiveServer
+@inject PlaygroundAuthSession Session
+@inject NavigationManager NavigationManager
+
+<PageTitle>Completing Login</PageTitle>
+
+<section class="playground-panel" data-testid="playground-auth-callback">
+    <FluentProgressRing />
+    <div>
+        <h1>Completing login</h1>
+        <p>Saving the Fargo auth result for tests.</p>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "auth")]
+    public string? AuthPayload { get; set; }
+
+    [SupplyParameterFromQuery(Name = "state")]
+    public string? State { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        if (!await TryCompleteLoginAsync())
+        {
+            await Session.ClearAsync();
+        }
+
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+    private async Task<bool> TryCompleteLoginAsync()
+    {
+        var expectedState = await Session.GetLoginStateAsync();
+        await Session.ClearLoginStateAsync();
+
+        if (string.IsNullOrWhiteSpace(expectedState) ||
+            !string.Equals(expectedState, State, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!PlaygroundAuthSession.TryDecodeAuthPayload(AuthPayload, out var auth) ||
+            auth is null ||
+            auth.ExpiresAt <= DateTimeOffset.UtcNow)
+        {
+            return false;
+        }
+
+        await Session.StoreAsync(auth);
+        return true;
+    }
+}

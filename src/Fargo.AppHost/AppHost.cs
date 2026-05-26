@@ -39,11 +39,26 @@ builder
     .WithReference(httpApi)
     .WaitFor(httpApi);
 
-builder
+var identityFrontend = builder
     .AddProject<Projects.Fargo_Web_Identity>("identityfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(httpApi)
     .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
     .WaitFor(httpApi);
+
+if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
+{
+    var playgroundFrontend = builder
+        .AddProject<Projects.Fargo_Web_Playground>("playgroundfrontend")
+        .WithExternalHttpEndpoints()
+        .WithReference(httpApi)
+        .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
+        .WithEnvironment("FargoWebIdentity__BaseAddress", identityFrontend.GetEndpoint("http"))
+        .WaitFor(httpApi);
+
+    identityFrontend.WithEnvironment(
+        "FargoWebPlayground__AllowedReturnOrigin",
+        playgroundFrontend.GetEndpoint("http"));
+}
 
 builder.Build().Run();
