@@ -69,8 +69,9 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
+            .Where(item => item.Guid == entityGuid)
             .Select(ItemDtoMappings.Projection)
-            .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         return item;
     }

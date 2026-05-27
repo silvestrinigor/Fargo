@@ -46,8 +46,9 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
+            .Where(user => user.Guid == entityGuid)
             .Select(UserDtoMappings.Projection)
-            .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         return user;
     }

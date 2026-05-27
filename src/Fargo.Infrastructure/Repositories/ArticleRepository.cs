@@ -69,8 +69,9 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
+            .Where(article => article.Guid == entityGuid)
             .Select(ArticleDtoMappings.Projection)
-            .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         return article;
     }
