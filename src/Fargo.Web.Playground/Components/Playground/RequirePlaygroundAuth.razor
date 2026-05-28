@@ -29,7 +29,6 @@ else
         <div class="playground-title">
             <div>
                 <h1>@Title</h1>
-                <p>@Description</p>
             </div>
         </div>
 
@@ -40,9 +39,6 @@ else
 @code {
     [Parameter]
     public string Title { get; set; } = "Authenticated Playground";
-
-    [Parameter]
-    public string Description { get; set; } = "This browser has a Fargo API auth result ready for tests.";
 
     [Parameter]
     public string? RedirectAuthenticatedTo { get; set; }
