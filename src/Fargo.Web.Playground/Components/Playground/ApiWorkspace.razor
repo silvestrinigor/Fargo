@@ -1807,15 +1807,15 @@
     </div>;
 
     private RenderFragment ArticleTable(IReadOnlyCollection<ArticleDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="ArticleDto" Class="playground-grid" Items="@rows.AsQueryable()" GridTemplateColumns="minmax(180px, 1.35fr) minmax(160px, 1.1fr) 120px 96px 90px 124px" ResizableColumns="true">
+        <FluentDataGrid TGridItem="ArticleDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(article => article.Guid)" GridTemplateColumns="minmax(180px, 1.35fr) minmax(160px, 1.1fr) 120px 96px 90px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
             <TemplateColumn Title="Guid" Context="article">@GuidChip(article.Guid)</TemplateColumn>
             <PropertyColumn Title="Name" Property="@(article => article!.Name)" />
             <PropertyColumn Title="Type" Property="@(article => article!.ArticleType)" />
             <TemplateColumn Title="Color" Context="article">@ColorSwatch(article.Color)</TemplateColumn>
             <TemplateColumn Title="Active" Context="article">@ActiveBadge(article.IsActive)</TemplateColumn>
             <TemplateColumn Title="Actions" Context="article">
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => SelectArticle(article)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => LoadArticleIntoPatch(article)">Patch</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectArticle(article)">View</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadArticleIntoPatch(article)">Patch</FluentButton>
             </TemplateColumn>
         </FluentDataGrid>
     </div>;
@@ -1863,15 +1863,15 @@
     </section>;
 
     private RenderFragment ItemTable(IReadOnlyCollection<ItemDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="ItemDto" Class="playground-grid" Items="@rows.AsQueryable()" GridTemplateColumns="minmax(170px, 1.2fr) minmax(170px, 1.2fr) 170px minmax(170px, 1fr) 90px 124px" ResizableColumns="true">
+        <FluentDataGrid TGridItem="ItemDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(item => item.Guid)" GridTemplateColumns="minmax(170px, 1.2fr) minmax(170px, 1.2fr) 170px minmax(170px, 1fr) 90px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
             <TemplateColumn Title="Guid" Context="item">@GuidChip(item.Guid)</TemplateColumn>
             <TemplateColumn Title="Article" Context="item">@GuidChip(item.ArticleGuid)</TemplateColumn>
             <TemplateColumn Title="Production" Context="item">@DisplayValue(item.ProductionDate?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))</TemplateColumn>
             <TemplateColumn Title="Container" Context="item">@GuidChip(item.ParentContainerGuid)</TemplateColumn>
             <TemplateColumn Title="Active" Context="item">@ActiveBadge(item.IsActive)</TemplateColumn>
             <TemplateColumn Title="Actions" Context="item">
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => SelectItem(item)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => LoadItemIntoUpdate(item)">Update</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectItem(item)">View</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadItemIntoUpdate(item)">Update</FluentButton>
             </TemplateColumn>
         </FluentDataGrid>
     </div>;
@@ -1891,7 +1891,7 @@
     </section>;
 
     private RenderFragment UserTable(IReadOnlyCollection<UserDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="UserDto" Class="playground-grid" Items="@rows.AsQueryable()" GridTemplateColumns="minmax(170px, 1.15fr) 160px minmax(150px, 1fr) 90px 100px 100px 124px" ResizableColumns="true">
+        <FluentDataGrid TGridItem="UserDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(user => user.Guid)" GridTemplateColumns="minmax(170px, 1.15fr) 160px minmax(150px, 1fr) 90px 100px 100px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
             <TemplateColumn Title="Guid" Context="user">@GuidChip(user.Guid)</TemplateColumn>
             <PropertyColumn Title="Nameid" Property="@(user => user!.Nameid)" />
             <TemplateColumn Title="Name" Context="user">@FullName(user)</TemplateColumn>
@@ -1899,8 +1899,8 @@
             <PropertyColumn Title="Permissions" Property="@(user => user!.Permissions.Count)" />
             <PropertyColumn Title="Partitions" Property="@(user => user!.Partitions.Count)" />
             <TemplateColumn Title="Actions" Context="user">
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => SelectUser(user)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => LoadUserIntoUpdate(user)">Update</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectUser(user)">View</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadUserIntoUpdate(user)">Update</FluentButton>
             </TemplateColumn>
         </FluentDataGrid>
     </div>;
@@ -1924,15 +1924,15 @@
     </section>;
 
     private RenderFragment UserGroupTable(IReadOnlyCollection<UserGroupDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="UserGroupDto" Class="playground-grid" Items="@rows.AsQueryable()" GridTemplateColumns="minmax(170px, 1.2fr) 180px 90px 100px 100px 124px" ResizableColumns="true">
+        <FluentDataGrid TGridItem="UserGroupDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(userGroup => userGroup.Guid)" GridTemplateColumns="minmax(170px, 1.2fr) 180px 90px 100px 100px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
             <TemplateColumn Title="Guid" Context="userGroup">@GuidChip(userGroup.Guid)</TemplateColumn>
             <PropertyColumn Title="Nameid" Property="@(userGroup => userGroup!.Nameid)" />
             <TemplateColumn Title="Active" Context="userGroup">@ActiveBadge(userGroup.IsActive)</TemplateColumn>
             <PropertyColumn Title="Permissions" Property="@(userGroup => userGroup!.Permissions.Count)" />
             <PropertyColumn Title="Partitions" Property="@(userGroup => userGroup!.Partitions.Count)" />
             <TemplateColumn Title="Actions" Context="userGroup">
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => SelectUserGroup(userGroup)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => LoadUserGroupIntoUpdate(userGroup)">Update</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectUserGroup(userGroup)">View</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadUserGroupIntoUpdate(userGroup)">Update</FluentButton>
             </TemplateColumn>
         </FluentDataGrid>
     </div>;
@@ -1951,15 +1951,15 @@
     </section>;
 
     private RenderFragment PartitionTable(IReadOnlyCollection<PartitionDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="PartitionDto" Class="playground-grid" Items="@rows.AsQueryable()" GridTemplateColumns="minmax(170px, 1.2fr) 180px minmax(170px, 1fr) 90px 110px 124px" ResizableColumns="true">
+        <FluentDataGrid TGridItem="PartitionDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(partition => partition.Guid)" GridTemplateColumns="minmax(170px, 1.2fr) 180px minmax(170px, 1fr) 90px 110px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
             <TemplateColumn Title="Guid" Context="partition">@GuidChip(partition.Guid)</TemplateColumn>
             <PropertyColumn Title="Name" Property="@(partition => partition!.Name)" />
             <TemplateColumn Title="Parent" Context="partition">@GuidChip(partition.ParentPartitionGuid)</TemplateColumn>
             <TemplateColumn Title="Active" Context="partition">@ActiveBadge(partition.IsActive)</TemplateColumn>
             <PropertyColumn Title="Modified" Property="@(partition => partition!.ModificationTypes)" />
             <TemplateColumn Title="Actions" Context="partition">
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => SelectPartition(partition)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Outline" @onclick="() => LoadPartitionIntoUpdate(partition)">Update</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectPartition(partition)">View</FluentButton>
+                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadPartitionIntoUpdate(partition)">Update</FluentButton>
             </TemplateColumn>
         </FluentDataGrid>
     </div>;

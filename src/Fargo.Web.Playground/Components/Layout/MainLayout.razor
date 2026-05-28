@@ -2,56 +2,32 @@
 
 <FluentLayout>
     <FluentHeader>
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center" Width="100%">
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween"
+                     VerticalAlignment="VerticalAlignment.Center" Width="100%">
             <span>Fargo Playground</span>
-            <FluentBadge Appearance="Appearance.Neutral">Development</FluentBadge>
         </FluentStack>
     </FluentHeader>
     <div class="playground-layout">
         <nav class="playground-nav" aria-label="Playground resources">
             <FluentAppBar Orientation="Orientation.Vertical" PopoverShowSearch="false">
-                <FluentAppBarItem
-                    Href="/articles"
-                    Match="NavLinkMatch.Prefix"
-                    Text="Articles"
-                    Tooltip="Articles"
-                    IconRest="@(new Icons.Regular.Size20.DocumentBulletList())"
-                    IconActive="@(new Icons.Filled.Size20.DocumentBulletList())" />
-                <FluentAppBarItem
-                    Href="/items"
-                    Match="NavLinkMatch.Prefix"
-                    Text="Items"
-                    Tooltip="Items"
-                    IconRest="@(new Icons.Regular.Size20.BoxMultiple())"
-                    IconActive="@(new Icons.Filled.Size20.BoxMultiple())" />
-                <FluentAppBarItem
-                    Href="/users"
-                    Match="NavLinkMatch.Prefix"
-                    Text="Users"
-                    Tooltip="Users"
-                    IconRest="@(new Icons.Regular.Size20.PeopleTeam())"
-                    IconActive="@(new Icons.Filled.Size20.PeopleTeam())" />
-                <FluentAppBarItem
-                    Href="/user-groups"
-                    Match="NavLinkMatch.Prefix"
-                    Text="Groups"
-                    Tooltip="User Groups"
-                    IconRest="@(new Icons.Regular.Size20.Organization())"
-                    IconActive="@(new Icons.Filled.Size20.Organization())" />
-                <FluentAppBarItem
-                    Href="/partitions"
-                    Match="NavLinkMatch.Prefix"
-                    Text="Partitions"
-                    Tooltip="Partitions"
-                    IconRest="@(new Icons.Regular.Size20.Storage())"
-                    IconActive="@(new Icons.Filled.Size20.Storage())" />
-                <FluentAppBarItem
-                    Href="/account"
-                    Match="NavLinkMatch.Prefix"
-                    Text="Account"
-                    Tooltip="Account"
-                    IconRest="@(new Icons.Regular.Size20.PersonSettings())"
-                    IconActive="@(new Icons.Filled.Size20.PersonSettings())" />
+                <FluentAppBarItem Href="/articles" Match="NavLinkMatch.Prefix" Text="Articles" Tooltip="Articles"
+                                  IconRest="@(new Icons.Regular.Size20.DocumentBulletList())"
+                                  IconActive="@(new Icons.Filled.Size20.DocumentBulletList())" />
+                <FluentAppBarItem Href="/items" Match="NavLinkMatch.Prefix" Text="Items" Tooltip="Items"
+                                  IconRest="@(new Icons.Regular.Size20.BoxMultiple())"
+                                  IconActive="@(new Icons.Filled.Size20.BoxMultiple())" />
+                <FluentAppBarItem Href="/users" Match="NavLinkMatch.Prefix" Text="Users" Tooltip="Users"
+                                  IconRest="@(new Icons.Regular.Size20.PeopleTeam())"
+                                  IconActive="@(new Icons.Filled.Size20.PeopleTeam())" />
+                <FluentAppBarItem Href="/user-groups" Match="NavLinkMatch.Prefix" Text="Groups" Tooltip="User Groups"
+                                  IconRest="@(new Icons.Regular.Size20.Organization())"
+                                  IconActive="@(new Icons.Filled.Size20.Organization())" />
+                <FluentAppBarItem Href="/partitions" Match="NavLinkMatch.Prefix" Text="Partitions" Tooltip="Partitions"
+                                  IconRest="@(new Icons.Regular.Size20.Storage())"
+                                  IconActive="@(new Icons.Filled.Size20.Storage())" />
+                <FluentAppBarItem Href="/account" Match="NavLinkMatch.Prefix" Text="Account" Tooltip="Account"
+                                  IconRest="@(new Icons.Regular.Size20.PersonSettings())"
+                                  IconActive="@(new Icons.Filled.Size20.PersonSettings())" />
             </FluentAppBar>
         </nav>
         <FluentBodyContent Class="body-content">

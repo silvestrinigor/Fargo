@@ -11,7 +11,7 @@ body {
 .playground-layout {
     min-height: calc(100dvh - 50px);
     display: grid;
-    grid-template-columns: 86px minmax(0, 1fr);
+    grid-template-columns: 68px minmax(0, 1fr);
 }
 
 .playground-nav {
@@ -318,24 +318,25 @@ pre {
 .table-wrap {
     max-width: 100%;
     overflow: auto;
-    margin-top: 14px;
+    margin-top: 10px;
 }
 
 .fluent-grid-wrap {
     border: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
-    border-radius: 8px;
+    border-radius: 6px;
     background: var(--neutral-layer-1);
     overflow: hidden;
 }
 
 .fluent-grid-wrap fluent-data-grid {
     width: 100%;
-    min-width: 760px;
+    min-width: 720px;
 }
 
 .playground-grid {
     width: 100%;
-    --fluent-data-grid-header-opacity: 0.72;
+    --fluent-data-grid-header-opacity: 0.64;
+    --fluent-data-grid-resize-handle-width: 1px;
 }
 
 .playground-grid th,
@@ -360,13 +361,18 @@ pre {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 4px 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--body-font-monospace, "Cascadia Mono", "Segoe UI Mono", monospace);
 }
 
 .playground-grid td .color-display {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
     white-space: nowrap;
 }
@@ -375,6 +381,10 @@ pre {
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playground-grid td:last-child {
     white-space: nowrap;
 }
 
