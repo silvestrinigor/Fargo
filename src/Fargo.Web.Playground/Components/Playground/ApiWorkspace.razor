@@ -287,13 +287,6 @@
                         @DetailValue("Trace", problem.TraceId)
                     </div>
                 }
-                @if (result.Payload is not null)
-                {
-                    <details class="debug-panel">
-                        <summary>Raw response</summary>
-                        <pre>@FormatPayload(result.Payload)</pre>
-                    </details>
-                }
             }
         </section>;
 
@@ -577,139 +570,147 @@
         </section>;
 
     private RenderFragment ResponseContent() => @<section class="response-data">
-            @if (result is { Payload: not null })
-            {
-                @PayloadContent(result.Payload)
-            }
-            else if (result is not null)
-            {
-                @EmptyResponse("No response body")
-            }
-            else
-            {
-                @ResourceFallbackContent()
-            }
-        </section>;
-
-    private RenderFragment ResourceFallbackContent() => @<div>
             @switch (Resource)
             {
                 case PlaygroundResource.Articles:
-                    @if (selectedArticle is not null)
-                    {
-                        @ArticleDetail(selectedArticle)
-                    }
-                    else if (articleRows.Count > 0)
-                    {
-                        @ArticleTable(articleRows)
-                    }
-                    else
-                    {
-                        @EmptyResponse("No article response yet")
-                    }
+                    @ArticlesResponse()
                     break;
                 case PlaygroundResource.Items:
-                    @if (selectedItem is not null)
-                    {
-                        @ItemDetail(selectedItem)
-                    }
-                    else if (itemRows.Count > 0)
-                    {
-                        @ItemTable(itemRows)
-                    }
-                    else
-                    {
-                        @EmptyResponse("No item response yet")
-                    }
+                    @ItemsResponse()
                     break;
                 case PlaygroundResource.Users:
-                    @if (selectedUser is not null)
-                    {
-                        @UserDetail(selectedUser)
-                    }
-                    else if (userRows.Count > 0)
-                    {
-                        @UserTable(userRows)
-                    }
-                    else
-                    {
-                        @EmptyResponse("No user response yet")
-                    }
+                    @UsersResponse()
                     break;
                 case PlaygroundResource.UserGroups:
-                    @if (selectedUserGroup is not null)
-                    {
-                        @UserGroupDetail(selectedUserGroup)
-                    }
-                    else if (userGroupRows.Count > 0)
-                    {
-                        @UserGroupTable(userGroupRows)
-                    }
-                    else
-                    {
-                        @EmptyResponse("No user group response yet")
-                    }
+                    @UserGroupsResponse()
                     break;
                 case PlaygroundResource.Partitions:
-                    @if (selectedPartition is not null)
-                    {
-                        @PartitionDetail(selectedPartition)
-                    }
-                    else if (partitionRows.Count > 0)
-                    {
-                        @PartitionTable(partitionRows)
-                    }
-                    else
-                    {
-                        @EmptyResponse("No partition response yet")
-                    }
+                    @PartitionsResponse()
                     break;
                 case PlaygroundResource.Account:
-                    @if (Session.CurrentAuth is not null)
-                    {
-                        @AuthDetail(Session.CurrentAuth)
-                    }
-                    else
-                    {
-                        @EmptyResponse("No account response yet")
-                    }
+                    @AccountResponse()
                     break;
+            }
+        </section>;
+
+    private RenderFragment ArticlesResponse() => @<div class="@ResponseLayoutClass(HasArticleGrid, CurrentArticleDetail is not null)">
+            @if (HasArticleGrid && CurrentArticleDetail is not null)
+            {
+                @SplitResponse(ResponseMain(ArticleTable(articleRows)), ArticleDetailsPane(CurrentArticleDetail))
+            }
+            else if (HasArticleGrid)
+            {
+                @ResponseMain(ArticleTable(articleRows))
+            }
+            else if (CurrentArticleDetail is null)
+            {
+                @FallbackResponse("No article response yet")
+            }
+
+            @if (!HasArticleGrid && CurrentArticleDetail is not null)
+            {
+                @ArticleDetailsPane(CurrentArticleDetail)
+            }
+        </div>;
+
+    private RenderFragment ItemsResponse() => @<div class="@ResponseLayoutClass(HasItemGrid, CurrentItemDetail is not null)">
+            @if (HasItemGrid && CurrentItemDetail is not null)
+            {
+                @SplitResponse(ResponseMain(ItemTable(itemRows)), ItemDetailsPane(CurrentItemDetail))
+            }
+            else if (HasItemGrid)
+            {
+                @ResponseMain(ItemTable(itemRows))
+            }
+            else if (CurrentItemDetail is null)
+            {
+                @FallbackResponse("No item response yet")
+            }
+
+            @if (!HasItemGrid && CurrentItemDetail is not null)
+            {
+                @ItemDetailsPane(CurrentItemDetail)
+            }
+        </div>;
+
+    private RenderFragment UsersResponse() => @<div class="@ResponseLayoutClass(HasUserGrid, CurrentUserDetail is not null)">
+            @if (HasUserGrid && CurrentUserDetail is not null)
+            {
+                @SplitResponse(ResponseMain(UserTable(userRows)), UserDetailsPane(CurrentUserDetail))
+            }
+            else if (HasUserGrid)
+            {
+                @ResponseMain(UserTable(userRows))
+            }
+            else if (CurrentUserDetail is null)
+            {
+                @FallbackResponse("No user response yet")
+            }
+
+            @if (!HasUserGrid && CurrentUserDetail is not null)
+            {
+                @UserDetailsPane(CurrentUserDetail)
+            }
+        </div>;
+
+    private RenderFragment UserGroupsResponse() => @<div class="@ResponseLayoutClass(HasUserGroupGrid, CurrentUserGroupDetail is not null)">
+            @if (HasUserGroupGrid && CurrentUserGroupDetail is not null)
+            {
+                @SplitResponse(ResponseMain(UserGroupTable(userGroupRows)), UserGroupDetailsPane(CurrentUserGroupDetail))
+            }
+            else if (HasUserGroupGrid)
+            {
+                @ResponseMain(UserGroupTable(userGroupRows))
+            }
+            else if (CurrentUserGroupDetail is null)
+            {
+                @FallbackResponse("No user group response yet")
+            }
+
+            @if (!HasUserGroupGrid && CurrentUserGroupDetail is not null)
+            {
+                @UserGroupDetailsPane(CurrentUserGroupDetail)
+            }
+        </div>;
+
+    private RenderFragment PartitionsResponse() => @<div class="@ResponseLayoutClass(HasPartitionGrid, CurrentPartitionDetail is not null)">
+            @if (HasPartitionGrid && CurrentPartitionDetail is not null)
+            {
+                @SplitResponse(ResponseMain(PartitionTable(partitionRows)), PartitionDetailsPane(CurrentPartitionDetail))
+            }
+            else if (HasPartitionGrid)
+            {
+                @ResponseMain(PartitionTable(partitionRows))
+            }
+            else if (CurrentPartitionDetail is null)
+            {
+                @FallbackResponse("No partition response yet")
+            }
+
+            @if (!HasPartitionGrid && CurrentPartitionDetail is not null)
+            {
+                @PartitionDetailsPane(CurrentPartitionDetail)
+            }
+        </div>;
+
+    private RenderFragment AccountResponse() => @<div>
+            @if (result?.Payload is AuthDto auth)
+            {
+                @AuthDetail(auth)
+            }
+            else if (Session.CurrentAuth is not null)
+            {
+                @AuthDetail(Session.CurrentAuth)
+            }
+            else
+            {
+                @FallbackResponse("No account response yet")
             }
         </div>;
 
     private RenderFragment PayloadContent(object payload) => @<div>
             @switch (payload)
             {
-                case IReadOnlyCollection<ArticleDto> articles:
-                    @ArticleTable(articles)
-                    break;
-                case ArticleDto article:
-                    @ArticleDetail(article)
-                    break;
-                case IReadOnlyCollection<ItemDto> items:
-                    @ItemTable(items)
-                    break;
-                case ItemDto item:
-                    @ItemDetail(item)
-                    break;
-                case IReadOnlyCollection<UserDto> users:
-                    @UserTable(users)
-                    break;
-                case UserDto user:
-                    @UserDetail(user)
-                    break;
-                case IReadOnlyCollection<UserGroupDto> userGroups:
-                    @UserGroupTable(userGroups)
-                    break;
-                case UserGroupDto userGroup:
-                    @UserGroupDetail(userGroup)
-                    break;
-                case IReadOnlyCollection<PartitionDto> partitions:
-                    @PartitionTable(partitions)
-                    break;
-                case PartitionDto partition:
-                    @PartitionDetail(partition)
-                    break;
                 case AuthDto auth:
                     @AuthDetail(auth)
                     break;
@@ -724,6 +725,60 @@
                     break;
             }
         </div>;
+
+    private RenderFragment FallbackResponse(string emptyMessage) => @<div>
+            @if (result?.Payload is not null)
+            {
+                @PayloadContent(result.Payload)
+            }
+            else if (result is not null)
+            {
+                @EmptyResponse("No response body")
+            }
+            else
+            {
+                @EmptyResponse(emptyMessage)
+            }
+        </div>;
+
+    private bool HasArticleGrid => articleRows.Count > 0 || result?.Payload is IReadOnlyCollection<ArticleDto>;
+
+    private ArticleDto? CurrentArticleDetail => selectedArticle ?? result?.Payload as ArticleDto;
+
+    private bool HasItemGrid => itemRows.Count > 0 || result?.Payload is IReadOnlyCollection<ItemDto>;
+
+    private ItemDto? CurrentItemDetail => selectedItem ?? result?.Payload as ItemDto;
+
+    private bool HasUserGrid => userRows.Count > 0 || result?.Payload is IReadOnlyCollection<UserDto>;
+
+    private UserDto? CurrentUserDetail => selectedUser ?? result?.Payload as UserDto;
+
+    private bool HasUserGroupGrid => userGroupRows.Count > 0 || result?.Payload is IReadOnlyCollection<UserGroupDto>;
+
+    private UserGroupDto? CurrentUserGroupDetail => selectedUserGroup ?? result?.Payload as UserGroupDto;
+
+    private bool HasPartitionGrid => partitionRows.Count > 0 || result?.Payload is IReadOnlyCollection<PartitionDto>;
+
+    private PartitionDto? CurrentPartitionDetail => selectedPartition ?? result?.Payload as PartitionDto;
+
+    private static string ResponseLayoutClass(bool hasGrid, bool hasDetails)
+        => $"response-layout {(hasGrid ? "has-grid" : "single-detail")} {(hasDetails ? "has-details" : string.Empty)}";
+
+    private RenderFragment ResponseMain(RenderFragment content) => @<section class="response-main">
+            @content
+        </section>;
+
+    private RenderFragment SplitResponse(RenderFragment main, RenderFragment details) => @<FluentSplitter
+            Class="response-splitter"
+            Orientation="Orientation.Horizontal"
+            Panel1="@main"
+            Panel2="@details"
+            Panel1Size="1fr"
+            Panel2Size="min(58vw, 760px)"
+            Panel1MinSize="220px"
+            Panel2MinSize="360px"
+            BarSize="6"
+            BarHandle="false" />;
 
     private RenderFragment EmptyResponse(string message) => @<div class="empty-response">
             <strong>@message</strong>
@@ -1806,22 +1861,58 @@
         @if (userGroupUpdate.IncludePermissions) { @PermissionFields(userGroupUpdate.Permissions) }
     </div>;
 
+    private RenderFragment DetailsPane(string resourceName, string? title, RenderFragment content, RenderFragment? actions) => @<aside class="details-pane">
+        <header class="details-pane-header">
+            <div class="details-pane-title">
+                <span>@resourceName</span>
+                <h3>@DisplayValue(title)</h3>
+            </div>
+            <div class="details-pane-actions">
+                @if (actions is not null)
+                {
+                    @actions
+                }
+                <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Dismiss())" Title="Close details" @onclick="CloseDetailsPane" />
+            </div>
+        </header>
+        <div class="details-pane-body">
+            @content
+        </div>
+    </aside>;
+
+    private RenderFragment ArticleDetailsPane(ArticleDto article)
+        => DetailsPane("Article", article.Name, ArticleDetail(article), ArticleDetailActions(article));
+
+    private RenderFragment ItemDetailsPane(ItemDto item)
+        => DetailsPane("Item", item.Guid.ToString("D"), ItemDetail(item), ItemDetailActions(item));
+
+    private RenderFragment UserDetailsPane(UserDto user)
+        => DetailsPane("User", user.Nameid, UserDetail(user), UserDetailActions(user));
+
+    private RenderFragment UserGroupDetailsPane(UserGroupDto userGroup)
+        => DetailsPane("User group", userGroup.Nameid, UserGroupDetail(userGroup), UserGroupDetailActions(userGroup));
+
+    private RenderFragment PartitionDetailsPane(PartitionDto partition)
+        => DetailsPane("Partition", partition.Name, PartitionDetail(partition), PartitionDetailActions(partition));
+
+    private RenderFragment ArticleDetailActions(ArticleDto article) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadArticleIntoPatch(article)">Patch</FluentButton>;
+
+    private RenderFragment ItemDetailActions(ItemDto item) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadItemIntoUpdate(item)">Update</FluentButton>;
+
+    private RenderFragment UserDetailActions(UserDto user) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadUserIntoUpdate(user)">Update</FluentButton>;
+
+    private RenderFragment UserGroupDetailActions(UserGroupDto userGroup) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadUserGroupIntoUpdate(userGroup)">Update</FluentButton>;
+
+    private RenderFragment PartitionDetailActions(PartitionDto partition) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadPartitionIntoUpdate(partition)">Update</FluentButton>;
+
     private RenderFragment ArticleTable(IReadOnlyCollection<ArticleDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="ArticleDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(article => article.Guid)" GridTemplateColumns="minmax(180px, 1.35fr) minmax(160px, 1.1fr) 120px 96px 90px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
+        <FluentDataGrid TGridItem="ArticleDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(article => article.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(article => selectedArticle?.Guid == article.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectArticle(row.Item!))">
             <TemplateColumn Title="Guid" Context="article">@GuidChip(article.Guid)</TemplateColumn>
             <PropertyColumn Title="Name" Property="@(article => article!.Name)" />
-            <PropertyColumn Title="Type" Property="@(article => article!.ArticleType)" />
-            <TemplateColumn Title="Color" Context="article">@ColorSwatch(article.Color)</TemplateColumn>
-            <TemplateColumn Title="Active" Context="article">@ActiveBadge(article.IsActive)</TemplateColumn>
-            <TemplateColumn Title="Actions" Context="article">
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectArticle(article)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadArticleIntoPatch(article)">Patch</FluentButton>
-            </TemplateColumn>
         </FluentDataGrid>
     </div>;
 
     private RenderFragment ArticleDetail(ArticleDto article) => @<section class="detail-panel">
-        <h3>@article.Name</h3>
         <div class="detail-grid">
             @DetailValue("Guid", article.Guid.ToString("D"))
             @DetailValue("Type", article.ArticleType.ToString())
@@ -1863,21 +1954,13 @@
     </section>;
 
     private RenderFragment ItemTable(IReadOnlyCollection<ItemDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="ItemDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(item => item.Guid)" GridTemplateColumns="minmax(170px, 1.2fr) minmax(170px, 1.2fr) 170px minmax(170px, 1fr) 90px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
+        <FluentDataGrid TGridItem="ItemDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(item => item.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(item => selectedItem?.Guid == item.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectItem(row.Item!))">
             <TemplateColumn Title="Guid" Context="item">@GuidChip(item.Guid)</TemplateColumn>
-            <TemplateColumn Title="Article" Context="item">@GuidChip(item.ArticleGuid)</TemplateColumn>
-            <TemplateColumn Title="Production" Context="item">@DisplayValue(item.ProductionDate?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))</TemplateColumn>
-            <TemplateColumn Title="Container" Context="item">@GuidChip(item.ParentContainerGuid)</TemplateColumn>
-            <TemplateColumn Title="Active" Context="item">@ActiveBadge(item.IsActive)</TemplateColumn>
-            <TemplateColumn Title="Actions" Context="item">
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectItem(item)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadItemIntoUpdate(item)">Update</FluentButton>
-            </TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(item => ItemDisplayName(item!))" />
         </FluentDataGrid>
     </div>;
 
     private RenderFragment ItemDetail(ItemDto item) => @<section class="detail-panel">
-        <h3>Item</h3>
         <div class="detail-grid">
             @DetailValue("Guid", item.Guid.ToString("D"))
             @DetailValue("Article", item.ArticleGuid.ToString("D"))
@@ -1891,22 +1974,13 @@
     </section>;
 
     private RenderFragment UserTable(IReadOnlyCollection<UserDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="UserDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(user => user.Guid)" GridTemplateColumns="minmax(170px, 1.15fr) 160px minmax(150px, 1fr) 90px 100px 100px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
+        <FluentDataGrid TGridItem="UserDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(user => user.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(user => selectedUser?.Guid == user.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectUser(row.Item!))">
             <TemplateColumn Title="Guid" Context="user">@GuidChip(user.Guid)</TemplateColumn>
-            <PropertyColumn Title="Nameid" Property="@(user => user!.Nameid)" />
-            <TemplateColumn Title="Name" Context="user">@FullName(user)</TemplateColumn>
-            <TemplateColumn Title="Active" Context="user">@ActiveBadge(user.IsActive)</TemplateColumn>
-            <PropertyColumn Title="Permissions" Property="@(user => user!.Permissions.Count)" />
-            <PropertyColumn Title="Partitions" Property="@(user => user!.Partitions.Count)" />
-            <TemplateColumn Title="Actions" Context="user">
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectUser(user)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadUserIntoUpdate(user)">Update</FluentButton>
-            </TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(user => user!.Nameid)" />
         </FluentDataGrid>
     </div>;
 
     private RenderFragment UserDetail(UserDto user) => @<section class="detail-panel">
-        <h3>@user.Nameid</h3>
         <div class="detail-grid">
             @DetailValue("Guid", user.Guid.ToString("D"))
             @DetailValue("First name", user.FirstName)
@@ -1924,21 +1998,13 @@
     </section>;
 
     private RenderFragment UserGroupTable(IReadOnlyCollection<UserGroupDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="UserGroupDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(userGroup => userGroup.Guid)" GridTemplateColumns="minmax(170px, 1.2fr) 180px 90px 100px 100px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
+        <FluentDataGrid TGridItem="UserGroupDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(userGroup => userGroup.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(userGroup => selectedUserGroup?.Guid == userGroup.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectUserGroup(row.Item!))">
             <TemplateColumn Title="Guid" Context="userGroup">@GuidChip(userGroup.Guid)</TemplateColumn>
-            <PropertyColumn Title="Nameid" Property="@(userGroup => userGroup!.Nameid)" />
-            <TemplateColumn Title="Active" Context="userGroup">@ActiveBadge(userGroup.IsActive)</TemplateColumn>
-            <PropertyColumn Title="Permissions" Property="@(userGroup => userGroup!.Permissions.Count)" />
-            <PropertyColumn Title="Partitions" Property="@(userGroup => userGroup!.Partitions.Count)" />
-            <TemplateColumn Title="Actions" Context="userGroup">
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectUserGroup(userGroup)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadUserGroupIntoUpdate(userGroup)">Update</FluentButton>
-            </TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(userGroup => userGroup!.Nameid)" />
         </FluentDataGrid>
     </div>;
 
     private RenderFragment UserGroupDetail(UserGroupDto userGroup) => @<section class="detail-panel">
-        <h3>@userGroup.Nameid</h3>
         <div class="detail-grid">
             @DetailValue("Guid", userGroup.Guid.ToString("D"))
             @DetailValue("Description", userGroup.Description)
@@ -1951,21 +2017,13 @@
     </section>;
 
     private RenderFragment PartitionTable(IReadOnlyCollection<PartitionDto> rows) => @<div class="table-wrap fluent-grid-wrap">
-        <FluentDataGrid TGridItem="PartitionDto" Class="playground-grid" Items="@rows.AsQueryable()" ItemKey="@(partition => partition.Guid)" GridTemplateColumns="minmax(170px, 1.2fr) 180px minmax(170px, 1fr) 90px 110px 124px" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Small">
+        <FluentDataGrid TGridItem="PartitionDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(partition => partition.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(partition => selectedPartition?.Guid == partition.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectPartition(row.Item!))">
             <TemplateColumn Title="Guid" Context="partition">@GuidChip(partition.Guid)</TemplateColumn>
             <PropertyColumn Title="Name" Property="@(partition => partition!.Name)" />
-            <TemplateColumn Title="Parent" Context="partition">@GuidChip(partition.ParentPartitionGuid)</TemplateColumn>
-            <TemplateColumn Title="Active" Context="partition">@ActiveBadge(partition.IsActive)</TemplateColumn>
-            <PropertyColumn Title="Modified" Property="@(partition => partition!.ModificationTypes)" />
-            <TemplateColumn Title="Actions" Context="partition">
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => SelectPartition(partition)">View</FluentButton>
-                <FluentButton Appearance="Appearance.Lightweight" @onclick="() => LoadPartitionIntoUpdate(partition)">Update</FluentButton>
-            </TemplateColumn>
         </FluentDataGrid>
     </div>;
 
     private RenderFragment PartitionDetail(PartitionDto partition) => @<section class="detail-panel">
-        <h3>@partition.Name</h3>
         <div class="detail-grid">
             @DetailValue("Guid", partition.Guid.ToString("D"))
             @DetailValue("Description", partition.Description)
@@ -1991,32 +2049,72 @@
     private void SelectArticle(ArticleDto article)
     {
         selectedArticle = article;
-        result = OperationResult.Success("Article selected", "Selected from the current response.", article);
     }
 
     private void SelectItem(ItemDto item)
     {
         selectedItem = item;
-        result = OperationResult.Success("Item selected", "Selected from the current response.", item);
     }
 
     private void SelectUser(UserDto user)
     {
         selectedUser = user;
-        result = OperationResult.Success("User selected", "Selected from the current response.", user);
     }
 
     private void SelectUserGroup(UserGroupDto userGroup)
     {
         selectedUserGroup = userGroup;
-        result = OperationResult.Success("User group selected", "Selected from the current response.", userGroup);
     }
 
     private void SelectPartition(PartitionDto partition)
     {
         selectedPartition = partition;
-        result = OperationResult.Success("Partition selected", "Selected from the current response.", partition);
     }
+
+    private void CloseDetailsPane()
+    {
+        switch (Resource)
+        {
+            case PlaygroundResource.Articles:
+                selectedArticle = null;
+                if (!HasArticleGrid && result?.Payload is ArticleDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.Items:
+                selectedItem = null;
+                if (!HasItemGrid && result?.Payload is ItemDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.Users:
+                selectedUser = null;
+                if (!HasUserGrid && result?.Payload is UserDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.UserGroups:
+                selectedUserGroup = null;
+                if (!HasUserGroupGrid && result?.Payload is UserGroupDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.Partitions:
+                selectedPartition = null;
+                if (!HasPartitionGrid && result?.Payload is PartitionDto)
+                {
+                    result = null;
+                }
+                break;
+        }
+    }
+
+    private static string ItemDisplayName(ItemDto item)
+        => $"Article {item.ArticleGuid.ToString("D")[..8]}";
 
     private static string FullName(UserDto user)
     {
