@@ -28,6 +28,12 @@ html[data-theme="dark"] {
     scrollbar-color: var(--scrollbar-color) transparent;
 }
 
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     --body-font: "Segoe UI Variable", "Segoe UI", sans-serif;
     font-family: var(--body-font);
@@ -50,6 +56,8 @@ body {
 }
 
 .layout {
+    height: 100dvh;
+    overflow: hidden;
     background: var(--playground-background);
 }
 
@@ -75,9 +83,11 @@ body {
 }
 
 .playground-layout {
-    min-height: calc(100dvh - 50px);
+    height: calc(100dvh - 50px);
+    min-height: 0;
     display: grid;
     grid-template-columns: 68px minmax(0, 1fr);
+    overflow: hidden;
 }
 
 .playground-nav {
@@ -95,15 +105,21 @@ body {
 }
 
 .body-content {
-    min-height: calc(100dvh - 50px);
+    height: 100%;
+    min-height: 0;
     display: flex;
     min-width: 0;
+    overflow: hidden;
     background: var(--playground-background);
 }
 
 .content {
+    box-sizing: border-box;
     width: 100%;
+    height: 100%;
+    min-height: 0;
     min-width: 0;
+    overflow: hidden;
     padding: 24px;
 }
 
@@ -113,7 +129,12 @@ body {
 
 .playground-shell {
     width: 100%;
+    height: 100%;
+    min-height: 0;
     max-width: none;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 22px;
 }
 
 .playground-panel {
@@ -141,7 +162,7 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     gap: 18px;
-    margin-bottom: 22px;
+    margin-bottom: 0;
 }
 
 .summary-grid {
@@ -179,12 +200,17 @@ body {
 }
 
 .api-workspace {
-    margin-top: 22px;
+    min-height: 0;
+    display: grid;
+    margin-top: 0;
 }
 
 .resource-panel {
     display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
     gap: 16px;
+    height: 100%;
+    min-height: 0;
     min-width: 0;
 }
 
@@ -202,7 +228,10 @@ body {
 .response-data {
     display: grid;
     gap: 14px;
+    height: 100%;
+    min-height: 0;
     min-width: 0;
+    overflow: hidden;
 }
 
 fluent-dialog.action-dialog::part(control) {
@@ -417,12 +446,14 @@ pre {
 }
 
 .response-layout {
+    height: 100%;
     width: 100%;
+    min-height: 0;
     min-width: 0;
 }
 
 .response-layout.has-grid.has-details {
-    min-height: min(660px, calc(100dvh - 260px));
+    min-height: 0;
 }
 
 .response-layout.single-detail {
@@ -431,8 +462,8 @@ pre {
 
 .response-splitter {
     width: 100%;
-    height: min(720px, calc(100dvh - 236px));
-    min-height: 420px;
+    height: 100%;
+    min-height: 0;
 }
 
 .response-main {
@@ -444,7 +475,7 @@ pre {
 .details-pane {
     height: 100%;
     min-width: 0;
-    max-height: min(720px, calc(100dvh - 220px));
+    max-height: none;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     border-left: calc(var(--stroke-width) * 1px) solid var(--playground-border);
