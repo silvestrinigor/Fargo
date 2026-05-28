@@ -1,8 +1,14 @@
 ﻿@page "/items"
+@page "/items/{EntityGuid:guid}"
 @rendermode InteractiveServer
 
 <PageTitle>Items - Fargo Playground</PageTitle>
 
 <RequirePlaygroundAuth Title="Items">
-    <ApiWorkspace Resource="PlaygroundResource.Items" />
+    <ApiWorkspace Resource="PlaygroundResource.Items" EntityGuid="@EntityGuid" />
 </RequirePlaygroundAuth>
+
+@code {
+    [Parameter]
+    public Guid? EntityGuid { get; set; }
+}

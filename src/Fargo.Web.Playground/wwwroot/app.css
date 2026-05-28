@@ -120,7 +120,7 @@ body {
     min-height: 0;
     min-width: 0;
     overflow: hidden;
-    padding: 24px;
+    padding: 24px 24px 0;
 }
 
 .playground-panel {
@@ -821,7 +821,7 @@ pre {
     }
 
     .content {
-        padding: 16px;
+        padding: 16px 16px 0;
     }
 
     .playground-title {

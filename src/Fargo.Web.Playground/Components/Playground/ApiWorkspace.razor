@@ -17,8 +17,13 @@
     [Parameter]
     public PlaygroundResource Resource { get; set; } = PlaygroundResource.Articles;
 
+    [Parameter]
+    public Guid? EntityGuid { get; set; }
+
     private bool isBusy;
     private OperationResult? result;
+    private PlaygroundResource? loadedListResource;
+    private Guid? loadedEntityGuid;
     private string? selectedArticleOperation;
     private string? selectedItemOperation;
     private string? selectedUserOperation;
