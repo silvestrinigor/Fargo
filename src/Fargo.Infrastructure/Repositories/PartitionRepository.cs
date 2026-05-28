@@ -31,8 +31,9 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
+            .Where(partition => partition.Guid == entityGuid)
             .Select(PartitionDtoMappings.Projection)
-            .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         return partition;
     }

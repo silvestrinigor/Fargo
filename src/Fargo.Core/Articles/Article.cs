@@ -14,14 +14,18 @@ namespace Fargo.Core.Articles;
 /// An article defines the descriptive information of a product or item type,
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
-///
-/// An article is partitioned data and may belong to multiple
-/// <see cref="Partition"/> instances. A user may access the article only
-/// if they have access to at least one of its partitions, subject to any
-/// additional authorization rules.
 /// </remarks>
 public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
 {
+    private Article()
+    {
+    }
+
+    private Article(Name name)
+    {
+        Name = name;
+    }
+
     public static Article CreateArticle(Name name, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
@@ -35,20 +39,10 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         return article;
     }
 
-    public static Article CreateArticle(Guid guid, Name name, Actor actor)
+    private Article(Name name, ArticleVariation variation)
+        : this(name)
     {
-        ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreateArticle);
-
-        var article = new Article(name)
-        {
-            Guid = guid
-        };
-
-        article.MarkAsEditedBy(actor.Guid);
-        article.MarkModificationType(ArticleModifiedType.General);
-
-        return article;
+        Variation = variation;
     }
 
     public static Article CreateArticleVariation(Name name, Article fromArticle, Actor actor)
@@ -68,6 +62,12 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         return article;
     }
 
+    private Article(Name name, ArticlePack pack)
+        : this(name)
+    {
+        Pack = pack;
+    }
+
     public static Article CreateArticlePack(Name name, Article fromArticle, Scalar quantity, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
@@ -83,6 +83,12 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
 
         return article;
+    }
+
+    private Article(Name name, ArticleKit kit)
+        : this(name)
+    {
+        Kit = kit;
     }
 
     public static Article CreateArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> components, Actor actor)
@@ -104,6 +110,12 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
         return article;
     }
 
+    private Article(Name name, ArticleContainer container)
+        : this(name)
+    {
+        Container = container;
+    }
+
     public static Article CreateArticleContainer(Name name, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
@@ -116,49 +128,8 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
 
         return article;
     }
-    private Article()
-    {
-    }
-
-    private Article(Name name)
-    {
-        Name = name;
-    }
-
-    private Article(Name name, ArticleVariation variation)
-        : this(name)
-    {
-        Variation = variation;
-    }
-
-    private Article(Name name, ArticlePack pack)
-        : this(name)
-    {
-        Pack = pack;
-    }
-
-    private Article(Name name, ArticleKit kit)
-        : this(name)
-    {
-        Kit = kit;
-    }
-
-    private Article(Name name, ArticleContainer container)
-        : this(name)
-    {
-        Container = container;
-    }
 
     #region General
-
-    /// <summary>
-    /// Gets or sets the name of the article.
-    /// </summary>
-    /// <remarks>
-    /// The name identifies the article in the domain and must satisfy
-    /// the validation rules defined by <see cref="Name"/>.
-    /// </remarks>
-    public Name Name { get; private set; }
 
     public ArticleType ArticleType
     {
@@ -187,6 +158,15 @@ public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEn
             return ArticleType.Default;
         }
     }
+
+    /// <summary>
+    /// Gets or sets the name of the article.
+    /// </summary>
+    /// <remarks>
+    /// The name identifies the article in the domain and must satisfy
+    /// the validation rules defined by <see cref="Name"/>.
+    /// </remarks>
+    public Name Name { get; private set; }
 
     public void Rename(Name name, Actor actor)
     {
@@ -767,7 +747,7 @@ public sealed class ArticleVariation
     {
     }
 
-    public ArticleVariation(Article fromArticle)
+    internal ArticleVariation(Article fromArticle)
     {
         FromArticle = fromArticle;
     }
@@ -775,7 +755,7 @@ public sealed class ArticleVariation
     /// <summary>
     /// Gets the unique identifier of the source article.
     /// </summary>
-    public Guid FromArticleGuid { get; private set; }
+    public Guid FromArticleGuid { get; private init; }
 
     /// <summary>
     /// Gets the article from which this variation originates.
@@ -783,7 +763,7 @@ public sealed class ArticleVariation
     public Article FromArticle
     {
         get;
-        private set
+        private init
         {
             FromArticleGuid = value.Guid;
             field = value;

@@ -49,8 +49,9 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
+            .Where(userGroup => userGroup.Guid == entityGuid)
             .Select(UserGroupDtoMappings.Projection)
-            .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         return userGroup;
     }

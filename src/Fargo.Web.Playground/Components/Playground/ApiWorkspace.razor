@@ -1,0 +1,2447 @@
+﻿@using System.Globalization
+@using System.Net
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject PlaygroundApiClientFactory ClientFactory
+@inject PlaygroundAuthSession Session
+@inject NavigationManager NavigationManager
+
+<section class="api-workspace">
+    @ResourceWorkspace()
+    @ActionDialog()
+</section>
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = CreateDisplayJsonOptions();
+
+    [Parameter]
+    public PlaygroundResource Resource { get; set; } = PlaygroundResource.Articles;
+
+    [Parameter]
+    public Guid? EntityGuid { get; set; }
+
+    private bool isBusy;
+    private OperationResult? result;
+    private PlaygroundResource? loadedListResource;
+    private Guid? loadedEntityGuid;
+    private string? selectedArticleOperation;
+    private string? selectedItemOperation;
+    private string? selectedUserOperation;
+    private string? selectedUserGroupOperation;
+    private string? selectedPartitionOperation;
+    private string? selectedAccountOperation;
+    private string? submittedArticleOperation;
+    private string? submittedItemOperation;
+    private string? submittedUserOperation;
+    private string? submittedUserGroupOperation;
+    private string? submittedPartitionOperation;
+    private string? submittedAccountOperation;
+    private bool isActionDialogHidden = true;
+    private string? activeOperationId;
+    private bool accountLogoutConfirmed;
+    private bool accountClearSavedAuthConfirmed;
+
+    private static readonly OperationOption[] ArticleOperationChoices =
+    [
+        new(OperationIds.GetMany, "Get many"),
+        new(OperationIds.GetByGuid, "Get by GUID"),
+        new(OperationIds.GetByBarcode, "Get by barcode"),
+        new(OperationIds.Create, "Create"),
+        new(OperationIds.Patch, "Patch"),
+        new(OperationIds.Delete, "Delete")
+    ];
+
+    private static readonly OperationOption[] CrudOperationChoices =
+    [
+        new(OperationIds.GetMany, "Get many"),
+        new(OperationIds.GetByGuid, "Get by GUID"),
+        new(OperationIds.Create, "Create"),
+        new(OperationIds.Update, "Update"),
+        new(OperationIds.Delete, "Delete")
+    ];
+
+    private static readonly OperationOption[] AccountOperationChoices =
+    [
+        new(OperationIds.RefreshAuth, "Refresh token"),
+        new(OperationIds.ChangePassword, "Change password"),
+        new(OperationIds.Logout, "Logout"),
+        new(OperationIds.ClearSavedAuth, "Clear saved auth")
+    ];
+
+    private readonly ListQueryForm articleListQuery = new();
+    private readonly ListQueryForm itemListQuery = new();
+    private readonly ListQueryForm userListQuery = new();
+    private readonly ListQueryForm userGroupListQuery = new();
+    private readonly ListQueryForm partitionListQuery = new();
+
+    private readonly GuidForm articleGet = new();
+    private readonly ArticleBarcodeForm articleBarcode = new();
+    private readonly ArticleCreateForm articleCreate = new();
+    private readonly ArticlePatchForm articlePatch = new();
+    private readonly ConfirmGuidForm articleDelete = new();
+    private IReadOnlyCollection<ArticleDto> articleRows = [];
+    private ArticleDto? selectedArticle;
+
+    private readonly GuidForm itemGet = new();
+    private readonly ItemCreateForm itemCreate = new();
+    private readonly ItemUpdateForm itemUpdate = new();
+    private readonly ConfirmGuidForm itemDelete = new();
+    private IReadOnlyCollection<ItemDto> itemRows = [];
+    private ItemDto? selectedItem;
+
+    private readonly GuidForm userGet = new();
+    private readonly UserCreateForm userCreate = new();
+    private readonly UserUpdateForm userUpdate = new();
+    private readonly ConfirmGuidForm userDelete = new();
+    private IReadOnlyCollection<UserDto> userRows = [];
+    private UserDto? selectedUser;
+
+    private readonly GuidForm userGroupGet = new();
+    private readonly UserGroupCreateForm userGroupCreate = new();
+    private readonly UserGroupUpdateForm userGroupUpdate = new();
+    private readonly ConfirmGuidForm userGroupDelete = new();
+    private IReadOnlyCollection<UserGroupDto> userGroupRows = [];
+    private UserGroupDto? selectedUserGroup;
+
+    private readonly GuidForm partitionGet = new();
+    private readonly PartitionCreateForm partitionCreate = new();
+    private readonly PartitionUpdateForm partitionUpdate = new();
+    private readonly ConfirmGuidForm partitionDelete = new();
+    private IReadOnlyCollection<PartitionDto> partitionRows = [];
+    private PartitionDto? selectedPartition;
+
+    private readonly PasswordForm accountPassword = new();
+
+    private RenderFragment ResourceWorkspace() => @<section class="resource-panel" data-testid="@ResourceTestId()">
+            <div class="workspace-actions" role="toolbar" aria-label="Operations">
+                @foreach (var operation in CurrentOperationChoices())
+                {
+                    <FluentButton
+                        Appearance="@(operation.Id == SubmittedOperation ? Appearance.Accent : Appearance.Outline)"
+                        Disabled="@isBusy"
+                        @onclick="() => OpenActionDialog(operation.Id)">
+                        @operation.Label
+                    </FluentButton>
+                }
+            </div>
+            @OperationResultContent()
+            <section class="workspace-data">
+                @ResponseContent()
+            </section>
+        </section>;
+
+    private RenderFragment ActionDialog() => @<FluentDialog
+            Class="action-dialog"
+            Hidden="@isActionDialogHidden"
+            HiddenChanged="@(hidden => OnActionDialogHiddenChanged(hidden))"
+            Modal="true"
+            TrapFocus="true"
+            PreventScroll="true"
+            AriaLabel="@ActiveOperationLabel">
+            <FluentDialogHeader ShowDismiss="true">
+                @ActiveOperationLabel
+            </FluentDialogHeader>
+            <FluentDialogBody Class="action-dialog-body">
+                @RequestContent()
+            </FluentDialogBody>
+            <FluentDialogFooter Visible="true">
+                <FluentButton Appearance="Appearance.Outline" Disabled="@isBusy" @onclick="CloseActionDialog">Close</FluentButton>
+            </FluentDialogFooter>
+        </FluentDialog>;
+
+    private string? SubmittedOperation => Resource switch
+    {
+        PlaygroundResource.Articles => submittedArticleOperation,
+        PlaygroundResource.Items => submittedItemOperation,
+        PlaygroundResource.Users => submittedUserOperation,
+        PlaygroundResource.UserGroups => submittedUserGroupOperation,
+        PlaygroundResource.Partitions => submittedPartitionOperation,
+        PlaygroundResource.Account => submittedAccountOperation,
+        _ => null
+    };
+
+    private string ActiveOperationLabel
+        => activeOperationId is null
+            ? "Operation"
+            : CurrentOperationChoices().FirstOrDefault(operation => operation.Id == activeOperationId)?.Label ?? "Operation";
+
+    private IReadOnlyCollection<OperationOption> CurrentOperationChoices() => Resource switch
+    {
+        PlaygroundResource.Articles => ArticleOperationChoices,
+        PlaygroundResource.Account => AccountOperationChoices,
+        _ => CrudOperationChoices
+    };
+
+    private string ResourceTestId() => Resource switch
+    {
+        PlaygroundResource.Articles => "playground-articles",
+        PlaygroundResource.Items => "playground-items",
+        PlaygroundResource.Users => "playground-users",
+        PlaygroundResource.UserGroups => "playground-user-groups",
+        PlaygroundResource.Partitions => "playground-partitions",
+        PlaygroundResource.Account => "playground-account",
+        _ => "playground-resource"
+    };
+
+    private void OpenActionDialog(string operationId)
+    {
+        SetCurrentOperation(operationId);
+        activeOperationId = operationId;
+        isActionDialogHidden = false;
+    }
+
+    private void CloseActionDialog()
+    {
+        if (isBusy)
+        {
+            return;
+        }
+
+        isActionDialogHidden = true;
+    }
+
+    private void OnActionDialogHiddenChanged(bool hidden)
+    {
+        isActionDialogHidden = hidden;
+    }
+
+    private void SetCurrentOperation(string operationId)
+    {
+        switch (Resource)
+        {
+            case PlaygroundResource.Articles:
+                selectedArticleOperation = operationId;
+                break;
+            case PlaygroundResource.Items:
+                selectedItemOperation = operationId;
+                break;
+            case PlaygroundResource.Users:
+                selectedUserOperation = operationId;
+                break;
+            case PlaygroundResource.UserGroups:
+                selectedUserGroupOperation = operationId;
+                break;
+            case PlaygroundResource.Partitions:
+                selectedPartitionOperation = operationId;
+                break;
+            case PlaygroundResource.Account:
+                selectedAccountOperation = operationId;
+                accountLogoutConfirmed = false;
+                accountClearSavedAuthConfirmed = false;
+                break;
+        }
+    }
+
+    private void SetSubmittedOperation(string operationId)
+    {
+        switch (Resource)
+        {
+            case PlaygroundResource.Articles:
+                submittedArticleOperation = operationId;
+                break;
+            case PlaygroundResource.Items:
+                submittedItemOperation = operationId;
+                break;
+            case PlaygroundResource.Users:
+                submittedUserOperation = operationId;
+                break;
+            case PlaygroundResource.UserGroups:
+                submittedUserGroupOperation = operationId;
+                break;
+            case PlaygroundResource.Partitions:
+                submittedPartitionOperation = operationId;
+                break;
+            case PlaygroundResource.Account:
+                submittedAccountOperation = operationId;
+                break;
+        }
+    }
+
+    private RenderFragment RequestContent() => Resource switch
+    {
+        PlaygroundResource.Articles => ArticlesRequestContent(),
+        PlaygroundResource.Items => ItemsRequestContent(),
+        PlaygroundResource.Users => UsersRequestContent(),
+        PlaygroundResource.UserGroups => UserGroupsRequestContent(),
+        PlaygroundResource.Partitions => PartitionsRequestContent(),
+        PlaygroundResource.Account => AccountRequestContent(),
+        _ => EmptyResponse("No action available")
+    };
+
+    private RenderFragment OperationResultContent() => @<section class="@($"operation-result {(result?.IsSuccess == true ? "success" : result is null ? "idle" : "error")}")" data-testid="playground-operation-result">
+            @if (result is null)
+            {
+                <FluentMessageBar Intent="MessageIntent.Info">
+                    <strong>Ready</strong>
+                    <span>No request has been sent yet.</span>
+                </FluentMessageBar>
+            }
+            else
+            {
+                <FluentMessageBar Intent="@(result.IsSuccess ? MessageIntent.Success : MessageIntent.Error)">
+                    <strong>@result.Title</strong>
+                    <span>@result.Message</span>
+                </FluentMessageBar>
+                @if (!result.IsSuccess && result.Payload is FargoProblemDetailsDto problem)
+                {
+                    <div class="detail-grid result-detail">
+                        @DetailValue("Status", problem.Status.ToString(CultureInfo.InvariantCulture))
+                        @DetailValue("Title", problem.Title)
+                        @DetailValue("Detail", problem.Detail)
+                        @DetailValue("Type", problem.Type)
+                        @DetailValue("Trace", problem.TraceId)
+                    </div>
+                }
+            }
+        </section>;
+
+    private RenderFragment ArticlesRequestContent() => @<section class="request-form">
+            @switch (selectedArticleOperation)
+            {
+                case OperationIds.GetMany:
+                    @ListQueryFields(articleListQuery)
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetArticlesAsync">Get articles</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.GetByGuid:
+                    <div class="form-grid">
+                        @GuidField("Article GUID", articleGet.Guid, value => articleGet.Guid = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetArticleAsync">Get article</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.GetByBarcode:
+                    <div class="form-grid">
+                        @TextField("Barcode", articleBarcode.Code, value => articleBarcode.Code = value)
+                        @EnumField("Format", articleBarcode.Format, value => articleBarcode.Format = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetArticleByBarcodeAsync">Get by barcode</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Create:
+                    @ArticleCreateFields()
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="CreateArticleAsync">Create article</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Patch:
+                    <div class="form-grid">
+                        @GuidField("Article GUID", articlePatch.Guid, value => articlePatch.Guid = value)
+                    </div>
+                    @ArticlePatchFields()
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="PatchArticleAsync">Patch article</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Delete:
+                    <div class="form-grid">
+                        @GuidField("Article GUID", articleDelete.Guid, value => articleDelete.Guid = value)
+                        @ConfirmField(articleDelete.Confirm, value => articleDelete.Confirm = value, "I understand this article will be deleted")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !articleDelete.Confirm)" @onclick="DeleteArticleAsync">Delete article</FluentButton>
+                    </div>
+                    break;
+            }
+        </section>;
+
+    private RenderFragment ItemsRequestContent() => @<section class="request-form">
+            @switch (selectedItemOperation)
+            {
+                case OperationIds.GetMany:
+                    @ListQueryFields(itemListQuery)
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetItemsAsync">Get items</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.GetByGuid:
+                    <div class="form-grid">
+                        @GuidField("Item GUID", itemGet.Guid, value => itemGet.Guid = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetItemAsync">Get item</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Create:
+                    <div class="form-grid">
+                        @GuidField("Article GUID", itemCreate.ArticleGuid, value => itemCreate.ArticleGuid = value)
+                        @DateTimeOffsetField("Production date", itemCreate.ProductionDate, value => itemCreate.ProductionDate = value)
+                        @TextAreaField("Partitions", itemCreate.PartitionsText, value => itemCreate.PartitionsText = value)
+                        @OptionalBoolField("Active", itemCreate.IncludeIsActive, value => itemCreate.IncludeIsActive = value, itemCreate.IsActive, value => itemCreate.IsActive = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="CreateItemAsync">Create item</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Update:
+                    <div class="form-grid">
+                        @GuidField("Item GUID", itemUpdate.Guid, value => itemUpdate.Guid = value)
+                        @TextAreaField("Partitions", itemUpdate.PartitionsText, value => itemUpdate.PartitionsText = value)
+                        @TextField("Parent container GUID", itemUpdate.ParentContainerGuid, value => itemUpdate.ParentContainerGuid = value)
+                        @OptionalBoolField("Active", itemUpdate.IncludeIsActive, value => itemUpdate.IncludeIsActive = value, itemUpdate.IsActive, value => itemUpdate.IsActive = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="UpdateItemAsync">Update item</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Delete:
+                    <div class="form-grid">
+                        @GuidField("Item GUID", itemDelete.Guid, value => itemDelete.Guid = value)
+                        @ConfirmField(itemDelete.Confirm, value => itemDelete.Confirm = value, "I understand this item will be deleted")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !itemDelete.Confirm)" @onclick="DeleteItemAsync">Delete item</FluentButton>
+                    </div>
+                    break;
+            }
+        </section>;
+
+    private RenderFragment UsersRequestContent() => @<section class="request-form">
+            @switch (selectedUserOperation)
+            {
+                case OperationIds.GetMany:
+                    @ListQueryFields(userListQuery)
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetUsersAsync">Get users</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.GetByGuid:
+                    <div class="form-grid">
+                        @GuidField("User GUID", userGet.Guid, value => userGet.Guid = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetUserAsync">Get user</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Create:
+                    @UserCreateFields()
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="CreateUserAsync">Create user</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Update:
+                    <div class="form-grid">
+                        @GuidField("User GUID", userUpdate.Guid, value => userUpdate.Guid = value)
+                    </div>
+                    @UserUpdateFields()
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="UpdateUserAsync">Update user</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Delete:
+                    <div class="form-grid">
+                        @GuidField("User GUID", userDelete.Guid, value => userDelete.Guid = value)
+                        @ConfirmField(userDelete.Confirm, value => userDelete.Confirm = value, "I understand this user will be deleted")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !userDelete.Confirm)" @onclick="DeleteUserAsync">Delete user</FluentButton>
+                    </div>
+                    break;
+            }
+        </section>;
+
+    private RenderFragment UserGroupsRequestContent() => @<section class="request-form">
+            @switch (selectedUserGroupOperation)
+            {
+                case OperationIds.GetMany:
+                    @ListQueryFields(userGroupListQuery)
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetUserGroupsAsync">Get user groups</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.GetByGuid:
+                    <div class="form-grid">
+                        @GuidField("User group GUID", userGroupGet.Guid, value => userGroupGet.Guid = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetUserGroupAsync">Get user group</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Create:
+                    @UserGroupCreateFields()
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="CreateUserGroupAsync">Create user group</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Update:
+                    <div class="form-grid">
+                        @GuidField("User group GUID", userGroupUpdate.Guid, value => userGroupUpdate.Guid = value)
+                    </div>
+                    @UserGroupUpdateFields()
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="UpdateUserGroupAsync">Update user group</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Delete:
+                    <div class="form-grid">
+                        @GuidField("User group GUID", userGroupDelete.Guid, value => userGroupDelete.Guid = value)
+                        @ConfirmField(userGroupDelete.Confirm, value => userGroupDelete.Confirm = value, "I understand this user group will be deleted")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !userGroupDelete.Confirm)" @onclick="DeleteUserGroupAsync">Delete user group</FluentButton>
+                    </div>
+                    break;
+            }
+        </section>;
+
+    private RenderFragment PartitionsRequestContent() => @<section class="request-form">
+            @switch (selectedPartitionOperation)
+            {
+                case OperationIds.GetMany:
+                    @ListQueryFields(partitionListQuery)
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetPartitionsAsync">Get partitions</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.GetByGuid:
+                    <div class="form-grid">
+                        @GuidField("Partition GUID", partitionGet.Guid, value => partitionGet.Guid = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetPartitionAsync">Get partition</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Create:
+                    <div class="form-grid">
+                        @TextField("Name", partitionCreate.Name, value => partitionCreate.Name = value)
+                        @TextField("Description", partitionCreate.Description, value => partitionCreate.Description = value)
+                        @TextField("Parent partition GUID", partitionCreate.ParentPartitionGuid, value => partitionCreate.ParentPartitionGuid = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="CreatePartitionAsync">Create partition</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Update:
+                    <div class="form-grid">
+                        @GuidField("Partition GUID", partitionUpdate.Guid, value => partitionUpdate.Guid = value)
+                        @TextField("Name", partitionUpdate.Name, value => partitionUpdate.Name = value)
+                        @TextField("Description", partitionUpdate.Description, value => partitionUpdate.Description = value)
+                        @TextField("Parent partition GUID", partitionUpdate.ParentPartitionGuid, value => partitionUpdate.ParentPartitionGuid = value)
+                        @OptionalBoolField("Active", partitionUpdate.IncludeIsActive, value => partitionUpdate.IncludeIsActive = value, partitionUpdate.IsActive, value => partitionUpdate.IsActive = value)
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="UpdatePartitionAsync">Update partition</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Delete:
+                    <div class="form-grid">
+                        @GuidField("Partition GUID", partitionDelete.Guid, value => partitionDelete.Guid = value)
+                        @ConfirmField(partitionDelete.Confirm, value => partitionDelete.Confirm = value, "I understand this partition will be deleted")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !partitionDelete.Confirm)" @onclick="DeletePartitionAsync">Delete partition</FluentButton>
+                    </div>
+                    break;
+            }
+        </section>;
+
+    private RenderFragment AccountRequestContent() => @<section class="request-form">
+            @switch (selectedAccountOperation)
+            {
+                case OperationIds.RefreshAuth:
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="RefreshAuthAsync">Refresh token</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.ChangePassword:
+                    <div class="form-grid">
+                        @TextField("Current password", accountPassword.CurrentPassword, value => accountPassword.CurrentPassword = value, type: "password")
+                        @TextField("New password", accountPassword.NewPassword, value => accountPassword.NewPassword = value, type: "password")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="ChangePasswordAsync">Change password</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.Logout:
+                    <div class="form-grid">
+                        @ConfirmField(accountLogoutConfirmed, value => accountLogoutConfirmed = value, "I understand this will end the current session")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !accountLogoutConfirmed)" @onclick="LogoutAsync">Logout</FluentButton>
+                    </div>
+                    break;
+                case OperationIds.ClearSavedAuth:
+                    <div class="form-grid">
+                        @ConfirmField(accountClearSavedAuthConfirmed, value => accountClearSavedAuthConfirmed = value, "I understand this will clear the saved authentication data")
+                    </div>
+                    <div class="request-actions">
+                        <FluentButton Appearance="Appearance.Outline" Disabled="@(isBusy || !accountClearSavedAuthConfirmed)" @onclick="ClearSavedAuthAsync">Clear saved auth</FluentButton>
+                    </div>
+                    break;
+            }
+        </section>;
+
+    private RenderFragment ResponseContent() => @<section class="response-data">
+            @switch (Resource)
+            {
+                case PlaygroundResource.Articles:
+                    @ArticlesResponse()
+                    break;
+                case PlaygroundResource.Items:
+                    @ItemsResponse()
+                    break;
+                case PlaygroundResource.Users:
+                    @UsersResponse()
+                    break;
+                case PlaygroundResource.UserGroups:
+                    @UserGroupsResponse()
+                    break;
+                case PlaygroundResource.Partitions:
+                    @PartitionsResponse()
+                    break;
+                case PlaygroundResource.Account:
+                    @AccountResponse()
+                    break;
+            }
+        </section>;
+
+    private RenderFragment ArticlesResponse() => @<div class="@ResponseLayoutClass(HasArticleGrid, CurrentArticleDetail is not null)">
+            @if (HasArticleGrid && CurrentArticleDetail is not null)
+            {
+                @SplitResponse(ResponseMain(ArticleTable(articleRows)), ArticleDetailsPane(CurrentArticleDetail))
+            }
+            else if (HasArticleGrid)
+            {
+                @ResponseMain(ArticleTable(articleRows))
+            }
+            else if (CurrentArticleDetail is null)
+            {
+                @FallbackResponse("No article response yet")
+            }
+
+            @if (!HasArticleGrid && CurrentArticleDetail is not null)
+            {
+                @ArticleDetailsPane(CurrentArticleDetail)
+            }
+        </div>;
+
+    private RenderFragment ItemsResponse() => @<div class="@ResponseLayoutClass(HasItemGrid, CurrentItemDetail is not null)">
+            @if (HasItemGrid && CurrentItemDetail is not null)
+            {
+                @SplitResponse(ResponseMain(ItemTable(itemRows)), ItemDetailsPane(CurrentItemDetail))
+            }
+            else if (HasItemGrid)
+            {
+                @ResponseMain(ItemTable(itemRows))
+            }
+            else if (CurrentItemDetail is null)
+            {
+                @FallbackResponse("No item response yet")
+            }
+
+            @if (!HasItemGrid && CurrentItemDetail is not null)
+            {
+                @ItemDetailsPane(CurrentItemDetail)
+            }
+        </div>;
+
+    private RenderFragment UsersResponse() => @<div class="@ResponseLayoutClass(HasUserGrid, CurrentUserDetail is not null)">
+            @if (HasUserGrid && CurrentUserDetail is not null)
+            {
+                @SplitResponse(ResponseMain(UserTable(userRows)), UserDetailsPane(CurrentUserDetail))
+            }
+            else if (HasUserGrid)
+            {
+                @ResponseMain(UserTable(userRows))
+            }
+            else if (CurrentUserDetail is null)
+            {
+                @FallbackResponse("No user response yet")
+            }
+
+            @if (!HasUserGrid && CurrentUserDetail is not null)
+            {
+                @UserDetailsPane(CurrentUserDetail)
+            }
+        </div>;
+
+    private RenderFragment UserGroupsResponse() => @<div class="@ResponseLayoutClass(HasUserGroupGrid, CurrentUserGroupDetail is not null)">
+            @if (HasUserGroupGrid && CurrentUserGroupDetail is not null)
+            {
+                @SplitResponse(ResponseMain(UserGroupTable(userGroupRows)), UserGroupDetailsPane(CurrentUserGroupDetail))
+            }
+            else if (HasUserGroupGrid)
+            {
+                @ResponseMain(UserGroupTable(userGroupRows))
+            }
+            else if (CurrentUserGroupDetail is null)
+            {
+                @FallbackResponse("No user group response yet")
+            }
+
+            @if (!HasUserGroupGrid && CurrentUserGroupDetail is not null)
+            {
+                @UserGroupDetailsPane(CurrentUserGroupDetail)
+            }
+        </div>;
+
+    private RenderFragment PartitionsResponse() => @<div class="@ResponseLayoutClass(HasPartitionGrid, CurrentPartitionDetail is not null)">
+            @if (HasPartitionGrid && CurrentPartitionDetail is not null)
+            {
+                @SplitResponse(ResponseMain(PartitionTable(partitionRows)), PartitionDetailsPane(CurrentPartitionDetail))
+            }
+            else if (HasPartitionGrid)
+            {
+                @ResponseMain(PartitionTable(partitionRows))
+            }
+            else if (CurrentPartitionDetail is null)
+            {
+                @FallbackResponse("No partition response yet")
+            }
+
+            @if (!HasPartitionGrid && CurrentPartitionDetail is not null)
+            {
+                @PartitionDetailsPane(CurrentPartitionDetail)
+            }
+        </div>;
+
+    private RenderFragment AccountResponse() => @<div>
+            @if (result?.Payload is AuthDto auth)
+            {
+                @AuthDetail(auth)
+            }
+            else if (Session.CurrentAuth is not null)
+            {
+                @AuthDetail(Session.CurrentAuth)
+            }
+            else
+            {
+                @FallbackResponse("No account response yet")
+            }
+        </div>;
+
+    private RenderFragment PayloadContent(object payload) => @<div>
+            @switch (payload)
+            {
+                case AuthDto auth:
+                    @AuthDetail(auth)
+                    break;
+                case string text:
+                    <p class="response-note">@text</p>
+                    break;
+                case FargoProblemDetailsDto:
+                    @EmptyResponse("Request failed")
+                    break;
+                default:
+                    @EmptyResponse("No structured view for this response")
+                    break;
+            }
+        </div>;
+
+    private RenderFragment FallbackResponse(string emptyMessage) => @<div>
+            @if (result?.Payload is not null)
+            {
+                @PayloadContent(result.Payload)
+            }
+            else if (result is not null)
+            {
+                @EmptyResponse("No response body")
+            }
+            else
+            {
+                @EmptyResponse(emptyMessage)
+            }
+        </div>;
+
+    private bool HasArticleGrid => articleRows.Count > 0 || result?.Payload is IReadOnlyCollection<ArticleDto>;
+
+    private ArticleDto? CurrentArticleDetail => selectedArticle ?? result?.Payload as ArticleDto;
+
+    private bool HasItemGrid => itemRows.Count > 0 || result?.Payload is IReadOnlyCollection<ItemDto>;
+
+    private ItemDto? CurrentItemDetail => selectedItem ?? result?.Payload as ItemDto;
+
+    private bool HasUserGrid => userRows.Count > 0 || result?.Payload is IReadOnlyCollection<UserDto>;
+
+    private UserDto? CurrentUserDetail => selectedUser ?? result?.Payload as UserDto;
+
+    private bool HasUserGroupGrid => userGroupRows.Count > 0 || result?.Payload is IReadOnlyCollection<UserGroupDto>;
+
+    private UserGroupDto? CurrentUserGroupDetail => selectedUserGroup ?? result?.Payload as UserGroupDto;
+
+    private bool HasPartitionGrid => partitionRows.Count > 0 || result?.Payload is IReadOnlyCollection<PartitionDto>;
+
+    private PartitionDto? CurrentPartitionDetail => selectedPartition ?? result?.Payload as PartitionDto;
+
+    private static string ResponseLayoutClass(bool hasGrid, bool hasDetails)
+        => $"response-layout {(hasGrid ? "has-grid" : "single-detail")} {(hasDetails ? "has-details" : string.Empty)}";
+
+    private RenderFragment ResponseMain(RenderFragment content) => @<section class="response-main">
+            @content
+        </section>;
+
+    private RenderFragment SplitResponse(RenderFragment main, RenderFragment details) => @<FluentSplitter
+            Class="response-splitter"
+            Orientation="Orientation.Horizontal"
+            Panel1="@main"
+            Panel2="@details"
+            Panel1Size="1fr"
+            Panel2Size="min(58vw, 760px)"
+            Panel1MinSize="220px"
+            Panel2MinSize="360px"
+            BarSize="6"
+            BarHandle="false" />;
+
+    private RenderFragment EmptyResponse(string message) => @<div class="empty-response">
+            <strong>@message</strong>
+        </div>;
+
+    private async Task GetArticlesAsync() => await RunAsync(
+        OperationIds.GetMany,
+        "Articles loaded",
+        async client =>
+        {
+            articleRows = await client.Articles.GetManyAsync(BuildListQuery(articleListQuery));
+            selectedArticle = null;
+            return articleRows;
+        });
+
+    private async Task GetArticleAsync() => await RunAsync(
+        OperationIds.GetByGuid,
+        "Article loaded",
+        async client =>
+        {
+            selectedArticle = await client.Articles.GetAsync(RequiredGuid(articleGet.Guid, "Article GUID"));
+            return selectedArticle is null ? "Article not found." : selectedArticle;
+        });
+
+    private async Task GetArticleByBarcodeAsync() => await RunAsync(
+        OperationIds.GetByBarcode,
+        "Article barcode lookup completed",
+        async client =>
+        {
+            selectedArticle = await client.Articles.GetByBarcodeAsync(RequiredText(articleBarcode.Code, "Barcode"), articleBarcode.Format);
+            return selectedArticle is null ? "Article not found." : selectedArticle;
+        });
+
+    private async Task CreateArticleAsync() => await RunAsync(
+        OperationIds.Create,
+        "Article created",
+        async client => await client.Articles.CreateAsync(BuildArticleCreateRequest()));
+
+    private async Task PatchArticleAsync() => await RunAsync(
+        OperationIds.Patch,
+        "Article patched",
+        async client =>
+        {
+            await client.Articles.PatchAsync(
+                RequiredGuid(articlePatch.Guid, "Article GUID"),
+                BuildArticlePatchRequest());
+            return null;
+        });
+
+    private async Task DeleteArticleAsync() => await RunAsync(
+        OperationIds.Delete,
+        "Article deleted",
+        async client =>
+        {
+            RequireConfirmation(articleDelete);
+            await client.Articles.DeleteAsync(RequiredGuid(articleDelete.Guid, "Article GUID"));
+            articleDelete.Confirm = false;
+            return null;
+        });
+
+    private async Task GetItemsAsync() => await RunAsync(
+        OperationIds.GetMany,
+        "Items loaded",
+        async client =>
+        {
+            itemRows = await client.Items.GetManyAsync(BuildListQuery(itemListQuery));
+            selectedItem = null;
+            return itemRows;
+        });
+
+    private async Task GetItemAsync() => await RunAsync(
+        OperationIds.GetByGuid,
+        "Item loaded",
+        async client =>
+        {
+            selectedItem = await client.Items.GetAsync(RequiredGuid(itemGet.Guid, "Item GUID"));
+            return selectedItem is null ? "Item not found." : selectedItem;
+        });
+
+    private async Task CreateItemAsync() => await RunAsync(
+        OperationIds.Create,
+        "Item created",
+        async client => await client.Items.CreateAsync(new ItemCreateRequest(
+            RequiredGuid(itemCreate.ArticleGuid, "Article GUID"),
+            ParseNullableDateTimeOffset(itemCreate.ProductionDate, "Production date"),
+            ParseGuidList(itemCreate.PartitionsText, "Partitions"),
+            OptionalBool(itemCreate.IncludeIsActive, itemCreate.IsActive))));
+
+    private async Task UpdateItemAsync() => await RunAsync(
+        OperationIds.Update,
+        "Item updated",
+        async client =>
+        {
+            await client.Items.UpdateAsync(
+                RequiredGuid(itemUpdate.Guid, "Item GUID"),
+                new ItemUpdateRequest(
+                    ParseGuidList(itemUpdate.PartitionsText, "Partitions"),
+                    ParseNullableGuid(itemUpdate.ParentContainerGuid, "Parent container GUID"),
+                    OptionalBool(itemUpdate.IncludeIsActive, itemUpdate.IsActive)));
+            return null;
+        });
+
+    private async Task DeleteItemAsync() => await RunAsync(
+        OperationIds.Delete,
+        "Item deleted",
+        async client =>
+        {
+            RequireConfirmation(itemDelete);
+            await client.Items.DeleteAsync(RequiredGuid(itemDelete.Guid, "Item GUID"));
+            itemDelete.Confirm = false;
+            return null;
+        });
+
+    private async Task GetUsersAsync() => await RunAsync(
+        OperationIds.GetMany,
+        "Users loaded",
+        async client =>
+        {
+            userRows = await client.Users.GetManyAsync(BuildListQuery(userListQuery));
+            selectedUser = null;
+            return userRows;
+        });
+
+    private async Task GetUserAsync() => await RunAsync(
+        OperationIds.GetByGuid,
+        "User loaded",
+        async client =>
+        {
+            selectedUser = await client.Users.GetAsync(RequiredGuid(userGet.Guid, "User GUID"));
+            return selectedUser is null ? "User not found." : selectedUser;
+        });
+
+    private async Task CreateUserAsync() => await RunAsync(
+        OperationIds.Create,
+        "User created",
+        async client => await client.Users.CreateAsync(new UserCreateRequest(
+            RequiredText(userCreate.Nameid, "Nameid"),
+            RequiredText(userCreate.Password, "Password"),
+            Clean(userCreate.FirstName),
+            Clean(userCreate.LastName),
+            Clean(userCreate.Description),
+            ToUserPermissions(userCreate.Permissions),
+            ParseNullableTimeSpan(userCreate.DefaultPasswordExpirationPeriod, "Default password expiration"),
+            ParseGuidList(userCreate.PartitionsText, "Partitions"),
+            ParseGuidList(userCreate.UserGroupsText, "User groups"))));
+
+    private async Task UpdateUserAsync() => await RunAsync(
+        OperationIds.Update,
+        "User updated",
+        async client =>
+        {
+            await client.Users.UpdateAsync(
+                RequiredGuid(userUpdate.Guid, "User GUID"),
+                new UserUpdateRequest(
+                    OptionalText(userUpdate.IncludeNameid, userUpdate.Nameid),
+                    OptionalText(userUpdate.IncludeFirstName, userUpdate.FirstName),
+                    OptionalText(userUpdate.IncludeLastName, userUpdate.LastName),
+                    OptionalText(userUpdate.IncludeDescription, userUpdate.Description),
+                    OptionalText(userUpdate.IncludePassword, userUpdate.Password),
+                    OptionalBool(userUpdate.IncludeIsActive, userUpdate.IsActive),
+                    userUpdate.IncludePermissions ? ToUserPermissions(userUpdate.Permissions) : null,
+                    userUpdate.IncludeDefaultPasswordExpirationPeriod
+                        ? ParseNullableTimeSpan(userUpdate.DefaultPasswordExpirationPeriod, "Default password expiration")
+                        : null,
+                    userUpdate.IncludePartitions ? ParseGuidList(userUpdate.PartitionsText, "Partitions") : null,
+                    userUpdate.IncludeUserGroups ? ParseGuidList(userUpdate.UserGroupsText, "User groups") : null));
+            return null;
+        });
+
+    private async Task DeleteUserAsync() => await RunAsync(
+        OperationIds.Delete,
+        "User deleted",
+        async client =>
+        {
+            RequireConfirmation(userDelete);
+            await client.Users.DeleteAsync(RequiredGuid(userDelete.Guid, "User GUID"));
+            userDelete.Confirm = false;
+            return null;
+        });
+
+    private async Task GetUserGroupsAsync() => await RunAsync(
+        OperationIds.GetMany,
+        "User groups loaded",
+        async client =>
+        {
+            userGroupRows = await client.UserGroups.GetManyAsync(BuildListQuery(userGroupListQuery));
+            selectedUserGroup = null;
+            return userGroupRows;
+        });
+
+    private async Task GetUserGroupAsync() => await RunAsync(
+        OperationIds.GetByGuid,
+        "User group loaded",
+        async client =>
+        {
+            selectedUserGroup = await client.UserGroups.GetAsync(RequiredGuid(userGroupGet.Guid, "User group GUID"));
+            return selectedUserGroup is null ? "User group not found." : selectedUserGroup;
+        });
+
+    private async Task CreateUserGroupAsync() => await RunAsync(
+        OperationIds.Create,
+        "User group created",
+        async client => await client.UserGroups.CreateAsync(new UserGroupCreateRequest(
+            RequiredText(userGroupCreate.Nameid, "Nameid"),
+            Clean(userGroupCreate.Description),
+            ToUserGroupPermissions(userGroupCreate.Permissions),
+            ParseGuidList(userGroupCreate.PartitionsText, "Partitions"))));
+
+    private async Task UpdateUserGroupAsync() => await RunAsync(
+        OperationIds.Update,
+        "User group updated",
+        async client =>
+        {
+            await client.UserGroups.UpdateAsync(
+                RequiredGuid(userGroupUpdate.Guid, "User group GUID"),
+                new UserGroupUpdateRequest(
+                    OptionalText(userGroupUpdate.IncludeNameid, userGroupUpdate.Nameid),
+                    OptionalText(userGroupUpdate.IncludeDescription, userGroupUpdate.Description),
+                    OptionalBool(userGroupUpdate.IncludeIsActive, userGroupUpdate.IsActive),
+                    userGroupUpdate.IncludePermissions ? ToUserGroupPermissions(userGroupUpdate.Permissions) : null,
+                    userGroupUpdate.IncludePartitions ? ParseGuidList(userGroupUpdate.PartitionsText, "Partitions") : null));
+            return null;
+        });
+
+    private async Task DeleteUserGroupAsync() => await RunAsync(
+        OperationIds.Delete,
+        "User group deleted",
+        async client =>
+        {
+            RequireConfirmation(userGroupDelete);
+            await client.UserGroups.DeleteAsync(RequiredGuid(userGroupDelete.Guid, "User group GUID"));
+            userGroupDelete.Confirm = false;
+            return null;
+        });
+
+    private async Task GetPartitionsAsync() => await RunAsync(
+        OperationIds.GetMany,
+        "Partitions loaded",
+        async client =>
+        {
+            partitionRows = await client.Partitions.GetManyAsync(BuildListQuery(partitionListQuery));
+            selectedPartition = null;
+            return partitionRows;
+        });
+
+    private async Task GetPartitionAsync() => await RunAsync(
+        OperationIds.GetByGuid,
+        "Partition loaded",
+        async client =>
+        {
+            selectedPartition = await client.Partitions.GetAsync(RequiredGuid(partitionGet.Guid, "Partition GUID"));
+            return selectedPartition is null ? "Partition not found." : selectedPartition;
+        });
+
+    private async Task CreatePartitionAsync() => await RunAsync(
+        OperationIds.Create,
+        "Partition created",
+        async client => await client.Partitions.CreateAsync(new PartitionCreateRequest(
+            RequiredText(partitionCreate.Name, "Name"),
+            Clean(partitionCreate.Description),
+            ParseNullableGuid(partitionCreate.ParentPartitionGuid, "Parent partition GUID"))));
+
+    private async Task UpdatePartitionAsync() => await RunAsync(
+        OperationIds.Update,
+        "Partition updated",
+        async client =>
+        {
+            await client.Partitions.UpdateAsync(
+                RequiredGuid(partitionUpdate.Guid, "Partition GUID"),
+                new PartitionUpdateRequest(
+                    Clean(partitionUpdate.Name),
+                    Clean(partitionUpdate.Description),
+                    ParseNullableGuid(partitionUpdate.ParentPartitionGuid, "Parent partition GUID"),
+                    OptionalBool(partitionUpdate.IncludeIsActive, partitionUpdate.IsActive)));
+            return null;
+        });
+
+    private async Task DeletePartitionAsync() => await RunAsync(
+        OperationIds.Delete,
+        "Partition deleted",
+        async client =>
+        {
+            RequireConfirmation(partitionDelete);
+            await client.Partitions.DeleteAsync(RequiredGuid(partitionDelete.Guid, "Partition GUID"));
+            partitionDelete.Confirm = false;
+            return null;
+        });
+
+    private async Task RefreshAuthAsync() => await RunAsync(
+        OperationIds.RefreshAuth,
+        "Auth refreshed",
+        async client =>
+        {
+            var refreshToken = Session.CurrentAuth?.RefreshToken
+                ?? throw new InvalidOperationException("No refresh token is currently available.");
+            var auth = await client.Identity.RefreshAsync(new RefreshRequest(refreshToken));
+            await Session.StoreAsync(auth);
+            return auth;
+        });
+
+    private async Task LogoutAsync() => await RunAsync(
+        OperationIds.Logout,
+        "Logged out",
+        async client =>
+        {
+            if (!string.IsNullOrWhiteSpace(Session.CurrentAuth?.RefreshToken))
+            {
+                await client.Identity.LogoutAsync(new RefreshRequest(Session.CurrentAuth.RefreshToken));
+            }
+
+            await Session.ClearAsync();
+            NavigationManager.NavigateTo("/", forceLoad: true);
+            return null;
+        });
+
+    private async Task ChangePasswordAsync() => await RunAsync(
+        OperationIds.ChangePassword,
+        "Password changed",
+        async client =>
+        {
+            await client.Identity.ChangePasswordAsync(new PasswordUpdateRequest(
+                RequiredText(accountPassword.NewPassword, "New password"),
+                RequiredText(accountPassword.CurrentPassword, "Current password")));
+            accountPassword.CurrentPassword = string.Empty;
+            accountPassword.NewPassword = string.Empty;
+            return null;
+        });
+
+    private async Task ClearSavedAuthAsync()
+    {
+        SetSubmittedOperation(OperationIds.ClearSavedAuth);
+        await Session.ClearAsync();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+    private async Task RunAsync(
+        string operationId,
+        string successTitle,
+        Func<IFargoHttpClient, Task<object?>> operation)
+    {
+        isBusy = true;
+        result = null;
+        SetSubmittedOperation(operationId);
+
+        try
+        {
+            var client = await ClientFactory.CreateAsync();
+            if (client is null)
+            {
+                NavigationManager.NavigateTo("/", forceLoad: true);
+                return;
+            }
+
+            var payload = await operation(client);
+            result = OperationResult.Success(successTitle, payload is string message ? message : "Operation completed.", payload);
+            isActionDialogHidden = true;
+            activeOperationId = null;
+        }
+        catch (FargoHttpApiException exception) when (exception.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await Session.ClearAsync();
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+        catch (FargoHttpApiException exception)
+        {
+            result = OperationResult.Failure(
+                "API request failed",
+                exception.ProblemDetails?.Detail ?? exception.Message,
+                exception.ProblemDetails is null ? exception.RawBody : exception.ProblemDetails);
+        }
+        catch (Exception exception)
+        {
+            result = OperationResult.Failure("Operation failed", exception.Message, null);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private ArticleCreateRequest BuildArticleCreateRequest()
+    {
+        var maxMass = BuildUnitValue(articleCreate.ContainerMaxMass, "Container max mass");
+
+        return new ArticleCreateRequest(
+            RequiredText(articleCreate.Name, "Name"),
+            articleCreate.ArticleType,
+            Clean(articleCreate.Description),
+            ParseNullableTimeSpan(articleCreate.ShelfLife, "Shelf life"),
+            Clean(articleCreate.Color),
+            BuildArticleMetrics(articleCreate.Metrics),
+            BuildArticleBarcodes(articleCreate.Barcodes),
+            ParseGuidList(articleCreate.PartitionsText, "Partitions"),
+            OptionalBool(articleCreate.IncludeIsActive, articleCreate.IsActive),
+            articleCreate.ArticleType == ArticleType.Variation
+                ? new ArticleCreateVariationRequest(RequiredGuid(articleCreate.FromArticleGuid, "From article GUID"))
+                : null,
+            articleCreate.ArticleType == ArticleType.Pack
+                ? new ArticleCreatePackRequest(
+                    RequiredGuid(articleCreate.FromArticleGuid, "From article GUID"),
+                    RequiredDouble(articleCreate.Quantity, "Quantity"))
+                : null,
+            articleCreate.ArticleType == ArticleType.Kit
+                ? new ArticleCreateKitRequest(ParseKitPacks(articleCreate.KitPacksText))
+                : null,
+            articleCreate.ArticleType == ArticleType.Container && maxMass is not null
+                ? new ArticleCreateContainerRequest(maxMass)
+                : null);
+    }
+
+    private ArticlePatchRequest BuildArticlePatchRequest()
+    {
+        var request = new ArticlePatchRequest
+        {
+            Name = OptionalText(articlePatch.IncludeName, articlePatch.Name),
+            Description = OptionalText(articlePatch.IncludeDescription, articlePatch.Description),
+            Metrics = articlePatch.IncludeMetrics ? BuildArticleMetrics(articlePatch.Metrics) : null,
+            Barcodes = articlePatch.IncludeBarcodes ? BuildArticleBarcodes(articlePatch.Barcodes) : null,
+            Partitions = articlePatch.IncludePartitions ? ParseGuidList(articlePatch.PartitionsText, "Partitions") : null,
+            IsActive = OptionalBool(articlePatch.IncludeIsActive, articlePatch.IsActive)
+        };
+
+        request = articlePatch.ShelfLifeMode switch
+        {
+            ShelfLifePatchMode.Set => request with
+            {
+                ShelfLife = OptionalField<TimeSpan>.FromValue(RequiredTimeSpan(articlePatch.ShelfLife, "Shelf life"))
+            },
+            ShelfLifePatchMode.Clear => request with
+            {
+                ShelfLife = OptionalField<TimeSpan>.FromValue(null)
+            },
+            _ => request
+        };
+
+        return request;
+    }
+
+    private static ArticleMetricsDto? BuildArticleMetrics(ArticleMetricsForm form)
+    {
+        var metrics = new ArticleMetricsDto(
+            BuildUnitValue(form.Mass, "Mass"),
+            BuildUnitValue(form.LengthX, "Length X"),
+            BuildUnitValue(form.LengthY, "Length Y"),
+            BuildUnitValue(form.LengthZ, "Length Z"));
+
+        return metrics.Mass is null &&
+               metrics.LengthX is null &&
+               metrics.LengthY is null &&
+               metrics.LengthZ is null
+            ? null
+            : metrics;
+    }
+
+    private static ArticleBarcodesDto? BuildArticleBarcodes(ArticleBarcodesForm form)
+    {
+        var barcodes = new ArticleBarcodesDto(
+            Clean(form.Ean13),
+            Clean(form.Ean8),
+            Clean(form.UpcA),
+            Clean(form.UpcE),
+            Clean(form.Code128),
+            Clean(form.Code39),
+            Clean(form.Itf14),
+            Clean(form.Gs1128),
+            Clean(form.QrCode),
+            Clean(form.DataMatrix));
+
+        return barcodes.Ean13 is null &&
+               barcodes.Ean8 is null &&
+               barcodes.UpcA is null &&
+               barcodes.UpcE is null &&
+               barcodes.Code128 is null &&
+               barcodes.Code39 is null &&
+               barcodes.Itf14 is null &&
+               barcodes.Gs1128 is null &&
+               barcodes.QrCode is null &&
+               barcodes.DataMatrix is null
+            ? null
+            : barcodes;
+    }
+
+    private static IReadOnlyCollection<ArticleCreateKitPackRequest> ParseKitPacks(string? value)
+    {
+        var rows = SplitLines(value);
+        if (rows.Count == 0)
+        {
+            throw new InvalidOperationException("Kit packs require at least one 'articleGuid,quantity' line.");
+        }
+
+        return rows.Select((row, index) =>
+        {
+            var parts = row.Split(',', StringSplitOptions.TrimEntries);
+            if (parts.Length != 2)
+            {
+                throw new InvalidOperationException($"Kit pack line {index + 1} must be 'articleGuid,quantity'.");
+            }
+
+            return new ArticleCreateKitPackRequest(
+                RequiredGuid(parts[0], $"Kit pack line {index + 1} article GUID"),
+                RequiredDouble(parts[1], $"Kit pack line {index + 1} quantity"));
+        }).ToArray();
+    }
+
+    private static UnitValueDto? BuildUnitValue(UnitValueForm form, string label)
+    {
+        if (string.IsNullOrWhiteSpace(form.Value) && string.IsNullOrWhiteSpace(form.Unit))
+        {
+            return null;
+        }
+
+        if (!double.TryParse(form.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedValue))
+        {
+            throw new InvalidOperationException($"{label} value is not a valid number.");
+        }
+
+        return new UnitValueDto(parsedValue, RequiredText(form.Unit, $"{label} unit"));
+    }
+
+    private static FargoListQuery BuildListQuery(ListQueryForm form)
+        => new(
+            ParseNullableDateTimeOffset(form.TemporalAsOf, "Temporal as of"),
+            ParseNullableInt(form.Page, "Page"),
+            ParseNullableInt(form.Limit, "Limit"),
+            ParseGuidList(form.ChildPartitionsText, "Child partitions"),
+            form.NotChildOfAnyPartition ? true : null);
+
+    private static IReadOnlyCollection<UserPermissionUpdateDto>? ToUserPermissions(HashSet<ActionType> permissions)
+        => permissions.Count == 0
+            ? null
+            : permissions.Select(static action => new UserPermissionUpdateDto(action)).ToArray();
+
+    private static IReadOnlyCollection<UserGroupPermissionUpdateDto>? ToUserGroupPermissions(HashSet<ActionType> permissions)
+        => permissions.Count == 0
+            ? null
+            : permissions.Select(static action => new UserGroupPermissionUpdateDto(action)).ToArray();
+
+    private static IReadOnlyCollection<Guid> ParseGuidList(string? value, string label)
+        => SplitLines(value)
+            .SelectMany(static line => line.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Select((item, index) => RequiredGuid(item, $"{label} item {index + 1}"))
+            .Distinct()
+            .ToArray();
+
+    private static Guid RequiredGuid(string? value, string label)
+        => Guid.TryParse(value, out var guid)
+            ? guid
+            : throw new InvalidOperationException($"{label} is required and must be a GUID.");
+
+    private static Guid? ParseNullableGuid(string? value, string label)
+        => string.IsNullOrWhiteSpace(value)
+            ? null
+            : RequiredGuid(value, label);
+
+    private static string RequiredText(string? value, string label)
+        => string.IsNullOrWhiteSpace(value)
+            ? throw new InvalidOperationException($"{label} is required.")
+            : value.Trim();
+
+    private static string? OptionalText(bool include, string? value)
+        => include ? value ?? string.Empty : null;
+
+    private static string? Clean(string? value)
+        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static double RequiredDouble(string? value, string label)
+        => double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : throw new InvalidOperationException($"{label} is required and must be a number.");
+
+    private static TimeSpan RequiredTimeSpan(string? value, string label)
+        => TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : throw new InvalidOperationException($"{label} is required and must be a TimeSpan.");
+
+    private static TimeSpan? ParseNullableTimeSpan(string? value, string label)
+        => string.IsNullOrWhiteSpace(value) ? null : RequiredTimeSpan(value, label);
+
+    private static int? ParseNullableInt(string? value, string label)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (!int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+        {
+            throw new InvalidOperationException($"{label} must be an integer.");
+        }
+
+        return parsed;
+    }
+
+    private static DateTimeOffset? ParseNullableDateTimeOffset(string? value, string label)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (!DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed))
+        {
+            throw new InvalidOperationException($"{label} must be a valid date/time.");
+        }
+
+        return parsed;
+    }
+
+    private static bool? OptionalBool(bool include, bool value)
+        => include ? value : null;
+
+    private static IReadOnlyCollection<string> SplitLines(string? value)
+        => string.IsNullOrWhiteSpace(value)
+            ? []
+            : value.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    private static TextFieldType ToTextFieldType(string type)
+        => type.ToLowerInvariant() switch
+        {
+            "password" => TextFieldType.Password,
+            "color" => TextFieldType.Color,
+            "number" => TextFieldType.Number,
+            "search" => TextFieldType.Search,
+            "email" => TextFieldType.Email,
+            "tel" => TextFieldType.Tel,
+            "url" => TextFieldType.Url,
+            _ => TextFieldType.Text
+        };
+
+    private static DateTime? GetDatePart(string? value)
+        => DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
+            ? parsed.LocalDateTime.Date
+            : null;
+
+    private static DateTime? GetTimePart(string? value)
+        => DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
+            ? new DateTime(2000, 1, 1, parsed.LocalDateTime.Hour, parsed.LocalDateTime.Minute, parsed.LocalDateTime.Second)
+            : null;
+
+    private static string? SetDatePart(string? currentValue, DateTime? date)
+    {
+        if (date is null)
+        {
+            return null;
+        }
+
+        var time = GetTimePart(currentValue)?.TimeOfDay ?? TimeSpan.Zero;
+        return FormatDateTimeOffset(date.Value.Date.Add(time));
+    }
+
+    private static string? SetTimePart(string? currentValue, DateTime? time)
+    {
+        if (time is null && string.IsNullOrWhiteSpace(currentValue))
+        {
+            return null;
+        }
+
+        var date = GetDatePart(currentValue) ?? DateTime.Today;
+        return FormatDateTimeOffset(date.Date.Add(time?.TimeOfDay ?? TimeSpan.Zero));
+    }
+
+    private static string FormatDateTimeOffset(DateTime localDateTime)
+        => new DateTimeOffset(DateTime.SpecifyKind(localDateTime, DateTimeKind.Local))
+            .ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture);
+
+    private static string? GetDurationPart(string? value, DurationPart part)
+    {
+        if (!TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var duration))
+        {
+            return null;
+        }
+
+        var numericValue = part switch
+        {
+            DurationPart.Days => duration.Days,
+            DurationPart.Hours => duration.Hours,
+            DurationPart.Minutes => duration.Minutes,
+            _ => 0
+        };
+
+        return numericValue.ToString(CultureInfo.InvariantCulture);
+    }
+
+    private static string? SetDurationPart(string? currentValue, DurationPart part, string? value)
+    {
+        var current = TimeSpan.TryParse(currentValue, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : TimeSpan.Zero;
+
+        var days = current.Days;
+        var hours = current.Hours;
+        var minutes = current.Minutes;
+        var newValue = int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedValue)
+            ? Math.Max(0, parsedValue)
+            : 0;
+
+        switch (part)
+        {
+            case DurationPart.Days:
+                days = newValue;
+                break;
+            case DurationPart.Hours:
+                hours = newValue;
+                break;
+            case DurationPart.Minutes:
+                minutes = newValue;
+                break;
+        }
+
+        if (days == 0 && hours == 0 && minutes == 0)
+        {
+            return null;
+        }
+
+        return new TimeSpan(days, hours, minutes, 0).ToString("c", CultureInfo.InvariantCulture);
+    }
+
+    private static void RequireConfirmation(ConfirmGuidForm form)
+    {
+        if (!form.Confirm)
+        {
+            throw new InvalidOperationException("Confirm the delete operation before submitting.");
+        }
+    }
+
+    private static void TogglePermission(HashSet<ActionType> set, ActionType action, bool isSelected)
+    {
+        if (isSelected)
+        {
+            set.Add(action);
+        }
+        else
+        {
+            set.Remove(action);
+        }
+    }
+
+    private void LoadArticleIntoPatch(ArticleDto article)
+    {
+        selectedArticle = article;
+        selectedArticleOperation = OperationIds.Patch;
+        articlePatch.Guid = article.Guid.ToString("D");
+        articlePatch.Name = article.Name;
+        articlePatch.Description = article.Description;
+        articlePatch.PartitionsText = string.Join(Environment.NewLine, article.Partitions);
+        articlePatch.IsActive = article.IsActive;
+        OpenActionDialog(OperationIds.Patch);
+    }
+
+    private void LoadItemIntoUpdate(ItemDto item)
+    {
+        selectedItem = item;
+        selectedItemOperation = OperationIds.Update;
+        itemUpdate.Guid = item.Guid.ToString("D");
+        itemUpdate.PartitionsText = string.Join(Environment.NewLine, item.Partitions);
+        itemUpdate.ParentContainerGuid = item.ParentContainerGuid?.ToString("D") ?? string.Empty;
+        itemUpdate.IsActive = item.IsActive;
+        OpenActionDialog(OperationIds.Update);
+    }
+
+    private void LoadUserIntoUpdate(UserDto user)
+    {
+        selectedUser = user;
+        selectedUserOperation = OperationIds.Update;
+        userUpdate.Guid = user.Guid.ToString("D");
+        userUpdate.Nameid = user.Nameid;
+        userUpdate.FirstName = user.FirstName ?? string.Empty;
+        userUpdate.LastName = user.LastName ?? string.Empty;
+        userUpdate.Description = user.Description;
+        userUpdate.PartitionsText = string.Join(Environment.NewLine, user.Partitions);
+        userUpdate.UserGroupsText = string.Join(Environment.NewLine, user.UserGroups);
+        userUpdate.IsActive = user.IsActive;
+        userUpdate.Permissions.Clear();
+        foreach (var permission in user.Permissions.Select(static permission => permission.Action))
+        {
+            userUpdate.Permissions.Add(permission);
+        }
+        OpenActionDialog(OperationIds.Update);
+    }
+
+    private void LoadUserGroupIntoUpdate(UserGroupDto userGroup)
+    {
+        selectedUserGroup = userGroup;
+        selectedUserGroupOperation = OperationIds.Update;
+        userGroupUpdate.Guid = userGroup.Guid.ToString("D");
+        userGroupUpdate.Nameid = userGroup.Nameid;
+        userGroupUpdate.Description = userGroup.Description;
+        userGroupUpdate.PartitionsText = string.Join(Environment.NewLine, userGroup.Partitions);
+        userGroupUpdate.IsActive = userGroup.IsActive;
+        userGroupUpdate.Permissions.Clear();
+        foreach (var permission in userGroup.Permissions.Select(static permission => permission.Action))
+        {
+            userGroupUpdate.Permissions.Add(permission);
+        }
+        OpenActionDialog(OperationIds.Update);
+    }
+
+    private void LoadPartitionIntoUpdate(PartitionDto partition)
+    {
+        selectedPartition = partition;
+        selectedPartitionOperation = OperationIds.Update;
+        partitionUpdate.Guid = partition.Guid.ToString("D");
+        partitionUpdate.Name = partition.Name;
+        partitionUpdate.Description = partition.Description;
+        partitionUpdate.ParentPartitionGuid = partition.ParentPartitionGuid?.ToString("D") ?? string.Empty;
+        partitionUpdate.IsActive = partition.IsActive;
+        OpenActionDialog(OperationIds.Update);
+    }
+
+    private static string FormatPayload(object payload)
+        => payload is string text
+            ? text
+            : JsonSerializer.Serialize(payload, JsonOptions);
+
+    private static JsonSerializerOptions CreateDisplayJsonOptions()
+    {
+        var options = FargoHttpJsonSerializerOptions.Create();
+        options.WriteIndented = true;
+        options.Converters.Add(new JsonStringEnumConverter());
+        return options;
+    }
+
+    private RenderFragment ListQueryFields(ListQueryForm form) => @<div class="form-grid">
+        @DateTimeOffsetField("Temporal as of", form.TemporalAsOf, value => form.TemporalAsOf = value)
+        @IntegerField("Page", form.Page, value => form.Page = value, 1)
+        @IntegerField("Limit", form.Limit, value => form.Limit = value, 1)
+        @TextAreaField("Child partitions", form.ChildPartitionsText, value => form.ChildPartitionsText = value)
+        @CheckboxField("Not child of any partition", form.NotChildOfAnyPartition, value => form.NotChildOfAnyPartition = value)
+    </div>;
+
+    private RenderFragment TextField(
+        string label,
+        string? value,
+        Action<string?> setValue,
+        string? placeholder = null,
+        string type = "text") => @<FluentTextField
+            Label="@label"
+            Value="@value"
+            ValueChanged="@(newValue => setValue(newValue))"
+            TextFieldType="@ToTextFieldType(type)"
+            Placeholder="@placeholder"
+            Immediate="true"
+            Class="field-control" />;
+
+    private RenderFragment GuidField(string label, string? value, Action<string?> setValue) => TextField(label, value, setValue);
+
+    private RenderFragment TextAreaField(string label, string? value, Action<string?> setValue) => @<FluentTextArea
+        Label="@label"
+        Value="@value"
+        ValueChanged="@(newValue => setValue(newValue))"
+        Rows="4"
+        Resize="TextAreaResize.Vertical"
+        Immediate="true"
+        Class="field-wide field-control" />;
+
+    private RenderFragment CheckboxField(string label, bool value, Action<bool> setValue) => @<FluentCheckbox
+        Value="@value"
+        ValueChanged="@(newValue => setValue(newValue))"
+        Class="check-field">
+        @label
+    </FluentCheckbox>;
+
+    private RenderFragment ConfirmField(bool value, Action<bool> setValue, string label) => CheckboxField(label, value, setValue);
+
+    private RenderFragment OptionalBoolField(string label, bool include, Action<bool> setInclude, bool value, Action<bool> setValue) => @<div class="field">
+        @CheckboxField($"Include {label}", include, setInclude)
+        @if (include)
+        {
+            @CheckboxField(label, value, setValue)
+        }
+    </div>;
+
+    private RenderFragment EnumField<TEnum>(string label, TEnum value, Action<TEnum> setValue)
+        where TEnum : struct, Enum
+        => @<FluentSelect
+            TOption="string"
+            Label="@label"
+            Value="@value.ToString()"
+            ValueChanged="@(newValue => setValue(Enum.Parse<TEnum>(newValue)))"
+            Class="field-control">
+            @foreach (var option in Enum.GetValues<TEnum>())
+            {
+                <FluentOption TOption="string" Value="@option.ToString()">@option</FluentOption>
+            }
+        </FluentSelect>;
+
+    private RenderFragment IntegerField(string label, string? value, Action<string?> setValue, int? min = null)
+    {
+        var parsed = int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var current)
+            ? current
+            : (int?)null;
+
+        return @<FluentNumberField
+            TValue="int?"
+            Label="@label"
+            Value="@parsed"
+            ValueChanged="@(newValue => setValue(newValue?.ToString(CultureInfo.InvariantCulture)))"
+            Min="@(min?.ToString(CultureInfo.InvariantCulture))"
+            Class="field-control" />;
+    }
+
+    private RenderFragment NumberField(string label, string? value, Action<string?> setValue, double? min = null)
+    {
+        var parsed = double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var current)
+            ? current
+            : (double?)null;
+
+        return @<FluentNumberField
+            TValue="double?"
+            Label="@label"
+            Value="@parsed"
+            ValueChanged="@(newValue => setValue(newValue?.ToString(CultureInfo.InvariantCulture)))"
+            Min="@(min?.ToString(CultureInfo.InvariantCulture))"
+            Step="0.01"
+            Class="field-control" />;
+    }
+
+    private RenderFragment ColorField(string label, string? value, Action<string?> setValue) => @<FluentTextField
+        Label="@label"
+        Value="@value"
+        ValueChanged="@(newValue => setValue(newValue))"
+        TextFieldType="TextFieldType.Color"
+        Class="field-control" />;
+
+    private RenderFragment DurationField(string label, string? value, Action<string?> setValue) => @<div class="field duration-field">
+        <span>@label</span>
+        <div class="duration-grid">
+            @IntegerField("Days", GetDurationPart(value, DurationPart.Days), newValue => setValue(SetDurationPart(value, DurationPart.Days, newValue)), 0)
+            @IntegerField("Hours", GetDurationPart(value, DurationPart.Hours), newValue => setValue(SetDurationPart(value, DurationPart.Hours, newValue)), 0)
+            @IntegerField("Minutes", GetDurationPart(value, DurationPart.Minutes), newValue => setValue(SetDurationPart(value, DurationPart.Minutes, newValue)), 0)
+        </div>
+    </div>;
+
+    private RenderFragment DateTimeOffsetField(string label, string? value, Action<string?> setValue) => @<div class="field field-wide date-time-field">
+        <span>@label</span>
+        <div class="date-time-controls">
+            <FluentDatePicker
+                Label="Date"
+                Value="@GetDatePart(value)"
+                ValueChanged="@(newValue => setValue(SetDatePart(value, newValue)))"
+                Class="field-control" />
+            <FluentTimePicker
+                Label="Time"
+                Value="@GetTimePart(value)"
+                ValueChanged="@(newValue => setValue(SetTimePart(value, newValue)))"
+                Class="field-control" />
+        </div>
+    </div>;
+
+    private RenderFragment UnitValueFields(string label, UnitValueForm form) => @<fieldset class="inline-fieldset">
+        <legend>@label</legend>
+        @NumberField("Value", form.Value, value => form.Value = value, 0)
+        @TextField("Unit", form.Unit, value => form.Unit = value)
+    </fieldset>;
+
+    private RenderFragment PermissionFields(HashSet<ActionType> permissions) => @<fieldset class="permission-grid">
+        <legend>Permissions</legend>
+        @foreach (var action in Enum.GetValues<ActionType>())
+        {
+            @CheckboxField(action.ToString(), permissions.Contains(action), value => TogglePermission(permissions, action, value))
+        }
+    </fieldset>;
+
+    private RenderFragment ArticleCreateFields() => @<div class="form-grid">
+        @TextField("Name", articleCreate.Name, value => articleCreate.Name = value)
+        @EnumField("Type", articleCreate.ArticleType, value => articleCreate.ArticleType = value)
+        @TextField("Description", articleCreate.Description, value => articleCreate.Description = value)
+        @DurationField("Shelf life", articleCreate.ShelfLife, value => articleCreate.ShelfLife = value)
+        @ColorField("Color", articleCreate.Color, value => articleCreate.Color = value)
+        @TextAreaField("Partitions", articleCreate.PartitionsText, value => articleCreate.PartitionsText = value)
+        @OptionalBoolField("Active", articleCreate.IncludeIsActive, value => articleCreate.IncludeIsActive = value, articleCreate.IsActive, value => articleCreate.IsActive = value)
+        @ArticleMetricsFields(articleCreate.Metrics)
+        @ArticleBarcodeFields(articleCreate.Barcodes)
+        @if (articleCreate.ArticleType is ArticleType.Variation or ArticleType.Pack)
+        {
+            @TextField("From article GUID", articleCreate.FromArticleGuid, value => articleCreate.FromArticleGuid = value)
+        }
+        @if (articleCreate.ArticleType == ArticleType.Pack)
+        {
+            @NumberField("Quantity", articleCreate.Quantity, value => articleCreate.Quantity = value, 0)
+        }
+        @if (articleCreate.ArticleType == ArticleType.Kit)
+        {
+            @TextAreaField("Kit packs: articleGuid,quantity", articleCreate.KitPacksText, value => articleCreate.KitPacksText = value)
+        }
+        @if (articleCreate.ArticleType == ArticleType.Container)
+        {
+            @UnitValueFields("Container max mass", articleCreate.ContainerMaxMass)
+        }
+    </div>;
+
+    private RenderFragment ArticlePatchFields() => @<div class="form-grid">
+        @CheckboxField("Include name", articlePatch.IncludeName, value => articlePatch.IncludeName = value)
+        @if (articlePatch.IncludeName) { @TextField("Name", articlePatch.Name, value => articlePatch.Name = value) }
+        @CheckboxField("Include description", articlePatch.IncludeDescription, value => articlePatch.IncludeDescription = value)
+        @if (articlePatch.IncludeDescription) { @TextField("Description", articlePatch.Description, value => articlePatch.Description = value) }
+        @EnumField("Shelf life", articlePatch.ShelfLifeMode, value => articlePatch.ShelfLifeMode = value)
+        @if (articlePatch.ShelfLifeMode == ShelfLifePatchMode.Set) { @DurationField("Shelf life value", articlePatch.ShelfLife, value => articlePatch.ShelfLife = value) }
+        @CheckboxField("Include metrics", articlePatch.IncludeMetrics, value => articlePatch.IncludeMetrics = value)
+        @if (articlePatch.IncludeMetrics) { @ArticleMetricsFields(articlePatch.Metrics) }
+        @CheckboxField("Include barcodes", articlePatch.IncludeBarcodes, value => articlePatch.IncludeBarcodes = value)
+        @if (articlePatch.IncludeBarcodes) { @ArticleBarcodeFields(articlePatch.Barcodes) }
+        @CheckboxField("Include partitions", articlePatch.IncludePartitions, value => articlePatch.IncludePartitions = value)
+        @if (articlePatch.IncludePartitions) { @TextAreaField("Partitions", articlePatch.PartitionsText, value => articlePatch.PartitionsText = value) }
+        @OptionalBoolField("Active", articlePatch.IncludeIsActive, value => articlePatch.IncludeIsActive = value, articlePatch.IsActive, value => articlePatch.IsActive = value)
+    </div>;
+
+    private RenderFragment ArticleMetricsFields(ArticleMetricsForm form) => @<fieldset class="form-section field-wide">
+        <legend>Metrics</legend>
+        @UnitValueFields("Mass", form.Mass)
+        @UnitValueFields("Length X", form.LengthX)
+        @UnitValueFields("Length Y", form.LengthY)
+        @UnitValueFields("Length Z", form.LengthZ)
+    </fieldset>;
+
+    private RenderFragment ArticleBarcodeFields(ArticleBarcodesForm form) => @<fieldset class="form-section field-wide">
+        <legend>Barcodes</legend>
+        @TextField("EAN-13", form.Ean13, value => form.Ean13 = value)
+        @TextField("EAN-8", form.Ean8, value => form.Ean8 = value)
+        @TextField("UPC-A", form.UpcA, value => form.UpcA = value)
+        @TextField("UPC-E", form.UpcE, value => form.UpcE = value)
+        @TextField("Code 128", form.Code128, value => form.Code128 = value)
+        @TextField("Code 39", form.Code39, value => form.Code39 = value)
+        @TextField("ITF-14", form.Itf14, value => form.Itf14 = value)
+        @TextField("GS1-128", form.Gs1128, value => form.Gs1128 = value)
+        @TextField("QR Code", form.QrCode, value => form.QrCode = value)
+        @TextField("Data Matrix", form.DataMatrix, value => form.DataMatrix = value)
+    </fieldset>;
+
+    private RenderFragment UserCreateFields() => @<div class="form-grid">
+        @TextField("Nameid", userCreate.Nameid, value => userCreate.Nameid = value)
+        @TextField("Password", userCreate.Password, value => userCreate.Password = value, type: "password")
+        @TextField("First name", userCreate.FirstName, value => userCreate.FirstName = value)
+        @TextField("Last name", userCreate.LastName, value => userCreate.LastName = value)
+        @TextField("Description", userCreate.Description, value => userCreate.Description = value)
+        @DurationField("Default password expiration", userCreate.DefaultPasswordExpirationPeriod, value => userCreate.DefaultPasswordExpirationPeriod = value)
+        @TextAreaField("Partitions", userCreate.PartitionsText, value => userCreate.PartitionsText = value)
+        @TextAreaField("User groups", userCreate.UserGroupsText, value => userCreate.UserGroupsText = value)
+        @PermissionFields(userCreate.Permissions)
+    </div>;
+
+    private RenderFragment UserUpdateFields() => @<div class="form-grid">
+        @CheckboxField("Include nameid", userUpdate.IncludeNameid, value => userUpdate.IncludeNameid = value)
+        @if (userUpdate.IncludeNameid) { @TextField("Nameid", userUpdate.Nameid, value => userUpdate.Nameid = value) }
+        @CheckboxField("Include first name", userUpdate.IncludeFirstName, value => userUpdate.IncludeFirstName = value)
+        @if (userUpdate.IncludeFirstName) { @TextField("First name", userUpdate.FirstName, value => userUpdate.FirstName = value) }
+        @CheckboxField("Include last name", userUpdate.IncludeLastName, value => userUpdate.IncludeLastName = value)
+        @if (userUpdate.IncludeLastName) { @TextField("Last name", userUpdate.LastName, value => userUpdate.LastName = value) }
+        @CheckboxField("Include description", userUpdate.IncludeDescription, value => userUpdate.IncludeDescription = value)
+        @if (userUpdate.IncludeDescription) { @TextField("Description", userUpdate.Description, value => userUpdate.Description = value) }
+        @CheckboxField("Include password", userUpdate.IncludePassword, value => userUpdate.IncludePassword = value)
+        @if (userUpdate.IncludePassword) { @TextField("Password", userUpdate.Password, value => userUpdate.Password = value, type: "password") }
+        @OptionalBoolField("Active", userUpdate.IncludeIsActive, value => userUpdate.IncludeIsActive = value, userUpdate.IsActive, value => userUpdate.IsActive = value)
+        @CheckboxField("Include default password expiration", userUpdate.IncludeDefaultPasswordExpirationPeriod, value => userUpdate.IncludeDefaultPasswordExpirationPeriod = value)
+        @if (userUpdate.IncludeDefaultPasswordExpirationPeriod) { @DurationField("Default password expiration", userUpdate.DefaultPasswordExpirationPeriod, value => userUpdate.DefaultPasswordExpirationPeriod = value) }
+        @CheckboxField("Include partitions", userUpdate.IncludePartitions, value => userUpdate.IncludePartitions = value)
+        @if (userUpdate.IncludePartitions) { @TextAreaField("Partitions", userUpdate.PartitionsText, value => userUpdate.PartitionsText = value) }
+        @CheckboxField("Include user groups", userUpdate.IncludeUserGroups, value => userUpdate.IncludeUserGroups = value)
+        @if (userUpdate.IncludeUserGroups) { @TextAreaField("User groups", userUpdate.UserGroupsText, value => userUpdate.UserGroupsText = value) }
+        @CheckboxField("Include permissions", userUpdate.IncludePermissions, value => userUpdate.IncludePermissions = value)
+        @if (userUpdate.IncludePermissions) { @PermissionFields(userUpdate.Permissions) }
+    </div>;
+
+    private RenderFragment UserGroupCreateFields() => @<div class="form-grid">
+        @TextField("Nameid", userGroupCreate.Nameid, value => userGroupCreate.Nameid = value)
+        @TextField("Description", userGroupCreate.Description, value => userGroupCreate.Description = value)
+        @TextAreaField("Partitions", userGroupCreate.PartitionsText, value => userGroupCreate.PartitionsText = value)
+        @PermissionFields(userGroupCreate.Permissions)
+    </div>;
+
+    private RenderFragment UserGroupUpdateFields() => @<div class="form-grid">
+        @CheckboxField("Include nameid", userGroupUpdate.IncludeNameid, value => userGroupUpdate.IncludeNameid = value)
+        @if (userGroupUpdate.IncludeNameid) { @TextField("Nameid", userGroupUpdate.Nameid, value => userGroupUpdate.Nameid = value) }
+        @CheckboxField("Include description", userGroupUpdate.IncludeDescription, value => userGroupUpdate.IncludeDescription = value)
+        @if (userGroupUpdate.IncludeDescription) { @TextField("Description", userGroupUpdate.Description, value => userGroupUpdate.Description = value) }
+        @OptionalBoolField("Active", userGroupUpdate.IncludeIsActive, value => userGroupUpdate.IncludeIsActive = value, userGroupUpdate.IsActive, value => userGroupUpdate.IsActive = value)
+        @CheckboxField("Include partitions", userGroupUpdate.IncludePartitions, value => userGroupUpdate.IncludePartitions = value)
+        @if (userGroupUpdate.IncludePartitions) { @TextAreaField("Partitions", userGroupUpdate.PartitionsText, value => userGroupUpdate.PartitionsText = value) }
+        @CheckboxField("Include permissions", userGroupUpdate.IncludePermissions, value => userGroupUpdate.IncludePermissions = value)
+        @if (userGroupUpdate.IncludePermissions) { @PermissionFields(userGroupUpdate.Permissions) }
+    </div>;
+
+    private RenderFragment DetailsPane(string resourceName, string? title, RenderFragment content, RenderFragment? actions) => @<aside class="details-pane">
+        <header class="details-pane-header">
+            <div class="details-pane-title">
+                <span>@resourceName</span>
+                <h3>@DisplayValue(title)</h3>
+            </div>
+            <div class="details-pane-actions">
+                @if (actions is not null)
+                {
+                    @actions
+                }
+                <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Dismiss())" Title="Close details" @onclick="CloseDetailsPane" />
+            </div>
+        </header>
+        <div class="details-pane-body">
+            @content
+        </div>
+    </aside>;
+
+    private RenderFragment ArticleDetailsPane(ArticleDto article)
+        => DetailsPane("Article", article.Name, ArticleDetail(article), ArticleDetailActions(article));
+
+    private RenderFragment ItemDetailsPane(ItemDto item)
+        => DetailsPane("Item", item.Guid.ToString("D"), ItemDetail(item), ItemDetailActions(item));
+
+    private RenderFragment UserDetailsPane(UserDto user)
+        => DetailsPane("User", user.Nameid, UserDetail(user), UserDetailActions(user));
+
+    private RenderFragment UserGroupDetailsPane(UserGroupDto userGroup)
+        => DetailsPane("User group", userGroup.Nameid, UserGroupDetail(userGroup), UserGroupDetailActions(userGroup));
+
+    private RenderFragment PartitionDetailsPane(PartitionDto partition)
+        => DetailsPane("Partition", partition.Name, PartitionDetail(partition), PartitionDetailActions(partition));
+
+    private RenderFragment ArticleDetailActions(ArticleDto article) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadArticleIntoPatch(article)">Patch</FluentButton>;
+
+    private RenderFragment ItemDetailActions(ItemDto item) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadItemIntoUpdate(item)">Update</FluentButton>;
+
+    private RenderFragment UserDetailActions(UserDto user) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadUserIntoUpdate(user)">Update</FluentButton>;
+
+    private RenderFragment UserGroupDetailActions(UserGroupDto userGroup) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadUserGroupIntoUpdate(userGroup)">Update</FluentButton>;
+
+    private RenderFragment PartitionDetailActions(PartitionDto partition) => @<FluentButton Appearance="Appearance.Lightweight" Disabled="@isBusy" @onclick="() => LoadPartitionIntoUpdate(partition)">Update</FluentButton>;
+
+    private RenderFragment ArticleTable(IReadOnlyCollection<ArticleDto> rows) => @<div class="table-wrap fluent-grid-wrap">
+        <FluentDataGrid TGridItem="ArticleDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(article => article.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(article => selectedArticle?.Guid == article.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectArticle(row.Item!))">
+            <TemplateColumn Title="Guid" Context="article">@GuidChip(article.Guid)</TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(article => article!.Name)" />
+        </FluentDataGrid>
+    </div>;
+
+    private RenderFragment ArticleDetail(ArticleDto article) => @<section class="detail-panel">
+        <div class="detail-grid">
+            @DetailValue("Guid", article.Guid.ToString("D"))
+            @DetailValue("Type", article.ArticleType.ToString())
+            @DetailValue("Description", article.Description)
+            @DetailValue("Shelf life", FormatDuration(article.ShelfLife))
+            @DetailValue("Active", article.IsActive ? "Yes" : "No")
+            @DetailValue("Modified", article.ModificationTypes.ToString())
+        </div>
+        <section class="detail-section">
+            <h4>Color</h4>
+            @ColorSwatch(article.Color)
+        </section>
+        <section class="detail-section">
+            <h4>Metrics</h4>
+            <div class="detail-grid">
+                @DetailValue("Mass", FormatUnit(article.Metrics.Mass))
+                @DetailValue("Length X", FormatUnit(article.Metrics.LengthX))
+                @DetailValue("Length Y", FormatUnit(article.Metrics.LengthY))
+                @DetailValue("Length Z", FormatUnit(article.Metrics.LengthZ))
+            </div>
+        </section>
+        <section class="detail-section">
+            <h4>Barcodes</h4>
+            <div class="detail-grid">
+                @DetailValue("EAN-13", article.Barcodes.Ean13)
+                @DetailValue("EAN-8", article.Barcodes.Ean8)
+                @DetailValue("UPC-A", article.Barcodes.UpcA)
+                @DetailValue("UPC-E", article.Barcodes.UpcE)
+                @DetailValue("Code 128", article.Barcodes.Code128)
+                @DetailValue("Code 39", article.Barcodes.Code39)
+                @DetailValue("ITF-14", article.Barcodes.Itf14)
+                @DetailValue("GS1-128", article.Barcodes.Gs1128)
+                @DetailValue("QR Code", article.Barcodes.QrCode)
+                @DetailValue("Data Matrix", article.Barcodes.DataMatrix)
+            </div>
+        </section>
+        @GuidCollection("Partitions", article.Partitions)
+        @EditedBy(article.EditedByGuid)
+    </section>;
+
+    private RenderFragment ItemTable(IReadOnlyCollection<ItemDto> rows) => @<div class="table-wrap fluent-grid-wrap">
+        <FluentDataGrid TGridItem="ItemDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(item => item.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(item => selectedItem?.Guid == item.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectItem(row.Item!))">
+            <TemplateColumn Title="Guid" Context="item">@GuidChip(item.Guid)</TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(item => ItemDisplayName(item!))" />
+        </FluentDataGrid>
+    </div>;
+
+    private RenderFragment ItemDetail(ItemDto item) => @<section class="detail-panel">
+        <div class="detail-grid">
+            @DetailValue("Guid", item.Guid.ToString("D"))
+            @DetailValue("Article", item.ArticleGuid.ToString("D"))
+            @DetailValue("Production", item.ProductionDate?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
+            @DetailValue("Parent container", item.ParentContainerGuid?.ToString("D"))
+            @DetailValue("Active", item.IsActive ? "Yes" : "No")
+            @DetailValue("Modified", item.ModificationTypes.ToString())
+        </div>
+        @GuidCollection("Partitions", item.Partitions)
+        @EditedBy(item.EditedByGuid)
+    </section>;
+
+    private RenderFragment UserTable(IReadOnlyCollection<UserDto> rows) => @<div class="table-wrap fluent-grid-wrap">
+        <FluentDataGrid TGridItem="UserDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(user => user.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(user => selectedUser?.Guid == user.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectUser(row.Item!))">
+            <TemplateColumn Title="Guid" Context="user">@GuidChip(user.Guid)</TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(user => user!.Nameid)" />
+        </FluentDataGrid>
+    </div>;
+
+    private RenderFragment UserDetail(UserDto user) => @<section class="detail-panel">
+        <div class="detail-grid">
+            @DetailValue("Guid", user.Guid.ToString("D"))
+            @DetailValue("First name", user.FirstName)
+            @DetailValue("Last name", user.LastName)
+            @DetailValue("Description", user.Description)
+            @DetailValue("Password expiration", FormatDuration(user.DefaultPasswordExpirationPeriod))
+            @DetailValue("Password change required", user.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
+            @DetailValue("Active", user.IsActive ? "Yes" : "No")
+            @DetailValue("Modified", user.ModificationTypes.ToString())
+        </div>
+        @PermissionCollection("Permissions", user.Permissions.Select(static permission => permission.Action))
+        @GuidCollection("Partitions", user.Partitions)
+        @GuidCollection("User groups", user.UserGroups)
+        @EditedBy(user.EditedByGuid)
+    </section>;
+
+    private RenderFragment UserGroupTable(IReadOnlyCollection<UserGroupDto> rows) => @<div class="table-wrap fluent-grid-wrap">
+        <FluentDataGrid TGridItem="UserGroupDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(userGroup => userGroup.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(userGroup => selectedUserGroup?.Guid == userGroup.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectUserGroup(row.Item!))">
+            <TemplateColumn Title="Guid" Context="userGroup">@GuidChip(userGroup.Guid)</TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(userGroup => userGroup!.Nameid)" />
+        </FluentDataGrid>
+    </div>;
+
+    private RenderFragment UserGroupDetail(UserGroupDto userGroup) => @<section class="detail-panel">
+        <div class="detail-grid">
+            @DetailValue("Guid", userGroup.Guid.ToString("D"))
+            @DetailValue("Description", userGroup.Description)
+            @DetailValue("Active", userGroup.IsActive ? "Yes" : "No")
+            @DetailValue("Modified", userGroup.ModificationTypes.ToString())
+        </div>
+        @PermissionCollection("Permissions", userGroup.Permissions.Select(static permission => permission.Action))
+        @GuidCollection("Partitions", userGroup.Partitions)
+        @EditedBy(userGroup.EditedByGuid)
+    </section>;
+
+    private RenderFragment PartitionTable(IReadOnlyCollection<PartitionDto> rows) => @<div class="table-wrap fluent-grid-wrap">
+        <FluentDataGrid TGridItem="PartitionDto" Class="playground-grid entity-grid" Items="@rows.AsQueryable()" ItemKey="@(partition => partition.Guid)" GridTemplateColumns="minmax(230px, 0.95fr) minmax(280px, 1.05fr)" ResizableColumns="true" GenerateHeader="GenerateHeaderOption.Sticky" ShowHover="true" RowSize="DataGridRowSize.Medium" RowClass="@(partition => selectedPartition?.Guid == partition.Guid ? "selected-row" : string.Empty)" OnRowClick="@(row => SelectPartition(row.Item!))">
+            <TemplateColumn Title="Guid" Context="partition">@GuidChip(partition.Guid)</TemplateColumn>
+            <PropertyColumn Title="Name" Property="@(partition => partition!.Name)" />
+        </FluentDataGrid>
+    </div>;
+
+    private RenderFragment PartitionDetail(PartitionDto partition) => @<section class="detail-panel">
+        <div class="detail-grid">
+            @DetailValue("Guid", partition.Guid.ToString("D"))
+            @DetailValue("Description", partition.Description)
+            @DetailValue("Parent", partition.ParentPartitionGuid?.ToString("D"))
+            @DetailValue("Active", partition.IsActive ? "Yes" : "No")
+            @DetailValue("Modified", partition.ModificationTypes.ToString())
+        </div>
+        @EditedBy(partition.EditedByGuid)
+    </section>;
+
+    private RenderFragment AuthDetail(AuthDto auth) => @<section class="detail-panel auth-detail">
+        <h3>Current auth</h3>
+        <div class="summary-grid auth-summary">
+            <div class="summary-item"><span>Expires</span><strong data-testid="playground-auth-expires">@auth.ExpiresAt.LocalDateTime</strong></div>
+            <div class="summary-item"><span>Admin</span><strong data-testid="playground-auth-admin">@auth.IsAdmin</strong></div>
+            <div class="summary-item"><span>Permissions</span><strong data-testid="playground-auth-permissions">@auth.PermissionActions.Count</strong></div>
+            <div class="summary-item"><span>Partitions</span><strong data-testid="playground-auth-partitions">@auth.PartitionAccesses.Count</strong></div>
+        </div>
+        @PermissionCollection("Permission actions", auth.PermissionActions)
+        @GuidCollection("Partition accesses", auth.PartitionAccesses)
+    </section>;
+
+    private void SelectArticle(ArticleDto article)
+    {
+        selectedArticle = article;
+    }
+
+    private void SelectItem(ItemDto item)
+    {
+        selectedItem = item;
+    }
+
+    private void SelectUser(UserDto user)
+    {
+        selectedUser = user;
+    }
+
+    private void SelectUserGroup(UserGroupDto userGroup)
+    {
+        selectedUserGroup = userGroup;
+    }
+
+    private void SelectPartition(PartitionDto partition)
+    {
+        selectedPartition = partition;
+    }
+
+    private void CloseDetailsPane()
+    {
+        switch (Resource)
+        {
+            case PlaygroundResource.Articles:
+                selectedArticle = null;
+                if (!HasArticleGrid && result?.Payload is ArticleDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.Items:
+                selectedItem = null;
+                if (!HasItemGrid && result?.Payload is ItemDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.Users:
+                selectedUser = null;
+                if (!HasUserGrid && result?.Payload is UserDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.UserGroups:
+                selectedUserGroup = null;
+                if (!HasUserGroupGrid && result?.Payload is UserGroupDto)
+                {
+                    result = null;
+                }
+                break;
+            case PlaygroundResource.Partitions:
+                selectedPartition = null;
+                if (!HasPartitionGrid && result?.Payload is PartitionDto)
+                {
+                    result = null;
+                }
+                break;
+        }
+    }
+
+    private static string ItemDisplayName(ItemDto item)
+        => $"Article {item.ArticleGuid.ToString("D")[..8]}";
+
+    private static string FullName(UserDto user)
+    {
+        var parts = new[] { user.FirstName, user.LastName }
+            .Where(static value => !string.IsNullOrWhiteSpace(value))
+            .ToArray();
+
+        return parts.Length == 0 ? "None" : string.Join(' ', parts);
+    }
+
+    private static string DisplayValue(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "None" : value;
+
+    private static string FormatDuration(TimeSpan? value)
+        => value is null ? "None" : value.Value.ToString("c", CultureInfo.InvariantCulture);
+
+    private static string FormatUnit(UnitValueDto? value)
+        => value is null ? "None" : $"{value.Value.ToString("G", CultureInfo.InvariantCulture)} {value.Unit}";
+
+    private RenderFragment DetailValue(string label, string? value) => @<div class="detail-item">
+        <span>@label</span>
+        <strong>@DisplayValue(value)</strong>
+    </div>;
+
+    private RenderFragment ActiveBadge(bool isActive) => @<FluentBadge Class="@(isActive ? "state-badge active" : "state-badge inactive")">
+        @(isActive ? "Active" : "Inactive")
+    </FluentBadge>;
+
+    private RenderFragment ColorSwatch(string? color) => @<div class="color-display">
+        @if (string.IsNullOrWhiteSpace(color))
+        {
+            <span class="color-swatch empty"></span>
+            <span>None</span>
+        }
+        else
+        {
+            <span class="color-swatch" style="@($"background-color: {color}")"></span>
+            <code class="color-value">@color</code>
+        }
+    </div>;
+
+    private RenderFragment GuidChip(Guid? guid) => @<code class="@($"guid-chip {(guid is null ? "empty" : string.Empty)}")">
+        @(guid?.ToString("D") ?? "None")
+    </code>;
+
+    private RenderFragment GuidCollection(string title, IEnumerable<Guid> guids)
+    {
+        var values = guids.ToArray();
+
+        return @<section class="detail-section">
+            <h4>@title</h4>
+            <div class="chip-list">
+                @if (values.Length == 0)
+                {
+                    <span class="empty-value">None</span>
+                }
+                else
+                {
+                    @foreach (var guid in values)
+                    {
+                        @GuidChip(guid)
+                    }
+                }
+            </div>
+        </section>;
+    }
+
+    private RenderFragment PermissionCollection(string title, IEnumerable<ActionType> permissions)
+    {
+        var values = permissions.ToArray();
+
+        return @<section class="detail-section">
+            <h4>@title</h4>
+            <div class="chip-list">
+                @if (values.Length == 0)
+                {
+                    <span class="empty-value">None</span>
+                }
+                else
+                {
+                    @foreach (var permission in values)
+                    {
+                        <FluentBadge Appearance="Appearance.Neutral">@permission</FluentBadge>
+                    }
+                }
+            </div>
+        </section>;
+    }
+
+    private RenderFragment EditedBy(Guid? editedByGuid) => @<section class="detail-section">
+        <h4>Edited by</h4>
+        @GuidChip(editedByGuid)
+    </section>;
+
+    private enum ShelfLifePatchMode
+    {
+        Unchanged,
+        Set,
+        Clear
+    }
+
+    private enum DurationPart
+    {
+        Days,
+        Hours,
+        Minutes
+    }
+
+    private static class OperationIds
+    {
+        public const string GetMany = "get-many";
+        public const string GetByGuid = "get-by-guid";
+        public const string GetByBarcode = "get-by-barcode";
+        public const string Create = "create";
+        public const string Patch = "patch";
+        public const string Update = "update";
+        public const string Delete = "delete";
+        public const string RefreshAuth = "refresh-auth";
+        public const string ChangePassword = "change-password";
+        public const string Logout = "logout";
+        public const string ClearSavedAuth = "clear-saved-auth";
+    }
+
+    private sealed record OperationOption(string Id, string Label);
+
+    private sealed record OperationResult(
+        bool IsSuccess,
+        string Title,
+        string Message,
+        object? Payload)
+    {
+        public static OperationResult Success(string title, string message, object? payload)
+            => new(true, title, message, payload);
+
+        public static OperationResult Failure(string title, string message, object? payload)
+            => new(false, title, message, payload);
+    }
+
+    private sealed class ListQueryForm
+    {
+        public string? TemporalAsOf { get; set; }
+        public string? Page { get; set; }
+        public string? Limit { get; set; } = "20";
+        public string? ChildPartitionsText { get; set; }
+        public bool NotChildOfAnyPartition { get; set; }
+    }
+
+    private class GuidForm
+    {
+        public string? Guid { get; set; }
+    }
+
+    private sealed class ConfirmGuidForm : GuidForm
+    {
+        public bool Confirm { get; set; }
+    }
+
+    private sealed class UnitValueForm
+    {
+        public string? Value { get; set; }
+        public string? Unit { get; set; }
+    }
+
+    private sealed class ArticleMetricsForm
+    {
+        public UnitValueForm Mass { get; } = new();
+        public UnitValueForm LengthX { get; } = new();
+        public UnitValueForm LengthY { get; } = new();
+        public UnitValueForm LengthZ { get; } = new();
+    }
+
+    private sealed class ArticleBarcodesForm
+    {
+        public string? Ean13 { get; set; }
+        public string? Ean8 { get; set; }
+        public string? UpcA { get; set; }
+        public string? UpcE { get; set; }
+        public string? Code128 { get; set; }
+        public string? Code39 { get; set; }
+        public string? Itf14 { get; set; }
+        public string? Gs1128 { get; set; }
+        public string? QrCode { get; set; }
+        public string? DataMatrix { get; set; }
+    }
+
+    private sealed class ArticleBarcodeForm
+    {
+        public string? Code { get; set; }
+        public BarcodeFormat Format { get; set; } = BarcodeFormat.Ean13;
+    }
+
+    private sealed class ArticleCreateForm
+    {
+        public string? Name { get; set; }
+        public ArticleType ArticleType { get; set; } = ArticleType.Default;
+        public string? Description { get; set; }
+        public string? ShelfLife { get; set; }
+        public string? Color { get; set; }
+        public ArticleMetricsForm Metrics { get; } = new();
+        public ArticleBarcodesForm Barcodes { get; } = new();
+        public string? PartitionsText { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+        public string? FromArticleGuid { get; set; }
+        public string? Quantity { get; set; }
+        public string? KitPacksText { get; set; }
+        public UnitValueForm ContainerMaxMass { get; } = new();
+    }
+
+    private sealed class ArticlePatchForm : GuidForm
+    {
+        public bool IncludeName { get; set; }
+        public string? Name { get; set; }
+        public bool IncludeDescription { get; set; }
+        public string? Description { get; set; }
+        public ShelfLifePatchMode ShelfLifeMode { get; set; }
+        public string? ShelfLife { get; set; }
+        public bool IncludeMetrics { get; set; }
+        public ArticleMetricsForm Metrics { get; } = new();
+        public bool IncludeBarcodes { get; set; }
+        public ArticleBarcodesForm Barcodes { get; } = new();
+        public bool IncludePartitions { get; set; }
+        public string? PartitionsText { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    private sealed class ItemCreateForm
+    {
+        public string? ArticleGuid { get; set; }
+        public string? ProductionDate { get; set; }
+        public string? PartitionsText { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    private sealed class ItemUpdateForm : GuidForm
+    {
+        public string? PartitionsText { get; set; }
+        public string? ParentContainerGuid { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    private sealed class UserCreateForm
+    {
+        public string? Nameid { get; set; }
+        public string? Password { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Description { get; set; }
+        public string? DefaultPasswordExpirationPeriod { get; set; }
+        public string? PartitionsText { get; set; }
+        public string? UserGroupsText { get; set; }
+        public HashSet<ActionType> Permissions { get; } = [];
+    }
+
+    private sealed class UserUpdateForm : GuidForm
+    {
+        public bool IncludeNameid { get; set; }
+        public string? Nameid { get; set; }
+        public bool IncludeFirstName { get; set; }
+        public string? FirstName { get; set; }
+        public bool IncludeLastName { get; set; }
+        public string? LastName { get; set; }
+        public bool IncludeDescription { get; set; }
+        public string? Description { get; set; }
+        public bool IncludePassword { get; set; }
+        public string? Password { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool IncludePermissions { get; set; }
+        public HashSet<ActionType> Permissions { get; } = [];
+        public bool IncludeDefaultPasswordExpirationPeriod { get; set; }
+        public string? DefaultPasswordExpirationPeriod { get; set; }
+        public bool IncludePartitions { get; set; }
+        public string? PartitionsText { get; set; }
+        public bool IncludeUserGroups { get; set; }
+        public string? UserGroupsText { get; set; }
+    }
+
+    private sealed class UserGroupCreateForm
+    {
+        public string? Nameid { get; set; }
+        public string? Description { get; set; }
+        public string? PartitionsText { get; set; }
+        public HashSet<ActionType> Permissions { get; } = [];
+    }
+
+    private sealed class UserGroupUpdateForm : GuidForm
+    {
+        public bool IncludeNameid { get; set; }
+        public string? Nameid { get; set; }
+        public bool IncludeDescription { get; set; }
+        public string? Description { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool IncludePermissions { get; set; }
+        public HashSet<ActionType> Permissions { get; } = [];
+        public bool IncludePartitions { get; set; }
+        public string? PartitionsText { get; set; }
+    }
+
+    private sealed class PartitionCreateForm
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? ParentPartitionGuid { get; set; }
+    }
+
+    private sealed class PartitionUpdateForm : GuidForm
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? ParentPartitionGuid { get; set; }
+        public bool IncludeIsActive { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    private sealed class PasswordForm
+    {
+        public string? CurrentPassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+}

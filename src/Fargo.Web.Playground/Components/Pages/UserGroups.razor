@@ -1,0 +1,14 @@
+﻿@page "/user-groups"
+@page "/user-groups/{EntityGuid:guid}"
+@rendermode InteractiveServer
+
+<PageTitle>User Groups - Fargo Playground</PageTitle>
+
+<RequirePlaygroundAuth Title="User Groups">
+    <ApiWorkspace Resource="PlaygroundResource.UserGroups" EntityGuid="@EntityGuid" />
+</RequirePlaygroundAuth>
+
+@code {
+    [Parameter]
+    public Guid? EntityGuid { get; set; }
+}

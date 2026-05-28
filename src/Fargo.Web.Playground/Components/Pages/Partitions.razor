@@ -1,0 +1,14 @@
+﻿@page "/partitions"
+@page "/partitions/{EntityGuid:guid}"
+@rendermode InteractiveServer
+
+<PageTitle>Partitions - Fargo Playground</PageTitle>
+
+<RequirePlaygroundAuth Title="Partitions">
+    <ApiWorkspace Resource="PlaygroundResource.Partitions" EntityGuid="@EntityGuid" />
+</RequirePlaygroundAuth>
+
+@code {
+    [Parameter]
+    public Guid? EntityGuid { get; set; }
+}
