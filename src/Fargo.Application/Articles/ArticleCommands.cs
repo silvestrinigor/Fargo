@@ -27,67 +27,6 @@ public sealed record ArticleCreateDefaultCommand(
 ) : ICommand<Guid>;
 
 /// <summary>
-/// Command used to create a variation article.
-/// </summary>
-public sealed record ArticleCreateVariationCommand(
-    Name Name,
-    Guid FromArticleGuid,
-    Description? Description = null,
-    TimeSpan? ShelfLife = null,
-    Color? Color = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
-) : ICommand<Guid>;
-
-/// <summary>
-/// Command used to create a pack article.
-/// </summary>
-public sealed record ArticleCreatePackCommand(
-    Name Name,
-    Guid FromArticleGuid,
-    Scalar Quantity,
-    Description? Description = null,
-    TimeSpan? ShelfLife = null,
-    Color? Color = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
-) : ICommand<Guid>;
-
-/// <summary>
-/// Command used to create a kit article.
-/// </summary>
-public sealed record ArticleCreateKitCommand(
-    Name Name,
-    IReadOnlyCollection<ArticleCreateKitPackDto> Packs,
-    Description? Description = null,
-    TimeSpan? ShelfLife = null,
-    Color? Color = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
-) : ICommand<Guid>;
-
-/// <summary>
-/// Command used to create a container article.
-/// </summary>
-public sealed record ArticleCreateContainerCommand(
-    Name Name,
-    Mass? MaxMass = null,
-    Description? Description = null,
-    TimeSpan? ShelfLife = null,
-    Color? Color = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null
-) : ICommand<Guid>;
-
-/// <summary>
 /// Handles default article creation.
 /// </summary>
 public sealed class ArticleCreateDefaultCommandHandler(
@@ -105,16 +44,14 @@ public sealed class ArticleCreateDefaultCommandHandler(
         ArticleCreateDefaultCommand command,
         CancellationToken cancellationToken = default)
     {
-        const ArticleType expectedArticleType = ArticleType.Default;
-
         var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);
+
         var actor = authorizationContext.ToActor();
 
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Article {ArticleType} create flow started for actor {ActorGuid}.",
-                expectedArticleType,
+                "Article create flow started for actor {ActorGuid}.",
                 actor.Guid);
         }
 
@@ -122,7 +59,7 @@ public sealed class ArticleCreateDefaultCommandHandler(
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+        entityEventRepository.Add(EntityEvent.EntityCreated(article, actor.Guid));
 
         if (command.Description is { } description)
         {
@@ -179,7 +116,7 @@ public sealed class ArticleCreateDefaultCommandHandler(
         {
             article.Deactivate(actor);
 
-            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+            entityEventRepository.Add(EntityEvent.Deactivated(article, actor.Guid));
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
@@ -187,8 +124,7 @@ public sealed class ArticleCreateDefaultCommandHandler(
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Article {ArticleType} create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
-                expectedArticleType,
+                "Article create mutation completed for article {ArticleGuid} by actor {ActorGuid}.",
                 article.Guid,
                 actor.Guid);
         }
@@ -196,6 +132,21 @@ public sealed class ArticleCreateDefaultCommandHandler(
         return article.Guid;
     }
 }
+
+/// <summary>
+/// Command used to create a variation article.
+/// </summary>
+public sealed record ArticleCreateVariationCommand(
+    Name Name,
+    Guid FromArticleGuid,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
+) : ICommand<Guid>;
 
 /// <summary>
 /// Handles variation article creation.
@@ -312,6 +263,22 @@ public sealed class ArticleCreateVariationCommandHandler(
 }
 
 /// <summary>
+/// Command used to create a pack article.
+/// </summary>
+public sealed record ArticleCreatePackCommand(
+    Name Name,
+    Guid FromArticleGuid,
+    Scalar Quantity,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
+) : ICommand<Guid>;
+
+/// <summary>
 /// Handles pack article creation.
 /// </summary>
 public sealed class ArticleCreatePackCommandHandler(
@@ -424,6 +391,21 @@ public sealed class ArticleCreatePackCommandHandler(
         return article.Guid;
     }
 }
+
+/// <summary>
+/// Command used to create a kit article.
+/// </summary>
+public sealed record ArticleCreateKitCommand(
+    Name Name,
+    IReadOnlyCollection<ArticleCreateKitPackDto> Packs,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
+) : ICommand<Guid>;
 
 /// <summary>
 /// Handles kit article creation.
@@ -547,6 +529,21 @@ public sealed class ArticleCreateKitCommandHandler(
         return article.Guid;
     }
 }
+
+/// <summary>
+/// Command used to create a container article.
+/// </summary>
+public sealed record ArticleCreateContainerCommand(
+    Name Name,
+    Mass? MaxMass = null,
+    Description? Description = null,
+    TimeSpan? ShelfLife = null,
+    Color? Color = null,
+    ArticleMetricsDto? Metrics = null,
+    ArticleBarcodesDto? Barcodes = null,
+    IReadOnlyCollection<Guid>? Partitions = null,
+    bool? IsActive = null
+) : ICommand<Guid>;
 
 /// <summary>
 /// Handles container article creation.
