@@ -4,8 +4,6 @@ using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
 using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
 
 namespace Fargo.HttpApi.Articles;
 
@@ -118,17 +116,17 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<HttpContracts.ArticleDto>>, NoContent>> GetManyArticle(
         DateTimeOffset? temporalAsOfDateTime,
-        int? page,
-        int? limit,
-        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        Page? page,
+        Limit? limit,
+        Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken
     )
     {
         var withPagination = new Pagination(
-            new Page(page ?? Page.FirstPage.Value),
-            new Limit(limit ?? Limit.MaxLimit.Value));
+            page ?? Page.FirstPage,
+            limit ?? Limit.MaxLimit);
 
         var query = new ArticlesQuery(
             withPagination,
@@ -145,7 +143,7 @@ public static class ArticleEndpointRouteBuilderExtension
         }
 
         IReadOnlyCollection<HttpContracts.ArticleDto> contractResponse =
-            response.Select(static article => article.ToContract()).ToArray();
+            [.. response.Select(static article => article.ToContract())];
 
         return TypedResults.Ok(contractResponse);
     }

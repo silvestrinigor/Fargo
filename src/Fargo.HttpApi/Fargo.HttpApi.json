@@ -173,24 +173,19 @@
             "name": "page",
             "in": "query",
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
             }
           },
           {
             "name": "limit",
             "in": "query",
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1000
             }
           },
           {
