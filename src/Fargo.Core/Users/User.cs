@@ -1,5 +1,6 @@
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 
 namespace Fargo.Core.Users;
@@ -18,7 +19,7 @@ namespace Fargo.Core.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivableEntity
+public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
 {
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
         => new(nameid, passwordHash);

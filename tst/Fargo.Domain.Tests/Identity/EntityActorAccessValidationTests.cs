@@ -4,6 +4,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Identity;

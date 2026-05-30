@@ -1,6 +1,6 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
-using Fargo.Core;
+using Fargo.Core.Shared;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;

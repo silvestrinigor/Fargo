@@ -1,4 +1,5 @@
 using Fargo.Core.Identity;
+using Fargo.Core.Shared;
 using Fargo.Core.Users;
 
 namespace Fargo.Core.UserGroups;

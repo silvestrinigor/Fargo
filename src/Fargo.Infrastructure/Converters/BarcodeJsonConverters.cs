@@ -1,4 +1,4 @@
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

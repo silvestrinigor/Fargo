@@ -3,13 +3,14 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 
 namespace Fargo.Core.Events;
 
 /// <summary>
 /// Represents a simple lifecycle event that happened to an entity.
 /// </summary>
-public enum EntityEventType
+public enum EventType
 {
     Created = 0,
     Deleted = 1,
@@ -37,7 +38,7 @@ public sealed class EntityEvent : Entity
 
     private EntityEvent(
         EntityType entityType,
-        EntityEventType eventType,
+        EventType eventType,
         Guid entityGuid,
         Guid actorGuid,
         DateTimeOffset occurredAt)
@@ -67,7 +68,7 @@ public sealed class EntityEvent : Entity
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity
-        => Create(entity, EntityEventType.Created, actorGuid, occurredAt);
+        => Create(entity, EventType.Created, actorGuid, occurredAt);
 
     /// <summary>
     /// Creates an entity deletion event for the specified entity.
@@ -77,7 +78,7 @@ public sealed class EntityEvent : Entity
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity
-        => Create(entity, EntityEventType.Deleted, actorGuid, occurredAt);
+        => Create(entity, EventType.Deleted, actorGuid, occurredAt);
 
     /// <summary>
     /// Creates an entity activation event for the specified entity.
@@ -86,8 +87,8 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IActivableEntity
-        => Create(entity, EntityEventType.Activated, actorGuid, occurredAt);
+        where TEntity : IEntity, IActivable
+        => Create(entity, EventType.Activated, actorGuid, occurredAt);
 
     /// <summary>
     /// Creates an entity deactivation event for the specified entity.
@@ -96,32 +97,32 @@ public sealed class EntityEvent : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IActivableEntity
-        => Create(entity, EntityEventType.Deactivated, actorGuid, occurredAt);
+        where TEntity : IEntity, IActivable
+        => Create(entity, EventType.Deactivated, actorGuid, occurredAt);
 
     internal static EntityEvent ItemMoved(
         Item item,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        => Create(item, EntityEventType.Moved, actorGuid, occurredAt);
+        => Create(item, EventType.Moved, actorGuid, occurredAt);
 
     internal static EntityEvent InsertedIntoPartition<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity, IPartitionedEntity
-        => Create(entity, EntityEventType.InsertedIntoPartition, actorGuid, occurredAt);
+        => Create(entity, EventType.InsertedIntoPartition, actorGuid, occurredAt);
 
     internal static EntityEvent RemovedFromPartition<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity, IPartitionedEntity
-        => Create(entity, EntityEventType.RemovedFromPartition, actorGuid, occurredAt);
+        => Create(entity, EventType.RemovedFromPartition, actorGuid, occurredAt);
 
     private static EntityEvent Create<TEntity>(
         TEntity entity,
-        EntityEventType eventType,
+        EventType eventType,
         Guid actorGuid,
         DateTimeOffset? occurredAt)
         where TEntity : IEntity
@@ -158,7 +159,7 @@ public sealed class EntityEvent : Entity
     /// <summary>
     /// Gets the lifecycle event type.
     /// </summary>
-    public EntityEventType EventType { get; private init; }
+    public EventType EventType { get; private init; }
 
     /// <summary>
     /// Gets the entity unique identifier.

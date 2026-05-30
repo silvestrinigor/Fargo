@@ -1,5 +1,6 @@
 using Fargo.Core;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Users;

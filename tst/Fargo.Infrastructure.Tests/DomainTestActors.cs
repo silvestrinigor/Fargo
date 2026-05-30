@@ -1,4 +1,4 @@
-using Fargo.Core;
+using Fargo.Core.Shared;
 using Fargo.Core.Identity;
 
 namespace Fargo.Infrastructure.Tests;

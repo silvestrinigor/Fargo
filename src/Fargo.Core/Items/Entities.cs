@@ -2,6 +2,7 @@ using Fargo.Core.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 
 namespace Fargo.Core.Items;
 
@@ -22,7 +23,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivableEntity
+public class Item : Entity, IModifiedEntity, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivable
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);

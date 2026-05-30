@@ -1,19 +1,6 @@
-namespace Fargo.Core;
+using Fargo.Core.Shared;
 
-/// <summary>
-/// Represents an entity that can be activated or deactivated.
-/// </summary>
-/// <remarks>
-/// Activable entities can participate in business rules that require the entity
-/// to be active before an operation is allowed.
-/// </remarks>
-public interface IActivableEntity : IEntity
-{
-    /// <summary>
-    /// Gets a value indicating whether the entity is currently active.
-    /// </summary>
-    bool IsActive { get; }
-}
+namespace Fargo.Core;
 
 /// <summary>
 /// Thrown when an operation requires an entity to be active,
@@ -23,7 +10,7 @@ public interface IActivableEntity : IEntity
 /// The type of the inactive entity.
 /// </typeparam>
 public class EntityNotActiveFargoDomainException<TEntity> : FargoDomainException
-    where TEntity : IActivableEntity
+    where TEntity : IActivable
 {
     /// <summary>
     /// Initializes a new instance of the
@@ -67,7 +54,7 @@ public class EntityNotActiveFargoDomainException<TEntity> : FargoDomainException
 public static class ActivableExtensions
 {
     extension<TEntity>(TEntity entity)
-        where TEntity : IActivableEntity
+        where TEntity : IActivable
     {
         /// <summary>
         /// Validates that the entity is active.

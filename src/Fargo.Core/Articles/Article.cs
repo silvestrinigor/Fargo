@@ -1,6 +1,7 @@
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
@@ -15,7 +16,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IPartitionedEntity, IActivableEntity, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
+public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
 {
     private Article()
     {

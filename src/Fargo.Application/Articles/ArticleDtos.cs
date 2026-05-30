@@ -1,6 +1,6 @@
-using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Shared;
 using System.Drawing;
 using System.Linq.Expressions;
 using UnitsNet;
