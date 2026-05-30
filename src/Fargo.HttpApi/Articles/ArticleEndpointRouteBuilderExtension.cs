@@ -6,7 +6,6 @@ using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
-using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.Articles;
 
@@ -43,9 +42,9 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapGetArticleByGuid(this IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/{articleGuid:guid}", GetSingleArticle)
+        builder.MapGet("/{articleGuid:guid}", GetArticleByGuid)
             .WithName("GetArticle")
-            .WithSummary("Gets a single article")
+            .WithSummary("Gets a single article by guid")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
             .Produces<HttpContracts.ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
@@ -54,7 +53,7 @@ public static class ArticleEndpointRouteBuilderExtension
         return builder;
     }
 
-    private static async Task<Results<Ok<HttpContracts.ArticleDto>, NotFound>> GetSingleArticle(
+    private static async Task<Results<Ok<HttpContracts.ArticleDto>, NotFound>> GetArticleByGuid(
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
@@ -85,14 +84,14 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<HttpContracts.ArticleDto>, NotFound>> GetArticleByBarcode(
-        string articleBarcode,
+        Barcode articleBarcode,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
         CancellationToken cancellationToken
     )
     {
         var query = new ArticleByBarcodeQuery(
-            Barcode.Parse(articleBarcode, CultureInfo.InvariantCulture),
+            articleBarcode,
             temporalAsOf);
 
         var response = await handler.Handle(query, cancellationToken);

@@ -10,7 +10,7 @@
         "tags": [
           "Articles"
         ],
-        "summary": "Gets a single article",
+        "summary": "Gets a single article by guid",
         "description": "Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.",
         "operationId": "GetArticle",
         "parameters": [
@@ -121,7 +121,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "pattern": ".+:(Ean13|Ean8|UpcA|UpcE|Code128|Code39|Itf14|Gs1128|QrCode|DataMatrix)$",
+              "type": "string",
+              "example": "7891234567895:Ean13"
             }
           },
           {
