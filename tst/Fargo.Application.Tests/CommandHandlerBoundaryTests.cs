@@ -10,6 +10,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -56,7 +57,7 @@ public sealed class CommandHandlerBoundaryTests
         movementRepository.Received(1).Add(Arg.Any<ItemMovement>());
         entityPartitionEventRepository.Received(1).Add(Arg.Any<EntityPartitionEvent>());
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
-            entityEvent.EventType == EntityEventType.Deactivated));
+            entityEvent.EventType == EventType.Deactivated));
         await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
 

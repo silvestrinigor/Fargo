@@ -1,3 +1,5 @@
+using Fargo.Core.Shared;
+
 namespace Fargo.Core.Users;
 
 /// <summary>

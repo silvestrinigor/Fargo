@@ -3,7 +3,6 @@ using Fargo.Application.Partitions;
 using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.Partitions;
 

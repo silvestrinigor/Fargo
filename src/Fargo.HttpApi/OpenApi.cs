@@ -1,5 +1,5 @@
 using Fargo.Application;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpContracts;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;

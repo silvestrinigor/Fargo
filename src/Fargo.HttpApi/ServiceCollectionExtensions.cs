@@ -1,6 +1,6 @@
 using Fargo.HttpApi.Articles;
-using global::Fargo.HttpContracts;
 using Fargo.Infrastructure.Converters;
+using global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi;
 

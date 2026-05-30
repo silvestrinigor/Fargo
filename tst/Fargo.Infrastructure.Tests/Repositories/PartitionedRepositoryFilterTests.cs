@@ -1,8 +1,8 @@
 using Fargo.Application;
-using Fargo.Application.Articles;
+using Fargo.Core.Shared;
 using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;

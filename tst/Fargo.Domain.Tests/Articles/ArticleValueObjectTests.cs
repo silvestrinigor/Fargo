@@ -1,5 +1,5 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using UnitsNet;
 
 namespace Fargo.Core.Tests.Articles;

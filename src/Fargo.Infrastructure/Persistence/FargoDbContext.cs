@@ -6,6 +6,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;

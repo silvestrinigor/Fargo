@@ -1,7 +1,7 @@
 using Fargo.Application.Articles;
-using Fargo.Core;
+using Fargo.Core.Shared;
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
 using Microsoft.AspNetCore.Routing;

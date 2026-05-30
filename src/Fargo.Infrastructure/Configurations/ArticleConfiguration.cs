@@ -1,5 +1,5 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

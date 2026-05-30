@@ -1,5 +1,5 @@
 using Fargo.Application.Identity;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;

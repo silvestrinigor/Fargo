@@ -1,6 +1,7 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
+using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using System.Collections.ObjectModel;
@@ -75,7 +76,7 @@ public interface IPartitionAccess
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity, IActivableEntity
+public class Partition : Entity, IModifiedEntity, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity, IActivable
 {
     public static Partition CreatePartition(Name name, Description? description = null)
         => new(name, description);

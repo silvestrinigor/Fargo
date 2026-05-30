@@ -1,6 +1,6 @@
 using Fargo.Application;
-using Fargo.Core;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared;
+using Fargo.Core.Shared.Barcodes;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.Units;
@@ -29,7 +29,6 @@ using AppUserGroupPermissionUpdate = Fargo.Application.UserGroups.UserGroupPermi
 using AppUserGroupUpdate = Fargo.Application.UserGroups.UserGroupUpdateDto;
 using AppUserPermissionUpdate = Fargo.Application.Users.UserPermissionUpdateDto;
 using AppUserUpdate = Fargo.Application.Users.UserUpdateDto;
-using HttpContracts = global::Fargo.HttpContracts;
 
 namespace Fargo.HttpApi.Contracts;
 
@@ -125,7 +124,7 @@ internal static class HttpContractMappings
             ToLastName(request.LastName),
             ToDescription(request.Description),
             request.Permissions?.Select(static permission =>
-                new AppUserPermissionUpdate((Fargo.Core.ActionType)(int)permission.Action)).ToArray(),
+                new AppUserPermissionUpdate((ActionType)(int)permission.Action)).ToArray(),
             request.DefaultPasswordExpirationTimeSpan,
             request.Partitions,
             request.UserGroups);
@@ -139,7 +138,7 @@ internal static class HttpContractMappings
             request.Password,
             request.IsActive,
             request.Permissions?.Select(static permission =>
-                new AppUserPermissionUpdate((Fargo.Core.ActionType)(int)permission.Action)).ToArray(),
+                new AppUserPermissionUpdate((ActionType)(int)permission.Action)).ToArray(),
             request.DefaultPasswordExpirationPeriod,
             request.Partitions,
             request.UserGroups);
@@ -167,7 +166,7 @@ internal static class HttpContractMappings
             request.Nameid,
             ToDescription(request.Description),
             request.Permissions?.Select(static permission =>
-                new AppUserGroupPermissionUpdate((Fargo.Core.ActionType)(int)permission.Action)).ToArray(),
+                new AppUserGroupPermissionUpdate((ActionType)(int)permission.Action)).ToArray(),
             request.Partitions);
 
     public static AppUserGroupUpdate ToApplication(this HttpContracts.UserGroupUpdateRequest request)
@@ -176,7 +175,7 @@ internal static class HttpContractMappings
             ToDescription(request.Description),
             request.IsActive,
             request.Permissions?.Select(static permission =>
-                new AppUserGroupPermissionUpdate((Fargo.Core.ActionType)(int)permission.Action)).ToArray(),
+                new AppUserGroupPermissionUpdate((ActionType)(int)permission.Action)).ToArray(),
             request.Partitions);
 
     public static HttpContracts.UserGroupDto ToContract(this AppUserGroup userGroup)

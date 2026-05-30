@@ -1,4 +1,4 @@
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using System.Globalization;
 
 namespace Fargo.HttpApi.Articles;

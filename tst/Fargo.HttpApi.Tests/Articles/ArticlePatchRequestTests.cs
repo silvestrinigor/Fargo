@@ -1,5 +1,5 @@
 using Fargo.Application.Articles;
-using Fargo.Core;
+using Fargo.Core.Shared;
 using Fargo.Infrastructure.Converters;
 using System.Text.Json;
 

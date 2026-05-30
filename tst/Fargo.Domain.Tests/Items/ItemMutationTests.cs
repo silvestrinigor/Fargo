@@ -1,5 +1,6 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
+using Fargo.Core.Shared;
 
 namespace Fargo.Core.Tests.Items;
 

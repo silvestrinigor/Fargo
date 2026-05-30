@@ -1,4 +1,4 @@
-namespace Fargo.Core;
+namespace Fargo.Core.Shared;
 
 /// <summary>
 /// Represents the type of entity recorded in an entity event.

@@ -1,6 +1,7 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 

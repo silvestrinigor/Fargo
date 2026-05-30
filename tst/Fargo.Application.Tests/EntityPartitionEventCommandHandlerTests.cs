@@ -11,6 +11,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Shared;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -45,7 +46,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             new ArticlePatchDto(Partitions: [partition.Guid])));
 
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.Article &&
             entityPartitionEvent.EntityGuid == article.Guid &&
             entityPartitionEvent.PartitionGuid == partition.Guid &&
@@ -79,13 +80,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([newPartition.Guid])));
 
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.Item &&
             entityPartitionEvent.EntityGuid == item.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
             entityPartitionEvent.ActorGuid == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.RemovedFromPartition &&
+            entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.Item &&
             entityPartitionEvent.EntityGuid == item.Guid &&
             entityPartitionEvent.PartitionGuid == oldPartition.Guid &&
@@ -123,13 +124,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             new UserUpdateDto(Partitions: [newPartition.Guid])));
 
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.User &&
             entityPartitionEvent.EntityGuid == user.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
             entityPartitionEvent.ActorGuid == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.RemovedFromPartition &&
+            entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.User &&
             entityPartitionEvent.EntityGuid == user.Guid &&
             entityPartitionEvent.PartitionGuid == oldPartition.Guid &&
@@ -164,13 +165,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             new UserGroupUpdateDto(null, null, null, null, [newPartition.Guid])));
 
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.UserGroup &&
             entityPartitionEvent.EntityGuid == userGroup.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
             entityPartitionEvent.ActorGuid == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
-            entityPartitionEvent.Event.EventType == EntityEventType.RemovedFromPartition &&
+            entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.UserGroup &&
             entityPartitionEvent.EntityGuid == userGroup.Guid &&
             entityPartitionEvent.PartitionGuid == oldPartition.Guid &&

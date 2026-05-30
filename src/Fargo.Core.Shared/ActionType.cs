@@ -1,4 +1,4 @@
-namespace Fargo.Core;
+namespace Fargo.Core.Shared;
 
 /// <summary>
 /// Represents the set of actions that can be authorized in the system.

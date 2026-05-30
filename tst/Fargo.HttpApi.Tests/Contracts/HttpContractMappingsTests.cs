@@ -1,6 +1,6 @@
 using Fargo.Application.Articles;
-using Fargo.Core;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpApi.Contracts;
 using System.Drawing;
 using UnitsNet;
@@ -8,8 +8,8 @@ using UnitsNet.NumberExtensions.NumberToScalar;
 using AppArticleType = Fargo.Core.Articles.ArticleType;
 using AppModifiedType = Fargo.Core.Articles.ArticleModifiedType;
 using ContractArticleType = Fargo.HttpContracts.ArticleType;
-using ContractCreateRequest = Fargo.HttpContracts.ArticleCreateRequest;
 using ContractCreatePackRequest = Fargo.HttpContracts.ArticleCreatePackRequest;
+using ContractCreateRequest = Fargo.HttpContracts.ArticleCreateRequest;
 using ContractModifiedType = Fargo.HttpContracts.ArticleModifiedType;
 using ContractUnitValue = Fargo.HttpContracts.UnitValueDto;
 

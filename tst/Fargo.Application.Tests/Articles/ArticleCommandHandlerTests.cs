@@ -1,9 +1,9 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
-using Fargo.Application.Partitions;
+using Fargo.Core.Shared;
 using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.Core.Barcodes;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
@@ -62,17 +62,17 @@ public sealed class ArticleCommandHandlerTests
             article.ModificationTypes.HasFlag(ArticleModifiedType.BarcodesChanged) &&
             article.ModificationTypes.HasFlag(ArticleModifiedType.PartitionsChanged)));
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
-            entityEvent.EventType == EntityEventType.Created &&
+            entityEvent.EventType == EventType.Created &&
             entityEvent.EntityType == EntityType.Article &&
             entityEvent.EntityGuid == articleGuid &&
             entityEvent.ActorGuid == actor.ActorGuid));
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
-            entityEvent.EventType == EntityEventType.Deactivated &&
+            entityEvent.EventType == EventType.Deactivated &&
             entityEvent.EntityType == EntityType.Article &&
             entityEvent.EntityGuid == articleGuid &&
             entityEvent.ActorGuid == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(partitionEvent =>
-            partitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            partitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             partitionEvent.EntityGuid == articleGuid &&
             partitionEvent.PartitionGuid == partition.Guid &&
             partitionEvent.ActorGuid == actor.ActorGuid));
@@ -223,13 +223,13 @@ public sealed class ArticleCommandHandlerTests
         Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.PartitionsChanged));
         Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.Deactivated));
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
-            entityEvent.EventType == EntityEventType.Deactivated &&
+            entityEvent.EventType == EventType.Deactivated &&
             entityEvent.EntityGuid == article.Guid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(partitionEvent =>
-            partitionEvent.Event.EventType == EntityEventType.InsertedIntoPartition &&
+            partitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             partitionEvent.PartitionGuid == newPartition.Guid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(partitionEvent =>
-            partitionEvent.Event.EventType == EntityEventType.RemovedFromPartition &&
+            partitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             partitionEvent.PartitionGuid == oldPartition.Guid));
         await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
@@ -273,7 +273,7 @@ public sealed class ArticleCommandHandlerTests
 
         articleRepository.Received(1).Remove(article);
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
-            entityEvent.EventType == EntityEventType.Deleted &&
+            entityEvent.EventType == EventType.Deleted &&
             entityEvent.EntityType == EntityType.Article &&
             entityEvent.EntityGuid == article.Guid &&
             entityEvent.ActorGuid == actor.ActorGuid));
