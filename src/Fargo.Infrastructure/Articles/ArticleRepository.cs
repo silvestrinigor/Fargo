@@ -8,7 +8,7 @@ using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fargo.Infrastructure.Repositories;
+namespace Fargo.Infrastructure.Articles;
 
 public sealed class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
@@ -209,5 +209,4 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                 throw new ArgumentOutOfRangeException(nameof(barcode), barcode.Format, "Unsupported barcode type.");
         }
     }
-
 }

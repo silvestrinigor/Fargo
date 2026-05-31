@@ -13,6 +13,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Infrastructure.Articles;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
