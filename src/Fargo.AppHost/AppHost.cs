@@ -10,13 +10,13 @@ var fargodb = sqlserver.AddDatabase("fargo");
 var environmentName = builder.Environment.EnvironmentName;
 
 var migrations = builder
-    .AddProject<Projects.Fargo_MigrationService>("migrations")
+    .AddProject<Projects.Fargo_ServiceMigration>("migrations")
     .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WaitFor(fargodb);
 
 var seeds = builder
-    .AddProject<Projects.Fargo_SeedService>("seeds")
+    .AddProject<Projects.Fargo_ServiceSeed>("seeds")
     .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
     .WithReference(fargodb)
     .WithReference(migrations)
@@ -33,14 +33,8 @@ var httpApi = builder
     .WaitForCompletion(migrations)
     .WaitForCompletion(seeds);
 
-builder
-    .AddProject<Projects.Fargo_Web>("webfrontend")
-    .WithExternalHttpEndpoints()
-    .WithReference(httpApi)
-    .WaitFor(httpApi);
-
 var identityFrontend = builder
-    .AddProject<Projects.Fargo_Web_Identity>("identityfrontend")
+    .AddProject<Projects.Fargo_WebIdentity>("identityfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(httpApi)
     .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
@@ -49,7 +43,7 @@ var identityFrontend = builder
 if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
 {
     var playgroundFrontend = builder
-        .AddProject<Projects.Fargo_Web_Playground>("playgroundfrontend")
+        .AddProject<Projects.Fargo_WebPlayground>("playgroundfrontend")
         .WithExternalHttpEndpoints()
         .WithReference(httpApi)
         .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))

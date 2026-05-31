@@ -1,4 +1,4 @@
-using Fargo.HttpContracts;
+using Fargo.Application.Shared.UserGroups;
 
 namespace Fargo.HttpClient;
 
@@ -14,12 +14,12 @@ public interface IFargoUserGroupClient
         CancellationToken cancellationToken = default);
 
     Task<Guid> CreateAsync(
-        UserGroupCreateRequest request,
+        UserGroupCreateDto request,
         CancellationToken cancellationToken = default);
 
     Task UpdateAsync(
         Guid userGroupGuid,
-        UserGroupUpdateRequest request,
+        UserGroupUpdateDto request,
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(
@@ -51,7 +51,7 @@ internal sealed class FargoUserGroupClient(FargoHttpTransport transport) : IFarg
             cancellationToken);
 
     public Task<Guid> CreateAsync(
-        UserGroupCreateRequest request,
+        UserGroupCreateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendRequiredAsync<Guid>(
             HttpMethod.Post,
@@ -61,7 +61,7 @@ internal sealed class FargoUserGroupClient(FargoHttpTransport transport) : IFarg
 
     public Task UpdateAsync(
         Guid userGroupGuid,
-        UserGroupUpdateRequest request,
+        UserGroupUpdateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Put,

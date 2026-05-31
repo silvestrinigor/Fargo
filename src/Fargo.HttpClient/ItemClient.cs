@@ -1,4 +1,4 @@
-using Fargo.HttpContracts;
+using Fargo.Application.Shared.Items;
 
 namespace Fargo.HttpClient;
 
@@ -14,12 +14,12 @@ public interface IFargoItemClient
         CancellationToken cancellationToken = default);
 
     Task<Guid> CreateAsync(
-        ItemCreateRequest request,
+        ItemCreateDto request,
         CancellationToken cancellationToken = default);
 
     Task UpdateAsync(
         Guid itemGuid,
-        ItemUpdateRequest request,
+        ItemUpdateDto request,
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(
@@ -51,7 +51,7 @@ internal sealed class FargoItemClient(FargoHttpTransport transport) : IFargoItem
             cancellationToken);
 
     public Task<Guid> CreateAsync(
-        ItemCreateRequest request,
+        ItemCreateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendRequiredAsync<Guid>(
             HttpMethod.Post,
@@ -61,7 +61,7 @@ internal sealed class FargoItemClient(FargoHttpTransport transport) : IFargoItem
 
     public Task UpdateAsync(
         Guid itemGuid,
-        ItemUpdateRequest request,
+        ItemUpdateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Put,

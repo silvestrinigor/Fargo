@@ -34,3 +34,16 @@ public record AuthResult(
     IReadOnlyCollection<ActionType> PermissionActions,
     IReadOnlyCollection<Guid> PartitionAccesses
 );
+
+public sealed record LoginDto(
+    string Nameid,
+    string Password
+);
+
+public sealed record RefreshDto(
+    Token RefreshToken
+);
+
+public sealed record LogOutDto(
+    Token RefreshToken
+);
