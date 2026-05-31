@@ -1122,7 +1122,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
+                "$ref": "#/components/schemas/LoginCommand"
               }
             }
           },
@@ -1134,7 +1134,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthDto"
+                  "$ref": "#/components/schemas/AuthResult"
                 }
               }
             }
@@ -1157,7 +1157,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "$ref": "#/components/schemas/LogoutCommand"
               }
             }
           },
@@ -1185,7 +1185,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "$ref": "#/components/schemas/RefreshCommand"
               }
             }
           },
@@ -1197,7 +1197,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthDto"
+                  "$ref": "#/components/schemas/AuthResult"
                 }
               }
             }
@@ -1220,7 +1220,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordUpdateRequest"
+                "$ref": "#/components/schemas/UserPasswordUpdateDto"
               }
             }
           },
@@ -1562,7 +1562,7 @@
       "ArticleType": {
         "type": "integer"
       },
-      "AuthDto": {
+      "AuthResult": {
         "required": [
           "accessToken",
           "refreshToken",
@@ -1574,10 +1574,10 @@
         "type": "object",
         "properties": {
           "accessToken": {
-            "type": "string"
+            "$ref": "#/components/schemas/Token"
           },
           "refreshToken": {
-            "type": "string"
+            "$ref": "#/components/schemas/Token"
           },
           "expiresAt": {
             "type": "string",
@@ -1851,7 +1851,7 @@
       "LengthUnit": {
         "type": "integer"
       },
-      "LoginRequest": {
+      "LoginCommand": {
         "required": [
           "nameid",
           "password"
@@ -1863,6 +1863,17 @@
           },
           "password": {
             "type": "string"
+          }
+        }
+      },
+      "LogoutCommand": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "$ref": "#/components/schemas/Token"
           }
         }
       },
@@ -1974,21 +1985,6 @@
           }
         }
       },
-      "PasswordUpdateRequest": {
-        "required": [
-          "newPassword",
-          "currentPassword"
-        ],
-        "type": "object",
-        "properties": {
-          "newPassword": {
-            "type": "string"
-          },
-          "currentPassword": {
-            "type": "string"
-          }
-        }
-      },
       "PermissionDto": {
         "required": [
           "guid",
@@ -2048,14 +2044,14 @@
           }
         }
       },
-      "RefreshRequest": {
+      "RefreshCommand": {
         "required": [
           "refreshToken"
         ],
         "type": "object",
         "properties": {
           "refreshToken": {
-            "type": "string"
+            "$ref": "#/components/schemas/Token"
           }
         }
       },
@@ -2095,6 +2091,7 @@
       "TemperatureUnit": {
         "type": "integer"
       },
+      "Token": { },
       "Type": { },
       "UnitInfoOfScalarUnit": {
         "type": "object",
@@ -2435,6 +2432,23 @@
       },
       "UserModifiedType": {
         "type": "integer"
+      },
+      "UserPasswordUpdateDto": {
+        "required": [
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          },
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       },
       "UserPermissionUpdateDto": {
         "required": [

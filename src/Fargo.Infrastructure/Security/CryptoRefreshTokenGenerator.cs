@@ -1,4 +1,5 @@
 using Fargo.Core.Identity;
+using Fargo.Core.Shared.Identity;
 using System.Security.Cryptography;
 
 namespace Fargo.Infrastructure.Security;

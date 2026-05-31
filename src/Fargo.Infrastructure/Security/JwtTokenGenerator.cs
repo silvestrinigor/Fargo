@@ -1,6 +1,5 @@
 using Fargo.Application.Identity;
-
-using Fargo.Core.Identity;
+using Fargo.Core.Shared.Identity;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

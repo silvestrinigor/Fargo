@@ -6,6 +6,7 @@ using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Application.Shared.Articles;
+using Fargo.Application.Shared.Identity;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;

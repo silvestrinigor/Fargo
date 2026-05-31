@@ -1,6 +1,4 @@
-using Fargo.Application;
 using Fargo.Core.Shared;
-using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using System.Drawing;
 using UnitsNet;
@@ -15,7 +13,7 @@ using AppArticleCreatePack = Fargo.Application.Shared.Articles.ArticleCreatePack
 using AppArticleCreateVariation = Fargo.Application.Shared.Articles.ArticleCreateVariationDto;
 using AppArticleMetrics = Fargo.Application.Shared.Articles.ArticleMetricsDto;
 using AppArticlePatch = Fargo.Application.Shared.Articles.ArticlePatchDto;
-using AppAuth = Fargo.Application.Identity.AuthResult;
+using AppAuth = Fargo.Application.Shared.Identity.AuthResult;
 using AppItem = Fargo.Application.Items.ItemDto;
 using AppItemCreate = Fargo.Application.Items.ItemCreateDto;
 using AppItemUpdate = Fargo.Application.Items.ItemUpdateDto;
