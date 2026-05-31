@@ -1,6 +1,5 @@
 using Fargo.Application;
 using Fargo.Core.Shared.Barcodes;
-using Fargo.HttpContracts;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
 
@@ -22,7 +21,6 @@ public static class OpenApiServiceCollectionExtensions
                 {
                     FargoOpenApiSchemaTransformers.Apply(
                         schema,
-                        context.JsonTypeInfo.Type,
                         context.ParameterDescription?.Type);
 
                     return Task.CompletedTask;
@@ -38,16 +36,8 @@ internal static class FargoOpenApiSchemaTransformers
 {
     public static void Apply(
         OpenApiSchema schema,
-        Type schemaType,
         Type? parameterType)
     {
-        if (schemaType == typeof(OptionalField<TimeSpan>))
-        {
-            schema.Type = JsonSchemaType.String | JsonSchemaType.Null;
-            schema.Pattern = @"^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$";
-            schema.Example = JsonValue.Create("7.00:00:00");
-        }
-
         if (parameterType == typeof(Barcode))
         {
             schema.Type = JsonSchemaType.String;

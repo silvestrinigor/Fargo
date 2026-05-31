@@ -1,7 +1,8 @@
-using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Barcodes;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;

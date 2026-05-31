@@ -1,7 +1,7 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
-using NSubstitute;
 using Fargo.Core.Shared;
+using NSubstitute;
 
 namespace Fargo.Core.Tests.Items;
 

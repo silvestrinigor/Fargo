@@ -1,4 +1,5 @@
 using Fargo.Application.Identity;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Microsoft.Extensions.Logging;
 

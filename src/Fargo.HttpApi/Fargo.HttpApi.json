@@ -70,7 +70,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ArticlePatchRequest"
+                "$ref": "#/components/schemas/ArticlePatchDto"
               }
             }
           },
@@ -237,7 +237,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ArticleCreateRequest"
+                "$ref": "#/components/schemas/ArticleCreateDto"
               }
             }
           },
@@ -323,7 +323,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ItemUpdateRequest"
+                "$ref": "#/components/schemas/ItemUpdateDto"
               }
             }
           },
@@ -450,7 +450,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ItemCreateRequest"
+                "$ref": "#/components/schemas/ItemCreateDto"
               }
             }
           },
@@ -536,7 +536,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserUpdateRequest"
+                "$ref": "#/components/schemas/UserUpdateDto"
               }
             }
           },
@@ -663,7 +663,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreateRequest"
+                "$ref": "#/components/schemas/UserCreateDto"
               }
             }
           },
@@ -749,7 +749,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserGroupUpdateRequest"
+                "$ref": "#/components/schemas/UserGroupUpdateDto"
               }
             }
           },
@@ -876,7 +876,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserGroupCreateRequest"
+                "$ref": "#/components/schemas/UserGroupCreateDto"
               }
             }
           },
@@ -962,7 +962,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PartitionUpdateRequest"
+                "$ref": "#/components/schemas/PartitionUpdateDto"
               }
             }
           },
@@ -1089,7 +1089,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PartitionCreateRequest"
+                "$ref": "#/components/schemas/PartitionCreateDto"
               }
             }
           },
@@ -1122,7 +1122,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
+                "$ref": "#/components/schemas/LoginCommand"
               }
             }
           },
@@ -1134,7 +1134,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthDto"
+                  "$ref": "#/components/schemas/AuthResult"
                 }
               }
             }
@@ -1157,7 +1157,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "$ref": "#/components/schemas/LogoutCommand"
               }
             }
           },
@@ -1185,7 +1185,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "$ref": "#/components/schemas/RefreshCommand"
               }
             }
           },
@@ -1197,7 +1197,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthDto"
+                  "$ref": "#/components/schemas/AuthResult"
                 }
               }
             }
@@ -1220,7 +1220,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordUpdateRequest"
+                "$ref": "#/components/schemas/UserPasswordUpdateDto"
               }
             }
           },
@@ -1245,143 +1245,31 @@
       "ActionType": {
         "type": "integer"
       },
+      "AmountOfSubstanceUnit": {
+        "type": "integer"
+      },
       "ArticleBarcodesDto": {
         "type": "object",
         "properties": {
-          "ean13": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "ean8": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upcA": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upcE": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "code128": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "code39": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "itf14": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "gs1128": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "qrCode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "dataMatrix": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
+          "ean13": { },
+          "ean8": { },
+          "upcA": { },
+          "upcE": { },
+          "code128": { },
+          "code39": { },
+          "itf14": { },
+          "gs1128": { },
+          "qrCode": { },
+          "dataMatrix": { }
         }
       },
-      "ArticleCreateContainerRequest": {
+      "ArticleCreateContainerDto": {
         "type": "object",
         "properties": {
-          "maxMass": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          }
+          "maxMass": { }
         }
       },
-      "ArticleCreateKitPackRequest": {
-        "required": [
-          "articleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "double"
-          }
-        }
-      },
-      "ArticleCreateKitRequest": {
-        "required": [
-          "packs"
-        ],
-        "type": "object",
-        "properties": {
-          "packs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ArticleCreateKitPackRequest"
-            }
-          }
-        }
-      },
-      "ArticleCreatePackRequest": {
-        "required": [
-          "fromArticleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "fromArticleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "double"
-          }
-        }
-      },
-      "ArticleCreateRequest": {
+      "ArticleCreateDto": {
         "required": [
           "name",
           "articleType"
@@ -1389,17 +1277,12 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
           "articleType": {
             "$ref": "#/components/schemas/ArticleType"
           },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "description": { },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
@@ -1407,12 +1290,7 @@
               "string"
             ]
           },
-          "color": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "color": { },
           "metrics": {
             "oneOf": [
               {
@@ -1455,7 +1333,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreateVariationRequest"
+                "$ref": "#/components/schemas/ArticleCreateVariationDto"
               }
             ]
           },
@@ -1465,7 +1343,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreatePackRequest"
+                "$ref": "#/components/schemas/ArticleCreatePackDto"
               }
             ]
           },
@@ -1475,7 +1353,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreateKitRequest"
+                "$ref": "#/components/schemas/ArticleCreateKitDto"
               }
             ]
           },
@@ -1485,13 +1363,59 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreateContainerRequest"
+                "$ref": "#/components/schemas/ArticleCreateContainerDto"
               }
             ]
           }
         }
       },
-      "ArticleCreateVariationRequest": {
+      "ArticleCreateKitDto": {
+        "required": [
+          "packs"
+        ],
+        "type": "object",
+        "properties": {
+          "packs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleCreateKitPackDto"
+            }
+          }
+        }
+      },
+      "ArticleCreateKitPackDto": {
+        "required": [
+          "articleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "ArticleCreatePackDto": {
+        "required": [
+          "fromArticleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "fromArticleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "ArticleCreateVariationDto": {
         "required": [
           "fromArticleGuid"
         ],
@@ -1507,7 +1431,6 @@
         "required": [
           "guid",
           "name",
-          "articleType",
           "description",
           "shelfLife",
           "color",
@@ -1515,8 +1438,7 @@
           "barcodes",
           "partitions",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -1525,13 +1447,10 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
-          },
-          "articleType": {
-            "$ref": "#/components/schemas/ArticleType"
+            "$ref": "#/components/schemas/Name"
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -1541,9 +1460,13 @@
             ]
           },
           "color": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Color"
+              }
             ]
           },
           "metrics": {
@@ -1568,77 +1491,35 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/ArticleModifiedType"
           }
         }
       },
       "ArticleMetricsDto": {
         "type": "object",
         "properties": {
-          "mass": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          },
-          "lengthX": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          },
-          "lengthY": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          },
-          "lengthZ": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          }
+          "mass": { },
+          "lengthX": { },
+          "lengthY": { },
+          "lengthZ": { }
         }
       },
-      "ArticleModifiedType": {
-        "type": "integer"
-      },
-      "ArticlePatchRequest": {
+      "ArticlePatchDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "name": { },
+          "description": { },
           "shelfLife": {
-            "$ref": "#/components/schemas/OptionalFieldOfTimeSpan"
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removeShelfLife": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           },
           "metrics": {
             "oneOf": [
@@ -1681,7 +1562,7 @@
       "ArticleType": {
         "type": "integer"
       },
-      "AuthDto": {
+      "AuthResult": {
         "required": [
           "accessToken",
           "refreshToken",
@@ -1693,10 +1574,10 @@
         "type": "object",
         "properties": {
           "accessToken": {
-            "type": "string"
+            "$ref": "#/components/schemas/Token"
           },
           "refreshToken": {
-            "type": "string"
+            "$ref": "#/components/schemas/Token"
           },
           "expiresAt": {
             "type": "string",
@@ -1720,7 +1601,132 @@
           }
         }
       },
-      "ItemCreateRequest": {
+      "BaseDimensions": {
+        "required": [
+          "length",
+          "mass",
+          "time",
+          "current",
+          "temperature",
+          "amount",
+          "luminousIntensity"
+        ],
+        "type": "object",
+        "properties": {
+          "length": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mass": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "time": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "current": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "temperature": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "luminousIntensity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "BaseUnits": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "$ref": "#/components/schemas/LengthUnit"
+          },
+          "mass": {
+            "$ref": "#/components/schemas/MassUnit"
+          },
+          "time": {
+            "$ref": "#/components/schemas/DurationUnit"
+          },
+          "current": {
+            "$ref": "#/components/schemas/ElectricCurrentUnit"
+          },
+          "temperature": {
+            "$ref": "#/components/schemas/TemperatureUnit"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/AmountOfSubstanceUnit"
+          },
+          "luminousIntensity": {
+            "$ref": "#/components/schemas/LuminousIntensityUnit"
+          },
+          "isFullyDefined": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Color": { },
+      "Description": { },
+      "DurationUnit": {
+        "type": "integer"
+      },
+      "ElectricCurrentUnit": {
+        "type": "integer"
+      },
+      "FirstName": { },
+      "IQuantityOfScalarUnit": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "quantityInfo": {
+            "$ref": "#/components/schemas/QuantityInfoOfScalarUnit"
+          },
+          "dimensions": {
+            "$ref": "#/components/schemas/BaseDimensions"
+          },
+          "value": {
+            "$ref": "#/components/schemas/QuantityValue"
+          }
+        }
+      },
+      "ItemCreateDto": {
         "required": [
           "articleGuid"
         ],
@@ -1763,8 +1769,7 @@
           "parentContainerGuid",
           "partitions",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -1806,16 +1811,10 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/ItemModifiedType"
           }
         }
       },
-      "ItemModifiedType": {
-        "type": "integer"
-      },
-      "ItemUpdateRequest": {
+      "ItemUpdateDto": {
         "required": [
           "partitions"
         ],
@@ -1843,7 +1842,11 @@
           }
         }
       },
-      "LoginRequest": {
+      "LastName": { },
+      "LengthUnit": {
+        "type": "integer"
+      },
+      "LoginCommand": {
         "required": [
           "nameid",
           "password"
@@ -1858,29 +1861,35 @@
           }
         }
       },
-      "OptionalFieldOfTimeSpan": {
-        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-        "type": [
-          "null",
-          "string"
+      "LogoutCommand": {
+        "required": [
+          "refreshToken"
         ],
-        "example": "7.00:00:00"
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "$ref": "#/components/schemas/Token"
+          }
+        }
       },
-      "PartitionCreateRequest": {
+      "LuminousIntensityUnit": {
+        "type": "integer"
+      },
+      "MassUnit": {
+        "type": "integer"
+      },
+      "Name": { },
+      "Nameid": { },
+      "PartitionCreateDto": {
         "required": [
           "name"
         ],
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "description": { },
           "parentPartitionGuid": {
             "type": [
               "null",
@@ -1897,8 +1906,7 @@
           "description",
           "parentPartitionGuid",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -1907,10 +1915,10 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "parentPartitionGuid": {
             "type": [
@@ -1928,30 +1936,14 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/PartitionModifiedType"
           }
         }
       },
-      "PartitionModifiedType": {
-        "type": "integer"
-      },
-      "PartitionUpdateRequest": {
+      "PartitionUpdateDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "name": { },
+          "description": { },
           "parentPartitionGuid": {
             "type": [
               "null",
@@ -1967,22 +1959,7 @@
           }
         }
       },
-      "PasswordUpdateRequest": {
-        "required": [
-          "newPassword",
-          "currentPassword"
-        ],
-        "type": "object",
-        "properties": {
-          "newPassword": {
-            "type": "string"
-          },
-          "currentPassword": {
-            "type": "string"
-          }
-        }
-      },
-      "PermissionDto": {
+      "Permission": {
         "required": [
           "guid",
           "action"
@@ -1998,22 +1975,61 @@
           }
         }
       },
-      "RefreshRequest": {
+      "QuantityInfoOfScalarUnit": {
+        "required": [
+          "unitInfos",
+          "zero",
+          "name",
+          "baseDimensions"
+        ],
+        "type": "object",
+        "properties": {
+          "unitInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitInfoOfScalarUnit"
+            }
+          },
+          "baseUnitInfo": {
+            "$ref": "#/components/schemas/UnitInfoOfScalarUnit"
+          },
+          "zero": {
+            "$ref": "#/components/schemas/IQuantityOfScalarUnit"
+          },
+          "unitType": {
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "name": {
+            "type": "string"
+          },
+          "valueType": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "baseDimensions": {
+            "$ref": "#/components/schemas/BaseDimensions"
+          }
+        }
+      },
+      "QuantityValue": {
+        "type": "object",
+        "properties": {
+          "isDecimal": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RefreshCommand": {
         "required": [
           "refreshToken"
         ],
         "type": "object",
         "properties": {
           "refreshToken": {
-            "type": "string"
+            "$ref": "#/components/schemas/Token"
           }
         }
       },
-      "UnitValueDto": {
-        "required": [
-          "value",
-          "unit"
-        ],
+      "Scalar": {
         "type": "object",
         "properties": {
           "value": {
@@ -2025,11 +2041,62 @@
             "format": "double"
           },
           "unit": {
-            "type": "string"
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "quantityInfo": {
+            "$ref": "#/components/schemas/QuantityInfoOfScalarUnit"
+          },
+          "dimensions": {
+            "$ref": "#/components/schemas/BaseDimensions"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
-      "UserCreateRequest": {
+      "ScalarUnit": {
+        "type": "integer"
+      },
+      "TemperatureUnit": {
+        "type": "integer"
+      },
+      "Token": { },
+      "Type": { },
+      "UnitInfoOfScalarUnit": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pluralName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "baseUnits": {
+            "$ref": "#/components/schemas/BaseUnits"
+          },
+          "quantityName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "UserCreateDto": {
         "required": [
           "nameid",
           "password"
@@ -2042,24 +2109,9 @@
           "password": {
             "type": "string"
           },
-          "firstName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "firstName": { },
+          "lastName": { },
+          "description": { },
           "permissions": {
             "type": [
               "null",
@@ -2111,8 +2163,7 @@
           "partitions",
           "userGroups",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -2121,22 +2172,30 @@
             "format": "uuid"
           },
           "nameid": {
-            "type": "string"
+            "$ref": "#/components/schemas/Nameid"
           },
           "firstName": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FirstName"
+              }
             ]
           },
           "lastName": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LastName"
+              }
             ]
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "defaultPasswordExpirationPeriod": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -2155,7 +2214,7 @@
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PermissionDto"
+              "$ref": "#/components/schemas/Permission"
             }
           },
           "partitions": {
@@ -2181,13 +2240,10 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/UserModifiedType"
           }
         }
       },
-      "UserGroupCreateRequest": {
+      "UserGroupCreateDto": {
         "required": [
           "nameid"
         ],
@@ -2196,12 +2252,7 @@
           "nameid": {
             "type": "string"
           },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "description": { },
           "permissions": {
             "type": [
               "null",
@@ -2231,8 +2282,7 @@
           "permissions",
           "partitions",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -2241,15 +2291,15 @@
             "format": "uuid"
           },
           "nameid": {
-            "type": "string"
+            "$ref": "#/components/schemas/Nameid"
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PermissionDto"
+              "$ref": "#/components/schemas/Permission"
             }
           },
           "partitions": {
@@ -2268,14 +2318,8 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/UserGroupModifiedType"
           }
         }
-      },
-      "UserGroupModifiedType": {
-        "type": "integer"
       },
       "UserGroupPermissionUpdateDto": {
         "required": [
@@ -2288,7 +2332,7 @@
           }
         }
       },
-      "UserGroupUpdateRequest": {
+      "UserGroupUpdateDto": {
         "required": [
           "nameid",
           "description",
@@ -2305,9 +2349,13 @@
             ]
           },
           "description": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Description"
+              }
             ]
           },
           "isActive": {
@@ -2337,8 +2385,22 @@
           }
         }
       },
-      "UserModifiedType": {
-        "type": "integer"
+      "UserPasswordUpdateDto": {
+        "required": [
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          },
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       },
       "UserPermissionUpdateDto": {
         "required": [
@@ -2351,7 +2413,7 @@
           }
         }
       },
-      "UserUpdateRequest": {
+      "UserUpdateDto": {
         "type": "object",
         "properties": {
           "nameid": {
@@ -2360,24 +2422,9 @@
               "string"
             ]
           },
-          "firstName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "firstName": { },
+          "lastName": { },
+          "description": { },
           "password": {
             "type": [
               "null",

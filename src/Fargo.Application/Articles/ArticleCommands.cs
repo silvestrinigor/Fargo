@@ -1,9 +1,11 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
 using UnitsNet;
@@ -731,7 +733,12 @@ public sealed class ArticlePatchCommandHandler(
             article.ChangeDescription(description, actor);
         }
 
-        if (patch.ShelfLife.IsSpecified)
+        if (patch.RemoveShelfLife is true)
+        {
+            article.SetShelfLife(null, actor);
+        }
+
+        if (patch.ShelfLife is not null)
         {
             article.SetShelfLife(patch.ShelfLife.Value, actor);
         }

@@ -1,6 +1,6 @@
-using Fargo.Application.Articles;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared;
-using Fargo.Core.Articles;
+using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
@@ -139,7 +139,6 @@ public sealed class ArticleDtoTests
         var article = new ArticleDto(
             Guid.NewGuid(),
             new Name("Article"),
-            ArticleType.Default,
             new Description("Description"),
             ShelfLife: null,
             Color: null,
@@ -147,15 +146,13 @@ public sealed class ArticleDtoTests
             new ArticleBarcodesDto(Ean13: new Ean13("7891234567895")),
             Partitions: [],
             IsActive: true,
-            EditedByGuid: null,
-            ArticleModifiedType.None);
+            EditedByGuid: null);
 
         var json = JsonSerializer.Serialize(article, JsonOptions);
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;
 
         Assert.False(root.TryGetProperty("ean13", out _));
-        Assert.Equal((int)ArticleType.Default, root.GetProperty("articleType").GetInt32());
         Assert.True(root.TryGetProperty("barcodes", out var barcodes));
         Assert.Equal("7891234567895", barcodes.GetProperty("ean13").GetString());
     }

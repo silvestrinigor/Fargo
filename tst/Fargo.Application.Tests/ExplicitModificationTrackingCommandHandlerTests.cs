@@ -1,6 +1,10 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
+using Fargo.Application.Shared.Items;
+using Fargo.Application.Shared.Partitions;
+using Fargo.Application.Shared.UserGroups;
+using Fargo.Application.Shared.Users;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core;
@@ -9,9 +13,9 @@ using Fargo.Core.Events;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Core.Shared;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 

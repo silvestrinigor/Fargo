@@ -1,5 +1,6 @@
 using Fargo.Application.Articles;
-using Fargo.Core.Articles;
+using Fargo.Application.Shared.Articles;
+using Fargo.Core.Shared.Articles;
 using System.Reflection;
 
 namespace Fargo.Application.Tests;

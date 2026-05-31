@@ -1,11 +1,8 @@
-using System.Text.Json.Serialization;
-
 namespace Fargo.HttpContracts;
 
 public sealed record ArticleDto(
     Guid Guid,
     string Name,
-    ArticleType ArticleType,
     string Description,
     TimeSpan? ShelfLife,
     string? Color,
@@ -13,8 +10,7 @@ public sealed record ArticleDto(
     ArticleBarcodesDto Barcodes,
     IReadOnlyCollection<Guid> Partitions,
     bool IsActive,
-    Guid? EditedByGuid,
-    ArticleModifiedType ModificationTypes
+    Guid? EditedByGuid
 );
 
 public sealed record ArticleMetricsDto(
@@ -84,6 +80,7 @@ public sealed record ArticlePatchRequest
     public ArticlePatchRequest(
         string? Name = null,
         string? Description = null,
+        bool? RemoveShelfLife = null,
         ArticleMetricsDto? Metrics = null,
         ArticleBarcodesDto? Barcodes = null,
         IReadOnlyCollection<Guid>? Partitions = null,
@@ -91,6 +88,7 @@ public sealed record ArticlePatchRequest
     {
         this.Name = Name;
         this.Description = Description;
+        this.RemoveShelfLife = RemoveShelfLife;
         this.Metrics = Metrics;
         this.Barcodes = Barcodes;
         this.Partitions = Partitions;
@@ -98,14 +96,14 @@ public sealed record ArticlePatchRequest
     }
 
     public ArticlePatchRequest(
-        OptionalField<TimeSpan> ShelfLife,
+        TimeSpan? ShelfLife,
         string? Name = null,
         string? Description = null,
         ArticleMetricsDto? Metrics = null,
         ArticleBarcodesDto? Barcodes = null,
         IReadOnlyCollection<Guid>? Partitions = null,
         bool? IsActive = null)
-        : this(Name, Description, Metrics, Barcodes, Partitions, IsActive)
+        : this(Name, Description, null, Metrics, Barcodes, Partitions, IsActive)
     {
         this.ShelfLife = ShelfLife;
     }
@@ -114,8 +112,9 @@ public sealed record ArticlePatchRequest
 
     public string? Description { get; init; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public OptionalField<TimeSpan> ShelfLife { get; init; } = default;
+    public TimeSpan? ShelfLife { get; init; } = default;
+
+    public bool? RemoveShelfLife { get; init; } = default;
 
     public ArticleMetricsDto? Metrics { get; init; }
 

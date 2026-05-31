@@ -1,11 +1,12 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
-using Fargo.Core.Shared;
-using Fargo.Core;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Articles;
-using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Barcodes;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using UnitsNet;

@@ -1,4 +1,3 @@
-using Fargo.Core;
 using Fargo.Core.Shared;
 
 namespace Fargo.Application.Users;

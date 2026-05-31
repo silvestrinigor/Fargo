@@ -1,4 +1,5 @@
 using Fargo.Application.Identity;
+using Fargo.Application.Shared.Partitions;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
@@ -43,7 +44,7 @@ public sealed class PartitionCreateCommandHandler(
 
         partitionRepository.Add(partition);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Partition>(partition, actor.Guid));
+        entityEventRepository.Add(EntityEvent.EntityCreated(partition, actor.Guid));
 
         if (create.Description is { } description)
         {
@@ -211,7 +212,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         partitionService.DeletePartition(partition, actor);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<Partition>(partition, actor.Guid));
+        entityEventRepository.Add(EntityEvent.EntityDeleted(partition, actor.Guid));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

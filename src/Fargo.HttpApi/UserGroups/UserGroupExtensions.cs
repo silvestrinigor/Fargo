@@ -1,6 +1,6 @@
 using Fargo.Application;
+using Fargo.Application.Shared.UserGroups;
 using Fargo.Application.UserGroups;
-using Fargo.HttpApi.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,14 +41,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroup")
             .WithSummary("Gets a single user group")
             .WithDescription("Retrieves a single user group by its unique identifier. Optionally allows querying historical data using temporal tables.")
-            .Produces<HttpContracts.UserGroupDto>(StatusCodes.Status200OK)
+            .Produces<UserGroupDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<HttpContracts.UserGroupDto>, NotFound>> GetSingleUserGroup(
+    private static async Task<Results<Ok<UserGroupDto>, NotFound>> GetSingleUserGroup(
         Guid userGroupGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<UserGroupSingleQuery, UserGroupDto?> handler,
@@ -59,7 +59,7 @@ public static class UserGroupEndpointRouteBuilderExtension
 
         var response = await handler.Handle(query, cancellationToken);
 
-        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response.ToContract());
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
     #endregion Get Single
@@ -72,14 +72,14 @@ public static class UserGroupEndpointRouteBuilderExtension
             .WithName("GetUserGroups")
             .WithSummary("Gets multiple user groups")
             .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.")
-            .Produces<IReadOnlyCollection<HttpContracts.UserGroupDto>>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<UserGroupDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<HttpContracts.UserGroupDto>>, NoContent>> GetManyUserGroup(
+    private static async Task<Results<Ok<IReadOnlyCollection<UserGroupDto>>, NoContent>> GetManyUserGroup(
         DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
@@ -107,10 +107,7 @@ public static class UserGroupEndpointRouteBuilderExtension
             return TypedResults.NoContent();
         }
 
-        IReadOnlyCollection<HttpContracts.UserGroupDto> contractResponse =
-            response.Select(static userGroup => userGroup.ToContract()).ToArray();
-
-        return TypedResults.Ok(contractResponse);
+        return TypedResults.Ok(response);
     }
 
     #endregion Get Many
@@ -129,11 +126,11 @@ public static class UserGroupEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<Guid>> CreateUserGroup(
-        HttpContracts.UserGroupCreateRequest request,
+        UserGroupCreateDto request,
         ICommandHandler<UserGroupCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new UserGroupCreateCommand(request.ToApplication()), cancellationToken);
+        var response = await handler.Handle(new UserGroupCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -155,11 +152,11 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     private static async Task<NoContent> UpdateUserGroup(
         Guid userGroupGuid,
-        HttpContracts.UserGroupUpdateRequest request,
+        UserGroupUpdateDto request,
         ICommandHandler<UserGroupUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request.ToApplication()), cancellationToken);
+        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }

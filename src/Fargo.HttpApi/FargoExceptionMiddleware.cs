@@ -1,5 +1,3 @@
-using global::Fargo.HttpContracts;
-
 namespace Fargo.HttpApi;
 
 /// <summary>

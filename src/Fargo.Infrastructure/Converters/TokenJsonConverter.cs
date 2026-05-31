@@ -1,4 +1,4 @@
-using Fargo.Core.Identity;
+using Fargo.Core.Shared.Identity;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

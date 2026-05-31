@@ -1,4 +1,4 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using System.Net
 @using System.Text.Json
 @using System.Text.Json.Serialization
@@ -1200,23 +1200,12 @@
         {
             Name = OptionalText(articlePatch.IncludeName, articlePatch.Name),
             Description = OptionalText(articlePatch.IncludeDescription, articlePatch.Description),
+            ShelfLife = null,
+            RemoveShelfLife =  null,
             Metrics = articlePatch.IncludeMetrics ? BuildArticleMetrics(articlePatch.Metrics) : null,
             Barcodes = articlePatch.IncludeBarcodes ? BuildArticleBarcodes(articlePatch.Barcodes) : null,
             Partitions = articlePatch.IncludePartitions ? ParseGuidList(articlePatch.PartitionsText, "Partitions") : null,
             IsActive = OptionalBool(articlePatch.IncludeIsActive, articlePatch.IsActive)
-        };
-
-        request = articlePatch.ShelfLifeMode switch
-        {
-            ShelfLifePatchMode.Set => request with
-            {
-                ShelfLife = OptionalField<TimeSpan>.FromValue(RequiredTimeSpan(articlePatch.ShelfLife, "Shelf life"))
-            },
-            ShelfLifePatchMode.Clear => request with
-            {
-                ShelfLife = OptionalField<TimeSpan>.FromValue(null)
-            },
-            _ => request
         };
 
         return request;
@@ -1920,11 +1909,9 @@
     private RenderFragment ArticleDetail(ArticleDto article) => @<section class="detail-panel">
         <div class="detail-grid">
             @DetailValue("Guid", article.Guid.ToString("D"))
-            @DetailValue("Type", article.ArticleType.ToString())
             @DetailValue("Description", article.Description)
             @DetailValue("Shelf life", FormatDuration(article.ShelfLife))
             @DetailValue("Active", article.IsActive ? "Yes" : "No")
-            @DetailValue("Modified", article.ModificationTypes.ToString())
         </div>
         <section class="detail-section">
             <h4>Color</h4>
