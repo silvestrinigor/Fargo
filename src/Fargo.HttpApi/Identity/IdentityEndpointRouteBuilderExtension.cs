@@ -1,8 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.Identity;
-using Fargo.Application.Users;
-using Fargo.Core.Shared.Identity;
+using Fargo.Application.Shared.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Identity;

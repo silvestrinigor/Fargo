@@ -12,6 +12,10 @@ using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Application.Shared.Items;
+using Fargo.Application.Shared.Users;
+using Fargo.Application.Shared.UserGroups;
+using Fargo.Application.Shared.Partitions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application;

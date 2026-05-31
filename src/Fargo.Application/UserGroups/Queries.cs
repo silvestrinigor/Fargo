@@ -1,5 +1,6 @@
 using Fargo.Application.Identity;
 using Microsoft.Extensions.Logging;
+using Fargo.Application.Shared.UserGroups;
 
 namespace Fargo.Application.UserGroups;
 

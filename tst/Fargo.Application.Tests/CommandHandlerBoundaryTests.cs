@@ -1,5 +1,9 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
+using Fargo.Application.Shared.Items;
+using Fargo.Application.Shared.UserGroups;
+using Fargo.Application.Shared.Users;
+using Fargo.Application.Shared.Partitions;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;

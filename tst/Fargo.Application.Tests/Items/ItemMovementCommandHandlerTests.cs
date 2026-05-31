@@ -1,6 +1,6 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
-using Fargo.Core;
+using Fargo.Application.Shared.Items;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Items;

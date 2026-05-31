@@ -323,7 +323,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ItemUpdateRequest"
+                "$ref": "#/components/schemas/ItemUpdateDto"
               }
             }
           },
@@ -450,7 +450,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ItemCreateRequest"
+                "$ref": "#/components/schemas/ItemCreateDto"
               }
             }
           },
@@ -536,7 +536,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserUpdateRequest"
+                "$ref": "#/components/schemas/UserUpdateDto"
               }
             }
           },
@@ -663,7 +663,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreateRequest"
+                "$ref": "#/components/schemas/UserCreateDto"
               }
             }
           },
@@ -749,7 +749,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserGroupUpdateRequest"
+                "$ref": "#/components/schemas/UserGroupUpdateDto"
               }
             }
           },
@@ -876,7 +876,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserGroupCreateRequest"
+                "$ref": "#/components/schemas/UserGroupCreateDto"
               }
             }
           },
@@ -962,7 +962,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PartitionUpdateRequest"
+                "$ref": "#/components/schemas/PartitionUpdateDto"
               }
             }
           },
@@ -1089,7 +1089,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PartitionCreateRequest"
+                "$ref": "#/components/schemas/PartitionCreateDto"
               }
             }
           },
@@ -1708,6 +1708,7 @@
       "ElectricCurrentUnit": {
         "type": "integer"
       },
+      "FirstName": { },
       "IQuantityOfScalarUnit": {
         "type": "object",
         "properties": {
@@ -1725,7 +1726,7 @@
           }
         }
       },
-      "ItemCreateRequest": {
+      "ItemCreateDto": {
         "required": [
           "articleGuid"
         ],
@@ -1768,8 +1769,7 @@
           "parentContainerGuid",
           "partitions",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -1811,16 +1811,10 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/ItemModifiedType"
           }
         }
       },
-      "ItemModifiedType": {
-        "type": "integer"
-      },
-      "ItemUpdateRequest": {
+      "ItemUpdateDto": {
         "required": [
           "partitions"
         ],
@@ -1848,6 +1842,7 @@
           }
         }
       },
+      "LastName": { },
       "LengthUnit": {
         "type": "integer"
       },
@@ -1884,21 +1879,17 @@
         "type": "integer"
       },
       "Name": { },
-      "PartitionCreateRequest": {
+      "Nameid": { },
+      "PartitionCreateDto": {
         "required": [
           "name"
         ],
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "description": { },
           "parentPartitionGuid": {
             "type": [
               "null",
@@ -1915,8 +1906,7 @@
           "description",
           "parentPartitionGuid",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -1925,10 +1915,10 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "parentPartitionGuid": {
             "type": [
@@ -1946,30 +1936,14 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/PartitionModifiedType"
           }
         }
       },
-      "PartitionModifiedType": {
-        "type": "integer"
-      },
-      "PartitionUpdateRequest": {
+      "PartitionUpdateDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "name": { },
+          "description": { },
           "parentPartitionGuid": {
             "type": [
               "null",
@@ -1985,7 +1959,7 @@
           }
         }
       },
-      "PermissionDto": {
+      "Permission": {
         "required": [
           "guid",
           "action"
@@ -2122,7 +2096,7 @@
           }
         }
       },
-      "UserCreateRequest": {
+      "UserCreateDto": {
         "required": [
           "nameid",
           "password"
@@ -2135,24 +2109,9 @@
           "password": {
             "type": "string"
           },
-          "firstName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "firstName": { },
+          "lastName": { },
+          "description": { },
           "permissions": {
             "type": [
               "null",
@@ -2204,8 +2163,7 @@
           "partitions",
           "userGroups",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -2214,22 +2172,30 @@
             "format": "uuid"
           },
           "nameid": {
-            "type": "string"
+            "$ref": "#/components/schemas/Nameid"
           },
           "firstName": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FirstName"
+              }
             ]
           },
           "lastName": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LastName"
+              }
             ]
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "defaultPasswordExpirationPeriod": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -2248,7 +2214,7 @@
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PermissionDto"
+              "$ref": "#/components/schemas/Permission"
             }
           },
           "partitions": {
@@ -2274,13 +2240,10 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/UserModifiedType"
           }
         }
       },
-      "UserGroupCreateRequest": {
+      "UserGroupCreateDto": {
         "required": [
           "nameid"
         ],
@@ -2289,12 +2252,7 @@
           "nameid": {
             "type": "string"
           },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "description": { },
           "permissions": {
             "type": [
               "null",
@@ -2324,8 +2282,7 @@
           "permissions",
           "partitions",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -2334,15 +2291,15 @@
             "format": "uuid"
           },
           "nameid": {
-            "type": "string"
+            "$ref": "#/components/schemas/Nameid"
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PermissionDto"
+              "$ref": "#/components/schemas/Permission"
             }
           },
           "partitions": {
@@ -2361,14 +2318,8 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/UserGroupModifiedType"
           }
         }
-      },
-      "UserGroupModifiedType": {
-        "type": "integer"
       },
       "UserGroupPermissionUpdateDto": {
         "required": [
@@ -2381,7 +2332,7 @@
           }
         }
       },
-      "UserGroupUpdateRequest": {
+      "UserGroupUpdateDto": {
         "required": [
           "nameid",
           "description",
@@ -2398,9 +2349,13 @@
             ]
           },
           "description": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Description"
+              }
             ]
           },
           "isActive": {
@@ -2430,9 +2385,6 @@
           }
         }
       },
-      "UserModifiedType": {
-        "type": "integer"
-      },
       "UserPasswordUpdateDto": {
         "required": [
           "newPassword"
@@ -2461,7 +2413,7 @@
           }
         }
       },
-      "UserUpdateRequest": {
+      "UserUpdateDto": {
         "type": "object",
         "properties": {
           "nameid": {
@@ -2470,24 +2422,9 @@
               "string"
             ]
           },
-          "firstName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "firstName": { },
+          "lastName": { },
+          "description": { },
           "password": {
             "type": [
               "null",

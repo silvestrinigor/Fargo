@@ -1,4 +1,4 @@
-using Fargo.Application.Users;
+using Fargo.Application.Shared.Users;
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Identity;

@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Users;
+using Fargo.Application.Shared.Users;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Extensions;

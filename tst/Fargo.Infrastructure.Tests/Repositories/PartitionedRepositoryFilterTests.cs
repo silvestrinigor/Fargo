@@ -1,7 +1,10 @@
 using Fargo.Application;
-using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared;
-using Fargo.Core.Shared.Articles;
+using Fargo.Application.Shared.Articles;
+using Fargo.Application.Shared.Items;
+using Fargo.Application.Shared.Partitions;
+using Fargo.Application.Shared.UserGroups;
+using Fargo.Application.Shared.Users;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Shared.Barcodes;
@@ -331,10 +334,10 @@ public sealed class PartitionedRepositoryFilterTests
     private static Guid GetGuid<T>(T dto)
         => dto switch
         {
-            Fargo.Application.Shared.Articles.ArticleDto article => article.Guid,
-            Fargo.Application.Items.ItemDto item => item.Guid,
-            Fargo.Application.Users.UserDto user => user.Guid,
-            Fargo.Application.UserGroups.UserGroupDto userGroup => userGroup.Guid,
+            ArticleDto article => article.Guid,
+            ItemDto item => item.Guid,
+            UserDto user => user.Guid,
+            UserGroupDto userGroup => userGroup.Guid,
             _ => throw new ArgumentOutOfRangeException(nameof(dto), dto, "Unsupported DTO type.")
         };
 
