@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Fargo.HttpContracts;
 
 public sealed record ArticleDto(

@@ -1,5 +1,5 @@
-using Fargo.Core.Items;
 using Fargo.Application.Shared.Items;
+using Fargo.Core.Items;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Items;

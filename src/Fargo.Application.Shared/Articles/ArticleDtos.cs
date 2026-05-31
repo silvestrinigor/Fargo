@@ -1,8 +1,8 @@
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
-using UnitsNet;
 using System.Drawing;
+using UnitsNet;
 
 namespace Fargo.Application.Shared.Articles;
 

@@ -1,6 +1,6 @@
 using Fargo.Application;
-using Fargo.Application.Users;
 using Fargo.Application.Shared.Users;
+using Fargo.Application.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 

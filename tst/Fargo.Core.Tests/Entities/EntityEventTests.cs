@@ -1,7 +1,7 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
-using Fargo.Core.Shared;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 
 namespace Fargo.Core.Tests.Entities;
 

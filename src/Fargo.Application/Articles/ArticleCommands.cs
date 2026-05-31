@@ -1,11 +1,11 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Articles;
-using Fargo.Core.Shared;
 using Fargo.Core.Articles;
-using Fargo.Core.Shared.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
 using UnitsNet;

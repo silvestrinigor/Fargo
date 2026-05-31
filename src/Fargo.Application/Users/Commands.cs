@@ -1,11 +1,11 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
-using Fargo.Application.UserGroups;
 using Fargo.Application.Shared.Users;
-using Fargo.Core.Shared;
+using Fargo.Application.UserGroups;
 using Fargo.Core.Events;
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;

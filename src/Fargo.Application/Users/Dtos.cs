@@ -1,6 +1,6 @@
-using Fargo.Core.Users;
-using Fargo.Core.Shared;
 using Fargo.Application.Shared.Users;
+using Fargo.Core.Shared;
+using Fargo.Core.Users;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Users;

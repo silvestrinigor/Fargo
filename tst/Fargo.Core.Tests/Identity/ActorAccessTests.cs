@@ -1,8 +1,8 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
-using Fargo.Core.Users;
 using Fargo.Core.Shared;
+using Fargo.Core.Users;
 
 namespace Fargo.Core.Tests.Identity;
 

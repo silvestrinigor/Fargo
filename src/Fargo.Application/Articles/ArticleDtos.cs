@@ -1,5 +1,5 @@
-using Fargo.Core.Articles;
 using Fargo.Application.Shared.Articles;
+using Fargo.Core.Articles;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Articles;

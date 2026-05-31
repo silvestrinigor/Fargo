@@ -1,6 +1,6 @@
 using Fargo.Core.Partitions;
-using Fargo.Core.Users;
 using Fargo.Core.Shared;
+using Fargo.Core.Users;
 
 namespace Fargo.Core.Identity;
 

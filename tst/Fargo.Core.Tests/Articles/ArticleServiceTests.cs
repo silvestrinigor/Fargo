@@ -1,7 +1,7 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Shared;
 using Fargo.Core.Shared.Barcodes;
 using NSubstitute;
-using Fargo.Core.Shared;
 
 namespace Fargo.Core.Tests.Articles;
 

@@ -1,6 +1,6 @@
 using Fargo.Application.Shared.Articles;
-using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpApi.Articles;
 using Fargo.Infrastructure.Converters;
