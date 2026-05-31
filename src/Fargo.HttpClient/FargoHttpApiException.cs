@@ -1,4 +1,3 @@
-using Fargo.HttpContracts;
 using System.Net;
 
 namespace Fargo.HttpClient;

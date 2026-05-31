@@ -1,39 +1,40 @@
-using Fargo.HttpContracts;
+using Fargo.Application.Shared.Identity;
+using Fargo.Application.Shared.Users;
 
 namespace Fargo.HttpClient;
 
 public interface IFargoIdentityClient
 {
-    Task<AuthDto> LoginAsync(
-        LoginRequest request,
+    Task<AuthResult> LoginAsync(
+        LoginDto request,
         CancellationToken cancellationToken = default);
 
     Task LogoutAsync(
-        RefreshRequest request,
+        RefreshDto request,
         CancellationToken cancellationToken = default);
 
-    Task<AuthDto> RefreshAsync(
-        RefreshRequest request,
+    Task<AuthResult> RefreshAsync(
+        RefreshDto request,
         CancellationToken cancellationToken = default);
 
     Task ChangePasswordAsync(
-        PasswordUpdateRequest request,
+        UserPasswordUpdateDto request,
         CancellationToken cancellationToken = default);
 }
 
 internal sealed class FargoIdentityClient(FargoHttpTransport transport) : IFargoIdentityClient
 {
-    public Task<AuthDto> LoginAsync(
-        LoginRequest request,
+    public Task<AuthResult> LoginAsync(
+        LoginDto request,
         CancellationToken cancellationToken = default)
-        => transport.SendRequiredAsync<AuthDto>(
+        => transport.SendRequiredAsync<AuthResult>(
             HttpMethod.Post,
             "/identity/login",
             request,
             cancellationToken);
 
     public Task LogoutAsync(
-        RefreshRequest request,
+        RefreshDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Post,
@@ -41,17 +42,17 @@ internal sealed class FargoIdentityClient(FargoHttpTransport transport) : IFargo
             request,
             cancellationToken);
 
-    public Task<AuthDto> RefreshAsync(
-        RefreshRequest request,
+    public Task<AuthResult> RefreshAsync(
+        RefreshDto request,
         CancellationToken cancellationToken = default)
-        => transport.SendRequiredAsync<AuthDto>(
+        => transport.SendRequiredAsync<AuthResult>(
             HttpMethod.Post,
             "/identity/refresh",
             request,
             cancellationToken);
 
     public Task ChangePasswordAsync(
-        PasswordUpdateRequest request,
+        UserPasswordUpdateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Put,

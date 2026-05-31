@@ -1,4 +1,4 @@
-using Fargo.HttpContracts;
+using Fargo.Application.Shared.Partitions;
 
 namespace Fargo.HttpClient;
 
@@ -14,12 +14,12 @@ public interface IFargoPartitionClient
         CancellationToken cancellationToken = default);
 
     Task<Guid> CreateAsync(
-        PartitionCreateRequest request,
+        PartitionCreateDto request,
         CancellationToken cancellationToken = default);
 
     Task UpdateAsync(
         Guid partitionGuid,
-        PartitionUpdateRequest request,
+        PartitionUpdateDto request,
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(
@@ -51,7 +51,7 @@ internal sealed class FargoPartitionClient(FargoHttpTransport transport) : IFarg
             cancellationToken);
 
     public Task<Guid> CreateAsync(
-        PartitionCreateRequest request,
+        PartitionCreateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendRequiredAsync<Guid>(
             HttpMethod.Post,
@@ -61,7 +61,7 @@ internal sealed class FargoPartitionClient(FargoHttpTransport transport) : IFarg
 
     public Task UpdateAsync(
         Guid partitionGuid,
-        PartitionUpdateRequest request,
+        PartitionUpdateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Put,

@@ -17,11 +17,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fargo.HttpApi\Fargo.HttpApi.csproj" />
-    <ProjectReference Include="..\Fargo.Web\Fargo.Web.csproj" />
-    <ProjectReference Include="..\Fargo.Web.Identity\Fargo.Web.Identity.csproj" />
-    <ProjectReference Include="..\Fargo.Web.Playground\Fargo.Web.Playground.csproj" />
-    <ProjectReference Include="..\Fargo.MigrationService\Fargo.MigrationService.csproj" />
-    <ProjectReference Include="..\Fargo.SeedService\Fargo.SeedService.csproj" />
+    <ProjectReference Include="..\Fargo.WebIdentity\Fargo.WebIdentity.csproj" />
+    <ProjectReference Include="..\Fargo.WebPlayground\Fargo.WebPlayground.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceMigration\Fargo.ServiceMigration.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceSeed\Fargo.ServiceSeed.csproj" />
   </ItemGroup>
 
 </Project>

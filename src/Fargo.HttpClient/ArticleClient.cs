@@ -1,4 +1,5 @@
-using Fargo.HttpContracts;
+using Fargo.Application.Shared.Articles;
+using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.HttpClient;
 
@@ -20,12 +21,12 @@ public interface IFargoArticleClient
         CancellationToken cancellationToken = default);
 
     Task<Guid> CreateAsync(
-        ArticleCreateRequest request,
+        ArticleCreateDto request,
         CancellationToken cancellationToken = default);
 
     Task PatchAsync(
         Guid articleGuid,
-        ArticlePatchRequest request,
+        ArticlePatchDto request,
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(
@@ -70,7 +71,7 @@ internal sealed class FargoArticleClient(FargoHttpTransport transport) : IFargoA
             cancellationToken);
 
     public Task<Guid> CreateAsync(
-        ArticleCreateRequest request,
+        ArticleCreateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendRequiredAsync<Guid>(
             HttpMethod.Post,
@@ -80,7 +81,7 @@ internal sealed class FargoArticleClient(FargoHttpTransport transport) : IFargoA
 
     public Task PatchAsync(
         Guid articleGuid,
-        ArticlePatchRequest request,
+        ArticlePatchDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Patch,
