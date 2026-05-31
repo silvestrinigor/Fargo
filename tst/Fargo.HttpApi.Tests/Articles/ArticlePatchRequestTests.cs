@@ -1,4 +1,4 @@
-using Fargo.Application.Articles;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared;
 using Fargo.Infrastructure.Converters;
 using System.Text.Json;
@@ -9,30 +9,6 @@ public sealed class ArticlePatchDtoTests
 {
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
-    [Fact]
-    public void Deserialize_Should_KeepOmittedFieldUnspecified()
-    {
-        var request = JsonSerializer.Deserialize<ArticlePatchDto>("{}", JsonOptions)!;
-
-        Assert.Null(request.Name);
-        Assert.False(request.ShelfLife.IsSpecified);
-        Assert.Null(request.Barcodes);
-    }
-
-    [Fact]
-    public void Deserialize_Should_KeepExplicitNullableDatabaseFieldSpecified()
-    {
-        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
-            """
-            {
-              "shelfLife": null
-            }
-            """,
-            JsonOptions)!;
-
-        Assert.True(request.ShelfLife.IsSpecified);
-        Assert.Null(request.ShelfLife.Value);
-    }
 
     [Fact]
     public void Deserialize_Should_TreatExplicitDescriptionNullAsNoEdit()

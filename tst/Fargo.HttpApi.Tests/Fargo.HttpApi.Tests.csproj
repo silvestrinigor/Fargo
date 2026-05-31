@@ -23,7 +23,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fargo.HttpApi\Fargo.HttpApi.csproj" />
     <ProjectReference Include="..\..\src\Fargo.Application\Fargo.Application.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.Application.Shared\Fargo.Application.Shared.csproj" />
     <ProjectReference Include="..\..\src\Fargo.Core\Fargo.Core.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.Core.Shared\Fargo.Core.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

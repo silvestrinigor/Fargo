@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Fargo.Application.Shared\Fargo.Application.Shared.csproj" />
         <ProjectReference Include="..\Fargo.Core\Fargo.Core.csproj" />
         <ProjectReference Include="..\Fargo.Core.Shared\Fargo.Core.Shared.csproj" />
     </ItemGroup>

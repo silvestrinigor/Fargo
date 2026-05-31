@@ -1,3 +1,4 @@
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Articles;
 using Fargo.Core.Shared.Barcodes;
 

@@ -1,68 +1,8 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Shared.Barcodes;
-using Fargo.Core.Shared;
-using System.Drawing;
+using Fargo.Application.Shared.Articles;
 using System.Linq.Expressions;
-using UnitsNet;
 
 namespace Fargo.Application.Articles;
-
-public sealed record ArticleDto(
-    Guid Guid,
-    Name Name,
-    ArticleType ArticleType,
-    Description Description,
-    TimeSpan? ShelfLife,
-    Color? Color,
-    ArticleMetricsDto Metrics,
-    ArticleBarcodesDto Barcodes,
-    IReadOnlyCollection<Guid> Partitions,
-    bool IsActive,
-    Guid? EditedByGuid,
-    ArticleModifiedType ModificationTypes
-);
-
-public sealed record ArticleMetricsDto(
-    Mass? Mass = null,
-    Length? LengthX = null,
-    Length? LengthY = null,
-    Length? LengthZ = null
-);
-
-public sealed record ArticleBarcodesDto(
-    Ean13? Ean13 = null,
-    Ean8? Ean8 = null,
-    UpcA? UpcA = null,
-    UpcE? UpcE = null,
-    Code128? Code128 = null,
-    Code39? Code39 = null,
-    Itf14? Itf14 = null,
-    Gs1128? Gs1128 = null,
-    QrCode? QrCode = null,
-    DataMatrix? DataMatrix = null
-);
-
-public sealed record ArticleCreateKitPackDto(
-    Guid ArticleGuid,
-    Scalar Quantity
-);
-
-public sealed record ArticleCreateVariationDto(
-    Guid FromArticleGuid
-);
-
-public sealed record ArticleCreatePackDto(
-    Guid FromArticleGuid,
-    Scalar Quantity
-);
-
-public sealed record ArticleCreateKitDto(
-    IReadOnlyCollection<ArticleCreateKitPackDto> Packs
-);
-
-public sealed record ArticleCreateContainerDto(
-    Mass? MaxMass = null
-);
 
 public static class ArticleCommandDtoMappings
 {
@@ -87,31 +27,6 @@ public static class ArticleCommandDtoMappings
             barcodes.DataMatrix);
 }
 
-public sealed record ArticleCreateDto(
-    Name Name,
-    ArticleType ArticleType,
-    Description? Description = null,
-    TimeSpan? ShelfLife = null,
-    Color? Color = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null,
-    ArticleCreateVariationDto? Variation = null,
-    ArticleCreatePackDto? Pack = null,
-    ArticleCreateKitDto? Kit = null,
-    ArticleCreateContainerDto? Container = null
-);
-
-public sealed record ArticlePatchDto(
-    Name? Name = default,
-    Description? Description = default,
-    OptionalValue<TimeSpan> ShelfLife = default,
-    ArticleMetricsDto? Metrics = default,
-    ArticleBarcodesDto? Barcodes = default,
-    IReadOnlyCollection<Guid>? Partitions = default,
-    bool? IsActive = default
-);
 
 /// <summary>
 /// Provides mappings for article DTO projections.
@@ -124,15 +39,6 @@ public static class ArticleDtoMappings
     public static readonly Expression<Func<Article, ArticleDto>> Projection = article => new ArticleDto(
         article.Guid,
         article.Name,
-        article.Variation != null
-            ? ArticleType.Variation
-            : article.Pack != null
-                ? ArticleType.Pack
-                : article.Kit != null
-                    ? ArticleType.Kit
-                    : article.Container != null
-                        ? ArticleType.Container
-                        : ArticleType.Default,
         article.Description,
         article.ShelfLife,
         article.Color,
@@ -154,7 +60,6 @@ public static class ArticleDtoMappings
             article.DataMatrix),
         article.Partitions.Select(partition => partition.Guid).ToArray(),
         article.IsActive,
-        article.EditedByGuid,
-        article.ModificationTypes
+        article.EditedByGuid
     );
 }

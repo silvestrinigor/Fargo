@@ -1507,7 +1507,6 @@
         "required": [
           "guid",
           "name",
-          "articleType",
           "description",
           "shelfLife",
           "color",
@@ -1515,8 +1514,7 @@
           "barcodes",
           "partitions",
           "isActive",
-          "editedByGuid",
-          "modificationTypes"
+          "editedByGuid"
         ],
         "type": "object",
         "properties": {
@@ -1526,9 +1524,6 @@
           },
           "name": {
             "type": "string"
-          },
-          "articleType": {
-            "$ref": "#/components/schemas/ArticleType"
           },
           "description": {
             "type": "string"
@@ -1568,9 +1563,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "modificationTypes": {
-            "$ref": "#/components/schemas/ArticleModifiedType"
           }
         }
       },
@@ -1619,9 +1611,6 @@
           }
         }
       },
-      "ArticleModifiedType": {
-        "type": "integer"
-      },
       "ArticlePatchRequest": {
         "type": "object",
         "properties": {
@@ -1638,7 +1627,17 @@
             ]
           },
           "shelfLife": {
-            "$ref": "#/components/schemas/OptionalFieldOfTimeSpan"
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removeShelfLife": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           },
           "metrics": {
             "oneOf": [
@@ -1857,14 +1856,6 @@
             "type": "string"
           }
         }
-      },
-      "OptionalFieldOfTimeSpan": {
-        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-        "type": [
-          "null",
-          "string"
-        ],
-        "example": "7.00:00:00"
       },
       "PartitionCreateRequest": {
         "required": [

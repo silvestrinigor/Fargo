@@ -1,5 +1,7 @@
 using Fargo.Application;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
 using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Shared.Barcodes;
@@ -329,7 +331,7 @@ public sealed class PartitionedRepositoryFilterTests
     private static Guid GetGuid<T>(T dto)
         => dto switch
         {
-            Fargo.Application.Articles.ArticleDto article => article.Guid,
+            Fargo.Application.Shared.Articles.ArticleDto article => article.Guid,
             Fargo.Application.Items.ItemDto item => item.Guid,
             Fargo.Application.Users.UserDto user => user.Guid,
             Fargo.Application.UserGroups.UserGroupDto userGroup => userGroup.Guid,

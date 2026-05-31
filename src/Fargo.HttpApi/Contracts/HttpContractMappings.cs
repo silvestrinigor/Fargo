@@ -1,19 +1,20 @@
 using Fargo.Application;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.Units;
-using AppArticle = Fargo.Application.Articles.ArticleDto;
-using AppArticleBarcodes = Fargo.Application.Articles.ArticleBarcodesDto;
-using AppArticleCreate = Fargo.Application.Articles.ArticleCreateDto;
-using AppArticleCreateContainer = Fargo.Application.Articles.ArticleCreateContainerDto;
-using AppArticleCreateKit = Fargo.Application.Articles.ArticleCreateKitDto;
-using AppArticleCreateKitPack = Fargo.Application.Articles.ArticleCreateKitPackDto;
-using AppArticleCreatePack = Fargo.Application.Articles.ArticleCreatePackDto;
-using AppArticleCreateVariation = Fargo.Application.Articles.ArticleCreateVariationDto;
-using AppArticleMetrics = Fargo.Application.Articles.ArticleMetricsDto;
-using AppArticlePatch = Fargo.Application.Articles.ArticlePatchDto;
+using AppArticle = Fargo.Application.Shared.Articles.ArticleDto;
+using AppArticleBarcodes = Fargo.Application.Shared.Articles.ArticleBarcodesDto;
+using AppArticleCreate = Fargo.Application.Shared.Articles.ArticleCreateDto;
+using AppArticleCreateContainer = Fargo.Application.Shared.Articles.ArticleCreateContainerDto;
+using AppArticleCreateKit = Fargo.Application.Shared.Articles.ArticleCreateKitDto;
+using AppArticleCreateKitPack = Fargo.Application.Shared.Articles.ArticleCreateKitPackDto;
+using AppArticleCreatePack = Fargo.Application.Shared.Articles.ArticleCreatePackDto;
+using AppArticleCreateVariation = Fargo.Application.Shared.Articles.ArticleCreateVariationDto;
+using AppArticleMetrics = Fargo.Application.Shared.Articles.ArticleMetricsDto;
+using AppArticlePatch = Fargo.Application.Shared.Articles.ArticlePatchDto;
 using AppAuth = Fargo.Application.Identity.AuthResult;
 using AppItem = Fargo.Application.Items.ItemDto;
 using AppItemCreate = Fargo.Application.Items.ItemCreateDto;
@@ -46,7 +47,7 @@ internal static class HttpContractMappings
     public static AppArticleCreate ToApplication(this HttpContracts.ArticleCreateRequest request)
         => new(
             new Name(request.Name),
-            (Fargo.Core.Articles.ArticleType)(int)request.ArticleType,
+            (Fargo.Core.Shared.Articles.ArticleType)(int)request.ArticleType,
             ToDescription(request.Description),
             request.ShelfLife,
             ToColor(request.Color),
@@ -69,9 +70,8 @@ internal static class HttpContractMappings
         => new(
             ToName(request.Name),
             ToDescription(request.Description),
-            request.ShelfLife.IsSpecified
-                ? OptionalValue<TimeSpan>.FromValue(request.ShelfLife.Value)
-                : default,
+            request.ShelfLife,
+            request.RemoveShelfLife,
             request.Metrics.ToApplication(),
             request.Barcodes.ToApplication(),
             request.Partitions,
@@ -81,7 +81,6 @@ internal static class HttpContractMappings
         => new(
             article.Guid,
             article.Name.Value,
-            (HttpContracts.ArticleType)(int)article.ArticleType,
             article.Description.Value,
             article.ShelfLife,
             article.Color is null ? null : ColorTranslator.ToHtml(article.Color.Value),
@@ -89,8 +88,7 @@ internal static class HttpContractMappings
             article.Barcodes.ToContract(),
             article.Partitions,
             article.IsActive,
-            article.EditedByGuid,
-            (HttpContracts.ArticleModifiedType)(int)article.ModificationTypes);
+            article.EditedByGuid);
 
     public static AppItemCreate ToApplication(this HttpContracts.ItemCreateRequest request)
         => new(

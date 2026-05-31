@@ -10,7 +10,9 @@
     <Project Path="src/Fargo.Web.Identity/Fargo.Web.Identity.csproj" />
     <Project Path="src/Fargo.Web.Playground/Fargo.Web.Playground.csproj" />
     <Project Path="src/Fargo.Application/Fargo.Application.csproj" />
+    <Project Path="src/Fargo.Application.Shared/Fargo.Application.Shared.csproj" />
     <Project Path="src/Fargo.Core/Fargo.Core.csproj" />
+    <Project Path="src/Fargo.Core.Shared/Fargo.Core.Shared.csproj" />
     <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
     <Project Path="tst/Fargo.Domain.Tests/Fargo.Domain.Tests.csproj" />
     <Project Path="tst/Fargo.HttpClient.Tests/Fargo.HttpClient.Tests.csproj" />

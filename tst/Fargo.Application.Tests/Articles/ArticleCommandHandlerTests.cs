@@ -1,7 +1,8 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Identity;
+using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared;
-using Fargo.Core;
+using Fargo.Core.Shared.Articles;
 using Fargo.Core.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Events;

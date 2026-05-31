@@ -1,12 +1,11 @@
-using Fargo.Application.Articles;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpApi.Contracts;
+using Fargo.Application.Shared.Articles;
 using System.Drawing;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
-using AppArticleType = Fargo.Core.Articles.ArticleType;
-using AppModifiedType = Fargo.Core.Articles.ArticleModifiedType;
+using AppArticleType = Fargo.Core.Shared.Articles.ArticleType;
 using ContractArticleType = Fargo.HttpContracts.ArticleType;
 using ContractCreatePackRequest = Fargo.HttpContracts.ArticleCreatePackRequest;
 using ContractCreateRequest = Fargo.HttpContracts.ArticleCreateRequest;
@@ -45,7 +44,6 @@ public sealed class HttpContractMappingsTests
         var article = new ArticleDto(
             articleGuid,
             new Name("Article"),
-            AppArticleType.Default,
             new Description("Description"),
             ShelfLife: TimeSpan.FromDays(7),
             Color: Color.Red,
@@ -53,19 +51,16 @@ public sealed class HttpContractMappingsTests
             new ArticleBarcodesDto(Ean13: new Ean13("7891234567895")),
             Partitions: [],
             IsActive: true,
-            EditedByGuid: null,
-            AppModifiedType.General);
+            EditedByGuid: null);
 
         var result = article.ToContract();
 
         Assert.Equal(articleGuid, result.Guid);
         Assert.Equal("Article", result.Name);
-        Assert.Equal(ContractArticleType.Default, result.ArticleType);
         Assert.Equal("Description", result.Description);
         Assert.Equal("red", result.Color?.ToLowerInvariant());
         Assert.Equal("kg", result.Metrics.Mass?.Unit);
         Assert.Equal(5, result.Metrics.Mass?.Value);
         Assert.Equal("7891234567895", result.Barcodes.Ean13);
-        Assert.Equal(ContractModifiedType.General, result.ModificationTypes);
     }
 }
