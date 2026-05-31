@@ -70,7 +70,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ArticlePatchRequest"
+                "$ref": "#/components/schemas/ArticlePatchDto"
               }
             }
           },
@@ -237,7 +237,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ArticleCreateRequest"
+                "$ref": "#/components/schemas/ArticleCreateDto"
               }
             }
           },
@@ -1245,143 +1245,31 @@
       "ActionType": {
         "type": "integer"
       },
+      "AmountOfSubstanceUnit": {
+        "type": "integer"
+      },
       "ArticleBarcodesDto": {
         "type": "object",
         "properties": {
-          "ean13": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "ean8": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upcA": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upcE": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "code128": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "code39": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "itf14": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "gs1128": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "qrCode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "dataMatrix": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
+          "ean13": { },
+          "ean8": { },
+          "upcA": { },
+          "upcE": { },
+          "code128": { },
+          "code39": { },
+          "itf14": { },
+          "gs1128": { },
+          "qrCode": { },
+          "dataMatrix": { }
         }
       },
-      "ArticleCreateContainerRequest": {
+      "ArticleCreateContainerDto": {
         "type": "object",
         "properties": {
-          "maxMass": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          }
+          "maxMass": { }
         }
       },
-      "ArticleCreateKitPackRequest": {
-        "required": [
-          "articleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "double"
-          }
-        }
-      },
-      "ArticleCreateKitRequest": {
-        "required": [
-          "packs"
-        ],
-        "type": "object",
-        "properties": {
-          "packs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ArticleCreateKitPackRequest"
-            }
-          }
-        }
-      },
-      "ArticleCreatePackRequest": {
-        "required": [
-          "fromArticleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "fromArticleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "double"
-          }
-        }
-      },
-      "ArticleCreateRequest": {
+      "ArticleCreateDto": {
         "required": [
           "name",
           "articleType"
@@ -1389,17 +1277,12 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
           "articleType": {
             "$ref": "#/components/schemas/ArticleType"
           },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "description": { },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
@@ -1407,12 +1290,7 @@
               "string"
             ]
           },
-          "color": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "color": { },
           "metrics": {
             "oneOf": [
               {
@@ -1455,7 +1333,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreateVariationRequest"
+                "$ref": "#/components/schemas/ArticleCreateVariationDto"
               }
             ]
           },
@@ -1465,7 +1343,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreatePackRequest"
+                "$ref": "#/components/schemas/ArticleCreatePackDto"
               }
             ]
           },
@@ -1475,7 +1353,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreateKitRequest"
+                "$ref": "#/components/schemas/ArticleCreateKitDto"
               }
             ]
           },
@@ -1485,13 +1363,59 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ArticleCreateContainerRequest"
+                "$ref": "#/components/schemas/ArticleCreateContainerDto"
               }
             ]
           }
         }
       },
-      "ArticleCreateVariationRequest": {
+      "ArticleCreateKitDto": {
+        "required": [
+          "packs"
+        ],
+        "type": "object",
+        "properties": {
+          "packs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleCreateKitPackDto"
+            }
+          }
+        }
+      },
+      "ArticleCreateKitPackDto": {
+        "required": [
+          "articleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "ArticleCreatePackDto": {
+        "required": [
+          "fromArticleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "fromArticleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "ArticleCreateVariationDto": {
         "required": [
           "fromArticleGuid"
         ],
@@ -1523,10 +1447,10 @@
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/Name"
           },
           "description": {
-            "type": "string"
+            "$ref": "#/components/schemas/Description"
           },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -1536,9 +1460,13 @@
             ]
           },
           "color": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Color"
+              }
             ]
           },
           "metrics": {
@@ -1569,63 +1497,17 @@
       "ArticleMetricsDto": {
         "type": "object",
         "properties": {
-          "mass": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          },
-          "lengthX": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          },
-          "lengthY": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          },
-          "lengthZ": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UnitValueDto"
-              }
-            ]
-          }
+          "mass": { },
+          "lengthX": { },
+          "lengthY": { },
+          "lengthZ": { }
         }
       },
-      "ArticlePatchRequest": {
+      "ArticlePatchDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "name": { },
+          "description": { },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
@@ -1716,6 +1598,130 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      },
+      "BaseDimensions": {
+        "required": [
+          "length",
+          "mass",
+          "time",
+          "current",
+          "temperature",
+          "amount",
+          "luminousIntensity"
+        ],
+        "type": "object",
+        "properties": {
+          "length": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mass": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "time": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "current": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "temperature": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "luminousIntensity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "BaseUnits": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "$ref": "#/components/schemas/LengthUnit"
+          },
+          "mass": {
+            "$ref": "#/components/schemas/MassUnit"
+          },
+          "time": {
+            "$ref": "#/components/schemas/DurationUnit"
+          },
+          "current": {
+            "$ref": "#/components/schemas/ElectricCurrentUnit"
+          },
+          "temperature": {
+            "$ref": "#/components/schemas/TemperatureUnit"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/AmountOfSubstanceUnit"
+          },
+          "luminousIntensity": {
+            "$ref": "#/components/schemas/LuminousIntensityUnit"
+          },
+          "isFullyDefined": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Color": { },
+      "Description": { },
+      "DurationUnit": {
+        "type": "integer"
+      },
+      "ElectricCurrentUnit": {
+        "type": "integer"
+      },
+      "IQuantityOfScalarUnit": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "quantityInfo": {
+            "$ref": "#/components/schemas/QuantityInfoOfScalarUnit"
+          },
+          "dimensions": {
+            "$ref": "#/components/schemas/BaseDimensions"
+          },
+          "value": {
+            "$ref": "#/components/schemas/QuantityValue"
           }
         }
       },
@@ -1842,6 +1848,9 @@
           }
         }
       },
+      "LengthUnit": {
+        "type": "integer"
+      },
       "LoginRequest": {
         "required": [
           "nameid",
@@ -1857,6 +1866,13 @@
           }
         }
       },
+      "LuminousIntensityUnit": {
+        "type": "integer"
+      },
+      "MassUnit": {
+        "type": "integer"
+      },
+      "Name": { },
       "PartitionCreateRequest": {
         "required": [
           "name"
@@ -1989,6 +2005,49 @@
           }
         }
       },
+      "QuantityInfoOfScalarUnit": {
+        "required": [
+          "unitInfos",
+          "zero",
+          "name",
+          "baseDimensions"
+        ],
+        "type": "object",
+        "properties": {
+          "unitInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitInfoOfScalarUnit"
+            }
+          },
+          "baseUnitInfo": {
+            "$ref": "#/components/schemas/UnitInfoOfScalarUnit"
+          },
+          "zero": {
+            "$ref": "#/components/schemas/IQuantityOfScalarUnit"
+          },
+          "unitType": {
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "name": {
+            "type": "string"
+          },
+          "valueType": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "baseDimensions": {
+            "$ref": "#/components/schemas/BaseDimensions"
+          }
+        }
+      },
+      "QuantityValue": {
+        "type": "object",
+        "properties": {
+          "isDecimal": {
+            "type": "boolean"
+          }
+        }
+      },
       "RefreshRequest": {
         "required": [
           "refreshToken"
@@ -2000,11 +2059,7 @@
           }
         }
       },
-      "UnitValueDto": {
-        "required": [
-          "value",
-          "unit"
-        ],
+      "Scalar": {
         "type": "object",
         "properties": {
           "value": {
@@ -2016,7 +2071,57 @@
             "format": "double"
           },
           "unit": {
-            "type": "string"
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "quantityInfo": {
+            "$ref": "#/components/schemas/QuantityInfoOfScalarUnit"
+          },
+          "dimensions": {
+            "$ref": "#/components/schemas/BaseDimensions"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ScalarUnit": {
+        "type": "integer"
+      },
+      "TemperatureUnit": {
+        "type": "integer"
+      },
+      "Type": { },
+      "UnitInfoOfScalarUnit": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/ScalarUnit"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pluralName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "baseUnits": {
+            "$ref": "#/components/schemas/BaseUnits"
+          },
+          "quantityName": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
