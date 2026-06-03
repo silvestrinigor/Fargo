@@ -1,11 +1,7 @@
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated user identifier (NAMEID) in the domain.
-///
-/// A NAMEID is used as a unique textual identifier for a user and must
-/// follow a restricted set of allowed characters and formatting rules.
-/// Comparisons are case-insensitive.
+/// Represents a validated nameid.
 /// </summary>
 public readonly struct Nameid : IEquatable<Nameid>
 {

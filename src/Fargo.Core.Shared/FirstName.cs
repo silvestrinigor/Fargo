@@ -5,23 +5,9 @@ using System.Text;
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated first name value object used in the domain.
-///
-/// This value object guarantees that a first name:
-/// - is not null, empty, or whitespace
-/// - is within the allowed length range
-/// - contains only letters, spaces, or hyphens
-/// - does not start or end with spaces or hyphens
-/// - does not contain consecutive spaces or hyphens
+/// Represents a validated first name.
 /// </summary>
-public readonly struct FirstName :
-    IEquatable<FirstName>,
-    IParsable<FirstName>,
-    ISpanParsable<FirstName>,
-    IFormattable,
-    ISpanFormattable,
-    IUtf8SpanParsable<FirstName>,
-    IUtf8SpanFormattable
+public readonly struct FirstName : IEquatable<FirstName>, IParsable<FirstName>, ISpanParsable<FirstName>, IFormattable, ISpanFormattable, IUtf8SpanParsable<FirstName>, IUtf8SpanFormattable
 {
     /// <summary>
     /// Maximum allowed length for a first name.
@@ -32,8 +18,6 @@ public readonly struct FirstName :
     /// Minimum allowed length for a first name.
     /// </summary>
     public const int MinLength = 2;
-
-    private readonly string? value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FirstName"/> struct.
@@ -69,6 +53,8 @@ public readonly struct FirstName :
 
         this.value = value;
     }
+
+    private readonly string? value;
 
     /// <summary>
     /// Gets the underlying string value of the first name.

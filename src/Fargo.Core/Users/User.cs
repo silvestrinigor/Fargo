@@ -746,7 +746,7 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
     public void ValidateCanChangePassword(Actor actor)
     {
         ValidateCanEdit(actor);
-        actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
+        actor.ValidateHasPermission(ActionType.ChangeAnotherUserPassword);
     }
 
     public Guid? EditedByGuid { get; private set; }

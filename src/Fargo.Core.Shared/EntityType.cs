@@ -1,13 +1,32 @@
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents the type of entity recorded in an entity event.
+/// Represents a entity type.
 /// </summary>
 public enum EntityType
 {
+    /// <summary>
+    /// Article.
+    /// <summary>
     Article = 0,
+
+    /// <summary>
+    /// Item.
+    /// <summary>
     Item = 1,
+
+    /// <summary>
+    /// User.
+    /// <summary>
     User = 2,
+
+    /// <summary>
+    /// User group.
+    /// <summary>
     UserGroup = 3,
-    Partition = 4,
+
+    /// <summary>
+    /// Partition.
+    /// <summary>
+    Partition = 4
 }

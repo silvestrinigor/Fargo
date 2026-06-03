@@ -86,7 +86,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         var refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
         refreshTokenRepository.GetByUserGuid(user.Guid, Arg.Any<CancellationToken>())
             .Returns([]);
-        var actor = CreateActor(ActionType.EditUser, ActionType.ChangeOtherUserPassword);
+        var actor = CreateActor(ActionType.EditUser, ActionType.ChangeAnotherUserPassword);
         var handler = new UserUpdateCommandHandler(
             new UserService(userRepository),
             userRepository,

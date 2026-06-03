@@ -1,10 +1,7 @@
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated plaintext password in the domain.
-///
-/// This value object enforces minimum security rules for passwords
-/// before they are hashed and stored in the system.
+/// Represents a validated plaintext password.
 /// </summary>
 public readonly struct Password : IEquatable<Password>
 {

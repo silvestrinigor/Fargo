@@ -5,32 +5,19 @@ using System.Text;
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated textual description in the domain.
-///
-/// This value object allows empty values, but enforces a maximum length.
-/// Because it is implemented as a <see langword="struct"/>, the default
-/// uninitialized state is considered invalid and is guarded against when accessed.
+/// Represents a validated textual description.
 /// </summary>
-public readonly struct Description :
-    IEquatable<Description>,
-    IParsable<Description>,
-    ISpanParsable<Description>,
-    IFormattable,
-    ISpanFormattable,
-    IUtf8SpanParsable<Description>,
-    IUtf8SpanFormattable
+public readonly struct Description : IEquatable<Description>, IParsable<Description>, ISpanParsable<Description>, IFormattable, ISpanFormattable, IUtf8SpanParsable<Description>, IUtf8SpanFormattable
 {
     /// <summary>
-    /// Minimum allowed length for a description.
+    /// Minimum length.
     /// </summary>
     public const int MinLength = 0;
 
     /// <summary>
-    /// Maximum allowed length for a description.
+    /// Maximum length.
     /// </summary>
     public const int MaxLength = 500;
-
-    private readonly string? value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Description"/> value object.
@@ -41,6 +28,8 @@ public readonly struct Description :
         Validate(value);
         this.value = value;
     }
+
+    private readonly string? value;
 
     /// <summary>
     /// Gets the underlying string value of the description.
@@ -248,3 +237,4 @@ public readonly struct Description :
         }
     }
 }
+
