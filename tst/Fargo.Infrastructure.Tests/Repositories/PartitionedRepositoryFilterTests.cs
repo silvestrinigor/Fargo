@@ -13,6 +13,7 @@ using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
+using Fargo.Infrastructure.Articles;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Tests.Repositories;
