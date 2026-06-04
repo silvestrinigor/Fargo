@@ -1,6 +1,6 @@
 using Fargo.Application;
-using Fargo.Application.Articles;
 using Fargo.Application.Articles.Commands;
+using Fargo.Application.Articles.Queries;
 using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
