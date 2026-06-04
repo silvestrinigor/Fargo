@@ -1,9 +1,9 @@
 using Fargo.Core.Shared.Barcodes;
 using System.Globalization;
 
-namespace Fargo.HttpApi.Articles;
+namespace Fargo.HttpApi.Barcodes;
 
-public sealed class ArticleBarcodeRouteConstraint : IRouteConstraint
+public sealed class BarcodeRouteConstraint : IRouteConstraint
 {
     public bool Match(
         HttpContext? httpContext,
