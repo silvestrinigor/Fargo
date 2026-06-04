@@ -1,108 +1,92 @@
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents the set of actions that can be authorized in the system.
-///
-/// Each value defines a specific permission that can be granted
-/// to a user through <see cref="Users.UserPermission"/>.
+/// Represents the set of actions in the system.
 /// </summary>
 public enum ActionType
 {
     /// <summary>
-    /// Allows creating new articles.
+    /// Create article.
     /// </summary>
-    CreateArticle = 0,
+    CreateArticle = 1,
 
     /// <summary>
-    /// Allows deleting existing articles.
+    /// Delete article.
     /// </summary>
-    DeleteArticle = 1,
+    DeleteArticle = 2,
 
     /// <summary>
-    /// Allows editing existing articles.
+    /// Edit article.
     /// </summary>
-    EditArticle = 2,
+    EditArticle = 3,
 
     /// <summary>
-    /// Allows creating new items associated with articles.
+    /// Create item.
     /// </summary>
-    CreateItem = 3,
+    CreateItem = 4,
 
     /// <summary>
-    /// Allows deleting existing items.
+    /// Delete item.
     /// </summary>
-    DeleteItem = 4,
+    DeleteItem = 5,
 
     /// <summary>
-    /// Allows editing existing items.
+    /// Edit item.
     /// </summary>
-    EditItem = 5,
+    EditItem = 6,
 
     /// <summary>
-    /// Allows creating new users.
+    /// Create user.
     /// </summary>
-    CreateUser = 6,
+    CreateUser = 7,
 
     /// <summary>
-    /// Allows deleting existing users.
+    /// Delete user.
     /// </summary>
-    DeleteUser = 7,
+    DeleteUser = 8,
 
     /// <summary>
-    /// Allows editing existing users.
+    /// Edit user.
     /// </summary>
-    EditUser = 8,
+    EditUser = 9,
 
     /// <summary>
-    /// Allows changing the password of another user without requiring
-    /// the current password of that user.
-    ///
-    /// This permission is typically intended for administrative users
-    /// who need to reset another user's password. It does not apply to
-    /// a user changing their own password, which should require the
-    /// current password.
+    /// Change another user's password.
     /// </summary>
-    ChangeOtherUserPassword = 9,
+    ChangeAnotherUserPassword = 10,
 
     /// <summary>
-    /// Allows creating new user groups.
+    /// Create user group.
     /// </summary>
-    CreateUserGroup = 10,
+    CreateUserGroup = 11,
 
     /// <summary>
-    /// Allows deleting existing user groups.
+    /// Delete user group.
     /// </summary>
-    DeleteUserGroup = 11,
+    DeleteUserGroup = 12,
 
     /// <summary>
-    /// Allows editing existing user groups.
+    /// Edit user group.
     /// </summary>
-    EditUserGroup = 12,
+    EditUserGroup = 13,
 
     /// <summary>
-    /// Allows modifying the membership of a user group,
-    /// including adding or removing users from the group.
-    ///
-    /// This permission controls operations that change which
-    /// users belong to a given <see cref="UserGroups.UserGroup"/>.
-    /// It does not grant permission to create, delete, or edit the group
-    /// itself, which are controlled by <see cref="CreateUserGroup"/>,
-    /// <see cref="DeleteUserGroup"/>, and <see cref="EditUserGroup"/>.
+    /// Change user group members.
     /// </summary>
-    ChangeUserGroupMembers = 13,
+    ChangeUserGroupMembers = 14,
 
     /// <summary>
-    /// Allows creating partitions.
+    /// Create partition.
     /// </summary>
-    CreatePartition = 14,
+    CreatePartition = 15,
 
     /// <summary>
-    /// Allows deleting existing partitions.
+    /// Delete partition.
     /// </summary>
-    DeletePartition = 15,
+    DeletePartition = 16,
 
     /// <summary>
-    /// Allows editing existing partitions.
+    /// Edit partition.
     /// </summary>
-    EditPartition = 16,
+    EditPartition = 17,
 }

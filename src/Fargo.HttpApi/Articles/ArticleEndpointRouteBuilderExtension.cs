@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
+using Fargo.Application.Articles.Commands;
 using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
@@ -45,8 +46,7 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithSummary("Gets a single article by guid")
             .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
             .Produces<ArticleDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound
-        );
+            .Produces(StatusCodes.Status404NotFound);
 
         return builder;
     }
@@ -55,8 +55,7 @@ public static class ArticleEndpointRouteBuilderExtension
         Guid articleGuid,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var query = new ArticleByGuidQuery(articleGuid, temporalAsOf);
 
@@ -85,8 +84,7 @@ public static class ArticleEndpointRouteBuilderExtension
         Barcode articleBarcode,
         DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var query = new ArticleByBarcodeQuery(
             articleBarcode,
@@ -108,8 +106,7 @@ public static class ArticleEndpointRouteBuilderExtension
             .WithSummary("Gets multiple articles")
             .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.")
             .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent
-        );
+            .Produces(StatusCodes.Status204NoContent);
 
         return builder;
     }
@@ -121,8 +118,7 @@ public static class ArticleEndpointRouteBuilderExtension
         Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(
             page ?? Page.FirstPage,

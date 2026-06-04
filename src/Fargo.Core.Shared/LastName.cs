@@ -1,39 +1,36 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Text;
+
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated last name value object used in the domain.
-///
-/// This value object guarantees that a last name:
-/// - is not null, empty, or whitespace
-/// - is within the allowed length range
-/// - contains only letters, spaces, or hyphens
-/// - does not start or end with separators
-/// - does not contain consecutive separators
+/// Represents a validated last name.
 /// </summary>
-public readonly struct LastName : IEquatable<LastName>
+public readonly struct LastName :
+    IEquatable<LastName>,
+    IParsable<LastName>,
+    ISpanParsable<LastName>,
+    IFormattable,
+    ISpanFormattable,
+    IUtf8SpanParsable<LastName>,
+    IUtf8SpanFormattable
 {
     /// <summary>
-    /// Maximum allowed length for a last name.
+    /// Maximum length.
     /// </summary>
     public const int MaxLength = 100;
 
     /// <summary>
-    /// Minimum allowed length for a last name.
+    /// Minimum length.
     /// </summary>
     public const int MinLength = 2;
 
-    private readonly string value;
+    private readonly string? value;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LastName"/> struct.
+    /// Initializes a last name.
     /// </summary>
-    /// <param name="value">The string value representing the last name.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the value is null, empty, or whitespace.
-    /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the value length is outside the allowed range.
-    /// </exception>
     public LastName(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -59,74 +56,181 @@ public readonly struct LastName : IEquatable<LastName>
     }
 
     /// <summary>
-    /// Gets the underlying string value of the last name.
+    /// Gets the value.
     /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the value object was not properly initialized.
-    /// </exception>
     public string Value
-        => value ?? throw new InvalidOperationException("LastName not initialized.");
+        => value ?? throw new InvalidOperationException("Last name not initialized.");
 
     /// <summary>
-    /// Creates a new <see cref="LastName"/> from a string.
+    /// Creates a last name from a string.
     /// </summary>
     public static LastName FromString(string value)
         => new(value);
 
-    /// <summary>
-    /// Creates a new validated <see cref="LastName"/>.
-    /// </summary>
-    public static LastName NewLastName(string value)
-        => new(value);
+    /// <inheritdoc />
+    public override string ToString()
+        => Value;
 
-    /// <summary>
-    /// Determines whether the current last name is equal to another last name.
-    /// </summary>
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        format ??= "G";
+
+        return format switch
+        {
+            "G" => Value,
+            "U" => Value.ToUpper(formatProvider as CultureInfo),
+            "L" => Value.ToLower(formatProvider as CultureInfo),
+            _ => throw new FormatException($"Unsupported format '{format}'.")
+        };
+    }
+
+    /// <inheritdoc />
+    public bool TryFormat(
+        Span<char> destination,
+        out int charsWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        string formatted = ToString(
+            format.IsEmpty ? "G" : format.ToString(),
+            provider);
+
+        if (formatted.AsSpan().TryCopyTo(destination))
+        {
+            charsWritten = formatted.Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public bool TryFormat(
+        Span<byte> utf8Destination,
+        out int bytesWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        string formatted = ToString(
+            format.IsEmpty ? "G" : format.ToString(),
+            provider);
+
+        return Encoding.UTF8.TryGetBytes(
+            formatted,
+            utf8Destination,
+            out bytesWritten);
+    }
+
+    /// <inheritdoc />
     public bool Equals(LastName other)
         => string.Equals(value, other.value, StringComparison.Ordinal);
 
-    /// <summary>
-    /// Determines whether the current last name is equal to the specified object.
-    /// </summary>
+    /// <inheritdoc />
     public override bool Equals(object? obj)
         => obj is LastName other && Equals(other);
 
-    /// <summary>
-    /// Returns a hash code for the current last name.
-    /// </summary>
+    /// <inheritdoc />
     public override int GetHashCode()
-        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+        => value is null
+            ? 0
+            : value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
-    /// Determines whether two <see cref="LastName"/> instances are equal.
+    /// Determines whether two last names are equal.
     /// </summary>
     public static bool operator ==(LastName left, LastName right)
         => left.Equals(right);
 
     /// <summary>
-    /// Determines whether two <see cref="LastName"/> instances are different.
+    /// Determines whether two last names are different.
     /// </summary>
     public static bool operator !=(LastName left, LastName right)
         => !left.Equals(right);
 
     /// <summary>
-    /// Returns the string representation of the last name.
-    /// </summary>
-    public override string ToString()
-        => Value;
-
-    /// <summary>
-    /// Implicitly converts a <see cref="LastName"/> to its string representation.
+    /// Converts a last name to a string.
     /// </summary>
     public static implicit operator string(LastName lastName)
         => lastName.Value;
 
     /// <summary>
-    /// Explicitly converts a string to a <see cref="LastName"/>.
+    /// Converts a string to a last name.
     /// </summary>
     public static explicit operator LastName(string value)
         => new(value);
 
+    /// <inheritdoc />
+    public static LastName Parse(string s, IFormatProvider? provider)
+        => new(s);
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        [NotNullWhen(true)] string? s,
+        IFormatProvider? provider,
+        out LastName result)
+    {
+        result = default;
+
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return false;
+        }
+
+        s = s.Trim();
+
+        if (s.Length < MinLength || s.Length > MaxLength)
+        {
+            return false;
+        }
+
+        try
+        {
+            ValidateCharacters(s);
+
+            result = new LastName(s);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public static LastName Parse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider)
+        => new(s.ToString());
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider,
+        out LastName result)
+        => TryParse(s.ToString(), provider, out result);
+
+    /// <inheritdoc />
+    public static LastName Parse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider)
+        => new(Encoding.UTF8.GetString(utf8Text));
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider,
+        out LastName result)
+    {
+        string value = Encoding.UTF8.GetString(utf8Text);
+
+        return TryParse(value, provider, out result);
+    }
+
+    /// <summary>
+    /// Validates the value.
+    /// </summary>
     private static void ValidateCharacters(string value)
     {
         var previousWasSeparator = false;
@@ -161,4 +265,3 @@ public readonly struct LastName : IEquatable<LastName>
         }
     }
 }
-

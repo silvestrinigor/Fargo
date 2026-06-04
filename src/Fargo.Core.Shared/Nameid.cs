@@ -1,36 +1,36 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Text;
+
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated user identifier (NAMEID) in the domain.
-///
-/// A NAMEID is used as a unique textual identifier for a user and must
-/// follow a restricted set of allowed characters and formatting rules.
-/// Comparisons are case-insensitive.
+/// Represents a validated nameid.
 /// </summary>
-public readonly struct Nameid : IEquatable<Nameid>
+public readonly struct Nameid :
+    IEquatable<Nameid>,
+    IParsable<Nameid>,
+    ISpanParsable<Nameid>,
+    IFormattable,
+    ISpanFormattable,
+    IUtf8SpanParsable<Nameid>,
+    IUtf8SpanFormattable
 {
     /// <summary>
-    /// Maximum allowed length for the identifier.
+    /// Maximum length.
     /// </summary>
     public const int MaxLength = 100;
 
     /// <summary>
-    /// Minimum allowed length for the identifier.
+    /// Minimum length.
     /// </summary>
     public const int MinLength = 3;
 
-    private readonly string value;
+    private readonly string? value;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Nameid"/> value object.
+    /// Initializes a nameid.
     /// </summary>
-    /// <param name="value">The identifier string.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the value is invalid.
-    /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the value length is outside the allowed range.
-    /// </exception>
     public Nameid(string value)
     {
         Validate(value);
@@ -38,96 +38,189 @@ public readonly struct Nameid : IEquatable<Nameid>
     }
 
     /// <summary>
-    /// Gets the underlying normalized string value.
+    /// Gets the value.
     /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the value object was not properly initialized.
-    /// This protects against the default struct state.
-    /// </exception>
     public string Value
         => value ?? throw new InvalidOperationException("Nameid not initialized.");
 
     /// <summary>
-    /// Creates a new <see cref="Nameid"/> from a string.
+    /// Creates a nameid from a string.
     /// </summary>
-    /// <param name="value">The string value.</param>
-    /// <returns>A validated <see cref="Nameid"/> instance.</returns>
     public static Nameid FromString(string value)
         => new(value);
 
-    /// <summary>
-    /// Creates a new validated <see cref="Nameid"/>.
-    /// </summary>
-    /// <param name="value">The identifier value.</param>
-    /// <returns>A validated <see cref="Nameid"/> instance.</returns>
-    public static Nameid NewNameid(string value)
-        => new(value);
-
-    /// <summary>
-    /// Returns the string representation of the identifier.
-    /// </summary>
+    /// <inheritdoc />
     public override string ToString()
         => Value;
 
-    /// <summary>
-    /// Determines whether this instance and another <see cref="Nameid"/> are equal,
-    /// ignoring character casing.
-    /// </summary>
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        format ??= "G";
+
+        return format switch
+        {
+            "G" => Value,
+            "U" => Value.ToUpper(formatProvider as CultureInfo),
+            "L" => Value.ToLower(formatProvider as CultureInfo),
+            _ => throw new FormatException($"Unsupported format '{format}'.")
+        };
+    }
+
+    /// <inheritdoc />
+    public bool TryFormat(
+        Span<char> destination,
+        out int charsWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        string formatted = ToString(
+            format.IsEmpty ? "G" : format.ToString(),
+            provider);
+
+        if (formatted.AsSpan().TryCopyTo(destination))
+        {
+            charsWritten = formatted.Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public bool TryFormat(
+        Span<byte> utf8Destination,
+        out int bytesWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        string formatted = ToString(
+            format.IsEmpty ? "G" : format.ToString(),
+            provider);
+
+        return Encoding.UTF8.TryGetBytes(
+            formatted,
+            utf8Destination,
+            out bytesWritten);
+    }
+
+    /// <inheritdoc />
     public bool Equals(Nameid other)
         => string.Equals(value, other.value, StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>
-    /// Determines whether this instance and a specified object are equal.
-    /// </summary>
+    /// <inheritdoc />
     public override bool Equals(object? obj)
         => obj is Nameid other && Equals(other);
 
-    /// <summary>
-    /// Returns a hash code for this instance, using case-insensitive semantics.
-    /// </summary>
+    /// <inheritdoc />
     public override int GetHashCode()
-        => value is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(value);
+        => value is null
+            ? 0
+            : StringComparer.OrdinalIgnoreCase.GetHashCode(value);
 
     /// <summary>
-    /// Determines whether two <see cref="Nameid"/> instances are equal.
+    /// Determines whether two nameids are equal.
     /// </summary>
-    /// <param name="left">The first <see cref="Nameid"/> to compare.</param>
-    /// <param name="right">The second <see cref="Nameid"/> to compare.</param>
-    /// <returns>
-    /// <see langword="true"/> if both <see cref="Nameid"/> instances are equal;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
     public static bool operator ==(Nameid left, Nameid right)
         => left.Equals(right);
 
     /// <summary>
-    /// Determines whether two <see cref="Nameid"/> instances are different.
+    /// Determines whether two nameids are different.
     /// </summary>
-    /// <param name="left">The first <see cref="Nameid"/> to compare.</param>
-    /// <param name="right">The second <see cref="Nameid"/> to compare.</param>
-    /// <returns>
-    /// <see langword="true"/> if both <see cref="Nameid"/> instances are different;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
     public static bool operator !=(Nameid left, Nameid right)
         => !left.Equals(right);
 
     /// <summary>
-    /// Implicitly converts a <see cref="Nameid"/> to <see cref="string"/>.
+    /// Converts a nameid to a string.
     /// </summary>
     public static implicit operator string(Nameid nameid)
         => nameid.Value;
 
     /// <summary>
-    /// Explicitly converts a <see cref="string"/> to <see cref="Nameid"/>.
+    /// Converts a string to a nameid.
     /// </summary>
     public static explicit operator Nameid(string value)
         => new(value);
 
+    /// <inheritdoc />
+    public static Nameid Parse(string s, IFormatProvider? provider)
+        => new(s);
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        [NotNullWhen(true)] string? s,
+        IFormatProvider? provider,
+        out Nameid result)
+    {
+        try
+        {
+            result = new Nameid(s!);
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public static Nameid Parse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider)
+        => new(s.ToString());
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider,
+        out Nameid result)
+    {
+        try
+        {
+            result = new Nameid(s.ToString());
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public static Nameid Parse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider)
+    {
+        string value = Encoding.UTF8.GetString(utf8Text);
+        return new Nameid(value);
+    }
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider,
+        out Nameid result)
+    {
+        try
+        {
+            string value = Encoding.UTF8.GetString(utf8Text);
+
+            result = new Nameid(value);
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
     /// <summary>
-    /// Validates the identifier value.
+    /// Validates the value.
     /// </summary>
-    /// <param name="value">The value to validate.</param>
     private static void Validate(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -205,4 +298,3 @@ public readonly struct Nameid : IEquatable<Nameid>
         }
     }
 }
-

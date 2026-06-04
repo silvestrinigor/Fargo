@@ -1,0 +1,187 @@
+using Fargo.Application;
+using Fargo.Application.Items;
+using Fargo.Application.Shared.Items;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace Fargo.HttpApi.Items;
+
+public static class ItemEndpointRouteBuilderExtension
+{
+    public static void MapFargoItem(this IEndpointRouteBuilder builder)
+    {
+        var group = builder.MapItemGroup();
+
+        group.MapGetItemByGuid();
+
+        group.MapGetItems();
+
+        group.MapCreateItem();
+
+        group.MapUpdateItem();
+
+        group.MapDeleteItem();
+    }
+
+    private static RouteGroupBuilder MapItemGroup(this IEndpointRouteBuilder builder)
+    {
+        var group = builder
+            .MapGroup("/items")
+            .RequireAuthorization()
+            .WithTags("Items");
+
+        return group;
+    }
+
+    #region Get Single
+
+    private static IEndpointRouteBuilder MapGetItemByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}", GetSingleItem)
+            .WithName("GetItem")
+            .WithSummary("Gets a single item")
+            .WithDescription("Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.")
+            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<ItemDto>, NotFound>> GetSingleItem(
+        Guid itemGuid,
+        DateTimeOffset? temporalAsOf,
+        IQueryHandler<ItemSingleQuery, ItemDto?> handler,
+        CancellationToken cancellationToken
+    )
+    {
+        var query = new ItemSingleQuery(itemGuid, temporalAsOf);
+
+        var response = await handler.Handle(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion Get Single
+
+    #region Get Many
+
+    private static IEndpointRouteBuilder MapGetItems(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/", GetManyItem)
+            .WithName("GetItems")
+            .WithSummary("Gets multiple items")
+            .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.")
+            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItem(
+        DateTimeOffset? temporalAsOfDateTime,
+        int? page,
+        int? limit,
+        Guid[]? childOfAnyOfThesePartitions,
+        bool? notChildOfAnyPartition,
+        IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>> handler,
+        CancellationToken cancellationToken
+    )
+    {
+        var withPagination = new Pagination(
+            new Page(page ?? Page.FirstPage.Value),
+            new Limit(limit ?? Limit.MaxLimit.Value));
+
+        var query = new ItemsQuery(
+            withPagination,
+            temporalAsOfDateTime,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition
+        );
+
+        var response = await handler.Handle(query, cancellationToken);
+
+        if (response.Count == 0)
+        {
+            return TypedResults.NoContent();
+        }
+
+        return TypedResults.Ok(response);
+    }
+
+    #endregion Get Many
+
+    #region Create
+
+    private static IEndpointRouteBuilder MapCreateItem(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPost("/", CreateItem)
+            .WithName("CreateItem")
+            .WithSummary("Creates a new item")
+            .WithDescription("Creates a new item with optional partitions. Returns the generated identifier.")
+            .Produces<Guid>(StatusCodes.Status200OK);
+
+        return builder;
+    }
+
+    private static async Task<Ok<Guid>> CreateItem(
+        ItemCreateDto request,
+        ICommandHandler<ItemCreateCommand, Guid> handler,
+        CancellationToken cancellationToken)
+    {
+        var response = await handler.Handle(new ItemCreateCommand(request), cancellationToken);
+
+        return TypedResults.Ok(response);
+    }
+
+    #endregion Create
+
+    #region Update
+
+    private static IEndpointRouteBuilder MapUpdateItem(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{itemGuid:guid}", UpdateItem)
+            .WithName("UpdateItem")
+            .WithSummary("Replaces an existing item")
+            .WithDescription("Replaces mutable item state including partitions and parent container.")
+            .Produces(StatusCodes.Status204NoContent);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> UpdateItem(
+        Guid itemGuid,
+        ItemUpdateDto request,
+        ICommandHandler<ItemUpdateCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.Handle(new ItemUpdateCommand(itemGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Update
+
+    #region Delete
+
+    private static IEndpointRouteBuilder MapDeleteItem(this IEndpointRouteBuilder builder)
+    {
+        builder.MapDelete("/{itemGuid:guid}", DeleteItem)
+            .WithName("DeleteItem")
+            .WithSummary("Deletes an item")
+            .WithDescription("Deletes the specified item from the system.")
+            .Produces(StatusCodes.Status204NoContent);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> DeleteItem(
+        Guid itemGuid,
+        ICommandHandler<ItemDeleteCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.Handle(new ItemDeleteCommand(itemGuid), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Delete
+}

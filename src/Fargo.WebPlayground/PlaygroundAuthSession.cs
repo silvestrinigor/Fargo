@@ -1,6 +1,6 @@
-using Fargo.HttpClient;
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Shared.Identity;
+using Fargo.HttpClient;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.JSInterop;
 using System.Text.Json;

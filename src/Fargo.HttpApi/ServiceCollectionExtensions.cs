@@ -1,4 +1,4 @@
-using Fargo.HttpApi.Articles;
+using Fargo.HttpApi.Barcodes;
 using Fargo.Infrastructure.Converters;
 
 namespace Fargo.HttpApi;
@@ -64,7 +64,7 @@ public static class ServiceCollectionExtension
         {
             services.Configure<RouteOptions>(options =>
             {
-                options.ConstraintMap["barcode"] = typeof(ArticleBarcodeRouteConstraint);
+                options.ConstraintMap["barcode"] = typeof(BarcodeRouteConstraint);
             });
 
             return services;

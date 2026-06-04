@@ -22,7 +22,7 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.Property(x => x.IsActive).IsRequired();
 
-        builder.Property(x => x.EditedByGuid).IsRequired(false);
+        builder.Property(x => x.EditedByActorGuid).IsRequired(false);
 
         builder.Property(x => x.ModificationTypes)
             .HasDefaultValue(UserGroupModifiedType.None);

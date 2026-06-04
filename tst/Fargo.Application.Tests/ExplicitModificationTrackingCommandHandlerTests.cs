@@ -45,7 +45,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         await handler.Handle(new ItemCreateCommand(new ItemCreateDto(article.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(item =>
-            item.EditedByGuid == actor.ActorGuid &&
+            item.EditedByActorGuid == actor.ActorGuid &&
             item.ModificationTypes == ItemModifiedType.General));
     }
 
@@ -69,7 +69,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             partition.Guid,
             new PartitionUpdateDto(Name: new Name("Renamed"))));
 
-        Assert.Equal(actor.ActorGuid, partition.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, partition.EditedByActorGuid);
         Assert.Equal(PartitionModifiedType.General, partition.ModificationTypes);
     }
 
@@ -86,7 +86,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         var refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
         refreshTokenRepository.GetByUserGuid(user.Guid, Arg.Any<CancellationToken>())
             .Returns([]);
-        var actor = CreateActor(ActionType.EditUser, ActionType.ChangeOtherUserPassword);
+        var actor = CreateActor(ActionType.EditUser, ActionType.ChangeAnotherUserPassword);
         var handler = new UserUpdateCommandHandler(
             new UserService(userRepository),
             userRepository,
@@ -102,7 +102,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
 
         await handler.Handle(new UserUpdateCommand(user.Guid, new UserUpdateDto(Password: "ValidPass1!")));
 
-        Assert.Equal(actor.ActorGuid, user.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, user.EditedByActorGuid);
         Assert.Equal(UserModifiedType.PasswordChanged, user.ModificationTypes);
     }
 
@@ -128,7 +128,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             userGroup.Guid,
             new UserGroupUpdateDto(null, null, null, [new UserGroupPermissionUpdateDto(ActionType.CreateUser)], null)));
 
-        Assert.Equal(actor.ActorGuid, userGroup.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, userGroup.EditedByActorGuid);
         Assert.Equal(UserGroupModifiedType.PermissionsChanged, userGroup.ModificationTypes);
     }
 

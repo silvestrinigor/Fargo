@@ -1,16 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Text;
+
 namespace Fargo.Core.Shared;
 
 /// <summary>
-/// Represents a validated first name value object used in the domain.
-///
-/// This value object guarantees that a first name:
-/// - is not null, empty, or whitespace
-/// - is within the allowed length range
-/// - contains only letters, spaces, or hyphens
-/// - does not start or end with spaces or hyphens
-/// - does not contain consecutive spaces or hyphens
+/// Represents a validated first name.
 /// </summary>
-public readonly struct FirstName : IEquatable<FirstName>
+public readonly struct FirstName : IEquatable<FirstName>, IParsable<FirstName>, ISpanParsable<FirstName>, IFormattable, ISpanFormattable, IUtf8SpanParsable<FirstName>, IUtf8SpanFormattable
 {
     /// <summary>
     /// Maximum allowed length for a first name.
@@ -22,14 +19,13 @@ public readonly struct FirstName : IEquatable<FirstName>
     /// </summary>
     public const int MinLength = 2;
 
-    private readonly string value;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="FirstName"/> struct.
     /// </summary>
     /// <param name="value">The string value representing the first name.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when the value is null, empty, or contains only whitespace.
+    /// Thrown when the value is null, empty, whitespace,
+    /// or contains invalid characters or separators.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when the value length is outside the allowed range.
@@ -58,89 +54,188 @@ public readonly struct FirstName : IEquatable<FirstName>
         this.value = value;
     }
 
+    private readonly string? value;
+
     /// <summary>
-    /// Gets the underlying string value of the first name.
+    /// Gets the value.
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the value object was not properly initialized.
+    /// This protects against the default struct state.
     /// </exception>
     public string Value
         => value ?? throw new InvalidOperationException("First name not initialized.");
 
     /// <summary>
-    /// Creates a new <see cref="FirstName"/> from a string.
+    /// Creates a first name from a string.
     /// </summary>
-    /// <param name="value">The string to convert.</param>
-    /// <returns>A validated <see cref="FirstName"/> instance.</returns>
     public static FirstName FromString(string value)
         => new(value);
 
-    /// <summary>
-    /// Creates a new validated <see cref="FirstName"/>.
-    /// </summary>
-    /// <param name="value">The string value.</param>
-    /// <returns>A new <see cref="FirstName"/> instance.</returns>
-    public static FirstName NewFirstName(string value)
-        => new(value);
+    /// <inheritdoc />
+    public override string ToString()
+        => Value;
 
-    /// <summary>
-    /// Determines whether the current first name is equal to another first name.
-    /// </summary>
-    /// <param name="other">The other first name to compare.</param>
-    /// <returns>
-    /// <see langword="true"/> if both first names have the same value; otherwise, <see langword="false"/>.
-    /// </returns>
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        format ??= "G";
+
+        return format switch
+        {
+            "G" => Value,
+            "U" => Value.ToUpper(formatProvider as CultureInfo),
+            "L" => Value.ToLower(formatProvider as CultureInfo),
+            _ => throw new FormatException($"Unsupported format '{format}'.")
+        };
+    }
+
+    /// <inheritdoc />
+    public bool TryFormat(
+        Span<char> destination,
+        out int charsWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        string formatted = ToString(
+            format.IsEmpty ? "G" : format.ToString(),
+            provider);
+
+        if (formatted.AsSpan().TryCopyTo(destination))
+        {
+            charsWritten = formatted.Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public bool TryFormat(
+        Span<byte> utf8Destination,
+        out int bytesWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        string formatted = ToString(
+            format.IsEmpty ? "G" : format.ToString(),
+            provider);
+
+        return Encoding.UTF8.TryGetBytes(
+            formatted,
+            utf8Destination,
+            out bytesWritten);
+    }
+
+    /// <inheritdoc />
     public bool Equals(FirstName other)
         => string.Equals(value, other.value, StringComparison.Ordinal);
 
-    /// <summary>
-    /// Determines whether the current first name is equal to the specified object.
-    /// </summary>
-    /// <param name="obj">The object to compare with the current first name.</param>
-    /// <returns>
-    /// <see langword="true"/> if the specified object is a <see cref="FirstName"/> with the same value;
-    /// otherwise, <see langword="false"/>.
-    /// </returns>
+    /// <inheritdoc />
     public override bool Equals(object? obj)
         => obj is FirstName other && Equals(other);
 
-    /// <summary>
-    /// Returns a hash code for the current first name.
-    /// </summary>
-    /// <returns>A hash code based on the underlying value.</returns>
+    /// <inheritdoc />
     public override int GetHashCode()
-        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+        => value is null
+            ? 0
+            : value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
-    /// Determines whether two <see cref="FirstName"/> instances are equal.
+    /// Determines whether two first names are equal.
     /// </summary>
     public static bool operator ==(FirstName left, FirstName right)
         => left.Equals(right);
 
     /// <summary>
-    /// Determines whether two <see cref="FirstName"/> instances are different.
+    /// Determines whether two first names are different.
     /// </summary>
     public static bool operator !=(FirstName left, FirstName right)
         => !left.Equals(right);
 
     /// <summary>
-    /// Returns the string representation of the first name.
-    /// </summary>
-    public override string ToString()
-        => Value;
-
-    /// <summary>
-    /// Implicitly converts a <see cref="FirstName"/> to its string representation.
+    /// Converts a first name to a string.
     /// </summary>
     public static implicit operator string(FirstName firstName)
         => firstName.Value;
 
     /// <summary>
-    /// Explicitly converts a string to a <see cref="FirstName"/>.
+    /// Converts a string to a first name.
     /// </summary>
     public static explicit operator FirstName(string value)
         => new(value);
 
+    /// <inheritdoc />
+    public static FirstName Parse(string s, IFormatProvider? provider)
+        => new(s);
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        [NotNullWhen(true)] string? s,
+        IFormatProvider? provider,
+        out FirstName result)
+    {
+        result = default;
+
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return false;
+        }
+
+        s = s.Trim();
+
+        if (s.Length < MinLength || s.Length > MaxLength)
+        {
+            return false;
+        }
+
+        try
+        {
+            ValidateCharacters(s);
+
+            result = new FirstName(s);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public static FirstName Parse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider)
+        => new(s.ToString());
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider,
+        out FirstName result)
+        => TryParse(s.ToString(), provider, out result);
+
+    /// <inheritdoc />
+    public static FirstName Parse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider)
+        => new(Encoding.UTF8.GetString(utf8Text));
+
+    /// <inheritdoc />
+    public static bool TryParse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider,
+        out FirstName result)
+    {
+        string value = Encoding.UTF8.GetString(utf8Text);
+
+        return TryParse(value, provider, out result);
+    }
+
+    /// <summary>
+    /// Validates the value.
+    /// </summary>
     private static void ValidateCharacters(string value)
     {
         var previousWasSeparator = false;
@@ -175,4 +270,3 @@ public readonly struct FirstName : IEquatable<FirstName>
         }
     }
 }
-

@@ -1,3 +1,5 @@
+using Fargo.Core.Entities;
+
 namespace Fargo.Core.Identity;
 
 #region Entities

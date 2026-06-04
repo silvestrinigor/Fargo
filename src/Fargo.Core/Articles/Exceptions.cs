@@ -7,7 +7,7 @@ namespace Fargo.Core.Articles;
 /// that still has items associated with it.
 /// </summary>
 public sealed class ArticleDeleteWithItemsAssociatedFargoDomainException(Guid articleGuid)
-    : FargoDomainException($"Article '{articleGuid}' cannot be deleted because it has associated items.")
+    : Exception($"Article '{articleGuid}' cannot be deleted because it has associated items.")
 {
     /// <summary>
     /// Gets the identifier of the article that could not be deleted.
@@ -19,7 +19,7 @@ public sealed class ArticleDeleteWithItemsAssociatedFargoDomainException(Guid ar
 /// Exception thrown when a barcode is already assigned to a different article.
 /// </summary>
 public sealed class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat format, string code)
-    : FargoDomainException($"Barcode '{code}' ({format}) is already assigned to another article.")
+    : Exception($"Barcode '{code}' ({format}) is already assigned to another article.")
 {
     /// <summary>Gets the barcode format that conflicts.</summary>
     public BarcodeFormat Format { get; } = format;
@@ -32,7 +32,7 @@ public sealed class ArticleBarcodeAlreadyInUseFargoDomainException(BarcodeFormat
 /// Exception thrown when a container-only article operation is requested for a non-container article.
 /// </summary>
 public sealed class ArticleIsNotContainerFargoDomainException(Guid articleGuid)
-    : FargoDomainException($"Article '{articleGuid}' is not a container.")
+    : Exception($"Article '{articleGuid}' is not a container.")
 {
     /// <summary>
     /// Gets the identifier of the article that is not a container.

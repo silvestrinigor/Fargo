@@ -1,6 +1,6 @@
 using Fargo.HttpClient;
-using Fargo.WebPlayground.Components;
 using Fargo.WebPlayground;
+using Fargo.WebPlayground.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);

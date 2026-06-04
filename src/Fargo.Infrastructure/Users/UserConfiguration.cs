@@ -46,7 +46,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.IsActive)
             .IsRequired();
 
-        builder.Property(x => x.EditedByGuid)
+        builder.Property(x => x.EditedByActorGuid)
             .IsRequired(false);
 
         builder.Property(x => x.ModificationTypes)

@@ -1,4 +1,7 @@
+using Fargo.Core.Activables;
+using Fargo.Core.Entities;
 using Fargo.Core.Identity;
+using Fargo.Core.Modifiables;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;
@@ -21,7 +24,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
     public static UserGroup CreateUserGroup(Nameid nameid, Description? description = null)
         => new(nameid, description);
@@ -486,11 +489,11 @@ public class UserGroup : Entity, IModifiedEntity, IModifiedEntityTypes<UserGroup
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public UserGroupModifiedType ModificationTypes { get; private set; }
@@ -628,11 +631,11 @@ public sealed class UserGroupCollection : Collection<UserGroup>
 /// This entity is part of the <see cref="UserGroup"/> aggregate and represents
 /// a single permission entry associated with the group.
 ///
-/// The entity also implements <see cref="IModifiedEntityMember"/>, meaning
+/// The entity also implements <see cref="IModifiableMember"/>, meaning
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="UserGroup"/> entity.
 /// </remarks>
-public class UserGroupPermission : Entity, IModifiedEntityMember, IPermission
+public class UserGroupPermission : Entity, IModifiableMember, IPermission
 {
     /// <summary>
     /// Gets the unique identifier of the user group that owns this permission.
@@ -682,7 +685,7 @@ public class UserGroupPermission : Entity, IModifiedEntityMember, IPermission
     /// modifications to this entity should update the audit metadata of
     /// the parent <see cref="UserGroup"/>.
     /// </remarks>
-    public IModifiedEntity ParentEditedEntity => UserGroup;
+    public IModifiable ParentEditedEntity => UserGroup;
 }
 
 #endregion Permissions
@@ -701,10 +704,10 @@ public class UserGroupPermission : Entity, IModifiedEntityMember, IPermission
 /// <see cref="UserGroupPartitionAccess"/>.
 ///
 /// This entity is a member of the <see cref="UserGroup"/> aggregate and implements
-/// <see cref="IModifiedEntityMember"/>, meaning that any modification to this
+/// <see cref="IModifiableMember"/>, meaning that any modification to this
 /// entity should update the audit metadata of the parent <see cref="UserGroup"/>.
 /// </remarks>
-public class UserGroupPartitionAccess : Entity, IModifiedEntityMember, IPartitionAccess
+public class UserGroupPartitionAccess : Entity, IModifiableMember, IPartitionAccess
 {
     /// <summary>
     /// Gets the unique identifier of the user group associated with this access entry.
@@ -759,7 +762,7 @@ public class UserGroupPartitionAccess : Entity, IModifiedEntityMember, IPartitio
     /// <see cref="UserGroup"/> aggregate, the parent audited entity is the
     /// associated user group.
     /// </remarks>
-    public IModifiedEntity ParentEditedEntity => UserGroup;
+    public IModifiable ParentEditedEntity => UserGroup;
 }
 
 #endregion Partition Access

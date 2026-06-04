@@ -37,7 +37,7 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
 
-        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, item.EditedByActorGuid);
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
             movement.Event.EntityType == EntityType.Item &&
@@ -58,7 +58,7 @@ public sealed class ItemMovementCommandHandlerTests
             .GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
         await new ItemService(itemRepository).MoveToContainer(parent, item, CreateDomainActor());
-        var originalEditedByGuid = item.EditedByGuid;
+        var originalEditedByGuid = item.EditedByActorGuid;
         var originalModificationTypes = item.ModificationTypes;
         var movementRepository = Substitute.For<IItemMovementRepository>();
         var handler = new ItemUpdateCommandHandler(
@@ -74,7 +74,7 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
 
-        Assert.Equal(originalEditedByGuid, item.EditedByGuid);
+        Assert.Equal(originalEditedByGuid, item.EditedByActorGuid);
         Assert.Equal(originalModificationTypes, item.ModificationTypes);
         movementRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
@@ -104,7 +104,7 @@ public sealed class ItemMovementCommandHandlerTests
 
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], null)));
 
-        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, item.EditedByActorGuid);
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
             movement.Event.EntityType == EntityType.Item &&

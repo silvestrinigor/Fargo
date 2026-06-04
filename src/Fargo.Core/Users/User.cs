@@ -1,4 +1,7 @@
+using Fargo.Core.Activables;
+using Fargo.Core.Entities;
 using Fargo.Core.Identity;
+using Fargo.Core.Modifiables;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
@@ -19,7 +22,7 @@ namespace Fargo.Core.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
+public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
 {
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
         => new(nameid, passwordHash);
@@ -746,14 +749,14 @@ public class User : Entity, IModifiedEntity, IModifiedEntityTypes<UserModifiedTy
     public void ValidateCanChangePassword(Actor actor)
     {
         ValidateCanEdit(actor);
-        actor.ValidateHasPermission(ActionType.ChangeOtherUserPassword);
+        actor.ValidateHasPermission(ActionType.ChangeAnotherUserPassword);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public UserModifiedType ModificationTypes { get; private set; }
@@ -836,11 +839,11 @@ public interface IPermissionUser
 /// This entity is part of the <see cref="User"/> aggregate and represents
 /// a single permission entry associated with the user.
 ///
-/// The entity also implements <see cref="IModifiedEntityMember"/>, meaning
+/// The entity also implements <see cref="IModifiableMember"/>, meaning
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="User"/> entity.
 /// </remarks>
-public class UserPermission : Entity, IModifiedEntityMember, IPermission
+public class UserPermission : Entity, IModifiableMember, IPermission
 {
     /// <summary>
     /// Gets the unique identifier of the user that owns this permission.
@@ -890,7 +893,7 @@ public class UserPermission : Entity, IModifiedEntityMember, IPermission
     /// modifications to this entity should update the audit metadata of
     /// the parent <see cref="User"/>.
     /// </remarks>
-    public IModifiedEntity ParentEditedEntity => User;
+    public IModifiable ParentEditedEntity => User;
 }
 
 #endregion Permissions
@@ -909,10 +912,10 @@ public class UserPermission : Entity, IModifiedEntityMember, IPermission
 /// <see cref="UserPartitionAccess"/>.
 ///
 /// This entity is a member of the <see cref="User"/> aggregate and implements
-/// <see cref="IModifiedEntityMember"/>, meaning that any modification to this
+/// <see cref="IModifiableMember"/>, meaning that any modification to this
 /// entity should update the audit metadata of the parent <see cref="User"/>.
 /// </remarks>
-public class UserPartitionAccess : Entity, IModifiedEntityMember, IPartitionAccess
+public class UserPartitionAccess : Entity, IModifiableMember, IPartitionAccess
 {
     /// <summary>
     /// Gets the unique identifier of the user associated with this access entry.
@@ -966,7 +969,7 @@ public class UserPartitionAccess : Entity, IModifiedEntityMember, IPartitionAcce
     /// Since <see cref="UserPartitionAccess"/> belongs to the <see cref="User"/> aggregate,
     /// the parent audited entity is the associated user.
     /// </remarks>
-    public IModifiedEntity ParentEditedEntity => User;
+    public IModifiable ParentEditedEntity => User;
 }
 
 #endregion Partition Access

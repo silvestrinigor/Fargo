@@ -9,7 +9,7 @@ namespace Fargo.Core.UserGroups;
 /// The default administrators user group is a critical system entity and cannot be deleted.
 /// </remarks>
 public sealed class DeleteDefaultAdministratorsUserGroupFargoDomainException()
-    : FargoDomainException("The default administrators user group cannot be deleted.")
+    : Exception("The default administrators user group cannot be deleted.")
 {
 }
 
@@ -19,7 +19,7 @@ public sealed class DeleteDefaultAdministratorsUserGroupFargoDomainException()
 /// </summary>
 public sealed class UserGroupNameidAlreadyExistsDomainException(
     Nameid nameid
-    ) : FargoDomainException(
+    ) : Exception(
         $"A user group with nameid '{nameid}' already exists.")
 {
     /// <summary>

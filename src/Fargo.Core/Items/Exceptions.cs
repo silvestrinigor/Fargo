@@ -4,7 +4,7 @@ namespace Fargo.Core.Items;
 /// Exception thrown when an item is placed inside itself.
 /// </summary>
 public sealed class ItemCannotBeOwnContainerFargoDomainException(Guid itemGuid)
-    : FargoDomainException($"Item '{itemGuid}' cannot be its own container.")
+    : Exception($"Item '{itemGuid}' cannot be its own container.")
 {
     /// <summary>
     /// Gets the identifier of the item involved in the violation.
@@ -16,7 +16,7 @@ public sealed class ItemCannotBeOwnContainerFargoDomainException(Guid itemGuid)
 /// Exception thrown when an item is placed inside a non-container item.
 /// </summary>
 public sealed class ItemParentIsNotContainerFargoDomainException(Guid parentItemGuid)
-    : FargoDomainException($"Item '{parentItemGuid}' cannot contain items.")
+    : Exception($"Item '{parentItemGuid}' cannot contain items.")
 {
     /// <summary>
     /// Gets the identifier of the invalid parent item.
@@ -30,7 +30,7 @@ public sealed class ItemParentIsNotContainerFargoDomainException(Guid parentItem
 public sealed class ItemCircularContainerHierarchyFargoDomainException(
     Guid parentContainerItemGuid,
     Guid memberItemGuid)
-    : FargoDomainException(
+    : Exception(
         $"Item '{memberItemGuid}' cannot be assigned to container " +
         $"'{parentContainerItemGuid}' because this would create a circular hierarchy.")
 {

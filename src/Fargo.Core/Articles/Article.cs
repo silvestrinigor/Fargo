@@ -1,9 +1,13 @@
+using Fargo.Core.Activables;
+using Fargo.Core.Entities;
 using Fargo.Core.Identity;
+using Fargo.Core.Modifiables;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using System.Drawing;
+using System.ComponentModel.DataAnnotations.Schema;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
@@ -17,7 +21,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, IModifiedEntityTypes<ArticleModifiedType>
+public class Article : Entity, IPartitionedEntity, IActivable, IModifiable, IModifiableTypes<ArticleModifiableType>
 {
     private Article()
     {
@@ -36,7 +40,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         var article = new Article(name);
 
         article.MarkAsEditedBy(actor.Guid);
-        article.MarkModificationType(ArticleModifiedType.General);
+        article.MarkModificationType(ArticleModifiableType.General);
 
         return article;
     }
@@ -59,7 +63,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         var article = new Article(name, new ArticleVariation(fromArticle));
 
         article.MarkAsEditedBy(actor.Guid);
-        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
+        article.MarkModificationType(ArticleModifiableType.General | ArticleModifiableType.Relation);
 
         return article;
     }
@@ -82,7 +86,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         var article = new Article(name, new ArticlePack(fromArticle, quantity));
 
         article.MarkAsEditedBy(actor.Guid);
-        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
+        article.MarkModificationType(ArticleModifiableType.General | ArticleModifiableType.Relation);
 
         return article;
     }
@@ -107,7 +111,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         var article = new Article(name, new ArticleKit(components));
 
         article.MarkAsEditedBy(actor.Guid);
-        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Relation);
+        article.MarkModificationType(ArticleModifiableType.General | ArticleModifiableType.Relation);
 
         return article;
     }
@@ -126,7 +130,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         var article = new Article(name, new ArticleContainer(null));
 
         article.MarkAsEditedBy(actor.Guid);
-        article.MarkModificationType(ArticleModifiedType.General | ArticleModifiedType.Container);
+        article.MarkModificationType(ArticleModifiableType.General | ArticleModifiableType.Container);
 
         return article;
     }
@@ -182,7 +186,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Name = name;
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.General);
+        MarkModificationType(ArticleModifiableType.General);
     }
 
     /// <summary>
@@ -206,7 +210,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Description = description;
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.General);
+        MarkModificationType(ArticleModifiableType.General);
     }
 
     /// <summary>
@@ -228,7 +232,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         ShelfLife = shelfLife;
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.General);
+        MarkModificationType(ArticleModifiableType.General);
     }
 
     /// <summary>
@@ -249,7 +253,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Color = color;
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.General);
+        MarkModificationType(ArticleModifiableType.General);
     }
 
     #endregion General
@@ -276,25 +280,25 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
     /// </summary>
     public Mass? Mass { get; private set; }
 
-    public void SetMetrics(ArticleMetrics metrics, Actor actor)
+    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ, Actor actor)
     {
         ValidateCanEdit(actor);
 
-        if (Nullable.Equals(Mass, metrics.Mass) &&
-            Nullable.Equals(LengthX, metrics.LengthX) &&
-            Nullable.Equals(LengthY, metrics.LengthY) &&
-            Nullable.Equals(LengthZ, metrics.LengthZ))
+        if (Nullable.Equals(Mass, mass) &&
+            Nullable.Equals(LengthX, lengthX) &&
+            Nullable.Equals(LengthY, lengthY) &&
+            Nullable.Equals(LengthZ, lengthZ))
         {
             return;
         }
 
-        Mass = metrics.Mass;
-        LengthX = metrics.LengthX;
-        LengthY = metrics.LengthY;
-        LengthZ = metrics.LengthZ;
+        Mass = mass;
+        LengthX = lengthX;
+        LengthY = lengthY;
+        LengthZ = lengthZ;
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.MetricsChanged);
+        MarkModificationType(ArticleModifiableType.MetricsChanged);
     }
 
     /// <summary>
@@ -398,7 +402,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         setter(value);
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.BarcodesChanged);
+        MarkModificationType(ArticleModifiableType.BarcodesChanged);
     }
 
     #endregion Barcode
@@ -443,7 +447,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Pack.SetQuantity(quantity);
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.Relation);
+        MarkModificationType(ArticleModifiableType.Relation);
     }
 
     /// <summary>
@@ -489,7 +493,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         {
             Container = new ArticleContainer(maxMass);
             MarkAsEditedBy(actor.Guid);
-            MarkModificationType(ArticleModifiedType.Container);
+            MarkModificationType(ArticleModifiableType.Container);
             return;
         }
 
@@ -501,7 +505,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Container.SetMaxMass(maxMass);
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.Container);
+        MarkModificationType(ArticleModifiableType.Container);
     }
 
     /// <summary>
@@ -528,7 +532,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         if (ActivateCore())
         {
             MarkAsEditedBy(actor.Guid);
-            MarkModificationType(ArticleModifiedType.Activated);
+            MarkModificationType(ArticleModifiableType.Activated);
         }
     }
 
@@ -542,7 +546,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         if (DeactivateCore())
         {
             MarkAsEditedBy(actor.Guid);
-            MarkModificationType(ArticleModifiedType.Deactivated);
+            MarkModificationType(ArticleModifiableType.Deactivated);
         }
     }
 
@@ -598,7 +602,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Partitions.Add(partition);
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.PartitionsChanged);
+        MarkModificationType(ArticleModifiableType.PartitionsChanged);
     }
 
     public void RemovePartition(Partition partition, Actor actor)
@@ -616,7 +620,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         Partitions.Remove(partition);
 
         MarkAsEditedBy(actor.Guid);
-        MarkModificationType(ArticleModifiedType.PartitionsChanged);
+        MarkModificationType(ArticleModifiableType.PartitionsChanged);
     }
 
     /// <inheritdoc />
@@ -642,22 +646,22 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
-    public void MarkAsEditedBy(Guid actorGuid)
+    private void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
-    public ArticleModifiedType ModificationTypes { get; private set; }
+    public ArticleModifiableType ModificationTypes { get; private set; }
 
-    public IReadOnlySet<ArticleModifiedType> GetModificationTypes()
+    public IReadOnlySet<ArticleModifiableType> GetModificationTypes()
     {
-        HashSet<ArticleModifiedType> result = [];
+        HashSet<ArticleModifiableType> result = [];
 
-        foreach (ArticleModifiedType value in Enum.GetValues<ArticleModifiedType>())
+        foreach (ArticleModifiableType value in Enum.GetValues<ArticleModifiableType>())
         {
-            if (value == ArticleModifiedType.None)
+            if (value == ArticleModifiableType.None)
             {
                 continue;
             }
@@ -671,13 +675,14 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
         return result;
     }
 
-    public bool IsEditStarted { get; private set; }
+    [NotMapped]
+    private bool IsEditStarted { get; set; } = false;
 
-    public void MarkModificationType(ArticleModifiedType modificationType)
+    private void MarkModificationType(ArticleModifiableType modificationType)
     {
         if (!IsEditStarted)
         {
-            ModificationTypes = ArticleModifiedType.None;
+            ModificationTypes = ArticleModifiableType.None;
             IsEditStarted = true;
         }
 
@@ -687,295 +692,3 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiedEntity, 
     #endregion Modified
 }
 
-#region Container
-
-/// <summary>
-/// Defines container constraints for an <see cref="Article"/>.
-/// </summary>
-/// <remarks>
-/// A container article represents an article that may contain other articles,
-/// optionally constrained by allowed articles, restricted articles, and maximum mass.
-/// </remarks>
-public sealed class ArticleContainer
-{
-    private ArticleContainer()
-    {
-    }
-
-    public ArticleContainer(Mass? maxMass)
-    {
-        SetMaxMass(maxMass);
-    }
-
-    /// <summary>
-    /// Gets or sets the maximum mass allowed inside the container.
-    /// </summary>
-    /// <remarks>
-    /// When <see langword="null"/>, no maximum mass constraint is defined.
-    /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the value is less than or equal to zero.
-    /// </exception>
-    public Mass? MaxMass { get; private set; }
-
-    public void SetMaxMass(Mass? maxMass)
-    {
-        if (maxMass is not null && maxMass.Value <= Mass.Zero)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(maxMass),
-                maxMass,
-                "The maximum mass of a container must be greater than zero.");
-        }
-
-        MaxMass = maxMass;
-    }
-}
-
-#endregion Container
-
-#region Variation
-
-/// <summary>
-/// Defines an article variation relationship.
-/// </summary>
-/// <remarks>
-/// A variation article is derived from another article, usually representing
-/// a different version, option, or presentation of the original article.
-/// </remarks>
-public sealed class ArticleVariation
-{
-    private ArticleVariation()
-    {
-    }
-
-    internal ArticleVariation(Article fromArticle)
-    {
-        FromArticle = fromArticle;
-    }
-
-    /// <summary>
-    /// Gets the unique identifier of the source article.
-    /// </summary>
-    public Guid FromArticleGuid { get; private init; }
-
-    /// <summary>
-    /// Gets the article from which this variation originates.
-    /// </summary>
-    public Article FromArticle
-    {
-        get;
-        private init
-        {
-            FromArticleGuid = value.Guid;
-            field = value;
-        }
-    } = null!;
-}
-
-#endregion Variation
-
-#region Pack
-
-/// <summary>
-/// Defines an article pack relationship.
-/// </summary>
-/// <remarks>
-/// A pack article represents a quantity of another article grouped as a single article.
-/// For example, a pack may represent twelve units of the same source article.
-/// </remarks>
-public sealed class ArticlePack
-{
-    private ArticlePack()
-    {
-    }
-
-    public ArticlePack(Article fromArticle, Scalar quantity)
-    {
-        FromArticle = fromArticle;
-        SetQuantity(quantity);
-    }
-
-    /// <summary>
-    /// Gets the unique identifier of the source article contained in the pack.
-    /// </summary>
-    public Guid FromArticleGuid { get; private set; }
-
-    /// <summary>
-    /// Gets the article from which this pack is composed.
-    /// </summary>
-    public Article FromArticle
-    {
-        get;
-        private set
-        {
-            FromArticleGuid = value.Guid;
-            field = value;
-        }
-    } = null!;
-
-    /// <summary>
-    /// Gets or sets the quantity of the source article represented by the pack.
-    /// </summary>
-    /// <remarks>
-    /// The quantity must be greater than zero.
-    /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the quantity is less than or equal to zero.
-    /// </exception>
-    public Scalar Quantity { get; private set; }
-
-    public void SetQuantity(Scalar quantity)
-    {
-        if (quantity <= 0.Amount())
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(quantity),
-                quantity,
-                "The pack quantity must be greater than zero.");
-        }
-
-        Quantity = quantity;
-    }
-}
-
-#endregion Pack
-
-#region Kit
-
-/// <summary>
-/// Identifies a source article and quantity requested for a kit article.
-/// </summary>
-public readonly record struct ArticleKitComponentRequest
-{
-    public ArticleKitComponentRequest(Guid articleGuid, Scalar quantity)
-    {
-        if (articleGuid == Guid.Empty)
-        {
-            throw new ArgumentException("A kit component article guid cannot be empty.", nameof(articleGuid));
-        }
-
-        if (quantity <= 0.Amount())
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(quantity),
-                quantity,
-                "A kit component quantity must be greater than zero.");
-        }
-
-        ArticleGuid = articleGuid;
-        Quantity = quantity;
-    }
-
-    /// <summary>
-    /// Gets the unique identifier of the source article included in the kit.
-    /// </summary>
-    public Guid ArticleGuid { get; }
-
-    /// <summary>
-    /// Gets the quantity of the source article included in the kit.
-    /// </summary>
-    public Scalar Quantity { get; }
-}
-
-/// <summary>
-/// Defines one component of a kit article.
-/// </summary>
-public sealed class ArticleKitComponent
-{
-    private ArticleKitComponent()
-    {
-    }
-
-    public ArticleKitComponent(Article article, Scalar quantity)
-    {
-        Article = article;
-        SetQuantity(quantity);
-    }
-
-    /// <summary>
-    /// Gets the unique identifier of the source article included in the kit.
-    /// </summary>
-    public Guid ArticleGuid { get; private set; }
-
-    /// <summary>
-    /// Gets the source article included in the kit.
-    /// </summary>
-    public Article Article
-    {
-        get;
-        private set
-        {
-            ArticleGuid = value.Guid;
-            field = value;
-        }
-    } = null!;
-
-    /// <summary>
-    /// Gets the quantity of the source article included in the kit.
-    /// </summary>
-    public Scalar Quantity { get; private set; }
-
-    public void SetQuantity(Scalar quantity)
-    {
-        if (quantity <= 0.Amount())
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(quantity),
-                quantity,
-                "A kit component quantity must be greater than zero.");
-        }
-
-        Quantity = quantity;
-    }
-}
-
-/// <summary>
-/// Defines an article kit relationship.
-/// </summary>
-/// <remarks>
-/// A kit article is composed of one or more components.
-/// Each component defines the source article and the quantity included in the kit.
-/// </remarks>
-public sealed class ArticleKit
-{
-    private ArticleKit()
-    {
-    }
-
-    public ArticleKit(IReadOnlyCollection<ArticleKitComponent> components)
-    {
-        SetComponents(components);
-    }
-
-    /// <summary>
-    /// Gets the components that compose the kit.
-    /// </summary>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the collection contains null components, or contains duplicated source articles.
-    /// </exception>
-    public IReadOnlyCollection<ArticleKitComponent> Components { get; private set; } = [];
-
-    private void SetComponents(IReadOnlyCollection<ArticleKitComponent> components)
-    {
-        if (components.Any(component => component is null))
-        {
-            throw new ArgumentException(
-                "A kit cannot contain null components.",
-                nameof(components));
-        }
-
-        if (components
-            .GroupBy(component => component.ArticleGuid)
-            .Any(group => group.Count() > 1))
-        {
-            throw new ArgumentException(
-                "A kit cannot contain duplicated source articles.",
-                nameof(components));
-        }
-
-        Components = components;
-    }
-}
-
-#endregion Kit

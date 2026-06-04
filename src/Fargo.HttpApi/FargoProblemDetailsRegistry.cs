@@ -5,7 +5,7 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
-using Fargo.Core;
+using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -120,11 +120,11 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid operation", "article/not-container")
             },
             {
-                typeof(EntityNotActiveFargoDomainException<Article>),
+                typeof(EntityNotActiveException<Article>),
                 new ProblemDetailsDefinition(400, "Invalid operation", "article/inactive")
             },
             {
-                typeof(EntityNotActiveFargoDomainException<>),
+                typeof(EntityNotActiveException<>),
                 new ProblemDetailsDefinition(400, "Invalid operation", "entity/inactive")
             },
             {
