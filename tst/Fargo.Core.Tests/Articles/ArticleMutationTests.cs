@@ -18,7 +18,7 @@ public sealed class ArticleMutationTests
         var article = Article.CreateArticle(new Name("Test article"), actor);
 
         Assert.Equal(ArticleType.Default, article.ArticleType);
-        Assert.Equal(actor.Guid, article.EditedByGuid);
+        Assert.Equal(actor.Guid, article.EditedByActorGuid);
         Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
         Assert.True(article.IsEditStarted);
     }
@@ -137,7 +137,7 @@ public sealed class ArticleMutationTests
         article.Rename(new Name("Renamed article"), actor);
 
         Assert.Equal("Renamed article", article.Name.Value);
-        Assert.Equal(actor.Guid, article.EditedByGuid);
+        Assert.Equal(actor.Guid, article.EditedByActorGuid);
         Assert.Equal(ArticleModifiedType.General, article.ModificationTypes);
     }
 
@@ -182,7 +182,7 @@ public sealed class ArticleMutationTests
 
         article.MarkAsEditedBy(actorGuid);
 
-        Assert.Equal(actorGuid, article.EditedByGuid);
+        Assert.Equal(actorGuid, article.EditedByActorGuid);
     }
 
     [Fact]

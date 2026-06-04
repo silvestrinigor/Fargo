@@ -159,7 +159,7 @@ public sealed class EntityEventCommandHandlerTests
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: false)));
 
         Assert.False(item.IsActive);
-        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, item.EditedByActorGuid);
         Assert.Equal(ItemModifiedType.Deactivated, item.ModificationTypes);
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Item &&
@@ -190,7 +190,7 @@ public sealed class EntityEventCommandHandlerTests
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
 
         Assert.True(item.IsActive);
-        Assert.Equal(actor.ActorGuid, item.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, item.EditedByActorGuid);
         Assert.Equal(ItemModifiedType.Activated, item.ModificationTypes);
         entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
             entityEvent.EntityType == EntityType.Item &&
@@ -219,7 +219,7 @@ public sealed class EntityEventCommandHandlerTests
 
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
 
-        Assert.Null(item.EditedByGuid);
+        Assert.Null(item.EditedByActorGuid);
         Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
         entityEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }

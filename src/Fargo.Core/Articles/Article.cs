@@ -20,7 +20,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IPartitionedEntity, IActivable, IModifiable, IModifiedEntityTypes<ArticleModifiedType>
+public class Article : Entity, IPartitionedEntity, IActivable, IModifiable, IModifiableTypes<ArticleModifiedType>
 {
     private Article()
     {
@@ -645,11 +645,11 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiable, IMod
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public ArticleModifiedType ModificationTypes { get; private set; }

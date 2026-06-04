@@ -21,7 +21,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasIndex(x => x.ArticleGuid);
 
-        builder.Property(x => x.EditedByGuid);
+        builder.Property(x => x.EditedByActorGuid);
 
         builder.Property(x => x.ModificationTypes)
             .HasDefaultValue(ItemModifiedType.None);

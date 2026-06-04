@@ -57,7 +57,7 @@ public sealed class ArticleCommandHandlerTests
             article.Ean13 == new Ean13("1234567890123") &&
             article.Partitions.Single().Guid == partition.Guid &&
             !article.IsActive &&
-            article.EditedByGuid == actor.ActorGuid &&
+            article.EditedByActorGuid == actor.ActorGuid &&
             article.ModificationTypes.HasFlag(ArticleModifiedType.General) &&
             article.ModificationTypes.HasFlag(ArticleModifiedType.Container) &&
             article.ModificationTypes.HasFlag(ArticleModifiedType.BarcodesChanged) &&
@@ -217,7 +217,7 @@ public sealed class ArticleCommandHandlerTests
         Assert.Single(article.Partitions);
         Assert.Equal(newPartition.Guid, article.Partitions.Single().Guid);
         Assert.False(article.IsActive);
-        Assert.Equal(actor.ActorGuid, article.EditedByGuid);
+        Assert.Equal(actor.ActorGuid, article.EditedByActorGuid);
         Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.General));
         Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.MetricsChanged));
         Assert.True(article.ModificationTypes.HasFlag(ArticleModifiedType.BarcodesChanged));

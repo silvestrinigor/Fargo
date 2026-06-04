@@ -79,7 +79,7 @@ public interface IPartitionAccess
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IModifiable, IModifiedEntityTypes<PartitionModifiedType>, IPartitionEntity, IActivable
+public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModifiedType>, IPartitionEntity, IActivable
 {
     public static Partition CreatePartition(Name name, Description? description = null)
         => new(name, description);
@@ -404,11 +404,11 @@ public class Partition : Entity, IModifiable, IModifiedEntityTypes<PartitionModi
         actor.ValidateHasPartitionAccess(Guid);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public PartitionModifiedType ModificationTypes { get; private set; }

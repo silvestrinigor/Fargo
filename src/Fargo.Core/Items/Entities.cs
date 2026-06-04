@@ -26,7 +26,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IModifiable, IModifiedEntityTypes<ItemModifiedType>, IPartitionedEntity, IActivable
+public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPartitionedEntity, IActivable
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
@@ -309,11 +309,11 @@ public class Item : Entity, IModifiable, IModifiedEntityTypes<ItemModifiedType>,
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public ItemModifiedType ModificationTypes { get; private set; }

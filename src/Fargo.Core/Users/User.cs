@@ -22,7 +22,7 @@ namespace Fargo.Core.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : Entity, IModifiable, IModifiedEntityTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
+public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
 {
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
         => new(nameid, passwordHash);
@@ -752,11 +752,11 @@ public class User : Entity, IModifiable, IModifiedEntityTypes<UserModifiedType>,
         actor.ValidateHasPermission(ActionType.ChangeAnotherUserPassword);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public UserModifiedType ModificationTypes { get; private set; }

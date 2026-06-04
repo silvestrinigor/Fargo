@@ -24,7 +24,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IModifiable, IModifiedEntityTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
 {
     public static UserGroup CreateUserGroup(Nameid nameid, Description? description = null)
         => new(nameid, description);
@@ -489,11 +489,11 @@ public class UserGroup : Entity, IModifiable, IModifiedEntityTypes<UserGroupModi
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByGuid { get; private set; }
+    public Guid? EditedByActorGuid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByGuid = actorGuid;
+        EditedByActorGuid = actorGuid;
     }
 
     public UserGroupModifiedType ModificationTypes { get; private set; }
