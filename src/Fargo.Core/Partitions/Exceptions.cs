@@ -5,7 +5,7 @@ namespace Fargo.Core.Partitions;
 /// </summary>
 public sealed class PartitionCannotBeOwnParentFargoDomainException(
     Guid partitionGuid
-    ) : FargoDomainException(
+    ) : Exception(
         $"Partition '{partitionGuid}' cannot be its own parent.")
 {
     /// <summary>
@@ -18,7 +18,7 @@ public sealed class PartitionCannotBeOwnParentFargoDomainException(
 /// Exception thrown when an attempt is made to delete the global partition.
 /// </summary>
 public sealed class PartitionGlobalDeleteFargoDomainException()
-    : FargoDomainException("The global partition cannot be deleted.")
+    : Exception("The global partition cannot be deleted.")
 {
 }
 
@@ -28,7 +28,7 @@ public sealed class PartitionGlobalDeleteFargoDomainException()
 public sealed class PartitionCircularHierarchyFargoDomainException(
     Guid parentPartitionGuid,
     Guid memberPartitionGuid
-    ) : FargoDomainException(
+    ) : Exception(
         $"Partition '{memberPartitionGuid}' cannot be assigned to parent " +
         $"'{parentPartitionGuid}' because this would create a circular hierarchy.")
 {

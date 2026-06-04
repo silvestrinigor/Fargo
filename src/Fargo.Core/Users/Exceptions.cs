@@ -10,7 +10,7 @@ namespace Fargo.Core.Users;
 /// The main administrator user has fixed permissions that cannot be altered.
 /// </remarks>
 public sealed class ChangeMainAdminUserPermissionsFargoDomainException()
-    : FargoDomainException("The permissions of the main administrator user cannot be modified.")
+    : Exception("The permissions of the main administrator user cannot be modified.")
 {
 }
 /// <summary>
@@ -20,7 +20,7 @@ public sealed class ChangeMainAdminUserPermissionsFargoDomainException()
 /// The main administrator user is a critical system entity and cannot be deleted.
 /// </remarks>
 public sealed class DeleteMainAdminUserFargoDomainException()
-    : FargoDomainException("The main administrator user cannot be deleted.")
+    : Exception("The main administrator user cannot be deleted.")
 {
 }
 /// <summary>
@@ -33,7 +33,7 @@ public sealed class DeleteMainAdminUserFargoDomainException()
 /// The identifier of the user who attempted to change their own permissions.
 /// </param>
 public sealed class UserCannotChangeOwnPermissionsFargoDomainException(Guid userGuid)
-    : FargoDomainException($"User '{userGuid}' cannot change their own permissions.")
+    : Exception($"User '{userGuid}' cannot change their own permissions.")
 {
     /// <summary>
     /// Gets the identifier of the user who attempted to change their own permissions.
@@ -53,7 +53,7 @@ public sealed class UserCannotChangeOwnPermissionsFargoDomainException(Guid user
 /// The unique identifier of the user group that the user attempted to delete.
 /// </param>
 public sealed class UserCannotDeleteParentUserGroupFargoDomainException(Guid userGroupGuid)
-    : FargoDomainException($"The user cannot delete the user group '{userGroupGuid}' because they belong to it.")
+    : Exception($"The user cannot delete the user group '{userGroupGuid}' because they belong to it.")
 {
     /// <summary>
     /// Gets the unique identifier of the user group that cannot be deleted.
@@ -70,7 +70,7 @@ public sealed class UserCannotDeleteParentUserGroupFargoDomainException(Guid use
 /// The identifier of the user that attempted to delete themselves.
 /// </param>
 public sealed class UserCannotDeleteSelfFargoDomainException(Guid userGuid)
-    : FargoDomainException($"User '{userGuid}' cannot delete their own account.")
+    : Exception($"User '{userGuid}' cannot delete their own account.")
 {
     /// <summary>
     /// Gets the identifier of the user that attempted to delete themselves.
@@ -87,7 +87,7 @@ public sealed class UserCannotDeleteSelfFargoDomainException(Guid userGuid)
 /// The identifier of the inactive user.
 /// </param>
 public sealed class UserInactiveFargoDomainException(Guid userGuid)
-    : FargoDomainException($"The user '{userGuid}' is inactive and cannot perform this operation.")
+    : Exception($"The user '{userGuid}' is inactive and cannot perform this operation.")
 {
     /// <summary>
     /// Gets the GUID of the user that is inactive.
@@ -102,7 +102,7 @@ public sealed class UserInactiveFargoDomainException(Guid userGuid)
 /// across all users.
 /// </summary>
 public sealed class UserNameidAlreadyExistsDomainException(Nameid nameid)
-    : FargoDomainException($"A user with Nameid '{nameid}' already exists.")
+    : Exception($"A user with Nameid '{nameid}' already exists.")
 {
     /// <summary>
     /// Gets the <see cref="Nameid"/> that caused the conflict.
@@ -116,7 +116,7 @@ public sealed class UserNameidAlreadyExistsDomainException(Nameid nameid)
 public sealed class UserNotAuthorizedFargoDomainException(
     Guid userGuid,
     ActionType actionType
-    ) : FargoDomainException(
+    ) : Exception(
         $"User '{userGuid}' is not authorized to perform action '{actionType}'.")
 {
     /// <summary>
@@ -133,7 +133,7 @@ public sealed class UserNotAuthorizedFargoDomainException(
 public sealed class UserEntityAccessNotAuthorizedFargoDomainException(
     Guid userGuid,
     Guid entityGuid
-    ) : FargoDomainException(
+    ) : Exception(
         $"User '{userGuid}' is not authorized to access entity '{entityGuid}'.")
 {
     /// <summary>
@@ -147,7 +147,7 @@ public sealed class UserEntityAccessNotAuthorizedFargoDomainException(
 public sealed class UserPartitionAccessNotAuthorizedFargoDomainException(
     Guid userGuid,
     Guid partitionGuid
-    ) : FargoDomainException(
+    ) : Exception(
         $"User '{userGuid}' is not authorized to access partition '{partitionGuid}'.")
 {
     /// <summary>

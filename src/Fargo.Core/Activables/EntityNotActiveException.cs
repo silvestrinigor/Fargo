@@ -7,7 +7,7 @@ namespace Fargo.Core.Activables;
 /// <typeparam name="TEntity">
 /// The type of the inactive entity.
 /// </typeparam>
-public class EntityNotActiveFargoDomainException<TEntity> : FargoDomainException
+public class EntityNotActiveFargoDomainException<TEntity> : Exception
     where TEntity : IActivable
 {
     /// <summary>
