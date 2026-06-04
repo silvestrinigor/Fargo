@@ -3,6 +3,7 @@ using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Fargo.HttpApi.Articles;
+using Fargo.HttpApi.Barcodes;
 using Fargo.Infrastructure.Converters;
 using Microsoft.AspNetCore.Routing;
 using System.Text.Json;
@@ -95,7 +96,7 @@ public sealed class ArticleDtoTests
     [Fact]
     public void BarcodeRouteConstraint_Should_AcceptBarcodeRouteValue()
     {
-        var constraint = new ArticleBarcodeRouteConstraint();
+        var constraint = new BarcodeRouteConstraint();
         var values = new RouteValueDictionary
         {
             ["articleBarcode"] = "7891234567895:Ean13"
@@ -117,7 +118,7 @@ public sealed class ArticleDtoTests
     [InlineData("123:Ean13")]
     public void BarcodeRouteConstraint_Should_RejectInvalidBarcodeRouteValue(string value)
     {
-        var constraint = new ArticleBarcodeRouteConstraint();
+        var constraint = new BarcodeRouteConstraint();
         var values = new RouteValueDictionary
         {
             ["articleBarcode"] = value
