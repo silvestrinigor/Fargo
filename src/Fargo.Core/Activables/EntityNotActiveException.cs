@@ -7,17 +7,17 @@ namespace Fargo.Core.Activables;
 /// <typeparam name="TEntity">
 /// The type of the inactive entity.
 /// </typeparam>
-public class EntityNotActiveFargoDomainException<TEntity> : Exception
+public class EntityNotActiveException<TEntity> : Exception
     where TEntity : IActivable
 {
     /// <summary>
     /// Initializes a new instance of the
-    /// <see cref="EntityNotActiveFargoDomainException{TEntity}"/> class.
+    /// <see cref="EntityNotActiveException{TEntity}"/> class.
     /// </summary>
     /// <param name="entity">
     /// The inactive entity that caused the exception.
     /// </param>
-    public EntityNotActiveFargoDomainException(TEntity entity)
+    public EntityNotActiveException(TEntity entity)
         : base($"{typeof(TEntity).Name} {entity.Guid} is not active.")
     {
         EntityGuid = entity.Guid;
@@ -25,7 +25,7 @@ public class EntityNotActiveFargoDomainException<TEntity> : Exception
 
     /// <summary>
     /// Initializes a new instance of the
-    /// <see cref="EntityNotActiveFargoDomainException{TEntity}"/> class
+    /// <see cref="EntityNotActiveException{TEntity}"/> class
     /// with a custom error message.
     /// </summary>
     /// <param name="entity">
@@ -34,7 +34,7 @@ public class EntityNotActiveFargoDomainException<TEntity> : Exception
     /// <param name="message">
     /// The custom exception message.
     /// </param>
-    public EntityNotActiveFargoDomainException(TEntity entity, string message)
+    public EntityNotActiveException(TEntity entity, string message)
         : base(message)
     {
         EntityGuid = entity.Guid;

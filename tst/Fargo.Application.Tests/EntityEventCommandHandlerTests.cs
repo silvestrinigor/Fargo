@@ -132,7 +132,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
-        await Assert.ThrowsAsync<EntityNotActiveFargoDomainException<Article>>(
+        await Assert.ThrowsAsync<EntityNotActiveException<Article>>(
             () => handler.Handle(new ItemCreateCommand(new ItemCreateDto(article.Guid))));
 
         itemRepository.DidNotReceiveWithAnyArgs().Add(default!);

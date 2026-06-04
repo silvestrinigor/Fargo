@@ -11,14 +11,14 @@ public static class ActivableExtensions
         /// <summary>
         /// Validates that the entity is active.
         /// </summary>
-        /// <exception cref="EntityNotActiveFargoDomainException{TEntity}">
+        /// <exception cref="EntityNotActiveException{TEntity}">
         /// Thrown when the entity is inactive.
         /// </exception>
         public void ValidateIsActive()
         {
             if (!entity.IsActive)
             {
-                throw new EntityNotActiveFargoDomainException<TEntity>(entity);
+                throw new EntityNotActiveException<TEntity>(entity);
             }
         }
     }
