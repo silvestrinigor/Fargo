@@ -6,50 +6,42 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Identity;
 
-/// <summary>
-/// Extension responsible for mapping identity endpoints.
-/// </summary>
 public static class IdentityEndpointRouteBuilderExtension
 {
-    /// <summary>
-    /// Maps all identity routes.
-    /// </summary>
-    /// <param name="builder">The endpoint route builder.</param>
     public static void MapFargoIdentity(this IEndpointRouteBuilder builder)
+    {
+        var group = builder.MapIdentityGroup();
+
+        group.MapIdentityLogin();
+
+        group.MapIdentityLogout();
+
+        group.MapIdentityRefresh();
+
+        group.MapIdentityChangePassword();
+    }
+
+    private static RouteGroupBuilder MapIdentityGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
             .MapGroup("/identity")
             .WithTags("Identity");
 
-        group.MapPost("/login", Login)
+        return group;
+    }
+
+    #region Login
+
+    private static IEndpointRouteBuilder MapIdentityLogin(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPost("/login", Login)
             .WithName("Login")
             .WithSummary("Authenticates a user")
             .WithDescription("Validates user credentials and returns an access token and refresh token.")
             .Produces<AuthResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
-        group.MapPost("/logout", Logout)
-            .WithName("Logout")
-            .WithSummary("Logs out the current user")
-            .WithDescription("Invalidates the current refresh token or session.")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
-
-        group.MapPost("/refresh", Refresh)
-            .WithName("RefreshToken")
-            .WithSummary("Refreshes the access token")
-            .WithDescription("Uses a valid refresh token to generate a new access token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
-
-        group.MapPut("/password", ChangePassword)
-            .RequireAuthorization()
-            .WithName("ChangePassword")
-            .WithSummary("Changes the password of the authenticated user")
-            .WithDescription("Validates the current password and updates it with the new password.")
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized);
+        return builder;
     }
 
     private static async Task<Ok<AuthResult>> Login(
@@ -62,6 +54,22 @@ public static class IdentityEndpointRouteBuilderExtension
         return TypedResults.Ok(result);
     }
 
+    #endregion
+
+    #region Logout
+
+    private static IEndpointRouteBuilder MapIdentityLogout(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPost("/logout", Logout)
+            .WithName("Logout")
+            .WithSummary("Logs out the current user")
+            .WithDescription("Invalidates the current refresh token or session.")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
+
+        return builder;
+    }
+
     private static async Task<Ok> Logout(
         LogoutCommand request,
         ICommandHandler<LogoutCommand> handler,
@@ -72,6 +80,21 @@ public static class IdentityEndpointRouteBuilderExtension
         return TypedResults.Ok();
     }
 
+    #endregion
+
+    #region Refresh
+
+    private static IEndpointRouteBuilder MapIdentityRefresh(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPost("/refresh", Refresh)
+            .WithName("RefreshToken")
+            .WithSummary("Refreshes the access token")
+            .WithDescription("Uses a valid refresh token to generate a new access token.")
+            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
+
+        return builder;
+    }
     private static async Task<Ok<AuthResult>> Refresh(
         RefreshCommand request,
         ICommandHandler<RefreshCommand, AuthResult> handler,
@@ -80,6 +103,24 @@ public static class IdentityEndpointRouteBuilderExtension
         var result = await handler.Handle(request, cancellationToken);
 
         return TypedResults.Ok(result);
+    }
+
+    #endregion
+
+    #region Change password
+
+    private static IEndpointRouteBuilder MapIdentityChangePassword(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/password", ChangePassword)
+            .RequireAuthorization()
+            .WithName("ChangePassword")
+            .WithSummary("Changes the password of the authenticated user")
+            .WithDescription("Validates the current password and updates it with the new password.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
+
+        return builder;
     }
 
     private static async Task<NoContent> ChangePassword(
@@ -91,4 +132,6 @@ public static class IdentityEndpointRouteBuilderExtension
 
         return TypedResults.NoContent();
     }
+
+    #endregion
 }

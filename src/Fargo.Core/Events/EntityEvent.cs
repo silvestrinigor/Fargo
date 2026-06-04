@@ -1,4 +1,6 @@
+using Fargo.Core.Activables;
 using Fargo.Core.Articles;
+using Fargo.Core.Entities;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;

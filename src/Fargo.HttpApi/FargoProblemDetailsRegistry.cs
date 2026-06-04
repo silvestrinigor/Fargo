@@ -5,7 +5,7 @@ using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
-using Fargo.Core;
+using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;

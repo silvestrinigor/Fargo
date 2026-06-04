@@ -2,7 +2,6 @@ using Fargo.Application;
 using Fargo.Application.Items;
 using Fargo.Application.Shared.Items;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Items;
 
@@ -12,7 +11,7 @@ public static class ItemEndpointRouteBuilderExtension
     {
         var group = builder.MapItemGroup();
 
-        group.MapGetItem();
+        group.MapGetItemByGuid();
 
         group.MapGetItems();
 
@@ -35,15 +34,14 @@ public static class ItemEndpointRouteBuilderExtension
 
     #region Get Single
 
-    private static IEndpointRouteBuilder MapGetItem(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapGetItemByGuid(this IEndpointRouteBuilder builder)
     {
         builder.MapGet("/{itemGuid:guid}", GetSingleItem)
             .WithName("GetItem")
             .WithSummary("Gets a single item")
             .WithDescription("Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.")
             .Produces<ItemDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound
-        );
+            .Produces(StatusCodes.Status404NotFound);
 
         return builder;
     }
@@ -73,8 +71,7 @@ public static class ItemEndpointRouteBuilderExtension
             .WithSummary("Gets multiple items")
             .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.")
             .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent
-        );
+            .Produces(StatusCodes.Status204NoContent);
 
         return builder;
     }
@@ -83,7 +80,7 @@ public static class ItemEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
-        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>> handler,
         CancellationToken cancellationToken

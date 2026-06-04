@@ -12,7 +12,7 @@ public static class UserGroupEndpointRouteBuilderExtension
     {
         var group = builder.MapUserGroupGroup();
 
-        group.MapGetUserGroup();
+        group.MapGetUserGroupByGuid();
 
         group.MapGetUserGroups();
 
@@ -35,7 +35,7 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     #region Get Single
 
-    private static IEndpointRouteBuilder MapGetUserGroup(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapGetUserGroupByGuid(this IEndpointRouteBuilder builder)
     {
         builder.MapGet("/{userGroupGuid:guid}", GetSingleUserGroup)
             .WithName("GetUserGroup")

@@ -12,7 +12,7 @@ public static class PartitionEndpointRouteBuilderExtension
     {
         var group = builder.MapPartitionGroup();
 
-        group.MapGetPartition();
+        group.MapGetPartitionByGuid();
 
         group.MapGetPartitions();
 
@@ -35,7 +35,7 @@ public static class PartitionEndpointRouteBuilderExtension
 
     #region Get Single
 
-    private static IEndpointRouteBuilder MapGetPartition(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapGetPartitionByGuid(this IEndpointRouteBuilder builder)
     {
         builder.MapGet("/{partitionGuid:guid}", GetSinglePartition)
             .WithName("GetPartition")

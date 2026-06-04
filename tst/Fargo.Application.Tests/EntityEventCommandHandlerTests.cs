@@ -3,7 +3,7 @@ using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Shared.Articles;
 using Fargo.Application.Shared.Items;
-using Fargo.Core;
+using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Items;
