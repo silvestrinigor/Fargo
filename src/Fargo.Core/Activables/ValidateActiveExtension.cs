@@ -3,7 +3,7 @@ namespace Fargo.Core.Activables;
 /// <summary>
 /// Provides extension operations for activable entities.
 /// </summary>
-public static class ActivableExtensions
+public static class ValidateActiveExtension
 {
     extension<TEntity>(TEntity entity)
         where TEntity : IActivable

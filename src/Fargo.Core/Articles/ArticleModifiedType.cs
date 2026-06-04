@@ -2,7 +2,7 @@ namespace Fargo.Core.Articles;
 
 
 [Flags]
-public enum ArticleModifiedType
+public enum ArticleModifiableType
 {
     None = 0,
     General = 1 << 0,

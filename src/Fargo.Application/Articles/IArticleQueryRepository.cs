@@ -1,5 +1,4 @@
 using Fargo.Application.Shared.Articles;
-using Fargo.Core.Articles;
 using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.Application.Articles;
@@ -95,39 +94,4 @@ public interface IArticleQueryRepository
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
-}
-
-/// <summary>
-/// Provides article repository extensions.
-/// </summary>
-public static class ArticleRepositoryExtensions
-{
-    extension(IArticleRepository repository)
-    {
-        /// <summary>
-        /// Retrieves an article by identifier or throws an exception when not found.
-        /// </summary>
-        /// <param name="articleGuid">
-        /// Article unique identifier.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// Cancellation token.
-        /// </param>
-        /// <returns>
-        /// Found article entity.
-        /// </returns>
-        /// <exception cref="ArticleNotFoundFargoApplicationException">
-        /// Thrown when the article does not exist.
-        /// </exception>
-        public async Task<Article> GetFoundByGuid(
-            Guid articleGuid,
-            CancellationToken cancellationToken = default
-        )
-        {
-            var article = await repository.GetByGuid(articleGuid, cancellationToken)
-                ?? throw new ArticleNotFoundFargoApplicationException(articleGuid);
-
-            return article;
-        }
-    }
 }

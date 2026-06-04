@@ -6,13 +6,6 @@ namespace Fargo.Application.Articles;
 
 public static class ArticleCommandDtoMappings
 {
-    public static ArticleMetrics ToCore(this ArticleMetricsDto metrics)
-        => new(
-            metrics.Mass,
-            metrics.LengthX,
-            metrics.LengthY,
-            metrics.LengthZ);
-
     public static ArticleBarcodesSet ToCore(this ArticleBarcodesDto barcodes)
         => new(
             barcodes.Ean13,

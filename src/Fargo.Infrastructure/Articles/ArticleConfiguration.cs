@@ -26,7 +26,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.HasKey(x => x.Guid);
 
-        builder.Ignore(x => x.IsEditStarted);
         builder.Ignore(x => x.ArticleType);
 
         builder.Property(x => x.Name).IsRequired();
@@ -43,7 +42,7 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(x => x.ModificationTypes)
             .HasConversion<int>()
-            .HasDefaultValue(ArticleModifiedType.None);
+            .HasDefaultValue(ArticleModifiableType.None);
 
         builder.OwnsOne(x => x.Container, container =>
         {
