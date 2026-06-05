@@ -29,11 +29,11 @@ public sealed record ArticleCreateDefaultCommand(
 /// Handles default article creation.
 /// </summary>
 public sealed class ArticleCreateDefaultCommandHandler(
-    ArticleService articleService,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IEntityEventRepository entityEventRepository,
     IEntityPartitionEventRepository entityPartitionEventRepository,
+    ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleCreateDefaultCommandHandler> logger
