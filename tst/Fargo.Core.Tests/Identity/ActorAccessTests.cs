@@ -1,5 +1,5 @@
+using Fargo.Core.Actors;
 using Fargo.Core.Articles;
-using Fargo.Core.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;

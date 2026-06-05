@@ -1,4 +1,4 @@
-using Fargo.Core.Identity;
+using Fargo.Core.Actors;
 
 namespace Fargo.Core.Partitions;
 

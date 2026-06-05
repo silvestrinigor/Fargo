@@ -3,7 +3,7 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;
 
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Actors;
 
 /// <summary>
 /// Represents an actor responsible for performing operations within the system.

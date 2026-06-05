@@ -1,7 +1,7 @@
 using Fargo.Core.Activables;
+using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
-using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Modifiables;
 using Fargo.Core.Shared;

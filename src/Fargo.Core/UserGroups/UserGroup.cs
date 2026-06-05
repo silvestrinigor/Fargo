@@ -1,6 +1,6 @@
 using Fargo.Core.Activables;
+using Fargo.Core.Actors;
 using Fargo.Core.Entities;
-using Fargo.Core.Identity;
 using Fargo.Core.Modifiables;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
