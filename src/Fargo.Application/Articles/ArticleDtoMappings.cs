@@ -4,23 +4,6 @@ using System.Linq.Expressions;
 
 namespace Fargo.Application.Articles;
 
-public static class ArticleCommandDtoMappings
-{
-    public static ArticleBarcodesSet ToCore(this ArticleBarcodesDto barcodes)
-        => new(
-            barcodes.Ean13,
-            barcodes.Ean8,
-            barcodes.UpcA,
-            barcodes.UpcE,
-            barcodes.Code128,
-            barcodes.Code39,
-            barcodes.Itf14,
-            barcodes.Gs1128,
-            barcodes.QrCode,
-            barcodes.DataMatrix);
-}
-
-
 /// <summary>
 /// Provides mappings for article DTO projections.
 /// </summary>

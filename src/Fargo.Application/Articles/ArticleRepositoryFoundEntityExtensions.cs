@@ -18,7 +18,7 @@ public static class ArticleRepositoryFoundEntityExtensions
         /// <returns>
         /// Found article entity.
         /// </returns>
-        /// <exception cref="ArticleNotFoundFargoApplicationException">
+        /// <exception cref="ArticleNotFoundException">
         /// Thrown when the article does not exist.
         /// </exception>
         public async Task<Article> GetFoundByGuid(
@@ -27,7 +27,7 @@ public static class ArticleRepositoryFoundEntityExtensions
         )
         {
             var article = await repository.GetByGuid(articleGuid, cancellationToken)
-                ?? throw new ArticleNotFoundFargoApplicationException(articleGuid);
+                ?? throw new ArticleNotFoundException(articleGuid);
 
             return article;
         }

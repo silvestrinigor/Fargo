@@ -80,7 +80,7 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
             },
             {
-                typeof(ArticleNotFoundFargoApplicationException),
+                typeof(ArticleNotFoundException),
                 new ProblemDetailsDefinition(404, "Article not found", "article/not-found")
             },
             {

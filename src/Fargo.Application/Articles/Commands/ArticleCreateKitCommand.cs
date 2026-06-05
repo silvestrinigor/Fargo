@@ -104,18 +104,16 @@ public sealed class ArticleCreateKitCommandHandler(
 
         if (command.Barcodes is { } barcodes)
         {
-            var articleBarcodes = barcodes.ToCore();
-
-            await articleService.SetEan13(articleBarcodes.Ean13, article, actor, cancellationToken);
-            await articleService.SetEan8(articleBarcodes.Ean8, article, actor, cancellationToken);
-            await articleService.SetUpcA(articleBarcodes.UpcA, article, actor, cancellationToken);
-            await articleService.SetUpcE(articleBarcodes.UpcE, article, actor, cancellationToken);
-            await articleService.SetCode128(articleBarcodes.Code128, article, actor, cancellationToken);
-            await articleService.SetCode39(articleBarcodes.Code39, article, actor, cancellationToken);
-            await articleService.SetItf14(articleBarcodes.Itf14, article, actor, cancellationToken);
-            await articleService.SetGs1128(articleBarcodes.Gs1128, article, actor, cancellationToken);
-            await articleService.SetQrCode(articleBarcodes.QrCode, article, actor, cancellationToken);
-            await articleService.SetDataMatrix(articleBarcodes.DataMatrix, article, actor, cancellationToken);
+            await articleService.SetEan13(barcodes.Ean13, article, actor, cancellationToken);
+            await articleService.SetEan8(barcodes.Ean8, article, actor, cancellationToken);
+            await articleService.SetUpcA(barcodes.UpcA, article, actor, cancellationToken);
+            await articleService.SetUpcE(barcodes.UpcE, article, actor, cancellationToken);
+            await articleService.SetCode128(barcodes.Code128, article, actor, cancellationToken);
+            await articleService.SetCode39(barcodes.Code39, article, actor, cancellationToken);
+            await articleService.SetItf14(barcodes.Itf14, article, actor, cancellationToken);
+            await articleService.SetGs1128(barcodes.Gs1128, article, actor, cancellationToken);
+            await articleService.SetQrCode(barcodes.QrCode, article, actor, cancellationToken);
+            await articleService.SetDataMatrix(barcodes.DataMatrix, article, actor, cancellationToken);
         }
 
         if (command.Partitions is { Count: > 0 } partitions)
