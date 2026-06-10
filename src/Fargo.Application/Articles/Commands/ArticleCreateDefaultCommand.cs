@@ -76,20 +76,34 @@ public sealed class ArticleCreateDefaultCommandHandler(
 
         if (command.Metrics is { } metrics)
         {
-            article.SetMetrics(metrics.Mass, metrics.LengthX, metrics.LengthY, metrics.LengthZ, actor);
+            article.SetMetrics(
+                metrics.Mass,
+                metrics.LengthX,
+                metrics.LengthY,
+                metrics.LengthZ, actor
+                );
         }
 
         if (command.Barcodes is { } barcodes)
         {
             await articleService.SetEan13(barcodes.Ean13, article, actor, cancellationToken);
+
             await articleService.SetEan8(barcodes.Ean8, article, actor, cancellationToken);
+
             await articleService.SetUpcA(barcodes.UpcA, article, actor, cancellationToken);
+
             await articleService.SetUpcE(barcodes.UpcE, article, actor, cancellationToken);
+
             await articleService.SetCode128(barcodes.Code128, article, actor, cancellationToken);
+
             await articleService.SetCode39(barcodes.Code39, article, actor, cancellationToken);
+
             await articleService.SetItf14(barcodes.Itf14, article, actor, cancellationToken);
+
             await articleService.SetGs1128(barcodes.Gs1128, article, actor, cancellationToken);
+
             await articleService.SetQrCode(barcodes.QrCode, article, actor, cancellationToken);
+
             await articleService.SetDataMatrix(barcodes.DataMatrix, article, actor, cancellationToken);
         }
 
@@ -99,13 +113,22 @@ public sealed class ArticleCreateDefaultCommandHandler(
             {
                 var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-                PartitionAddChildPartitionedEntityFunction.PartitionedInsertIntoPartition(article, partition, actor, entityPartitionEventRepository);
+                PartitionAddChildPartitionedEntityFunction.PartitionedInsertIntoPartition(
+                    article,
+                    partition,
+                    actor,
+                    entityPartitionEventRepository);
             }
         }
 
-        if (command.IsActive == false)
+        if (command.IsActive == false && article.IsActive)
         {
             ActivableDeactivateFunction.DeactivateEntity(article, actor, eventRepository);
+        }
+
+        if (command.IsActive == true && !article.IsActive)
+        {
+            ActivableActivateFunction.ActivateEntity(article, actor, eventRepository);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
