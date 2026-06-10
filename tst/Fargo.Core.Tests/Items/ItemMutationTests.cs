@@ -9,7 +9,7 @@ public sealed class ItemMutationTests
     [Fact]
     public void Constructor_Should_SetItemActiveByDefault()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
 
         Assert.True(item.IsActive);
     }
@@ -17,7 +17,7 @@ public sealed class ItemMutationTests
     [Fact]
     public void CreateItem_Should_SetArticleAndProductionDate()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var productionDate = DateTimeOffset.UtcNow;
 
         var item = Item.CreateItem(article, productionDate);
@@ -41,7 +41,7 @@ public sealed class ItemMutationTests
     [Fact]
     public void ActivateDeactivate_Should_UpdateActiveState()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
 
         item.Deactivate();
         Assert.False(item.IsActive);

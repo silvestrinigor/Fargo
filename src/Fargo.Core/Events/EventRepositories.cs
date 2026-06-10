@@ -1,23 +1,23 @@
 namespace Fargo.Core.Events;
 
 /// <summary>
-/// Defines the repository contract for managing <see cref="EntityEvent"/> ledger entries.
+/// Defines the repository contract for managing <see cref="Event"/> ledger entries.
 /// </summary>
-public interface IEntityEventRepository
+public interface IEventRepository
 {
     /// <summary>
     /// Adds a new entity event ledger entry to the persistence context.
     /// </summary>
-    void Add(EntityEvent entityEvent);
+    void Add(Event entityEvent);
 }
 
 /// <summary>
-/// Defines the repository contract for managing <see cref="EntityPartitionEvent"/> ledger entries.
+/// Defines the repository contract for managing <see cref="PartitionEvent"/> ledger entries.
 /// </summary>
-public interface IEntityPartitionEventRepository
+public interface IPartitionEventRepository
 {
     /// <summary>
     /// Adds a new entity partition event ledger entry to the persistence context.
     /// </summary>
-    void Add(EntityPartitionEvent entityPartitionEvent);
+    void Add(PartitionEvent entityPartitionEvent);
 }

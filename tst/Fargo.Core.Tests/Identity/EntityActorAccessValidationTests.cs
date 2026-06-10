@@ -15,7 +15,7 @@ public sealed class EntityActorAccessValidationTests
     public void ArticleEdit_Should_RejectActorWithoutArticleAccess()
     {
         var partition = Partition.CreatePartition(new Name("Restricted"));
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         article.AddPartition(partition, CreateDomainActor());
         var actor = CreateActor([ActionType.EditArticle]);
 
@@ -27,7 +27,7 @@ public sealed class EntityActorAccessValidationTests
     public void ArticleVariationCreate_Should_RejectActorWithoutSourceArticleAccess()
     {
         var partition = Partition.CreatePartition(new Name("Restricted"));
-        var sourceArticle = Article.CreateArticle(new Name("Source article"), CreateDomainActor());
+        var sourceArticle = Article.NewArticle(new Name("Source article"), CreateDomainActor());
         sourceArticle.AddPartition(partition, CreateDomainActor());
         var actor = CreateActor([ActionType.CreateArticle]);
 
@@ -39,7 +39,7 @@ public sealed class EntityActorAccessValidationTests
     public void ItemCreate_Should_RejectActorWithoutSourceArticleAccess()
     {
         var partition = Partition.CreatePartition(new Name("Restricted"));
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         article.AddPartition(partition, CreateDomainActor());
         var actor = CreateActor([ActionType.CreateItem]);
 
@@ -53,7 +53,7 @@ public sealed class EntityActorAccessValidationTests
         var partition = Partition.CreatePartition(new Name("Restricted"));
         var parent = Item.CreateItem(Article.CreateArticleContainer(new Name("Container"), CreateDomainActor()));
         parent.AddPartition(partition, CreateDomainActor());
-        var member = Item.CreateItem(Article.CreateArticle(new Name("Member"), CreateDomainActor()));
+        var member = Item.CreateItem(Article.NewArticle(new Name("Member"), CreateDomainActor()));
         var actor = CreateActor([ActionType.EditItem]);
         var service = new ItemService(Substitute.For<IItemRepository>());
 

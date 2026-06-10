@@ -20,7 +20,7 @@ public sealed record ArticleDeleteCommand(
 /// </summary>
 public sealed class ArticleDeleteCommandHandler(
     IArticleRepository articleRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleDeleteCommandHandler> logger
@@ -59,7 +59,7 @@ public sealed class ArticleDeleteCommandHandler(
 
         articleRepository.Remove(article);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<Article>(article, actor.Guid));
+        entityEventRepository.Add(Event.EntityDeleted<Article>(article, actor.Guid));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

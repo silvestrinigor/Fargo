@@ -131,8 +131,8 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
-            services.AddScoped<IEntityEventRepository, EntityEventRepository>();
-            services.AddScoped<IEntityPartitionEventRepository, EntityPartitionEventRepository>();
+            services.AddScoped<IEventRepository, EntityEventRepository>();
+            services.AddScoped<IPartitionEventRepository, EntityPartitionEventRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();

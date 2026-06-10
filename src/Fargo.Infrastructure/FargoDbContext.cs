@@ -15,9 +15,9 @@ namespace Fargo.Infrastructure.Persistence;
 
 public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
-    public DbSet<EntityEvent> EntityEvents { get; set; }
+    public DbSet<Event> EntityEvents { get; set; }
 
-    public DbSet<EntityPartitionEvent> EntityPartitionEvents { get; set; }
+    public DbSet<PartitionEvent> EntityPartitionEvents { get; set; }
 
     public DbSet<Article> Articles { get; set; }
 

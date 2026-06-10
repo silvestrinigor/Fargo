@@ -35,8 +35,8 @@ public sealed record ArticleCreatePackCommand(
 public sealed class ArticleCreatePackCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
@@ -68,7 +68,7 @@ public sealed class ArticleCreatePackCommandHandler(
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+        entityEventRepository.Add(Event.NewEntityCreatedEvent<Article>(article, actor.Guid));
 
         if (command.Description is { } description)
         {
@@ -112,7 +112,7 @@ public sealed class ArticleCreatePackCommandHandler(
 
                 article.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     article,
                     partition,
                     actor.Guid));
@@ -123,7 +123,7 @@ public sealed class ArticleCreatePackCommandHandler(
         {
             article.Deactivate(actor);
 
-            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+            entityEventRepository.Add(Event.Deactivated<Article>(article, actor.Guid));
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

@@ -25,14 +25,14 @@ public sealed class CommandNoOpGuardTests
     public async Task ItemUpdate_Should_SkipPartitions_WhenPartitionsAreUnchanged()
     {
         var partition = Partition.CreatePartition(new Name("Partition"));
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(partition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
         var partitionRepository = Substitute.For<IPartitionRepository>();
-        var entityEventRepository = Substitute.For<IEntityEventRepository>();
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityEventRepository = Substitute.For<IEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var handler = new ItemUpdateCommandHandler(
             itemRepository,
             partitionRepository,
@@ -66,8 +66,8 @@ public sealed class CommandNoOpGuardTests
             Substitute.For<IPartitionRepository>(),
             Substitute.For<IUserGroupRepository>(),
             Substitute.For<IRefreshTokenRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(actorGuid, ActionType.EditUser)),
             Substitute.For<IPasswordHasher>(),
             Substitute.For<IUnitOfWork>(),
@@ -90,8 +90,8 @@ public sealed class CommandNoOpGuardTests
         userGroupRepository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(userGroup);
         var partitionRepository = Substitute.For<IPartitionRepository>();
-        var entityEventRepository = Substitute.For<IEntityEventRepository>();
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityEventRepository = Substitute.For<IEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var handler = new UserGroupUpdateCommandHandler(
             new UserGroupService(userGroupRepository),
             userGroupRepository,

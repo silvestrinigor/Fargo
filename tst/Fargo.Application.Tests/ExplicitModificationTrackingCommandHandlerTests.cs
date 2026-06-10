@@ -26,7 +26,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
     [Fact]
     public async Task ItemCreate_Should_MarkActorAndGeneralModificationType()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var itemRepository = Substitute.For<IItemRepository>();
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
@@ -36,8 +36,8 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             itemRepository,
             articleRepository,
             Substitute.For<IPartitionRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
@@ -60,7 +60,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         var handler = new PartitionUpdateCommandHandler(
             new PartitionService(repository),
             repository,
-            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<PartitionUpdateCommandHandler>>());
@@ -93,8 +93,8 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             Substitute.For<IPartitionRepository>(),
             Substitute.For<IUserGroupRepository>(),
             refreshTokenRepository,
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
             passwordHasher,
             Substitute.For<IUnitOfWork>(),
@@ -118,8 +118,8 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             new UserGroupService(repository),
             repository,
             Substitute.For<IPartitionRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());

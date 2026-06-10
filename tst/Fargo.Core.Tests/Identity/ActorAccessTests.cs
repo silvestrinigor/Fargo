@@ -11,7 +11,7 @@ public sealed class ActorAccessTests
     [Fact]
     public void ValidateHasAccess_Should_AllowPublicPartitionedEntity()
     {
-        var article = Article.CreateArticle(new Name("Public article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Public article"), CreateDomainActor());
         var actor = CreateActor();
 
         var exception = Record.Exception(() => actor.ValidateHasAccess(article));
@@ -23,7 +23,7 @@ public sealed class ActorAccessTests
     public void ValidateHasAccess_Should_AllowEntityWithMatchingPartition()
     {
         var partition = Partition.CreatePartition(new Name("Allowed"));
-        var article = Article.CreateArticle(new Name("Partitioned article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Partitioned article"), CreateDomainActor());
         article.AddPartition(partition, CreateDomainActor());
         var actor = CreateActor(partition.Guid);
 
@@ -36,7 +36,7 @@ public sealed class ActorAccessTests
     public void ValidateHasAccess_Should_AllowAdminActor()
     {
         var partition = Partition.CreatePartition(new Name("Restricted"));
-        var article = Article.CreateArticle(new Name("Partitioned article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Partitioned article"), CreateDomainActor());
         article.AddPartition(partition, CreateDomainActor());
         var actor = CreateActor(isAdmin: true);
 
@@ -49,7 +49,7 @@ public sealed class ActorAccessTests
     public void ValidateHasAccess_Should_Throw_WhenActorHasNoEntityPartitionAccess()
     {
         var partition = Partition.CreatePartition(new Name("Restricted"));
-        var article = Article.CreateArticle(new Name("Partitioned article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Partitioned article"), CreateDomainActor());
         article.AddPartition(partition, CreateDomainActor());
         var actor = CreateActor();
 

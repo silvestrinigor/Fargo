@@ -32,7 +32,7 @@ public class Article : Entity, IPartitionedEntity, IActivable, IModifiable, IMod
         Name = name;
     }
 
-    public static Article CreateArticle(Name name, Actor actor)
+    public static Article NewArticle(Name name, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
         actor.ValidateHasPermission(ActionType.CreateArticle);

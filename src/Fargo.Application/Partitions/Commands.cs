@@ -21,7 +21,7 @@ public sealed record PartitionCreateCommand(
 public sealed class PartitionCreateCommandHandler(
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<PartitionCreateCommandHandler> logger
@@ -44,7 +44,7 @@ public sealed class PartitionCreateCommandHandler(
 
         partitionRepository.Add(partition);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated(partition, actor.Guid));
+        entityEventRepository.Add(Event.NewEntityCreatedEvent(partition, actor.Guid));
 
         if (create.Description is { } description)
         {
@@ -96,7 +96,7 @@ public sealed record PartitionUpdateCommand(
 public sealed class PartitionUpdateCommandHandler(
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<PartitionUpdateCommandHandler> logger
@@ -149,12 +149,12 @@ public sealed class PartitionUpdateCommandHandler(
             if (isActive && !partition.IsActive)
             {
                 partition.Activate(actor);
-                entityEventRepository.Add(EntityEvent.Activated<Partition>(partition, actor.Guid));
+                entityEventRepository.Add(Event.Activated<Partition>(partition, actor.Guid));
             }
             else if (!isActive && partition.IsActive)
             {
                 partition.Deactivate(actor);
-                entityEventRepository.Add(EntityEvent.Deactivated<Partition>(partition, actor.Guid));
+                entityEventRepository.Add(Event.Deactivated<Partition>(partition, actor.Guid));
             }
         }
 
@@ -187,7 +187,7 @@ public sealed record PartitionDeleteCommand(
 public sealed class PartitionDeleteCommandHandler(
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<PartitionDeleteCommandHandler> logger
@@ -212,7 +212,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         partitionService.DeletePartition(partition, actor);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted(partition, actor.Guid));
+        entityEventRepository.Add(Event.EntityDeleted(partition, actor.Guid));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

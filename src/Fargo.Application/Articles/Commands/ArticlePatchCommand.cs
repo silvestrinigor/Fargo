@@ -23,8 +23,8 @@ public sealed record ArticlePatchCommand(
 public sealed class ArticlePatchCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
@@ -105,7 +105,7 @@ public sealed class ArticlePatchCommandHandler(
 
                 article.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     article,
                     partition,
                     actor.Guid));
@@ -119,7 +119,7 @@ public sealed class ArticlePatchCommandHandler(
             {
                 article.RemovePartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.RemovedFromPartition(
                     article,
                     partition,
                     actor.Guid));
@@ -131,12 +131,12 @@ public sealed class ArticlePatchCommandHandler(
             if (isActive && !article.IsActive)
             {
                 article.Activate(actor);
-                entityEventRepository.Add(EntityEvent.Activated<Article>(article, actor.Guid));
+                entityEventRepository.Add(Event.Activated<Article>(article, actor.Guid));
             }
             else if (!isActive && article.IsActive)
             {
                 article.Deactivate(actor);
-                entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+                entityEventRepository.Add(Event.Deactivated<Article>(article, actor.Guid));
             }
         }
 

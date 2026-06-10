@@ -26,14 +26,14 @@ public sealed class EntityPartitionEventCommandHandlerTests
     [Fact]
     public async Task ArticlePatchPartitions_Should_RecordInsertedPartitionEvent()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var articleRepository = Substitute.For<IArticleRepository>();
         articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
         var partitionRepository = CreatePartitionRepository(partition);
-        var entityEventRepository = Substitute.For<IEntityEventRepository>();
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityEventRepository = Substitute.For<IEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var actor = CreateActor(ActionType.EditArticle);
         var handler = new ArticlePatchCommandHandler(
             articleRepository,
@@ -49,7 +49,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             article.Guid,
             new ArticlePatchDto(Partitions: [partition.Guid])));
 
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.Article &&
             entityPartitionEvent.EntityGuid == article.Guid &&
@@ -62,18 +62,18 @@ public sealed class EntityPartitionEventCommandHandlerTests
     {
         var oldPartition = Partition.CreatePartition(new Name("Old partition"));
         var newPartition = Partition.CreatePartition(new Name("New partition"));
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(oldPartition);
         var itemRepository = Substitute.For<IItemRepository>();
         itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
         var partitionRepository = CreatePartitionRepository(newPartition);
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var actor = CreateActor(ActionType.EditItem);
         var handler = new ItemUpdateCommandHandler(
             itemRepository,
             partitionRepository,
-            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEventRepository>(),
             entityPartitionEventRepository,
             Substitute.For<IItemMovementRepository>(),
             new ItemService(itemRepository),
@@ -83,13 +83,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
 
         await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([newPartition.Guid])));
 
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.Item &&
             entityPartitionEvent.EntityGuid == item.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
             entityPartitionEvent.ActorGuid == actor.ActorGuid));
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.Item &&
             entityPartitionEvent.EntityGuid == item.Guid &&
@@ -108,7 +108,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
         userRepository.GetByGuid(user.Guid, Arg.Any<CancellationToken>())
             .Returns(user);
         var partitionRepository = CreatePartitionRepository(newPartition);
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var actor = CreateActor(ActionType.EditUser);
         var handler = new UserUpdateCommandHandler(
             new UserService(userRepository),
@@ -116,7 +116,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             partitionRepository,
             Substitute.For<IUserGroupRepository>(),
             Substitute.For<IRefreshTokenRepository>(),
-            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEventRepository>(),
             entityPartitionEventRepository,
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IPasswordHasher>(),
@@ -127,13 +127,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             user.Guid,
             new UserUpdateDto(Partitions: [newPartition.Guid])));
 
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.User &&
             entityPartitionEvent.EntityGuid == user.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
             entityPartitionEvent.ActorGuid == actor.ActorGuid));
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.User &&
             entityPartitionEvent.EntityGuid == user.Guid &&
@@ -152,13 +152,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
         userGroupRepository.GetByGuid(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(userGroup);
         var partitionRepository = CreatePartitionRepository(newPartition);
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var actor = CreateActor(ActionType.EditUserGroup);
         var handler = new UserGroupUpdateCommandHandler(
             new UserGroupService(userGroupRepository),
             userGroupRepository,
             partitionRepository,
-            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEventRepository>(),
             entityPartitionEventRepository,
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IUnitOfWork>(),
@@ -168,13 +168,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             userGroup.Guid,
             new UserGroupUpdateDto(null, null, null, null, [newPartition.Guid])));
 
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
             entityPartitionEvent.EntityType == EntityType.UserGroup &&
             entityPartitionEvent.EntityGuid == userGroup.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
             entityPartitionEvent.ActorGuid == actor.ActorGuid));
-        entityPartitionEventRepository.Received(1).Add(Arg.Is<EntityPartitionEvent>(entityPartitionEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.UserGroup &&
             entityPartitionEvent.EntityGuid == userGroup.Guid &&

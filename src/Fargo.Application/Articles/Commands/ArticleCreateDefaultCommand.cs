@@ -1,7 +1,10 @@
 using Fargo.Application.Articles;
+using Fargo.Application.Articles.Functions;
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
+using Fargo.Application.Partitions.Functions;
 using Fargo.Application.Shared.Articles;
+using Fargo.Application.Activables.Functions;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
@@ -31,8 +34,8 @@ public sealed record ArticleCreateDefaultCommand(
 public sealed class ArticleCreateDefaultCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository eventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
@@ -54,11 +57,7 @@ public sealed class ArticleCreateDefaultCommandHandler(
                 actor.Guid);
         }
 
-        var article = Article.CreateArticle(command.Name, actor);
-
-        articleRepository.Add(article);
-
-        entityEventRepository.Add(EntityEvent.EntityCreated(article, actor.Guid));
+        var article = ArticleCreateDefaultFunction.CreateArticle(command.Name, actor, articleRepository, eventRepository);
 
         if (command.Description is { } description)
         {
@@ -100,20 +99,13 @@ public sealed class ArticleCreateDefaultCommandHandler(
             {
                 var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
-                article.AddPartition(partition, actor);
-
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
-                    article,
-                    partition,
-                    actor.Guid));
+                PartitionAddChildPartitionedEntityFunction.PartitionedInsertIntoPartition(article, partition, actor, entityPartitionEventRepository);
             }
         }
 
         if (command.IsActive == false)
         {
-            article.Deactivate(actor);
-
-            entityEventRepository.Add(EntityEvent.Deactivated(article, actor.Guid));
+            ActivableDeactivateFunction.DeactivateEntity(article, actor, eventRepository);
         }
 
         await unitOfWork.SaveChanges(cancellationToken);

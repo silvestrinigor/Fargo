@@ -29,8 +29,8 @@ public sealed class UserCreateCommandHandler(
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
@@ -80,7 +80,7 @@ public sealed class UserCreateCommandHandler(
 
         userRepository.Add(user);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<User>(user, actor.Guid));
+        entityEventRepository.Add(Event.NewEntityCreatedEvent<User>(user, actor.Guid));
 
         if (create.FirstName is not null)
         {
@@ -135,7 +135,7 @@ public sealed class UserCreateCommandHandler(
 
                 user.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     user,
                     partition,
                     actor.Guid));
@@ -189,8 +189,8 @@ public sealed class UserUpdateCommandHandler(
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
     IRefreshTokenRepository refreshTokenRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
@@ -317,7 +317,7 @@ public sealed class UserUpdateCommandHandler(
 
                 user.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     user,
                     partition,
                     actor.Guid));
@@ -331,7 +331,7 @@ public sealed class UserUpdateCommandHandler(
             {
                 user.RemovePartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.RemovedFromPartition(
                     user,
                     partition,
                     actor.Guid));
@@ -369,12 +369,12 @@ public sealed class UserUpdateCommandHandler(
             if (isActive && !user.IsActive)
             {
                 user.Activate(actor);
-                entityEventRepository.Add(EntityEvent.Activated<User>(user, actor.Guid));
+                entityEventRepository.Add(Event.Activated<User>(user, actor.Guid));
             }
             else if (!isActive && user.IsActive)
             {
                 user.Deactivate(actor);
-                entityEventRepository.Add(EntityEvent.Deactivated<User>(user, actor.Guid));
+                entityEventRepository.Add(Event.Deactivated<User>(user, actor.Guid));
             }
         }
 
@@ -406,7 +406,7 @@ public sealed record UserDeleteCommand(
 /// </summary>
 public sealed class UserDeleteCommandHandler(
     IUserRepository userRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<UserDeleteCommandHandler> logger
@@ -433,7 +433,7 @@ public sealed class UserDeleteCommandHandler(
 
         userRepository.Remove(user);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<User>(user, actor.Guid));
+        entityEventRepository.Add(Event.EntityDeleted<User>(user, actor.Guid));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

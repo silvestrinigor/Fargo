@@ -27,8 +27,8 @@ public sealed class ItemMovementCommandHandlerTests
         var handler = new ItemUpdateCommandHandler(
             itemRepository,
             Substitute.For<IPartitionRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             movementRepository,
             new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
@@ -64,8 +64,8 @@ public sealed class ItemMovementCommandHandlerTests
         var handler = new ItemUpdateCommandHandler(
             itemRepository,
             Substitute.For<IPartitionRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             movementRepository,
             new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditItem)),
@@ -94,8 +94,8 @@ public sealed class ItemMovementCommandHandlerTests
         var handler = new ItemUpdateCommandHandler(
             itemRepository,
             Substitute.For<IPartitionRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             movementRepository,
             new ItemService(itemRepository),
             CreateCurrentAuthorizationContext(actor),
@@ -147,7 +147,7 @@ public sealed class ItemMovementCommandHandlerTests
             UserGroupGuids: []);
 
     private static Item CreateItem()
-        => Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        => Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
 
     private static Item CreateContainerItem()
         => Item.CreateItem(Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor()));

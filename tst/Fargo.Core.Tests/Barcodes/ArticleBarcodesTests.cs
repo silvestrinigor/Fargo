@@ -87,7 +87,7 @@ public sealed class ArticleBarcodesTests
 
     private static Article CreateArticle()
     {
-        var article = Article.CreateArticle(new Name("Test article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Test article"), CreateDomainActor());
 
         article.ChangeDescription(new Description("Test description"), CreateDomainActor());
 

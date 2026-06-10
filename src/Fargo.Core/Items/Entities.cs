@@ -391,7 +391,7 @@ public sealed class ItemBatch : Entity
 /// Represents item movement details attached to an entity event.
 /// </summary>
 /// <remarks>
-/// The related <see cref="EntityEvent"/> stores the moved item, actor, and occurrence time.
+/// The related <see cref="Events.Event"/> stores the moved item, actor, and occurrence time.
 /// This row stores only the movement-specific location details.
 /// </remarks>
 public sealed class ItemMovement : Entity
@@ -407,7 +407,7 @@ public sealed class ItemMovement : Entity
     }
 
     private ItemMovement(
-        EntityEvent entityEvent,
+        Event entityEvent,
         Guid? fromParentContainerGuid,
         Guid? toParentContainerGuid)
     {
@@ -427,14 +427,14 @@ public sealed class ItemMovement : Entity
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         => new(
-            EntityEvent.ItemMoved(item, actorGuid, occurredAt),
+            Event.ItemMoved(item, actorGuid, occurredAt),
             fromParentContainerGuid,
             toParentContainerGuid);
 
     /// <summary>
     /// Gets the related entity event.
     /// </summary>
-    public EntityEvent Event { get; private init; } = null!;
+    public Event Event { get; private init; } = null!;
 
     /// <summary>
     /// Gets the moved item unique identifier.

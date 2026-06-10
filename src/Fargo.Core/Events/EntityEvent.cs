@@ -26,7 +26,7 @@ public enum EventType
 /// <summary>
 /// Represents event for an entity.
 /// </summary>
-public sealed class EntityEvent : Entity
+public sealed class Event : Entity
 {
     /// <summary>
     /// Initializes a new entity event.
@@ -34,11 +34,11 @@ public sealed class EntityEvent : Entity
     /// <remarks>
     /// Required by Entity Framework.
     /// </remarks>
-    private EntityEvent()
+    private Event()
     {
     }
 
-    private EntityEvent(
+    private Event(
         EntityType entityType,
         EventType eventType,
         Guid entityGuid,
@@ -65,7 +65,7 @@ public sealed class EntityEvent : Entity
     /// <summary>
     /// Creates an entity creation event for the specified entity.
     /// </summary>
-    public static EntityEvent EntityCreated<TEntity>(
+    public static Event NewEntityCreatedEvent<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
@@ -75,7 +75,7 @@ public sealed class EntityEvent : Entity
     /// <summary>
     /// Creates an entity deletion event for the specified entity.
     /// </summary>
-    public static EntityEvent EntityDeleted<TEntity>(
+    public static Event EntityDeleted<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
@@ -85,7 +85,7 @@ public sealed class EntityEvent : Entity
     /// <summary>
     /// Creates an entity activation event for the specified entity.
     /// </summary>
-    public static EntityEvent Activated<TEntity>(
+    public static Event Activated<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
@@ -95,34 +95,34 @@ public sealed class EntityEvent : Entity
     /// <summary>
     /// Creates an entity deactivation event for the specified entity.
     /// </summary>
-    public static EntityEvent Deactivated<TEntity>(
+    public static Event Deactivated<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity, IActivable
         => Create(entity, EventType.Deactivated, actorGuid, occurredAt);
 
-    internal static EntityEvent ItemMoved(
+    internal static Event ItemMoved(
         Item item,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         => Create(item, EventType.Moved, actorGuid, occurredAt);
 
-    internal static EntityEvent InsertedIntoPartition<TEntity>(
+    internal static Event InsertedIntoPartition<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity, IPartitionedEntity
         => Create(entity, EventType.InsertedIntoPartition, actorGuid, occurredAt);
 
-    internal static EntityEvent RemovedFromPartition<TEntity>(
+    internal static Event RemovedFromPartition<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
         where TEntity : IEntity, IPartitionedEntity
         => Create(entity, EventType.RemovedFromPartition, actorGuid, occurredAt);
 
-    private static EntityEvent Create<TEntity>(
+    private static Event Create<TEntity>(
         TEntity entity,
         EventType eventType,
         Guid actorGuid,
@@ -131,7 +131,7 @@ public sealed class EntityEvent : Entity
     {
         ArgumentNullException.ThrowIfNull(entity);
 
-        return new EntityEvent(
+        return new Event(
             ToEntityType<TEntity>(),
             eventType,
             entity.Guid,
@@ -183,10 +183,10 @@ public sealed class EntityEvent : Entity
 /// Represents partition assignment details attached to an entity event.
 /// </summary>
 /// <remarks>
-/// The related <see cref="EntityEvent"/> stores the affected entity, actor, and occurrence time.
+/// The related <see cref="Events.Event"/> stores the affected entity, actor, and occurrence time.
 /// This row stores only the affected partition.
 /// </remarks>
-public sealed class EntityPartitionEvent : Entity
+public sealed class PartitionEvent : Entity
 {
     /// <summary>
     /// Initializes a new entity partition event.
@@ -194,12 +194,12 @@ public sealed class EntityPartitionEvent : Entity
     /// <remarks>
     /// Required by Entity Framework.
     /// </remarks>
-    private EntityPartitionEvent()
+    private PartitionEvent()
     {
     }
 
-    private EntityPartitionEvent(
-        EntityEvent entityEvent,
+    private PartitionEvent(
+        Event entityEvent,
         Guid partitionGuid)
     {
         Event = entityEvent;
@@ -210,7 +210,7 @@ public sealed class EntityPartitionEvent : Entity
     /// <summary>
     /// Creates a partition insertion detail and its related entity event.
     /// </summary>
-    public static EntityPartitionEvent InsertedIntoPartition<TEntity>(
+    public static PartitionEvent InsertedIntoPartition<TEntity>(
         TEntity entity,
         Partition partition,
         Guid actorGuid,
@@ -220,14 +220,14 @@ public sealed class EntityPartitionEvent : Entity
         ArgumentNullException.ThrowIfNull(partition);
 
         return new(
-            EntityEvent.InsertedIntoPartition(entity, actorGuid, occurredAt),
+            Event.InsertedIntoPartition(entity, actorGuid, occurredAt),
             partition.Guid);
     }
 
     /// <summary>
     /// Creates a partition removal detail and its related entity event.
     /// </summary>
-    public static EntityPartitionEvent RemovedFromPartition<TEntity>(
+    public static PartitionEvent RemovedFromPartition<TEntity>(
         TEntity entity,
         Partition partition,
         Guid actorGuid,
@@ -237,14 +237,14 @@ public sealed class EntityPartitionEvent : Entity
         ArgumentNullException.ThrowIfNull(partition);
 
         return new(
-            EntityEvent.RemovedFromPartition(entity, actorGuid, occurredAt),
+            Event.RemovedFromPartition(entity, actorGuid, occurredAt),
             partition.Guid);
     }
 
     /// <summary>
     /// Gets the related entity event.
     /// </summary>
-    public EntityEvent Event { get; private init; } = null!;
+    public Event Event { get; private init; } = null!;
 
     /// <summary>
     /// Gets the affected entity type.

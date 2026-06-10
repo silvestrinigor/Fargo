@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations;
 
-public sealed class EntityEventConfiguration : IEntityTypeConfiguration<EntityEvent>
+public sealed class EntityEventConfiguration : IEntityTypeConfiguration<Event>
 {
-    public void Configure(EntityTypeBuilder<EntityEvent> builder)
+    public void Configure(EntityTypeBuilder<Event> builder)
     {
         builder.ToTable("EntityEvents");
 

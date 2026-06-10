@@ -7,6 +7,7 @@ using Fargo.Core.Modifiables;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Core.Actors;
 using System.Collections.ObjectModel;
 
 namespace Fargo.Core.Partitions;
@@ -31,12 +32,16 @@ public interface IPartitioned
 /// <summary>
 /// Represents an entity that is associated with one or more partitions.
 /// </summary>
-public interface IPartitionedEntity
+public interface IPartitionedEntity : IEntity
 {
     /// <summary>
     /// Gets the partitions associated with the entity.
     /// </summary>
     IReadOnlyCollection<IPartitionEntity> Partitions { get; }
+
+    void AddPartition(Partition partition, Actor actor);
+
+    void RemovePartition(Partition partition, Actor actor);
 }
 
 /// <summary>

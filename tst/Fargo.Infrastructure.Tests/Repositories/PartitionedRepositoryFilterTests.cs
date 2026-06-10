@@ -269,7 +269,7 @@ public sealed class PartitionedRepositoryFilterTests
         string name,
         IReadOnlyCollection<Partition>? partitions = null)
     {
-        var article = Article.CreateArticle(new Name(name), CreateDomainActor());
+        var article = Article.NewArticle(new Name(name), CreateDomainActor());
 
         foreach (var partition in partitions ?? [])
         {

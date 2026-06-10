@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations;
 
-public sealed class EntityPartitionEventConfiguration : IEntityTypeConfiguration<EntityPartitionEvent>
+public sealed class EntityPartitionEventConfiguration : IEntityTypeConfiguration<PartitionEvent>
 {
-    public void Configure(EntityTypeBuilder<EntityPartitionEvent> builder)
+    public void Configure(EntityTypeBuilder<PartitionEvent> builder)
     {
         builder.ToTable("EntityPartitionEvents");
 
@@ -23,7 +23,7 @@ public sealed class EntityPartitionEventConfiguration : IEntityTypeConfiguration
         builder
             .HasOne(x => x.Event)
             .WithOne()
-            .HasForeignKey<EntityPartitionEvent>(x => x.Guid)
+            .HasForeignKey<PartitionEvent>(x => x.Guid)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(x => x.PartitionGuid);

@@ -10,11 +10,11 @@ public sealed class EntityEventTests
     [Fact]
     public void Constructor_Should_SetProperties()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
 
-        var entityEvent = EntityEvent.EntityCreated<Article>(
+        var entityEvent = Event.NewEntityCreatedEvent<Article>(
             article,
             actorGuid,
             occurredAt);
@@ -29,15 +29,15 @@ public sealed class EntityEventTests
     [Fact]
     public void Factory_Should_Throw_WhenRequiredArgumentsAreInvalid()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var occurredAt = DateTimeOffset.UtcNow;
 
-        Assert.Throws<ArgumentNullException>(() => EntityEvent.EntityCreated<Article>(
+        Assert.Throws<ArgumentNullException>(() => Event.NewEntityCreatedEvent<Article>(
             null!,
             Guid.NewGuid(),
             occurredAt));
 
-        Assert.Throws<ArgumentException>(() => EntityEvent.EntityCreated<Article>(
+        Assert.Throws<ArgumentException>(() => Event.NewEntityCreatedEvent<Article>(
             article,
             Guid.Empty,
             occurredAt));
@@ -46,12 +46,12 @@ public sealed class EntityEventTests
     [Fact]
     public void InsertedIntoPartition_Should_SetDetailsAndEventProperties()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
 
-        var entityPartitionEvent = EntityPartitionEvent.InsertedIntoPartition(
+        var entityPartitionEvent = PartitionEvent.InsertedIntoPartition(
             article,
             partition,
             actorGuid,
@@ -69,12 +69,12 @@ public sealed class EntityEventTests
     [Fact]
     public void RemovedFromPartition_Should_SetDetailsAndEventProperties()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var actorGuid = Guid.NewGuid();
         var occurredAt = DateTimeOffset.UtcNow;
 
-        var entityPartitionEvent = EntityPartitionEvent.RemovedFromPartition(
+        var entityPartitionEvent = PartitionEvent.RemovedFromPartition(
             article,
             partition,
             actorGuid,
@@ -92,23 +92,23 @@ public sealed class EntityEventTests
     [Fact]
     public void EntityPartitionEventFactories_Should_Throw_WhenRequiredArgumentsAreInvalid()
     {
-        var article = Article.CreateArticle(new Name("Article"), CreateDomainActor());
+        var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var occurredAt = DateTimeOffset.UtcNow;
 
-        Assert.Throws<ArgumentNullException>(() => EntityPartitionEvent.InsertedIntoPartition<Article>(
+        Assert.Throws<ArgumentNullException>(() => PartitionEvent.InsertedIntoPartition<Article>(
             null!,
             partition,
             Guid.NewGuid(),
             occurredAt));
 
-        Assert.Throws<ArgumentNullException>(() => EntityPartitionEvent.InsertedIntoPartition(
+        Assert.Throws<ArgumentNullException>(() => PartitionEvent.InsertedIntoPartition(
             article,
             null!,
             Guid.NewGuid(),
             occurredAt));
 
-        Assert.Throws<ArgumentException>(() => EntityPartitionEvent.InsertedIntoPartition(
+        Assert.Throws<ArgumentException>(() => PartitionEvent.InsertedIntoPartition(
             article,
             partition,
             Guid.Empty,

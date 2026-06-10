@@ -110,7 +110,7 @@ public sealed class ItemServiceTests
         => Item.CreateItem(CreateContainerArticle());
 
     private static Article CreateArticle()
-        => Article.CreateArticle(new Name("Test article"), CreateDomainActor());
+        => Article.NewArticle(new Name("Test article"), CreateDomainActor());
 
     private static Article CreateContainerArticle()
         => Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor());

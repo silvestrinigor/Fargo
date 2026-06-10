@@ -4,16 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Repositories;
 
-public sealed class EntityEventRepository(FargoDbContext context) : IEntityEventRepository
+public sealed class EntityEventRepository(FargoDbContext context) : IEventRepository
 {
-    private readonly DbSet<EntityEvent> entityEvents = context.EntityEvents;
+    private readonly DbSet<Event> entityEvents = context.EntityEvents;
 
-    public void Add(EntityEvent entityEvent) => entityEvents.Add(entityEvent);
+    public void Add(Event entityEvent) => entityEvents.Add(entityEvent);
 }
 
-public sealed class EntityPartitionEventRepository(FargoDbContext context) : IEntityPartitionEventRepository
+public sealed class EntityPartitionEventRepository(FargoDbContext context) : IPartitionEventRepository
 {
-    private readonly DbSet<EntityPartitionEvent> entityPartitionEvents = context.EntityPartitionEvents;
+    private readonly DbSet<PartitionEvent> entityPartitionEvents = context.EntityPartitionEvents;
 
-    public void Add(EntityPartitionEvent entityPartitionEvent) => entityPartitionEvents.Add(entityPartitionEvent);
+    public void Add(PartitionEvent entityPartitionEvent) => entityPartitionEvents.Add(entityPartitionEvent);
 }

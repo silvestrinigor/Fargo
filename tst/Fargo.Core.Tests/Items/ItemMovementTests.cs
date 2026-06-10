@@ -10,7 +10,7 @@ public sealed class ItemMovementTests
     [Fact]
     public void Moved_Should_SetMovementDetailsAndEventProperties()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         var fromParentGuid = Guid.NewGuid();
         var toParentGuid = Guid.NewGuid();
         var actorGuid = Guid.NewGuid();
@@ -37,7 +37,7 @@ public sealed class ItemMovementTests
     [Fact]
     public void Moved_Should_Throw_WhenRequiredArgumentsAreInvalid()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         var occurredAt = DateTimeOffset.UtcNow;
 
         Assert.Throws<ArgumentNullException>(() => ItemMovement.Moved(

@@ -26,8 +26,8 @@ public sealed class ItemCreateCommandHandler(
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ItemCreateCommandHandler> logger
@@ -55,7 +55,7 @@ public sealed class ItemCreateCommandHandler(
 
         itemRepository.Add(item);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Item>(item, actor.Guid));
+        entityEventRepository.Add(Event.NewEntityCreatedEvent<Item>(item, actor.Guid));
 
         if (create.Partitions is { Count: > 0 } partitions)
         {
@@ -65,7 +65,7 @@ public sealed class ItemCreateCommandHandler(
 
                 item.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     item,
                     partition,
                     actor.Guid));
@@ -76,7 +76,7 @@ public sealed class ItemCreateCommandHandler(
         {
             item.Deactivate(actor);
 
-            entityEventRepository.Add(EntityEvent.Deactivated<Item>(item, actor.Guid));
+            entityEventRepository.Add(Event.Deactivated<Item>(item, actor.Guid));
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
@@ -112,8 +112,8 @@ public sealed record ItemUpdateCommand(
 public sealed class ItemUpdateCommandHandler(
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     IItemMovementRepository itemMovementRepository,
     ItemService itemService,
     ICurrentAuthorizationContext currentAuthorizationContext,
@@ -188,7 +188,7 @@ public sealed class ItemUpdateCommandHandler(
 
                 item.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     item,
                     partition,
                     actor.Guid));
@@ -202,7 +202,7 @@ public sealed class ItemUpdateCommandHandler(
             {
                 item.RemovePartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.RemovedFromPartition(
                     item,
                     partition,
                     actor.Guid));
@@ -214,12 +214,12 @@ public sealed class ItemUpdateCommandHandler(
             if (isActive && !item.IsActive)
             {
                 item.Activate(actor);
-                entityEventRepository.Add(EntityEvent.Activated<Item>(item, actor.Guid));
+                entityEventRepository.Add(Event.Activated<Item>(item, actor.Guid));
             }
             else if (!isActive && item.IsActive)
             {
                 item.Deactivate(actor);
-                entityEventRepository.Add(EntityEvent.Deactivated<Item>(item, actor.Guid));
+                entityEventRepository.Add(Event.Deactivated<Item>(item, actor.Guid));
             }
         }
 
@@ -251,7 +251,7 @@ public sealed record ItemDeleteCommand(
 /// </summary>
 public sealed class ItemDeleteCommandHandler(
     IItemRepository itemRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ItemDeleteCommandHandler> logger
@@ -278,7 +278,7 @@ public sealed class ItemDeleteCommandHandler(
 
         itemRepository.Remove(item);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<Item>(item, actor.Guid));
+        entityEventRepository.Add(Event.EntityDeleted<Item>(item, actor.Guid));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

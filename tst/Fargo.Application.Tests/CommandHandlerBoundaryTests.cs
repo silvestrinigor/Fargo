@@ -25,7 +25,7 @@ public sealed class CommandHandlerBoundaryTests
     [Fact]
     public async Task ItemUpdate_Should_ApplyEndpointPayload_And_SaveOnce()
     {
-        var item = Item.CreateItem(Article.CreateArticle(new Name("Article"), CreateDomainActor()));
+        var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         var parent = Item.CreateItem(Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor()));
         var partition = Partition.CreatePartition(new Name("Partition"));
         var itemRepository = Substitute.For<IItemRepository>();
@@ -36,8 +36,8 @@ public sealed class CommandHandlerBoundaryTests
         itemRepository.GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);
         var partitionRepository = CreatePartitionRepository(partition);
-        var entityEventRepository = Substitute.For<IEntityEventRepository>();
-        var entityPartitionEventRepository = Substitute.For<IEntityPartitionEventRepository>();
+        var entityEventRepository = Substitute.For<IEventRepository>();
+        var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();
         var movementRepository = Substitute.For<IItemMovementRepository>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var handler = new ItemUpdateCommandHandler(
@@ -59,8 +59,8 @@ public sealed class CommandHandlerBoundaryTests
         Assert.Contains(item.Partitions, p => p.Guid == partition.Guid);
         Assert.False(item.IsActive);
         movementRepository.Received(1).Add(Arg.Any<ItemMovement>());
-        entityPartitionEventRepository.Received(1).Add(Arg.Any<EntityPartitionEvent>());
-        entityEventRepository.Received(1).Add(Arg.Is<EntityEvent>(entityEvent =>
+        entityPartitionEventRepository.Received(1).Add(Arg.Any<PartitionEvent>());
+        entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EventType == EventType.Deactivated));
         await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
@@ -78,7 +78,7 @@ public sealed class CommandHandlerBoundaryTests
         var handler = new PartitionCreateCommandHandler(
             new PartitionService(partitionRepository),
             partitionRepository,
-            Substitute.For<IEntityEventRepository>(),
+            Substitute.For<IEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.CreatePartition, ActionType.EditPartition)),
             unitOfWork,
             Substitute.For<ILogger<PartitionCreateCommandHandler>>());
@@ -108,8 +108,8 @@ public sealed class CommandHandlerBoundaryTests
             userRepository,
             Substitute.For<IPartitionRepository>(),
             Substitute.For<IUserGroupRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.CreateUser, ActionType.EditUser)),
             passwordHasher,
             unitOfWork,
@@ -139,8 +139,8 @@ public sealed class CommandHandlerBoundaryTests
             new UserGroupService(userGroupRepository),
             userGroupRepository,
             Substitute.For<IPartitionRepository>(),
-            Substitute.For<IEntityEventRepository>(),
-            Substitute.For<IEntityPartitionEventRepository>(),
+            Substitute.For<IEventRepository>(),
+            Substitute.For<IPartitionEventRepository>(),
             CreateCurrentAuthorizationContext(CreateActor(ActionType.EditUserGroup)),
             unitOfWork,
             Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());

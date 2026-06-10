@@ -25,8 +25,8 @@ public sealed class UserGroupCreateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<UserGroupCreateCommandHandler> logger
@@ -62,7 +62,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         userGroupRepository.Add(userGroup);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<UserGroup>(userGroup, actor.Guid));
+        entityEventRepository.Add(Event.NewEntityCreatedEvent<UserGroup>(userGroup, actor.Guid));
 
         if (create.Description is { } description)
         {
@@ -97,7 +97,7 @@ public sealed class UserGroupCreateCommandHandler(
 
                 userGroup.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     userGroup,
                     partition,
                     actor.Guid));
@@ -137,8 +137,8 @@ public sealed class UserGroupUpdateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<UserGroupUpdateCommandHandler> logger
@@ -220,7 +220,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     userGroup,
                     partition,
                     actor.Guid));
@@ -234,7 +234,7 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 userGroup.RemovePartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.RemovedFromPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.RemovedFromPartition(
                     userGroup,
                     partition,
                     actor.Guid));
@@ -246,12 +246,12 @@ public sealed class UserGroupUpdateCommandHandler(
             if (isActive && !userGroup.IsActive)
             {
                 userGroup.Activate(actor);
-                entityEventRepository.Add(EntityEvent.Activated<UserGroup>(userGroup, actor.Guid));
+                entityEventRepository.Add(Event.Activated<UserGroup>(userGroup, actor.Guid));
             }
             else if (!isActive && userGroup.IsActive)
             {
                 userGroup.Deactivate(actor);
-                entityEventRepository.Add(EntityEvent.Deactivated<UserGroup>(userGroup, actor.Guid));
+                entityEventRepository.Add(Event.Deactivated<UserGroup>(userGroup, actor.Guid));
             }
         }
 
@@ -283,7 +283,7 @@ public sealed record UserGroupDeleteCommand(
 /// </summary>
 public sealed class UserGroupDeleteCommandHandler(
     IUserGroupRepository userGroupRepository,
-    IEntityEventRepository entityEventRepository,
+    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<UserGroupDeleteCommandHandler> logger
@@ -310,7 +310,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
         userGroupRepository.Remove(userGroup);
 
-        entityEventRepository.Add(EntityEvent.EntityDeleted<UserGroup>(userGroup, actor.Guid));
+        entityEventRepository.Add(Event.EntityDeleted<UserGroup>(userGroup, actor.Guid));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

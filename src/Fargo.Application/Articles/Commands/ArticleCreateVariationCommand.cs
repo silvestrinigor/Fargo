@@ -33,8 +33,8 @@ public sealed record ArticleCreateVariationCommand(
 public sealed class ArticleCreateVariationCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IEntityEventRepository entityEventRepository,
-    IEntityPartitionEventRepository entityPartitionEventRepository,
+    IEventRepository entityEventRepository,
+    IPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
@@ -66,7 +66,7 @@ public sealed class ArticleCreateVariationCommandHandler(
 
         articleRepository.Add(article);
 
-        entityEventRepository.Add(EntityEvent.EntityCreated<Article>(article, actor.Guid));
+        entityEventRepository.Add(Event.NewEntityCreatedEvent<Article>(article, actor.Guid));
 
         if (command.Description is { } description)
         {
@@ -110,7 +110,7 @@ public sealed class ArticleCreateVariationCommandHandler(
 
                 article.AddPartition(partition, actor);
 
-                entityPartitionEventRepository.Add(EntityPartitionEvent.InsertedIntoPartition(
+                entityPartitionEventRepository.Add(PartitionEvent.InsertedIntoPartition(
                     article,
                     partition,
                     actor.Guid));
@@ -121,7 +121,7 @@ public sealed class ArticleCreateVariationCommandHandler(
         {
             article.Deactivate(actor);
 
-            entityEventRepository.Add(EntityEvent.Deactivated<Article>(article, actor.Guid));
+            entityEventRepository.Add(Event.Deactivated<Article>(article, actor.Guid));
         }
 
         await unitOfWork.SaveChanges(cancellationToken);
