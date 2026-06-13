@@ -12,6 +12,6 @@ public static class PartitionDtoMappings
         partition.Description,
         partition.ParentPartitionGuid,
         partition.IsActive,
-        partition.EditedByActorGuid);
+        partition.EditedByActorid);
 }
 

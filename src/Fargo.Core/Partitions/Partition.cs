@@ -7,7 +7,6 @@ using Fargo.Core.Modifiables;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Core.Actors;
 using System.Collections.ObjectModel;
 
 namespace Fargo.Core.Partitions;
@@ -22,9 +21,9 @@ namespace Fargo.Core.Partitions;
 /// partition-based access control (PBAC) model, meaning its visibility and
 /// mutability are governed by the actor's partition access set.
 /// </remarks>
-public interface IPartitionEntity : IEntity;
+public interface IPartition : IEntity;
 
-public interface IPartitioned
+public interface IPartitionedGuids : IEntity
 {
     IReadOnlyCollection<Guid> PartitionGuids { get; }
 }
@@ -32,16 +31,16 @@ public interface IPartitioned
 /// <summary>
 /// Represents an entity that is associated with one or more partitions.
 /// </summary>
-public interface IPartitionedEntity : IEntity
+public interface IPartitioned : IEntity
 {
     /// <summary>
     /// Gets the partitions associated with the entity.
     /// </summary>
-    IReadOnlyCollection<IPartitionEntity> Partitions { get; }
+    IReadOnlyCollection<IPartition> Partitions { get; }
 
-    void AddPartition(Partition partition, Actor actor);
+    void AddPartition(Partition partition);
 
-    void RemovePartition(Partition partition, Actor actor);
+    void RemovePartition(Partition partition);
 }
 
 /// <summary>
@@ -84,7 +83,7 @@ public interface IPartitionAccess
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModifiedType>, IPartitionEntity, IActivable
+public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModifiedType>, IPartition, IActivable
 {
     public static Partition CreatePartition(Name name, Description? description = null)
         => new(name, description);
@@ -398,7 +397,7 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
         ArgumentNullException.ThrowIfNull(actor);
 
         actor.ValidateHasPermission(ActionType.EditPartition);
-        actor.ValidateHasPartitionAccess(Guid);
+        actor.ValidateHasAccess(Guid);
     }
 
     public void ValidateCanDelete(Actor actor)
@@ -406,14 +405,14 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
         ArgumentNullException.ThrowIfNull(actor);
 
         actor.ValidateHasPermission(ActionType.DeletePartition);
-        actor.ValidateHasPartitionAccess(Guid);
+        actor.ValidateHasAccess(Guid);
     }
 
-    public Guid? EditedByActorGuid { get; private set; }
+    public Guid? EditedByActorid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByActorGuid = actorGuid;
+        EditedByActorid = actorGuid;
     }
 
     public PartitionModifiedType ModificationTypes { get; private set; }

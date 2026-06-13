@@ -43,7 +43,7 @@ public sealed class PartitionSingleQueryHandler(
 
         if (partition is not null)
         {
-            actor.ValidateHasPartitionAccess(partition.Guid);
+            actor.ValidateHasAccess(partition.Guid);
         }
 
         if (logger.IsEnabled(LogLevel.Debug))

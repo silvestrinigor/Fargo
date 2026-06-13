@@ -1,10 +1,10 @@
+using Fargo.Application.Activables.Functions;
 using Fargo.Application.Articles;
 using Fargo.Application.Articles.Functions;
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Application.Partitions.Functions;
 using Fargo.Application.Shared.Articles;
-using Fargo.Application.Activables.Functions;
 using Fargo.Core.Articles;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;

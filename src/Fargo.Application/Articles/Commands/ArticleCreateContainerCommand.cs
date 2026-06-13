@@ -8,8 +8,8 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
 using Microsoft.Extensions.Logging;
-using UnitsNet;
 using System.Drawing;
+using UnitsNet;
 
 namespace Fargo.Application.Articles.Commands;
 

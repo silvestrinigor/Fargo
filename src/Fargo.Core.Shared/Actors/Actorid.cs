@@ -15,8 +15,10 @@ public readonly struct ActorId :
         ActorType = type;
     }
 
+    private const string actorDistriminator = "actor";
+
     public override string ToString()
-        => $"{Guid}:{ActorType}";
+        => $"{actorDistriminator}:{Guid}:{ActorType}";
 
     public static ActorId Parse(string s, IFormatProvider? provider)
     {
@@ -42,18 +44,23 @@ public readonly struct ActorId :
 
         var parts = s.Split(':');
 
-        if (parts.Length != 2)
+        if (parts.Length != 3)
         {
             return false;
         }
 
-        if (!Guid.TryParse(parts[0], out var id))
+        if (!string.Equals(parts[0], actorDistriminator, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (!Guid.TryParse(parts[1], out var id))
         {
             return false;
         }
 
         if (!Enum.TryParse<ActorType>(
-            parts[1],
+            parts[2],
             true,
             out var type))
         {

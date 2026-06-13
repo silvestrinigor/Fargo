@@ -1,12 +1,12 @@
+using Fargo.Core.Actors;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
-using Fargo.Core.Actors;
 
 namespace Fargo.Application.Partitions.Functions;
 
 internal static class PartitionAddChildPartitionedEntityFunction
 {
-    internal static void PartitionedInsertIntoPartition(IPartitionedEntity partitioned, Partition partition, Actor actor, IPartitionEventRepository partitionEventRepository)
+    internal static void PartitionedInsertIntoPartition(IPartitioned partitioned, Partition partition, Actor actor, IPartitionEventRepository partitionEventRepository)
     {
         partitioned.AddPartition(partition, actor);
 

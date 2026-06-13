@@ -22,7 +22,7 @@ namespace Fargo.Core.Users;
 /// - Direct permissions and partition access
 /// - Permissions and partition access inherited from user groups
 /// </remarks>
-public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPartitionedEntity, IPartitionUser, IPartitioned, IPermissionUser, IActivable
+public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
 {
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
         => new(nameid, passwordHash);
@@ -558,7 +558,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
         {
@@ -597,7 +597,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
     public void RemovePartitionAccess(Guid partitionGuid, Actor actor)
     {
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partitionGuid);
+        actor.ValidateHasAccess(partitionGuid);
 
         var userPartition =
             partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
@@ -630,7 +630,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
     public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 
     public IReadOnlyCollection<Guid> PartitionGuids => [.. Partitions.Select(p => p.Guid)];
 
@@ -644,7 +644,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -667,7 +667,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (!Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -752,11 +752,11 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
         actor.ValidateHasPermission(ActionType.ChangeAnotherUserPassword);
     }
 
-    public Guid? EditedByActorGuid { get; private set; }
+    public Guid? EditedByActorid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByActorGuid = actorGuid;
+        EditedByActorid = actorGuid;
     }
 
     public UserModifiedType ModificationTypes { get; private set; }

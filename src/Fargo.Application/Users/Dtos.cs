@@ -19,5 +19,5 @@ public static class UserDtoMappings
         user.Partitions.Select(partition => partition.Guid).ToArray(),
         user.UserGroups.Select(group => group.Guid).ToArray(),
         user.IsActive,
-        user.EditedByActorGuid);
+        user.EditedByActorid);
 }

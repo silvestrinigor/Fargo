@@ -112,14 +112,14 @@ public sealed class Event : Entity
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IPartitionedEntity
+        where TEntity : IEntity, IPartitioned
         => Create(entity, EventType.InsertedIntoPartition, actorGuid, occurredAt);
 
     internal static Event RemovedFromPartition<TEntity>(
         TEntity entity,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IPartitionedEntity
+        where TEntity : IEntity, IPartitioned
         => Create(entity, EventType.RemovedFromPartition, actorGuid, occurredAt);
 
     private static Event Create<TEntity>(
@@ -215,7 +215,7 @@ public sealed class PartitionEvent : Entity
         Partition partition,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IPartitionedEntity
+        where TEntity : IEntity, IPartitioned
     {
         ArgumentNullException.ThrowIfNull(partition);
 
@@ -232,7 +232,7 @@ public sealed class PartitionEvent : Entity
         Partition partition,
         Guid actorGuid,
         DateTimeOffset? occurredAt = null)
-        where TEntity : IEntity, IPartitionedEntity
+        where TEntity : IEntity, IPartitioned
     {
         ArgumentNullException.ThrowIfNull(partition);
 

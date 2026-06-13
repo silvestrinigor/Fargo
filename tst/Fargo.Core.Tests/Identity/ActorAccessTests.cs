@@ -67,7 +67,7 @@ public sealed class ActorAccessTests
         var actor = CreateActor();
 
         var exception = Assert.Throws<UserPartitionAccessNotAuthorizedFargoDomainException>(
-            () => actor.ValidateHasPartitionAccess(partitionGuid));
+            () => actor.ValidateHasAccess(partitionGuid));
 
         Assert.Equal(actor.Guid, exception.UserGuid);
         Assert.Equal(partitionGuid, exception.PartitionGuid);

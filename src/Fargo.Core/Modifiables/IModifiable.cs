@@ -1,3 +1,5 @@
+using Fargo.Core.Shared.Actors;
+
 namespace Fargo.Core.Modifiables;
 
 /// <summary>
@@ -8,5 +10,5 @@ public interface IModifiable
     /// <summary>
     /// Gets the unique identifier of the actor that last modified the entity.
     /// </summary>
-    Guid? EditedByActorGuid { get; }
+    ActorId? EditedByActorid { get; }
 }

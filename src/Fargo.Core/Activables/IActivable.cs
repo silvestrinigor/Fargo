@@ -1,5 +1,4 @@
 using Fargo.Core.Entities;
-using Fargo.Core.Actors;
 
 namespace Fargo.Core.Activables;
 
@@ -13,11 +12,7 @@ namespace Fargo.Core.Activables;
 public interface IActivable : IEntity
 {
     /// <summary>
-    /// Gets a value indicating whether the entity is currently active.
+    /// Gets or sets the value indicating whether the entity is currently active.
     /// </summary>
-    bool IsActive { get; }
-
-    void Activate(Actor actor);
-
-    void Deactivate(Actor actor);
+    bool IsActive { get; set; }
 }

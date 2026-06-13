@@ -110,7 +110,7 @@ public class PartitionService(
         ArgumentNullException.ThrowIfNull(actor);
 
         memberPartition.ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(parentPartition.Guid);
+        actor.ValidateHasAccess(parentPartition.Guid);
 
         if (parentPartition.Guid == memberPartition.Guid)
         {

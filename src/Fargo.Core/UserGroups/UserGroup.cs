@@ -24,7 +24,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModifiedType>, IPartitionedEntity, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModifiedType>, IPartitioned, IPartitionUser, IPermissionUser, IActivable
 {
     public static UserGroup CreateUserGroup(Nameid nameid, Description? description = null)
         => new(nameid, description);
@@ -301,7 +301,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
     public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
@@ -348,7 +348,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
         {
@@ -387,7 +387,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
     public void RemovePartitionAccess(Guid partitionGuid, Actor actor)
     {
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partitionGuid);
+        actor.ValidateHasAccess(partitionGuid);
 
         var userGroupPartition =
             partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
@@ -413,7 +413,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -436,7 +436,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (!Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -489,11 +489,11 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByActorGuid { get; private set; }
+    public Guid? EditedByActorid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByActorGuid = actorGuid;
+        EditedByActorid = actorGuid;
     }
 
     public UserGroupModifiedType ModificationTypes { get; private set; }

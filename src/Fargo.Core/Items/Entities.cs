@@ -26,7 +26,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPartitionedEntity, IActivable
+public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPartitioned, IActivable
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
@@ -250,7 +250,7 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -273,7 +273,7 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(partition);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasPartitionAccess(partition.Guid);
+        actor.ValidateHasAccess(partition.Guid);
 
         if (!Partitions.Any(p => p.Guid == partition.Guid))
         {
@@ -287,7 +287,7 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
     }
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartitionEntity> IPartitionedEntity.Partitions => Partitions;
+    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 
     #endregion  Partition
 
@@ -309,11 +309,11 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
         actor.ValidateHasAccess(this);
     }
 
-    public Guid? EditedByActorGuid { get; private set; }
+    public Guid? EditedByActorid { get; private set; }
 
     public void MarkAsEditedBy(Guid actorGuid)
     {
-        EditedByActorGuid = actorGuid;
+        EditedByActorid = actorGuid;
     }
 
     public ItemModifiedType ModificationTypes { get; private set; }

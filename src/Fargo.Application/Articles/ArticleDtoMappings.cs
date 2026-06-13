@@ -36,6 +36,6 @@ public static class ArticleDtoMappings
             article.DataMatrix),
         article.Partitions.Select(partition => partition.Guid).ToArray(),
         article.IsActive,
-        article.EditedByActorGuid
+        article.EditedByActorid
     );
 }
