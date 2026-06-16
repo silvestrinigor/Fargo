@@ -1,13 +1,10 @@
-using Fargo.Application.Activables.Functions;
 using Fargo.Application.Articles;
-using Fargo.Application.Articles.Functions;
 using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
-using Fargo.Application.Partitions.Functions;
 using Fargo.Core.Articles;
-using Fargo.Core.Events;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
@@ -21,6 +18,7 @@ namespace Fargo.Application.Articles.Commands;
 public sealed record ArticleCreateDefaultCommand(
     Name Name,
     Description? Description = null,
+    ArticleType? ArticleType = null,
     TimeSpan? ShelfLife = null,
     Color? Color = null,
     Mass? Mass = null,
@@ -47,8 +45,6 @@ public sealed record ArticleCreateDefaultCommand(
 public sealed class ArticleCreateDefaultCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IEventRepository eventRepository,
-    IPartitionEventRepository entityPartitionEventRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
@@ -72,76 +68,56 @@ public sealed class ArticleCreateDefaultCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.CreateArticle);
 
-        var article = ArticleCreateFunction.CreateArticle(command.Name, actor, articleRepository, eventRepository);
+        var article = Article.NewArticle(command.Name);
 
-        if (command.Description is { } description)
-        {
-            article.Description = description;
-        }
+        article.Description = command.Description ?? Description.Empty;
 
-        if (command.ShelfLife is not null)
-        {
-            article.ShelfLife = command.ShelfLife;
-        }
+        article.ShelfLife = command.ShelfLife;
 
-        if (command.Color is not null)
-        {
-            article.Color = command.Color;
-        }
+        article.Color = command.Color;
 
-        if (command.Metrics is { } metrics)
-        {
-            article.SetMetrics(
-                metrics.Mass,
-                metrics.LengthX,
-                metrics.LengthY,
-                metrics.LengthZ);
-        }
+        article.SetMetrics(
+            command.Mass,
+            command.LengthX,
+            command.LengthY,
+            command.LengthZ
+        );
 
-        if (command.Barcodes is { } barcodes)
-        {
-            await articleService.SetEan13(barcodes.Ean13, article, actor, cancellationToken);
+        await articleService.SetEan13(command.Ean13, article, actor, cancellationToken);
 
-            await articleService.SetEan8(barcodes.Ean8, article, actor, cancellationToken);
+        await articleService.SetEan8(command.Ean8, article, actor, cancellationToken);
 
-            await articleService.SetUpcA(barcodes.UpcA, article, actor, cancellationToken);
+        await articleService.SetUpcA(command.UpcA, article, actor, cancellationToken);
 
-            await articleService.SetUpcE(barcodes.UpcE, article, actor, cancellationToken);
+        await articleService.SetUpcE(command.UpcE, article, actor, cancellationToken);
 
-            await articleService.SetCode128(barcodes.Code128, article, actor, cancellationToken);
+        await articleService.SetCode128(barcodes.Code128, article, actor, cancellationToken);
 
-            await articleService.SetCode39(barcodes.Code39, article, actor, cancellationToken);
+        await articleService.SetCode39(barcodes.Code39, article, actor, cancellationToken);
 
-            await articleService.SetItf14(barcodes.Itf14, article, actor, cancellationToken);
+        await articleService.SetItf14(barcodes.Itf14, article, actor, cancellationToken);
 
-            await articleService.SetGs1128(barcodes.Gs1128, article, actor, cancellationToken);
+        await articleService.SetGs1128(barcodes.Gs1128, article, actor, cancellationToken);
 
-            await articleService.SetQrCode(barcodes.QrCode, article, actor, cancellationToken);
+        await articleService.SetQrCode(barcodes.QrCode, article, actor, cancellationToken);
 
-            await articleService.SetDataMatrix(barcodes.DataMatrix, article, actor, cancellationToken);
-        }
+        await articleService.SetDataMatrix(barcodes.DataMatrix, article, actor, cancellationToken);
 
         if (command.Partitions is { Count: > 0 } partitions)
         {
-            foreach (var partitionGuid in part
-itions.Distinct())
+            foreach (var partitionGuid in partitions.Distinct())
             {
                 var partition = await partitionRepository.GetFoundByGuid(partitionGuid, cancellationToken);
 
                 actor.ThrowIfAccessNotAuthorized(partition);
 
-                PartitionAddChildPartitionedEntityFunction.PartitionedInsertIntoPartition(
-                    article,
-                    partition,
-                    actor,
-                    entityPartitionEventRepository);
+                article.AddPartition(partition);
             }
         }
 
-        if (command.IsActive is not null && article.IsActive != command.IsActive)
-        {
-            ActivableActivateFunction.ActivateEntity(article, command.IsActive.Value, actor, eventRepository);
-        }
+        article.IsActive = command.IsActive ?? true;
+
+        articleRepository.Add(article);
 
         await unitOfWork.SaveChanges(cancellationToken);
 
