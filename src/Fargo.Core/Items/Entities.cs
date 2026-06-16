@@ -42,8 +42,8 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(article);
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.CreateItem);
-        actor.ValidateHasAccess(article);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateItem);
+        actor.ThrowIfAccessNotAuthorized(article);
         article.ValidateIsActive();
 
         var item = new Item(article, productionDate);
@@ -59,8 +59,8 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(article);
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.CreateItem);
-        actor.ValidateHasAccess(article);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateItem);
+        actor.ThrowIfAccessNotAuthorized(article);
         article.ValidateIsActive();
 
         var item = new Item(article, productionDate)
@@ -297,16 +297,16 @@ public class Item : Entity, IModifiable, IModifiableTypes<ItemModifiedType>, IPa
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.EditItem);
-        actor.ValidateHasAccess(this);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.EditItem);
+        actor.ThrowIfAccessNotAuthorized(this);
     }
 
     public void ValidateCanDelete(Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.DeleteItem);
-        actor.ValidateHasAccess(this);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteItem);
+        actor.ThrowIfAccessNotAuthorized(this);
     }
 
     public Guid? EditedByActorid { get; private set; }
@@ -454,7 +454,7 @@ public sealed class ItemMovement : Entity
     /// <summary>
     /// Gets the actor unique identifier that performed the movement.
     /// </summary>
-    public Guid ActorGuid => Event.ActorGuid;
+    public Guid ActorGuid => Event.ActorId;
 
     /// <summary>
     /// Gets the date and time when the movement occurred.

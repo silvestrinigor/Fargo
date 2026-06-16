@@ -97,7 +97,7 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
     public static Partition CreatePartition(Name name, Actor actor, Description? description = null)
     {
         ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreatePartition);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreatePartition);
 
         var partition = new Partition(name, description);
 
@@ -110,7 +110,7 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
     public static Partition CreatePartition(Guid guid, Name name, Actor actor, Description? description = null)
     {
         ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreatePartition);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreatePartition);
 
         var partition = new Partition(name, description)
         {
@@ -396,7 +396,7 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.EditPartition);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.EditPartition);
         actor.ValidateHasAccess(Guid);
     }
 
@@ -404,7 +404,7 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.DeletePartition);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.DeletePartition);
         actor.ValidateHasAccess(Guid);
     }
 

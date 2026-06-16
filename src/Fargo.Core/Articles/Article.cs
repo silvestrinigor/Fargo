@@ -256,37 +256,62 @@ public class Article : Entity, IActivable, IPartitioned
     {
     }
 
-    public Article(Name name)
+    internal Article(Name name)
     {
         Name = name;
         ArticleType = ArticleType.Default;
     }
 
-    public Article(Name name, Article fromArticle)
+    internal Article(Name name, ArticleVariation variation)
         : this(name)
     {
-        Variation = new ArticleVariation(fromArticle);
+        Variation = variation;
         ArticleType = ArticleType.Variation;
     }
 
-    public Article(Name name, Article fromArticle, Scalar quantity)
+    internal Article(Name name, ArticlePack pack)
         : this(name)
     {
-        Pack = new ArticlePack(fromArticle, quantity);
+        Pack = pack;
         ArticleType = ArticleType.Pack;
     }
 
-    public Article(Name name, IReadOnlyCollection<ArticleKitComponent> components)
+    internal Article(Name name, ArticleKit kit)
         : this(name)
     {
-        Kit = new ArticleKit(components);
+        Kit = kit;
         ArticleType = ArticleType.Kit;
     }
 
-    public Article(Name name, ArticleContainer container)
+    internal Article(Name name, ArticleContainer container)
         : this(name)
     {
         Container = container;
         ArticleType = ArticleType.Container;
+    }
+
+    public static Article NewArticle(Name name)
+    {
+        return new Article(name);
+    }
+
+    public static Article NewArticleVariation(Name name, Article fromArticle)
+    {
+        return new Article(name, new ArticleVariation(fromArticle));
+    }
+
+    public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
+    {
+        return new Article(name, new ArticlePack(fromArticle, quantity));
+    }
+
+    public static Article NewArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> kitComponents)
+    {
+        return new Article(name, new ArticleKit(kitComponents));
+    }
+
+    public static Article NewArticleContainer(Name name)
+    {
+        return new Article(name, new ArticleContainer(null));
     }
 }

@@ -17,7 +17,7 @@ public sealed class EntityPartitionEventConfiguration : IEntityTypeConfiguration
 
         builder.Ignore(x => x.EntityType);
         builder.Ignore(x => x.EntityGuid);
-        builder.Ignore(x => x.ActorGuid);
+        builder.Ignore(x => x.ActorId);
         builder.Ignore(x => x.OccurredAt);
 
         builder

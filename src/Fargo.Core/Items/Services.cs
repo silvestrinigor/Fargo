@@ -30,7 +30,7 @@ public sealed class ItemService(IItemRepository itemRepository)
         ArgumentNullException.ThrowIfNull(actor);
 
         memberItem.ValidateCanEdit(actor);
-        actor.ValidateHasAccess(parentContainerItem);
+        actor.ThrowIfAccessNotAuthorized(parentContainerItem);
 
         if (parentContainerItem.Guid == memberItem.Guid)
         {

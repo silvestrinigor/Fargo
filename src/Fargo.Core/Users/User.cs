@@ -36,7 +36,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreateUser);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUser);
 
         var user = new User(nameid, passwordHash);
 
@@ -49,7 +49,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
     public static User CreateUser(Guid guid, Nameid nameid, PasswordHash passwordHash, Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreateUser);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUser);
 
         var user = new User(nameid, passwordHash)
         {
@@ -690,7 +690,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(userGroup);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasAccess(userGroup);
+        actor.ThrowIfAccessNotAuthorized(userGroup);
 
         if (UserGroups.Any(g => g.Guid == userGroup.Guid))
         {
@@ -713,7 +713,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
         ArgumentNullException.ThrowIfNull(userGroup);
 
         ValidateCanEdit(actor);
-        actor.ValidateHasAccess(userGroup);
+        actor.ThrowIfAccessNotAuthorized(userGroup);
 
         if (!UserGroups.Any(g => g.Guid == userGroup.Guid))
         {
@@ -734,7 +734,7 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.EditUser);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.EditUser);
         actor.ValidateHasAccess(this);
     }
 
@@ -742,14 +742,14 @@ public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPa
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.DeleteUser);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteUser);
         actor.ValidateHasAccess(this);
     }
 
     public void ValidateCanChangePassword(Actor actor)
     {
         ValidateCanEdit(actor);
-        actor.ValidateHasPermission(ActionType.ChangeAnotherUserPassword);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.ChangeAnotherUserPassword);
     }
 
     public Guid? EditedByActorid { get; private set; }

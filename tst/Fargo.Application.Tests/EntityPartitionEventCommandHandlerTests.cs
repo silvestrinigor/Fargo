@@ -54,7 +54,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             entityPartitionEvent.EntityType == EntityType.Article &&
             entityPartitionEvent.EntityGuid == article.Guid &&
             entityPartitionEvent.PartitionGuid == partition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -88,13 +88,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             entityPartitionEvent.EntityType == EntityType.Item &&
             entityPartitionEvent.EntityGuid == item.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.Item &&
             entityPartitionEvent.EntityGuid == item.Guid &&
             entityPartitionEvent.PartitionGuid == oldPartition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -132,13 +132,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             entityPartitionEvent.EntityType == EntityType.User &&
             entityPartitionEvent.EntityGuid == user.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.User &&
             entityPartitionEvent.EntityGuid == user.Guid &&
             entityPartitionEvent.PartitionGuid == oldPartition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -173,13 +173,13 @@ public sealed class EntityPartitionEventCommandHandlerTests
             entityPartitionEvent.EntityType == EntityType.UserGroup &&
             entityPartitionEvent.EntityGuid == userGroup.Guid &&
             entityPartitionEvent.PartitionGuid == newPartition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
         entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.RemovedFromPartition &&
             entityPartitionEvent.EntityType == EntityType.UserGroup &&
             entityPartitionEvent.EntityGuid == userGroup.Guid &&
             entityPartitionEvent.PartitionGuid == oldPartition.Guid &&
-            entityPartitionEvent.ActorGuid == actor.ActorGuid));
+            entityPartitionEvent.ActorId == actor.ActorGuid));
     }
 
     private static IPartitionRepository CreatePartitionRepository(params Partition[] partitions)

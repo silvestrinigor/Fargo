@@ -25,7 +25,7 @@ public sealed class ItemMovementTests
 
         Assert.Equal(movement.Event.Guid, movement.Guid);
         Assert.Equal(EntityType.Item, movement.Event.EntityType);
-        Assert.Equal(EventType.Moved, movement.Event.EventType);
+        Assert.Equal(EventType.ItemMoved, movement.Event.EventType);
         Assert.Equal(item.Guid, movement.Event.EntityGuid);
         Assert.Equal(item.Guid, movement.ItemGuid);
         Assert.Equal(fromParentGuid, movement.FromParentContainerGuid);

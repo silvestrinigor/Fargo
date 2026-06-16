@@ -20,9 +20,9 @@ public sealed class EntityEventTests
             occurredAt);
 
         Assert.Equal(EntityType.Article, entityEvent.EntityType);
-        Assert.Equal(EventType.Created, entityEvent.EventType);
+        Assert.Equal(EventType.EntityCreated, entityEvent.EventType);
         Assert.Equal(article.Guid, entityEvent.EntityGuid);
-        Assert.Equal(actorGuid, entityEvent.ActorGuid);
+        Assert.Equal(actorGuid, entityEvent.ActorId);
         Assert.Equal(occurredAt, entityEvent.OccurredAt);
     }
 
@@ -62,7 +62,7 @@ public sealed class EntityEventTests
         Assert.Equal(EventType.InsertedIntoPartition, entityPartitionEvent.Event.EventType);
         Assert.Equal(article.Guid, entityPartitionEvent.EntityGuid);
         Assert.Equal(partition.Guid, entityPartitionEvent.PartitionGuid);
-        Assert.Equal(actorGuid, entityPartitionEvent.ActorGuid);
+        Assert.Equal(actorGuid, entityPartitionEvent.ActorId);
         Assert.Equal(occurredAt, entityPartitionEvent.OccurredAt);
     }
 
@@ -85,7 +85,7 @@ public sealed class EntityEventTests
         Assert.Equal(EventType.RemovedFromPartition, entityPartitionEvent.Event.EventType);
         Assert.Equal(article.Guid, entityPartitionEvent.EntityGuid);
         Assert.Equal(partition.Guid, entityPartitionEvent.PartitionGuid);
-        Assert.Equal(actorGuid, entityPartitionEvent.ActorGuid);
+        Assert.Equal(actorGuid, entityPartitionEvent.ActorId);
         Assert.Equal(occurredAt, entityPartitionEvent.OccurredAt);
     }
 

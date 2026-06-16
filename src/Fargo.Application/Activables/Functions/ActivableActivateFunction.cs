@@ -6,11 +6,11 @@ namespace Fargo.Application.Activables.Functions;
 
 internal static class ActivableActivateFunction
 {
-    internal static void ActivateEntity(IActivable activable, Actor actor, IEventRepository eventRepository)
+    internal static void ActivateEntity(IActivable activable, bool isActive, Actor actor, IEventRepository eventRepository)
     {
-        activable.Activate(actor);
+        activable.IsActive = isActive;
 
-        var activated = Event.Activated(activable, actor.Guid);
+        var activated = Event.Activated(activable, actor.ActorId);
 
         eventRepository.Add(activated);
     }

@@ -61,7 +61,7 @@ public sealed class CommandHandlerBoundaryTests
         movementRepository.Received(1).Add(Arg.Any<ItemMovement>());
         entityPartitionEventRepository.Received(1).Add(Arg.Any<PartitionEvent>());
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
-            entityEvent.EventType == EventType.Deactivated));
+            entityEvent.EventType == EventType.EntityDeactivated));
         await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
     }
 

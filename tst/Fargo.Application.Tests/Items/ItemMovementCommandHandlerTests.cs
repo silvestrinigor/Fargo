@@ -41,7 +41,7 @@ public sealed class ItemMovementCommandHandlerTests
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
             movement.Event.EntityType == EntityType.Item &&
-            movement.Event.EventType == EventType.Moved &&
+            movement.Event.EventType == EventType.ItemMoved &&
             movement.ItemGuid == item.Guid &&
             movement.FromParentContainerGuid == null &&
             movement.ToParentContainerGuid == parent.Guid &&
@@ -108,7 +108,7 @@ public sealed class ItemMovementCommandHandlerTests
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
         movementRepository.Received(1).Add(Arg.Is<ItemMovement>(movement =>
             movement.Event.EntityType == EntityType.Item &&
-            movement.Event.EventType == EventType.Moved &&
+            movement.Event.EventType == EventType.ItemMoved &&
             movement.ItemGuid == item.Guid &&
             movement.FromParentContainerGuid == parent.Guid &&
             movement.ToParentContainerGuid == null &&

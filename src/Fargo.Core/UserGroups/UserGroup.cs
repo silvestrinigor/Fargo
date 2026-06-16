@@ -38,7 +38,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
     public static UserGroup CreateUserGroup(Nameid nameid, Actor actor, Description? description = null)
     {
         ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreateUserGroup);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUserGroup);
 
         var userGroup = new UserGroup(nameid, description);
 
@@ -51,7 +51,7 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
     public static UserGroup CreateUserGroup(Guid guid, Nameid nameid, Actor actor, Description? description = null)
     {
         ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreateUserGroup);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUserGroup);
 
         var userGroup = new UserGroup(nameid, description)
         {
@@ -477,16 +477,16 @@ public class UserGroup : Entity, IModifiable, IModifiableTypes<UserGroupModified
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.EditUserGroup);
-        actor.ValidateHasAccess(this);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.EditUserGroup);
+        actor.ThrowIfAccessNotAuthorized(this);
     }
 
     public void ValidateCanDelete(Actor actor)
     {
         ArgumentNullException.ThrowIfNull(actor);
 
-        actor.ValidateHasPermission(ActionType.DeleteUserGroup);
-        actor.ValidateHasAccess(this);
+        actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteUserGroup);
+        actor.ThrowIfAccessNotAuthorized(this);
     }
 
     public Guid? EditedByActorid { get; private set; }

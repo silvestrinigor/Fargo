@@ -15,12 +15,12 @@ public sealed class EntityEventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(x => x.EntityType).IsRequired();
         builder.Property(x => x.EventType).IsRequired();
         builder.Property(x => x.EntityGuid).IsRequired();
-        builder.Property(x => x.ActorGuid).IsRequired();
+        builder.Property(x => x.ActorId).IsRequired();
         builder.Property(x => x.OccurredAt).IsRequired();
 
         builder.HasIndex(x => new { x.EntityGuid, x.OccurredAt });
         builder.HasIndex(x => x.EntityType);
         builder.HasIndex(x => x.EventType);
-        builder.HasIndex(x => x.ActorGuid);
+        builder.HasIndex(x => x.ActorId);
     }
 }

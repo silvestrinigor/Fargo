@@ -8,12 +8,12 @@ internal static class PartitionAddChildPartitionedEntityFunction
 {
     internal static void PartitionedInsertIntoPartition(IPartitioned partitioned, Partition partition, Actor actor, IPartitionEventRepository partitionEventRepository)
     {
-        partitioned.AddPartition(partition, actor);
+        partitioned.AddPartition(partition);
 
         var insertedIntoPartitionEvent = PartitionEvent.InsertedIntoPartition(
             partitioned,
             partition,
-            actor.Guid);
+            actor.ActorId);
 
         partitionEventRepository.Add(insertedIntoPartitionEvent);
     }

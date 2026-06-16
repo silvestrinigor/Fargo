@@ -49,7 +49,6 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         where TBarcode : struct, IEquatable<TBarcode>
     {
         ArgumentNullException.ThrowIfNull(article);
-        article.ValidateCanEdit(actor);
 
         if (EqualityComparer<TBarcode?>.Default.Equals(getter(article), value))
         {

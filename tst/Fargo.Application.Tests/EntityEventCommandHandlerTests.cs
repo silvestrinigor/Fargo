@@ -37,9 +37,9 @@ public sealed class EntityEventCommandHandlerTests
 
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
-            entityEvent.EventType == EventType.Created &&
+            entityEvent.EventType == EventType.EntityCreated &&
             entityEvent.EntityGuid == articleGuid &&
-            entityEvent.ActorGuid == actor.ActorGuid));
+            entityEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -63,9 +63,9 @@ public sealed class EntityEventCommandHandlerTests
 
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
-            entityEvent.EventType == EventType.Deactivated &&
+            entityEvent.EventType == EventType.EntityDeactivated &&
             entityEvent.EntityGuid == article.Guid &&
-            entityEvent.ActorGuid == actor.ActorGuid));
+            entityEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -108,9 +108,9 @@ public sealed class EntityEventCommandHandlerTests
 
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Item &&
-            entityEvent.EventType == EventType.Deleted &&
+            entityEvent.EventType == EventType.EntityDeleted &&
             entityEvent.EntityGuid == item.Guid &&
-            entityEvent.ActorGuid == actor.ActorGuid));
+            entityEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -163,9 +163,9 @@ public sealed class EntityEventCommandHandlerTests
         Assert.Equal(ItemModifiedType.Deactivated, item.ModificationTypes);
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Item &&
-            entityEvent.EventType == EventType.Deactivated &&
+            entityEvent.EventType == EventType.EntityDeactivated &&
             entityEvent.EntityGuid == item.Guid &&
-            entityEvent.ActorGuid == actor.ActorGuid));
+            entityEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
@@ -194,9 +194,9 @@ public sealed class EntityEventCommandHandlerTests
         Assert.Equal(ItemModifiedType.Activated, item.ModificationTypes);
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Item &&
-            entityEvent.EventType == EventType.Activated &&
+            entityEvent.EventType == EventType.EntityActivated &&
             entityEvent.EntityGuid == item.Guid &&
-            entityEvent.ActorGuid == actor.ActorGuid));
+            entityEvent.ActorId == actor.ActorGuid));
     }
 
     [Fact]
