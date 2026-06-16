@@ -46,7 +46,7 @@ public sealed class CommandHandlerArchitectureTests
     {
         Type[] commandTypes =
         [
-            typeof(ArticleCreateDefaultCommand),
+            typeof(ArticleCreateCommand),
             typeof(ArticleCreateVariationCommand),
             typeof(ArticleCreatePackCommand),
             typeof(ArticleCreateKitCommand),

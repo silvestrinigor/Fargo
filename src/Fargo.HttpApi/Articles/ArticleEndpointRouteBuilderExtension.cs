@@ -158,7 +158,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Ok<Guid>> CreateArticle(
         ArticleCreateDto request,
-        ICommandHandler<ArticleCreateDefaultCommand, Guid> defaultHandler,
+        ICommandHandler<ArticleCreateCommand, Guid> defaultHandler,
         ICommandHandler<ArticleCreateVariationCommand, Guid> variationHandler,
         ICommandHandler<ArticleCreatePackCommand, Guid> packHandler,
         ICommandHandler<ArticleCreateKitCommand, Guid> kitHandler,
@@ -190,7 +190,7 @@ public static class ArticleEndpointRouteBuilderExtension
         return TypedResults.Ok(response);
     }
 
-    internal static ArticleCreateDefaultCommand CreateDefaultCommand(ArticleCreateDto request)
+    internal static ArticleCreateCommand CreateDefaultCommand(ArticleCreateDto request)
     {
         RejectPayload(
             request.Variation is not null,

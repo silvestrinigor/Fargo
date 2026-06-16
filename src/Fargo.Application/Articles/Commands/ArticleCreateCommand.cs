@@ -15,7 +15,7 @@ namespace Fargo.Application.Articles.Commands;
 /// <summary>
 /// Command used to create a article.
 /// </summary>
-public sealed record ArticleCreateDefaultCommand(
+public sealed record ArticleCreateCommand(
     Name Name,
     Description? Description = null,
     ArticleType? ArticleType = null,
@@ -42,17 +42,17 @@ public sealed record ArticleCreateDefaultCommand(
 /// <summary>
 /// Handles article creation.
 /// </summary>
-public sealed class ArticleCreateDefaultCommandHandler(
+public sealed class ArticleCreateCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     ArticleService articleService,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
-    ILogger<ArticleCreateDefaultCommandHandler> logger
-) : ICommandHandler<ArticleCreateDefaultCommand, Guid>
+    ILogger<ArticleCreateCommandHandler> logger
+) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     public async Task<Guid> Handle(
-        ArticleCreateDefaultCommand command,
+        ArticleCreateCommand command,
         CancellationToken cancellationToken = default)
     {
         var authorizationContext = await currentAuthorizationContext.GetAsync(cancellationToken);

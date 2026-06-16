@@ -21,7 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application;
 
-public static class FargoApplicationDependencyInjection
+public static class FargoApplicationDependencyInjectionExtension
 {
     extension(IServiceCollection services)
     {
@@ -33,8 +33,7 @@ public static class FargoApplicationDependencyInjection
             .AddFargoUserApplication()
             .AddFargoItemApplication()
             .AddFargoIdentityApplication()
-            .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>()
-            .AddScoped<ICommandDispatcher, CommandDispatcher>();
+            .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
         private IServiceCollection AddFargoDomain() => services
             .AddScoped<ArticleService>()
@@ -71,11 +70,7 @@ public static class FargoApplicationDependencyInjection
             .AddScoped<IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>, UserGroupsQueryHandler>();
 
         private IServiceCollection AddFargoArticleApplication() => services
-            .AddScoped<ICommandHandler<ArticleCreateDefaultCommand, Guid>, ArticleCreateDefaultCommandHandler>()
-            .AddScoped<ICommandHandler<ArticleCreateVariationCommand, Guid>, ArticleCreateVariationCommandHandler>()
-            .AddScoped<ICommandHandler<ArticleCreatePackCommand, Guid>, ArticleCreatePackCommandHandler>()
-            .AddScoped<ICommandHandler<ArticleCreateKitCommand, Guid>, ArticleCreateKitCommandHandler>()
-            .AddScoped<ICommandHandler<ArticleCreateContainerCommand, Guid>, ArticleCreateContainerCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
             .AddScoped<ICommandHandler<ArticlePatchCommand>, ArticlePatchCommandHandler>()
             .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()

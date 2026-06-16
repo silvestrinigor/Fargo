@@ -1,6 +1,5 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Articles;
-using Fargo.Core.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles.Commands;
@@ -20,7 +19,6 @@ public sealed record ArticleDeleteCommand(
 /// </summary>
 public sealed class ArticleDeleteCommandHandler(
     IArticleRepository articleRepository,
-    IEventRepository entityEventRepository,
     ICurrentAuthorizationContext currentAuthorizationContext,
     IUnitOfWork unitOfWork,
     ILogger<ArticleDeleteCommandHandler> logger
@@ -58,8 +56,6 @@ public sealed class ArticleDeleteCommandHandler(
         }
 
         articleRepository.Remove(article);
-
-        entityEventRepository.Add(Event.EntityDeleted(article, actor.ActorId));
 
         await unitOfWork.SaveChanges(cancellationToken);
 

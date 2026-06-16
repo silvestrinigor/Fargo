@@ -60,38 +60,3 @@ public interface ICommandHandler<in TCommand, TResponse>
         CancellationToken cancellationToken = default
     );
 }
-
-public interface ICommandDispatcher
-{
-    Task Dispatch<TCommand>(
-        TCommand command,
-        CancellationToken cancellationToken = default)
-        where TCommand : ICommand;
-
-    Task<TResponse> Dispatch<TCommand, TResponse>(
-        TCommand command,
-        CancellationToken cancellationToken = default)
-        where TCommand : ICommand<TResponse>;
-
-    Task<object?> Dispatch(
-        ICommand command,
-        CancellationToken cancellationToken = default);
-}
-
-public interface ICommandBehavior<TCommand>
-    where TCommand : ICommand
-{
-    Task Handle(
-        TCommand command,
-        Func<CancellationToken, Task> next,
-        CancellationToken cancellationToken = default);
-}
-
-public interface ICommandBehavior<TCommand, TResponse>
-    where TCommand : ICommand<TResponse>
-{
-    Task<TResponse> Handle(
-        TCommand command,
-        Func<CancellationToken, Task<TResponse>> next,
-        CancellationToken cancellationToken = default);
-}

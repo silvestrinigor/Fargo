@@ -30,9 +30,9 @@ public sealed class EntityEventCommandHandlerTests
             new ArticleService(articleRepository),
             CreateCurrentAuthorizationContext(actor),
             Substitute.For<IUnitOfWork>(),
-            Substitute.For<ILogger<ArticleCreateDefaultCommandHandler>>());
+            Substitute.For<ILogger<ArticleCreateCommandHandler>>());
 
-        var articleGuid = await handler.Handle(new ArticleCreateDefaultCommand(
+        var articleGuid = await handler.Handle(new ArticleCreateCommand(
             new Name("Article")));
 
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
