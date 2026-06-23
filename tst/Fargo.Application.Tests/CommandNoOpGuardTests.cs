@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Shared.Items;
 using Fargo.Application.Shared.UserGroups;
@@ -44,7 +43,7 @@ public sealed class CommandNoOpGuardTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([partition.Guid])));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([partition.Guid])));
 
         await partitionRepository.DidNotReceiveWithAnyArgs()
             .GetByGuid(default, default);
@@ -73,7 +72,7 @@ public sealed class CommandNoOpGuardTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserUpdateCommandHandler>>());
 
-        await handler.Handle(new UserUpdateCommand(
+        await handler.HandleAsync(new UserUpdateCommand(
             user.Guid,
             new UserUpdateDto(Permissions: [new UserPermissionUpdateDto(ActionType.EditUser)])));
 
@@ -102,7 +101,7 @@ public sealed class CommandNoOpGuardTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());
 
-        await handler.Handle(new UserGroupUpdateCommand(
+        await handler.HandleAsync(new UserGroupUpdateCommand(
             userGroup.Guid,
             new UserGroupUpdateDto(null, null, null, null, [partition.Guid])));
 

@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Shared.Partitions;
 using Fargo.Core.Events;
 using Fargo.Core.Partitions;
@@ -27,7 +26,7 @@ public sealed class PartitionCreateCommandHandler(
     ILogger<PartitionCreateCommandHandler> logger
 ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
-    public async Task<Guid> Handle(
+    public async Task<Guid> HandleAsync(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -64,7 +63,7 @@ public sealed class PartitionCreateCommandHandler(
                 cancellationToken);
         }
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -102,7 +101,7 @@ public sealed class PartitionUpdateCommandHandler(
     ILogger<PartitionUpdateCommandHandler> logger
 ) : ICommandHandler<PartitionUpdateCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         PartitionUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -158,7 +157,7 @@ public sealed class PartitionUpdateCommandHandler(
             }
         }
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -193,7 +192,7 @@ public sealed class PartitionDeleteCommandHandler(
     ILogger<PartitionDeleteCommandHandler> logger
 ) : ICommandHandler<PartitionDeleteCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -214,7 +213,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         entityEventRepository.Add(Event.EntityDeleted(partition, actor.Guid));
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {

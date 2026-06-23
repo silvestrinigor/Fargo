@@ -57,7 +57,7 @@ public static class UserEndpointRouteBuilderExtension
     {
         var query = new UserSingleQuery(userGuid, temporalAsOf);
 
-        var response = await handler.Handle(query, cancellationToken);
+        var response = await handler.HandleAsync(query, cancellationToken);
 
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
@@ -100,7 +100,7 @@ public static class UserEndpointRouteBuilderExtension
             notChildOfAnyPartition
         );
 
-        var response = await handler.Handle(query, cancellationToken);
+        var response = await handler.HandleAsync(query, cancellationToken);
 
         if (response.Count == 0)
         {
@@ -130,7 +130,7 @@ public static class UserEndpointRouteBuilderExtension
         ICommandHandler<UserCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new UserCreateCommand(request), cancellationToken);
+        var response = await handler.HandleAsync(new UserCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -156,7 +156,7 @@ public static class UserEndpointRouteBuilderExtension
         ICommandHandler<UserUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserUpdateCommand(userGuid, request), cancellationToken);
+        await handler.HandleAsync(new UserUpdateCommand(userGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -181,7 +181,7 @@ public static class UserEndpointRouteBuilderExtension
         ICommandHandler<UserDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserDeleteCommand(userGuid), cancellationToken);
+        await handler.HandleAsync(new UserDeleteCommand(userGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

@@ -4,5 +4,5 @@ namespace Fargo.Core.Actors;
 
 public interface IActorQueryService
 {
-    Task<Actor?> GetActorByActorId(ActorId actorId, CancellationToken cancellationToken = default);
+    Task<Actor?> GetActorByActorIdAsync(ActorId actorId, CancellationToken cancellationToken = default);
 }

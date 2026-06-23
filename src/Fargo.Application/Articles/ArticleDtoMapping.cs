@@ -4,14 +4,8 @@ using System.Linq.Expressions;
 
 namespace Fargo.Application.Articles;
 
-/// <summary>
-/// Provides mappings for article DTO projections.
-/// </summary>
-public static class ArticleDtoMappings
+public static class ArticleDtoMapping
 {
-    /// <summary>
-    /// Expression used to project an article entity into an <see cref="ArticleDto"/>.
-    /// </summary>
     public static readonly Expression<Func<Article, ArticleDto>> Projection = article => new ArticleDto(
         article.Guid,
         article.Name,
@@ -35,7 +29,5 @@ public static class ArticleDtoMappings
             article.QrCode,
             article.DataMatrix),
         article.Partitions.Select(partition => partition.Guid).ToArray(),
-        article.IsActive,
-        article.EditedByActorid
-    );
+        article.IsActive);
 }

@@ -1,7 +1,5 @@
-using Fargo.Application.Articles.Commands;
-using Fargo.Application.Identity;
+using Fargo.Application.Articles;
 using Fargo.Application.Items;
-using Fargo.Application.Shared.Articles;
 using Fargo.Application.Shared.Items;
 using Fargo.Core.Activables;
 using Fargo.Core.Articles;
@@ -59,7 +57,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: false)));
+        await handler.HandleAsync(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: false)));
 
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Article &&
@@ -85,7 +83,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: true)));
+        await handler.HandleAsync(new ArticlePatchCommand(article.Guid, new ArticlePatchDto(IsActive: true)));
 
         entityEventRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
@@ -104,7 +102,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemDeleteCommandHandler>>());
 
-        await handler.Handle(new ItemDeleteCommand(item.Guid));
+        await handler.HandleAsync(new ItemDeleteCommand(item.Guid));
 
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EntityType == EntityType.Item &&
@@ -120,7 +118,7 @@ public sealed class EntityEventCommandHandlerTests
         article.Deactivate(CreateDomainActor());
         var itemRepository = Substitute.For<IItemRepository>();
         var articleRepository = Substitute.For<IArticleRepository>();
-        articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
+        articleRepository.GetByGuidAsync(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
         var handler = new ItemCreateCommandHandler(
             itemRepository,
@@ -133,7 +131,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
         await Assert.ThrowsAsync<EntityNotActiveException<Article>>(
-            () => handler.Handle(new ItemCreateCommand(new ItemCreateDto(article.Guid))));
+            () => handler.HandleAsync(new ItemCreateCommand(new ItemCreateDto(article.Guid))));
 
         itemRepository.DidNotReceiveWithAnyArgs().Add(default!);
     }
@@ -156,7 +154,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: false)));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: false)));
 
         Assert.False(item.IsActive);
         Assert.Equal(actor.ActorGuid, item.EditedByActorid);
@@ -187,7 +185,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
 
         Assert.True(item.IsActive);
         Assert.Equal(actor.ActorGuid, item.EditedByActorid);
@@ -217,7 +215,7 @@ public sealed class EntityEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], IsActive: true)));
 
         Assert.Null(item.EditedByActorid);
         Assert.Equal(ItemModifiedType.None, item.ModificationTypes);
@@ -227,7 +225,7 @@ public sealed class EntityEventCommandHandlerTests
     private static IArticleRepository CreateArticleRepository(Article article)
     {
         var repository = Substitute.For<IArticleRepository>();
-        repository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
+        repository.GetByGuidAsync(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
 
         return repository;

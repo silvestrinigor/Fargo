@@ -1,17 +1,6 @@
 namespace Fargo.Application;
 
 /// <summary>
-/// Represents a query in the application layer.
-///
-/// Queries are used to retrieve data and must not change the state
-/// of the system.
-/// </summary>
-/// <typeparam name="TResponse">
-/// The type of response returned by the query.
-/// </typeparam>
-public interface IQuery<out TResponse>;
-
-/// <summary>
 /// Defines a handler responsible for executing a query.
 /// </summary>
 /// <typeparam name="TQuery">
@@ -31,7 +20,7 @@ public interface IQueryHandler<in TQuery, TResponse>
     /// <returns>
     /// The result produced by the query.
     /// </returns>
-    Task<TResponse> Handle(
+    Task<TResponse> HandleAsync(
         TQuery query,
         CancellationToken cancellationToken = default
     );

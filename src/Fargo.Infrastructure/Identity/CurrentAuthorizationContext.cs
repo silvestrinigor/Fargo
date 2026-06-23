@@ -3,7 +3,7 @@ using Fargo.Application.Identity;
 namespace Fargo.Infrastructure.Security;
 
 public sealed class CurrentAuthorizationContext(
-    ICurrentUser currentUser,
+    ICurrentActor currentUser,
     IAuthorizationContextFactory authorizationContextFactory
 ) : ICurrentAuthorizationContext
 {
@@ -11,6 +11,6 @@ public sealed class CurrentAuthorizationContext(
 
     public Task<IAuthorizationContext> GetAsync(CancellationToken cancellationToken = default)
         => cached ??= authorizationContextFactory.CreateFromUserGuid(
-            currentUser.UserGuid,
+            currentUser.ActorId,
             cancellationToken);
 }

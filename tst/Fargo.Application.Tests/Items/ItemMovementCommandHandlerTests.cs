@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Shared.Items;
 using Fargo.Core.Articles;
@@ -35,7 +34,7 @@ public sealed class ItemMovementCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
 
         Assert.Equal(actor.ActorGuid, item.EditedByActorid);
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);
@@ -72,7 +71,7 @@ public sealed class ItemMovementCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], parent.Guid)));
 
         Assert.Equal(originalEditedByGuid, item.EditedByActorid);
         Assert.Equal(originalModificationTypes, item.ModificationTypes);
@@ -102,7 +101,7 @@ public sealed class ItemMovementCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], null)));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([], null)));
 
         Assert.Equal(actor.ActorGuid, item.EditedByActorid);
         Assert.Equal(ItemModifiedType.ParentContainerChanged, item.ModificationTypes);

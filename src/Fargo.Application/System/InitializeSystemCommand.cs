@@ -20,7 +20,7 @@ public sealed class InitializeSystemCommandHandler(
     ILogger<InitializeSystemCommandHandler> logger
     ) : ICommandHandler<InitializeSystemCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         InitializeSystemCommand command,
         CancellationToken cancellationToken = default
     )
@@ -101,7 +101,7 @@ public sealed class InitializeSystemCommandHandler(
 
         userRepository.Add(admin);
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {

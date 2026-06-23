@@ -24,7 +24,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         => IncludeAggregate(users)
             .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
 
-    public Task<User?> GetByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+    public Task<User?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => IncludeAggregate(users)
             .SingleOrDefaultAsync(user => user.Nameid == nameid, cancellationToken);
 

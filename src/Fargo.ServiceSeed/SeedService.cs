@@ -72,7 +72,7 @@ public sealed class SeedService(
             var handler = scope.ServiceProvider
                 .GetRequiredService<ICommandHandler<InitializeSystemCommand>>();
 
-            await handler.Handle(command, stoppingToken);
+            await handler.HandleAsync(command, stoppingToken);
         }
         catch (Exception ex)
         {

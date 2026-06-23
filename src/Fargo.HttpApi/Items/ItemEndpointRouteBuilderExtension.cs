@@ -55,7 +55,7 @@ public static class ItemEndpointRouteBuilderExtension
     {
         var query = new ItemSingleQuery(itemGuid, temporalAsOf);
 
-        var response = await handler.Handle(query, cancellationToken);
+        var response = await handler.HandleAsync(query, cancellationToken);
 
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
@@ -97,7 +97,7 @@ public static class ItemEndpointRouteBuilderExtension
             notChildOfAnyPartition
         );
 
-        var response = await handler.Handle(query, cancellationToken);
+        var response = await handler.HandleAsync(query, cancellationToken);
 
         if (response.Count == 0)
         {
@@ -127,7 +127,7 @@ public static class ItemEndpointRouteBuilderExtension
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new ItemCreateCommand(request), cancellationToken);
+        var response = await handler.HandleAsync(new ItemCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -153,7 +153,7 @@ public static class ItemEndpointRouteBuilderExtension
         ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ItemUpdateCommand(itemGuid, request), cancellationToken);
+        await handler.HandleAsync(new ItemUpdateCommand(itemGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -178,7 +178,7 @@ public static class ItemEndpointRouteBuilderExtension
         ICommandHandler<ItemDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new ItemDeleteCommand(itemGuid), cancellationToken);
+        await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

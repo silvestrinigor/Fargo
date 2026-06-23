@@ -57,7 +57,7 @@ public static class UserGroupEndpointRouteBuilderExtension
     {
         var query = new UserGroupSingleQuery(userGroupGuid, temporalAsOf);
 
-        var response = await handler.Handle(query, cancellationToken);
+        var response = await handler.HandleAsync(query, cancellationToken);
 
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
@@ -100,7 +100,7 @@ public static class UserGroupEndpointRouteBuilderExtension
             notChildOfAnyPartition
         );
 
-        var response = await handler.Handle(query, cancellationToken);
+        var response = await handler.HandleAsync(query, cancellationToken);
 
         if (response.Count == 0)
         {
@@ -130,7 +130,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         ICommandHandler<UserGroupCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.Handle(new UserGroupCreateCommand(request), cancellationToken);
+        var response = await handler.HandleAsync(new UserGroupCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -156,7 +156,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         ICommandHandler<UserGroupUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserGroupUpdateCommand(userGroupGuid, request), cancellationToken);
+        await handler.HandleAsync(new UserGroupUpdateCommand(userGroupGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -181,7 +181,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         ICommandHandler<UserGroupDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new UserGroupDeleteCommand(userGroupGuid), cancellationToken);
+        await handler.HandleAsync(new UserGroupDeleteCommand(userGroupGuid), cancellationToken);
 
         return TypedResults.NoContent();
     }

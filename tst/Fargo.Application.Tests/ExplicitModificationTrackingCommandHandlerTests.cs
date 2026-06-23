@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Items;
@@ -29,7 +28,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
         var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var itemRepository = Substitute.For<IItemRepository>();
         var articleRepository = Substitute.For<IArticleRepository>();
-        articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
+        articleRepository.GetByGuidAsync(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
         var actor = CreateActor(ActionType.CreateItem);
         var handler = new ItemCreateCommandHandler(
@@ -42,7 +41,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemCreateCommandHandler>>());
 
-        await handler.Handle(new ItemCreateCommand(new ItemCreateDto(article.Guid)));
+        await handler.HandleAsync(new ItemCreateCommand(new ItemCreateDto(article.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(item =>
             item.EditedByActorid == actor.ActorGuid &&
@@ -65,7 +64,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<PartitionUpdateCommandHandler>>());
 
-        await handler.Handle(new PartitionUpdateCommand(
+        await handler.HandleAsync(new PartitionUpdateCommand(
             partition.Guid,
             new PartitionUpdateDto(Name: new Name("Renamed"))));
 
@@ -100,7 +99,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserUpdateCommandHandler>>());
 
-        await handler.Handle(new UserUpdateCommand(user.Guid, new UserUpdateDto(Password: "ValidPass1!")));
+        await handler.HandleAsync(new UserUpdateCommand(user.Guid, new UserUpdateDto(Password: "ValidPass1!")));
 
         Assert.Equal(actor.ActorGuid, user.EditedByActorid);
         Assert.Equal(UserModifiedType.PasswordChanged, user.ModificationTypes);
@@ -124,7 +123,7 @@ public sealed class ExplicitModificationTrackingCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());
 
-        await handler.Handle(new UserGroupUpdateCommand(
+        await handler.HandleAsync(new UserGroupUpdateCommand(
             userGroup.Guid,
             new UserGroupUpdateDto(null, null, null, [new UserGroupPermissionUpdateDto(ActionType.CreateUser)], null)));
 

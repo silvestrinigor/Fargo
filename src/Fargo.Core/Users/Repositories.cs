@@ -18,7 +18,7 @@ public interface IUserRepository
     /// <summary>
     /// Gets a user by their unique <see cref="Nameid"/>.
     /// </summary>
-    Task<User?> GetByNameid(
+    Task<User?> GetByNameidAsync(
         Nameid nameid,
         CancellationToken cancellationToken = default
     );

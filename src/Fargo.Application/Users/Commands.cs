@@ -37,7 +37,7 @@ public sealed class UserCreateCommandHandler(
     ILogger<UserCreateCommandHandler> logger
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
-    public async Task<Guid> Handle(
+    public async Task<Guid> HandleAsync(
         UserCreateCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -154,7 +154,7 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -197,7 +197,7 @@ public sealed class UserUpdateCommandHandler(
     ILogger<UserUpdateCommandHandler> logger
 ) : ICommandHandler<UserUpdateCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         UserUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -378,7 +378,7 @@ public sealed class UserUpdateCommandHandler(
             }
         }
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -412,7 +412,7 @@ public sealed class UserDeleteCommandHandler(
     ILogger<UserDeleteCommandHandler> logger
 ) : ICommandHandler<UserDeleteCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         UserDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -435,7 +435,7 @@ public sealed class UserDeleteCommandHandler(
 
         entityEventRepository.Add(Event.EntityDeleted<User>(user, actor.Guid));
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {

@@ -1,5 +1,4 @@
-using Fargo.Core.Actors;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actors;
 using Fargo.Core.Shared.Identity;
 using Fargo.Core.Users;
 
@@ -7,87 +6,17 @@ namespace Fargo.Application.Identity;
 
 #region Contracts
 
-/// <summary>
-/// Provides information about the currently authenticated user.
-/// </summary>
-/// <remarks>
-/// This abstraction allows the application layer to access
-/// user identity information without depending on HTTP,
-/// authentication frameworks, or infrastructure concerns.
-/// </remarks>
-public interface ICurrentUser
+public interface ICurrentActor
 {
-    /// <summary>
-    /// Gets the unique identifier of the current user.
-    /// </summary>
-    /// <remarks>
-    /// Returns <see cref="Guid.Empty"/> when the user is not authenticated.
-    /// </remarks>
-    Guid UserGuid
+    ActorId ActorId
     {
         get;
     }
 
-    /// <summary>
-    /// Gets a value indicating whether the current user is authenticated.
-    /// </summary>
     bool IsAuthenticated
     {
         get;
     }
-}
-
-/// <summary>
-/// Represents the resolved authorization snapshot for a request or user.
-/// </summary>
-public interface IAuthorizationContext
-{
-    Guid ActorGuid { get; }
-
-    bool IsAuthenticated { get; }
-
-    bool IsAdmin { get; }
-
-    IReadOnlyCollection<ActionType> PermissionActions { get; }
-
-    IReadOnlyCollection<Guid> PartitionAccesses { get; }
-
-    IReadOnlyCollection<Guid> UserGroupGuids { get; }
-}
-
-/// <summary>
-/// Immutable authorization snapshot used across the application layer.
-/// </summary>
-public sealed record AuthorizationContext(
-    Guid ActorGuid,
-    bool IsAuthenticated,
-    bool IsAdmin,
-    IReadOnlyCollection<ActionType> PermissionActions,
-    IReadOnlyCollection<Guid> PartitionAccesses,
-    IReadOnlyCollection<Guid> UserGroupGuids
-) : IAuthorizationContext;
-
-/// <summary>
-/// Creates authorization snapshots from user data.
-/// </summary>
-public interface IAuthorizationContextFactory
-{
-    Task<IAuthorizationContext> CreateFromUserGuid(
-        Guid userGuid,
-        CancellationToken cancellationToken = default);
-
-    Task<IAuthorizationContext> CreateFromUser(
-        User user,
-        CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// Provides the authorization snapshot for the current request.
-/// </summary>
-public interface ICurrentAuthorizationContext
-{
-    Task<IAuthorizationContext> GetAsync(
-        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -169,21 +98,3 @@ public sealed class DefaultAdminOptions
 
 #endregion Contracts
 
-#region Authorization Helpers
-
-/// <summary>
-/// Provides conversion helpers from application authorization snapshots
-/// to domain actors.
-/// </summary>
-public static class AuthorizationContextExtensions
-{
-    public static Actor ToActor(this IAuthorizationContext context)
-        => new(
-            context.ActorGuid,
-            context.IsAdmin,
-            context.IsAuthenticated,
-            context.PermissionActions,
-            context.PartitionAccesses);
-}
-
-#endregion Authorization Helpers

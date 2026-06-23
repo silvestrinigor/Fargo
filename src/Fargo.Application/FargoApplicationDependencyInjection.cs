@@ -1,6 +1,8 @@
+using Fargo.Application.Articles;
 using Fargo.Application.Articles.Commands;
 using Fargo.Application.Articles.Queries;
-using Fargo.Application.Identity;
+using Fargo.Application.Identity.Commands;
+using Fargo.Application.Identity.Commands.Handlers;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Articles;
@@ -71,7 +73,7 @@ public static class FargoApplicationDependencyInjectionExtension
 
         private IServiceCollection AddFargoArticleApplication() => services
             .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
-            .AddScoped<ICommandHandler<ArticlePatchCommand>, ArticlePatchCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticlePatchCommandHandler>()
             .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()
             .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>()

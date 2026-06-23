@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Shared.UserGroups;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +16,7 @@ public sealed class UserGroupSingleQueryHandler(
     ILogger<UserGroupSingleQueryHandler> logger
 ) : IQueryHandler<UserGroupSingleQuery, UserGroupDto?>
 {
-    public async Task<UserGroupDto?> Handle(
+    public async Task<UserGroupDto?> HandleAsync(
         UserGroupSingleQuery query,
         CancellationToken cancellationToken = default
     )
@@ -70,7 +69,7 @@ public sealed class UserGroupsQueryHandler(
     ILogger<UserGroupsQueryHandler> logger
 ) : IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>
 {
-    public async Task<IReadOnlyCollection<UserGroupDto>> Handle(
+    public async Task<IReadOnlyCollection<UserGroupDto>> HandleAsync(
         UserGroupsQuery query,
         CancellationToken cancellationToken = default
     )

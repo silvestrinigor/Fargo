@@ -10,58 +10,57 @@ public interface IArticleRepository
     /// <summary>
     /// Gets an article by its unique identifier.
     /// </summary>
-    Task<Article?> GetByGuid(
+    Task<Article?> GetByGuidAsync(
         Guid entityGuid,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByEan13(
         Ean13 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByEan8(
         Ean8 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByUpcE(
         UpcE code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByUpcA(
         UpcA code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByCode128(
         Code128 code,
         CancellationToken cancellationToken = default
     );
 
-
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByCode39(
         Code39 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByItf14(
         Itf14 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByGs1128(
         Gs1128 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByQrCode(
         QrCode code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByDataMatrix(
         DataMatrix code,
         CancellationToken cancellationToken = default
     );

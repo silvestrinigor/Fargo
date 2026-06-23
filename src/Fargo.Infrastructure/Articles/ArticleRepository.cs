@@ -13,6 +13,7 @@ namespace Fargo.Infrastructure.Articles;
 public sealed class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
     private readonly DbSet<Article> articles = context.Articles;
+
     private readonly DbSet<Item> items = context.Items;
 
     public void Add(Article article) => articles.Add(article);
@@ -22,39 +23,39 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public Task<bool> HasItemsAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
         => items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
 
-    public Task<Article?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+    public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => articles
             .Include(article => article.Partitions)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Ean13 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByEan13(Ean13 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Ean13 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Ean8 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByEan8(Ean8 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Ean8 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(UpcE code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByUpcE(UpcE code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.UpcE == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(UpcA code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByUpcA(UpcA code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.UpcA == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Code128 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByCode128(Code128 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Code128 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Code39 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByCode39(Code39 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Code39 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Itf14 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByItf14(Itf14 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Itf14 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(Gs1128 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByGs1128(Gs1128 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Gs1128 == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(QrCode code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByQrCode(QrCode code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.QrCode == code, cancellationToken);
 
-    public Task<bool> ExistsByBarcode(DataMatrix code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByDataMatrix(DataMatrix code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.DataMatrix == code, cancellationToken);
 
     public async Task<ArticleDto?> GetInfoByGuid(
@@ -71,7 +72,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
             .Where(article => article.Guid == entityGuid)
-            .Select(ArticleDtoMappings.Projection)
+            .Select(ArticleDtoMapping.Projection)
             .SingleOrDefaultAsync(cancellationToken);
 
         return article;
@@ -92,7 +93,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             notChildOfAnyPartition);
 
         return await ApplyBarcodeFilter(query, barcode)
-            .Select(ArticleDtoMappings.Projection)
+            .Select(ArticleDtoMapping.Projection)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
@@ -111,7 +112,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                 notChildOfAnyPartition)
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
-            .Select(ArticleDtoMappings.Projection)
+            .Select(ArticleDtoMapping.Projection)
             .ToListAsync(cancellationToken);
 
         return result;

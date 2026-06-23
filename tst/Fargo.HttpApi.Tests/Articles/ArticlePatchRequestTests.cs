@@ -13,7 +13,7 @@ public sealed class ArticlePatchDtoTests
     [Fact]
     public void Deserialize_Should_TreatExplicitDescriptionNullAsNoEdit()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
+        var request = JsonSerializer.Deserialize<ArticleUpdateDto>(
             """
             {
               "description": null
@@ -27,7 +27,7 @@ public sealed class ArticlePatchDtoTests
     [Fact]
     public void Deserialize_Should_ReadNestedBarcodes()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
+        var request = JsonSerializer.Deserialize<ArticleUpdateDto>(
             """
             {
               "barcodes": {
@@ -44,7 +44,7 @@ public sealed class ArticlePatchDtoTests
     [Fact]
     public void Deserialize_Should_ReadName()
     {
-        var request = JsonSerializer.Deserialize<ArticlePatchDto>(
+        var request = JsonSerializer.Deserialize<ArticleUpdateDto>(
             """
             {
               "name": "Article"

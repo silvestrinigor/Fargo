@@ -26,7 +26,7 @@ public interface IFargoArticleClient
 
     Task PatchAsync(
         Guid articleGuid,
-        ArticlePatchDto request,
+        ArticleUpdateDto request,
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(
@@ -81,7 +81,7 @@ internal sealed class FargoArticleClient(FargoHttpTransport transport) : IFargoA
 
     public Task PatchAsync(
         Guid articleGuid,
-        ArticlePatchDto request,
+        ArticleUpdateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Patch,

@@ -1,5 +1,5 @@
 using Fargo.Application;
-using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Infrastructure.Persistence;
 
@@ -7,30 +7,12 @@ namespace Fargo.Infrastructure.Persistence;
 /// Implementation of <see cref="IUnitOfWork"/> that coordinates persistence
 /// operations using the <see cref="FargoDbContext"/>.
 /// </summary>
-/// <remarks>
-/// This class acts as a boundary for committing changes to the database.
-/// All write operations performed through repositories that share the same
-/// <see cref="FargoDbContext"/> instance are persisted when
-/// <see cref="SaveChanges(CancellationToken)"/> is executed.
-/// <para>
-/// The unit of work ensures that multiple repository operations are committed
-/// as a single atomic database transaction handled internally by Entity Framework Core.
-/// </para>
-/// </remarks>
-public sealed class UnitOfWork(
-    FargoDbContext fargoContext
-) : IUnitOfWork
+public sealed class UnitOfWork(FargoDbContext fargoContext, ILogger<IUnitOfWork> logger) : IUnitOfWork
 {
-    /// <summary>
-    /// The write database context used to persist changes.
-    /// </summary>
     private readonly FargoDbContext fargoContext = fargoContext;
 
-    public async Task<IUnitOfWorkTransaction> BeginTransaction(CancellationToken cancellationToken = default)
-        => new UnitOfWorkTransaction(await fargoContext.Database.BeginTransactionAsync(cancellationToken));
-
     /// <summary>
-    /// Persists all pending changes tracked by the <see cref="FargoDbContext"/>.
+    /// Persists all pending changes.
     /// </summary>
     /// <param name="cancellationToken">
     /// A token used to cancel the save operation.
@@ -38,18 +20,15 @@ public sealed class UnitOfWork(
     /// <returns>
     /// The number of state entries written to the database.
     /// </returns>
-    public async Task<int> SaveChanges(CancellationToken cancellationToken = default)
-        => await fargoContext.SaveChangesAsync(cancellationToken);
-
-    private sealed class UnitOfWorkTransaction(IDbContextTransaction transaction) : IUnitOfWorkTransaction
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        public async Task Commit(CancellationToken cancellationToken = default)
-            => await transaction.CommitAsync(cancellationToken);
+        var changes = await fargoContext.SaveChangesAsync(cancellationToken);
 
-        public async Task Rollback(CancellationToken cancellationToken = default)
-            => await transaction.RollbackAsync(cancellationToken);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug("Unit of work save {changes} changes.", changes);
+        }
 
-        public async ValueTask DisposeAsync()
-            => await transaction.DisposeAsync();
+        return changes;
     }
 }

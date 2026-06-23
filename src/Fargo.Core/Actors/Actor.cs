@@ -20,6 +20,8 @@ public sealed class Actor : IActor
 
     private readonly ISet<Guid> partitionAccessGuids;
 
+    public IReadOnlySet<Guid> PartitionAccessGuids => partitionAccessGuids.AsReadOnly();
+
     internal Actor(ActorId actorId, ISet<ActionType> permissions, ISet<Guid> partitionAccess)
     {
         ActorId = actorId;

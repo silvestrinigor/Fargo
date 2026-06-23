@@ -1,5 +1,3 @@
-using Fargo.Application.Articles;
-using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Items;
 using Fargo.Core.Articles;
@@ -33,7 +31,7 @@ public sealed class ItemCreateCommandHandler(
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
-    public async Task<Guid> Handle(
+    public async Task<Guid> HandleAsync(
         ItemCreateCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -79,7 +77,7 @@ public sealed class ItemCreateCommandHandler(
             entityEventRepository.Add(Event.Deactivated<Item>(item, actor.Guid));
         }
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -121,7 +119,7 @@ public sealed class ItemUpdateCommandHandler(
     ILogger<ItemUpdateCommandHandler> logger
 ) : ICommandHandler<ItemUpdateCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         ItemUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -223,7 +221,7 @@ public sealed class ItemUpdateCommandHandler(
             }
         }
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -257,7 +255,7 @@ public sealed class ItemDeleteCommandHandler(
     ILogger<ItemDeleteCommandHandler> logger
 ) : ICommandHandler<ItemDeleteCommand>
 {
-    public async Task Handle(
+    public async Task HandleAsync(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -280,7 +278,7 @@ public sealed class ItemDeleteCommandHandler(
 
         entityEventRepository.Add(Event.EntityDeleted<Item>(item, actor.Guid));
 
-        await unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {

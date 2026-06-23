@@ -8,21 +8,10 @@ using Fargo.Core.UserGroups;
 
 namespace Fargo.Core.Users;
 
-#region Entity
-
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-/// <remarks>
-/// A user contains authentication credentials, direct permissions,
-/// partition access, and group memberships that may grant additional
-/// permissions and access.
-///
-/// Authorization for a user is determined by the combination of:
-/// - Direct permissions and partition access
-/// - Permissions and partition access inherited from user groups
-/// </remarks>
-public class User : Entity, IModifiable, IModifiableTypes<UserModifiedType>, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
+public class User : Entity, IModifiableTypes<UserModifiedType>, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
 {
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
         => new(nameid, passwordHash);
@@ -898,7 +887,6 @@ public class UserPermission : Entity, IModifiableMember, IPermission
 
 #endregion Permissions
 
-#region Partition Access
 
 /// <summary>
 /// Represents the access relationship between a <see cref="User"/> and a <see cref="Partition"/>.
@@ -972,4 +960,3 @@ public class UserPartitionAccess : Entity, IModifiableMember, IPartitionAccess
     public IModifiable ParentEditedEntity => User;
 }
 
-#endregion Partition Access

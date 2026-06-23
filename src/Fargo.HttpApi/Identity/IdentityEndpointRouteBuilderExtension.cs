@@ -1,5 +1,5 @@
 using Fargo.Application;
-using Fargo.Application.Identity;
+using Fargo.Application.Identity.Commands;
 using Fargo.Application.Shared.Identity;
 using Fargo.Application.Shared.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -49,7 +49,7 @@ public static class IdentityEndpointRouteBuilderExtension
         ICommandHandler<LoginCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.Handle(request, cancellationToken);
+        var result = await handler.HandleAsync(request, cancellationToken);
 
         return TypedResults.Ok(result);
     }
@@ -75,7 +75,7 @@ public static class IdentityEndpointRouteBuilderExtension
         ICommandHandler<LogoutCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(request, cancellationToken);
+        await handler.HandleAsync(request, cancellationToken);
 
         return TypedResults.Ok();
     }
@@ -100,7 +100,7 @@ public static class IdentityEndpointRouteBuilderExtension
         ICommandHandler<RefreshCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.Handle(request, cancellationToken);
+        var result = await handler.HandleAsync(request, cancellationToken);
 
         return TypedResults.Ok(result);
     }
@@ -128,7 +128,7 @@ public static class IdentityEndpointRouteBuilderExtension
         ICommandHandler<PasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new PasswordChangeCommand(request), cancellationToken);
+        await handler.HandleAsync(new PasswordChangeCommand(request), cancellationToken);
 
         return TypedResults.NoContent();
     }

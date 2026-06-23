@@ -14,7 +14,7 @@ builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(MigrationServic
 
 builder.Services.AddFargoMigrationInfrastructure(builder.Configuration);
 
-builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<ICurrentActor, CurrentUser>();
 
 var host = builder.Build();
 

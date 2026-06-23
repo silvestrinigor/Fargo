@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Items;
@@ -51,7 +50,7 @@ public sealed class CommandHandlerBoundaryTests
             unitOfWork,
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(
+        await handler.HandleAsync(new ItemUpdateCommand(
             item.Guid,
             new ItemUpdateDto([partition.Guid], parent.Guid, false)));
 
@@ -62,7 +61,7 @@ public sealed class CommandHandlerBoundaryTests
         entityPartitionEventRepository.Received(1).Add(Arg.Any<PartitionEvent>());
         entityEventRepository.Received(1).Add(Arg.Is<Event>(entityEvent =>
             entityEvent.EventType == EventType.EntityDeactivated));
-        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -83,14 +82,14 @@ public sealed class CommandHandlerBoundaryTests
             unitOfWork,
             Substitute.For<ILogger<PartitionCreateCommandHandler>>());
 
-        var partitionGuid = await handler.Handle(new PartitionCreateCommand(
+        var partitionGuid = await handler.HandleAsync(new PartitionCreateCommand(
             new PartitionCreateDto(new Name("Partition"))));
 
         Assert.NotEqual(Guid.Empty, partitionGuid);
         partitionRepository.Received(1).Add(Arg.Is<Partition>(partition =>
             partition.Guid == partitionGuid &&
             partition.ParentPartitionGuid == parent.Guid));
-        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -115,7 +114,7 @@ public sealed class CommandHandlerBoundaryTests
             unitOfWork,
             Substitute.For<ILogger<UserCreateCommandHandler>>());
 
-        var userGuid = await handler.Handle(new UserCreateCommand(
+        var userGuid = await handler.HandleAsync(new UserCreateCommand(
             new UserCreateDto(
                 "valid-user",
                 "ValidPass1!",
@@ -124,7 +123,7 @@ public sealed class CommandHandlerBoundaryTests
         userRepository.Received(1).Add(Arg.Is<User>(user =>
             user.Guid == userGuid &&
             user.FirstName == new FirstName("Valid")));
-        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -145,13 +144,13 @@ public sealed class CommandHandlerBoundaryTests
             unitOfWork,
             Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());
 
-        await handler.Handle(new UserGroupUpdateCommand(
+        await handler.HandleAsync(new UserGroupUpdateCommand(
             userGroup.Guid,
             new UserGroupUpdateDto(null, new Description("Updated group"), false, null, null)));
 
         Assert.Equal(new Description("Updated group"), userGroup.Description);
         Assert.False(userGroup.IsActive);
-        await unitOfWork.Received(1).SaveChanges(Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     private static IPartitionRepository CreatePartitionRepository(params Partition[] partitions)

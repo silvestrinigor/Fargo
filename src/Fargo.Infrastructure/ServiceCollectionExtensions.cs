@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
             AddSecurity(services);
             AddPersistence(services);
 
-            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<ICurrentActor, CurrentUser>();
             services.AddScoped<IAuthorizationContextFactory, AuthorizationContextFactory>();
             services.AddScoped<ICurrentAuthorizationContext, CurrentAuthorizationContext>();
 

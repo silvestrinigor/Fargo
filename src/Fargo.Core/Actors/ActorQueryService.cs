@@ -8,7 +8,7 @@ namespace Fargo.Core.Actors;
 public sealed class ActorQueryService(
     IUserRepository userRepository, IPartitionRepository partitionRepository) : IActorQueryService
 {
-    public async Task<Actor?> GetActorByActorId(ActorId actorId, CancellationToken cancellationToken = default)
+    public async Task<Actor?> GetActorByActorIdAsync(ActorId actorId, CancellationToken cancellationToken = default)
     {
         if (actorId.ActorType == ActorType.User)
         {

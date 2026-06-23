@@ -1,7 +1,5 @@
-using Fargo.Application.Articles.Commands;
-using Fargo.Application.Identity;
+using Fargo.Application.Articles;
 using Fargo.Application.Items;
-using Fargo.Application.Shared.Articles;
 using Fargo.Application.Shared.Items;
 using Fargo.Application.Shared.UserGroups;
 using Fargo.Application.Shared.Users;
@@ -29,7 +27,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
         var article = Article.NewArticle(new Name("Article"), CreateDomainActor());
         var partition = Partition.CreatePartition(new Name("Partition"));
         var articleRepository = Substitute.For<IArticleRepository>();
-        articleRepository.GetByGuid(article.Guid, Arg.Any<CancellationToken>())
+        articleRepository.GetByGuidAsync(article.Guid, Arg.Any<CancellationToken>())
             .Returns(article);
         var partitionRepository = CreatePartitionRepository(partition);
         var entityEventRepository = Substitute.For<IEventRepository>();
@@ -45,7 +43,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ArticlePatchCommandHandler>>());
 
-        await handler.Handle(new ArticlePatchCommand(
+        await handler.HandleAsync(new ArticlePatchCommand(
             article.Guid,
             new ArticlePatchDto(Partitions: [partition.Guid])));
 
@@ -81,7 +79,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<ItemUpdateCommandHandler>>());
 
-        await handler.Handle(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([newPartition.Guid])));
+        await handler.HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto([newPartition.Guid])));
 
         entityPartitionEventRepository.Received(1).Add(Arg.Is<PartitionEvent>(entityPartitionEvent =>
             entityPartitionEvent.Event.EventType == EventType.InsertedIntoPartition &&
@@ -123,7 +121,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserUpdateCommandHandler>>());
 
-        await handler.Handle(new UserUpdateCommand(
+        await handler.HandleAsync(new UserUpdateCommand(
             user.Guid,
             new UserUpdateDto(Partitions: [newPartition.Guid])));
 
@@ -164,7 +162,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
             Substitute.For<IUnitOfWork>(),
             Substitute.For<ILogger<UserGroupUpdateCommandHandler>>());
 
-        await handler.Handle(new UserGroupUpdateCommand(
+        await handler.HandleAsync(new UserGroupUpdateCommand(
             userGroup.Guid,
             new UserGroupUpdateDto(null, null, null, null, [newPartition.Guid])));
 

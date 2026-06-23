@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace Fargo.Infrastructure.Security;
 
 /// <summary>
-/// Provides the implementation of <see cref="ICurrentUser"/> based on the
+/// Provides the implementation of <see cref="ICurrentActor"/> based on the
 /// current HTTP request context.
 /// </summary>
 /// <remarks>
@@ -33,7 +33,7 @@ namespace Fargo.Infrastructure.Security;
 public sealed class CurrentUser(
         IHttpContextAccessor httpContextAccessor
         )
-    : ICurrentUser
+    : ICurrentActor
 {
     private readonly IHttpContextAccessor _http = httpContextAccessor;
 

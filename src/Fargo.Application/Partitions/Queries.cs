@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Shared.Partitions;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +16,7 @@ public sealed class PartitionSingleQueryHandler(
     ILogger<PartitionSingleQueryHandler> logger
 ) : IQueryHandler<PartitionSingleQuery, PartitionDto?>
 {
-    public async Task<PartitionDto?> Handle(
+    public async Task<PartitionDto?> HandleAsync(
         PartitionSingleQuery query,
         CancellationToken cancellationToken = default
     )
@@ -76,7 +75,7 @@ public sealed class PartitionsQueryHandler(
     ILogger<PartitionsQueryHandler> logger
 ) : IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>
 {
-    public async Task<IReadOnlyCollection<PartitionDto>> Handle(
+    public async Task<IReadOnlyCollection<PartitionDto>> HandleAsync(
         PartitionsQuery query,
         CancellationToken cancellationToken = default
     )

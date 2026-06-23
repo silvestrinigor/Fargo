@@ -65,3 +65,4 @@ app.MapFargoIdentity();
 app.MapDefaultEndpoints();
 
 app.Run();
+

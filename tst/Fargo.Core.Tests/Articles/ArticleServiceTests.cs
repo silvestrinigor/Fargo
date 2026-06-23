@@ -201,34 +201,34 @@ public sealed class ArticleServiceTests
         switch (barcodeKind)
         {
             case "Ean13":
-                repository.ExistsByBarcode((Ean13)barcode!).Returns(returns);
+                repository.ExistsByEan13((Ean13)barcode!).Returns(returns);
                 return;
             case "Ean8":
-                repository.ExistsByBarcode((Ean8)barcode!).Returns(returns);
+                repository.ExistsByEan8((Ean8)barcode!).Returns(returns);
                 return;
             case "UpcA":
-                repository.ExistsByBarcode((UpcA)barcode!).Returns(returns);
+                repository.ExistsByUpcA((UpcA)barcode!).Returns(returns);
                 return;
             case "UpcE":
-                repository.ExistsByBarcode((UpcE)barcode!).Returns(returns);
+                repository.ExistsByUpcE((UpcE)barcode!).Returns(returns);
                 return;
             case "Code128":
-                repository.ExistsByBarcode((Code128)barcode!).Returns(returns);
+                repository.ExistsByCode128((Code128)barcode!).Returns(returns);
                 return;
             case "Code39":
-                repository.ExistsByBarcode((Code39)barcode!).Returns(returns);
+                repository.ExistsByCode39((Code39)barcode!).Returns(returns);
                 return;
             case "Itf14":
-                repository.ExistsByBarcode((Itf14)barcode!).Returns(returns);
+                repository.ExistsByItf14((Itf14)barcode!).Returns(returns);
                 return;
             case "Gs1128":
-                repository.ExistsByBarcode((Gs1128)barcode!).Returns(returns);
+                repository.ExistsByGs1128((Gs1128)barcode!).Returns(returns);
                 return;
             case "QrCode":
-                repository.ExistsByBarcode((QrCode)barcode!).Returns(returns);
+                repository.ExistsByQrCode((QrCode)barcode!).Returns(returns);
                 return;
             case "DataMatrix":
-                repository.ExistsByBarcode((DataMatrix)barcode!).Returns(returns);
+                repository.ExistsByDataMatrix((DataMatrix)barcode!).Returns(returns);
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcodeKind), barcodeKind, "Unsupported barcode kind.");

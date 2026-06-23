@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Shared.Items;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +16,7 @@ public sealed class ItemSingleQueryHandler(
     ILogger<ItemSingleQueryHandler> logger
 ) : IQueryHandler<ItemSingleQuery, ItemDto?>
 {
-    public async Task<ItemDto?> Handle(
+    public async Task<ItemDto?> HandleAsync(
         ItemSingleQuery query,
         CancellationToken cancellationToken = default
     )
@@ -70,7 +69,7 @@ public sealed class ItemsQueryHandler(
     ILogger<ItemsQueryHandler> logger
 ) : IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>
 {
-    public async Task<IReadOnlyCollection<ItemDto>> Handle(
+    public async Task<IReadOnlyCollection<ItemDto>> HandleAsync(
         ItemsQuery query,
         CancellationToken cancellationToken = default
     )
