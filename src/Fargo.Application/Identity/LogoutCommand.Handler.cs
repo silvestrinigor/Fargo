@@ -1,11 +1,8 @@
 using Fargo.Core.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Application.Identity.Commands.Handlers;
+namespace Fargo.Application.Identity;
 
-/// <summary>
-/// Handles the execution of <see cref="LogoutCommand"/>.
-/// </summary>
 public sealed class LogoutCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ITokenHasher tokenHasher,
@@ -13,15 +10,6 @@ public sealed class LogoutCommandHandler(
     ILogger<LogoutCommandHandler> logger
 ) : ICommandHandler<LogoutCommand>
 {
-    /// <summary>
-    /// Invalidates the provided refresh token.
-    /// </summary>
-    /// <param name="command">
-    /// The command containing the refresh token.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// Token used to cancel the operation.
-    /// </param>
     public async Task HandleAsync(
         LogoutCommand command,
         CancellationToken cancellationToken = default)
@@ -31,13 +19,12 @@ public sealed class LogoutCommandHandler(
         var refreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
         var storedRefreshToken = await refreshTokenRepository.GetByTokenHash(
-            refreshTokenHash,
-            cancellationToken
-        );
+            refreshTokenHash, cancellationToken);
 
         if (storedRefreshToken == null)
         {
             logger.LogWarning("Logout flow completed without revoking a refresh token because it was not found.");
+
             return;
         }
 

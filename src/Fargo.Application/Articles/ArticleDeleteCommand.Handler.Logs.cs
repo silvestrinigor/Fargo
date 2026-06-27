@@ -7,7 +7,7 @@ internal static partial class ArticleDeleteCommandHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Article delete flow started for article {ArticleGuid} by actor {ActorId}.")]
+        Message = "Article delete flow started for article {articleGuid} by actor {actorId}.")]
     public static partial void DeleteStarted(
         this ILogger logger,
         Guid articleGuid,
@@ -15,7 +15,7 @@ internal static partial class ArticleDeleteCommandHandlerLogs
 
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Article delete mutation completed for article {ArticleGuid} by actor {ActorId}.")]
+        Message = "Article delete mutation completed for article {articleGuid} by actor {actorId}.")]
     public static partial void DeleteCompleted(
         this ILogger logger,
         Guid articleGuid,

@@ -10,7 +10,7 @@ internal static partial class ArticlesQueryHandlerLogs
         Message = "Articles query started for actor {actorId}. Page: {Page}. Limit: {Limit}.")]
     public static partial void ArticlesQueryStarted(
         this ILogger logger,
-        ActorId articleId,
+        ActorId actorId,
         Page page,
         Limit limit);
 

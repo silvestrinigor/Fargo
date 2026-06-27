@@ -18,7 +18,7 @@ public sealed class AuthorizationContextFactory(
 
         if (user is null || !user.IsActive)
         {
-            throw new UnauthorizedAccessFargoApplicationException();
+            throw new Application.Identity.UnauthorizedAccessException();
         }
 
         return await CreateFromUser(user, cancellationToken);

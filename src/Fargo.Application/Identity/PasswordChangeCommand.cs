@@ -1,6 +1,6 @@
 using Fargo.Application.Shared.Users;
 
-namespace Fargo.Application.Identity.Commands;
+namespace Fargo.Application.Identity;
 
 /// <summary>
 /// Command used by an authenticated user to change their own password.

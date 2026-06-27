@@ -54,7 +54,7 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid request", "request/invalid")
             },
             {
-                typeof(UnauthorizedAccessFargoApplicationException),
+                typeof(Application.Identity.UnauthorizedAccessException),
                 new ProblemDetailsDefinition(401, "Unauthorized", "auth/unauthorized")
             },
             {
@@ -74,7 +74,7 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid nameid", "user/invalid-nameid")
             },
             {
-                typeof(PasswordChangeRequiredFargoApplicationException),
+                typeof(PasswordChangeRequiredException),
                 new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
             },
             {

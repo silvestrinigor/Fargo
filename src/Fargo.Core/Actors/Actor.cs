@@ -18,6 +18,8 @@ public sealed class Actor : IActor
 
     private readonly ISet<ActionType> permissionActionTypes;
 
+    public IReadOnlySet<ActionType> PermissionActionTypes => permissionActionTypes.AsReadOnly();
+
     private readonly ISet<Guid> partitionAccessGuids;
 
     public IReadOnlySet<Guid> PartitionAccessGuids => partitionAccessGuids.AsReadOnly();

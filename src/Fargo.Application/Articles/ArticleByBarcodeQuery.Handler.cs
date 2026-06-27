@@ -1,4 +1,3 @@
-using Fargo.Application.Actors;
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.Articles;
 using Fargo.Core.Actors;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleByBarcodeQueryHandler(
-    ActorQueryService actorService,
+    ActorService actorService,
     IArticleQueryRepository articleRepository,
     ICurrentActor currentActor,
     ILogger<ArticleByBarcodeQueryHandler> logger

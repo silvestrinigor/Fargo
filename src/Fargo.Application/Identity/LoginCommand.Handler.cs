@@ -1,20 +1,22 @@
 using Fargo.Application.Articles.Commands.Handlers;
 using Fargo.Application.Shared.Identity;
+using Fargo.Core.Actors;
+using Fargo.Core.Shared.Actors;
 using Fargo.Core.Identity;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Application.Identity.Commands.Handlers;
+namespace Fargo.Application.Identity;
 
 public sealed class LoginCommandHandler(
+    ActorService actorService,
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     ITokenGenerator tokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator,
     ITokenHasher tokenHasher,
     IRefreshTokenRepository refreshTokenRepository,
-    IAuthorizationContextFactory authorizationContextFactory,
     IUnitOfWork unitOfWork,
     ILogger<LoginCommandHandler> logger
 ) : ICommandHandler<LoginCommand, AuthResult>
@@ -38,10 +40,7 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        var user = await userRepository.GetByNameidAsync(
-            nameid,
-            cancellationToken
-        );
+        var user = await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
         if (user is null)
         {
@@ -58,9 +57,7 @@ public sealed class LoginCommandHandler(
         }
 
         var isValid = passwordHasher.Verify(
-            user.PasswordHash,
-            command.Password
-        );
+            user.PasswordHash, command.Password);
 
         if (!isValid)
         {
@@ -76,10 +73,12 @@ public sealed class LoginCommandHandler(
                 logger.LogInformation("Login flow requires password change for user {UserGuid}.", user.Guid);
             }
 
-            throw new PasswordChangeRequiredFargoApplicationException(user.Guid);
+            throw new PasswordChangeRequiredException(user.Guid);
         }
 
-        var authorization = await authorizationContextFactory.CreateFromUser(user, cancellationToken);
+        var actor = await actorService.GetActorByActorIdAsync(new ActorId(user.Guid, ActorType.User), cancellationToken);
+
+        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
         var accessTokenResult = tokenGenerator.Generate(user);
 
@@ -103,10 +102,8 @@ public sealed class LoginCommandHandler(
             accessTokenResult.AccessToken,
             rawRefreshToken,
             accessTokenResult.ExpiresAt,
-            authorization.IsAdmin,
-            authorization.PermissionActions,
-            authorization.PartitionAccesses
-        );
+            actor.PermissionActionTypes,
+            actor.PartitionAccessGuids);
     }
 }
 

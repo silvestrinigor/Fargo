@@ -15,7 +15,7 @@ internal static partial class ArticleByGuidQueryHandlerLogs
 
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Article single query completed for article {articleGuid} by actor {actorId}. Found: {Found}.")]
+        Message = "Article single query completed for article {articleGuid} by actor {actorId}. Found: {found}.")]
     public static partial void QueryByGuidCompleted(
         this ILogger logger,
         Guid articleGuid,

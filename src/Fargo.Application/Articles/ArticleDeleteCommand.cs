@@ -1,4 +1,4 @@
-namespace Fargo.Application.Articles.Commands;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Command to delete an article.

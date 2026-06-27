@@ -1,7 +1,5 @@
 using Fargo.Application;
 using Fargo.Application.Articles;
-using Fargo.Application.Articles.Commands;
-using Fargo.Application.Articles.Queries;
 using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -161,7 +159,7 @@ public static class ArticleEndpointRouteBuilderExtension
         ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var articleGuid = await handler.HandleAsync(command, cancellationToken);
+        var articleGuid = await handler.HandleAsync(new ArticleCreateCommand(request), cancellationToken);
 
         return TypedResults.Ok(articleGuid);
     }
@@ -219,4 +217,3 @@ public static class ArticleEndpointRouteBuilderExtension
 
     #endregion Delete
 }
-

@@ -1,19 +1,12 @@
-using Fargo.Application.Actors;
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.Articles;
 using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Application.Articles.Queries;
+namespace Fargo.Application.Articles;
 
-/// <summary>
-/// Handles article queries by identifier.
-/// </summary>
-/// <remarks>
-/// Retrieves an article visible to the current actor.
-/// </remarks>
 public sealed class ArticleByGuidQueryHandler(
-    ActorQueryService actorService,
+    ActorService actorService,
     IArticleQueryRepository articleRepository,
     ICurrentActor currentActor,
     ILogger<ArticleByGuidQueryHandler> logger
@@ -21,8 +14,7 @@ public sealed class ArticleByGuidQueryHandler(
 {
     public async Task<ArticleDto?> HandleAsync(
         ArticleByGuidQuery query,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         logger.QueryByGuidStarted(query.ArticleGuid, currentActor.ActorId);
 

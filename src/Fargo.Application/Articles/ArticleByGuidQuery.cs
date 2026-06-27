@@ -1,6 +1,6 @@
 using Fargo.Application.Shared.Articles;
 
-namespace Fargo.Application.Articles.Queries;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Query used to retrieve an article by identifier.

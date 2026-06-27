@@ -50,19 +50,28 @@ public sealed record ArticleCreateContainerDto(
 
 public sealed record ArticleCreateDto(
     Name Name,
-    ArticleType ArticleType,
     Description? Description = null,
+    ArticleType? ArticleType = null,
+    Guid? FromArticle = null,
+    Scalar? PackQuantity = null,
     TimeSpan? ShelfLife = null,
     Color? Color = null,
-    ArticleMetricsDto? Metrics = null,
-    ArticleBarcodesDto? Barcodes = null,
+    Mass? Mass = null,
+    Length? LengthX = null,
+    Length? LengthY = null,
+    Length? LengthZ = null,
+    Ean13? Ean13 = null,
+    Ean8? Ean8 = null,
+    UpcA? UpcA = null,
+    UpcE? UpcE = null,
+    Code128? Code128 = null,
+    Code39? Code39 = null,
+    Itf14? Itf14 = null,
+    Gs1128? Gs1128 = null,
+    QrCode? QrCode = null,
+    DataMatrix? DataMatrix = null,
     IReadOnlyCollection<Guid>? Partitions = null,
-    bool? IsActive = null,
-    ArticleCreateVariationDto? Variation = null,
-    ArticleCreatePackDto? Pack = null,
-    ArticleCreateKitDto? Kit = null,
-    ArticleCreateContainerDto? Container = null
-);
+    bool? IsActive = null);
 
 public sealed record ArticleUpdateDto(
     Name? Name = null,
@@ -100,4 +109,3 @@ public sealed record ArticleUpdateDto(
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
     IReadOnlyCollection<Guid>? PartitionsToRemove = null,
     bool? IsActive = null);
-

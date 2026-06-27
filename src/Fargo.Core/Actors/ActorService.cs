@@ -5,8 +5,8 @@ using Fargo.Core.Users;
 
 namespace Fargo.Core.Actors;
 
-public sealed class ActorQueryService(
-    IUserRepository userRepository, IPartitionRepository partitionRepository) : IActorQueryService
+public sealed class ActorService(
+    IUserRepository userRepository, IPartitionRepository partitionRepository) : IActorService
 {
     public async Task<Actor?> GetActorByActorIdAsync(ActorId actorId, CancellationToken cancellationToken = default)
     {

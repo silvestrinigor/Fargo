@@ -1,7 +1,7 @@
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Shared.Identity;
 
-namespace Fargo.Application.Identity.Commands;
+namespace Fargo.Application.Identity;
 
 /// <summary>
 /// Command used to refresh authentication tokens using a valid refresh token.

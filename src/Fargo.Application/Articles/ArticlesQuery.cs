@@ -23,4 +23,3 @@ public sealed record ArticlesQuery(
     IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
     bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;
-

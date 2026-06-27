@@ -1,6 +1,6 @@
 using Fargo.Core.Shared.Identity;
 
-namespace Fargo.Application.Identity.Commands;
+namespace Fargo.Application.Identity;
 
 /// <summary>
 /// Command used to log out a user by invalidating a refresh token.

@@ -2,7 +2,7 @@ using Fargo.Core.Entities;
 using System.Diagnostics.CodeAnalysis;
 
 
-namespace Fargo.Application.Entities;
+namespace Fargo.Application;
 
 public static class EntityAssertFound
 {

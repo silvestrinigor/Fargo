@@ -1,6 +1,3 @@
-using Fargo.Application.Actors;
-using Fargo.Application.Articles.Commands;
-using Fargo.Application.Entities;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
@@ -10,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleDeleteCommandHandler(
-    ArticleService articleService, ActorQueryService actorService,
+    ArticleService articleService, ActorService actorService,
     IArticleRepository articleRepository, ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticleDeleteCommandHandler> logger) : ICommandHandler<ArticleDeleteCommand>
 {

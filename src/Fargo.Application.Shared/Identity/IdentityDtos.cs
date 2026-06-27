@@ -30,7 +30,6 @@ public record AuthResult(
     Token AccessToken,
     Token RefreshToken,
     DateTimeOffset ExpiresAt,
-    bool IsAdmin,
     IReadOnlyCollection<ActionType> PermissionActions,
     IReadOnlyCollection<Guid> PartitionAccesses
 );

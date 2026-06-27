@@ -8,6 +8,10 @@ public interface IActor
 {
     ActorId ActorId { get; }
 
+    IReadOnlySet<Guid> PartitionAccessGuids { get; }
+
+    IReadOnlySet<ActionType> PermissionActionTypes { get; }
+
     bool HasPermission(ActionType action);
 
     bool HasPartitionAccess(Guid partitionGuid);

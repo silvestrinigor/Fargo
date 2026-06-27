@@ -1,8 +1,5 @@
 using Fargo.Application.Articles;
-using Fargo.Application.Articles.Commands;
-using Fargo.Application.Articles.Queries;
-using Fargo.Application.Identity.Commands;
-using Fargo.Application.Identity.Commands.Handlers;
+using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Articles;

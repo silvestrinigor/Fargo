@@ -1,6 +1,6 @@
 using Fargo.Application.Shared.Identity;
 
-namespace Fargo.Application.Identity.Commands;
+namespace Fargo.Application.Identity;
 
 /// <summary>
 /// Command used to authenticate a user with a nameid and password.

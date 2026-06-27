@@ -1,7 +1,7 @@
 using Fargo.Core.Actors;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Fargo.Application.Actors;
+namespace Fargo.Application;
 
 public static class ActorAssertFound
 {
@@ -9,7 +9,7 @@ public static class ActorAssertFound
     {
         if (actor is null)
         {
-            throw new NotImplementedException();
+            throw new UnauthorizedAccessException();
         }
     }
 }

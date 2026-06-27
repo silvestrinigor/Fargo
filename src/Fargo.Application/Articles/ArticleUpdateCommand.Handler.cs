@@ -1,5 +1,3 @@
-using Fargo.Application.Actors;
-using Fargo.Application.Entities;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
@@ -10,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticlePatchCommandHandler(
-    ActorQueryService actorService,
+    ActorService actorService,
     ArticleService articleService,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
@@ -152,7 +150,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.DataMatrix = null;
         }
-        if (articleUpdateDto.DataMatrix is { } dataMatrix)
+        else if (articleUpdateDto.DataMatrix is { } dataMatrix)
         {
             await articleService.AssertArticleDataMatrixIsAvailable(dataMatrix, cancellationToken);
 
