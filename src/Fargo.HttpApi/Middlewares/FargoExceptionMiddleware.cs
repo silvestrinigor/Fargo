@@ -1,14 +1,5 @@
-namespace Fargo.HttpApi;
+namespace Fargo.HttpApi.Middlewares;
 
-/// <summary>
-/// Middleware responsible for handling exceptions thrown during HTTP request processing.
-/// </summary>
-/// <remarks>
-/// This middleware converts known application and domain exceptions into standardized
-/// <see cref="FargoProblemDetails"/> responses using the <c>application/problem+json</c> format.
-///
-/// Unknown exceptions are mapped to a generic <c>500 Internal Server Error</c> response.
-/// </remarks>
 public sealed class FargoExceptionMiddleware
 {
     public FargoExceptionMiddleware(RequestDelegate next, IHostEnvironment environment)

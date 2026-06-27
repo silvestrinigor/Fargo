@@ -20,7 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application;
 
-public static class FargoApplicationDependencyInjectionExtension
+public static class FargoApplicationDependencyInjectionServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {

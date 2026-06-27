@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;

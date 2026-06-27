@@ -4,7 +4,7 @@ using Fargo.Application.Shared.Identity;
 using Fargo.Application.Shared.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Identity;
+namespace Fargo.HttpApi.Endpoints;
 
 public static class IdentityEndpointRouteBuilderExtension
 {

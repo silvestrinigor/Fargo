@@ -1,26 +1,11 @@
-using Fargo.HttpApi.Barcodes;
 using Fargo.Infrastructure.Converters;
 
-namespace Fargo.HttpApi;
+namespace Fargo.HttpApi.Json;
 
-/// <summary>
-/// Provides extension methods for configuring HTTP API services.
-/// </summary>
-public static class ServiceCollectionExtension
+public static class JsonServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {
-        /// <summary>
-        /// Configures the JSON serialization options used by the HTTP API.
-        ///
-        /// Custom converters are registered to support application-specific
-        /// value objects and strongly typed models during JSON serialization
-        /// and deserialization.
-        /// </summary>
-        /// <returns>
-        /// The same <see cref="IServiceCollection"/> instance so that additional
-        /// calls can be chained.
-        /// </returns>
         public IServiceCollection ConfigureFargoHttpJsonOptions()
         {
             services.ConfigureHttpJsonOptions(options =>
@@ -48,23 +33,6 @@ public static class ServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new QrCodeJsonConverter());
                 options.SerializerOptions.Converters.Add(new DataMatrixJsonConverter());
                 options.SerializerOptions.Converters.Add(new OptionalValueJsonConverterFactory());
-            });
-
-            return services;
-        }
-
-        /// <summary>
-        /// Configures runtime routing options used by HTTP API endpoints.
-        /// </summary>
-        /// <returns>
-        /// The same <see cref="IServiceCollection"/> instance so that additional
-        /// calls can be chained.
-        /// </returns>
-        public IServiceCollection ConfigureFargoRouting()
-        {
-            services.Configure<RouteOptions>(options =>
-            {
-                options.ConstraintMap["barcode"] = typeof(BarcodeRouteConstraint);
             });
 
             return services;

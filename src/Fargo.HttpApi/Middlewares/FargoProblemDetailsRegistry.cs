@@ -10,7 +10,7 @@ using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 
-namespace Fargo.HttpApi;
+namespace Fargo.HttpApi.Middlewares;
 
 /// <summary>
 /// Central registry that maps application and domain exceptions
@@ -62,24 +62,8 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(401, "Invalid credentials", "auth/invalid-credentials")
             },
             {
-                typeof(InvalidPasswordFargoApplicationException),
-                new ProblemDetailsDefinition(400, "Invalid password", "auth/invalid-password")
-            },
-            {
-                typeof(WeakPasswordFargoApplicationException),
-                new ProblemDetailsDefinition(400, "Weak password", "auth/weak-password")
-            },
-            {
-                typeof(InvalidNameidFargoApplicationException),
-                new ProblemDetailsDefinition(400, "Invalid nameid", "user/invalid-nameid")
-            },
-            {
                 typeof(PasswordChangeRequiredException),
                 new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
-            },
-            {
-                typeof(ArticleNotFoundException),
-                new ProblemDetailsDefinition(404, "Article not found", "article/not-found")
             },
             {
                 typeof(UserNotFoundFargoApplicationException),
@@ -159,10 +143,6 @@ public static class FargoProblemDetailsRegistry
             },
             {
                 typeof(PartitionedEntityAccessDeniedFargoApplicationException),
-                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
-            },
-            {
-                typeof(EntityAccessViolationFargoApplicationException),
                 new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
             },
             {

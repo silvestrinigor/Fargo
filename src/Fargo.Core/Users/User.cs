@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Actors;
 using Fargo.Core.Entities;
 using Fargo.Core.Modifiables;
@@ -11,46 +10,8 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IModifiableTypes<UserModifiedType>, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
+public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser
 {
-    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
-        => new(nameid, passwordHash);
-
-    public static User CreateUser(Guid guid, Nameid nameid, PasswordHash passwordHash)
-        => new(nameid, passwordHash)
-        {
-            Guid = guid
-        };
-
-    public static User CreateUser(Nameid nameid, PasswordHash passwordHash, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUser);
-
-        var user = new User(nameid, passwordHash);
-
-        user.MarkAsEditedBy(actor.Guid);
-        user.MarkModificationType(UserModifiedType.General);
-
-        return user;
-    }
-
-    public static User CreateUser(Guid guid, Nameid nameid, PasswordHash passwordHash, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUser);
-
-        var user = new User(nameid, passwordHash)
-        {
-            Guid = guid
-        };
-
-        user.MarkAsEditedBy(actor.Guid);
-        user.MarkModificationType(UserModifiedType.General);
-
-        return user;
-    }
-
     private User()
     {
     }
@@ -61,160 +22,28 @@ public class User : Entity, IModifiableTypes<UserModifiedType>, IPartitioned, IP
         PasswordHash = passwordHash;
     }
 
+    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
+        => new(nameid, passwordHash);
+
     /// <summary>
-    /// Gets or sets the unique NAMEID (username) of the user.
-    /// This value identifies the user in the system and must satisfy
-    /// the validation rules defined by <see cref="Nameid"/>.
+    /// Gets or sets the unique nameid of the user.
     /// </summary>
-    public Nameid Nameid
-    {
-        get;
-        private set;
-    }
+    public Nameid Nameid { get; set; }
 
     /// <summary>
     /// Gets or sets the user's first name.
-    ///
-    /// This value is optional and, when provided, must satisfy the
-    /// validation rules defined by <see cref="FirstName"/>.
     /// </summary>
-    /// <remarks>
-    /// A <see langword="null"/> value indicates that the first name
-    /// has not been specified.
-    /// </remarks>
-    public FirstName? FirstName
-    {
-        get;
-        private set;
-    } = null;
+    public FirstName? FirstName { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the user's last name.
-    ///
-    /// This value is optional and, when provided, must satisfy the
-    /// validation rules defined by <see cref="LastName"/>.
     /// </summary>
-    /// <remarks>
-    /// A <see langword="null"/> value indicates that the last name
-    /// has not been specified.
-    /// </remarks>
-    public LastName? LastName
-    {
-        get;
-        private set;
-    } = null;
+    public LastName? LastName { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the textual description associated with the user.
-    /// If not specified, the description defaults to <see cref="Description.Empty"/>.
     /// </summary>
-    public Description Description
-    {
-        get;
-        private set;
-    } = Description.Empty;
-
-    public void ChangeNameid(Nameid nameid)
-    {
-        if (Nameid == nameid)
-        {
-            return;
-        }
-
-        Nameid = nameid;
-    }
-
-    public void ChangeNameid(Nameid nameid, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (Nameid == nameid)
-        {
-            return;
-        }
-
-        Nameid = nameid;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.General);
-    }
-
-    public void ChangeFirstName(FirstName? firstName)
-    {
-        if (FirstName == firstName)
-        {
-            return;
-        }
-
-        FirstName = firstName;
-    }
-
-    public void ChangeFirstName(FirstName? firstName, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (FirstName == firstName)
-        {
-            return;
-        }
-
-        FirstName = firstName;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.General);
-    }
-
-    public void ChangeLastName(LastName? lastName)
-    {
-        if (LastName == lastName)
-        {
-            return;
-        }
-
-        LastName = lastName;
-    }
-
-    public void ChangeLastName(LastName? lastName, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (LastName == lastName)
-        {
-            return;
-        }
-
-        LastName = lastName;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.General);
-    }
-
-    public void ChangeDescription(Description description)
-    {
-        if (Description == description)
-        {
-            return;
-        }
-
-        Description = description;
-    }
-
-    public void ChangeDescription(Description description, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (Description == description)
-        {
-            return;
-        }
-
-        Description = description;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.General);
-    }
-
-    #region Active
+    public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
     /// Gets a value indicating whether the user is active.
@@ -711,84 +540,8 @@ public class User : Entity, IModifiableTypes<UserModifiedType>, IPartitioned, IP
 
         UserGroups.Remove(userGroup);
 
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.UserGroupsChanged);
     }
-
-    #endregion Partition
-
-    #region Modified
-
-    public void ValidateCanEdit(Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditUser);
-        actor.ValidateHasAccess(this);
-    }
-
-    public void ValidateCanDelete(Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-
-        actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteUser);
-        actor.ValidateHasAccess(this);
-    }
-
-    public void ValidateCanChangePassword(Actor actor)
-    {
-        ValidateCanEdit(actor);
-        actor.ThrowIfPermissionNotAuthorized(ActionType.ChangeAnotherUserPassword);
-    }
-
-    public Guid? EditedByActorid { get; private set; }
-
-    public void MarkAsEditedBy(Guid actorGuid)
-    {
-        EditedByActorid = actorGuid;
-    }
-
-    public UserModifiedType ModificationTypes { get; private set; }
-
-    public IReadOnlySet<UserModifiedType> GetModificationTypes()
-    {
-        HashSet<UserModifiedType> result = [];
-
-        foreach (UserModifiedType value in Enum.GetValues<UserModifiedType>())
-        {
-            if (value == UserModifiedType.None)
-            {
-                continue;
-            }
-
-            if ((ModificationTypes & value) != 0)
-            {
-                result.Add(value);
-            }
-        }
-
-        return result;
-    }
-
-    public bool IsEditStarted { get; private set; }
-
-    public void MarkModificationType(UserModifiedType modificationType)
-    {
-        if (!IsEditStarted)
-        {
-            ModificationTypes = UserModifiedType.None;
-            IsEditStarted = true;
-        }
-
-        ModificationTypes |= modificationType;
-    }
-
-    #endregion Modified
 }
-
-#endregion Entity
-
-#region Permissions
 
 /// <summary>
 /// Represents an object that grants a specific permission action.
@@ -832,7 +585,7 @@ public interface IPermissionUser
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="User"/> entity.
 /// </remarks>
-public class UserPermission : Entity, IModifiableMember, IPermission
+public class UserPermission : Entity, IPermission
 {
     /// <summary>
     /// Gets the unique identifier of the user that owns this permission.
@@ -872,21 +625,7 @@ public class UserPermission : Entity, IModifiableMember, IPermission
     /// the specified <see cref="ActionType"/>.
     /// </remarks>
     public required ActionType Action { get; init; }
-
-    /// <summary>
-    /// Gets the parent audited entity whose audit metadata must be updated
-    /// when this permission changes.
-    /// </summary>
-    /// <remarks>
-    /// Since permissions are part of the <see cref="User"/> aggregate,
-    /// modifications to this entity should update the audit metadata of
-    /// the parent <see cref="User"/>.
-    /// </remarks>
-    public IModifiable ParentEditedEntity => User;
 }
-
-#endregion Permissions
-
 
 /// <summary>
 /// Represents the access relationship between a <see cref="User"/> and a <see cref="Partition"/>.
@@ -903,7 +642,7 @@ public class UserPermission : Entity, IModifiableMember, IPermission
 /// <see cref="IModifiableMember"/>, meaning that any modification to this
 /// entity should update the audit metadata of the parent <see cref="User"/>.
 /// </remarks>
-public class UserPartitionAccess : Entity, IModifiableMember, IPartitionAccess
+public class UserPartitionAccess : Entity, IPartitionAccess
 {
     /// <summary>
     /// Gets the unique identifier of the user associated with this access entry.
@@ -948,15 +687,5 @@ public class UserPartitionAccess : Entity, IModifiableMember, IPartitionAccess
             field = value;
         }
     }
-
-    /// <summary>
-    /// Gets the parent audited entity whose audit metadata must be updated
-    /// when this entity changes.
-    /// </summary>
-    /// <remarks>
-    /// Since <see cref="UserPartitionAccess"/> belongs to the <see cref="User"/> aggregate,
-    /// the parent audited entity is the associated user.
-    /// </remarks>
-    public IModifiable ParentEditedEntity => User;
 }
 

@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.HttpApi.Middlewares;
 
 namespace Fargo.HttpApi.Tests.Middlewares;
 

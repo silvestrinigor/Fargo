@@ -4,7 +4,7 @@ using Fargo.Application.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Articles;
+namespace Fargo.HttpApi.Endpoints;
 
 public static class ArticleEndpointRouteBuilderExtension
 {

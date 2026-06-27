@@ -1,10 +1,10 @@
-namespace Fargo.HttpApi.Barcodes;
+namespace Fargo.HttpApi.Routes;
 
-public static class BarcodeServiceCollectionExtension
+public static class FargoRouteServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureBarcodeRouteConstraint()
+        public IServiceCollection ConfigureFargoRouteOptions()
         {
             services.Configure<RouteOptions>(options =>
             {

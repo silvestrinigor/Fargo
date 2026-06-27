@@ -1,4 +1,3 @@
-using Fargo.Application.Identity;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.UserGroups;
 using Fargo.Core.Events;

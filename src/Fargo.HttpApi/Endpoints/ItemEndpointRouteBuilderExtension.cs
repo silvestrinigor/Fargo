@@ -3,7 +3,7 @@ using Fargo.Application.Items;
 using Fargo.Application.Shared.Items;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.Items;
+namespace Fargo.HttpApi.Endpoints;
 
 public static class ItemEndpointRouteBuilderExtension
 {

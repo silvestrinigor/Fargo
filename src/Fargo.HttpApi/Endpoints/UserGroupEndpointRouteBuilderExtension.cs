@@ -4,7 +4,7 @@ using Fargo.Application.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fargo.HttpApi.UserGroups;
+namespace Fargo.HttpApi.Endpoints;
 
 public static class UserGroupEndpointRouteBuilderExtension
 {

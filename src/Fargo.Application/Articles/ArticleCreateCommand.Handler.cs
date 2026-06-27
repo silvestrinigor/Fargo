@@ -42,7 +42,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     if (dto.FromArticle is null)
                     {
-                        throw new InvalidOperationException();
+                        throw new ArgumentException("FromArticle cannot be null when the ArticleType is Variation");
                     }
 
                     var fromArticle = await articleRepository.GetByGuidAsync(dto.FromArticle.Value, cancellationToken);
