@@ -38,12 +38,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 x => x.HasValue ? Color.FromArgb(x.Value) : null)
             .IsRequired(false);
 
-        builder.Property(x => x.EditedByActorid);
-
-        builder.Property(x => x.ModificationTypes)
-            .HasConversion<int>()
-            .HasDefaultValue(ArticleModifiableType.None);
-
         builder.OwnsOne(x => x.Container, container =>
         {
             container.ToTable("ArticleContainers");

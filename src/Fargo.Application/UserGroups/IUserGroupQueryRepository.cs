@@ -1,5 +1,4 @@
 using Fargo.Application.Shared.UserGroups;
-using Fargo.Core.UserGroups;
 
 namespace Fargo.Application.UserGroups;
 
@@ -20,21 +19,4 @@ public interface IUserGroupQueryRepository
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default
     );
-}
-
-public static class UserGroupRepositoryExtensions
-{
-    extension(IUserGroupRepository repository)
-    {
-        public async Task<UserGroup> GetFoundByGuid(
-            Guid userGroupGuid,
-            CancellationToken cancellationToken = default
-        )
-        {
-            var group = await repository.GetByGuid(userGroupGuid, cancellationToken)
-                ?? throw new UserGroupNotFoundFargoApplicationException(userGroupGuid);
-
-            return group;
-        }
-    }
 }

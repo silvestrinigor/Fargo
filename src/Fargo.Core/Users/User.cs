@@ -1,6 +1,5 @@
-using Fargo.Core.Actors;
+using Fargo.Core.Activables;
 using Fargo.Core.Entities;
-using Fargo.Core.Modifiables;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
@@ -10,7 +9,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser
+public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
 {
     private User()
     {
@@ -48,51 +47,7 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     /// <summary>
     /// Gets a value indicating whether the user is active.
     /// </summary>
-    public bool IsActive { get; private set; } = true;
-
-    /// <summary>
-    /// Activates the user.
-    /// </summary>
-    public void Activate() => IsActive = true;
-
-    public void Activate(Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (IsActive)
-        {
-            return;
-        }
-
-        IsActive = true;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.Activated);
-    }
-
-    /// <summary>
-    /// Deactivates the user.
-    /// </summary>
-    public void Deactivate() => IsActive = false;
-
-    public void Deactivate(Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (!IsActive)
-        {
-            return;
-        }
-
-        IsActive = false;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.Deactivated);
-    }
-
-    #endregion Active
-
-    #region Password
+    public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Gets or sets the hashed password of the user.
@@ -100,15 +55,11 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     /// The raw password is never stored. Instead, a secure hash
     /// is persisted using the application's password hashing strategy.
     /// </summary>
-    public PasswordHash PasswordHash
-    {
-        get;
-        private set;
-    }
+    public PasswordHash PasswordHash { get; set; }
 
-    public TimeSpan? DefaultPasswordExpirationPeriod { get; private set; } = null;
+    public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
 
-    public DateTimeOffset? RequirePasswordChangeAt { get; private set; } = null;
+    public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
 
@@ -160,31 +111,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
     }
 
-    public void ChangePasswordHash(PasswordHash passwordHash)
-    {
-        if (PasswordHash == passwordHash)
-        {
-            return;
-        }
-
-        PasswordHash = passwordHash;
-    }
-
-    public void ChangePasswordHash(PasswordHash passwordHash, Actor actor)
-    {
-        ValidateCanChangePassword(actor);
-
-        if (PasswordHash == passwordHash)
-        {
-            return;
-        }
-
-        PasswordHash = passwordHash;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PasswordChanged);
-    }
-
     public void SetDefaultPasswordExpirationPeriod(TimeSpan? expirationPeriod)
     {
         if (DefaultPasswordExpirationPeriod == expirationPeriod)
@@ -195,29 +121,10 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         DefaultPasswordExpirationPeriod = expirationPeriod;
     }
 
-    public void SetDefaultPasswordExpirationPeriod(TimeSpan? expirationPeriod, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (DefaultPasswordExpirationPeriod == expirationPeriod)
-        {
-            return;
-        }
-
-        DefaultPasswordExpirationPeriod = expirationPeriod;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.General);
-    }
-
     public void RotateAuthVersion()
     {
         AuthVersion = Guid.NewGuid();
     }
-
-    #endregion Password
-
-    #region Permission
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
@@ -256,27 +163,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         permissions.Add(userPermission);
     }
 
-    public void AddPermission(ActionType action, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (permissions.Any(x => x.Action == action))
-        {
-            return;
-        }
-
-        var userPermission = new UserPermission
-        {
-            Action = action,
-            User = this
-        };
-
-        permissions.Add(userPermission);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PermissionsChanged);
-    }
-
     /// <summary>
     /// Removes a permission from the user if it exists.
     /// </summary>
@@ -293,25 +179,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         permissions.Remove(userPermission);
     }
 
-    public void RemovePermission(ActionType action, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        var userPermission = permissions.SingleOrDefault(x => x.Action == action);
-
-        if (userPermission == null)
-        {
-            return;
-        }
-
-        permissions.Remove(userPermission);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PermissionsChanged);
-    }
-
-    #endregion Permission
-
     /// <summary>
     /// Gets the collection of groups the user belongs to.
     /// </summary>
@@ -324,8 +191,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     /// - Permissions and partition access inherited from groups
     /// </remarks>
     public UserGroupCollection UserGroups { get; init; } = [];
-
-    #region Partition
 
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
@@ -371,30 +236,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         partitionAccesses.Add(partitionAccess);
     }
 
-    public void AddPartitionAccess(Partition partition, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        ValidateCanEdit(actor);
-        actor.ValidateHasAccess(partition.Guid);
-
-        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
-        {
-            return;
-        }
-
-        var partitionAccess = new UserPartitionAccess
-        {
-            User = this,
-            Partition = partition
-        };
-
-        partitionAccesses.Add(partitionAccess);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PartitionsChanged);
-    }
-
     /// <summary>
     /// Removes access to the specified partition from the user.
     /// </summary>
@@ -410,25 +251,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         }
 
         partitionAccesses.Remove(userPartition);
-    }
-
-    public void RemovePartitionAccess(Guid partitionGuid, Actor actor)
-    {
-        ValidateCanEdit(actor);
-        actor.ValidateHasAccess(partitionGuid);
-
-        var userPartition =
-            partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
-
-        if (userPartition == null)
-        {
-            return;
-        }
-
-        partitionAccesses.Remove(userPartition);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PartitionsChanged);
     }
 
     /// <summary>
@@ -457,45 +279,9 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         Partitions.Add(partition);
     }
 
-    public void AddPartition(Partition partition, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        ValidateCanEdit(actor);
-        actor.ValidateHasAccess(partition.Guid);
-
-        if (Partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
-        Partitions.Add(partition);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PartitionsChanged);
-    }
-
     public void RemovePartition(Partition partition)
     {
         Partitions.Remove(partition);
-    }
-
-    public void RemovePartition(Partition partition, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        ValidateCanEdit(actor);
-        actor.ValidateHasAccess(partition.Guid);
-
-        if (!Partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
-        Partitions.Remove(partition);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.PartitionsChanged);
     }
 
     public void AddUserGroup(UserGroup userGroup)
@@ -503,189 +289,8 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
         UserGroups.Add(userGroup);
     }
 
-    public void AddUserGroup(UserGroup userGroup, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(userGroup);
-
-        ValidateCanEdit(actor);
-        actor.ThrowIfAccessNotAuthorized(userGroup);
-
-        if (UserGroups.Any(g => g.Guid == userGroup.Guid))
-        {
-            return;
-        }
-
-        UserGroups.Add(userGroup);
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(UserModifiedType.UserGroupsChanged);
-    }
-
     public void RemoveUserGroup(UserGroup userGroup)
     {
         UserGroups.Remove(userGroup);
     }
-
-    public void RemoveUserGroup(UserGroup userGroup, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(userGroup);
-
-        ValidateCanEdit(actor);
-        actor.ThrowIfAccessNotAuthorized(userGroup);
-
-        if (!UserGroups.Any(g => g.Guid == userGroup.Guid))
-        {
-            return;
-        }
-
-        UserGroups.Remove(userGroup);
-
-    }
 }
-
-/// <summary>
-/// Represents an object that grants a specific permission action.
-/// </summary>
-/// <remarks>
-/// This abstraction allows different permission sources, such as direct user
-/// permissions or group permissions, to be evaluated uniformly.
-/// </remarks>
-public interface IPermission
-{
-    /// <summary>
-    /// Gets the action granted by the permission.
-    /// </summary>
-    ActionType Action { get; }
-}
-/// <summary>
-/// Represents an object that exposes a read-only collection of permissions.
-/// </summary>
-/// <remarks>
-/// Implementations typically include domain entities such as users or user groups
-/// that participate in authorization checks.
-/// </remarks>
-public interface IPermissionUser
-{
-    /// <summary>
-    /// Gets the read-only collection of permissions associated with the object.
-    /// </summary>
-    IReadOnlyCollection<IPermission> Permissions { get; }
-}
-/// <summary>
-/// Represents a permission assigned to a user.
-/// </summary>
-/// <remarks>
-/// Each instance defines that a specific <see cref="User"/> is allowed
-/// to perform a particular <see cref="ActionType"/>.
-///
-/// This entity is part of the <see cref="User"/> aggregate and represents
-/// a single permission entry associated with the user.
-///
-/// The entity also implements <see cref="IModifiableMember"/>, meaning
-/// that any changes to this permission will propagate auditing updates
-/// to the parent <see cref="User"/> entity.
-/// </remarks>
-public class UserPermission : Entity, IPermission
-{
-    /// <summary>
-    /// Gets the unique identifier of the user that owns this permission.
-    /// </summary>
-    /// <remarks>
-    /// This value mirrors the identifier of the associated <see cref="User"/>.
-    /// It is automatically synchronized when the <see cref="User"/> property
-    /// is assigned.
-    /// </remarks>
-    public Guid UserGuid { get; private set; }
-
-    /// <summary>
-    /// Gets the user associated with this permission.
-    /// </summary>
-    /// <remarks>
-    /// When the user is assigned, the <see cref="UserGuid"/> property
-    /// is automatically synchronized with the user's identifier.
-    ///
-    /// This navigation property represents the parent entity in the
-    /// aggregate relationship.
-    /// </remarks>
-    public required User User
-    {
-        get;
-        init
-        {
-            UserGuid = value.Guid;
-            field = value;
-        }
-    }
-
-    /// <summary>
-    /// Gets the action that the user is allowed to perform.
-    /// </summary>
-    /// <remarks>
-    /// Each permission grants the associated user the ability to perform
-    /// the specified <see cref="ActionType"/>.
-    /// </remarks>
-    public required ActionType Action { get; init; }
-}
-
-/// <summary>
-/// Represents the access relationship between a <see cref="User"/> and a <see cref="Partition"/>.
-/// </summary>
-/// <remarks>
-/// A <see cref="UserPartitionAccess"/> defines whether a user is allowed to access a specific
-/// partition and optionally whether the user can modify entities within that partition.
-///
-/// Partitions are used to logically isolate data in the system. Users can only access
-/// entities that belong to partitions for which they have an associated
-/// <see cref="UserPartitionAccess"/>.
-///
-/// This entity is a member of the <see cref="User"/> aggregate and implements
-/// <see cref="IModifiableMember"/>, meaning that any modification to this
-/// entity should update the audit metadata of the parent <see cref="User"/>.
-/// </remarks>
-public class UserPartitionAccess : Entity, IPartitionAccess
-{
-    /// <summary>
-    /// Gets the unique identifier of the user associated with this access entry.
-    /// </summary>
-    public Guid UserGuid { get; private set; }
-
-    /// <summary>
-    /// Gets or sets the user that owns this partition access.
-    /// </summary>
-    /// <remarks>
-    /// When the user reference is assigned, <see cref="UserGuid"/> is automatically
-    /// synchronized with the user's identifier.
-    /// </remarks>
-    public required User User
-    {
-        get;
-        set
-        {
-            UserGuid = value.Guid;
-            field = value;
-        }
-    }
-
-    /// <summary>
-    /// Gets the unique identifier of the partition associated with this access entry.
-    /// </summary>
-    public Guid PartitionGuid { get; private set; }
-
-    /// <summary>
-    /// Gets or sets the partition to which the user has access.
-    /// </summary>
-    /// <remarks>
-    /// When the partition reference is assigned, <see cref="PartitionGuid"/>
-    /// is automatically synchronized with the partition's identifier.
-    /// </remarks>
-    public required Partition Partition
-    {
-        get;
-        set
-        {
-            PartitionGuid = value.Guid;
-            field = value;
-        }
-    }
-}
-

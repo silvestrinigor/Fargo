@@ -7,7 +7,6 @@ using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core.Articles;
-using Fargo.Core.Events;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -38,8 +37,6 @@ public static class ServiceCollectionExtensions
             AddPersistence(services);
 
             services.AddScoped<ICurrentActor, CurrentUser>();
-            services.AddScoped<IAuthorizationContextFactory, AuthorizationContextFactory>();
-            services.AddScoped<ICurrentAuthorizationContext, CurrentAuthorizationContext>();
 
             return services;
         }
@@ -131,8 +128,6 @@ public static class ServiceCollectionExtensions
 
         private void AddRepositories()
         {
-            services.AddScoped<IEventRepository, EntityEventRepository>();
-            services.AddScoped<IPartitionEventRepository, EntityPartitionEventRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();

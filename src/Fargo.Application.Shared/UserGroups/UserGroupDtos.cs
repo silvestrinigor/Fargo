@@ -8,9 +8,7 @@ public sealed record UserGroupDto(
     Description Description,
     IReadOnlyCollection<Permission> Permissions,
     IReadOnlyCollection<Guid> Partitions,
-    bool IsActive,
-    Guid? EditedByGuid
-);
+    bool IsActive);
 
 public sealed record UserGroupCreateDto(
     string Nameid,

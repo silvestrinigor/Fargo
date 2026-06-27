@@ -13,9 +13,7 @@ public sealed record UserDto(
     IReadOnlyCollection<Permission> Permissions,
     IReadOnlyCollection<Guid> Partitions,
     IReadOnlyCollection<Guid> UserGroups,
-    bool IsActive,
-    Guid? EditedByGuid
-);
+    bool IsActive);
 
 public sealed record UserCreateDto(
     string Nameid,
@@ -23,10 +21,10 @@ public sealed record UserCreateDto(
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,
-    IReadOnlyCollection<UserPermissionUpdateDto>? Permissions = null,
+    IReadOnlyCollection<UserPermissionUpdateDto>? PermissionsToAdd = null,
     TimeSpan? DefaultPasswordExpirationTimeSpan = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    IReadOnlyCollection<Guid>? UserGroups = null
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
+    IReadOnlyCollection<Guid>? UserGroupsToAdd = null
 );
 
 public sealed record UserUpdateDto(
@@ -39,7 +37,7 @@ public sealed record UserUpdateDto(
     IReadOnlyCollection<UserPermissionUpdateDto>? Permissions = null,
     TimeSpan? DefaultPasswordExpirationPeriod = null,
     IReadOnlyCollection<Guid>? Partitions = null,
-    IReadOnlyCollection<Guid>? UserGroups = null
+    IReadOnlyCollection<Guid>? UserGroupsToAdd = null
 );
 
 public sealed record UserPermissionUpdateDto(
