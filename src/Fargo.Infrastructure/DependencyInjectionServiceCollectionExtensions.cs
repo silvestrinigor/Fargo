@@ -24,7 +24,7 @@ using Microsoft.Extensions.Options;
 
 namespace Fargo.Infrastructure.Extensions;
 
-public static class ServiceCollectionExtensions
+public static class DependencyInjectionServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {

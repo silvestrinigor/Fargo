@@ -10,4 +10,3 @@ namespace Fargo.Application;
 /// The type of response returned by the query.
 /// </typeparam>
 public interface IQuery<out TResponse>;
-

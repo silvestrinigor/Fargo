@@ -9,12 +9,8 @@ using UnitsNet;
 
 namespace Fargo.Infrastructure.Configurations;
 
-/// <summary>
-/// Entity Framework Core configuration for <see cref="Article"/>.
-/// </summary>
 public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Article> builder)
     {
         builder.ToTable("Articles", t => t.IsTemporal(ttb =>

@@ -14,7 +14,7 @@ public sealed record UserGroupCreateDto(
     string Nameid,
     Description? Description = null,
     IReadOnlyCollection<UserGroupPermissionUpdateDto>? Permissions = null,
-    IReadOnlyCollection<Guid>? Partitions = null
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null
 );
 
 public sealed record UserGroupUpdateDto(

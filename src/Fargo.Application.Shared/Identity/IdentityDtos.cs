@@ -46,3 +46,8 @@ public sealed record RefreshDto(
 public sealed record LogOutDto(
     Token RefreshToken
 );
+
+public sealed record IdentityPasswordUpdateDto(
+    string NewPassword,
+    string? CurrentPassword = null
+);

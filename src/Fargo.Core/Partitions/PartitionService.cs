@@ -51,33 +51,6 @@ public class PartitionService(
         new(GlobalPartitionGuidString);
 
     /// <summary>
-    /// Deletes the specified <see cref="Partition"/> from the system.
-    /// </summary>
-    /// <param name="partition">
-    /// The partition to be deleted.
-    /// </param>
-    /// <exception cref="PartitionGlobalDeleteFargoDomainException">
-    /// Thrown when an attempt is made to delete the global partition.
-    /// </exception>
-    /// <remarks>
-    /// This operation removes the partition from the system.
-    /// The global partition cannot be deleted under any circumstances.
-    /// </remarks>
-    public void DeletePartition(Partition partition, Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        partition.ValidateCanDelete(actor);
-
-        if (partition.Guid == GlobalPartitionGuid)
-        {
-            throw new PartitionGlobalDeleteFargoDomainException();
-        }
-
-        partitionRepository.Remove(partition);
-    }
-
-    /// <summary>
     /// Sets the parent partition of a member partition.
     /// </summary>
     /// <param name="parentPartition">
@@ -102,15 +75,10 @@ public class PartitionService(
     public async Task SetParentPartition(
         Partition parentPartition,
         Partition memberPartition,
-        Actor actor,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(parentPartition);
         ArgumentNullException.ThrowIfNull(memberPartition);
-        ArgumentNullException.ThrowIfNull(actor);
-
-        memberPartition.ValidateCanEdit(actor);
-        actor.ValidateHasAccess(parentPartition.Guid);
 
         if (parentPartition.Guid == memberPartition.Guid)
         {
@@ -135,8 +103,6 @@ public class PartitionService(
         }
 
         memberPartition.ParentPartition = parentPartition;
-        memberPartition.MarkAsEditedBy(actor.Guid);
-        memberPartition.MarkModificationType(PartitionModifiedType.ParentPartitionChanged);
     }
 
     private async Task<bool> CreatesCircularHierarchy(

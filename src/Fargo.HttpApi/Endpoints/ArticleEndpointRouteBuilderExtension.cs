@@ -84,9 +84,7 @@ public static class ArticleEndpointRouteBuilderExtension
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ArticleByBarcodeQuery(
-            articleBarcode,
-            temporalAsOf);
+        var query = new ArticleByBarcodeQuery(articleBarcode, temporalAsOf);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -111,23 +109,20 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticleAsync(
         DateTimeOffset? temporalAsOfDateTime,
-        Page? page,
-        Limit? limit,
+        Page? page, Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(
-            page ?? Page.FirstPage,
-            limit ?? Limit.MaxLimit);
+            page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
 
         var query = new ArticlesQuery(
             withPagination,
             temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
-            notChildOfAnyPartition
-        );
+            notChildOfAnyPartition);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -159,7 +154,9 @@ public static class ArticleEndpointRouteBuilderExtension
         ICommandHandler<ArticleCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var articleGuid = await handler.HandleAsync(new ArticleCreateCommand(request), cancellationToken);
+        var command = new ArticleCreateCommand(request);
+
+        var articleGuid = await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok(articleGuid);
     }
@@ -185,7 +182,9 @@ public static class ArticleEndpointRouteBuilderExtension
         ICommandHandler<ArticleUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new ArticleUpdateCommand(articleGuid, request), cancellationToken);
+        var command = new ArticleUpdateCommand(articleGuid, request);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -210,7 +209,9 @@ public static class ArticleEndpointRouteBuilderExtension
         ICommandHandler<ArticleDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new ArticleDeleteCommand(articleGuid), cancellationToken);
+        var command = new ArticleDeleteCommand(articleGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }

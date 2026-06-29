@@ -2,7 +2,6 @@ using Fargo.Application;
 using Fargo.Application.Shared.Users;
 using Fargo.Application.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Endpoints;
 
@@ -83,7 +82,7 @@ public static class UserEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
-        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>> handler,
         CancellationToken cancellationToken
@@ -97,8 +96,7 @@ public static class UserEndpointRouteBuilderExtension
             withPagination,
             temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
-            notChildOfAnyPartition
-        );
+            notChildOfAnyPartition);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -130,7 +128,9 @@ public static class UserEndpointRouteBuilderExtension
         ICommandHandler<UserCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.HandleAsync(new UserCreateCommand(request), cancellationToken);
+        var command = new UserCreateCommand(request);
+
+        var response = await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -156,7 +156,9 @@ public static class UserEndpointRouteBuilderExtension
         ICommandHandler<UserUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new UserUpdateCommand(userGuid, request), cancellationToken);
+        var command = new UserUpdateCommand(userGuid, request);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -181,7 +183,9 @@ public static class UserEndpointRouteBuilderExtension
         ICommandHandler<UserDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new UserDeleteCommand(userGuid), cancellationToken);
+        var command = new UserDeleteCommand(userGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }

@@ -2,7 +2,6 @@ using Fargo.Application;
 using Fargo.Application.Shared.UserGroups;
 using Fargo.Application.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Endpoints;
 
@@ -62,7 +61,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
-    #endregion Get Single
+    #endregion
 
     #region Get Many
 
@@ -83,7 +82,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
-        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>> handler,
         CancellationToken cancellationToken
@@ -97,8 +96,7 @@ public static class UserGroupEndpointRouteBuilderExtension
             withPagination,
             temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
-            notChildOfAnyPartition
-        );
+            notChildOfAnyPartition);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

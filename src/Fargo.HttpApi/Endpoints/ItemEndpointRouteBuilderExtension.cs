@@ -94,8 +94,7 @@ public static class ItemEndpointRouteBuilderExtension
             withPagination,
             temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
-            notChildOfAnyPartition
-        );
+            notChildOfAnyPartition);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -127,7 +126,9 @@ public static class ItemEndpointRouteBuilderExtension
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.HandleAsync(new ItemCreateCommand(request), cancellationToken);
+        var command = new ItemCreateCommand(request);
+
+        var response = await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -138,7 +139,7 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapUpdateItem(this IEndpointRouteBuilder builder)
     {
-        builder.MapPut("/{itemGuid:guid}", UpdateItem)
+        builder.MapPatch("/{itemGuid:guid}", UpdateItem)
             .WithName("UpdateItem")
             .WithSummary("Replaces an existing item")
             .WithDescription("Replaces mutable item state including partitions and parent container.")
@@ -153,7 +154,9 @@ public static class ItemEndpointRouteBuilderExtension
         ICommandHandler<ItemUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new ItemUpdateCommand(itemGuid, request), cancellationToken);
+        var command = new ItemUpdateCommand(itemGuid, request);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -178,7 +181,9 @@ public static class ItemEndpointRouteBuilderExtension
         ICommandHandler<ItemDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new ItemDeleteCommand(itemGuid), cancellationToken);
+        var command = new ItemDeleteCommand(itemGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }

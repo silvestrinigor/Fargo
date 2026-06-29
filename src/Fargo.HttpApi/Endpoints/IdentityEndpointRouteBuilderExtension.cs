@@ -1,7 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.Identity;
-using Fargo.Application.Shared.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.HttpApi.Endpoints;
@@ -45,11 +44,13 @@ public static class IdentityEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok<AuthResult>> Login(
-        LoginCommand request,
+        LoginDto request,
         ICommandHandler<LoginCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.HandleAsync(request, cancellationToken);
+        var command = new LoginCommand(request.Nameid, request.Password);
+
+        var result = await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok(result);
     }
@@ -71,11 +72,13 @@ public static class IdentityEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok> Logout(
-        LogoutCommand request,
+        LogOutDto request,
         ICommandHandler<LogoutCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(request, cancellationToken);
+        var command = new LogoutCommand(request.RefreshToken);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok();
     }
@@ -95,12 +98,15 @@ public static class IdentityEndpointRouteBuilderExtension
 
         return builder;
     }
+
     private static async Task<Ok<AuthResult>> Refresh(
-        RefreshCommand request,
+        RefreshDto request,
         ICommandHandler<RefreshCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.HandleAsync(request, cancellationToken);
+        var command = new RefreshCommand(request.RefreshToken);
+
+        var result = await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok(result);
     }
@@ -124,11 +130,13 @@ public static class IdentityEndpointRouteBuilderExtension
     }
 
     private static async Task<NoContent> ChangePassword(
-        UserPasswordUpdateDto request,
+        IdentityPasswordUpdateDto request,
         ICommandHandler<PasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new PasswordChangeCommand(request), cancellationToken);
+        var command = new PasswordChangeCommand(request);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }

@@ -2,7 +2,6 @@ using Fargo.Application;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.Endpoints;
 
@@ -83,11 +82,10 @@ public static class PartitionEndpointRouteBuilderExtension
         DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
-        [FromQuery] Guid[]? childOfAnyOfThesePartitions,
+        Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>> handler,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(
             new Page(page ?? Page.FirstPage.Value),
@@ -97,8 +95,7 @@ public static class PartitionEndpointRouteBuilderExtension
             withPagination,
             temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
-            notChildOfAnyPartition
-        );
+            notChildOfAnyPartition);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -130,7 +127,9 @@ public static class PartitionEndpointRouteBuilderExtension
         ICommandHandler<PartitionCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var response = await handler.HandleAsync(new PartitionCreateCommand(request), cancellationToken);
+        var command = new PartitionCreateCommand(request);
+
+        var response = await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.Ok(response);
     }
@@ -141,7 +140,7 @@ public static class PartitionEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapUpdatePartition(this IEndpointRouteBuilder builder)
     {
-        builder.MapPut("/{partitionGuid:guid}", UpdatePartition)
+        builder.MapPatch("/{partitionGuid:guid}", UpdatePartition)
             .WithName("UpdatePartition")
             .WithSummary("Updates an existing partition")
             .WithDescription("Updates partition properties. Only fields provided in the body are applied; null fields are ignored.")
@@ -156,7 +155,9 @@ public static class PartitionEndpointRouteBuilderExtension
         ICommandHandler<PartitionUpdateCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new PartitionUpdateCommand(partitionGuid, request), cancellationToken);
+        var command = new PartitionUpdateCommand(partitionGuid, request);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -181,7 +182,9 @@ public static class PartitionEndpointRouteBuilderExtension
         ICommandHandler<PartitionDeleteCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new PartitionDeleteCommand(partitionGuid), cancellationToken);
+        var command = new PartitionDeleteCommand(partitionGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }

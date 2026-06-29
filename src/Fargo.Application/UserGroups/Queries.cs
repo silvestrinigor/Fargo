@@ -1,4 +1,6 @@
+using Fargo.Application.Identity;
 using Fargo.Application.Shared.UserGroups;
+using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
@@ -11,8 +13,9 @@ public sealed record UserGroupSingleQuery(
 ) : IQuery<UserGroupDto?>;
 
 public sealed class UserGroupSingleQueryHandler(
+    ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
+    ICurrentActor currentActor,
     ILogger<UserGroupSingleQueryHandler> logger
 ) : IQueryHandler<UserGroupSingleQuery, UserGroupDto?>
 {
@@ -21,30 +24,31 @@ public sealed class UserGroupSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "User group single query started for user group {UserGroupGuid} by actor {ActorGuid}.",
+                "User group single query started for user group {userGroupGuid} by actor {actorId}.",
                 query.UserGroupGuid,
-                actor.ActorGuid);
+                currentActor.ActorId);
         }
+
+        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+
+        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
         var userGroup = await userGroupRepository.GetInfoByGuid(
             query.UserGroupGuid,
             query.AsOfDateTime,
-            actor.PartitionAccesses,
+            actor.PartitionAccessGuids,
             notChildOfAnyPartition: true,
-            cancellationToken
-        );
+            cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "User group single query completed for user group {UserGroupGuid} by actor {ActorGuid}. Found: {Found}.",
+                "User group single query completed for user group {userGroupGuid} by actor {actorGuid}. Found: {found}.",
                 query.UserGroupGuid,
-                actor.ActorGuid,
+                actor.ActorId,
                 userGroup is not null);
         }
 
@@ -64,8 +68,9 @@ public sealed record UserGroupsQuery(
 ) : IQuery<IReadOnlyCollection<UserGroupDto>>;
 
 public sealed class UserGroupsQueryHandler(
+    ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
-    ICurrentAuthorizationContext currentAuthorizationContext,
+    ICurrentActor currentActor,
     ILogger<UserGroupsQueryHandler> logger
 ) : IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>
 {
@@ -74,22 +79,24 @@ public sealed class UserGroupsQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        var actor = await currentAuthorizationContext.GetAsync(cancellationToken);
-
         var pagination = query.WithPagination;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "User groups query started for actor {ActorGuid}. Page: {Page}. Limit: {Limit}.",
-                actor.ActorGuid,
+                "User groups query started for actor {actorId}. Page: {page}. Limit: {limit}.",
+                currentActor.ActorId,
                 pagination.Page,
                 pagination.Limit);
         }
 
+        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+
+        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
-                actor.PartitionAccesses,
+                actor.PartitionAccessGuids,
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
@@ -104,8 +111,8 @@ public sealed class UserGroupsQueryHandler(
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "User groups query completed for actor {ActorGuid}. RequestedPartitionCount: {RequestedPartitionCount}. EffectivePartitionCount: {EffectivePartitionCount}. ResultCount: {ResultCount}.",
-                actor.ActorGuid,
+                "User groups query completed for actor {actorID}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.",
+                actor.ActorId,
                 query.ChildOfAnyOfThesePartitions?.Count ?? 0,
                 childOfAnyOfThesePartitions?.Count ?? 0,
                 userGroups.Count);
