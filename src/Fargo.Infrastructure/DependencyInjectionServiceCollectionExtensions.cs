@@ -36,7 +36,7 @@ public static class DependencyInjectionServiceCollectionExtensions
             AddSecurity(services);
             AddPersistence(services);
 
-            services.AddScoped<ICurrentActor, CurrentUser>();
+            services.AddScoped<ICurrentActor, HttpCurrentUserActor>();
 
             return services;
         }
@@ -132,7 +132,6 @@ public static class DependencyInjectionServiceCollectionExtensions
             services.AddScoped<IArticleQueryRepository, ArticleRepository>();
             services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<IItemQueryRepository, ItemRepository>();
-            services.AddScoped<IItemMovementRepository, ItemMovementRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserQueryRepository, UserRepository>();
             services.AddScoped<IUserGroupRepository, UserGroupRepository>();

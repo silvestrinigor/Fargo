@@ -7,8 +7,7 @@ public sealed record PartitionDto(
     Name Name,
     Description Description,
     Guid? ParentPartitionGuid,
-    bool IsActive,
-    Guid? EditedByGuid
+    bool IsActive
 );
 
 public sealed record PartitionCreateDto(

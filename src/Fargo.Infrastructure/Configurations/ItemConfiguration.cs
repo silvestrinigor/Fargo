@@ -21,11 +21,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasIndex(x => x.ArticleGuid);
 
-        builder.Property(x => x.EditedByActorid);
-
-        builder.Property(x => x.ModificationTypes)
-            .HasDefaultValue(ItemModifiedType.None);
-
         builder.Property(x => x.ProductionDate).IsRequired(false);
 
         builder.Property(x => x.IsActive)

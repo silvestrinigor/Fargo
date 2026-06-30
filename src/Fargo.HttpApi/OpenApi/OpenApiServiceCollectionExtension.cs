@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 
 namespace Fargo.HttpApi.OpenApi;
 
-public static class OpenApiServiceCollectionExtensions
+public static class OpenApiServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {

@@ -17,6 +17,8 @@ public readonly struct ActorId :
 
     private const string actorDistriminator = "actor";
 
+    public static ActorId Empty => new(Guid.Empty, ActorType.None);
+
     public override string ToString()
         => $"{actorDistriminator}:{Guid}:{ActorType}";
 

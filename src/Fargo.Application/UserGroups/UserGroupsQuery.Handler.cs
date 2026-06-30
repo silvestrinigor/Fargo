@@ -5,68 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
-#region Single
-
-public sealed record UserGroupSingleQuery(
-    Guid UserGroupGuid,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<UserGroupDto?>;
-
-public sealed class UserGroupSingleQueryHandler(
-    ActorService actorService,
-    IUserGroupQueryRepository userGroupRepository,
-    ICurrentActor currentActor,
-    ILogger<UserGroupSingleQueryHandler> logger
-) : IQueryHandler<UserGroupSingleQuery, UserGroupDto?>
-{
-    public async Task<UserGroupDto?> HandleAsync(
-        UserGroupSingleQuery query,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User group single query started for user group {userGroupGuid} by actor {actorId}.",
-                query.UserGroupGuid,
-                currentActor.ActorId);
-        }
-
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
-
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
-
-        var userGroup = await userGroupRepository.GetInfoByGuid(
-            query.UserGroupGuid,
-            query.AsOfDateTime,
-            actor.PartitionAccessGuids,
-            notChildOfAnyPartition: true,
-            cancellationToken);
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User group single query completed for user group {userGroupGuid} by actor {actorGuid}. Found: {found}.",
-                query.UserGroupGuid,
-                actor.ActorId,
-                userGroup is not null);
-        }
-
-        return userGroup;
-    }
-}
-
-#endregion Single
-
-#region Many
-
-public sealed record UserGroupsQuery(
-    Pagination WithPagination,
-    DateTimeOffset? TemporalAsOfDateTime = null,
-    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
-    bool? NotChildOfAnyPartition = null
-) : IQuery<IReadOnlyCollection<UserGroupDto>>;
-
 public sealed class UserGroupsQueryHandler(
     ActorService actorService,
     IUserGroupQueryRepository userGroupRepository,
@@ -121,5 +59,3 @@ public sealed class UserGroupsQueryHandler(
         return userGroups;
     }
 }
-
-#endregion Many
