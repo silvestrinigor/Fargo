@@ -1,12 +1,10 @@
 using Fargo.Core.Activables;
-using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using System.Collections.ObjectModel;
 
 namespace Fargo.Core.Partitions;
 
@@ -37,7 +35,7 @@ public class Partition : Entity, IPartition, IActivable
     {
     }
 
-    private Partition(Name name, Description? description = null)
+    public Partition(Name name, Description? description = null)
     {
         Name = name;
         Description = description ?? Description.Empty;

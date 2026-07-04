@@ -1,6 +1,5 @@
 using Fargo.Core;
 using Fargo.Core.Articles;
-using Fargo.Core.Events;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -15,15 +14,9 @@ namespace Fargo.Infrastructure.Persistence;
 
 public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContext(options)
 {
-    public DbSet<Event> EntityEvents { get; set; }
-
-    public DbSet<PartitionEvent> EntityPartitionEvents { get; set; }
-
     public DbSet<Article> Articles { get; set; }
 
     public DbSet<Item> Items { get; set; }
-
-    public DbSet<ItemMovement> ItemMovements { get; set; }
 
     public DbSet<User> Users { get; set; }
 
@@ -81,15 +74,9 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new EntityEventConfiguration());
-
-        modelBuilder.ApplyConfiguration(new EntityPartitionEventConfiguration());
-
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemMovementConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 

@@ -28,9 +28,9 @@ public sealed class CommandHandlerBoundaryTests
         var parent = Item.CreateItem(Article.CreateArticleContainer(new Name("Container article"), CreateDomainActor()));
         var partition = Partition.CreatePartition(new Name("Partition"));
         var itemRepository = Substitute.For<IItemRepository>();
-        itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
+        itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
-        itemRepository.GetByGuid(parent.Guid, Arg.Any<CancellationToken>())
+        itemRepository.GetByGuidAsync(parent.Guid, Arg.Any<CancellationToken>())
             .Returns(parent);
         itemRepository.GetContainerDescendantGuids(item.Guid, false, Arg.Any<CancellationToken>())
             .Returns([]);

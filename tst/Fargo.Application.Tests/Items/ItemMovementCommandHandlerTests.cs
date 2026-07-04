@@ -120,7 +120,7 @@ public sealed class ItemMovementCommandHandlerTests
         var repository = Substitute.For<IItemRepository>();
         foreach (var item in items)
         {
-            repository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
+            repository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
                 .Returns(item);
         }
 

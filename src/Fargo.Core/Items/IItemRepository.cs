@@ -8,7 +8,7 @@ public interface IItemRepository
     /// <summary>
     /// Gets an item by its unique identifier.
     /// </summary>
-    Task<Item?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default);
+    Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the unique identifiers of all items contained under a given item.

@@ -27,7 +27,7 @@ public sealed class CommandNoOpGuardTests
         var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(partition);
         var itemRepository = Substitute.For<IItemRepository>();
-        itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
+        itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
         var partitionRepository = Substitute.For<IPartitionRepository>();
         var entityEventRepository = Substitute.For<IEventRepository>();

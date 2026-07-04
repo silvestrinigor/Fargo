@@ -15,7 +15,7 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     {
     }
 
-    private User(Nameid nameid, PasswordHash passwordHash)
+    public User(Nameid nameid, PasswordHash passwordHash)
     {
         Nameid = nameid;
         PasswordHash = passwordHash;
@@ -215,9 +215,6 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     /// Grants access to the specified partition for the user.
     /// </summary>
     /// <param name="partition">The partition to grant access to.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-    /// </exception>
     public void AddPartitionAccess(Partition partition)
     {
         ArgumentNullException.ThrowIfNull(partition);
@@ -256,20 +253,8 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
-    /// <remarks>
-    /// These partitions define the partition scope of the user entity itself,
-    /// not the partitions the user has access to.
-    ///
-    /// This is used for partition-based access control on the user entity,
-    /// meaning a user can only access this user record if they have access
-    /// to at least one of these partitions.
-    ///
-    /// To determine which partitions the user can access, see
-    /// <see cref="PartitionAccesses"/> and <see cref="UserGroups"/>.
-    /// </remarks>
     public PartitionCollection Partitions { get; init; } = [];
 
-    /// <inheritdoc />
     IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
 
     public IReadOnlyCollection<Guid> PartitionGuids => [.. Partitions.Select(p => p.Guid)];

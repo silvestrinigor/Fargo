@@ -6,8 +6,7 @@ public sealed record ItemDto(
     DateTimeOffset? ProductionDate,
     Guid? ParentContainerGuid,
     IReadOnlyCollection<Guid> Partitions,
-    bool IsActive,
-    Guid? EditedByGuid
+    bool IsActive
 );
 
 public sealed record ItemCreateDto(

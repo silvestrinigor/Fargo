@@ -70,7 +70,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ArticlePatchDto"
+                "$ref": "#/components/schemas/ArticleUpdateDto"
               }
             }
           },
@@ -301,7 +301,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "tags": [
           "Items"
         ],
@@ -940,7 +940,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "tags": [
           "Partitions"
         ],
@@ -1122,7 +1122,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginCommand"
+                "$ref": "#/components/schemas/LoginDto"
               }
             }
           },
@@ -1157,7 +1157,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutCommand"
+                "$ref": "#/components/schemas/LogOutDto"
               }
             }
           },
@@ -1185,7 +1185,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshCommand"
+                "$ref": "#/components/schemas/RefreshDto"
               }
             }
           },
@@ -1220,7 +1220,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserPasswordUpdateDto"
+                "$ref": "#/components/schemas/IdentityPasswordUpdateDto"
               }
             }
           },
@@ -1263,26 +1263,43 @@
           "dataMatrix": { }
         }
       },
-      "ArticleCreateContainerDto": {
-        "type": "object",
-        "properties": {
-          "maxMass": { }
-        }
-      },
       "ArticleCreateDto": {
         "required": [
-          "name",
-          "articleType"
+          "name"
         ],
         "type": "object",
         "properties": {
           "name": {
             "$ref": "#/components/schemas/Name"
           },
-          "articleType": {
-            "$ref": "#/components/schemas/ArticleType"
-          },
           "description": { },
+          "articleType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleType"
+              }
+            ]
+          },
+          "fromArticle": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "packQuantity": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Scalar"
+              }
+            ]
+          },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
@@ -1291,26 +1308,20 @@
             ]
           },
           "color": { },
-          "metrics": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleMetricsDto"
-              }
-            ]
-          },
-          "barcodes": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleBarcodesDto"
-              }
-            ]
-          },
+          "mass": { },
+          "lengthX": { },
+          "lengthY": { },
+          "lengthZ": { },
+          "ean13": { },
+          "ean8": { },
+          "upcA": { },
+          "upcE": { },
+          "code128": { },
+          "code39": { },
+          "itf14": { },
+          "gs1128": { },
+          "qrCode": { },
+          "dataMatrix": { },
           "partitions": {
             "type": [
               "null",
@@ -1326,104 +1337,6 @@
               "null",
               "boolean"
             ]
-          },
-          "variation": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleCreateVariationDto"
-              }
-            ]
-          },
-          "pack": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleCreatePackDto"
-              }
-            ]
-          },
-          "kit": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleCreateKitDto"
-              }
-            ]
-          },
-          "container": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleCreateContainerDto"
-              }
-            ]
-          }
-        }
-      },
-      "ArticleCreateKitDto": {
-        "required": [
-          "packs"
-        ],
-        "type": "object",
-        "properties": {
-          "packs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ArticleCreateKitPackDto"
-            }
-          }
-        }
-      },
-      "ArticleCreateKitPackDto": {
-        "required": [
-          "articleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "$ref": "#/components/schemas/Scalar"
-          }
-        }
-      },
-      "ArticleCreatePackDto": {
-        "required": [
-          "fromArticleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "fromArticleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "$ref": "#/components/schemas/Scalar"
-          }
-        }
-      },
-      "ArticleCreateVariationDto": {
-        "required": [
-          "fromArticleGuid"
-        ],
-        "type": "object",
-        "properties": {
-          "fromArticleGuid": {
-            "type": "string",
-            "format": "uuid"
           }
         }
       },
@@ -1437,8 +1350,7 @@
           "metrics",
           "barcodes",
           "partitions",
-          "isActive",
-          "editedByGuid"
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -1484,13 +1396,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "editedByGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -1503,7 +1408,10 @@
           "lengthZ": { }
         }
       },
-      "ArticlePatchDto": {
+      "ArticleType": {
+        "type": "integer"
+      },
+      "ArticleUpdateDto": {
         "type": "object",
         "properties": {
           "name": { },
@@ -1521,27 +1429,115 @@
               "boolean"
             ]
           },
-          "metrics": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleMetricsDto"
-              }
+          "mass": { },
+          "removeMass": {
+            "type": [
+              "null",
+              "boolean"
             ]
           },
-          "barcodes": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleBarcodesDto"
-              }
+          "lengthX": { },
+          "removeLengthX": {
+            "type": [
+              "null",
+              "boolean"
             ]
           },
-          "partitions": {
+          "lengthY": { },
+          "removeLengthY": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "lengthZ": { },
+          "removeLengthZ": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "ean13": { },
+          "removeEan13": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "ean8": { },
+          "removeEan8": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "upcA": { },
+          "removeUpcA": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "upcE": { },
+          "removeUpcE": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "code128": { },
+          "removeCode128": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "code39": { },
+          "removeCode39": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "itf14": { },
+          "removeItf14": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "gs1128": { },
+          "removeGs1128": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "qrCode": { },
+          "removeQrCode": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "dataMatrix": { },
+          "removeDataMatrix": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
             "type": [
               "null",
               "array"
@@ -1559,15 +1555,11 @@
           }
         }
       },
-      "ArticleType": {
-        "type": "integer"
-      },
       "AuthResult": {
         "required": [
           "accessToken",
           "refreshToken",
           "expiresAt",
-          "isAdmin",
           "permissionActions",
           "partitionAccesses"
         ],
@@ -1582,9 +1574,6 @@
           "expiresAt": {
             "type": "string",
             "format": "date-time"
-          },
-          "isAdmin": {
-            "type": "boolean"
           },
           "permissionActions": {
             "type": "array",
@@ -1709,6 +1698,23 @@
         "type": "integer"
       },
       "FirstName": { },
+      "IdentityPasswordUpdateDto": {
+        "required": [
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          },
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "IQuantityOfScalarUnit": {
         "type": "object",
         "properties": {
@@ -1768,8 +1774,7 @@
           "productionDate",
           "parentContainerGuid",
           "partitions",
-          "isActive",
-          "editedByGuid"
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -1804,13 +1809,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "editedByGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -1846,7 +1844,7 @@
       "LengthUnit": {
         "type": "integer"
       },
-      "LoginCommand": {
+      "LoginDto": {
         "required": [
           "nameid",
           "password"
@@ -1861,7 +1859,7 @@
           }
         }
       },
-      "LogoutCommand": {
+      "LogOutDto": {
         "required": [
           "refreshToken"
         ],
@@ -1905,8 +1903,7 @@
           "name",
           "description",
           "parentPartitionGuid",
-          "isActive",
-          "editedByGuid"
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -1929,13 +1926,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "editedByGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -2018,7 +2008,7 @@
           }
         }
       },
-      "RefreshCommand": {
+      "RefreshDto": {
         "required": [
           "refreshToken"
         ],
@@ -2112,7 +2102,7 @@
           "firstName": { },
           "lastName": { },
           "description": { },
-          "permissions": {
+          "permissionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2128,7 +2118,7 @@
               "string"
             ]
           },
-          "partitions": {
+          "partitionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2138,7 +2128,7 @@
               "format": "uuid"
             }
           },
-          "userGroups": {
+          "userGroupsToAdd": {
             "type": [
               "null",
               "array"
@@ -2162,8 +2152,7 @@
           "permissions",
           "partitions",
           "userGroups",
-          "isActive",
-          "editedByGuid"
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -2233,13 +2222,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "editedByGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -2262,7 +2244,7 @@
               "$ref": "#/components/schemas/UserGroupPermissionUpdateDto"
             }
           },
-          "partitions": {
+          "partitionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2281,8 +2263,7 @@
           "description",
           "permissions",
           "partitions",
-          "isActive",
-          "editedByGuid"
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -2311,13 +2292,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "editedByGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -2385,23 +2359,6 @@
           }
         }
       },
-      "UserPasswordUpdateDto": {
-        "required": [
-          "newPassword"
-        ],
-        "type": "object",
-        "properties": {
-          "newPassword": {
-            "type": "string"
-          },
-          "currentPassword": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
       "UserPermissionUpdateDto": {
         "required": [
           "action"
@@ -2463,7 +2420,7 @@
               "format": "uuid"
             }
           },
-          "userGroups": {
+          "userGroupsToAdd": {
             "type": [
               "null",
               "array"

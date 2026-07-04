@@ -63,7 +63,7 @@ public sealed class EntityPartitionEventCommandHandlerTests
         var item = Item.CreateItem(Article.NewArticle(new Name("Article"), CreateDomainActor()));
         item.AddPartition(oldPartition);
         var itemRepository = Substitute.For<IItemRepository>();
-        itemRepository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
+        itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
         var partitionRepository = CreatePartitionRepository(newPartition);
         var entityPartitionEventRepository = Substitute.For<IPartitionEventRepository>();

@@ -1,5 +1,4 @@
 using Fargo.Core.Activables;
-using Fargo.Core.Actors;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -26,7 +25,7 @@ public class UserGroup : Entity, IPartitioned, IPartitionUser, IPermissionUser, 
     {
     }
 
-    private UserGroup(Nameid nameid, Description? description = null)
+    public UserGroup(Nameid nameid, Description? description = null)
     {
         Nameid = nameid;
         Description = description ?? Description.Empty;

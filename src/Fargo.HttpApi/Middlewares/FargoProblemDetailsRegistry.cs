@@ -1,8 +1,4 @@
 using Fargo.Application.Identity;
-using Fargo.Application.Items;
-using Fargo.Application.Partitions;
-using Fargo.Application.UserGroups;
-using Fargo.Application.Users;
 using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
@@ -66,18 +62,6 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
             },
             {
-                typeof(UserNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "User not found", "user/not-found")
-            },
-            {
-                typeof(ItemNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "Item not found", "item/not-found")
-            },
-            {
-                typeof(UserGroupNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "User group not found", "user-group/not-found")
-            },
-            {
                 typeof(UserNotAuthorizedFargoDomainException),
                 new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
             },
@@ -128,22 +112,6 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(UserInactiveFargoDomainException),
                 new ProblemDetailsDefinition(403, "User inactive", "user/inactive")
-            },
-            {
-                typeof(PartitionNotFoundFargoApplicationException),
-                new ProblemDetailsDefinition(404, "Partition not found", "partition/not-found")
-            },
-            {
-                typeof(UserNotAuthorizedFargoApplicationException),
-                new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
-            },
-            {
-                typeof(PartitionAccessDeniedFargoApplicationException),
-                new ProblemDetailsDefinition(403, "Access denied", "partition/access-denied")
-            },
-            {
-                typeof(PartitionedEntityAccessDeniedFargoApplicationException),
-                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
             },
             {
                 typeof(PartitionCircularHierarchyFargoDomainException),

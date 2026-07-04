@@ -16,7 +16,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public void Remove(Item item) => items.Remove(item);
 
-    public Task<Item?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+    public Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => items
             .Include(item => item.Article)
             .Include(item => item.Partitions)
@@ -129,11 +129,4 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-}
-
-public sealed class ItemMovementRepository(FargoDbContext context) : IItemMovementRepository
-{
-    private readonly DbSet<ItemMovement> movements = context.ItemMovements;
-
-    public void Add(ItemMovement movement) => movements.Add(movement);
 }

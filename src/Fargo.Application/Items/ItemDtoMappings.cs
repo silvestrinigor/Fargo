@@ -12,6 +12,5 @@ public static class ItemDtoMappings
         item.ProductionDate,
         item.ParentContainerGuid,
         item.Partitions.Select(partition => partition.Guid).ToArray(),
-        item.IsActive,
-        item.EditedByActorid);
+        item.IsActive);
 }

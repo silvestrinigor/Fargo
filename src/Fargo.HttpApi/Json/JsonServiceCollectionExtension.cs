@@ -32,7 +32,6 @@ public static class JsonServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new Gs1128JsonConverter());
                 options.SerializerOptions.Converters.Add(new QrCodeJsonConverter());
                 options.SerializerOptions.Converters.Add(new DataMatrixJsonConverter());
-                options.SerializerOptions.Converters.Add(new OptionalValueJsonConverterFactory());
             });
 
             return services;

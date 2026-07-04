@@ -1175,8 +1175,8 @@
 
         return new ArticleCreateDto(
             new Name(RequiredText(articleCreate.Name, "Name")),
+            (description == null) ? null : new Description(description),
             articleCreate.ArticleType,
-            description == null ? null :new Description(description),
             ParseNullableTimeSpan(articleCreate.ShelfLife, "Shelf life"),
             null,
             BuildArticleMetrics(articleCreate.Metrics),

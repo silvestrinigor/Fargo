@@ -234,7 +234,7 @@ public sealed class EntityEventCommandHandlerTests
     private static IItemRepository CreateItemRepository(Item item)
     {
         var repository = Substitute.For<IItemRepository>();
-        repository.GetByGuid(item.Guid, Arg.Any<CancellationToken>())
+        repository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
             .Returns(item);
 
         return repository;
