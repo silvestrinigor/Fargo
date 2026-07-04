@@ -22,15 +22,14 @@ public sealed class ArticleByGuidQueryHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        var article = await articleRepository.GetInfoByGuid(
+        var article = await articleRepository.GetInfoByGuidAsync(
             query.ArticleGuid,
             query.AsOfDateTime,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true,
-            cancellationToken
-        );
+            cancellationToken);
 
-        logger.QueryByGuidCompleted(query.ArticleGuid, currentActor.ActorId, article is not null);
+        logger.QueryByGuidCompleted(query.ArticleGuid, currentActor.ActorId, found: article is not null);
 
         return article;
     }

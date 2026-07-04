@@ -29,7 +29,7 @@ public interface IArticleQueryRepository
     /// <returns>
     /// Article information if found; otherwise null.
     /// </returns>
-    Task<ArticleDto?> GetInfoByGuid(
+    Task<ArticleDto?> GetInfoByGuidAsync(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
@@ -58,7 +58,7 @@ public interface IArticleQueryRepository
     /// <returns>
     /// Article information if found; otherwise null.
     /// </returns>
-    Task<ArticleDto?> GetInfoByBarcode(
+    Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode barcode,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

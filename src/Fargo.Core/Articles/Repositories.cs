@@ -15,52 +15,52 @@ public interface IArticleRepository
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByEan13(
+    Task<bool> ExistsByEan13Async(
         Ean13 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByEan8(
+    Task<bool> ExistsByEan8Async(
         Ean8 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByUpcE(
+    Task<bool> ExistsByUpcEAsync(
         UpcE code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByUpcA(
+    Task<bool> ExistsByUpcAAsync(
         UpcA code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByCode128(
+    Task<bool> ExistsByCode128Async(
         Code128 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByCode39(
+    Task<bool> ExistsByCode39Async(
         Code39 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByItf14(
+    Task<bool> ExistsByItf14Async(
         Itf14 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByGs1128(
+    Task<bool> ExistsByGs1128Async(
         Gs1128 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByQrCode(
+    Task<bool> ExistsByQrCodeAsync(
         QrCode code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByDataMatrix(
+    Task<bool> ExistsByDataMatrixAsync(
         DataMatrix code,
         CancellationToken cancellationToken = default
     );
@@ -68,7 +68,7 @@ public interface IArticleRepository
     /// <summary>
     /// Determines whether the specified article has any associated items.
     /// </summary>
-    Task<bool> HasItemsAssociated(
+    Task<bool> HasItemsAssociatedAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default
     );

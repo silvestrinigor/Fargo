@@ -16,7 +16,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
     public void Remove(Partition partition) => partitions.Remove(partition);
 
-    public Task<Partition?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+    public Task<Partition?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => partitions.SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
 
     public async Task<PartitionDto?> GetInfoByGuid(

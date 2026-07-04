@@ -30,25 +30,6 @@ public class UserService(
     public static Guid DefaultAdministratorUserGuid =>
         new(DefaultAdministratorUserGuidString);
 
-    /// <summary>
-    /// Validates the rules required to create a new <see cref="User"/>.
-    /// </summary>
-    /// <param name="user">
-    /// The user being created.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="UserNameidAlreadyExistsDomainException">
-    /// Thrown when another user with the same <see cref="User.Nameid"/> already exists.
-    /// </exception>
-    /// <remarks>
-    /// This validation ensures that the <see cref="User.Nameid"/> is unique
-    /// within the system.
-    /// </remarks>
     public async Task ValidateUserCreate(
         User user,
         CancellationToken cancellationToken = default)
@@ -71,15 +52,10 @@ public class UserService(
     {
         ArgumentNullException.ThrowIfNull(user);
 
-        if (user.Nameid == nameid)
-        {
-            return;
-        }
+        var userWithTheNameid =
+            await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
-        var alreadyExistsWithNameid =
-            await userRepository.ExistsByNameid(nameid, cancellationToken);
-
-        if (alreadyExistsWithNameid)
+        if (userWithTheNameid is not null && user.Guid != userWithTheNameid.Guid)
         {
             throw new UserNameidAlreadyExistsDomainException(nameid);
         }

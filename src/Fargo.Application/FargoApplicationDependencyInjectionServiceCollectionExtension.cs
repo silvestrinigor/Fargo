@@ -11,6 +11,7 @@ using Fargo.Application.Shared.Users;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
+using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -35,6 +36,7 @@ public static class FargoApplicationDependencyInjectionServiceCollectionExtensio
             .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
         private IServiceCollection AddFargoDomain() => services
+            .AddScoped<ActorService>()
             .AddScoped<ArticleService>()
             .AddScoped<UserService>()
             .AddScoped<UserGroupService>()

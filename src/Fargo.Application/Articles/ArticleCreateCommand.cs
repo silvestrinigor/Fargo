@@ -8,4 +8,3 @@ namespace Fargo.Application.Articles;
 public sealed record ArticleCreateCommand(
     ArticleCreateDto Article
 ) : ICommand<Guid>;
-

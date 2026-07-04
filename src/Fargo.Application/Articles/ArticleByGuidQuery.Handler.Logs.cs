@@ -7,7 +7,7 @@ internal static partial class ArticleByGuidQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Article single query started for article {articleGuid} by actor {actorId}..")]
+        Message = "Article single query started for article {articleGuid} by actor {actorId}.")]
     public static partial void QueryByGuidStarted(
         this ILogger logger,
         Guid articleGuid,

@@ -40,7 +40,7 @@ public sealed class PartitionCreateCommandHandler(
 
         if (partition.ParentPartitionGuid != parentPartitionGuid)
         {
-            var parentPartition = await partitionRepository.GetByGuid(parentPartitionGuid, cancellationToken);
+            var parentPartition = await partitionRepository.GetByGuidAsync(parentPartitionGuid, cancellationToken);
 
             EntityAssertFound.ThrowNotFoundIfNull(parentPartition);
 

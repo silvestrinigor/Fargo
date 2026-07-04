@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-    <Using Include="Fargo.Application.Tests.DomainTestActors" Static="true" />
   </ItemGroup>
 
 </Project>

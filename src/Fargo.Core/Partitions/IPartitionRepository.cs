@@ -8,7 +8,7 @@ public interface IPartitionRepository
     /// <summary>
     /// Retrieves a partition by its unique identifier.
     /// </summary>
-    Task<Partition?> GetByGuid(
+    Task<Partition?> GetByGuidAsync(
         Guid entityGuid,
         CancellationToken cancellationToken = default
     );

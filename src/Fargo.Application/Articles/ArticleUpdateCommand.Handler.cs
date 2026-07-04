@@ -53,7 +53,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.Ean13 is { } ean13)
         {
-            await articleService.AssertArticleEan13IsAvailable(ean13, cancellationToken);
+            await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Ean13 = ean13;
         }
@@ -64,7 +64,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.Ean8 is { } ean8)
         {
-            await articleService.AssertArticleEan8IsAvailable(ean8, cancellationToken);
+            await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
 
             article.Ean8 = ean8;
         }
@@ -75,7 +75,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.UpcA is { } upcA)
         {
-            await articleService.AssertArticleUpcAIsAvailable(upcA, cancellationToken);
+            await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
 
             article.UpcA = upcA;
         }
@@ -86,7 +86,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.UpcE is { } upcE)
         {
-            await articleService.AssertArticleUpcEIsAvailable(upcE, cancellationToken);
+            await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
 
             article.UpcE = upcE;
         }
@@ -97,7 +97,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.Code128 is { } code128)
         {
-            await articleService.AssertArticleCode128IsAvailable(code128, cancellationToken);
+            await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
 
             article.Code128 = code128;
         }
@@ -108,7 +108,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.Code39 is { } code39)
         {
-            await articleService.AssertArticleCode39IsAvailable(code39, cancellationToken);
+            await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
 
             article.Code39 = code39;
         }
@@ -119,7 +119,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.Itf14 is { } itf14)
         {
-            await articleService.AssertArticleItf14IsAvailable(itf14, cancellationToken);
+            await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
 
             article.Itf14 = itf14;
         }
@@ -130,7 +130,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.Gs1128 is { } gs1128)
         {
-            await articleService.AssertArticleGs1128IsAvailable(gs1128, cancellationToken);
+            await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
 
             article.Gs1128 = gs1128;
         }
@@ -141,7 +141,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.QrCode is { } qrCode)
         {
-            await articleService.AssertArticleQrCodeIsAvailable(qrCode, cancellationToken);
+            await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
 
             article.QrCode = qrCode;
         }
@@ -152,7 +152,7 @@ public sealed class ArticlePatchCommandHandler(
         }
         else if (articleUpdateDto.DataMatrix is { } dataMatrix)
         {
-            await articleService.AssertArticleDataMatrixIsAvailable(dataMatrix, cancellationToken);
+            await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
 
             article.DataMatrix = dataMatrix;
         }
@@ -161,7 +161,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             foreach (var partitionGuid in partitionsToAdd.Distinct())
             {
-                var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition);
 
@@ -175,7 +175,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             foreach (var partitionGuid in partitionsToRemove.Distinct())
             {
-                var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition);
 

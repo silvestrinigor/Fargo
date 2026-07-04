@@ -31,7 +31,7 @@ public sealed class PartitionUpdateCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.EditPartition);
 
-        var partition = await partitionRepository.GetByGuid(command.PartitionGuid, cancellationToken);
+        var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(partition);
 

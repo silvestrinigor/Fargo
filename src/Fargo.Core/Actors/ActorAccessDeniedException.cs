@@ -25,12 +25,19 @@ public class ActorAccessDeniedException : Exception
         EntityGuid = partitioned.Guid;
     }
 
-
     public ActorAccessDeniedException(IActor actor, IPartition partition)
         : base($"Access denied for actor {actor.ActorId}")
     {
         ActorId = actor.ActorId;
 
         EntityGuid = partition.Guid;
+    }
+
+    public ActorAccessDeniedException(IActor actor, Guid partitionGuid)
+        : base($"Access denied for actor {actor.ActorId}")
+    {
+        ActorId = actor.ActorId;
+
+        EntityGuid = partitionGuid;
     }
 }

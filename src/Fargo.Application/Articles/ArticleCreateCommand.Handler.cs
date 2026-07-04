@@ -12,7 +12,8 @@ public sealed class ArticleCreateCommandHandler(
     ArticleService articleService, ActorService actorService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
     ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ArticleCreateCommandHandler> logger) : ICommandHandler<ArticleCreateCommand, Guid>
+    ILogger<ArticleCreateCommandHandler> logger
+    ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
         ArticleCreateCommand command,
@@ -20,13 +21,13 @@ public sealed class ArticleCreateCommandHandler(
     {
         logger.CreateStarted(currentActor.ActorId);
 
-        var dto = command.Article;
-
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.CreateArticle);
+
+        var dto = command.Article;
 
         Article article;
 
@@ -92,84 +93,83 @@ public sealed class ArticleCreateCommandHandler(
             dto.Mass ?? null,
             dto.LengthX ?? null,
             dto.LengthY ?? null,
-            dto.LengthZ ?? null
-        );
+            dto.LengthZ ?? null);
 
         if (dto.Ean13 is { } ean13)
         {
-            await articleService.AssertArticleEan13IsAvailable(ean13, cancellationToken);
+            await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Ean13 = ean13;
         }
 
         if (dto.Ean8 is { } ean8)
         {
-            await articleService.AssertArticleEan8IsAvailable(ean8, cancellationToken);
+            await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
 
             article.Ean8 = ean8;
         }
 
         if (dto.UpcA is { } upcA)
         {
-            await articleService.AssertArticleUpcAIsAvailable(upcA, cancellationToken);
+            await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
 
             article.UpcA = upcA;
         }
 
         if (dto.UpcE is { } upcE)
         {
-            await articleService.AssertArticleUpcEIsAvailable(upcE, cancellationToken);
+            await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
 
             article.UpcE = upcE;
         }
 
         if (dto.Code128 is { } code128)
         {
-            await articleService.AssertArticleCode128IsAvailable(code128, cancellationToken);
+            await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
 
             article.Code128 = code128;
         }
 
         if (dto.Code39 is { } code39)
         {
-            await articleService.AssertArticleCode39IsAvailable(code39, cancellationToken);
+            await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
 
             article.Code39 = code39;
         }
 
         if (dto.Itf14 is { } itf14)
         {
-            await articleService.AssertArticleItf14IsAvailable(itf14, cancellationToken);
+            await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
 
             article.Itf14 = itf14;
         }
 
         if (dto.Gs1128 is { } gs1128)
         {
-            await articleService.AssertArticleGs1128IsAvailable(gs1128, cancellationToken);
+            await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
 
             article.Gs1128 = gs1128;
         }
 
         if (dto.QrCode is { } qrCode)
         {
-            await articleService.AssertArticleQrCodeIsAvailable(qrCode, cancellationToken);
+            await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
 
             article.QrCode = qrCode;
         }
 
         if (dto.DataMatrix is { } dataMatrix)
         {
-            await articleService.AssertArticleDataMatrixIsAvailable(dataMatrix, cancellationToken);
+            await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
 
             article.DataMatrix = dataMatrix;
         }
 
-        if (dto.Partitions is { Count: > 0 } partitionsToAdd)
+        if (dto.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
         {
             foreach (var partitionGuid in partitionsToAdd.Distinct())
             {
-                var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition);
 

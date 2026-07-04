@@ -4,5 +4,5 @@ public sealed class AdministratorsUserGroupOptions
 {
     public const string SectionName = "Administrators";
 
-    public required string Name { get; init; }
+    public required string Nameid { get; init; }
 }

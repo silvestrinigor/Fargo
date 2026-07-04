@@ -34,7 +34,7 @@ public sealed class InitializeSystemCommandHandler(
             return;
         }
 
-        var globalPartition = await partitionRepository.GetByGuid(PartitionService.GlobalPartitionGuid, cancellationToken);
+        var globalPartition = await partitionRepository.GetByGuidAsync(PartitionService.GlobalPartitionGuid, cancellationToken);
 
         var globalPartitionCreated = false;
 
@@ -58,7 +58,7 @@ public sealed class InitializeSystemCommandHandler(
 
         if (administratorsGroup is null)
         {
-            var administratorsName = new Nameid(administratorsOptions.Value.Name);
+            var administratorsName = new Nameid(administratorsOptions.Value.Nameid);
 
             administratorsGroup = new UserGroup(administratorsName)
             {

@@ -56,7 +56,7 @@ public sealed class UserGroupCreateCommandHandler(
         {
             foreach (var partitionGuid in partitions.Distinct())
             {
-                var partition = await partitionRepository.GetByGuid(partitionGuid, cancellationToken);
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition);
 

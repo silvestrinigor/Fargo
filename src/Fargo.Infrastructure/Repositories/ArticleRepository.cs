@@ -20,7 +20,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public void Remove(Article article) => articles.Remove(article);
 
-    public Task<bool> HasItemsAssociated(Guid articleGuid, CancellationToken cancellationToken = default)
+    public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
         => items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
 
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
@@ -28,37 +28,37 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             .Include(article => article.Partitions)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
-    public Task<bool> ExistsByEan13(Ean13 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByEan13Async(Ean13 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Ean13 == code, cancellationToken);
 
-    public Task<bool> ExistsByEan8(Ean8 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByEan8Async(Ean8 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Ean8 == code, cancellationToken);
 
-    public Task<bool> ExistsByUpcE(UpcE code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByUpcEAsync(UpcE code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.UpcE == code, cancellationToken);
 
-    public Task<bool> ExistsByUpcA(UpcA code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByUpcAAsync(UpcA code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.UpcA == code, cancellationToken);
 
-    public Task<bool> ExistsByCode128(Code128 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByCode128Async(Code128 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Code128 == code, cancellationToken);
 
-    public Task<bool> ExistsByCode39(Code39 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByCode39Async(Code39 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Code39 == code, cancellationToken);
 
-    public Task<bool> ExistsByItf14(Itf14 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByItf14Async(Itf14 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Itf14 == code, cancellationToken);
 
-    public Task<bool> ExistsByGs1128(Gs1128 code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByGs1128Async(Gs1128 code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.Gs1128 == code, cancellationToken);
 
-    public Task<bool> ExistsByQrCode(QrCode code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByQrCodeAsync(QrCode code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.QrCode == code, cancellationToken);
 
-    public Task<bool> ExistsByDataMatrix(DataMatrix code, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByDataMatrixAsync(DataMatrix code, CancellationToken cancellationToken = default)
         => articles.AnyAsync(article => article.DataMatrix == code, cancellationToken);
 
-    public async Task<ArticleDto?> GetInfoByGuid(
+    public async Task<ArticleDto?> GetInfoByGuidAsync(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
@@ -78,7 +78,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return article;
     }
 
-    public async Task<ArticleDto?> GetInfoByBarcode(
+    public async Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode barcode,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

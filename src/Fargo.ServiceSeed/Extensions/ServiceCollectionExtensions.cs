@@ -47,6 +47,19 @@ public static class ServiceCollectionExtensions
                         "DefaultAdmin:Password must be provided.")
                 .ValidateOnStart();
 
+            services
+                .AddOptions<AdministratorsUserGroupOptions>()
+                .Bind(configuration.GetSection(AdministratorsUserGroupOptions.SectionName))
+                .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid),
+                        "DefaultAdmin:Nameid must be provided.")
+                .ValidateOnStart();
+
+            services.AddOptions<GlobalPartitionOptions>()
+                .Bind(configuration.GetSection(GlobalPartitionOptions.SectionName))
+                .Validate(o => !string.IsNullOrWhiteSpace(o.Name),
+                    "GlobalPartition:Name must be provided.")
+                .ValidateOnStart();
+
             return services;
         }
     }

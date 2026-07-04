@@ -22,7 +22,7 @@ public sealed class ArticleByBarcodeQueryHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        var article = await articleRepository.GetInfoByBarcode(
+        var article = await articleRepository.GetInfoByBarcodeAsync(
             query.ArticleBarcode,
             query.AsOfDateTime,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,

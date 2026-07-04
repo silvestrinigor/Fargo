@@ -6,7 +6,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 {
     public async Task AssertArticleCanBeDeletedAsync(Article article, CancellationToken cancellationToken = default)
     {
-        var hasItems = await articleRepository.HasItemsAssociated(
+        var hasItems = await articleRepository.HasItemsAssociatedAsync(
             article.Guid,
             cancellationToken);
 
@@ -16,9 +16,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleEan13IsAvailable(Ean13 ean13, CancellationToken cancellationToken = default)
+    public async Task AssertArticleEan13IsAvailableAsync(Ean13 ean13, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByEan13(ean13, cancellationToken);
+        var exists = await articleRepository.ExistsByEan13Async(ean13, cancellationToken);
 
         if (exists)
         {
@@ -26,9 +26,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleEan8IsAvailable(Ean8 ean8, CancellationToken cancellationToken = default)
+    public async Task AssertArticleEan8IsAvailableAsync(Ean8 ean8, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByEan8(ean8, cancellationToken);
+        var exists = await articleRepository.ExistsByEan8Async(ean8, cancellationToken);
 
         if (exists)
         {
@@ -36,9 +36,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleUpcAIsAvailable(UpcA upcA, CancellationToken cancellationToken = default)
+    public async Task AssertArticleUpcAIsAvailableAsync(UpcA upcA, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByUpcA(upcA, cancellationToken);
+        var exists = await articleRepository.ExistsByUpcAAsync(upcA, cancellationToken);
 
         if (exists)
         {
@@ -46,9 +46,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleUpcEIsAvailable(UpcE upcE, CancellationToken cancellationToken = default)
+    public async Task AssertArticleUpcEIsAvailableAsync(UpcE upcE, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByUpcE(upcE, cancellationToken);
+        var exists = await articleRepository.ExistsByUpcEAsync(upcE, cancellationToken);
 
         if (exists)
         {
@@ -56,9 +56,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleCode128IsAvailable(Code128 code128, CancellationToken cancellationToken = default)
+    public async Task AssertArticleCode128IsAvailableAsync(Code128 code128, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByCode128(code128, cancellationToken);
+        var exists = await articleRepository.ExistsByCode128Async(code128, cancellationToken);
 
         if (exists)
         {
@@ -66,9 +66,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleCode39IsAvailable(Code39 code39, CancellationToken cancellationToken = default)
+    public async Task AssertArticleCode39IsAvailableAsync(Code39 code39, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByCode39(code39, cancellationToken);
+        var exists = await articleRepository.ExistsByCode39Async(code39, cancellationToken);
 
         if (exists)
         {
@@ -76,9 +76,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleItf14IsAvailable(Itf14 itf14, CancellationToken cancellationToken = default)
+    public async Task AssertArticleItf14IsAvailableAsync(Itf14 itf14, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByItf14(itf14, cancellationToken);
+        var exists = await articleRepository.ExistsByItf14Async(itf14, cancellationToken);
 
         if (exists)
         {
@@ -86,9 +86,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleGs1128IsAvailable(Gs1128 gs1128, CancellationToken cancellationToken = default)
+    public async Task AssertArticleGs1128IsAvailableAsync(Gs1128 gs1128, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByGs1128(gs1128, cancellationToken);
+        var exists = await articleRepository.ExistsByGs1128Async(gs1128, cancellationToken);
 
         if (exists)
         {
@@ -96,9 +96,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleQrCodeIsAvailable(QrCode qrCode, CancellationToken cancellationToken = default)
+    public async Task AssertArticleQrCodeIsAvailableAsync(QrCode qrCode, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByQrCode(qrCode, cancellationToken);
+        var exists = await articleRepository.ExistsByQrCodeAsync(qrCode, cancellationToken);
 
         if (exists)
         {
@@ -106,9 +106,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleDataMatrixIsAvailable(DataMatrix dataMatrix, CancellationToken cancellationToken = default)
+    public async Task AssertArticleDataMatrixIsAvailableAsync(DataMatrix dataMatrix, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByDataMatrix(dataMatrix, cancellationToken);
+        var exists = await articleRepository.ExistsByDataMatrixAsync(dataMatrix, cancellationToken);
 
         if (exists)
         {

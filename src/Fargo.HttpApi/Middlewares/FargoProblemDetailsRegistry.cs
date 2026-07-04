@@ -62,18 +62,6 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(403, "Password change required", "auth/password-change-required")
             },
             {
-                typeof(UserNotAuthorizedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Forbidden", "user/forbidden")
-            },
-            {
-                typeof(UserEntityAccessNotAuthorizedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Access denied", "entity/access-denied")
-            },
-            {
-                typeof(UserPartitionAccessNotAuthorizedFargoDomainException),
-                new ProblemDetailsDefinition(403, "Access denied", "partition/access-denied")
-            },
-            {
                 typeof(ArticleDeleteWithItemsAssociatedFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "article/delete-with-items")
             },
@@ -108,10 +96,6 @@ public static class FargoProblemDetailsRegistry
             {
                 typeof(UserCannotChangeOwnPermissionsFargoDomainException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-change-own-permissions")
-            },
-            {
-                typeof(UserInactiveFargoDomainException),
-                new ProblemDetailsDefinition(403, "User inactive", "user/inactive")
             },
             {
                 typeof(PartitionCircularHierarchyFargoDomainException),
