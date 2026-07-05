@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.DependencyInjection;
 using Fargo.HttpApi.Endpoints;
 using Fargo.HttpApi.Json;
 using Fargo.HttpApi.Middlewares;
@@ -19,7 +19,7 @@ builder.Services.AddFargoOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.ConfigureFargoHttpJsonOptions();
+builder.Services.ConfigureFargoJson();
 
 builder.Services.AddFargoApplication();
 

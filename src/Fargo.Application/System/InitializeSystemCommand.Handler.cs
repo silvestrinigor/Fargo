@@ -1,5 +1,7 @@
+using Fargo.Application.Identity;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actors;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -13,6 +15,7 @@ public sealed class InitializeSystemCommandHandler(
     IPartitionRepository partitionRepository,
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
+    ICurrentActor currentActor,
     IOptions<DefaultAdminOptions> defaultAdminOptions,
     IOptions<AdministratorsUserGroupOptions> administratorsOptions,
     IOptions<GlobalPartitionOptions> globalPartitionOptions,
@@ -24,6 +27,11 @@ public sealed class InitializeSystemCommandHandler(
         CancellationToken cancellationToken = default)
     {
         logger.InitializeSystemStarted();
+
+        if (currentActor.ActorId.ActorType != ActorType.Application)
+        {
+            throw new Identity.UnauthorizedAccessException();
+        }
 
         var anyUser = await userRepository.Any(cancellationToken);
 

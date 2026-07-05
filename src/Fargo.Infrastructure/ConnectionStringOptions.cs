@@ -1,4 +1,4 @@
-namespace Fargo.Infrastructure.Persistence;
+namespace Fargo.Infrastructure;
 
 /// <summary>
 /// Configuration options used to resolve database connection strings.
