@@ -93,9 +93,7 @@ public sealed class RefreshCommandHandler(
         return new AuthResult(
             newAccessTokenResult.AccessToken,
             rawNewRefreshToken,
-            newAccessTokenResult.ExpiresAt,
-            actorUser.PermissionActionTypes,
-            actorUser.PartitionAccessGuids);
+            newAccessTokenResult.ExpiresAt);
     }
 }
 

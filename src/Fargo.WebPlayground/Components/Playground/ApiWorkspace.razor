@@ -23,8 +23,6 @@
 
     private bool isBusy;
     private OperationResult? result;
-    private PlaygroundResource? loadedListResource;
-    private Guid? loadedEntityGuid;
     private string? selectedArticleOperation;
     private string? selectedItemOperation;
     private string? selectedUserOperation;
@@ -1106,7 +1104,7 @@
         "Password changed",
         async client =>
         {
-            await client.Identity.ChangePasswordAsync(new UserPasswordUpdateDto(
+            await client.Identity.ChangePasswordAsync(new PasswordUpdateDto(
                 RequiredText(accountPassword.NewPassword, "New password"),
                 RequiredText(accountPassword.CurrentPassword, "Current password")));
             accountPassword.CurrentPassword = string.Empty;
@@ -1201,28 +1199,6 @@
     private static ArticleBarcodesDto? BuildArticleBarcodes(ArticleBarcodesForm form)
     {
         return null;
-    }
-
-    private static IReadOnlyCollection<ArticleCreateKitPackDto> ParseKitPacks(string? value)
-    {
-        var rows = SplitLines(value);
-        if (rows.Count == 0)
-        {
-            throw new InvalidOperationException("Kit packs require at least one 'articleGuid,quantity' line.");
-        }
-
-        return rows.Select((row, index) =>
-        {
-            var parts = row.Split(',', StringSplitOptions.TrimEntries);
-            if (parts.Length != 2)
-            {
-                throw new InvalidOperationException($"Kit pack line {index + 1} must be 'articleGuid,quantity'.");
-            }
-
-            return new ArticleCreateKitPackDto(
-                RequiredGuid(parts[0], $"Kit pack line {index + 1} article GUID"),
-                1.Amount());
-        }).ToArray();
     }
 
     private static UnitValueDto? BuildUnitValue(UnitValueForm form, string label)
@@ -1969,11 +1945,7 @@
         <h3>Current auth</h3>
         <div class="summary-grid auth-summary">
             <div class="summary-item"><span>Expires</span><strong data-testid="playground-auth-expires">@auth.ExpiresAt.LocalDateTime</strong></div>
-            <div class="summary-item"><span>Permissions</span><strong data-testid="playground-auth-permissions">@auth.PermissionActions.Count</strong></div>
-            <div class="summary-item"><span>Partitions</span><strong data-testid="playground-auth-partitions">@auth.PartitionAccesses.Count</strong></div>
         </div>
-        @PermissionCollection("Permission actions", auth.PermissionActions)
-        @GuidCollection("Partition accesses", auth.PartitionAccesses)
     </section>;
 
     private void SelectArticle(ArticleDto article)

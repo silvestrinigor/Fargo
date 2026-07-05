@@ -42,4 +42,6 @@ public sealed class DefaultAdminOptions
     /// is first deployed to ensure proper security.
     /// </remarks>
     public required string Password { get; init; }
+
+    public string Description { get; init; } = string.Empty;
 }

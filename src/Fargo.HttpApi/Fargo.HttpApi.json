@@ -1220,7 +1220,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IdentityPasswordUpdateDto"
+                "$ref": "#/components/schemas/PasswordUpdateDto"
               }
             }
           },
@@ -1322,7 +1322,7 @@
           "gs1128": { },
           "qrCode": { },
           "dataMatrix": { },
-          "partitions": {
+          "partitionsToAdd": {
             "type": [
               "null",
               "array"
@@ -1559,9 +1559,7 @@
         "required": [
           "accessToken",
           "refreshToken",
-          "expiresAt",
-          "permissionActions",
-          "partitionAccesses"
+          "expiresAt"
         ],
         "type": "object",
         "properties": {
@@ -1574,19 +1572,6 @@
           "expiresAt": {
             "type": "string",
             "format": "date-time"
-          },
-          "permissionActions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionAccesses": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         }
       },
@@ -1698,23 +1683,6 @@
         "type": "integer"
       },
       "FirstName": { },
-      "IdentityPasswordUpdateDto": {
-        "required": [
-          "newPassword"
-        ],
-        "type": "object",
-        "properties": {
-          "newPassword": {
-            "type": "string"
-          },
-          "currentPassword": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
       "IQuantityOfScalarUnit": {
         "type": "object",
         "properties": {
@@ -1946,6 +1914,21 @@
               "null",
               "boolean"
             ]
+          }
+        }
+      },
+      "PasswordUpdateDto": {
+        "required": [
+          "newPassword",
+          "currentPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          },
+          "currentPassword": {
+            "type": "string"
           }
         }
       },

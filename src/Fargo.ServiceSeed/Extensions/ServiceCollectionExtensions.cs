@@ -35,8 +35,7 @@ public static class ServiceCollectionExtensions
         /// fast if the configuration is missing or invalid.
         /// </remarks>
         public IServiceCollection AddFargoDefaultAdmin(
-                IConfiguration configuration
-                )
+                IConfiguration configuration)
         {
             services
                 .AddOptions<DefaultAdminOptions>()

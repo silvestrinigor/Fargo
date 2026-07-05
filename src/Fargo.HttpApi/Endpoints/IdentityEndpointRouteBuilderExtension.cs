@@ -130,7 +130,7 @@ public static class IdentityEndpointRouteBuilderExtension
     }
 
     private static async Task<NoContent> ChangePassword(
-        IdentityPasswordUpdateDto request,
+        PasswordUpdateDto request,
         ICommandHandler<PasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {

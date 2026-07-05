@@ -1,5 +1,4 @@
 using Fargo.Application.Shared.Identity;
-using Fargo.Application.Shared.Users;
 
 namespace Fargo.HttpClient;
 
@@ -18,7 +17,7 @@ public interface IFargoIdentityClient
         CancellationToken cancellationToken = default);
 
     Task ChangePasswordAsync(
-        UserPasswordUpdateDto request,
+        PasswordUpdateDto request,
         CancellationToken cancellationToken = default);
 }
 
@@ -52,7 +51,7 @@ internal sealed class FargoIdentityClient(FargoHttpTransport transport) : IFargo
             cancellationToken);
 
     public Task ChangePasswordAsync(
-        UserPasswordUpdateDto request,
+        PasswordUpdateDto request,
         CancellationToken cancellationToken = default)
         => transport.SendNoContentAsync(
             HttpMethod.Put,

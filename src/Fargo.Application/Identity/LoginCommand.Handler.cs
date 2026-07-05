@@ -1,16 +1,13 @@
 using Fargo.Application.Articles.Commands.Handlers;
 using Fargo.Application.Shared.Identity;
-using Fargo.Core.Actors;
 using Fargo.Core.Identity;
 using Fargo.Core.Shared;
-using Fargo.Core.Shared.Actors;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
 public sealed class LoginCommandHandler(
-    ActorService actorService,
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     ITokenGenerator tokenGenerator,
@@ -76,10 +73,6 @@ public sealed class LoginCommandHandler(
             throw new PasswordChangeRequiredException(user.Guid);
         }
 
-        var actor = await actorService.GetActorByActorIdAsync(new ActorId(user.Guid, ActorType.User), cancellationToken);
-
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
-
         var accessTokenResult = tokenGenerator.Generate(user);
 
         var rawRefreshToken = refreshTokenGenerator.Generate();
@@ -101,9 +94,7 @@ public sealed class LoginCommandHandler(
         return new AuthResult(
             accessTokenResult.AccessToken,
             rawRefreshToken,
-            accessTokenResult.ExpiresAt,
-            actor.PermissionActionTypes,
-            actor.PartitionAccessGuids);
+            accessTokenResult.ExpiresAt);
     }
 }
 

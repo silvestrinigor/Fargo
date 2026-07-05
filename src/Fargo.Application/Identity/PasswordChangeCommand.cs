@@ -8,4 +8,4 @@ namespace Fargo.Application.Identity;
 /// <param name="Passwords">
 /// The current password and the new password.
 /// </param>
-public sealed record PasswordChangeCommand(IdentityPasswordUpdateDto Passwords) : ICommand;
+public sealed record PasswordChangeCommand(PasswordUpdateDto Passwords) : ICommand;
