@@ -1,65 +1,12 @@
 using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
-using Fargo.Core.Identity;
 using Fargo.Core.Items;
-using Fargo.Core.Modifiables;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using System.Collections.ObjectModel;
 
 namespace Fargo.Core.Partitions;
-
-#region Entity
-
-/// <summary>
-/// Marker interface for domain entities that belong to one or more partitions.
-/// </summary>
-/// <remarks>
-/// Implementing this interface signals that an entity participates in the
-/// partition-based access control (PBAC) model, meaning its visibility and
-/// mutability are governed by the actor's partition access set.
-/// </remarks>
-public interface IPartitionEntity : IEntity;
-
-public interface IPartitioned
-{
-    IReadOnlyCollection<Guid> PartitionGuids { get; }
-}
-
-/// <summary>
-/// Represents an entity that is associated with one or more partitions.
-/// </summary>
-public interface IPartitionedEntity
-{
-    /// <summary>
-    /// Gets the partitions associated with the entity.
-    /// </summary>
-    IReadOnlyCollection<IPartitionEntity> Partitions { get; }
-}
-
-/// <summary>
-/// Represents an entity that has access to one or more partitions.
-/// </summary>
-public interface IPartitionUser
-{
-    /// <summary>
-    /// Gets the collection of partition accesses granted to the user.
-    /// </summary>
-    IReadOnlyCollection<IPartitionAccess> PartitionAccesses { get; }
-}
-
-/// <summary>
-/// Represents a user's access to a specific partition.
-/// </summary>
-public interface IPartitionAccess
-{
-    /// <summary>
-    /// Gets the partition associated with this access.
-    /// </summary>
-    Partition Partition { get; }
-}
 
 /// <summary>
 /// Represents a partition used to isolate and scope access to domain entities.
@@ -79,51 +26,16 @@ public interface IPartitionAccess
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModifiedType>, IPartitionEntity, IActivable
+public class Partition : Entity, IPartition, IActivable
 {
     public static Partition CreatePartition(Name name, Description? description = null)
         => new(name, description);
-
-    public static Partition CreatePartition(Guid guid, Name name, Description? description = null)
-        => new(name, description)
-        {
-            Guid = guid
-        };
-
-    public static Partition CreatePartition(Name name, Actor actor, Description? description = null)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreatePartition);
-
-        var partition = new Partition(name, description);
-
-        partition.MarkAsEditedBy(actor.Guid);
-        partition.MarkModificationType(PartitionModifiedType.General);
-
-        return partition;
-    }
-
-    public static Partition CreatePartition(Guid guid, Name name, Actor actor, Description? description = null)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-        actor.ValidateHasPermission(ActionType.CreatePartition);
-
-        var partition = new Partition(name, description)
-        {
-            Guid = guid
-        };
-
-        partition.MarkAsEditedBy(actor.Guid);
-        partition.MarkModificationType(PartitionModifiedType.General);
-
-        return partition;
-    }
 
     private Partition()
     {
     }
 
-    private Partition(Name name, Description? description = null)
+    public Partition(Name name, Description? description = null)
     {
         Name = name;
         Description = description ?? Description.Empty;
@@ -132,114 +44,17 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
     /// <summary>
     /// Gets or sets the name of the partition.
     /// </summary>
-    /// <remarks>
-    /// The name identifies the partition and must satisfy the validation
-    /// rules defined by <see cref="Name"/>.
-    /// </remarks>
-    public Name Name { get; private set; }
+    public Name Name { get; set; }
 
     /// <summary>
     /// Gets or sets the description of the partition.
     /// </summary>
-    /// <remarks>
-    /// This field provides additional contextual information about the
-    /// purpose or scope of the partition. If not explicitly defined,
-    /// it defaults to <see cref="Description.Empty"/>.
-    /// </remarks>
-    public Description Description { get; private set; } = Description.Empty;
+    public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the partition is active.
     /// </summary>
-    /// <remarks>
-    /// Inactive partitions should not be considered available for new access
-    /// assignments or operational use, depending on application rules.
-    /// </remarks>
-    public bool IsActive { get; private set; } = true;
-
-    public void Rename(Name name)
-    {
-        if (Name == name)
-        {
-            return;
-        }
-
-        Name = name;
-    }
-
-    public void Rename(Name name, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (Name == name)
-        {
-            return;
-        }
-
-        Name = name;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(PartitionModifiedType.General);
-    }
-
-    public void ChangeDescription(Description description)
-    {
-        if (Description == description)
-        {
-            return;
-        }
-
-        Description = description;
-    }
-
-    public void ChangeDescription(Description description, Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (Description == description)
-        {
-            return;
-        }
-
-        Description = description;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(PartitionModifiedType.General);
-    }
-
-    public void Activate() => IsActive = true;
-
-    public void Deactivate() => IsActive = false;
-
-    public void Activate(Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (IsActive)
-        {
-            return;
-        }
-
-        IsActive = true;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(PartitionModifiedType.Activated);
-    }
-
-    public void Deactivate(Actor actor)
-    {
-        ValidateCanEdit(actor);
-
-        if (!IsActive)
-        {
-            return;
-        }
-
-        IsActive = false;
-
-        MarkAsEditedBy(actor.Guid);
-        MarkModificationType(PartitionModifiedType.Deactivated);
-    }
+    public bool IsActive { get; set; } = true;
 
     #region ParentPartition
 
@@ -386,138 +201,4 @@ public class Partition : Entity, IModifiable, IModifiableTypes<PartitionModified
 
     #endregion UserGroup
 
-    #region Modified
-
-    public void ValidateCanEdit(Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-
-        actor.ValidateHasPermission(ActionType.EditPartition);
-        actor.ValidateHasPartitionAccess(Guid);
-    }
-
-    public void ValidateCanDelete(Actor actor)
-    {
-        ArgumentNullException.ThrowIfNull(actor);
-
-        actor.ValidateHasPermission(ActionType.DeletePartition);
-        actor.ValidateHasPartitionAccess(Guid);
-    }
-
-    public Guid? EditedByActorGuid { get; private set; }
-
-    public void MarkAsEditedBy(Guid actorGuid)
-    {
-        EditedByActorGuid = actorGuid;
-    }
-
-    public PartitionModifiedType ModificationTypes { get; private set; }
-
-    public IReadOnlySet<PartitionModifiedType> GetModificationTypes()
-    {
-        HashSet<PartitionModifiedType> result = [];
-
-        foreach (PartitionModifiedType value in Enum.GetValues<PartitionModifiedType>())
-        {
-            if (value == PartitionModifiedType.None)
-            {
-                continue;
-            }
-
-            if ((ModificationTypes & value) != 0)
-            {
-                result.Add(value);
-            }
-        }
-
-        return result;
-    }
-
-    public bool IsEditStarted { get; private set; }
-
-    public void MarkModificationType(PartitionModifiedType modificationType)
-    {
-        if (!IsEditStarted)
-        {
-            ModificationTypes = PartitionModifiedType.None;
-            IsEditStarted = true;
-        }
-
-        ModificationTypes |= modificationType;
-    }
-
-    #endregion Modified
 }
-
-#endregion Entity
-
-#region Collections
-
-/// <summary>
-/// Represents a collection of <see cref="Partition"/> instances associated with an entity.
-/// </summary>
-/// <remarks>
-/// This collection enforces domain rules for entity partitions, such as preventing
-/// duplicate items and rejecting <see langword="null"/> values.
-/// </remarks>
-public sealed class PartitionCollection : Collection<Partition>
-{
-    /// <summary>
-    /// Initializes an empty <see cref="PartitionCollection"/>.
-    /// </summary>
-    public PartitionCollection()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new <see cref="PartitionCollection"/> with the specified partitions.
-    /// </summary>
-    /// <param name="partitions">
-    /// The partitions to populate the collection with.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partitions"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the collection contains duplicate partitions.
-    /// </exception>
-    public PartitionCollection(IEnumerable<Partition> partitions)
-    {
-        ArgumentNullException.ThrowIfNull(partitions);
-
-        foreach (var partition in partitions)
-        {
-            Add(partition);
-        }
-    }
-
-    /// <inheritdoc />
-    protected override void InsertItem(int index, Partition item)
-    {
-        ArgumentNullException.ThrowIfNull(item);
-
-        if (Items.Contains(item))
-        {
-            throw new InvalidOperationException(
-                "The partition already exists in the collection.");
-        }
-
-        base.InsertItem(index, item);
-    }
-
-    /// <inheritdoc />
-    protected override void SetItem(int index, Partition item)
-    {
-        ArgumentNullException.ThrowIfNull(item);
-
-        if (Items.Contains(item) && !ReferenceEquals(Items[index], item))
-        {
-            throw new InvalidOperationException(
-                "The partition already exists in the collection.");
-        }
-
-        base.SetItem(index, item);
-    }
-}
-
-#endregion Collections

@@ -21,5 +21,19 @@ public static class ValidateActiveExtension
                 throw new EntityNotActiveException<TEntity>(entity);
             }
         }
+
+        /// <summary>
+        /// Validates that the entity is not active.
+        /// </summary>
+        /// <exception cref="EntityActiveException{TEntity}">
+        /// Thrown when the entity is not inactive.
+        /// </exception>
+        public void ValidateIsNotActive()
+        {
+            if (entity.IsActive)
+            {
+                throw new EntityActiveException<TEntity>(entity);
+            }
+        }
     }
 }

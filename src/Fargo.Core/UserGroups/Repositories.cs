@@ -10,7 +10,7 @@ public interface IUserGroupRepository
     /// <summary>
     /// Gets a user group by its unique identifier.
     /// </summary>
-    Task<UserGroup?> GetByGuid(
+    Task<UserGroup?> GetByGuidAsync(
         Guid entityGuid,
         CancellationToken cancellationToken = default
     );

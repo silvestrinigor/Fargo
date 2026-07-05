@@ -1,0 +1,5 @@
+{
+    "appHost": {
+        "path": "src/Fargo.AppHost/Fargo.AppHost.csproj"
+    }
+}

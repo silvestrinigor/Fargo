@@ -1,4 +1,4 @@
-using Fargo.Core.Identity;
+using Fargo.Core.Actors;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;
 
@@ -92,8 +92,6 @@ public class UserGroupService(
         ArgumentNullException.ThrowIfNull(userGroup);
         ArgumentNullException.ThrowIfNull(actor);
         ArgumentNullException.ThrowIfNull(actorUserGroupGuids);
-
-        userGroup.ValidateCanDelete(actor);
 
         if (actorUserGroupGuids.Contains(userGroup.Guid))
         {

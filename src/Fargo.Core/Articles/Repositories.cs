@@ -10,58 +10,57 @@ public interface IArticleRepository
     /// <summary>
     /// Gets an article by its unique identifier.
     /// </summary>
-    Task<Article?> GetByGuid(
+    Task<Article?> GetByGuidAsync(
         Guid entityGuid,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByEan13Async(
         Ean13 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByEan8Async(
         Ean8 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByUpcEAsync(
         UpcE code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByUpcAAsync(
         UpcA code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByCode128Async(
         Code128 code,
         CancellationToken cancellationToken = default
     );
 
-
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByCode39Async(
         Code39 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByItf14Async(
         Itf14 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByGs1128Async(
         Gs1128 code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByQrCodeAsync(
         QrCode code,
         CancellationToken cancellationToken = default
     );
 
-    Task<bool> ExistsByBarcode(
+    Task<bool> ExistsByDataMatrixAsync(
         DataMatrix code,
         CancellationToken cancellationToken = default
     );
@@ -69,7 +68,7 @@ public interface IArticleRepository
     /// <summary>
     /// Determines whether the specified article has any associated items.
     /// </summary>
-    Task<bool> HasItemsAssociated(
+    Task<bool> HasItemsAssociatedAsync(
         Guid articleGuid,
         CancellationToken cancellationToken = default
     );

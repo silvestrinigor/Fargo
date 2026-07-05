@@ -92,9 +92,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("nvarchar(8)");
 
-                    b.Property<Guid?>("EditedByGuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Gs1128")
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
@@ -125,11 +122,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Mass");
-
-                    b.Property<int>("ModificationTypes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -217,55 +209,6 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("Fargo.Core.Events.EntityEvent", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ActorGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EntityGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("EntityType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Guid");
-
-                    b.HasIndex("ActorGuid");
-
-                    b.HasIndex("EntityType");
-
-                    b.HasIndex("EventType");
-
-                    b.HasIndex("EntityGuid", "OccurredAt");
-
-                    b.ToTable("EntityEvents", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.EntityPartitionEvent", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Guid");
-
-                    b.HasIndex("PartitionGuid");
-
-                    b.ToTable("EntityPartitionEvents", (string)null);
-                });
-
             modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -330,21 +273,10 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid>("ArticleGuid")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("EditedByGuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
-
-                    b.Property<bool>("IsEditStarted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ModificationTypes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
 
                     b.Property<Guid?>("ParentContainerGuid")
                         .HasColumnType("uniqueidentifier");
@@ -382,26 +314,6 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.ItemMovement", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("FromParentContainerGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ToParentContainerGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Guid");
-
-                    b.HasIndex("FromParentContainerGuid");
-
-                    b.HasIndex("ToParentContainerGuid");
-
-                    b.ToTable("ItemMovements", (string)null);
-                });
-
             modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -413,19 +325,8 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("EditedByGuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsEditStarted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ModificationTypes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -473,19 +374,8 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("EditedByGuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsEditStarted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ModificationTypes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
 
                     b.Property<string>("Nameid")
                         .IsRequired()
@@ -620,9 +510,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("EditedByGuid")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("FirstName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -630,17 +517,9 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsEditStarted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("ModificationTypes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
 
                     b.Property<string>("Nameid")
                         .IsRequired()
@@ -1060,17 +939,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Variation");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Events.EntityPartitionEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Events.EntityEvent", "Event")
-                        .WithOne()
-                        .HasForeignKey("Fargo.Core.Events.EntityPartitionEvent", "Guid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-                });
-
             modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
                 {
                     b.HasOne("Fargo.Core.Users.User", null)
@@ -1094,17 +962,6 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.ItemMovement", b =>
-                {
-                    b.HasOne("Fargo.Core.Events.EntityEvent", "Event")
-                        .WithOne()
-                        .HasForeignKey("Fargo.Core.Items.ItemMovement", "Guid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>

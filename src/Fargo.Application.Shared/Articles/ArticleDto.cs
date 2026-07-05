@@ -12,6 +12,4 @@ public sealed record ArticleDto(
     ArticleMetricsDto Metrics,
     ArticleBarcodesDto Barcodes,
     IReadOnlyCollection<Guid> Partitions,
-    bool IsActive,
-    Guid? EditedByGuid
-);
+    bool IsActive);

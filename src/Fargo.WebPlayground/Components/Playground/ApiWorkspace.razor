@@ -23,8 +23,6 @@
 
     private bool isBusy;
     private OperationResult? result;
-    private PlaygroundResource? loadedListResource;
-    private Guid? loadedEntityGuid;
     private string? selectedArticleOperation;
     private string? selectedItemOperation;
     private string? selectedUserOperation;
@@ -322,6 +320,7 @@
                         <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="GetArticleByBarcodeAsync">Get by barcode</FluentButton>
                     </div>
                     break;
+                    
                 case OperationIds.Create:
                     @ArticleCreateFields()
                     <div class="request-actions">
@@ -1105,7 +1104,7 @@
         "Password changed",
         async client =>
         {
-            await client.Identity.ChangePasswordAsync(new UserPasswordUpdateDto(
+            await client.Identity.ChangePasswordAsync(new PasswordUpdateDto(
                 RequiredText(accountPassword.NewPassword, "New password"),
                 RequiredText(accountPassword.CurrentPassword, "Current password")));
             accountPassword.CurrentPassword = string.Empty;
@@ -1174,42 +1173,18 @@
         var color = Clean(articleCreate.Color);
 
         return new ArticleCreateDto(
-            new Name(RequiredText(articleCreate.Name, "Name")),
-            articleCreate.ArticleType,
-            description == null ? null :new Description(description),
-            ParseNullableTimeSpan(articleCreate.ShelfLife, "Shelf life"),
-            null,
-            BuildArticleMetrics(articleCreate.Metrics),
-            BuildArticleBarcodes(articleCreate.Barcodes),
-            ParseGuidList(articleCreate.PartitionsText, "Partitions"),
-            OptionalBool(articleCreate.IncludeIsActive, articleCreate.IsActive),
-            articleCreate.ArticleType == ArticleType.Variation
-                ? new ArticleCreateVariationDto(RequiredGuid(articleCreate.FromArticleGuid, "From article GUID"))
-                : null,
-            articleCreate.ArticleType == ArticleType.Pack
-                ? new ArticleCreatePackDto(
-                    RequiredGuid(articleCreate.FromArticleGuid, "From article GUID"),
-                    1.Amount())
-                : null,
-            articleCreate.ArticleType == ArticleType.Kit
-                ? new ArticleCreateKitDto(ParseKitPacks(articleCreate.KitPacksText))
-                : null,
-            articleCreate.ArticleType == ArticleType.Container && maxMass is not null
-                ? null
-                : null);
+            new Name(RequiredText(articleCreate.Name, "Name"))
+            );
     }
 
-    private ArticlePatchDto BuildArticlePatchRequest()
+    private ArticleUpdateDto BuildArticlePatchRequest()
     {
-        var request = new ArticlePatchDto
+        var request = new ArticleUpdateDto
         {
             Name = articlePatch.IncludeName ? new Name(articlePatch.Name ?? "Article name") : null,
             Description = articlePatch.IncludeDescription ? new Description(articlePatch.Description ?? "") : null,
             ShelfLife = null,
             RemoveShelfLife =  null,
-            Metrics = articlePatch.IncludeMetrics ? BuildArticleMetrics(articlePatch.Metrics) : null,
-            Barcodes = articlePatch.IncludeBarcodes ? BuildArticleBarcodes(articlePatch.Barcodes) : null,
-            Partitions = articlePatch.IncludePartitions ? ParseGuidList(articlePatch.PartitionsText, "Partitions") : null,
             IsActive = OptionalBool(articlePatch.IncludeIsActive, articlePatch.IsActive)
         };
 
@@ -1224,28 +1199,6 @@
     private static ArticleBarcodesDto? BuildArticleBarcodes(ArticleBarcodesForm form)
     {
         return null;
-    }
-
-    private static IReadOnlyCollection<ArticleCreateKitPackDto> ParseKitPacks(string? value)
-    {
-        var rows = SplitLines(value);
-        if (rows.Count == 0)
-        {
-            throw new InvalidOperationException("Kit packs require at least one 'articleGuid,quantity' line.");
-        }
-
-        return rows.Select((row, index) =>
-        {
-            var parts = row.Split(',', StringSplitOptions.TrimEntries);
-            if (parts.Length != 2)
-            {
-                throw new InvalidOperationException($"Kit pack line {index + 1} must be 'articleGuid,quantity'.");
-            }
-
-            return new ArticleCreateKitPackDto(
-                RequiredGuid(parts[0], $"Kit pack line {index + 1} article GUID"),
-                1.Amount());
-        }).ToArray();
     }
 
     private static UnitValueDto? BuildUnitValue(UnitValueForm form, string label)
@@ -1912,8 +1865,7 @@
                 @DetailValue("Data Matrix", article.Barcodes.DataMatrix)
             </div>
         </section>
-        @GuidCollection("Partitions", article.Partitions)
-        @EditedBy(article.EditedByGuid)
+        @GuidCollection("Partitions", article.Partitions))
     </section>;
 
     private RenderFragment ItemTable(IReadOnlyCollection<ItemDto> rows) => @<div class="table-wrap fluent-grid-wrap">
@@ -1931,8 +1883,7 @@
             @DetailValue("Parent container", item.ParentContainerGuid?.ToString("D"))
             @DetailValue("Active", item.IsActive ? "Yes" : "No")
         </div>
-        @GuidCollection("Partitions", item.Partitions)
-        @EditedBy(item.EditedByGuid)
+        @GuidCollection("Partitions", item.Partitions))
     </section>;
 
     private RenderFragment UserTable(IReadOnlyCollection<UserDto> rows) => @<div class="table-wrap fluent-grid-wrap">
@@ -1954,8 +1905,7 @@
         </div>
         @PermissionCollection("Permissions", user.Permissions.Select(static permission => permission.Action))
         @GuidCollection("Partitions", user.Partitions)
-        @GuidCollection("User groups", user.UserGroups)
-        @EditedBy(user.EditedByGuid)
+        @GuidCollection("User groups", user.UserGroups))
     </section>;
 
     private RenderFragment UserGroupTable(IReadOnlyCollection<UserGroupDto> rows) => @<div class="table-wrap fluent-grid-wrap">
@@ -1972,8 +1922,7 @@
             @DetailValue("Active", userGroup.IsActive ? "Yes" : "No")
         </div>
         @PermissionCollection("Permissions", userGroup.Permissions.Select(static permission => permission.Action))
-        @GuidCollection("Partitions", userGroup.Partitions)
-        @EditedBy(userGroup.EditedByGuid)
+        @GuidCollection("Partitions", userGroup.Partitions))
     </section>;
 
     private RenderFragment PartitionTable(IReadOnlyCollection<PartitionDto> rows) => @<div class="table-wrap fluent-grid-wrap">
@@ -1988,21 +1937,15 @@
             @DetailValue("Guid", partition.Guid.ToString("D"))
             @DetailValue("Description", partition.Description)
             @DetailValue("Parent", partition.ParentPartitionGuid?.ToString("D"))
-            @DetailValue("Active", partition.IsActive ? "Yes" : "No")
+            @DetailValue("Active", partition.IsActive ? "Yes" : "No"))
         </div>
-        @EditedBy(partition.EditedByGuid)
     </section>;
 
     private RenderFragment AuthDetail(AuthResult auth) => @<section class="detail-panel auth-detail">
         <h3>Current auth</h3>
         <div class="summary-grid auth-summary">
             <div class="summary-item"><span>Expires</span><strong data-testid="playground-auth-expires">@auth.ExpiresAt.LocalDateTime</strong></div>
-            <div class="summary-item"><span>Admin</span><strong data-testid="playground-auth-admin">@auth.IsAdmin</strong></div>
-            <div class="summary-item"><span>Permissions</span><strong data-testid="playground-auth-permissions">@auth.PermissionActions.Count</strong></div>
-            <div class="summary-item"><span>Partitions</span><strong data-testid="playground-auth-partitions">@auth.PartitionAccesses.Count</strong></div>
         </div>
-        @PermissionCollection("Permission actions", auth.PermissionActions)
-        @GuidCollection("Partition accesses", auth.PartitionAccesses)
     </section>;
 
     private void SelectArticle(ArticleDto article)

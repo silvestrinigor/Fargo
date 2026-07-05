@@ -2,7 +2,6 @@ using Fargo.Application.Identity;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.ServiceMigration;
-using Fargo.ServiceMigration.Security;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -14,7 +13,7 @@ builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(MigrationServic
 
 builder.Services.AddFargoMigrationInfrastructure(builder.Configuration);
 
-builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<ICurrentActor, EmptyCurrentActor>();
 
 var host = builder.Build();
 

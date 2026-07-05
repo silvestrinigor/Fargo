@@ -1,4 +1,4 @@
-using Fargo.Application.Identity;
+using Fargo.Application.System;
 
 namespace Fargo.ServiceSeed.Extensions;
 
@@ -35,8 +35,7 @@ public static class ServiceCollectionExtensions
         /// fast if the configuration is missing or invalid.
         /// </remarks>
         public IServiceCollection AddFargoDefaultAdmin(
-                IConfiguration configuration
-                )
+                IConfiguration configuration)
         {
             services
                 .AddOptions<DefaultAdminOptions>()
@@ -45,6 +44,19 @@ public static class ServiceCollectionExtensions
                         "DefaultAdmin:Nameid must be provided.")
                 .Validate(o => !string.IsNullOrWhiteSpace(o.Password),
                         "DefaultAdmin:Password must be provided.")
+                .ValidateOnStart();
+
+            services
+                .AddOptions<AdministratorsUserGroupOptions>()
+                .Bind(configuration.GetSection(AdministratorsUserGroupOptions.SectionName))
+                .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid),
+                        "DefaultAdmin:Nameid must be provided.")
+                .ValidateOnStart();
+
+            services.AddOptions<GlobalPartitionOptions>()
+                .Bind(configuration.GetSection(GlobalPartitionOptions.SectionName))
+                .Validate(o => !string.IsNullOrWhiteSpace(o.Name),
+                    "GlobalPartition:Name must be provided.")
                 .ValidateOnStart();
 
             return services;
