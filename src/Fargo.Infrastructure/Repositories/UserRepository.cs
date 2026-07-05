@@ -20,7 +20,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 
     public void Remove(User user) => users.Remove(user);
 
-    public Task<User?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+    public Task<User?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => IncludeAggregate(users)
             .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
 
@@ -34,7 +34,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     public Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default)
         => users.AnyAsync(user => user.Nameid == nameid, cancellationToken);
 
-    public async Task<UserDto?> GetInfoByGuid(
+    public async Task<UserDto?> GetInfoByGuidAsync(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
@@ -54,7 +54,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         return user;
     }
 
-    public async Task<IReadOnlyCollection<UserDto>> GetManyInfo(
+    public async Task<IReadOnlyCollection<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

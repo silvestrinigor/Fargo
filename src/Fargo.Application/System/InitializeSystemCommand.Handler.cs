@@ -23,13 +23,13 @@ public sealed class InitializeSystemCommandHandler(
         InitializeSystemCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("System initialization flow started.");
+        logger.InitializeSystemStarted();
 
         var anyUser = await userRepository.Any(cancellationToken);
 
         if (anyUser)
         {
-            logger.LogInformation("System initialization flow skipped because users already exist.");
+            logger.InitializeSystemSkiped();
 
             return;
         }
@@ -51,7 +51,7 @@ public sealed class InitializeSystemCommandHandler(
             globalPartitionCreated = true;
         }
 
-        var administratorsGroup = await userGroupRepository.GetByGuid(UserGroupService.AdministratorsUserGroupGuid, cancellationToken);
+        var administratorsGroup = await userGroupRepository.GetByGuidAsync(UserGroupService.AdministratorsUserGroupGuid, cancellationToken);
 
         var allActions = Enum.GetValues<ActionType>();
 
@@ -108,10 +108,6 @@ public sealed class InitializeSystemCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("System initialization flow completed. Global partition created: {}. Administrators group created: {}. Admin user created: {}",
-            globalPartitionCreated, administratorsGroupCreated, true);
-        }
+        logger.InitializeSystemCompleted(globalPartitionCreated, administratorsGroupCreated, true);
     }
 }

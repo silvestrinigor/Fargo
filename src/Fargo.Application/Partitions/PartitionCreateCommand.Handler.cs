@@ -19,10 +19,7 @@ public sealed class PartitionCreateCommandHandler(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("Partition create flow started by actor {actorId}.", currentActor.ActorId);
-        }
+        logger.CreateStarted(currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -52,12 +49,7 @@ public sealed class PartitionCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Partition create mutation completed for partition {partitionGuid} by actor {actorId}.",
-                partition.Guid, actor.ActorId);
-        }
+        logger.CreateCompleted(partition.Guid, currentActor.ActorId);
 
         return partition.Guid;
     }

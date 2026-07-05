@@ -17,30 +17,20 @@ public sealed class UserSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User single query started for user {userGuid} by actor {actorId}.",
-                query.UserGuid, currentActor.ActorId);
-        }
+        logger.SingleQueryStarted(query.UserGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        var user = await userRepository.GetInfoByGuid(
+        var user = await userRepository.GetInfoByGuidAsync(
             query.UserGuid,
             query.AsOfDateTime,
             actor.PartitionAccessGuids,
             notChildOfAnyPartition: true,
             cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User single query completed for user {userGuid} by actor {actorId}. Found: {Found}.",
-                query.UserGuid, actor.ActorId, user is not null);
-        }
+        logger.SingleQueryCompleted(query.UserGuid, currentActor.ActorId, user is not null);
 
         return user;
     }

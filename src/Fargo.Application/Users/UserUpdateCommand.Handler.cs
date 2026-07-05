@@ -18,12 +18,7 @@ public sealed class UserUpdateCommandHandler(
         UserUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User update flow started for user {userGuid} by actor {actorId}.",
-                command.UserGuid, currentActor.ActorId);
-        }
+        logger.UpdateStarted(command.UserGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -31,7 +26,7 @@ public sealed class UserUpdateCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.EditUser);
 
-        var user = await userRepository.GetByGuid(command.UserGuid, cancellationToken);
+        var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(user);
 
@@ -47,11 +42,6 @@ public sealed class UserUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User update mutation completed for user {userGuid} by actor {actorId}.",
-                user.Guid, actor.ActorId);
-        }
+        logger.UpdateCompleted(command.UserGuid, currentActor.ActorId);
     }
 }

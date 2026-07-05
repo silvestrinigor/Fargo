@@ -36,7 +36,7 @@ public sealed class RefreshCommandHandler(
             throw new UnauthorizedAccessException();
         }
 
-        var user = await userRepository.GetByGuid(storedOldRefreshToken.UserGuid, cancellationToken);
+        var user = await userRepository.GetByGuidAsync(storedOldRefreshToken.UserGuid, cancellationToken);
 
         if (user is null)
         {

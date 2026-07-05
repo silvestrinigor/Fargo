@@ -17,33 +17,20 @@ public sealed class UserGroupSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User group single query started for user group {userGroupGuid} by actor {actorId}.",
-                query.UserGroupGuid,
-                currentActor.ActorId);
-        }
+        logger.SingleQueryStarted(query.UserGroupGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        var userGroup = await userGroupRepository.GetInfoByGuid(
+        var userGroup = await userGroupRepository.GetInfoByGuidAsync(
             query.UserGroupGuid,
             query.AsOfDateTime,
             actor.PartitionAccessGuids,
             notChildOfAnyPartition: true,
             cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User group single query completed for user group {userGroupGuid} by actor {actorGuid}. Found: {found}.",
-                query.UserGroupGuid,
-                actor.ActorId,
-                userGroup is not null);
-        }
+        logger.SingleQueryCompleted(query.UserGroupGuid, currentActor.ActorId, userGroup is not null);
 
         return userGroup;
     }

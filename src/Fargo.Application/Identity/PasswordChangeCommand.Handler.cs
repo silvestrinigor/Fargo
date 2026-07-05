@@ -25,7 +25,7 @@ public sealed class PasswordChangeCommandHandler(
 
         var userGuid = currentActor.ActorId.Guid;
 
-        var user = await userRepository.GetByGuid(
+        var user = await userRepository.GetByGuidAsync(
             userGuid,
             cancellationToken);
 

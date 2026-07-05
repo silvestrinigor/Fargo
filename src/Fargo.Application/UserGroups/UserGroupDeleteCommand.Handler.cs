@@ -17,19 +17,13 @@ public sealed class UserGroupDeleteCommandHandler(
         UserGroupDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group delete flow started for user group {userGroupGuid} by actor {actorId}.",
-                command.UserGroupGuid,
-                currentActor.ActorId);
-        }
+        logger.DeleteStarted(command.UserGroupGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        var userGroup = await userGroupRepository.GetByGuid(command.UserGroupGuid, cancellationToken);
+        var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(userGroup);
 
@@ -37,11 +31,6 @@ public sealed class UserGroupDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group delete mutation completed for user group {userGroupGuid} by actor {actorId}.",
-                userGroup.Guid, actor.ActorId);
-        }
+        logger.DeleteCompleted(command.UserGroupGuid, currentActor.ActorId);
     }
 }

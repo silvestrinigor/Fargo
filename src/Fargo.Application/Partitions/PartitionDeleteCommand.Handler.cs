@@ -18,12 +18,7 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Partition delete flow started for partition {partitionGuid} by actor {actorId}.",
-                command.PartitionGuid, currentActor.ActorId);
-        }
+        logger.DeleteStarted(command.PartitionGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -39,11 +34,6 @@ public sealed class PartitionDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Partition delete mutation completed for partition {partitionGuid} by actor {actorId}.",
-                partition.Guid, actor.ActorId);
-        }
+        logger.DeleteCompleted(command.PartitionGuid, currentActor.ActorId);
     }
 }

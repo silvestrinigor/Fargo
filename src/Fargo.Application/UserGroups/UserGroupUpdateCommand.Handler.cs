@@ -21,12 +21,7 @@ public sealed class UserGroupUpdateCommandHandler(
     {
         var update = command.Update;
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group update flow started for user group {UserGroupGuid} by actor {actorId}.",
-                command.UserGroupGuid, currentActor.ActorId);
-        }
+        logger.UpdateStarted(command.UserGroupGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -34,7 +29,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.EditUserGroup);
 
-        var userGroup = await userGroupRepository.GetByGuid(command.UserGroupGuid, cancellationToken);
+        var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(userGroup);
 
@@ -64,11 +59,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group update mutation completed for user group {UserGroupGuid} by actor {actorId}.",
-                userGroup.Guid, actor.ActorId);
-        }
+        logger.UpdateCompleted(command.UserGroupGuid, currentActor.ActorId);
     }
 }

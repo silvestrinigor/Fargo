@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Users;
 
-
 public sealed class UsersQueryHandler(
     ActorService actorService,
     IUserQueryRepository userRepository,
@@ -15,15 +14,9 @@ public sealed class UsersQueryHandler(
 {
     public async Task<IReadOnlyCollection<UserDto>> HandleAsync(
         UsersQuery query,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Users query started for actor {actorId}. Page: {page}. Limit: {limit}.",
-                currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
-        }
+        logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -35,19 +28,14 @@ public sealed class UsersQueryHandler(
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
-        var users = await userRepository.GetManyInfo(
+        var users = await userRepository.GetManyInfoAsync(
             query.WithPagination,
             query.TemporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition,
             cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Users query completed for actor {actorId}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.",
-                actor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0, childOfAnyOfThesePartitions?.Count ?? 0, users.Count);
-        }
+        logger.ManyQueryCompleted(currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0, childOfAnyOfThesePartitions?.Count ?? 0, users.Count);
 
         return users;
     }

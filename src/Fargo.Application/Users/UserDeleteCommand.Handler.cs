@@ -18,12 +18,7 @@ public sealed class UserDeleteCommandHandler(
         UserDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User delete flow started for user {userGuid} by actor {actorId}.",
-                command.UserGuid, currentActor.ActorId);
-        }
+        logger.UserDeleteCompleted(command.UserGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -31,7 +26,7 @@ public sealed class UserDeleteCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteUser);
 
-        var user = await userRepository.GetByGuid(command.UserGuid, cancellationToken);
+        var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(user);
 
@@ -39,11 +34,6 @@ public sealed class UserDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User delete mutation completed for user {userGuid} by actor {actorId}.",
-                user.Guid, actor.ActorId);
-        }
+        logger.UserDeleteCompleted(command.UserGuid, currentActor.ActorId);
     }
 }

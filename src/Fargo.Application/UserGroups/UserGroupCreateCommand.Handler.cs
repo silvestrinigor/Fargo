@@ -7,9 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
-/// <summary>
-/// Handles user group creation, including optional create-time state.
-/// </summary>
 public sealed class UserGroupCreateCommandHandler(
     ActorService actorService,
     UserGroupService userGroupService,
@@ -24,10 +21,7 @@ public sealed class UserGroupCreateCommandHandler(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("User group create flow started by actor {actorId}.", currentActor.ActorId);
-        }
+        logger.CreateStarted(currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -72,12 +66,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User group create mutation completed for user group {userGroupGuid} by actor {actorId}.",
-                userGroup.Guid, actor.ActorId);
-        }
+        logger.CreateCompleted(userGroup.Guid, currentActor.ActorId);
 
         return userGroup.Guid;
     }

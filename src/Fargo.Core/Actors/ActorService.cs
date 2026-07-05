@@ -30,7 +30,7 @@ public sealed class ActorService(
 
     private async Task<Actor?> GetUserActorByGuid(Guid guid, CancellationToken cancellationToken = default)
     {
-        var user = await userRepository.GetByGuid(guid, cancellationToken);
+        var user = await userRepository.GetByGuidAsync(guid, cancellationToken);
 
         if (user is null || !user.IsActive)
         {

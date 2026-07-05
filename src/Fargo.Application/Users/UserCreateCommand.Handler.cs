@@ -24,10 +24,7 @@ public sealed class UserCreateCommandHandler(
         UserCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("User create flow started by actor {actorId}.", currentActor.ActorId);
-        }
+        logger.UserCreateStarted(currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -65,7 +62,7 @@ public sealed class UserCreateCommandHandler(
 
         user.MarkPasswordChangeAsRequired();
 
-        await userService.ValidateUserCreate(user, cancellationToken);
+        await userService.ValidateUserCreateAsync(user, cancellationToken);
 
         user.FirstName = create.FirstName ?? null;
 
@@ -106,7 +103,7 @@ public sealed class UserCreateCommandHandler(
         {
             foreach (var userGroupGuid in userGroups.Distinct())
             {
-                var userGroup = await userGroupRepository.GetByGuid(userGroupGuid, cancellationToken);
+                var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
 
                 EntityAssertFound.ThrowNotFoundIfNull(userGroup);
 
@@ -120,13 +117,7 @@ public sealed class UserCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "User create mutation completed for user {userGuid} by actor {actorId}.",
-                user.Guid,
-                actor.ActorId);
-        }
+        logger.UserCreateCompleted(user.Guid, currentActor.ActorId);
 
         return user.Guid;
     }

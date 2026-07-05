@@ -10,7 +10,7 @@ public interface IUserRepository
     /// <summary>
     /// Gets a user by its unique identifier.
     /// </summary>
-    Task<User?> GetByGuid(
+    Task<User?> GetByGuidAsync(
         Guid entityGuid,
         CancellationToken cancellationToken = default
     );

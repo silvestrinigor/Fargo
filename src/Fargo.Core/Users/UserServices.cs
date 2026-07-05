@@ -30,7 +30,7 @@ public class UserService(
     public static Guid DefaultAdministratorUserGuid =>
         new(DefaultAdministratorUserGuidString);
 
-    public async Task ValidateUserCreate(
+    public async Task ValidateUserCreateAsync(
         User user,
         CancellationToken cancellationToken = default)
     {

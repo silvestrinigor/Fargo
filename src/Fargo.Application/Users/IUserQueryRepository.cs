@@ -4,7 +4,7 @@ namespace Fargo.Application.Users;
 
 public interface IUserQueryRepository
 {
-    Task<UserDto?> GetInfoByGuid(
+    Task<UserDto?> GetInfoByGuidAsync(
         Guid entityGuid,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
@@ -12,7 +12,7 @@ public interface IUserQueryRepository
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<UserDto>> GetManyInfo(
+    Task<IReadOnlyCollection<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

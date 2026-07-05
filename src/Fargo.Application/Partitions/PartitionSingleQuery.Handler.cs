@@ -1,10 +1,12 @@
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.Partitions;
+using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
 
 public sealed class PartitionSingleQueryHandler(
+    ActorService actorService,
     IPartitionQueryRepository partitionRepository,
     ICurrentActor currentActor,
     ILogger<PartitionSingleQueryHandler> logger
@@ -13,25 +15,18 @@ public sealed class PartitionSingleQueryHandler(
     public async Task<PartitionDto?> HandleAsync(
         PartitionSingleQuery query, CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Partition single query started for partition {partitionGuid} by actor {actorId}.",
-                query.PartitionGuid, currentActor.ActorId);
-        }
+        logger.SingleQueryStarted(query.PartitionGuid, currentActor.ActorId);
+
+        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+
+        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
         var partition = await partitionRepository.GetInfoByGuid(
-            query.PartitionGuid, query.AsOfDateTime, childOfAnyOfThesePartitions: null,
-            notChildOfAnyPartition: null, cancellationToken);
+            query.PartitionGuid, query.AsOfDateTime,
+            childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
+            notChildOfAnyPartition: true, cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Partition single query completed for partition {partitionGuid} by actor {actorId}. Found: {Found}.",
-                query.PartitionGuid,
-                currentActor.ActorId,
-                partition is not null);
-        }
+        logger.SingleQueryCompleted(query.PartitionGuid, currentActor.ActorId, partition is not null);
 
         return partition;
     }

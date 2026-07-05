@@ -15,14 +15,7 @@ public sealed class PartitionsQueryHandler(
     public async Task<IReadOnlyCollection<PartitionDto>> HandleAsync(
         PartitionsQuery query, CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Partitions query started for actor {actorId}. Page: {page}. Limit: {limit}.",
-                currentActor.ActorId,
-                query.WithPagination.Page,
-                query.WithPagination.Limit);
-        }
+        logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -38,13 +31,10 @@ public sealed class PartitionsQueryHandler(
             query.WithPagination, query.TemporalAsOfDateTime, childOfAnyOfThesePartitions,
             notChildOfAnyPartition, cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Partitions query completed for actor {actorId}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.",
-                actor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-                childOfAnyOfThesePartitions?.Count ?? 0, partitions.Count);
-        }
+        logger.ManyQueryCompleted(
+            currentActor.ActorId,
+            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0, partitions.Count);
 
         return partitions;
     }

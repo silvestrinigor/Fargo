@@ -18,12 +18,7 @@ public sealed class PartitionUpdateCommandHandler(
         PartitionUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Partition update flow started for partition {partitionGuid} by actor {actorId}.",
-                command.PartitionGuid, currentActor.ActorId);
-        }
+        logger.UpdateStarted(command.PartitionGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -37,11 +32,6 @@ public sealed class PartitionUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Partition update mutation completed for partition {partitionGuid} by actor {actorId}.",
-                partition.Guid, actor.ActorId);
-        }
+        logger.UpdateCompleted(partition.Guid, currentActor.ActorId);
     }
 }

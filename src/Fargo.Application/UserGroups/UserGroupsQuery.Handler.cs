@@ -14,19 +14,9 @@ public sealed class UserGroupsQueryHandler(
 {
     public async Task<IReadOnlyCollection<UserGroupDto>> HandleAsync(
         UserGroupsQuery query,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        var pagination = query.WithPagination;
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User groups query started for actor {actorId}. Page: {page}. Limit: {limit}.",
-                currentActor.ActorId,
-                pagination.Page,
-                pagination.Limit);
-        }
+        logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -38,23 +28,16 @@ public sealed class UserGroupsQueryHandler(
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
-        var userGroups = await userGroupRepository.GetManyInfo(
-            pagination,
+        var userGroups = await userGroupRepository.GetManyInfoAsync(
+            query.WithPagination,
             query.TemporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition,
-            cancellationToken
-        );
+            cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "User groups query completed for actor {actorID}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.",
-                actor.ActorId,
-                query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-                childOfAnyOfThesePartitions?.Count ?? 0,
-                userGroups.Count);
-        }
+        logger.ManyQueryCompleted(
+            currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0, userGroups.Count);
 
         return userGroups;
     }
