@@ -12,7 +12,7 @@ builder.Services.AddFargoDefaultAdmin(builder.Configuration);
 
 builder.Services.AddFargoSeedInfrastructure(builder.Configuration);
 
-builder.Services.AddScoped<ICurrentActor, EmptyCurrentActor>();
+builder.Services.AddScoped<ICurrentActor, CurrentActorSystem>();
 
 builder.Services.AddHostedService<SeedService>();
 

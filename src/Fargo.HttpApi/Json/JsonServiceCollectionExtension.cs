@@ -6,7 +6,7 @@ public static class JsonServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureFargoHttpJsonOptions()
+        public IServiceCollection ConfigureFargoJson()
         {
             services.ConfigureHttpJsonOptions(options =>
             {

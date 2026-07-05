@@ -19,9 +19,9 @@ using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Fargo.Application;
+namespace Fargo.Application.DependencyInjection;
 
-public static class FargoApplicationDependencyInjectionServiceCollectionExtension
+public static class DependencyInjectionServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {
@@ -33,7 +33,7 @@ public static class FargoApplicationDependencyInjectionServiceCollectionExtensio
             .AddFargoUserApplication()
             .AddFargoItemApplication()
             .AddFargoIdentityApplication()
-            .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
+            .AddFargoSystemApplication();
 
         private IServiceCollection AddFargoDomain() => services
             .AddScoped<ActorService>()
@@ -42,6 +42,9 @@ public static class FargoApplicationDependencyInjectionServiceCollectionExtensio
             .AddScoped<UserGroupService>()
             .AddScoped<PartitionService>()
             .AddScoped<ItemService>();
+
+        private IServiceCollection AddFargoSystemApplication() => services
+            .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
         private IServiceCollection AddFargoIdentityApplication() => services
             .AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>()
