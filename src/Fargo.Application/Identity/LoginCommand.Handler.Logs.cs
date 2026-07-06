@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.Application.Articles.Commands.Handlers;
+namespace Fargo.Application.Identity;
 
 internal static partial class LoginCommandHandlerLogs
 {
@@ -31,6 +31,20 @@ internal static partial class LoginCommandHandlerLogs
     public static partial void LoginRejectedUserNotActive(
         this ILogger logger,
         string nameid);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Login flow rejected because the password was invalid for user {UserGuid}.")]
+    public static partial void LoginRejectedInvalidPassword(
+        this ILogger logger,
+        Guid userGuid);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Login flow requires password change for user {UserGuid}.")]
+    public static partial void LoginRejectedPasswordChangeRequired(
+        this ILogger logger,
+        Guid userGuid);
 
     [LoggerMessage(
         Level = LogLevel.Information,

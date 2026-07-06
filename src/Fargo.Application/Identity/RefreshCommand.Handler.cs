@@ -1,4 +1,3 @@
-using Fargo.Application.Articles.Commands.Handlers;
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Identity;
@@ -84,7 +83,9 @@ public sealed class RefreshCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var actorUser = await actorService.GetActorByActorIdAsync(new ActorId(storedOldRefreshToken.UserGuid, ActorType.User), cancellationToken);
+        var actorUserId = new ActorId(storedOldRefreshToken.UserGuid, ActorType.User);
+
+        var actorUser = await actorService.GetActorByActorIdAsync(actorUserId, cancellationToken);
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actorUser);
 

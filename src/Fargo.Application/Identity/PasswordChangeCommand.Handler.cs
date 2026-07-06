@@ -18,50 +18,32 @@ public sealed class PasswordChangeCommandHandler(
         PasswordChangeCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("Password change flow started for user {UserGuid}.", currentActor.ActorId);
-        }
+        logger.PasswordChangeStarted(currentActor.ActorId.Guid);
 
-        var userGuid = currentActor.ActorId.Guid;
-
-        var user = await userRepository.GetByGuidAsync(
-            userGuid,
-            cancellationToken);
+        var user = await userRepository.GetByGuidAsync(currentActor.ActorId.Guid, cancellationToken);
 
         if (user is null)
         {
-            logger.LogWarning("Password change flow rejected because user {UserGuid} was not found.", userGuid);
+            logger.PasswordChangeUserNotFound(currentActor.ActorId.Guid);
 
             throw new UnauthorizedAccessException();
         }
 
         if (!user.IsActive)
         {
-            logger.LogWarning("Password change flow rejected for inactive user {UserGuid}.", user.Guid);
-
-            throw new UnauthorizedAccessException();
-        }
-
-        if (command.Passwords.CurrentPassword is null)
-        {
-            logger.LogWarning(
-                "Password change flow rejected because the current password was missing for user {UserGuid}.",
-                user.Guid);
+            logger.PasswordChangeUserInactive(user.Guid);
 
             throw new UnauthorizedAccessException();
         }
 
         var currentPassword = command.Passwords.CurrentPassword;
 
-        var isValid = passwordHasher.Verify(
-            user.PasswordHash,
-            currentPassword
-        );
+        var isValid = passwordHasher.Verify(user.PasswordHash, currentPassword);
 
         if (!isValid)
         {
-            logger.LogWarning("Password change flow rejected because the current password was invalid for user {UserGuid}.", user.Guid);
+            logger.PasswordChangeInvalidPassword(user.Guid);
+
             throw new UnauthorizedAccessException();
         }
 
@@ -83,6 +65,7 @@ public sealed class PasswordChangeCommandHandler(
         user.RotateAuthVersion();
 
         var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
+
         foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
         {
             refreshToken.Revoke();
@@ -90,10 +73,6 @@ public sealed class PasswordChangeCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("Password change flow completed for user {UserGuid}.", user.Guid);
-        }
+        logger.PasswordChangeCompleted(user.Guid);
     }
 }
-
