@@ -12,6 +12,11 @@ public sealed class ArticleKitComponent
     {
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="article"></param>
+    /// <param name="quantity"></param>
     public ArticleKitComponent(Article article, Scalar quantity)
     {
         Article = article;

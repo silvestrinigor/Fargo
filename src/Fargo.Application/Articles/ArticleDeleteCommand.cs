@@ -7,4 +7,3 @@ namespace Fargo.Application.Articles;
 /// Article unique identifier.
 /// </param>
 public sealed record ArticleDeleteCommand(Guid ArticleGuid) : ICommand;
-

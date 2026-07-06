@@ -2,6 +2,15 @@ using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.Core.Articles;
 
+public sealed class ArticleDeleteIsDependencyOfAnotherArticle(Guid articleGuid)
+    : Exception($"Article '{articleGuid}' cannot be deleted because it is a dependency of another article.")
+{
+    /// <summary>
+    /// Gets the identifier of the article that could not be deleted.
+    /// </summary>
+    public Guid ArticleGuid { get; } = articleGuid;
+}
+
 /// <summary>
 /// Exception thrown when an attempt is made to delete an article
 /// that still has items associated with it.

@@ -8,12 +8,9 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticlePatchCommandHandler(
-    ActorService actorService,
-    ArticleService articleService,
-    IArticleRepository articleRepository,
-    IPartitionRepository partitionRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
+    ActorService actorService, ArticleService articleService,
+    IArticleRepository articleRepository, IPartitionRepository partitionRepository,
+    ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticlePatchCommandHandler> logger
 ) : ICommandHandler<ArticleUpdateCommand>
 {
@@ -22,8 +19,6 @@ public sealed class ArticlePatchCommandHandler(
         CancellationToken cancellationToken = default)
     {
         logger.UpdateStarted(command.ArticleGuid, currentActor.ActorId);
-
-        var articleUpdateDto = command.Article;
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -35,17 +30,27 @@ public sealed class ArticlePatchCommandHandler(
 
         EntityAssertFound.ThrowNotFoundIfNull(article);
 
+        var articleUpdateDto = command.Article;
+
         article.Name = articleUpdateDto.Name ?? article.Name;
 
         article.Description = articleUpdateDto.Description ?? article.Description;
 
-        article.ShelfLife = articleUpdateDto.RemoveShelfLife is true ? null : articleUpdateDto.ShelfLife ?? article.ShelfLife;
+        article.ShelfLife = articleUpdateDto.RemoveShelfLife is true
+            ? null : articleUpdateDto.ShelfLife ?? article.ShelfLife;
 
         article.SetMetrics(
-            articleUpdateDto.RemoveMass is true ? null : articleUpdateDto.Mass ?? article.Mass,
-            articleUpdateDto.RemoveLengthX is true ? null : articleUpdateDto.LengthX ?? article.LengthX,
-            articleUpdateDto.RemoveLengthY is true ? null : articleUpdateDto.LengthY ?? article.LengthY,
-            articleUpdateDto.RemoveLengthZ is true ? null : articleUpdateDto.LengthZ ?? article.LengthZ);
+            articleUpdateDto.RemoveMass is true
+                ? null : articleUpdateDto.Mass ?? article.Mass,
+
+            articleUpdateDto.RemoveLengthX is true
+                ? null : articleUpdateDto.LengthX ?? article.LengthX,
+
+            articleUpdateDto.RemoveLengthY is true
+                ? null : articleUpdateDto.LengthY ?? article.LengthY,
+
+            articleUpdateDto.RemoveLengthZ is true
+                ? null : articleUpdateDto.LengthZ ?? article.LengthZ);
 
         if (articleUpdateDto.RemoveEan13 is true)
         {

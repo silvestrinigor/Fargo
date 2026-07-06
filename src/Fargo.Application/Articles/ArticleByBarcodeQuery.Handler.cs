@@ -6,10 +6,8 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleByBarcodeQueryHandler(
-    ActorService actorService,
-    IArticleQueryRepository articleRepository,
-    ICurrentActor currentActor,
-    ILogger<ArticleByBarcodeQueryHandler> logger
+    ActorService actorService, IArticleQueryRepository articleRepository,
+    ICurrentActor currentActor, ILogger<ArticleByBarcodeQueryHandler> logger
 ) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
     public async Task<ArticleDto?> HandleAsync(
