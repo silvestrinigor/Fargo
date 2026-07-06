@@ -30,6 +30,8 @@ public sealed class ArticlePatchCommandHandler(
 
         EntityAssertFound.ThrowNotFoundIfNull(article);
 
+        actor.ThrowIfAccessNotAuthorized(article);
+
         var articleUpdateDto = command.Article;
 
         article.Name = articleUpdateDto.Name ?? article.Name;
@@ -56,6 +58,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.Ean13 = null;
         }
+
         else if (articleUpdateDto.Ean13 is { } ean13)
         {
             await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
@@ -67,6 +70,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.Ean8 = null;
         }
+
         else if (articleUpdateDto.Ean8 is { } ean8)
         {
             await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
@@ -78,6 +82,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.UpcA = null;
         }
+
         else if (articleUpdateDto.UpcA is { } upcA)
         {
             await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
@@ -89,6 +94,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.UpcE = null;
         }
+
         else if (articleUpdateDto.UpcE is { } upcE)
         {
             await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
@@ -100,6 +106,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.Code128 = null;
         }
+
         else if (articleUpdateDto.Code128 is { } code128)
         {
             await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
@@ -111,6 +118,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.Code39 = null;
         }
+
         else if (articleUpdateDto.Code39 is { } code39)
         {
             await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
@@ -122,6 +130,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.Itf14 = null;
         }
+
         else if (articleUpdateDto.Itf14 is { } itf14)
         {
             await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
@@ -133,6 +142,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.Gs1128 = null;
         }
+
         else if (articleUpdateDto.Gs1128 is { } gs1128)
         {
             await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
@@ -144,6 +154,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.QrCode = null;
         }
+
         else if (articleUpdateDto.QrCode is { } qrCode)
         {
             await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
@@ -155,6 +166,7 @@ public sealed class ArticlePatchCommandHandler(
         {
             article.DataMatrix = null;
         }
+
         else if (articleUpdateDto.DataMatrix is { } dataMatrix)
         {
             await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
