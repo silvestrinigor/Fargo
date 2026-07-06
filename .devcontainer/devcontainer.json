@@ -14,7 +14,11 @@
     },
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "version": "2"
+        }
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009],
