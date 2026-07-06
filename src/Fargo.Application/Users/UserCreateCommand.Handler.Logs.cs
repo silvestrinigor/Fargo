@@ -9,14 +9,12 @@ internal static partial class UserCreateCommandHandlerLogs
         Level = LogLevel.Information,
         Message = "User create flow started by actor {actorId}.")]
     public static partial void UserCreateStarted(
-        this ILogger logger,
-        ActorId actorId);
+        this ILogger logger, ActorId actorId);
 
     [LoggerMessage(
         Level = LogLevel.Information,
         Message = "User create mutation completed for user {userGuid} by actor {actorId}.")]
     public static partial void UserCreateCompleted(
         this ILogger logger,
-        Guid userGuid,
-        ActorId actorId);
+        Guid userGuid, ActorId actorId);
 }

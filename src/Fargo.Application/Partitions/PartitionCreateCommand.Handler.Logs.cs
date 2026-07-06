@@ -17,6 +17,5 @@ internal static partial class PartitionCreateCommandHandlerLogs
         Message = "Partition create mutation completed for partition {partitionGuid} by actor {actorId}.")]
     public static partial void CreateCompleted(
         this ILogger logger,
-        Guid partitionGuid,
-        ActorId actorId);
+        Guid partitionGuid, ActorId actorId);
 }

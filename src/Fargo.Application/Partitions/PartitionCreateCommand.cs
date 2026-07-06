@@ -6,5 +6,4 @@ namespace Fargo.Application.Partitions;
 /// Command used to create a new partition from an API creation payload.
 /// </summary>
 public sealed record PartitionCreateCommand(
-    PartitionCreateDto Create
-) : ICommand<Guid>;
+    PartitionCreateDto Create) : ICommand<Guid>;

@@ -18,14 +18,7 @@ public sealed class ItemUpdateCommandHandler(
         ItemUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var update = command.Update;
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Item update flow started for item {itemGuid} by actor {actorId}.",
-                command.ItemGuid, currentActor.ActorId);
-        }
+        logger.UpdateStarted(command.ItemGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -41,11 +34,6 @@ public sealed class ItemUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Item update mutation completed for item {itemGuid} by actor {actorId}.",
-                item.Guid, actor.ActorId);
-        }
+        logger.UpdateCompleted(item.Guid, currentActor.ActorId);
     }
 }

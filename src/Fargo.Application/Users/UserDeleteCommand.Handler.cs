@@ -30,6 +30,8 @@ public sealed class UserDeleteCommandHandler(
 
         EntityAssertFound.ThrowNotFoundIfNull(user);
 
+        actor.ThrowIfAccessNotAuthorized(user);
+
         userRepository.Remove(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -19,12 +19,7 @@ public sealed class ItemsQueryHandler(
     {
         var pagination = query.WithPagination;
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Items query started for actor {actorId}. Page: {page}. Limit: {limit}.",
-                currentActor.ActorId, pagination.Page, pagination.Limit);
-        }
+        logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -37,19 +32,13 @@ public sealed class ItemsQueryHandler(
                 query.NotChildOfAnyPartition);
 
         var items = await itemRepository.GetManyInfo(
-            pagination,
-            query.TemporalAsOfDateTime,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
+            pagination, query.TemporalAsOfDateTime,
+            childOfAnyOfThesePartitions, notChildOfAnyPartition,
             cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Items query completed for actor {actorId}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.",
-                actor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-                childOfAnyOfThesePartitions?.Count ?? 0, items.Count);
-        }
+        logger.ManyQueryCompleted(
+            currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0, items.Count);
 
         return items;
     }

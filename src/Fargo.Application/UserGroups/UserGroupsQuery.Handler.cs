@@ -29,10 +29,8 @@ public sealed class UserGroupsQueryHandler(
                 query.NotChildOfAnyPartition);
 
         var userGroups = await userGroupRepository.GetManyInfoAsync(
-            query.WithPagination,
-            query.TemporalAsOfDateTime,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
+            query.WithPagination, query.TemporalAsOfDateTime,
+            childOfAnyOfThesePartitions, notChildOfAnyPartition,
             cancellationToken);
 
         logger.ManyQueryCompleted(

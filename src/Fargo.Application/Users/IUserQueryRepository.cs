@@ -9,14 +9,12 @@ public interface IUserQueryRepository
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken = default);
 }
