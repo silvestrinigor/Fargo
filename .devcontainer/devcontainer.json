@@ -1,10 +1,6 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
 	"name": "C# (.NET)",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0",
-
+	"image": "mcr.microsoft.com/dotnet/sdk:10.0",
 	"customizations": {
         "vscode": {
             "extensions": [
@@ -24,7 +20,7 @@
 	"forwardPorts": [5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet restore && git lfs install"
+	"postCreateCommand": "dotnet restore"
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
