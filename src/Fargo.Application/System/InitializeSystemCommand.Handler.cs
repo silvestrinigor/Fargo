@@ -5,7 +5,6 @@ using Fargo.Core.Shared.Actors;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Fargo.Application.System;
 
@@ -16,9 +15,6 @@ public sealed class InitializeSystemCommandHandler(
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
     ICurrentActor currentActor,
-    IOptions<DefaultAdminOptions> defaultAdminOptions,
-    IOptions<AdministratorsUserGroupOptions> administratorsOptions,
-    IOptions<GlobalPartitionOptions> globalPartitionOptions,
     ILogger<InitializeSystemCommandHandler> logger
     ) : ICommandHandler<InitializeSystemCommand>
 {
@@ -48,10 +44,10 @@ public sealed class InitializeSystemCommandHandler(
 
         if (globalPartition is null)
         {
-            globalPartition = new Partition(new(globalPartitionOptions.Value.Name))
+            globalPartition = new Partition(command.GlobalPartitionName)
             {
                 Guid = PartitionService.GlobalPartitionGuid,
-                Description = new(globalPartitionOptions.Value.Description)
+                Description = command.GlobalPartitionDescription
             };
 
             partitionRepository.Add(globalPartition);
@@ -67,12 +63,10 @@ public sealed class InitializeSystemCommandHandler(
 
         if (administratorsGroup is null)
         {
-            var administratorsName = new Nameid(administratorsOptions.Value.Nameid);
-
-            administratorsGroup = new UserGroup(administratorsName)
+            administratorsGroup = new UserGroup(command.UserGroupAdministratorsNameid)
             {
                 Guid = UserGroupService.AdministratorsUserGroupGuid,
-                Description = new(administratorsOptions.Value.Description)
+                Description = command.UserGroupAdministratorsDescription
             };
 
             administratorsGroup.AddPartitionAccess(globalPartition);
@@ -89,16 +83,12 @@ public sealed class InitializeSystemCommandHandler(
             administratorsGroupCreated = true;
         }
 
-        var adminNameid = new Nameid(defaultAdminOptions.Value.Nameid);
+        var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
-        var adminPassword = new Password(defaultAdminOptions.Value.Password);
-
-        var passwordHash = passwordHasher.Hash(adminPassword);
-
-        var admin = new User(adminNameid, passwordHash)
+        var admin = new User(command.UserAdminNameid, passwordHash)
         {
             Guid = UserService.DefaultAdministratorUserGuid,
-            Description = new(defaultAdminOptions.Value.Description)
+            Description = command.UserAdminDescription
         };
 
         admin.AddPartitionAccess(globalPartition);

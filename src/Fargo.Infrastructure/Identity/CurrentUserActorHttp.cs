@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace Fargo.Infrastructure.Security;
 
-public sealed class HttpCurrentUserActor(IHttpContextAccessor httpContextAccessor) : ICurrentActor
+public sealed class CurrentUserActorHttp(IHttpContextAccessor httpContextAccessor) : ICurrentActor
 {
     private readonly IHttpContextAccessor _http = httpContextAccessor;
 

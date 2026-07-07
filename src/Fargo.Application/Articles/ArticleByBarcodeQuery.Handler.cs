@@ -11,8 +11,7 @@ public sealed class ArticleByBarcodeQueryHandler(
 ) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
     public async Task<ArticleDto?> HandleAsync(
-        ArticleByBarcodeQuery query,
-        CancellationToken cancellationToken = default)
+        ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {
         logger.QueryByBarcodeStarted(query.ArticleBarcode, currentActor.ActorId);
 
@@ -21,11 +20,9 @@ public sealed class ArticleByBarcodeQueryHandler(
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
         var article = await articleRepository.GetInfoByBarcodeAsync(
-            query.ArticleBarcode,
-            query.AsOfDateTime,
+            query.ArticleBarcode, query.AsOfDateTime,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
-            notChildOfAnyPartition: true,
-            cancellationToken);
+            notChildOfAnyPartition: true, cancellationToken);
 
         logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.ActorId);
 

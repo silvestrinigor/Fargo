@@ -1,4 +1,4 @@
-using Fargo.Application.Identity;
+using Fargo.Application.DependencyInjection;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.ServiceSeed;
@@ -8,11 +8,12 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddFargoDefaultAdmin(builder.Configuration);
+builder.Services.AddFargoDefaultAdminOptions(builder.Configuration);
 
-builder.Services.AddFargoSeedInfrastructure(builder.Configuration);
+builder.Services.AddFargoApplication();
 
-builder.Services.AddScoped<ICurrentActor, CurrentActorSystem>();
+builder.Services.AddFargoInfrastructure(
+    builder.Configuration, configure => configure.UseSystemCurrentActor());
 
 builder.Services.AddHostedService<SeedService>();
 

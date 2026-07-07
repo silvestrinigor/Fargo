@@ -6,6 +6,7 @@ using Fargo.HttpApi.OpenApi;
 using Fargo.HttpApi.Routes;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,9 +24,12 @@ builder.Services.ConfigureFargoJson();
 
 builder.Services.AddFargoApplication();
 
-builder.Services.AddFargoInfrastructure(builder.Configuration);
+builder.Services.AddFargoInfrastructure(builder.Configuration, configure => configure.UseHttpCurrentUserActor());
 
-builder.Services.AddFargoAuthentication(builder.Configuration);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
+
+builder.Services.AddFargoJwt(builder.Configuration);
 
 builder.Services.AddAuthorization();
 
