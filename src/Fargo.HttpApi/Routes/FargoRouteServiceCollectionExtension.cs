@@ -4,7 +4,7 @@ public static class FargoRouteServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureFargoRouteOptions()
+        public IServiceCollection AddFargoRoutes()
         {
             services.Configure<RouteOptions>(options =>
             {

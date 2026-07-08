@@ -41,16 +41,18 @@ public static class DependencyInjectionServiceCollectionExtensions
 
             services.ConfigureOptions<JwtBearerOptionsSetup>();
 
-            services.AddRepositories();
+            services.AddFargoRepositories();
 
-            services.AddSecurity();
+            services.AddFargoJwtOptions(configuration);
+
+            services.AddFargoSecurity();
 
             options.ConfigureCurrentUser?.Invoke(services);
 
             return services;
         }
 
-        public IServiceCollection AddFargoJwt(
+        private IServiceCollection AddFargoJwtOptions(
                 IConfiguration configuration)
         {
             services
@@ -61,17 +63,17 @@ public static class DependencyInjectionServiceCollectionExtensions
             return services;
         }
 
-        private IServiceCollection AddFargoUnitOfWork() => services
+        public IServiceCollection AddFargoUnitOfWork() => services
             .AddScoped<IUnitOfWork, UnitOfWork>();
 
-        private IServiceCollection AddFargoDbContext() => services
+        public IServiceCollection AddFargoDbContext() => services
             .AddDbContext<FargoDbContext>((sp, opt) => UsesFargoSqlServer(sp, opt));
 
-        private void AddFargoConnectionStringOptions(IConfiguration configuration) => services
+        public void AddFargoConnectionStringOptions(IConfiguration configuration) => services
             .AddOptions<ConnectionStringOptions>()
             .Bind(configuration.GetSection(ConnectionStringOptions.SectionName));
 
-        private static void UsesFargoSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)
+        public static void UsesFargoSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)
         {
             var options = sp
                 .GetRequiredService<IOptions<ConnectionStringOptions>>()
@@ -80,7 +82,7 @@ public static class DependencyInjectionServiceCollectionExtensions
             opt.UseSqlServer(options.Fargo);
         }
 
-        private void AddRepositories() => services
+        public void AddFargoRepositories() => services
             .AddScoped<IArticleRepository, ArticleRepository>()
             .AddScoped<IArticleQueryRepository, ArticleRepository>()
             .AddScoped<IItemRepository, ItemRepository>()
@@ -93,7 +95,7 @@ public static class DependencyInjectionServiceCollectionExtensions
             .AddScoped<IPartitionRepository, PartitionRepository>()
             .AddScoped<IPartitionQueryRepository, PartitionRepository>();
 
-        private void AddSecurity() => services
+        public void AddFargoSecurity() => services
             .AddScoped<IPasswordHasher, IdentityPasswordHasher>()
             .AddScoped<ITokenGenerator, JwtTokenGenerator>()
             .AddScoped<ITokenHasher, Sha256TokenHasher>()

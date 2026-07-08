@@ -22,6 +22,7 @@ namespace Fargo.ServiceSeed;
 /// </para>
 /// </remarks>
 public sealed class SeedService(
+    ICommandHandler<InitializeSystemCommand> handler,
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime
     ) : BackgroundService
@@ -60,17 +61,13 @@ public sealed class SeedService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var activity = activitySource.StartActivity(
-            "Seeding database", ActivityKind.Client
-        );
+            "Seeding database", ActivityKind.Client);
 
         try
         {
             using var scope = serviceProvider.CreateScope();
 
             var command = new InitializeSystemCommand();
-
-            var handler = scope.ServiceProvider
-                .GetRequiredService<ICommandHandler<InitializeSystemCommand>>();
 
             await handler.HandleAsync(command, stoppingToken);
         }

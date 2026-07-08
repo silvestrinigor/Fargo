@@ -14,7 +14,7 @@ builder.AddServiceDefaults();
 
 builder.Services.AddResponseCompression();
 
-builder.Services.ConfigureFargoRouteOptions();
+builder.Services.AddFargoRoutes();
 
 builder.Services.AddFargoOpenApi();
 
@@ -24,12 +24,10 @@ builder.Services.ConfigureFargoJson();
 
 builder.Services.AddFargoApplication();
 
-builder.Services.AddFargoInfrastructure(builder.Configuration, configure => configure.UseHttpCurrentUserActor());
+builder.Services.AddFargoInfrastructure(builder.Configuration, configure => configure.UseHttpCurrentActor());
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();
-
-builder.Services.AddFargoJwt(builder.Configuration);
 
 builder.Services.AddAuthorization();
 

@@ -32,9 +32,7 @@ namespace Fargo.Infrastructure.Security;
 /// The token is signed using HMAC SHA-256 and expires according to
 /// <see cref="JwtOptions.AccessTokenExpirationInMinutes"/>.
 /// </remarks>
-public sealed class JwtTokenGenerator(
-        IOptions<JwtOptions> jwtOptions
-        ) : ITokenGenerator
+public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenGenerator
 {
     private readonly JwtOptions options = jwtOptions.Value;
 
@@ -51,11 +49,10 @@ public sealed class JwtTokenGenerator(
     public TokenGenerateResult Generate(User user)
     {
         var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(options.Key));
+            Encoding.UTF8.GetBytes(options.Key));
 
         var credentials = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha256);
+            key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
         {
@@ -66,21 +63,17 @@ public sealed class JwtTokenGenerator(
         };
 
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(
-                options.AccessTokenExpirationInMinutes);
+            options.AccessTokenExpirationInMinutes);
 
         var token = new JwtSecurityToken(
-                issuer: options.Issuer,
-                audience: options.Audience,
-                claims: claims,
-                expires: expiresAt.UtcDateTime,
-                signingCredentials: credentials
-                );
+            issuer: options.Issuer,
+            audience: options.Audience,
+            claims: claims,
+            expires: expiresAt.UtcDateTime,
+            signingCredentials: credentials);
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new TokenGenerateResult(
-                new Token(tokenString),
-                expiresAt
-                );
+        return new TokenGenerateResult(new Token(tokenString), expiresAt);
     }
 }

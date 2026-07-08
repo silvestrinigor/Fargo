@@ -8,7 +8,7 @@ public sealed class InfrastructureOptions
 {
     internal Action<IServiceCollection>? ConfigureCurrentUser { get; private set; }
 
-    public void UseHttpCurrentUserActor()
+    public void UseHttpCurrentActor()
     {
         ConfigureCurrentUser = services =>
         {
