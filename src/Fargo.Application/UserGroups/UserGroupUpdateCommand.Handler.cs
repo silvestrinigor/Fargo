@@ -27,13 +27,13 @@ public sealed class UserGroupUpdateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditUserGroup);
+        actor.ThrowIfPermissionDenied(ActionType.EditUserGroup);
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
 
-        actor.ThrowIfAccessNotAuthorized(userGroup);
+        actor.ThrowIfAccessDenied(userGroup);
 
         if (update.Nameid is not null)
         {

@@ -24,9 +24,13 @@ public sealed class UserGroupDeleteCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
+        actor.ThrowIfPermissionDenied(ActionType.DeleteUserGroup);
+
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
+
+        actor.ThrowIfAccessDenied(userGroup);
 
         userGroupRepository.Remove(userGroup);
 

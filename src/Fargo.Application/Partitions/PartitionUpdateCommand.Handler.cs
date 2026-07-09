@@ -24,11 +24,13 @@ public sealed class PartitionUpdateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditPartition);
+        actor.ThrowIfPermissionDenied(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(partition, command.PartitionGuid, EntityType.Partition);
+
+        actor.ThrowIfAccessDeniedToPartition(partition);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -24,13 +24,13 @@ public sealed class ItemUpdateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditItem);
+        actor.ThrowIfPermissionDenied(ActionType.EditItem);
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(item, command.ItemGuid, EntityType.Item);
 
-        actor.ThrowIfAccessNotAuthorized(item);
+        actor.ThrowIfAccessDenied(item);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

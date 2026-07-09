@@ -25,7 +25,7 @@ public sealed class ArticleCreateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateArticle);
+        actor.ThrowIfPermissionDenied(ActionType.CreateArticle);
 
         Article article;
 
@@ -41,7 +41,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
-                    actor.ThrowIfAccessNotAuthorized(fromArticle);
+                    actor.ThrowIfAccessDenied(fromArticle);
 
                     article = Article.NewArticleVariation(command.Name, fromArticle);
 
@@ -54,7 +54,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
-                    actor.ThrowIfAccessNotAuthorized(fromArticle);
+                    actor.ThrowIfAccessDenied(fromArticle);
 
                     article = Article.NewArticlePack(command.Name, fromArticle, command.PackQuantity!.Value);
 
@@ -159,7 +159,7 @@ public sealed class ArticleCreateCommandHandler(
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessNotAuthorized(partition);
+                actor.ThrowIfAccessDeniedToPartition(partition);
 
                 article.AddPartition(partition);
             }

@@ -9,7 +9,7 @@ public static class ActorAssertFound
     {
         if (actor is null)
         {
-            throw new UnauthorizedAccessException();
+            throw new Identity.UnauthorizedAccessException();
         }
     }
 }

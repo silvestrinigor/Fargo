@@ -22,13 +22,13 @@ public sealed class ItemDeleteCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteItem);
+        actor.ThrowIfPermissionDenied(ActionType.DeleteItem);
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(item, command.ItemGuid, EntityType.Item);
 
-        actor.ThrowIfAccessNotAuthorized(item);
+        actor.ThrowIfAccessDenied(item);
 
         itemRepository.Remove(item);
 

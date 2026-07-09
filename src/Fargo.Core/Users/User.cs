@@ -9,7 +9,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
+public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser, IPartitionedGuids, IPermissionUser, IActivable
 {
     private User()
     {
@@ -48,6 +48,8 @@ public class User : Entity, IPartitioned, IPartitionUser, IPartitionedGuids, IPe
     /// Gets a value indicating whether the user is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    public EntityType GetEntityType() => EntityType.User;
 
     /// <summary>
     /// Gets or sets the hashed password of the user.

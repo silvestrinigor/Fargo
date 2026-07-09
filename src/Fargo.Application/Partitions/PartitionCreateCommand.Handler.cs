@@ -25,7 +25,7 @@ public sealed class PartitionCreateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.CreatePartition);
+        actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
 
         var create = command.Create;
 

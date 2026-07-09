@@ -24,11 +24,13 @@ public sealed class PartitionDeleteCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.DeletePartition);
+        actor.ThrowIfPermissionDenied(ActionType.DeletePartition);
 
         var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(partition, command.PartitionGuid, EntityType.Partition);
+
+        actor.ThrowIfAccessDeniedToPartition(partition);
 
         partitionRepository.Remove(partition);
 

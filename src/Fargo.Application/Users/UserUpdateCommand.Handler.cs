@@ -24,11 +24,13 @@ public sealed class UserUpdateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditUser);
+        actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(user, command.UserGuid, EntityType.User);
+
+        actor.ThrowIfAccessDenied(user);
 
         var update = command.Update;
 

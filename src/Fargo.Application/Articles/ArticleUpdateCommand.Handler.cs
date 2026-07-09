@@ -24,13 +24,13 @@ public sealed class ArticlePatchCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditArticle);
+        actor.ThrowIfPermissionDenied(ActionType.EditArticle);
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(article, command.ArticleGuid, EntityType.Article);
 
-        actor.ThrowIfAccessNotAuthorized(article);
+        actor.ThrowIfAccessDenied(article);
 
         var articleUpdateDto = command.Article;
 
@@ -182,7 +182,7 @@ public sealed class ArticlePatchCommandHandler(
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessNotAuthorized(partition);
+                actor.ThrowIfAccessDeniedToPartition(partition);
 
                 article.AddPartition(partition);
             }
@@ -196,7 +196,7 @@ public sealed class ArticlePatchCommandHandler(
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessNotAuthorized(partition);
+                actor.ThrowIfAccessDeniedToPartition(partition);
 
                 article.RemovePartition(partition);
             }

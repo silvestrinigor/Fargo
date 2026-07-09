@@ -2,6 +2,7 @@ using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared;
 
 namespace Fargo.Core.Items;
 
@@ -22,7 +23,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IPartitioned, IActivable
+public class Item : Entity, IEntityTyped, IPartitioned, IActivable
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
@@ -99,6 +100,8 @@ public class Item : Entity, IPartitioned, IActivable
     /// Gets a value indicating whether the item is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    public EntityType GetEntityType() => EntityType.Item;
 
     #region Container
 

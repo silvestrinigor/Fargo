@@ -26,13 +26,13 @@ public sealed class ItemCreateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateItem);
+        actor.ThrowIfPermissionDenied(ActionType.CreateItem);
 
         var article = await articleRepository.GetByGuidAsync(command.Create.ArticleGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(article, command.Create.ArticleGuid, EntityType.Article);
 
-        actor.ThrowIfAccessNotAuthorized(article);
+        actor.ThrowIfAccessDenied(article);
 
         var item = Item.CreateItem(article, command.Create.ProductionDate);
 
