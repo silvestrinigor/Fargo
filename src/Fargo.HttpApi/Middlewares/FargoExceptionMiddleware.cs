@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Fargo.HttpApi.Middlewares;
 
 public sealed class FargoExceptionMiddleware
@@ -83,15 +85,16 @@ public sealed class FargoExceptionMiddleware
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/problem+json";
 
-        var problemDetails = new FargoProblemDetailsDto
+        var problemDetails = new ProblemDetails
         {
             Status = statusCode,
             Title = title,
             Detail = detail,
             Type = type,
-            Instance = context.Request.Path,
-            TraceId = traceId
+            Instance = context.Request.Path
         };
+
+        problemDetails.Extensions.TryAdd("traceId", traceId);
 
         await context.Response.WriteAsJsonAsync(problemDetails);
     }
