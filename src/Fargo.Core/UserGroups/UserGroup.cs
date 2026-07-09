@@ -19,7 +19,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IPartitioned, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IEntityTyped, IPartitioned, IPartitionUser, IPermissionUser, IActivable
 {
     private UserGroup()
     {
@@ -48,6 +48,8 @@ public class UserGroup : Entity, IPartitioned, IPartitionUser, IPermissionUser, 
     /// Gets a value indicating whether the user group is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    public EntityType GetEntityType() => EntityType.UserGroup;
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned to the user group.

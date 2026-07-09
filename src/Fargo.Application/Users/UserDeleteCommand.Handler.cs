@@ -24,13 +24,13 @@ public sealed class UserDeleteCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.DeleteUser);
+        actor.ThrowIfPermissionDenied(ActionType.DeleteUser);
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
         EntityAssertFound.ThrowNotFoundIfNull(user, command.UserGuid, EntityType.User);
 
-        actor.ThrowIfAccessNotAuthorized(user);
+        actor.ThrowIfAccessDenied(user);
 
         userRepository.Remove(user);
 

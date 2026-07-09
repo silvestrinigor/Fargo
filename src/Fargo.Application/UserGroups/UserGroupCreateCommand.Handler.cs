@@ -27,7 +27,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.CreateUserGroup);
+        actor.ThrowIfPermissionDenied(ActionType.CreateUserGroup);
 
         Nameid nameid;
 
@@ -54,7 +54,7 @@ public sealed class UserGroupCreateCommandHandler(
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessNotAuthorized(partition);
+                actor.ThrowIfAccessDeniedToPartition(partition);
 
                 userGroup.AddPartition(partition);
             }

@@ -65,36 +65,4 @@ public sealed class Actor : IActor
 
         return partitioned.PartitionGuids.Any(partitionAccessGuids.Contains);
     }
-
-    public void ThrowIfPermissionNotAuthorized(ActionType action)
-    {
-        if (!HasPermission(action))
-        {
-            throw new ActorPermissionDeniedException(this, action);
-        }
-    }
-
-    public void ValidateHasAccess(IPartitionedGuids partitioned)
-    {
-        if (!HasAccess(partitioned))
-        {
-            throw new ActorAccessDeniedException(this, partitioned);
-        }
-    }
-
-    public void ThrowIfAccessNotAuthorized(IPartitioned partitioned)
-    {
-        if (!HasAccess(partitioned))
-        {
-            throw new ActorAccessDeniedException(this, partitioned);
-        }
-    }
-
-    public void ThrowIfAccessNotAuthorized(IPartition partition)
-    {
-        if (!HasAccess(partition))
-        {
-            throw new ActorAccessDeniedException(this, partition);
-        }
-    }
 }

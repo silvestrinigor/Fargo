@@ -9,10 +9,10 @@ public class ActorPermissionDeniedException : Exception
 
     public ActionType ActionType { get; }
 
-    public ActorPermissionDeniedException(IActor actor, ActionType actionType)
-        : base($"Permission denied for actor {actor.ActorId}")
+    public ActorPermissionDeniedException(ActorId actorId, ActionType actionType)
+        : base($"Permission to perform action '{actionType}' denied for actor '{actorId}'")
     {
-        ActorId = actor.ActorId;
+        ActorId = actorId;
 
         ActionType = actionType;
     }

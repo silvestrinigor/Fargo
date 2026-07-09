@@ -30,7 +30,7 @@ public sealed class UserCreateCommandHandler(
 
         ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
 
-        actor.ThrowIfPermissionNotAuthorized(ActionType.EditUser);
+        actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
         var create = command.Create;
 
@@ -95,6 +95,8 @@ public sealed class UserCreateCommandHandler(
 
                 EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
+                actor.ThrowIfAccessDeniedToPartition(partition);
+
                 user.AddPartition(partition);
             }
         }
@@ -107,7 +109,7 @@ public sealed class UserCreateCommandHandler(
 
                 EntityAssertFound.ThrowNotFoundIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
 
-                actor.ThrowIfAccessNotAuthorized(userGroup);
+                actor.ThrowIfAccessDenied(userGroup);
 
                 user.AddUserGroup(userGroup);
             }
