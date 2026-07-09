@@ -26,7 +26,7 @@ public sealed class ItemDeleteCommandHandler(
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(item);
+        EntityAssertFound.ThrowNotFoundIfNull(item, command.ItemGuid, EntityType.Item);
 
         actor.ThrowIfAccessNotAuthorized(item);
 

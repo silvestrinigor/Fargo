@@ -30,7 +30,7 @@ public sealed class ItemCreateCommandHandler(
 
         var article = await articleRepository.GetByGuidAsync(command.Create.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article);
+        EntityAssertFound.ThrowNotFoundIfNull(article, command.Create.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessNotAuthorized(article);
 

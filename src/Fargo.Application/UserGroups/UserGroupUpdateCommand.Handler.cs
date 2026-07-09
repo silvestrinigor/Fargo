@@ -31,7 +31,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(userGroup);
+        EntityAssertFound.ThrowNotFoundIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
 
         actor.ThrowIfAccessNotAuthorized(userGroup);
 

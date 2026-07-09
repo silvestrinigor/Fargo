@@ -93,7 +93,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition);
+                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
                 user.AddPartition(partition);
             }
@@ -105,7 +105,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(userGroup);
+                EntityAssertFound.ThrowNotFoundIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
 
                 actor.ThrowIfAccessNotAuthorized(userGroup);
 

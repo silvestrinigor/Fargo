@@ -28,7 +28,7 @@ public sealed class ArticlePatchCommandHandler(
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article);
+        EntityAssertFound.ThrowNotFoundIfNull(article, command.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessNotAuthorized(article);
 
@@ -180,7 +180,7 @@ public sealed class ArticlePatchCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition);
+                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessNotAuthorized(partition);
 
@@ -194,7 +194,7 @@ public sealed class ArticlePatchCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition);
+                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessNotAuthorized(partition);
 

@@ -25,7 +25,7 @@ public sealed class ArticleDeleteCommandHandler(
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article);
+        EntityAssertFound.ThrowNotFoundIfNull(article, command.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessNotAuthorized(article);
 

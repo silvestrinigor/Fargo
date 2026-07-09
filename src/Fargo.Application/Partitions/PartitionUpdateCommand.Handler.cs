@@ -28,7 +28,7 @@ public sealed class PartitionUpdateCommandHandler(
 
         var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(partition);
+        EntityAssertFound.ThrowNotFoundIfNull(partition, command.PartitionGuid, EntityType.Partition);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

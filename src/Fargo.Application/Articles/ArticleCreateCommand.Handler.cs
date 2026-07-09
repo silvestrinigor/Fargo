@@ -39,7 +39,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle);
+                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
                     actor.ThrowIfAccessNotAuthorized(fromArticle);
 
@@ -52,7 +52,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle);
+                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
                     actor.ThrowIfAccessNotAuthorized(fromArticle);
 
@@ -157,7 +157,7 @@ public sealed class ArticleCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition);
+                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessNotAuthorized(partition);
 

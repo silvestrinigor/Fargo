@@ -52,7 +52,7 @@ public sealed class UserGroupCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition);
+                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessNotAuthorized(partition);
 
