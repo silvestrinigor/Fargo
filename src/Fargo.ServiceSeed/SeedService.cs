@@ -23,10 +23,6 @@ namespace Fargo.ServiceSeed;
 /// </para>
 /// </remarks>
 public sealed class SeedService(
-    ICommandHandler<InitializeSystemCommand> handler,
-    IOptions<AdministratorsUserGroupOptions> administratorsOptions,
-    IOptions<DefaultAdminOptions> adminOptions,
-    IOptions<GlobalPartitionOptions> globalPartitionOptions,
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime
     ) : BackgroundService
@@ -70,6 +66,14 @@ public sealed class SeedService(
         try
         {
             using var scope = serviceProvider.CreateScope();
+
+            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<InitializeSystemCommand>>();
+
+            var administratorsOptions = scope.ServiceProvider.GetRequiredService<IOptions<AdministratorsUserGroupOptions>>();
+
+            var adminOptions = scope.ServiceProvider.GetRequiredService<IOptions<DefaultAdminOptions>>();
+
+            var globalPartitionOptions = scope.ServiceProvider.GetRequiredService<IOptions<GlobalPartitionOptions>>();
 
             var command = new InitializeSystemCommand(
                 new(adminOptions.Value.Nameid), new(adminOptions.Value.Password), new(adminOptions.Value.Description),
