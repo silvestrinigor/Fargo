@@ -11,6 +11,7 @@ public sealed class FargoExceptionMiddleware
     }
 
     private readonly RequestDelegate next;
+
     private readonly IHostEnvironment environment;
 
     /// <summary>
@@ -34,9 +35,7 @@ public sealed class FargoExceptionMiddleware
     /// </summary>
     /// <param name="context">The current HTTP request context.</param>
     /// <param name="exception">The exception to handle.</param>
-    private async Task HandleExceptionAsync(
-        HttpContext context,
-        Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         if (FargoProblemDetailsRegistry.TryGetDefinition(exception.GetType(), out var definition))
         {

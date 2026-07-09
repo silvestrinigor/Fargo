@@ -10,7 +10,7 @@ public static class ActorAssertHasAccessExtension
     {
         if (!actor.HasAccess(entity))
         {
-            throw new ActorAccessDeniedException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoException(actor.ActorId, entity.Guid, entity.GetEntityType());
         }
     }
 
@@ -19,7 +19,7 @@ public static class ActorAssertHasAccessExtension
     {
         if (!actor.HasAccess(entity))
         {
-            throw new ActorAccessDeniedException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoException(actor.ActorId, entity.Guid, entity.GetEntityType());
         }
     }
 }

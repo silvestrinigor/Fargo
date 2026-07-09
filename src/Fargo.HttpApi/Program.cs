@@ -1,5 +1,6 @@
 using Fargo.Application.DependencyInjection;
 using Fargo.HttpApi.Endpoints;
+using Fargo.HttpApi.ExceptionHandlers;
 using Fargo.HttpApi.Json;
 using Fargo.HttpApi.Middlewares;
 using Fargo.HttpApi.OpenApi;
@@ -31,11 +32,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddFargoExceptionHandler();
+
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 app.UseResponseCompression();
 
-app.UseMiddleware<FargoExceptionMiddleware>();
+app.UseExceptionHandler();
+
+app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {
