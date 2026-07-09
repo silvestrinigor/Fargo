@@ -34,7 +34,7 @@ public static class ServiceCollectionExtensions
         /// The use of <c>ValidateOnStart()</c> ensures that the application fails
         /// fast if the configuration is missing or invalid.
         /// </remarks>
-        public IServiceCollection AddFargoDefaultAdmin(
+        public IServiceCollection AddFargoSeedOptions(
                 IConfiguration configuration)
         {
             services

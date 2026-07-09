@@ -28,7 +28,7 @@ public sealed class UserUpdateCommandHandler(
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(user);
+        EntityAssertFound.ThrowNotFoundIfNull(user, command.UserGuid, EntityType.User);
 
         var update = command.Update;
 

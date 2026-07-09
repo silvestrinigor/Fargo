@@ -27,151 +27,137 @@ public sealed class ArticleCreateCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.CreateArticle);
 
-        var dto = command.Article;
-
         Article article;
 
-        switch (dto.ArticleType)
+        switch (command.ArticleType)
         {
-            case null:
-
             case ArticleType.Default:
-                article = Article.NewArticle(dto.Name);
+                article = Article.NewArticle(command.Name);
                 break;
 
             case ArticleType.Variation:
                 {
-                    if (dto.FromArticle is null)
-                    {
-                        throw new ArgumentException("FromArticle cannot be null when the ArticleType is Variation");
-                    }
+                    var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    var fromArticle = await articleRepository.GetByGuidAsync(dto.FromArticle.Value, cancellationToken);
+                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle);
+                    actor.ThrowIfAccessNotAuthorized(fromArticle);
 
-                    article = Article.NewArticleVariation(dto.Name, fromArticle);
+                    article = Article.NewArticleVariation(command.Name, fromArticle);
 
                     break;
                 }
 
             case ArticleType.Pack:
                 {
-                    if (dto.FromArticle is null)
-                    {
-                        throw new InvalidOperationException();
-                    }
+                    var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    if (dto.PackQuantity is null)
-                    {
-                        throw new InvalidOperationException();
-                    }
+                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
-                    var fromArticle = await articleRepository.GetByGuidAsync(dto.FromArticle.Value, cancellationToken);
+                    actor.ThrowIfAccessNotAuthorized(fromArticle);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle);
-
-                    article = Article.NewArticlePack(dto.Name, fromArticle, dto.PackQuantity.Value);
+                    article = Article.NewArticlePack(command.Name, fromArticle, command.PackQuantity!.Value);
 
                     break;
                 }
 
-            case ArticleType.Kit: throw new NotImplementedException();
+            case ArticleType.Container: article = Article.NewArticleContainer(command.Name); break;
 
-            case ArticleType.Container: article = Article.NewArticleContainer(dto.Name); break;
-
-            default: throw new InvalidOperationException();
+            default: throw new NotSupportedException("Not supported article type.");
         }
 
-        article.Description = dto.Description ?? Description.Empty;
+        article.Description = command.Description ?? Description.Empty;
 
-        article.ShelfLife = dto.ShelfLife ?? null;
+        article.ShelfLife = command.ShelfLife ?? null;
 
-        article.Color = dto.Color ?? null;
+        article.Color = command.Color ?? null;
 
         article.SetMetrics(
-            dto.Mass ?? null,
-            dto.LengthX ?? null,
-            dto.LengthY ?? null,
-            dto.LengthZ ?? null);
+            command.Mass ?? null,
 
-        if (dto.Ean13 is { } ean13)
+            command.LengthX ?? null,
+
+            command.LengthY ?? null,
+
+            command.LengthZ ?? null);
+
+        if (command.Ean13 is { } ean13)
         {
             await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Ean13 = ean13;
         }
 
-        if (dto.Ean8 is { } ean8)
+        if (command.Ean8 is { } ean8)
         {
             await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
 
             article.Ean8 = ean8;
         }
 
-        if (dto.UpcA is { } upcA)
+        if (command.UpcA is { } upcA)
         {
             await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
 
             article.UpcA = upcA;
         }
 
-        if (dto.UpcE is { } upcE)
+        if (command.UpcE is { } upcE)
         {
             await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
 
             article.UpcE = upcE;
         }
 
-        if (dto.Code128 is { } code128)
+        if (command.Code128 is { } code128)
         {
             await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
 
             article.Code128 = code128;
         }
 
-        if (dto.Code39 is { } code39)
+        if (command.Code39 is { } code39)
         {
             await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
 
             article.Code39 = code39;
         }
 
-        if (dto.Itf14 is { } itf14)
+        if (command.Itf14 is { } itf14)
         {
             await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
 
             article.Itf14 = itf14;
         }
 
-        if (dto.Gs1128 is { } gs1128)
+        if (command.Gs1128 is { } gs1128)
         {
             await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
 
             article.Gs1128 = gs1128;
         }
 
-        if (dto.QrCode is { } qrCode)
+        if (command.QrCode is { } qrCode)
         {
             await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
 
             article.QrCode = qrCode;
         }
 
-        if (dto.DataMatrix is { } dataMatrix)
+        if (command.DataMatrix is { } dataMatrix)
         {
             await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
 
             article.DataMatrix = dataMatrix;
         }
 
-        if (dto.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
+        if (command.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
         {
             foreach (var partitionGuid in partitionsToAdd.Distinct())
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition);
+                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessNotAuthorized(partition);
 
@@ -179,7 +165,7 @@ public sealed class ArticleCreateCommandHandler(
             }
         }
 
-        article.IsActive = dto.IsActive ?? true;
+        article.IsActive = command.IsActive ?? true;
 
         articleRepository.Add(article);
 
@@ -190,4 +176,3 @@ public sealed class ArticleCreateCommandHandler(
         return article.Guid;
     }
 }
-

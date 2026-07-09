@@ -14,16 +14,16 @@ public sealed class LogoutCommandHandler(
         LogoutCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Logout flow started.");
+        logger.LogoutStarted();
 
         var refreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
-        var storedRefreshToken = await refreshTokenRepository.GetByTokenHash(
-            refreshTokenHash, cancellationToken);
+        var storedRefreshToken =
+            await refreshTokenRepository.GetByTokenHash(refreshTokenHash, cancellationToken);
 
         if (storedRefreshToken == null)
         {
-            logger.LogWarning("Logout flow completed without revoking a refresh token because it was not found.");
+            logger.LogoutCompletedRefreshTokenNotFound();
 
             return;
         }
@@ -32,10 +32,6 @@ public sealed class LogoutCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("Logout flow completed for user {UserGuid}.", storedRefreshToken.UserGuid);
-        }
+        logger.LogoutCompleted(storedRefreshToken.UserGuid);
     }
 }
-

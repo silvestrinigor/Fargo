@@ -6,6 +6,5 @@ namespace Fargo.Application.UserGroups;
 /// Command used to update an existing user group from an API update payload.
 /// </summary>
 public sealed record UserGroupUpdateCommand(
-    Guid UserGroupGuid,
-    UserGroupUpdateDto Update
+    Guid UserGroupGuid, UserGroupUpdateDto Update
 ) : ICommand;

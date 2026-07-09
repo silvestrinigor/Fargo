@@ -73,6 +73,8 @@ public interface IArticleRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<bool> IsDependenceOfAnotherArticle(Guid articleGuid, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Adds a new article to the persistence context.
     /// </summary>

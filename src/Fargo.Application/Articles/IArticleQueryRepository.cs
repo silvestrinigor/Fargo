@@ -34,8 +34,7 @@ public interface IArticleQueryRepository
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves article information by barcode.
@@ -63,8 +62,7 @@ public interface IArticleQueryRepository
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves multiple article information records.
@@ -87,11 +85,10 @@ public interface IArticleQueryRepository
     /// <returns>
     /// Collection of article information.
     /// </returns>
-    Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken = default);
 }

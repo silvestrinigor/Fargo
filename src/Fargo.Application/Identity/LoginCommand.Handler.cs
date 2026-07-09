@@ -1,4 +1,3 @@
-using Fargo.Application.Articles.Commands.Handlers;
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Identity;
 using Fargo.Core.Shared;
@@ -8,19 +7,14 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Identity;
 
 public sealed class LoginCommandHandler(
-    IUserRepository userRepository,
-    IPasswordHasher passwordHasher,
-    ITokenGenerator tokenGenerator,
-    IRefreshTokenGenerator refreshTokenGenerator,
-    ITokenHasher tokenHasher,
-    IRefreshTokenRepository refreshTokenRepository,
-    IUnitOfWork unitOfWork,
-    ILogger<LoginCommandHandler> logger
+    IUserRepository userRepository, IPasswordHasher passwordHasher,
+    ITokenGenerator tokenGenerator, IRefreshTokenGenerator refreshTokenGenerator,
+    ITokenHasher tokenHasher, IRefreshTokenRepository refreshTokenRepository,
+    IUnitOfWork unitOfWork, ILogger<LoginCommandHandler> logger
 ) : ICommandHandler<LoginCommand, AuthResult>
 {
     public async Task<AuthResult> HandleAsync(
-        LoginCommand command,
-        CancellationToken cancellationToken = default)
+        LoginCommand command, CancellationToken cancellationToken = default)
     {
         logger.LoginStarted(command.Nameid);
 
@@ -58,17 +52,14 @@ public sealed class LoginCommandHandler(
 
         if (!isValid)
         {
-            logger.LogWarning("Login flow rejected because the password was invalid for user {UserGuid}.", user.Guid);
+            logger.LoginRejectedInvalidPassword(user.Guid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (user.IsPasswordChangeRequired)
         {
-            if (logger.IsEnabled(LogLevel.Information))
-            {
-                logger.LogInformation("Login flow requires password change for user {UserGuid}.", user.Guid);
-            }
+            logger.LoginRejectedPasswordChangeRequired(user.Guid);
 
             throw new PasswordChangeRequiredException(user.Guid);
         }
@@ -89,12 +80,11 @@ public sealed class LoginCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
+        var authResult = new AuthResult(
+            accessTokenResult.AccessToken, rawRefreshToken, accessTokenResult.ExpiresAt);
+
         logger.LoginCompleted(command.Nameid);
 
-        return new AuthResult(
-            accessTokenResult.AccessToken,
-            rawRefreshToken,
-            accessTokenResult.ExpiresAt);
+        return authResult;
     }
 }
-

@@ -35,7 +35,7 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddFargoIdentityApplication()
             .AddFargoSystemApplication();
 
-        private IServiceCollection AddFargoDomain() => services
+        public IServiceCollection AddFargoDomain() => services
             .AddScoped<ActorService>()
             .AddScoped<ArticleService>()
             .AddScoped<UserService>()
@@ -43,37 +43,37 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<PartitionService>()
             .AddScoped<ItemService>();
 
-        private IServiceCollection AddFargoSystemApplication() => services
+        public IServiceCollection AddFargoSystemApplication() => services
             .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
-        private IServiceCollection AddFargoIdentityApplication() => services
+        public IServiceCollection AddFargoIdentityApplication() => services
             .AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>()
             .AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>()
             .AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>()
             .AddScoped<ICommandHandler<PasswordChangeCommand>, PasswordChangeCommandHandler>();
 
-        private IServiceCollection AddFargoItemApplication() => services
+        public IServiceCollection AddFargoItemApplication() => services
             .AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>()
             .AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>()
             .AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>()
             .AddScoped<IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>, ItemsQueryHandler>();
 
-        private IServiceCollection AddFargoUserApplication() => services
+        public IServiceCollection AddFargoUserApplication() => services
             .AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>()
             .AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>()
             .AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>()
             .AddScoped<IQueryHandler<UserSingleQuery, UserDto?>, UserSingleQueryHandler>()
             .AddScoped<IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>, UsersQueryHandler>();
 
-        private IServiceCollection AddFargoUserGroupApplication() => services
+        public IServiceCollection AddFargoUserGroupApplication() => services
             .AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>()
             .AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>()
             .AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>()
             .AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupDto?>, UserGroupSingleQueryHandler>()
             .AddScoped<IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>, UserGroupsQueryHandler>();
 
-        private IServiceCollection AddFargoArticleApplication() => services
+        public IServiceCollection AddFargoArticleApplication() => services
             .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
             .AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticlePatchCommandHandler>()
             .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
@@ -81,7 +81,7 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>()
             .AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>();
 
-        private IServiceCollection AddFargoPartitionApplication() => services
+        public IServiceCollection AddFargoPartitionApplication() => services
             .AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>()
             .AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>()
             .AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>()

@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.System;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
 namespace Fargo.ServiceSeed;
@@ -60,17 +61,25 @@ public sealed class SeedService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var activity = activitySource.StartActivity(
-            "Seeding database", ActivityKind.Client
-        );
+            "Seeding database", ActivityKind.Client);
 
         try
         {
             using var scope = serviceProvider.CreateScope();
 
-            var command = new InitializeSystemCommand();
+            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<InitializeSystemCommand>>();
 
-            var handler = scope.ServiceProvider
-                .GetRequiredService<ICommandHandler<InitializeSystemCommand>>();
+            var administratorsOptions = scope.ServiceProvider.GetRequiredService<IOptions<AdministratorsUserGroupOptions>>();
+
+            var adminOptions = scope.ServiceProvider.GetRequiredService<IOptions<DefaultAdminOptions>>();
+
+            var globalPartitionOptions = scope.ServiceProvider.GetRequiredService<IOptions<GlobalPartitionOptions>>();
+
+            var command = new InitializeSystemCommand(
+                new(adminOptions.Value.Nameid), new(adminOptions.Value.Password), new(adminOptions.Value.Description),
+                new(administratorsOptions.Value.Nameid), new(administratorsOptions.Value.Description),
+                new(globalPartitionOptions.Value.Name), new(globalPartitionOptions.Value.Description)
+            );
 
             await handler.HandleAsync(command, stoppingToken);
         }

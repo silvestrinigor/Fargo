@@ -20,14 +20,7 @@ public sealed class ItemCreateCommandHandler(
         ItemCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var create = command.Create;
-
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Item create flow started for article {articleGuid} by actor {ActorGuid}.",
-                create.ArticleGuid, currentActor.ActorId);
-        }
+        logger.CreateStarted(command.Create.ArticleGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -35,26 +28,21 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ThrowIfPermissionNotAuthorized(ActionType.CreateItem);
 
-        var article = await articleRepository.GetByGuidAsync(create.ArticleGuid, cancellationToken);
+        var article = await articleRepository.GetByGuidAsync(command.Create.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article);
+        EntityAssertFound.ThrowNotFoundIfNull(article, command.Create.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessNotAuthorized(article);
 
-        var item = Item.CreateItem(article, create.ProductionDate);
+        var item = Item.CreateItem(article, command.Create.ProductionDate);
 
-        item.IsActive = create.IsActive ?? true;
+        item.IsActive = command.Create.IsActive ?? true;
 
         itemRepository.Add(item);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Item create mutation completed for item {itemGuid} by actor {actorId}. ArticleGuid: {articleGuid}.",
-                item.Guid, actor.ActorId, article.Guid);
-        }
+        logger.CreateCompleted(item.Guid, actor.ActorId, article.Guid);
 
         return item.Guid;
     }

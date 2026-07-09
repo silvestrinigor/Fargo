@@ -16,12 +16,25 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     private readonly DbSet<Item> items = context.Items;
 
+    private readonly DbSet<ArticleVariation> variations = context.ArticleVariations;
+
+    private readonly DbSet<ArticlePack> articlePacks = context.ArticlePacks;
+
+    private readonly DbSet<ArticleKit> articleKits = context.ArticleKits;
+
     public void Add(Article article) => articles.Add(article);
 
     public void Remove(Article article) => articles.Remove(article);
 
     public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
         => items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
+
+    public async Task<bool> IsDependenceOfAnotherArticle(Guid articleGuid, CancellationToken cancellationToken = default)
+    {
+        return await variations.AnyAsync(v => v.FromArticleGuid == articleGuid, cancellationToken)
+            || await articlePacks.AnyAsync(p => p.FromArticleGuid == articleGuid, cancellationToken)
+            || await articleKits.AnyAsync(k => k.Components.Any(c => c.ArticleGuid == articleGuid), cancellationToken);
+    }
 
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => articles
@@ -97,7 +110,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfo(
+    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
         Pagination pagination,
         DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

@@ -1,5 +1,6 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(userGroup);
+        EntityAssertFound.ThrowNotFoundIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
 
         userGroupRepository.Remove(userGroup);
 

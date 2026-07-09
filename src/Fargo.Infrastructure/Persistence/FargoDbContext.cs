@@ -16,6 +16,12 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 {
     public DbSet<Article> Articles { get; set; }
 
+    public DbSet<ArticleVariation> ArticleVariations { get; set; }
+
+    public DbSet<ArticlePack> ArticlePacks { get; set; }
+
+    public DbSet<ArticleKit> ArticleKits { get; set; }
+
     public DbSet<Item> Items { get; set; }
 
     public DbSet<User> Users { get; set; }

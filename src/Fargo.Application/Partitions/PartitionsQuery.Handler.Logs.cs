@@ -17,5 +17,6 @@ internal static partial class PartitionsQueryHandlerLogs
         Message = "Partitions query completed for actor {actorId}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
     public static partial void ManyQueryCompleted(
         this ILogger logger,
-        ActorId actorId, int requestedPartitionCount, int effectivePartitionCount, int resultCount);
+        ActorId actorId, int requestedPartitionCount,
+        int effectivePartitionCount, int resultCount);
 }

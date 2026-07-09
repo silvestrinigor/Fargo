@@ -6,7 +6,7 @@ namespace Fargo.Application.Articles;
 internal static partial class ArticlesQueryHandlerLogs
 {
     [LoggerMessage(
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Articles query started for actor {actorId}. Page: {Page}. Limit: {Limit}.")]
     public static partial void ArticlesQueryStarted(
         this ILogger logger,
@@ -15,7 +15,7 @@ internal static partial class ArticlesQueryHandlerLogs
         Limit limit);
 
     [LoggerMessage(
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Articles query completed for actor {actorId}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
     public static partial void ArticlesQueryCompleted(
         this ILogger logger,

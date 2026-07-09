@@ -16,9 +16,8 @@ public sealed class ArticlesQueryHandler(
         ArticlesQuery query,
         CancellationToken cancellationToken = default)
     {
-        var pagination = query.WithPagination;
-
-        logger.ArticlesQueryStarted(currentActor.ActorId, pagination.Page, pagination.Limit);
+        logger.ArticlesQueryStarted(
+            currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
@@ -30,15 +29,14 @@ public sealed class ArticlesQueryHandler(
                 query.ChildOfAnyOfThesePartitions,
                 query.NotChildOfAnyPartition);
 
-        var articles = await articleRepository.GetManyInfo(
-            pagination,
-            query.TemporalAsOfDateTime,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
-            cancellationToken
-        );
+        var articles = await articleRepository.GetManyInfoAsync(
+            query.WithPagination, query.TemporalAsOfDateTime,
+            childOfAnyOfThesePartitions, notChildOfAnyPartition,
+            cancellationToken);
 
-        logger.ArticlesQueryCompleted(actor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0, childOfAnyOfThesePartitions?.Count ?? 0, articles.Count);
+        logger.ArticlesQueryCompleted(
+            actor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0, articles.Count);
 
         return articles;
     }

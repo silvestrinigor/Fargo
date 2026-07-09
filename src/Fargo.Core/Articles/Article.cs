@@ -23,10 +23,6 @@ public class Article : Entity, IActivable, IPartitioned
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
-    /// <remarks>
-    /// The name identifies the article in the domain and must satisfy
-    /// the validation rules defined by <see cref="Name"/>.
-    /// </remarks>
     public Name Name { get; set; }
 
     /// <summary>
@@ -46,7 +42,6 @@ public class Article : Entity, IActivable, IPartitioned
     /// <summary>
     /// Gets or sets the shelf life of the article.
     /// When <see langword="null"/>, no shelf life constraint is defined.
-    /// Persisted as <c>bigint</c> (ticks) in the database.
     /// </summary>
     public TimeSpan? ShelfLife { get; set; }
 
@@ -62,22 +57,22 @@ public class Article : Entity, IActivable, IPartitioned
     public bool IsActive { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets the X dimension of the article.
+    /// Gets the X dimension of the article.
     /// </summary>
     public Length? LengthX { get; private set; }
 
     /// <summary>
-    /// Gets or sets the Y dimension of the article.
+    /// Gets the Y dimension of the article.
     /// </summary>
     public Length? LengthY { get; private set; }
 
     /// <summary>
-    /// Gets or sets the Z dimension of the article.
+    /// Gets the Z dimension of the article.
     /// </summary>
     public Length? LengthZ { get; private set; }
 
     /// <summary>
-    /// Gets or sets the physical mass of the article.
+    /// Gets the physical mass of the article.
     /// </summary>
     public Mass? Mass { get; private set; }
 
@@ -187,12 +182,12 @@ public class Article : Entity, IActivable, IPartitioned
     /// Gets the kit info associated with the article.
     /// When <see langword="null"/>, no kit constraint is defined.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Kit))]
     public ArticleKit? Kit { get; private init; }
 
     /// <summary>
     /// Gets a value indicating whether this article represents a kit.
     /// </summary>
+    [MemberNotNullWhen(true, nameof(Kit))]
     public bool IsKit => Kit is not null;
 
     #endregion Kit
@@ -290,26 +285,55 @@ public class Article : Entity, IActivable, IPartitioned
         ArticleType = ArticleType.Container;
     }
 
+    /// <summary>
+    /// Creates a new article.
+    /// </summary>
+    /// <param name="name">The name of the article.</param>
+    /// <returns></returns>
     public static Article NewArticle(Name name)
     {
         return new Article(name);
     }
 
+    /// <summary>
+    /// Creates a new article variation.
+    /// </summary>
+    /// <param name="name">The name of the article.</param>
+    /// <param name="fromArticle">The article this article is a variation of.</param>
+    /// <returns></returns>
     public static Article NewArticleVariation(Name name, Article fromArticle)
     {
         return new Article(name, new ArticleVariation(fromArticle));
     }
 
+    /// <summary>
+    /// Creates a new article pack.
+    /// </summary>
+    /// <param name="name">The name of the article.</param>
+    /// <param name="fromArticle">The article this article is a pack of.</param>
+    /// <param name="quantity"></param>
+    /// <returns></returns>
     public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
     {
         return new Article(name, new ArticlePack(fromArticle, quantity));
     }
 
+    /// <summary>
+    /// creates a new article kit.
+    /// </summary>
+    /// <param name="name">The name of the article.</param>
+    /// <param name="kitComponents"></param>
+    /// <returns></returns>
     public static Article NewArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> kitComponents)
     {
         return new Article(name, new ArticleKit(kitComponents));
     }
 
+    /// <summary>
+    /// Creates a new article container.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static Article NewArticleContainer(Name name)
     {
         return new Article(name, new ArticleContainer(null));

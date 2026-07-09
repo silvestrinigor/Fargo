@@ -4,13 +4,7 @@ namespace Fargo.Application.Identity;
 
 public interface ICurrentActor
 {
-    ActorId ActorId
-    {
-        get;
-    }
+    ActorId ActorId { get; }
 
-    bool IsAuthenticated
-    {
-        get;
-    }
+    bool IsAuthenticated { get; }
 }

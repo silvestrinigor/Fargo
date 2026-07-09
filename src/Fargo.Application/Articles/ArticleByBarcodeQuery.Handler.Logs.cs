@@ -7,7 +7,7 @@ namespace Fargo.Application.Articles;
 internal static partial class ArticleByBarcodeQueryHandlerLogs
 {
     [LoggerMessage(
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Article query by barcode flow started for article {articleBarcode} by actor {actorId}.")]
     public static partial void QueryByBarcodeStarted(
         this ILogger logger,
@@ -15,7 +15,7 @@ internal static partial class ArticleByBarcodeQueryHandlerLogs
         ActorId actorId);
 
     [LoggerMessage(
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Article query by barcode flow completed for article {articleBarcode} by actor {actorId}.")]
     public static partial void QueryByBarcodeCompleted(
         this ILogger logger,

@@ -1,0 +1,35 @@
+{
+	"name": "C# (.NET)",
+	"image": "mcr.microsoft.com/dotnet/sdk:10.0",
+	"customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit"
+            ]
+        }
+    },
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "version": "2"
+        },
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers/features/dotnet:2": {
+            "version": "none",
+            "dotnetRuntimeVersions": "10.0",
+            "aspNetCoreRuntimeVersions": "10.0"
+        },
+        "ghcr.io/dotnet/aspire-devcontainer-feature/dotnetaspire:1": {}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "dotnet restore && sudo apt update && sudo apt install -y git-lfs && git lfs install && dotnet dev-certs https --clean && dotnet dev-certs https --trust && export SSL_CERT_DIR=\\\"$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs\\\""
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

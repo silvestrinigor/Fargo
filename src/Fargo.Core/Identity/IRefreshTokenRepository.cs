@@ -29,12 +29,10 @@ public interface IRefreshTokenRepository
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
     Task<RefreshToken?> GetByTokenHash(
-        TokenHash tokenHash,
-        CancellationToken cancellationToken = default);
+        TokenHash tokenHash, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<RefreshToken>> GetByUserGuid(
-        Guid userGuid,
-        CancellationToken cancellationToken = default);
+        Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new refresh token to the persistence context.

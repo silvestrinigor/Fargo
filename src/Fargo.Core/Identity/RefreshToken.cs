@@ -2,8 +2,6 @@ using Fargo.Core.Entities;
 
 namespace Fargo.Core.Identity;
 
-#region Entities
-
 /// <summary>
 /// Represents a refresh token used to obtain a new access token
 /// without requiring the user to authenticate again.
@@ -80,6 +78,3 @@ public sealed class RefreshToken : Entity
         RevokedAt ??= DateTimeOffset.UtcNow;
     }
 }
-
-#endregion Entities
-

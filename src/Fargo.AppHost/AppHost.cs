@@ -7,6 +7,7 @@ var sqlserver = builder
     .WithLifetime(ContainerLifetime.Persistent);
 
 var fargodb = sqlserver.AddDatabase("fargo");
+
 var environmentName = builder.Environment.EnvironmentName;
 
 var migrations = builder

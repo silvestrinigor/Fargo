@@ -7,12 +7,19 @@ public sealed class ArticleService(IArticleRepository articleRepository)
     public async Task AssertArticleCanBeDeletedAsync(Article article, CancellationToken cancellationToken = default)
     {
         var hasItems = await articleRepository.HasItemsAssociatedAsync(
-            article.Guid,
-            cancellationToken);
+            article.Guid, cancellationToken);
 
         if (hasItems)
         {
             throw new ArticleDeleteWithItemsAssociatedFargoDomainException(article.Guid);
+        }
+
+        var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticle(
+            article.Guid, cancellationToken);
+
+        if (isArticleDependence)
+        {
+            throw new ArticleDeleteIsDependencyOfAnotherArticle(article.Guid);
         }
     }
 
