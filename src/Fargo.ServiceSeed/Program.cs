@@ -12,8 +12,6 @@ builder.Services.AddFargoSeedOptions(builder.Configuration);
 
 builder.Services.AddFargoSystemApplication();
 
-builder.Services.AddFargoInfrastructure(builder.Configuration);
-
 builder.Services.AddFargoConnectionStringOptions(builder.Configuration);
 
 builder.Services.AddFargoDbContext();
