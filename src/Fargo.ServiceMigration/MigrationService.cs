@@ -13,8 +13,7 @@ namespace Fargo.ServiceMigration;
 /// <see cref="FargoDbContext"/>, and executes the migration process.
 /// </remarks>
 public sealed class MigrationService(
-    IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime
-) : BackgroundService
+    IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing migration operations.

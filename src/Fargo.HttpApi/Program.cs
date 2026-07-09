@@ -24,7 +24,7 @@ builder.Services.ConfigureFargoJson();
 
 builder.Services.AddFargoApplication();
 
-builder.Services.AddFargoInfrastructure(builder.Configuration, configure => configure.UseHttpCurrentActor());
+builder.Services.AddFargoInfrastructure(builder.Configuration);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();

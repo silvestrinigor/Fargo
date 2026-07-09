@@ -1,5 +1,6 @@
 using Fargo.Application;
 using Fargo.Application.System;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
 namespace Fargo.ServiceSeed;
@@ -23,6 +24,9 @@ namespace Fargo.ServiceSeed;
 /// </remarks>
 public sealed class SeedService(
     ICommandHandler<InitializeSystemCommand> handler,
+    IOptions<AdministratorsUserGroupOptions> administratorsOptions,
+    IOptions<DefaultAdminOptions> adminOptions,
+    IOptions<GlobalPartitionOptions> globalPartitionOptions,
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime
     ) : BackgroundService
@@ -67,7 +71,11 @@ public sealed class SeedService(
         {
             using var scope = serviceProvider.CreateScope();
 
-            var command = new InitializeSystemCommand();
+            var command = new InitializeSystemCommand(
+                new(adminOptions.Value.Nameid), new(adminOptions.Value.Password), new(adminOptions.Value.Description),
+                new(administratorsOptions.Value.Nameid), new(administratorsOptions.Value.Description),
+                new(globalPartitionOptions.Value.Name), new(globalPartitionOptions.Value.Description)
+            );
 
             await handler.HandleAsync(command, stoppingToken);
         }

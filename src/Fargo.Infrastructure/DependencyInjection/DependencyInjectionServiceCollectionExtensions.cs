@@ -26,13 +26,8 @@ public static class DependencyInjectionServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddFargoInfrastructure(
-            IConfiguration configuration, Action<InfrastructureOptions>? configure = null)
+        public IServiceCollection AddFargoInfrastructure(IConfiguration configuration)
         {
-            var options = new InfrastructureOptions();
-
-            configure?.Invoke(options);
-
             services.AddFargoConnectionStringOptions(configuration);
 
             services.AddFargoDbContext();
@@ -47,7 +42,7 @@ public static class DependencyInjectionServiceCollectionExtensions
 
             services.AddFargoSecurity();
 
-            options.ConfigureCurrentUser?.Invoke(services);
+            services.AddScoped<ICurrentActor, CurrentUserActorHttp>();
 
             return services;
         }

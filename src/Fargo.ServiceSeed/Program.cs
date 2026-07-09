@@ -8,12 +8,19 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddFargoDefaultAdminOptions(builder.Configuration);
+builder.Services.AddFargoSeedOptions(builder.Configuration);
 
-builder.Services.AddFargoApplication();
+builder.Services.AddFargoSystemApplication();
 
-builder.Services.AddFargoInfrastructure(
-    builder.Configuration, configure => configure.UseSystemCurrentActor());
+builder.Services.AddFargoInfrastructure(builder.Configuration);
+
+builder.Services.AddFargoConnectionStringOptions(builder.Configuration);
+
+builder.Services.AddFargoDbContext();
+
+builder.Services.AddFargoUnitOfWork();
+
+builder.Services.AddFargoRepositories();
 
 builder.Services.AddHostedService<SeedService>();
 
