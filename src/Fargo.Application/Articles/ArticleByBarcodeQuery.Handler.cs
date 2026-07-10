@@ -17,7 +17,7 @@ public sealed class ArticleByBarcodeQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
 
         var article = await articleRepository.GetInfoByBarcodeAsync(
             query.ArticleBarcode, query.AsOfDateTime,

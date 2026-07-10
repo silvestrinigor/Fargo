@@ -10,7 +10,7 @@ public static class EntityAssertFound
     {
         if (entity is null)
         {
-            throw new EntityNotFoundException(entityGuid, type);
+            throw new EntityNotFoundFargoException(entityGuid, type);
         }
     }
 }

@@ -5,4 +5,4 @@ namespace Fargo.Application.Identity;
 /// to perform the requested operation.
 /// </summary>
 public class UnauthorizedAccessException()
-    : Exception("The current user is not authorized to perform this operation.");
+    : Exception("The current actor is not authorized to perform this operation.");

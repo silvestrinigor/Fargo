@@ -17,7 +17,7 @@ public sealed class ItemSingleQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
 
         var item = await itemRepository.GetInfoByGuid(
             query.ItemGuid, query.AsOfDateTime,
