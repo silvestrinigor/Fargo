@@ -12,8 +12,10 @@ namespace Fargo.ServiceMigration;
 /// This service creates a scoped service provider, resolves the
 /// <see cref="FargoDbContext"/>, and executes the migration process.
 /// </remarks>
-public sealed class MigrationService(
-    IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
+public sealed class FargoMigrationService(
+    IServiceProvider serviceProvider,
+    IHostApplicationLifetime hostApplicationLifetime,
+    ILogger<FargoMigrationService> logger) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing migration operations.
@@ -53,6 +55,8 @@ public sealed class MigrationService(
         using var activity = activitySource.StartActivity(
             "Migrating database", ActivityKind.Client);
 
+        logger.LogInformation("Starting database migration.");
+
         try
         {
             using var scope = serviceProvider.CreateScope();
@@ -60,14 +64,23 @@ public sealed class MigrationService(
             var dbContext = scope.ServiceProvider.GetRequiredService<FargoDbContext>();
 
             await RunMigrationAsync(dbContext, stoppingToken);
+
+            logger.LogInformation("Database migration completed successfully.");
         }
         catch (Exception ex)
         {
             activity?.AddException(ex);
+
+            logger.LogError(ex, "Database migration failed.");
+
             throw;
         }
+        finally
+        {
+            logger.LogInformation("Stopping seed application.");
 
-        hostApplicationLifetime.StopApplication();
+            hostApplicationLifetime.StopApplication();
+        }
     }
 
     /// <summary>

@@ -8,24 +8,10 @@ namespace Fargo.ServiceSeed;
 /// <summary>
 /// Background service responsible for executing the system seed process during application startup.
 /// </summary>
-/// <remarks>
-/// This service creates a scoped dependency container, resolves the
-/// <see cref="ICommandHandler{TCommand}"/> for <see cref="InitializeSystemCommand"/>,
-/// and executes it to initialize the system state.
-/// <para>
-/// The default administrator configuration is no longer read directly by this service.
-/// That configuration is provided through application options and consumed by the
-/// <see cref="InitializeSystemCommandHandler"/>.
-/// </para>
-/// <para>
-/// After the seed process finishes, the application is stopped through
-/// <see cref="IHostApplicationLifetime.StopApplication"/>.
-/// </para>
-/// </remarks>
-public sealed class SeedService(
+public sealed class FargoSeedService(
     IServiceProvider serviceProvider,
-    IHostApplicationLifetime hostApplicationLifetime
-    ) : BackgroundService
+    IHostApplicationLifetime hostApplicationLifetime,
+    ILogger<FargoSeedService> logger) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing seed operations.
@@ -63,6 +49,8 @@ public sealed class SeedService(
         using var activity = activitySource.StartActivity(
             "Seeding database", ActivityKind.Client);
 
+        logger.LogInformation("Starting system initialization.");
+
         try
         {
             using var scope = serviceProvider.CreateScope();
@@ -82,13 +70,22 @@ public sealed class SeedService(
             );
 
             await handler.HandleAsync(command, stoppingToken);
+
+            logger.LogInformation("System initialization completed successfully.");
         }
         catch (Exception ex)
         {
             activity?.AddException(ex);
+
+            logger.LogError(ex, "System initialization failed.");
+
             throw;
         }
+        finally
+        {
+            logger.LogInformation("Stopping seed application.");
 
-        hostApplicationLifetime.StopApplication();
+            hostApplicationLifetime.StopApplication();
+        }
     }
 }
