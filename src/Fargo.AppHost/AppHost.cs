@@ -1,5 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var environmentName = builder.Environment.EnvironmentName;
+
 var sqlserver = builder
     .AddSqlServer("sqlserver")
     .WithImage("mssql/server")
@@ -7,8 +9,6 @@ var sqlserver = builder
     .WithLifetime(ContainerLifetime.Persistent);
 
 var fargodb = sqlserver.AddDatabase("fargo");
-
-var environmentName = builder.Environment.EnvironmentName;
 
 var migrations = builder
     .AddProject<Projects.Fargo_ServiceMigration>("migrations")
@@ -34,7 +34,7 @@ var httpApi = builder
     .WaitForCompletion(migrations)
     .WaitForCompletion(seeds);
 
-var identityFrontend = builder
+builder
     .AddProject<Projects.Fargo_WebIdentity>("identityfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(httpApi)
@@ -43,17 +43,12 @@ var identityFrontend = builder
 
 if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
 {
-    var playgroundFrontend = builder
+    builder
         .AddProject<Projects.Fargo_WebPlayground>("playgroundfrontend")
         .WithExternalHttpEndpoints()
         .WithReference(httpApi)
         .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
-        .WithEnvironment("FargoWebIdentity__BaseAddress", identityFrontend.GetEndpoint("http"))
         .WaitFor(httpApi);
-
-    identityFrontend.WithEnvironment(
-        "FargoWebPlayground__AllowedReturnOrigin",
-        playgroundFrontend.GetEndpoint("http"));
 }
 
 builder.Build().Run();
