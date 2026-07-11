@@ -18,8 +18,19 @@ public sealed class ItemContainer
         Item = item;
     }
 
+    public Guid ItemGuid { get; private init; }
+
     /// <summary>
     /// Gets the item that owns this container information.
     /// </summary>
-    public Item Item { get; private init; }
+    public Item Item
+    {
+        get;
+        private init
+        {
+            ItemGuid = value.Guid;
+
+            field = value;
+        }
+    }
 }
