@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Fargo.Core.Shared.Identity;
 
 /// <summary>
@@ -7,11 +9,15 @@ namespace Fargo.Core.Shared.Identity;
 /// purposes (for example, access tokens or refresh tokens).
 /// This value object ensures the token is not null, empty, or malformed.
 /// </summary>
-public readonly struct Token : IEquatable<Token>
+public readonly struct Token :
+    IEquatable<Token>,
+    IParsable<Token>,
+    ISpanParsable<Token>,
+    IUtf8SpanParsable<Token>,
+    IFormattable,
+    ISpanFormattable,
+    IUtf8SpanFormattable
 {
-    /// <summary>
-    /// Minimum allowed length for the token.
-    /// </summary>
     public const int MinLength = 50;
 
     /// <summary>
@@ -53,6 +59,8 @@ public readonly struct Token : IEquatable<Token>
     public static Token FromString(string value)
         => new(value);
 
+    #region Equality
+
     /// <summary>
     /// Determines whether the current token is equal to another token.
     /// </summary>
@@ -83,17 +91,119 @@ public readonly struct Token : IEquatable<Token>
     public static bool operator !=(Token left, Token right)
         => !left.Equals(right);
 
+    #endregion
+
+    #region Formatting
+
     /// <summary>
     /// Returns the token string.
     /// </summary>
     public override string ToString()
         => Value;
 
+    public string ToString(string? format, IFormatProvider? formatProvider)
+        => Value;
+
+    public bool TryFormat(
+        Span<char> destination,
+        out int charsWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        if (Value.AsSpan().TryCopyTo(destination))
+        {
+            charsWritten = Value.Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
+
+    public bool TryFormat(
+        Span<byte> utf8Destination,
+        out int bytesWritten,
+        ReadOnlySpan<char> format,
+        IFormatProvider? provider)
+    {
+        return Encoding.UTF8.TryGetBytes(Value.AsSpan(), utf8Destination, out bytesWritten);
+    }
+
+    #endregion
+
+    #region Parsing
+
+    public static Token Parse(string s, IFormatProvider? provider)
+        => new(s);
+
+    public static bool TryParse(
+        string? s,
+        IFormatProvider? provider,
+        out Token result)
+    {
+        try
+        {
+            result = new Token(s!);
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
+    public static Token Parse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider)
+        => new(s.ToString());
+
+    public static bool TryParse(
+        ReadOnlySpan<char> s,
+        IFormatProvider? provider,
+        out Token result)
+    {
+        try
+        {
+            result = new Token(s.ToString());
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
+    public static Token Parse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider)
+        => new(Encoding.UTF8.GetString(utf8Text));
+
+    public static bool TryParse(
+        ReadOnlySpan<byte> utf8Text,
+        IFormatProvider? provider,
+        out Token result)
+    {
+        try
+        {
+            result = new Token(Encoding.UTF8.GetString(utf8Text));
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// Implicitly converts a <see cref="Token"/> to <see cref="string"/>.
     /// </summary>
     public static implicit operator string(Token token)
-        => token.Value;
+    => token.Value;
 
     /// <summary>
     /// Explicitly converts a <see cref="string"/> to <see cref="Token"/>.
