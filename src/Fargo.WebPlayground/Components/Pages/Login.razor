@@ -1,0 +1,117 @@
+@page "/login"
+
+@rendermode InteractiveServer
+
+@inject IFargoIdentityClient IdentityClient
+@inject IdentitySession Session
+@inject NavigationManager NavigationManager
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment
+
+@using System.Text.Json
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+<EditForm Model=form OnValidSubmit=LoginAsync>
+
+    <DataAnnotationsValidator />
+
+    <FluentStack Orientation="Orientation.Vertical" Width="320px">
+
+        <FluentTextField
+            @bind-Value=form.Nameid
+            Disabled=isSubmitting
+            TextFieldType="TextFieldType.Text"
+            Required>
+            Nameid
+        </FluentTextField>
+
+        <FluentTextField
+            @bind-Value=form.Password
+            Disabled=isSubmitting
+            TextFieldType="TextFieldType.Password"
+            Required>
+            Password
+        </FluentTextField>
+
+        <FluentButton
+            Appearance="Appearance.Accent"
+            Disabled=isSubmitting
+            Type="ButtonType.Submit">
+            @(isSubmitting ? "Logging in" : "Login")
+        </FluentButton>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <FluentMessageBar Intent=messageIntent>
+                @message
+            </FluentMessageBar>
+        }
+
+    </FluentStack>
+
+</EditForm>
+
+@if (Session.IsAuthenticated)
+{
+    <p>Authenticated until @Session.CurrentAuth!.ExpiresAt.LocalDateTime.</p>
+}
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = FargoHttpJsonSerializerOptions.Create();
+
+    private readonly LoginForm form = new();
+    private bool isSubmitting;
+    private string? message;
+    private MessageIntent messageIntent = MessageIntent.Info;
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "state")]
+    public string? State { get; set; }
+
+    private async Task LoginAsync()
+    {
+        isSubmitting = true;
+        message = null;
+        Session.Clear();
+
+        try
+        {
+            var auth = await IdentityClient.LoginAsync(
+                new LoginDto(form.Nameid, form.Password));
+
+            Session.Set(auth);
+
+            form.Password = string.Empty;
+
+            messageIntent = MessageIntent.Success;
+            message = "Logged in.";
+        }
+        catch (FargoHttpApiException exception)
+        {
+            messageIntent = MessageIntent.Error;
+            message = exception.ProblemDetails?.Detail
+                ?? exception.Message;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            messageIntent = MessageIntent.Error;
+            message = "The Fargo HTTP API is unavailable.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed class LoginForm
+    {
+        public string Nameid { get; set; } = string.Empty;
+
+        public string Password { get; set; } = string.Empty;
+    }
+}

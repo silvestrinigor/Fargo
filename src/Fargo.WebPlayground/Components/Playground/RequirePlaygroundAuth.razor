@@ -58,7 +58,8 @@ else
         var auth = await Session.LoadAsync();
         if (auth is null || !Session.IsAuthenticated)
         {
-            await RedirectToIdentityAsync();
+            NavigationManager.NavigateTo("/login", true);;
+
             return;
         }
 
@@ -70,32 +71,4 @@ else
             NavigationManager.NavigateTo(RedirectAuthenticatedTo, forceLoad: true);
         }
     }
-
-    private async Task RedirectToIdentityAsync()
-    {
-        var state = Guid.NewGuid().ToString("N");
-        await Session.SetLoginStateAsync(state);
-
-        var identityBaseAddress = Configuration["FargoWebIdentity:BaseAddress"]
-            ?? "http://localhost:5098";
-        var loginUri = new Uri(new Uri(EnsureTrailingSlash(identityBaseAddress)), "login").ToString();
-        var returnTo = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        var callbackUri = QueryHelpers.AddQueryString(
-            new Uri(new Uri(NavigationManager.BaseUri), "auth/callback").ToString(),
-            "returnTo",
-            string.IsNullOrWhiteSpace(returnTo) ? "articles" : returnTo);
-
-        var redirectUri = QueryHelpers.AddQueryString(
-            loginUri,
-            new Dictionary<string, string?>
-            {
-                ["returnUrl"] = callbackUri,
-                ["state"] = state
-            });
-
-        NavigationManager.NavigateTo(redirectUri, forceLoad: true);
-    }
-
-    private static string EnsureTrailingSlash(string value)
-        => value.EndsWith('/') ? value : $"{value}/";
 }
