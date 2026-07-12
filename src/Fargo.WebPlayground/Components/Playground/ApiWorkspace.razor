@@ -2,6 +2,7 @@
 @using System.Net
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using Fargo.Core.Shared.Identity
 @using UnitsNet.NumberExtensions.NumberToScalar
 @inject PlaygroundApiClientFactory ClientFactory
 @inject PlaygroundAuthSession Session
@@ -1079,7 +1080,7 @@
         {
             var refreshToken = Session.CurrentAuth?.RefreshToken
                 ?? throw new InvalidOperationException("No refresh token is currently available.");
-            var auth = await client.Identity.RefreshAsync(new RefreshDto(refreshToken));
+            var auth = await client.Identity.RefreshAsync(new RefreshDto((Token)refreshToken));
             await Session.StoreAsync(auth);
             return auth;
         });
@@ -1091,7 +1092,7 @@
         {
             if (!string.IsNullOrWhiteSpace(Session.CurrentAuth?.RefreshToken))
             {
-                await client.Identity.LogoutAsync(new RefreshDto(Session.CurrentAuth.RefreshToken));
+                await client.Identity.LogoutAsync(new RefreshDto((Token)Session.CurrentAuth.RefreshToken));
             }
 
             await Session.ClearAsync();

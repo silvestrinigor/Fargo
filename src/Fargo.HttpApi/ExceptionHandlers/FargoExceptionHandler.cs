@@ -99,7 +99,7 @@ public sealed class FargoExceptionHandler : IExceptionHandler
 
                     break;
 
-                #endregion
+                    #endregion
             }
         }
 

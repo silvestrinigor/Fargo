@@ -1,5 +1,3 @@
-using Fargo.Core.Actors;
-
 namespace Fargo.Core.Partitions;
 
 /// <summary>

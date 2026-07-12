@@ -1,5 +1,3 @@
-using Fargo.Core.Shared.Identity;
-
 namespace Fargo.Application.Shared.Identity;
 
 /// <summary>
@@ -15,6 +13,6 @@ namespace Fargo.Application.Shared.Identity;
 /// The date and time when the access token expires.
 /// </param>
 public record AuthResult(
-    Token AccessToken,
-    Token RefreshToken,
+    string AccessToken,
+    string RefreshToken,
     DateTimeOffset ExpiresAt);

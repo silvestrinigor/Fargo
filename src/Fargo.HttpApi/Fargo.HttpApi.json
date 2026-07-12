@@ -1564,10 +1564,10 @@
         "type": "object",
         "properties": {
           "accessToken": {
-            "$ref": "#/components/schemas/Token"
+            "type": "string"
           },
           "refreshToken": {
-            "$ref": "#/components/schemas/Token"
+            "type": "string"
           },
           "expiresAt": {
             "type": "string",
