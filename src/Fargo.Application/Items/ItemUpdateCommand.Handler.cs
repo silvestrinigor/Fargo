@@ -22,13 +22,13 @@ public sealed class ItemUpdateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.EditItem);
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(item, command.ItemGuid, EntityType.Item);
+        EntityNotFoundFargoException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
 
         actor.ThrowIfAccessDenied(item);
 

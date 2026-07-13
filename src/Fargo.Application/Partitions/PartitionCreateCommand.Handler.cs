@@ -23,7 +23,7 @@ public sealed class PartitionCreateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
 
@@ -39,7 +39,7 @@ public sealed class PartitionCreateCommandHandler(
         {
             var parentPartition = await partitionRepository.GetByGuidAsync(parentPartitionGuid, cancellationToken);
 
-            EntityAssertFound.ThrowNotFoundIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
+            EntityNotFoundFargoException.ThrowIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
 
             await partitionService.SetParentPartition(
                 parentPartition, partition, cancellationToken);

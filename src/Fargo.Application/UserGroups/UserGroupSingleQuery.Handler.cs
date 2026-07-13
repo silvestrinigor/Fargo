@@ -21,7 +21,7 @@ public sealed class UserGroupSingleQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         var userGroup = await userGroupRepository.GetInfoByGuidAsync(
             query.UserGroupGuid,

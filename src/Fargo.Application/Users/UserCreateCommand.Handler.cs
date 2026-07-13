@@ -28,7 +28,7 @@ public sealed class UserCreateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
@@ -93,7 +93,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessDeniedToPartition(partition);
 
@@ -107,7 +107,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
+                EntityNotFoundFargoException.ThrowIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
 
                 actor.ThrowIfAccessDenied(userGroup);
 

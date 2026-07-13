@@ -19,13 +19,13 @@ public sealed class ArticleDeleteCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteArticle);
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article, command.ArticleGuid, EntityType.Article);
+        EntityNotFoundFargoException.ThrowIfNull(article, command.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessDenied(article);
 

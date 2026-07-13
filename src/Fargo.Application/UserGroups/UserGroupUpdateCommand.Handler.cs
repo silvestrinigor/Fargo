@@ -25,13 +25,13 @@ public sealed class UserGroupUpdateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUserGroup);
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
+        EntityNotFoundFargoException.ThrowIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
 
         actor.ThrowIfAccessDenied(userGroup);
 

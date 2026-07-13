@@ -23,7 +23,7 @@ public sealed class ArticleCreateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateArticle);
 
@@ -39,7 +39,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
+                    EntityNotFoundFargoException.ThrowIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
@@ -52,7 +52,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
+                    EntityNotFoundFargoException.ThrowIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
@@ -157,7 +157,7 @@ public sealed class ArticleCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessDeniedToPartition(partition);
 

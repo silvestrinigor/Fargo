@@ -20,7 +20,7 @@ public sealed class ArticleByGuidQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotFoundIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
         var article = await articleRepository.GetInfoByGuidAsync(
             query.ArticleGuid,
