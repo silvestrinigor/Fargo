@@ -1,4 +1,5 @@
 using Fargo.Application.Identity;
+using Fargo.Core;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -33,7 +34,7 @@ public sealed class PartitionCreateCommandHandler(
 
         partition.Description = create.Description ?? Description.Empty;
 
-        var parentPartitionGuid = create.ParentPartitionGuid ?? PartitionService.GlobalPartitionGuid;
+        var parentPartitionGuid = create.ParentPartitionGuid ?? FargoConstantGuids.GlobalPartitionGuid;
 
         if (partition.ParentPartitionGuid != parentPartitionGuid)
         {

@@ -12,24 +12,6 @@ namespace Fargo.Core.Users;
 public class UserService(
     IUserRepository userRepository)
 {
-    /// <summary>
-    /// The predefined unique identifier string representing
-    /// the default administrator user.
-    /// </summary>
-    private const string DefaultAdministratorUserGuidString =
-        "00000000-0000-0000-0000-000000000004";
-
-    /// <summary>
-    /// Gets the predefined unique identifier representing
-    /// the default administrator user.
-    /// </summary>
-    /// <remarks>
-    /// This GUID is reserved for the built-in administrator account
-    /// created during system initialization.
-    /// </remarks>
-    public static Guid DefaultAdministratorUserGuid =>
-        new(DefaultAdministratorUserGuidString);
-
     public async Task ValidateUserCreateAsync(
         User user,
         CancellationToken cancellationToken = default)
