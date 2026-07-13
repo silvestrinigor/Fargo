@@ -118,7 +118,7 @@ public static class FargoProblemDetailsRegistry
                 new ProblemDetailsDefinition(400, "Invalid operation", "item/circular-container-hierarchy")
             },
             {
-                typeof(DeleteMainAdminUserFargoDomainException),
+                typeof(DeleteMainAdminUserFargoException),
                 new ProblemDetailsDefinition(400, "Invalid operation", "user/cannot-delete-main-admin")
             },
             {

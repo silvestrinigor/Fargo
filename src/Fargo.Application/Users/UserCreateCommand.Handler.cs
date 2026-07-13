@@ -9,14 +9,10 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserCreateCommandHandler(
-    ActorService actorService,
-    UserService userService,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    IUserGroupRepository userGroupRepository,
-    ICurrentActor currentActor,
-    IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork,
+    ActorService actorService, UserService userService,
+    IUserRepository userRepository, IPartitionRepository partitionRepository,
+    IUserGroupRepository userGroupRepository, ICurrentActor currentActor,
+    IPasswordHasher passwordHasher, IUnitOfWork unitOfWork,
     ILogger<UserCreateCommandHandler> logger
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
@@ -42,6 +38,7 @@ public sealed class UserCreateCommandHandler(
         {
             nameid = new Nameid(create.Nameid);
         }
+
         catch (ArgumentException ex)
         {
             throw new InvalidOperationException(ex.Message, ex);
@@ -58,11 +55,11 @@ public sealed class UserCreateCommandHandler(
 
         var userPasswordHash = passwordHasher.Hash(password);
 
+        await userService.ValidateUserNameidIsAvailableAsync(nameid, cancellationToken);
+
         var user = User.CreateUser(nameid, userPasswordHash);
 
         user.MarkPasswordChangeAsRequired();
-
-        await userService.ValidateUserCreateAsync(user, cancellationToken);
 
         user.FirstName = create.FirstName ?? null;
 

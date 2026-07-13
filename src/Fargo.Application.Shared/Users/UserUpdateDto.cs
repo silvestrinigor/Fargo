@@ -3,7 +3,7 @@ using Fargo.Core.Shared;
 namespace Fargo.Application.Shared.Users;
 
 public sealed record UserUpdateDto(
-    string? Nameid = null,
+    Nameid? Nameid = null,
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,

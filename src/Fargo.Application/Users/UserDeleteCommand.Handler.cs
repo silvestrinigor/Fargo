@@ -32,6 +32,8 @@ public sealed class UserDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(user);
 
+        UserService.ValidateUserDelete(user);
+
         userRepository.Remove(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

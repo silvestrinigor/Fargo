@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserUpdateCommandHandler(
+    UserService userService,
     ActorService actorService,
     IUserRepository userRepository,
     ICurrentActor currentActor,
@@ -33,6 +34,13 @@ public sealed class UserUpdateCommandHandler(
         actor.ThrowIfAccessDenied(user);
 
         var update = command.Update;
+
+        if (update.Nameid is not null)
+        {
+            await userService.ValidateUserNameidIsAvailableAsync(update.Nameid.Value, cancellationToken);
+
+            user.Nameid = update.Nameid.Value;
+        }
 
         user.FirstName = update.FirstName ?? user.FirstName;
 

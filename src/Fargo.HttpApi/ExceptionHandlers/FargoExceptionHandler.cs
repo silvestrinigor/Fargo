@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Core;
 using Fargo.Core.Actors;
+using Fargo.Core.Users;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,6 +57,40 @@ public sealed class FargoExceptionHandler : IExceptionHandler
                     problem.Extensions.Add("actorId", ex.ActorId);
 
                     problem.Extensions.Add("actionType", ex.ActionType);
+
+                    break;
+
+                case UserNameidAlreadyExistsDomainException ex:
+
+                    problem = new ProblemDetails
+                    {
+                        Type = "user/nameid-already-in-use",
+                        Status = StatusCodes.Status400BadRequest,
+                        Title = "User nameid is already in use.",
+                        Detail = ex.Message,
+                        Instance = httpContext.Request.Path
+                    };
+
+                    problem.Extensions.TryAdd("traceId", httpContext.TraceIdentifier);
+
+                    problem.Extensions.Add("nameId", ex.Nameid);
+
+                    break;
+
+                case DeleteMainAdminUserFargoException ex:
+
+                    problem = new ProblemDetails
+                    {
+                        Type = "user/delete-main-admin",
+                        Status = StatusCodes.Status403Forbidden,
+                        Title = "Cannot delete main admin user.",
+                        Detail = ex.Message,
+                        Instance = httpContext.Request.Path
+                    };
+
+                    problem.Extensions.TryAdd("traceId", httpContext.TraceIdentifier);
+
+                    problem.Extensions.Add("adminUserGuid", DeleteMainAdminUserFargoException.AdminGuid);
 
                     break;
 
