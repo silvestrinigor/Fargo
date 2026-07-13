@@ -12,19 +12,6 @@ namespace Fargo.Core.Users;
 public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     IPartitionedGuids, IPermissionUser, IActivable
 {
-    private User()
-    {
-    }
-
-    public User(Nameid nameid, PasswordHash passwordHash)
-    {
-        Nameid = nameid;
-        PasswordHash = passwordHash;
-    }
-
-    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
-        => new(nameid, passwordHash);
-
     /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>
@@ -68,6 +55,19 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
 
     public bool IsPasswordChangeRequired
         => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
+
+    private User()
+    {
+    }
+
+    public User(Nameid nameid, PasswordHash passwordHash)
+    {
+        Nameid = nameid;
+        PasswordHash = passwordHash;
+    }
+
+    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
+        => new(nameid, passwordHash);
 
     /// <summary>
     /// Resets the password expiration date based on the user's

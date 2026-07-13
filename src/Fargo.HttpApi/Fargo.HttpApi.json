@@ -1917,6 +1917,17 @@
           }
         }
       },
+      "Password": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "PasswordUpdateDto": {
         "required": [
           "newPassword",
@@ -2077,10 +2088,10 @@
         "type": "object",
         "properties": {
           "nameid": {
-            "type": "string"
+            "$ref": "#/components/schemas/Nameid"
           },
           "password": {
-            "type": "string"
+            "$ref": "#/components/schemas/Password"
           },
           "firstName": { },
           "lastName": { },
@@ -2356,12 +2367,7 @@
       "UserUpdateDto": {
         "type": "object",
         "properties": {
-          "nameid": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
+          "nameid": { },
           "firstName": { },
           "lastName": { },
           "description": { },

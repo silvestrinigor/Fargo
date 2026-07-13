@@ -420,7 +420,7 @@
                 case OperationIds.Create:
                     @UserCreateFields()
                     <div class="request-actions">
-                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="CreateUserAsync">Create user</FluentButton>
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" >Create user</FluentButton>
                     </div>
                     break;
                 case OperationIds.Update:
@@ -429,7 +429,7 @@
                     </div>
                     @UserUpdateFields()
                     <div class="request-actions">
-                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" @onclick="UpdateUserAsync">Update user</FluentButton>
+                        <FluentButton Appearance="Appearance.Accent" Disabled="@isBusy" >Update user</FluentButton>
                     </div>
                     break;
                 case OperationIds.Delete:
@@ -915,43 +915,6 @@
         {
             selectedUser = await client.Users.GetAsync(RequiredGuid(userGet.Guid, "User GUID"));
             return selectedUser is null ? "User not found." : selectedUser;
-        });
-
-    private async Task CreateUserAsync() => await RunAsync(
-        OperationIds.Create,
-        "User created",
-        async client => await client.Users.CreateAsync(new UserCreateDto(
-            RequiredText(userCreate.Nameid, "Nameid"),
-            RequiredText(userCreate.Password, "Password"),
-            null,
-            null,
-            null,
-            ToUserPermissions(userCreate.Permissions),
-            ParseNullableTimeSpan(userCreate.DefaultPasswordExpirationPeriod, "Default password expiration"),
-            ParseGuidList(userCreate.PartitionsText, "Partitions"),
-            ParseGuidList(userCreate.UserGroupsText, "User groups"))));
-
-    private async Task UpdateUserAsync() => await RunAsync(
-        OperationIds.Update,
-        "User updated",
-        async client =>
-        {
-            await client.Users.UpdateAsync(
-                RequiredGuid(userUpdate.Guid, "User GUID"),
-                new UserUpdateDto(
-                    OptionalText(userUpdate.IncludeNameid, userUpdate.Nameid),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    userUpdate.IncludePermissions ? ToUserPermissions(userUpdate.Permissions) : null,
-                    userUpdate.IncludeDefaultPasswordExpirationPeriod
-                        ? ParseNullableTimeSpan(userUpdate.DefaultPasswordExpirationPeriod, "Default password expiration")
-                        : null,
-                    userUpdate.IncludePartitions ? ParseGuidList(userUpdate.PartitionsText, "Partitions") : null,
-                    userUpdate.IncludeUserGroups ? ParseGuidList(userUpdate.UserGroupsText, "User groups") : null));
-            return null;
         });
 
     private async Task DeleteUserAsync() => await RunAsync(

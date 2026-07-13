@@ -3,8 +3,8 @@ using Fargo.Core.Shared;
 namespace Fargo.Application.Shared.Users;
 
 public sealed record UserCreateDto(
-    string Nameid,
-    string Password,
+    Nameid Nameid,
+    Password Password,
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,

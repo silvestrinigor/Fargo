@@ -26,50 +26,26 @@ public sealed class UserCreateCommandHandler(
 
         ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
 
-        actor.ThrowIfPermissionDenied(ActionType.EditUser);
+        actor.ThrowIfPermissionDenied(ActionType.CreateUser);
 
-        var create = command.Create;
+        var userPasswordHash = passwordHasher.Hash(command.Create.Password);
 
-        Nameid nameid;
+        await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        Password password;
-
-        try
+        var user = new User(command.Create.Nameid, userPasswordHash)
         {
-            nameid = new Nameid(create.Nameid);
-        }
+            FirstName = command.Create.FirstName ?? null,
 
-        catch (ArgumentException ex)
-        {
-            throw new InvalidOperationException(ex.Message, ex);
-        }
+            LastName = command.Create.LastName ?? null,
 
-        try
-        {
-            password = new Password(create.Password);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidOperationException(ex.Message, ex);
-        }
+            Description = command.Create.Description ?? Description.Empty,
 
-        var userPasswordHash = passwordHasher.Hash(password);
-
-        await userService.ValidateUserNameidIsAvailableAsync(nameid, cancellationToken);
-
-        var user = User.CreateUser(nameid, userPasswordHash);
+            DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null
+        };
 
         user.MarkPasswordChangeAsRequired();
 
-        user.FirstName = create.FirstName ?? null;
-
-        user.LastName = create.LastName ?? null;
-
-        user.Description = create.Description ?? Description.Empty;
-
-        user.DefaultPasswordExpirationPeriod = create.DefaultPasswordExpirationTimeSpan ?? null;
-
-        if (create.PermissionsToAdd is { } permissions)
+        if (command.Create.PermissionsToAdd is { } permissions)
         {
             var requestedActions = permissions.Select(p => p.Action).Distinct().ToHashSet();
 
@@ -84,7 +60,7 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
-        if (create.PartitionsToAdd is { Count: > 0 } partitions)
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
             {
@@ -98,7 +74,7 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
-        if (create.UserGroupsToAdd is { Count: > 0 } userGroups)
+        if (command.Create.UserGroupsToAdd is { Count: > 0 } userGroups)
         {
             foreach (var userGroupGuid in userGroups.Distinct())
             {
