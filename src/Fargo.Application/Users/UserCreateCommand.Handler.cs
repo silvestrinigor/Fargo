@@ -17,8 +17,7 @@ public sealed class UserCreateCommandHandler(
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
-        UserCreateCommand command,
-        CancellationToken cancellationToken = default)
+        UserCreateCommand command, CancellationToken cancellationToken = default)
     {
         logger.UserCreateStarted(currentActor.ActorId);
 
