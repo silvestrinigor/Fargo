@@ -16,5 +16,6 @@ public class FargoException : Exception
     /// </summary>
     /// <param name="message"></param>
     /// <param name="innerException"></param>
-    public FargoException(string? message, Exception innerException) : base(message, innerException) { }
+    public FargoException(string? message, Exception innerException)
+        : base(message, innerException) { }
 }

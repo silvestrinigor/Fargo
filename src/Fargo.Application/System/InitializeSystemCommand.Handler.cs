@@ -78,10 +78,12 @@ public sealed class InitializeSystemCommandHandler(
 
         var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
-        var admin = new User(command.UserAdminNameid, passwordHash)
+        var admin = new User
         {
             Guid = FargoConstantGuids.AdminUserGuid,
-            Description = command.UserAdminDescription
+            Nameid = command.UserAdminNameid,
+            Description = command.UserAdminDescription,
+            PasswordHash = passwordHash
         };
 
         admin.AddPartitionAccess(globalPartition);

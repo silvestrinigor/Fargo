@@ -8,7 +8,7 @@ public static class FargoRouteServiceCollectionExtension
         {
             services.Configure<RouteOptions>(options =>
             {
-                options.ConstraintMap["barcode"] = typeof(BarcodeRouteConstraint);
+                options.ConstraintMap["barcode"] = typeof(FargoBarcodeRouteConstraint);
             });
 
             return services;

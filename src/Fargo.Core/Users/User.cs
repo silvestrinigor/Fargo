@@ -15,7 +15,7 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>
-    public Nameid Nameid { get; set; }
+    public required Nameid Nameid { get; set; }
 
     /// <summary>
     /// Gets or sets the user's first name.
@@ -33,41 +33,67 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets a value indicating whether the user is active.
+    /// Gets or sets the value indicating whether the user is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
 
-    public EntityType GetEntityType() => EntityType.User;
+    /// <summary>
+    /// Gets the value indicating the user is the main admin user.
+    /// </summary>
+    public bool IsSystemAdmin => Guid == FargoConstantGuids.AdminUserGuid;
 
     /// <summary>
     /// Gets or sets the hashed password of the user.
-    ///
-    /// The raw password is never stored. Instead, a secure hash
-    /// is persisted using the application's password hashing strategy.
     /// </summary>
-    public PasswordHash PasswordHash { get; set; }
+    public required PasswordHash PasswordHash { get; set; }
 
+    /// <summary>
+    /// Gets or sets the default password expiration perid.
+    /// </summary>
     public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
 
+    /// <summary>
+    /// Gets or sets the required date to change the password.
+    /// </summary>
     public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
-    public Guid AuthVersion { get; private set; } = Guid.NewGuid();
-
+    /// <summary>
+    /// Gets a value indicating whether it is necessary to change password.
+    /// </summary>
     public bool IsPasswordChangeRequired
         => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
 
-    private User()
+    /// <summary>
+    /// 
+    /// </summary>
+    public Guid AuthVersion { get; private set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets the read-only collection of permissions assigned directly to the user.
+    ///
+    /// Each permission represents an allowed <see cref="ActionType"/>
+    /// that the user can perform without considering group memberships.
+    /// </summary>
+    public IReadOnlyCollection<UserPermission> Permissions
+    {
+        get => permissions;
+        init => permissions = [.. value];
+    }
+
+    /// <inheritdoc />
+    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
+
+    private readonly List<UserPermission> permissions = [];
+
+    public User()
     {
     }
 
-    public User(Nameid nameid, PasswordHash passwordHash)
-    {
-        Nameid = nameid;
-        PasswordHash = passwordHash;
-    }
-
-    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
-        => new(nameid, passwordHash);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public EntityType GetEntityType() => EntityType.User;
 
     /// <summary>
     /// Resets the password expiration date based on the user's
@@ -87,22 +113,6 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
         => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationPeriod;
 
     /// <summary>
-    /// Sets the password expiration requirement to a future date based on the specified number of days.
-    /// </summary>
-    /// <param name="days">
-    /// The number of days from the current UTC time after which the user must change their password.
-    /// </param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="days"/> is less than zero.
-    /// </exception>
-    public void RequirePasswordChangeInDays(int days)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(days);
-
-        RequirePasswordChangeAt = DateTimeOffset.UtcNow.AddDays(days);
-    }
-
-    /// <summary>
     /// Marks the user's password as requiring an immediate change.
     /// </summary>
     /// <remarks>
@@ -114,37 +124,10 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
     }
 
-    public void SetDefaultPasswordExpirationPeriod(TimeSpan? expirationPeriod)
-    {
-        if (DefaultPasswordExpirationPeriod == expirationPeriod)
-        {
-            return;
-        }
-
-        DefaultPasswordExpirationPeriod = expirationPeriod;
-    }
-
     public void RotateAuthVersion()
     {
         AuthVersion = Guid.NewGuid();
     }
-
-    /// <summary>
-    /// Gets the read-only collection of permissions assigned directly to the user.
-    ///
-    /// Each permission represents an allowed <see cref="ActionType"/>
-    /// that the user can perform without considering group memberships.
-    /// </summary>
-    public IReadOnlyCollection<UserPermission> Permissions
-    {
-        get => permissions;
-        init => permissions = [.. value];
-    }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
-
-    private readonly List<UserPermission> permissions = [];
 
     /// <summary>
     /// Adds a permission to the user if it does not already exist.

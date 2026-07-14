@@ -31,11 +31,15 @@ public sealed class UserCreateCommandHandler(
 
         await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var user = new User(command.Create.Nameid, userPasswordHash)
+        var user = new User
         {
+            Nameid = command.Create.Nameid,
+
             FirstName = command.Create.FirstName ?? null,
 
             LastName = command.Create.LastName ?? null,
+
+            PasswordHash = userPasswordHash,
 
             Description = command.Create.Description ?? Description.Empty,
 
