@@ -134,7 +134,22 @@ public sealed class FargoExceptionHandler : IExceptionHandler
 
                     break;
 
-                    #endregion
+                #endregion
+
+                default:
+
+                    problem = new ProblemDetails
+                    {
+                        Type = "core/exception",
+                        Status = StatusCodes.Status400BadRequest,
+                        Title = "Core exception.",
+                        Detail = fargoException.Message,
+                        Instance = httpContext.Request.Path
+                    };
+
+                    problem.Extensions.TryAdd("traceId", httpContext.TraceIdentifier);
+
+                    break;
             }
         }
 
