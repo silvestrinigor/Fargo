@@ -1,3 +1,4 @@
+using Fargo.Application;
 using Fargo.Core.Shared;
 
 namespace Fargo.Core.Actors;
@@ -8,7 +9,7 @@ public static class ActorAssertHasPermissionExtension
     {
         if (!actor.HasPermission(action))
         {
-            throw new ActorPermissionDeniedException(actor.ActorId, action);
+            throw new PermissionDeniedFargoApplicationException(actor.ActorId, action);
         }
     }
 }

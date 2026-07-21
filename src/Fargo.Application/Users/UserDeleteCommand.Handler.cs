@@ -22,15 +22,17 @@ public sealed class UserDeleteCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteUser);
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(user, command.UserGuid, EntityType.User);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.User);
 
         actor.ThrowIfAccessDenied(user);
+
+        UserService.ValidateUserCanBeDeleted(user);
 
         userRepository.Remove(user);
 

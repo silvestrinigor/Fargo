@@ -6,7 +6,7 @@ using Fargo.ServiceSeed.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.AddServiceDefaults();
+builder.AddFargoServiceDefaults();
 
 builder.Services.AddFargoSeedOptions(builder.Configuration);
 
@@ -22,9 +22,9 @@ builder.Services.AddFargoSecurity();
 
 builder.Services.AddFargoSystemApplication();
 
-builder.Services.AddHostedService<SeedService>();
+builder.Services.AddHostedService<FargoSeedService>();
 
-builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(SeedService.ActivitySourceName));
+builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(FargoSeedService.ActivitySourceName));
 
 var host = builder.Build();
 

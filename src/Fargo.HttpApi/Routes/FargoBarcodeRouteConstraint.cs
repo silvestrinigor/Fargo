@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Fargo.HttpApi.Routes;
 
-public sealed class BarcodeRouteConstraint : IRouteConstraint
+public sealed class FargoBarcodeRouteConstraint : IRouteConstraint
 {
     public bool Match(
         HttpContext? httpContext,
@@ -12,5 +12,7 @@ public sealed class BarcodeRouteConstraint : IRouteConstraint
         RouteValueDictionary values,
         RouteDirection routeDirection)
         => values.TryGetValue(routeKey, out var value) &&
-            Barcode.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out _);
+            Barcode.TryParse(
+                Convert.ToString(value, CultureInfo.InvariantCulture),
+                CultureInfo.InvariantCulture, out _);
 }

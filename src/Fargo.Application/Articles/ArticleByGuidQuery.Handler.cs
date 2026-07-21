@@ -6,21 +6,18 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleByGuidQueryHandler(
-    ActorService actorService,
-    IArticleQueryRepository articleRepository,
-    ICurrentActor currentActor,
-    ILogger<ArticleByGuidQueryHandler> logger
+    ActorService actorService, IArticleQueryRepository articleRepository,
+    ICurrentActor currentActor, ILogger<ArticleByGuidQueryHandler> logger
 ) : IQueryHandler<ArticleByGuidQuery, ArticleDto?>
 {
     public async Task<ArticleDto?> HandleAsync(
-        ArticleByGuidQuery query,
-        CancellationToken cancellationToken = default)
+        ArticleByGuidQuery query, CancellationToken cancellationToken = default)
     {
         logger.QueryByGuidStarted(query.ArticleGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var article = await articleRepository.GetInfoByGuidAsync(
             query.ArticleGuid,

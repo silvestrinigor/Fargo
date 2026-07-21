@@ -12,20 +12,19 @@ public sealed class ArticleDeleteCommandHandler(
     ILogger<ArticleDeleteCommandHandler> logger) : ICommandHandler<ArticleDeleteCommand>
 {
     public async Task HandleAsync(
-        ArticleDeleteCommand command,
-        CancellationToken cancellationToken = default)
+        ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
         logger.DeleteStarted(command.ArticleGuid, currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteArticle);
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article, command.ArticleGuid, EntityType.Article);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(article, command.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessDenied(article);
 

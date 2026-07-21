@@ -1,5 +1,3 @@
-using Fargo.Core.Actors;
-
 namespace Fargo.Core.Partitions;
 
 /// <summary>
@@ -27,29 +25,6 @@ namespace Fargo.Core.Partitions;
 public class PartitionService(
     IPartitionRepository partitionRepository)
 {
-    /// <summary>
-    /// The predefined unique identifier string representing
-    /// the global partition.
-    /// </summary>
-    /// <remarks>
-    /// The global partition is the root of the partition hierarchy
-    /// and has implicit access to all descendant partitions.
-    /// </remarks>
-    private const string GlobalPartitionGuidString =
-        "00000000-0000-0000-0000-000000000002";
-
-    /// <summary>
-    /// Gets the predefined unique identifier representing
-    /// the global partition.
-    /// </summary>
-    /// <remarks>
-    /// This GUID is reserved for the root partition of the system.
-    /// It must remain constant across environments and is used
-    /// to establish the top-level access scope for privileged users.
-    /// </remarks>
-    public static Guid GlobalPartitionGuid =>
-        new(GlobalPartitionGuidString);
-
     /// <summary>
     /// Sets the parent partition of a member partition.
     /// </summary>

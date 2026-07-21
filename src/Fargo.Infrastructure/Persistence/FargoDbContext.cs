@@ -84,6 +84,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ItemContainerConfiguration());
+
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
@@ -99,6 +101,5 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
-
     }
 }

@@ -29,7 +29,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(ean13.ToString(), BarcodeFormat.Ean13));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(ean13.ToString(), BarcodeFormat.Ean13));
         }
     }
 
@@ -39,7 +40,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(ean8.ToString(), BarcodeFormat.Ean8));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(ean8.ToString(), BarcodeFormat.Ean8));
         }
     }
 
@@ -49,7 +51,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(upcA.ToString(), BarcodeFormat.UpcA));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(upcA.ToString(), BarcodeFormat.UpcA));
         }
     }
 
@@ -59,7 +62,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(upcE.ToString(), BarcodeFormat.UpcE));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(upcE.ToString(), BarcodeFormat.UpcE));
         }
     }
 
@@ -69,7 +73,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(code128.ToString(), BarcodeFormat.Code128));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(code128.ToString(), BarcodeFormat.Code128));
         }
     }
 
@@ -79,7 +84,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(code39.ToString(), BarcodeFormat.Code39));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(code39.ToString(), BarcodeFormat.Code39));
         }
     }
 
@@ -89,7 +95,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(itf14.ToString(), BarcodeFormat.Itf14));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(itf14.ToString(), BarcodeFormat.Itf14));
         }
     }
 
@@ -99,7 +106,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(gs1128.ToString(), BarcodeFormat.Gs1128));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(gs1128.ToString(), BarcodeFormat.Gs1128));
         }
     }
 
@@ -109,7 +117,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(qrCode.ToString(), BarcodeFormat.QrCode));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(qrCode.ToString(), BarcodeFormat.QrCode));
         }
     }
 
@@ -119,7 +128,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoDomainException(new Barcode(dataMatrix.ToString(), BarcodeFormat.DataMatrix));
+            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
+                new Barcode(dataMatrix.ToString(), BarcodeFormat.DataMatrix));
         }
     }
 }

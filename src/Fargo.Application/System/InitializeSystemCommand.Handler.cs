@@ -1,3 +1,4 @@
+using Fargo.Core;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
@@ -30,7 +31,7 @@ public sealed class InitializeSystemCommandHandler(
             return;
         }
 
-        var globalPartition = await partitionRepository.GetByGuidAsync(PartitionService.GlobalPartitionGuid, cancellationToken);
+        var globalPartition = await partitionRepository.GetByGuidAsync(FargoDefaultGuids.GlobalPartitionGuid, cancellationToken);
 
         var globalPartitionCreated = false;
 
@@ -38,7 +39,7 @@ public sealed class InitializeSystemCommandHandler(
         {
             globalPartition = new Partition(command.GlobalPartitionName)
             {
-                Guid = PartitionService.GlobalPartitionGuid,
+                Guid = FargoDefaultGuids.GlobalPartitionGuid,
                 Description = command.GlobalPartitionDescription
             };
 
@@ -47,7 +48,7 @@ public sealed class InitializeSystemCommandHandler(
             globalPartitionCreated = true;
         }
 
-        var administratorsGroup = await userGroupRepository.GetByGuidAsync(UserGroupService.AdministratorsUserGroupGuid, cancellationToken);
+        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoDefaultGuids.AdminUserGroupGuid, cancellationToken);
 
         var allActions = Enum.GetValues<ActionType>();
 
@@ -57,7 +58,7 @@ public sealed class InitializeSystemCommandHandler(
         {
             administratorsGroup = new UserGroup(command.UserGroupAdministratorsNameid)
             {
-                Guid = UserGroupService.AdministratorsUserGroupGuid,
+                Guid = FargoDefaultGuids.AdminUserGroupGuid,
                 Description = command.UserGroupAdministratorsDescription
             };
 
@@ -77,10 +78,12 @@ public sealed class InitializeSystemCommandHandler(
 
         var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
-        var admin = new User(command.UserAdminNameid, passwordHash)
+        var admin = new User
         {
-            Guid = UserService.DefaultAdministratorUserGuid,
-            Description = command.UserAdminDescription
+            Guid = FargoDefaultGuids.AdminUserGuid,
+            Nameid = command.UserAdminNameid,
+            Description = command.UserAdminDescription,
+            PasswordHash = passwordHash
         };
 
         admin.AddPartitionAccess(globalPartition);

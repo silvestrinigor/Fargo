@@ -17,14 +17,14 @@ public sealed class ArticleByBarcodeQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var article = await articleRepository.GetInfoByBarcodeAsync(
             query.ArticleBarcode, query.AsOfDateTime,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true, cancellationToken);
 
-        logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.ActorId);
+        logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.ActorId, article is not null);
 
         return article;
     }

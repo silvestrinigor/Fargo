@@ -4,11 +4,11 @@ using Fargo.ServiceMigration;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.AddServiceDefaults();
+builder.AddFargoServiceDefaults();
 
-builder.Services.AddHostedService<MigrationService>();
+builder.Services.AddHostedService<FargoMigrationService>();
 
-builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(MigrationService.ActivitySourceName));
+builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(FargoMigrationService.ActivitySourceName));
 
 builder.Services.AddFargoConnectionStringOptions(builder.Configuration);
 

@@ -85,7 +85,8 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             .Include(user => user.UserGroups)
                 .ThenInclude(group => group.Partitions)
             .Include(user => user.PartitionAccesses)
-            .Include(user => user.Partitions);
+            .Include(user => user.Partitions)
+            .AsSplitQuery();
 
     private static IQueryable<User> ApplyPartitionFilter(
         IQueryable<User> query,

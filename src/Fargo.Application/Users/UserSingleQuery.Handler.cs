@@ -21,7 +21,7 @@ public sealed class UserSingleQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var user = await userRepository.GetInfoByGuidAsync(
             query.UserGuid,

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserUpdateCommandHandler(
+    UserService userService,
     ActorService actorService,
     IUserRepository userRepository,
     ICurrentActor currentActor,
@@ -22,17 +23,24 @@ public sealed class UserUpdateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(user, command.UserGuid, EntityType.User);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.User);
 
         actor.ThrowIfAccessDenied(user);
 
         var update = command.Update;
+
+        if (update.Nameid is not null)
+        {
+            await userService.ValidateUserNameidIsAvailableAsync(update.Nameid.Value, cancellationToken);
+
+            user.Nameid = update.Nameid.Value;
+        }
 
         user.FirstName = update.FirstName ?? user.FirstName;
 

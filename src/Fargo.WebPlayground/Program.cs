@@ -5,16 +5,17 @@ using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
-{
-    throw new InvalidOperationException("Fargo.Web.Playground only runs in the Development environment.");
-}
-
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 builder.Services.AddFluentUIComponents();
+
 builder.Services.AddScoped<PlaygroundAuthSession>();
+
 builder.Services.AddScoped<PlaygroundApiClientFactory>();
+
+builder.Services.AddScoped<IdentitySession>();
+
 builder.Services.AddFargoHttpClient(options =>
 {
     var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
@@ -22,6 +23,7 @@ builder.Services.AddFargoHttpClient(options =>
 
     options.BaseAddress = new Uri(baseAddress);
 });
+
 builder.Services.AddHttpClient(PlaygroundApiClientFactory.HttpClientName, httpClient =>
 {
     var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
@@ -33,12 +35,15 @@ builder.Services.AddHttpClient(PlaygroundApiClientFactory.HttpClientName, httpCl
 var app = builder.Build();
 
 app.UseDeveloperExceptionPage();
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

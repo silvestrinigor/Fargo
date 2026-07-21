@@ -22,13 +22,13 @@ public sealed class PartitionDeleteCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.DeletePartition);
 
         var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(partition, command.PartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(partition, command.PartitionGuid, EntityType.Partition);
 
         actor.ThrowIfAccessDeniedToPartition(partition);
 

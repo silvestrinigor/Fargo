@@ -24,13 +24,13 @@ public sealed class ItemCreateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateItem);
 
         var article = await articleRepository.GetByGuidAsync(command.Create.ArticleGuid, cancellationToken);
 
-        EntityAssertFound.ThrowNotFoundIfNull(article, command.Create.ArticleGuid, EntityType.Article);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(article, command.Create.ArticleGuid, EntityType.Article);
 
         actor.ThrowIfAccessDenied(article);
 

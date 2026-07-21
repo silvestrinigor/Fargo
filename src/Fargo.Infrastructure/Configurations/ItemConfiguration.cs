@@ -28,15 +28,19 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.Property(x => x.ParentContainerGuid).IsRequired(false);
 
-        builder
-            .HasOne<Item>()
-            .WithMany()
-            .HasForeignKey(x => x.ParentContainerGuid)
+        builder.HasOne(i => i.Container)
+            .WithOne(c => c.Item)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(i => i.ParentContainer)
+            .WithMany()
+            .HasForeignKey(i => i.ParentContainerGuid)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(x => x.ParentContainerGuid);
 
         builder.Ignore(x => x.ParentContainer);
+
         builder.Ignore(x => x.Container);
 
         builder.HasMany(i => i.Partitions).WithMany(p => p.ItemMembers);

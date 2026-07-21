@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.1" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.14.1" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.3" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.14.3" />
     <PackageReference Include="UnitsNet" Version="5.75.0" />
     <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.0" />
   </ItemGroup>

@@ -1,21 +1,26 @@
 @page "/login"
+
 @rendermode InteractiveServer
-@using Microsoft.AspNetCore.WebUtilities
-@using System.Text.Json
+
 @inject IFargoIdentityClient IdentityClient
 @inject IdentitySession Session
 @inject NavigationManager NavigationManager
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment
 
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Text.Json
+
 <PageTitle>Login</PageTitle>
 
 <h1>Login</h1>
 
 <EditForm Model=form OnValidSubmit=LoginAsync>
+
     <DataAnnotationsValidator />
 
     <FluentStack Orientation="Orientation.Vertical" Width="320px">
+
         <FluentTextField
             @bind-Value=form.Nameid
             Disabled=isSubmitting
@@ -45,7 +50,9 @@
                 @message
             </FluentMessageBar>
         }
+
     </FluentStack>
+
 </EditForm>
 
 @if (Session.IsAuthenticated)
@@ -79,13 +86,8 @@
                 new LoginDto(form.Nameid, form.Password));
 
             Session.Set(auth);
-            form.Password = string.Empty;
 
-            if (TryBuildPlaygroundReturnUri(auth, out var returnUri))
-            {
-                NavigationManager.NavigateTo(returnUri, forceLoad: true);
-                return;
-            }
+            form.Password = string.Empty;
 
             messageIntent = MessageIntent.Success;
             message = "Logged in.";
@@ -104,72 +106,6 @@
         finally
         {
             isSubmitting = false;
-        }
-    }
-
-    private bool TryBuildPlaygroundReturnUri(
-        AuthResult auth,
-        out string returnUri)
-    {
-        returnUri = string.Empty;
-
-        if (!Environment.IsDevelopment() ||
-            string.IsNullOrWhiteSpace(ReturnUrl) ||
-            string.IsNullOrWhiteSpace(State) ||
-            !Uri.TryCreate(ReturnUrl, UriKind.Absolute, out var callbackUri) ||
-            !IsAllowedPlaygroundReturn(callbackUri))
-        {
-            return false;
-        }
-
-        var payload = WebEncoders.Base64UrlEncode(
-            JsonSerializer.SerializeToUtf8Bytes(auth, JsonOptions));
-
-        returnUri = QueryHelpers.AddQueryString(
-            callbackUri.ToString(),
-            new Dictionary<string, string?>
-            {
-                ["auth"] = payload,
-                ["state"] = State
-            });
-
-        return true;
-    }
-
-    private bool IsAllowedPlaygroundReturn(Uri callbackUri)
-    {
-        foreach (var allowedOrigin in GetAllowedReturnOrigins())
-        {
-            if (!Uri.TryCreate(allowedOrigin, UriKind.Absolute, out var allowedUri))
-            {
-                continue;
-            }
-
-            if (string.Equals(callbackUri.Scheme, allowedUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(callbackUri.Host, allowedUri.Host, StringComparison.OrdinalIgnoreCase) &&
-                callbackUri.Port == allowedUri.Port)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private IEnumerable<string> GetAllowedReturnOrigins()
-    {
-        foreach (var origin in Configuration.GetSection("FargoWebPlayground:AllowedReturnOrigins").GetChildren())
-        {
-            if (!string.IsNullOrWhiteSpace(origin.Value))
-            {
-                yield return origin.Value;
-            }
-        }
-
-        var configuredOrigin = Configuration["FargoWebPlayground:AllowedReturnOrigin"];
-        if (!string.IsNullOrWhiteSpace(configuredOrigin))
-        {
-            yield return configuredOrigin;
         }
     }
 

@@ -87,7 +87,7 @@ public sealed class RefreshCommandHandler(
 
         var actorUser = await actorService.GetActorByActorIdAsync(actorUserId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actorUser);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, actorUserId);
 
         logger.RefreshCompleted(user.Guid);
 

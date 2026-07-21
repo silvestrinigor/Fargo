@@ -9,91 +9,62 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserCreateCommandHandler(
-    ActorService actorService,
-    UserService userService,
-    IUserRepository userRepository,
-    IPartitionRepository partitionRepository,
-    IUserGroupRepository userGroupRepository,
-    ICurrentActor currentActor,
-    IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork,
+    ActorService actorService, UserService userService,
+    IUserRepository userRepository, IPartitionRepository partitionRepository,
+    IUserGroupRepository userGroupRepository, ICurrentActor currentActor,
+    IPasswordHasher passwordHasher, IUnitOfWork unitOfWork,
     ILogger<UserCreateCommandHandler> logger
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
-        UserCreateCommand command,
-        CancellationToken cancellationToken = default)
+        UserCreateCommand command, CancellationToken cancellationToken = default)
     {
         logger.UserCreateStarted(currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
-        actor.ThrowIfPermissionDenied(ActionType.EditUser);
+        actor.ThrowIfPermissionDenied(ActionType.CreateUser);
 
-        var create = command.Create;
+        var userPasswordHash = passwordHasher.Hash(command.Create.Password);
 
-        Nameid nameid;
+        await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        Password password;
-
-        try
+        var user = new User
         {
-            nameid = new Nameid(create.Nameid);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidOperationException(ex.Message, ex);
-        }
+            Nameid = command.Create.Nameid,
 
-        try
-        {
-            password = new Password(create.Password);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidOperationException(ex.Message, ex);
-        }
+            FirstName = command.Create.FirstName ?? null,
 
-        var userPasswordHash = passwordHasher.Hash(password);
+            LastName = command.Create.LastName ?? null,
 
-        var user = User.CreateUser(nameid, userPasswordHash);
+            PasswordHash = userPasswordHash,
+
+            Description = command.Create.Description ?? Description.Empty,
+
+            DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null
+        };
 
         user.MarkPasswordChangeAsRequired();
 
-        await userService.ValidateUserCreateAsync(user, cancellationToken);
-
-        user.FirstName = create.FirstName ?? null;
-
-        user.LastName = create.LastName ?? null;
-
-        user.Description = create.Description ?? Description.Empty;
-
-        user.DefaultPasswordExpirationPeriod = create.DefaultPasswordExpirationTimeSpan ?? null;
-
-        if (create.PermissionsToAdd is { } permissions)
+        if (command.Create.PermissionsToAdd is { } permissions)
         {
             var requestedActions = permissions.Select(p => p.Action).Distinct().ToHashSet();
 
-            var currentActions = user.Permissions.Select(p => p.Action).ToHashSet();
-
-            if (!requestedActions.SetEquals(currentActions))
+            foreach (var action in requestedActions)
             {
-                foreach (var action in requestedActions.Except(currentActions))
-                {
-                    user.AddPermission(action);
-                }
+                user.AddPermission(action);
             }
         }
 
-        if (create.PartitionsToAdd is { Count: > 0 } partitions)
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessDeniedToPartition(partition);
 
@@ -101,13 +72,13 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
-        if (create.UserGroupsToAdd is { Count: > 0 } userGroups)
+        if (command.Create.UserGroupsToAdd is { Count: > 0 } userGroups)
         {
             foreach (var userGroupGuid in userGroups.Distinct())
             {
                 var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
 
                 actor.ThrowIfAccessDenied(userGroup);
 

@@ -58,4 +58,3 @@ public class UserPermission : Entity, IPermission
     /// </remarks>
     public required ActionType Action { get; init; }
 }
-

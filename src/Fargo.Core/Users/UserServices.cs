@@ -5,59 +5,38 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Provides domain validation and business rules related to <see cref="User"/> entities.
 /// </summary>
-/// <remarks>
-/// This service encapsulates domain rules involving users, such as uniqueness
-/// validation, and self-protection rules.
-/// </remarks>
 public class UserService(
     IUserRepository userRepository)
 {
     /// <summary>
-    /// The predefined unique identifier string representing
-    /// the default administrator user.
+    /// 
     /// </summary>
-    private const string DefaultAdministratorUserGuidString =
-        "00000000-0000-0000-0000-000000000004";
-
-    /// <summary>
-    /// Gets the predefined unique identifier representing
-    /// the default administrator user.
-    /// </summary>
-    /// <remarks>
-    /// This GUID is reserved for the built-in administrator account
-    /// created during system initialization.
-    /// </remarks>
-    public static Guid DefaultAdministratorUserGuid =>
-        new(DefaultAdministratorUserGuidString);
-
-    public async Task ValidateUserCreateAsync(
-        User user,
-        CancellationToken cancellationToken = default)
+    /// <param name="nameid"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="UserNameidAlreadyExistsFargoCoreException"></exception>
+    public async Task ValidateUserNameidIsAvailableAsync(
+        Nameid nameid, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(user);
-
-        var alreadyExistsWithNameid =
-            await userRepository.ExistsByNameid(user.Nameid, cancellationToken);
-
-        if (alreadyExistsWithNameid)
-        {
-            throw new UserNameidAlreadyExistsDomainException(user.Nameid);
-        }
-    }
-
-    public async Task ValidateUserNameidChange(
-        User user,
-        Nameid nameid,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(user);
-
         var userWithTheNameid =
             await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
-        if (userWithTheNameid is not null && user.Guid != userWithTheNameid.Guid)
+        if (userWithTheNameid is not null)
         {
-            throw new UserNameidAlreadyExistsDomainException(nameid);
+            throw new UserNameidAlreadyExistsFargoCoreException(nameid);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="user"></param>
+    /// <exception cref="FargoCoreException"></exception>
+    public static void ValidateUserCanBeDeleted(User user)
+    {
+        if (user.Guid == FargoDefaultGuids.AdminUserGuid)
+        {
+            throw new DeleteMainAdminUserFargoCoreException();
         }
     }
 }

@@ -16,14 +16,13 @@ public sealed class ArticleCreateCommandHandler(
     ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
-        ArticleCreateCommand command,
-        CancellationToken cancellationToken = default)
+        ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
         logger.CreateStarted(currentActor.ActorId);
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorAssertFound.ThrowNotAuthorizedIfNull(actor);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateArticle);
 
@@ -39,7 +38,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
+                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
@@ -52,11 +51,33 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
 
-                    EntityAssertFound.ThrowNotFoundIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
+                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
                     article = Article.NewArticlePack(command.Name, fromArticle, command.PackQuantity!.Value);
+
+                    break;
+                }
+
+            case ArticleType.Kit:
+                {
+                    var kitComponents = new List<ArticleKitComponent>();
+
+                    foreach (var kdo in command.KitComponents!)
+                    {
+                        var fromArticle = await articleRepository.GetByGuidAsync(kdo.ArticleGuid, cancellationToken);
+
+                        EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, kdo.ArticleGuid, EntityType.Article);
+
+                        actor.ThrowIfAccessDenied(fromArticle);
+
+                        var kit = new ArticleKitComponent(fromArticle, kdo.Quantity);
+
+                        kitComponents.Add(kit);
+                    }
+
+                    article = Article.NewArticleKit(command.Name, kitComponents);
 
                     break;
                 }
@@ -157,7 +178,7 @@ public sealed class ArticleCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityAssertFound.ThrowNotFoundIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessDeniedToPartition(partition);
 

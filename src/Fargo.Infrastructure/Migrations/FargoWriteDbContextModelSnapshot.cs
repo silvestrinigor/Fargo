@@ -314,6 +314,37 @@ namespace Fargo.Infrastructure.Migrations
                             }));
                 });
 
+            modelBuilder.Entity("Fargo.Core.Items.ItemContainer", b =>
+                {
+                    b.Property<Guid>("ItemGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PeriodStart");
+
+                    b.HasKey("ItemGuid");
+
+                    b.ToTable("ItemContainers", (string)null);
+
+                    b.ToTable(tb => tb.IsTemporal(ttb =>
+                            {
+                                ttb.UseHistoryTable("ItemContainersHistory");
+                                ttb
+                                    .HasPeriodStart("PeriodStart")
+                                    .HasColumnName("PeriodStart");
+                                ttb
+                                    .HasPeriodEnd("PeriodEnd")
+                                    .HasColumnName("PeriodEnd");
+                            }));
+                });
+
             modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -956,12 +987,18 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Fargo.Core.Items.Item", null)
-                        .WithMany()
-                        .HasForeignKey("ParentContainerGuid")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Items.ItemContainer", b =>
+                {
+                    b.HasOne("Fargo.Core.Items.Item", "Item")
+                        .WithOne("Container")
+                        .HasForeignKey("Fargo.Core.Items.ItemContainer", "ItemGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>
@@ -1092,6 +1129,11 @@ namespace Fargo.Infrastructure.Migrations
                         .HasForeignKey("UsersGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fargo.Core.Items.Item", b =>
+                {
+                    b.Navigation("Container");
                 });
 
             modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>
