@@ -22,13 +22,13 @@ public sealed class UserGroupDeleteCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteUserGroup);
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
-        EntityNotFoundFargoException.ThrowIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
 
         actor.ThrowIfAccessDenied(userGroup);
 

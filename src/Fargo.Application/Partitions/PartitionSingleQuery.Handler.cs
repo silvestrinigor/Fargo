@@ -19,7 +19,7 @@ public sealed class PartitionSingleQueryHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var partition = await partitionRepository.GetInfoByGuid(
             query.PartitionGuid, query.AsOfDateTime,

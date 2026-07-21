@@ -23,13 +23,13 @@ public sealed class UserUpdateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
-        EntityNotFoundFargoException.ThrowIfNull(user, command.UserGuid, EntityType.User);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.User);
 
         actor.ThrowIfAccessDenied(user);
 

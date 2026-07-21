@@ -20,13 +20,13 @@ public sealed class ItemDeleteCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteItem);
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
-        EntityNotFoundFargoException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
 
         actor.ThrowIfAccessDenied(item);
 

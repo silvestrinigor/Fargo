@@ -4,7 +4,9 @@ public static class FargoExceptionHandlerExtension
 {
     public static IServiceCollection AddFargoExceptionHandler(this IServiceCollection services)
     {
-        services.AddExceptionHandler<FargoExceptionHandler>();
+        services.AddExceptionHandler<FargoApplicationExceptionHandler>();
+
+        services.AddExceptionHandler<FargoCoreExceptionHandler>();
 
         return services;
     }

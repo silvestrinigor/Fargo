@@ -23,7 +23,7 @@ public sealed class UserCreateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUser);
 
@@ -52,14 +52,9 @@ public sealed class UserCreateCommandHandler(
         {
             var requestedActions = permissions.Select(p => p.Action).Distinct().ToHashSet();
 
-            var currentActions = user.Permissions.Select(p => p.Action).ToHashSet();
-
-            if (!requestedActions.SetEquals(currentActions))
+            foreach (var action in requestedActions)
             {
-                foreach (var action in requestedActions.Except(currentActions))
-                {
-                    user.AddPermission(action);
-                }
+                user.AddPermission(action);
             }
         }
 
@@ -69,7 +64,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
                 actor.ThrowIfAccessDeniedToPartition(partition);
 
@@ -83,7 +78,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
 
-                EntityNotFoundFargoException.ThrowIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
 
                 actor.ThrowIfAccessDenied(userGroup);
 

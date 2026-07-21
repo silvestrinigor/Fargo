@@ -22,13 +22,13 @@ public sealed class PartitionUpdateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.EditPartition);
 
         var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityNotFoundFargoException.ThrowIfNull(partition, command.PartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(partition, command.PartitionGuid, EntityType.Partition);
 
         actor.ThrowIfAccessDeniedToPartition(partition);
 

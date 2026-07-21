@@ -24,7 +24,7 @@ public sealed class PartitionCreateCommandHandler(
 
         var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
 
-        ActorNotFoundFargoException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
 
@@ -34,13 +34,13 @@ public sealed class PartitionCreateCommandHandler(
 
         partition.Description = create.Description ?? Description.Empty;
 
-        var parentPartitionGuid = create.ParentPartitionGuid ?? FargoConstantGuids.GlobalPartitionGuid;
+        var parentPartitionGuid = create.ParentPartitionGuid ?? FargoDefaultGuids.GlobalPartitionGuid;
 
         if (partition.ParentPartitionGuid != parentPartitionGuid)
         {
             var parentPartition = await partitionRepository.GetByGuidAsync(parentPartitionGuid, cancellationToken);
 
-            EntityNotFoundFargoException.ThrowIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
 
             await partitionService.SetParentPartition(
                 parentPartition, partition, cancellationToken);

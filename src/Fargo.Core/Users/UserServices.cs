@@ -14,17 +14,16 @@ public class UserService(
     /// <param name="nameid"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    /// <exception cref="UserNameidAlreadyExistsDomainException"></exception>
+    /// <exception cref="UserNameidAlreadyExistsFargoCoreException"></exception>
     public async Task ValidateUserNameidIsAvailableAsync(
-        Nameid nameid,
-        CancellationToken cancellationToken = default)
+        Nameid nameid, CancellationToken cancellationToken = default)
     {
         var userWithTheNameid =
             await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
         if (userWithTheNameid is not null)
         {
-            throw new UserNameidAlreadyExistsDomainException(nameid);
+            throw new UserNameidAlreadyExistsFargoCoreException(nameid);
         }
     }
 
@@ -32,12 +31,12 @@ public class UserService(
     /// 
     /// </summary>
     /// <param name="user"></param>
-    /// <exception cref="DeleteMainAdminUserFargoException"></exception>
-    public static void ValidateUserDelete(User user)
+    /// <exception cref="FargoCoreException"></exception>
+    public static void ValidateUserCanBeDeleted(User user)
     {
-        if (user.Guid == FargoConstantGuids.AdminUserGuid)
+        if (user.Guid == FargoDefaultGuids.AdminUserGuid)
         {
-            throw new DeleteMainAdminUserFargoException();
+            throw new DeleteMainAdminUserFargoCoreException();
         }
     }
 }

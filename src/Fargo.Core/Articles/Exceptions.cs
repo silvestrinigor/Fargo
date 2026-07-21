@@ -25,15 +25,6 @@ public sealed class ArticleDeleteWithItemsAssociatedFargoDomainException(Guid ar
 }
 
 /// <summary>
-/// Exception thrown when a barcode is already assigned to a different article.
-/// </summary>
-public sealed class ArticleBarcodeAlreadyInUseFargoDomainException(Barcode barcode)
-    : Exception($"Barcode '{barcode}' is already assigned to another article.")
-{
-    public Barcode Barcode { get; } = barcode;
-}
-
-/// <summary>
 /// Exception thrown when a container-only article operation is requested for a non-container article.
 /// </summary>
 public sealed class ArticleIsNotContainerFargoDomainException(Guid articleGuid)

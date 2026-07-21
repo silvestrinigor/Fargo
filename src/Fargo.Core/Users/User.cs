@@ -40,7 +40,7 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     /// <summary>
     /// Gets the value indicating the user is the main admin user.
     /// </summary>
-    public bool IsSystemAdmin => Guid == FargoConstantGuids.AdminUserGuid;
+    public bool IsSystemAdmin => Guid == FargoDefaultGuids.AdminUserGuid;
 
     /// <summary>
     /// Gets or sets the hashed password of the user.

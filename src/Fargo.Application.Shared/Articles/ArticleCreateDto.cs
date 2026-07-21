@@ -12,6 +12,7 @@ public sealed record ArticleCreateDto(
     ArticleType? ArticleType = null,
     Guid? FromArticle = null,
     Scalar? PackQuantity = null,
+    IReadOnlyCollection<ArticleKitComponentDto>? KitComponents = null,
     TimeSpan? ShelfLife = null,
     Color? Color = null,
     Mass? Mass = null,

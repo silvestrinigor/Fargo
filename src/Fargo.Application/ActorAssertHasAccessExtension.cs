@@ -1,3 +1,4 @@
+using Fargo.Application;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 
@@ -10,7 +11,7 @@ public static class ActorAssertHasAccessExtension
     {
         if (!actor.HasAccess(entity))
         {
-            throw new AccessDeniedFargoException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid, entity.GetEntityType());
         }
     }
 
@@ -19,7 +20,7 @@ public static class ActorAssertHasAccessExtension
     {
         if (!actor.HasAccess(entity))
         {
-            throw new AccessDeniedFargoException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid, entity.GetEntityType());
         }
     }
 }

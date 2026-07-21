@@ -1,9 +1,9 @@
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Actors;
 
-namespace Fargo.Core.Actors;
+namespace Fargo.Application;
 
-public class AccessDeniedFargoException : FargoException
+public class AccessDeniedFargoApplicationException : FargoApplicationException
 {
     public ActorId ActorId { get; }
 
@@ -11,7 +11,7 @@ public class AccessDeniedFargoException : FargoException
 
     public EntityType EntityType { get; }
 
-    public AccessDeniedFargoException(ActorId actorId, Guid entityGuid, EntityType entityType)
+    public AccessDeniedFargoApplicationException(ActorId actorId, Guid entityGuid, EntityType entityType)
         : base($"Access to entity '{entityGuid}' of type '{entityType}' denied for actor '{actorId}'")
     {
         ActorId = actorId;

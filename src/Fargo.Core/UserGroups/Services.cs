@@ -81,12 +81,7 @@ public class UserGroupService(
         ArgumentNullException.ThrowIfNull(actor);
         ArgumentNullException.ThrowIfNull(actorUserGroupGuids);
 
-        if (actorUserGroupGuids.Contains(userGroup.Guid))
-        {
-            throw new UserCannotDeleteParentUserGroupFargoDomainException(userGroup.Guid);
-        }
-
-        if (userGroup.Guid == FargoConstantGuids.AdminUserGroupGuid)
+        if (userGroup.Guid == FargoDefaultGuids.AdminUserGroupGuid)
         {
             throw new DeleteDefaultAdministratorsUserGroupFargoDomainException();
         }

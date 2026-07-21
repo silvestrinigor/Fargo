@@ -1,4 +1,5 @@
 using Fargo.Application.Shared.Articles;
+using Fargo.Core.Articles;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Barcodes;
@@ -18,6 +19,8 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
     public Guid? FromArticle { get; init; } = null;
 
     public Scalar? PackQuantity { get; init; } = null;
+
+    public IReadOnlyCollection<ArticleKitComponentDto>? KitComponents { get; init; } = null;
 
     public TimeSpan? ShelfLife { get; init; } = null;
 
@@ -79,6 +82,17 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
             }
 
             PackQuantity = dto.PackQuantity;
+        }
+
+        if (ArticleType is ArticleType.Kit)
+        {
+            if (dto.KitComponents is null || dto.KitComponents.Count == 0)
+            {
+                throw new ArgumentException(
+                    "Kit components should be informed when article type is kit.", nameof(dto));
+            }
+
+            KitComponents = dto.KitComponents;
         }
 
         if (ArticleType is not ArticleType.Default && ArticleType is not ArticleType.Variation
