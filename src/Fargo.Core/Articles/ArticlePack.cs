@@ -12,16 +12,6 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticlePack
 {
-    private ArticlePack()
-    {
-    }
-
-    public ArticlePack(Article fromArticle, Scalar quantity)
-    {
-        FromArticle = fromArticle;
-        SetQuantity(quantity);
-    }
-
     /// <summary>
     /// Gets the unique identifier of the source article contained in the pack.
     /// </summary>
@@ -50,6 +40,16 @@ public sealed class ArticlePack
     /// Thrown when the quantity is less than or equal to zero.
     /// </exception>
     public Scalar Quantity { get; private set; }
+
+    private ArticlePack()
+    {
+    }
+
+    public ArticlePack(Article fromArticle, Scalar quantity)
+    {
+        FromArticle = fromArticle;
+        SetQuantity(quantity);
+    }
 
     public void SetQuantity(Scalar quantity)
     {

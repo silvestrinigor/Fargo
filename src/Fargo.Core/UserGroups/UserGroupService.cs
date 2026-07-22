@@ -1,6 +1,5 @@
 using Fargo.Core.Actors;
 using Fargo.Core.Shared;
-using Fargo.Core.Users;
 
 namespace Fargo.Core.UserGroups;
 
@@ -23,7 +22,7 @@ public class UserGroupService(
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
-    /// <exception cref="UserGroupNameidAlreadyExistsDomainException">
+    /// <exception cref="UserGroupNameidAlreadyExistsCoreException">
     /// Thrown when another user group with the same
     /// <see cref="UserGroup.Nameid"/> already exists.
     /// </exception>
@@ -39,7 +38,7 @@ public class UserGroupService(
 
         if (alreadyExistsWithName)
         {
-            throw new UserGroupNameidAlreadyExistsDomainException(userGroup.Nameid);
+            throw new UserGroupNameidAlreadyExistsCoreException(userGroup.Nameid);
         }
     }
 
@@ -62,7 +61,7 @@ public class UserGroupService(
 
         if (alreadyExistsWithName)
         {
-            throw new UserGroupNameidAlreadyExistsDomainException(nameid);
+            throw new UserGroupNameidAlreadyExistsCoreException(nameid);
         }
     }
 
@@ -83,7 +82,7 @@ public class UserGroupService(
 
         if (userGroup.Guid == FargoDefaultGuids.AdminUserGroupGuid)
         {
-            throw new DeleteDefaultAdministratorsUserGroupFargoDomainException();
+            throw new DeleteDefaultAdministratorsUserGroupFargoCoreException();
         }
     }
 }

@@ -24,4 +24,34 @@ public enum FargoCoreErrorType
     /// 
     /// </summary>
     ArticleBarcodeAlreadyInUse = 3,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    CannotDeleteArticleThatIsDependencyOfAnotherArticle = 4,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    CannotDeleteArticleWithItemsAssociated = 5,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    CannotDeleteMainAdministratorsUserGroup = 6,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    UserGroupNameidAlrealdyInUse = 7,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    CannotDeleteGlobalPartition = 8,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    PartitionCircularHierarchy = 9
 }

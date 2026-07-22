@@ -69,11 +69,11 @@ public interface IArticleRepository
     /// Determines whether the specified article has any associated items.
     /// </summary>
     Task<bool> HasItemsAssociatedAsync(
-        Guid articleGuid,
-        CancellationToken cancellationToken = default
+        Guid articleGuid, CancellationToken cancellationToken = default
     );
 
-    Task<bool> IsDependenceOfAnotherArticle(Guid articleGuid, CancellationToken cancellationToken = default);
+    Task<bool> IsDependenceOfAnotherArticle(
+        Guid articleGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new article to the persistence context.
