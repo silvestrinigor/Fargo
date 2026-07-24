@@ -53,5 +53,25 @@ public enum FargoCoreErrorType
     /// <summary>
     /// 
     /// </summary>
-    PartitionCircularHierarchy = 9
+    PartitionCircularHierarchy = 9,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    PartitionCannotBeOwnParentPartition = 10,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    ItemCannotBeOwnContainer = 11,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    ItemIsNotContainer = 12,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    ItemCircularContainerHierarchy = 13,
 }

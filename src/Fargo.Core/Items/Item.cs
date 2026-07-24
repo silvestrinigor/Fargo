@@ -123,7 +123,7 @@ public class Item : Entity, IEntityTyped, IPartitioned, IActivable
         {
             if (value?.Item.Guid == Guid)
             {
-                throw new ItemCannotBeOwnContainerFargoDomainException(Guid);
+                throw new ItemCannotBeOwnContainerFargoCoreException(Guid);
             }
 
             ParentContainerGuid = value?.Item.Guid;

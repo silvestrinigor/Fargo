@@ -41,7 +41,7 @@ public class PartitionService(
     /// Thrown when <paramref name="parentPartition"/> or
     /// <paramref name="memberPartition"/> is <see langword="null"/>.
     /// </exception>
-    /// <exception cref="PartitionCannotBeOwnParentFargoDomainException">
+    /// <exception cref="PartitionCannotBeOwnParentFargoCoreException">
     /// Thrown when a partition is assigned as its own parent.
     /// </exception>
     /// <exception cref="PartitionCircularHierarchyFargoDomainException">
@@ -57,7 +57,7 @@ public class PartitionService(
 
         if (parentPartition.Guid == memberPartition.Guid)
         {
-            throw new PartitionCannotBeOwnParentFargoDomainException(
+            throw new PartitionCannotBeOwnParentFargoCoreException(
                 memberPartition.Guid
             );
         }
