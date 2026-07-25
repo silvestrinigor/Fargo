@@ -12,11 +12,11 @@ namespace Fargo.Core.Users;
 public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     IPartitionedGuids, IPermissionUser, IActivable
 {
-    //    /// Gets or sets the unique nameid of the user.
+    /// <summary>
+    /// Gets or sets the unique nameid of the user.
     /// </summary>
     public required Nameid Nameid { get; set; }
 
-/ <summary>
     /// <summary>
     /// Gets or sets the user's first name.
     /// </summary>
