@@ -23,9 +23,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.Property(x => x.ProductionDate).IsRequired(false);
 
-        builder.Property(x => x.IsActive)
-            .HasDefaultValue(true);
-
         builder.Property(x => x.ParentContainerGuid).IsRequired(false);
 
         builder.HasOne(i => i.Container)

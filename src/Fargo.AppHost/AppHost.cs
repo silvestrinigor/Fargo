@@ -1,52 +1,45 @@
+using Fargo.AppHost.Extensions;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var environmentName = builder.Environment.EnvironmentName;
 
 var postgres = builder
-    .AddPostgres("postgres")
+    .AddPostgres("fargo-postgres")
     .WithLifetime(ContainerLifetime.Persistent);
 
-var fargodb = postgres.AddDatabase("fargo");
+var databaseFargo = postgres.AddDatabase("fargo-database");
 
-var migrations = builder
-    .AddProject<Projects.Fargo_ServiceMigration>("migrations")
-    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
-    .WithReference(fargodb)
-    .WaitFor(fargodb);
+var serviceMigrations = builder
+    .AddProject<Projects.Fargo_ServiceMigration>("fargo-migration")
+    .WithFargoEnvironment(environmentName)
+    .WithReference(databaseFargo)
+    .WaitFor(databaseFargo);
 
-var seeds = builder
-    .AddProject<Projects.Fargo_ServiceSeed>("seeds")
-    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
-    .WithReference(fargodb)
-    .WithReference(migrations)
-    .WaitForCompletion(migrations);
+var serviceSeeds = builder
+    .AddProject<Projects.Fargo_ServiceSeed>("fargo-seed")
+    .WithFargoEnvironment(environmentName)
+    .WithReference(databaseFargo)
+    .WithReference(serviceMigrations)
+    .WaitForCompletion(serviceMigrations);
 
-var httpApi = builder
-    .AddProject<Projects.Fargo_HttpApi>("apiservice")
+var serviceHttAppi = builder
+    .AddProject<Projects.Fargo_HttpApi>("fargo-api")
     .WithHttpHealthCheck("/health")
-    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
-    .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
-    .WithReference(fargodb)
-    .WithReference(migrations)
-    .WithReference(seeds)
-    .WaitForCompletion(migrations)
-    .WaitForCompletion(seeds);
-
-builder
-    .AddProject<Projects.Fargo_WebIdentity>("identityfrontend")
-    .WithExternalHttpEndpoints()
-    .WithReference(httpApi)
-    .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
-    .WaitFor(httpApi);
+    .WithFargoEnvironment(environmentName)
+    .WithReference(databaseFargo)
+    .WithReference(serviceMigrations)
+    .WithReference(serviceSeeds)
+    .WaitForCompletion(serviceMigrations)
+    .WaitForCompletion(serviceSeeds);
 
 if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
 {
     builder
-        .AddProject<Projects.Fargo_WebPlayground>("playgroundfrontend")
+        .AddProject<Projects.Fargo_WebPlayground>("fargo-playground")
         .WithExternalHttpEndpoints()
-        .WithReference(httpApi)
-        .WithEnvironment("FargoHttpApi__BaseAddress", httpApi.GetEndpoint("http"))
-        .WaitFor(httpApi);
+        .WithReference(serviceHttAppi)
+        .WaitFor(serviceHttAppi);
 }
 
 builder.Build().Run();

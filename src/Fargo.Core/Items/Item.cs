@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
@@ -23,7 +22,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IEntityTyped, IPartitioned, IActivable
+public class Item : Entity, IEntityTyped, IPartitioned
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
@@ -95,11 +94,6 @@ public class Item : Entity, IEntityTyped, IPartitioned, IActivable
     /// When <see langword="null"/>, the expiration date is unknown.
     /// </summary>
     public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
-
-    /// <summary>
-    /// Gets a value indicating whether the item is active.
-    /// </summary>
-    public bool IsActive { get; set; } = true;
 
     public EntityType GetEntityType() => EntityType.Item;
 

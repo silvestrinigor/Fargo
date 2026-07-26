@@ -5,5 +5,4 @@ public sealed record ItemDto(
     Guid ArticleGuid,
     DateTimeOffset? ProductionDate,
     Guid? ParentContainerGuid,
-    IReadOnlyCollection<Guid> Partitions,
-    bool IsActive);
+    IReadOnlyCollection<Guid> Partitions);

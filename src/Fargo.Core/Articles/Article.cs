@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -18,7 +17,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IEntityTyped, IActivable, IPartitioned
+public class Article : Entity, IEntityTyped, IPartitioned
 {
     /// <summary>
     /// Gets or sets the name of the article.
@@ -50,11 +49,6 @@ public class Article : Entity, IEntityTyped, IActivable, IPartitioned
     /// When <see langword="null"/>, no color constraint is defined.
     /// </summary>
     public Color? Color { get; set; }
-
-    /// <summary>
-    /// Gets or sets the value indicating whether the article is active.
-    /// </summary>
-    public bool IsActive { get; set; } = true;
 
     public EntityType GetEntityType() => EntityType.Article;
 

@@ -14,8 +14,6 @@ public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
 
         builder.Property(x => x.Description).IsRequired();
 
-        builder.Property(x => x.IsActive).IsRequired();
-
         builder.Property(x => x.ParentPartitionGuid);
 
         builder

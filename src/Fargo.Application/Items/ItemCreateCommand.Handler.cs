@@ -36,8 +36,6 @@ public sealed class ItemCreateCommandHandler(
 
         var item = Item.CreateItem(article, command.Create.ProductionDate);
 
-        item.IsActive = command.Create.IsActive ?? true;
-
         itemRepository.Add(item);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

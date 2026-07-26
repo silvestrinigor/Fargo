@@ -1252,12 +1252,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1270,8 +1264,7 @@
           "color",
           "metrics",
           "barcodes",
-          "partitions",
-          "isActive"
+          "partitions"
         ],
         "type": "object",
         "properties": {
@@ -1314,9 +1307,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": "boolean"
           }
         }
       },
@@ -1483,12 +1473,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1663,12 +1647,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1678,8 +1656,7 @@
           "articleGuid",
           "productionDate",
           "parentContainerGuid",
-          "partitions",
-          "isActive"
+          "partitions"
         ],
         "type": "object",
         "properties": {
@@ -1711,9 +1688,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": "boolean"
           }
         }
       },
@@ -1736,12 +1710,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1807,8 +1775,7 @@
           "guid",
           "name",
           "description",
-          "parentPartitionGuid",
-          "isActive"
+          "parentPartitionGuid"
         ],
         "type": "object",
         "properties": {
@@ -1828,9 +1795,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "isActive": {
-            "type": "boolean"
           }
         }
       },
@@ -1845,12 +1809,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },

@@ -186,8 +186,6 @@ public sealed class ArticleCreateCommandHandler(
             }
         }
 
-        article.IsActive = command.IsActive ?? true;
-
         articleRepository.Add(article);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

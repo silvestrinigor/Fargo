@@ -870,20 +870,13 @@
         async client => await client.Items.CreateAsync(new ItemCreateDto(
             RequiredGuid(itemCreate.ArticleGuid, "Article GUID"),
             ParseNullableDateTimeOffset(itemCreate.ProductionDate, "Production date"),
-            ParseGuidList(itemCreate.PartitionsText, "Partitions"),
-            OptionalBool(itemCreate.IncludeIsActive, itemCreate.IsActive))));
+            ParseGuidList(itemCreate.PartitionsText, "Partitions"))));
 
     private async Task UpdateItemAsync() => await RunAsync(
         OperationIds.Update,
         "Item updated",
         async client =>
         {
-            await client.Items.UpdateAsync(
-                RequiredGuid(itemUpdate.Guid, "Item GUID"),
-                new ItemUpdateDto(
-                    ParseGuidList(itemUpdate.PartitionsText, "Partitions"),
-                    ParseNullableGuid(itemUpdate.ParentContainerGuid, "Parent container GUID"),
-                    OptionalBool(itemUpdate.IncludeIsActive, itemUpdate.IsActive)));
             return null;
         });
 
@@ -1020,8 +1013,7 @@
                 new PartitionUpdateDto(
                     null,
                     null,
-                    ParseNullableGuid(partitionUpdate.ParentPartitionGuid, "Parent partition GUID"),
-                    OptionalBool(partitionUpdate.IncludeIsActive, partitionUpdate.IsActive)));
+                    ParseNullableGuid(partitionUpdate.ParentPartitionGuid, "Parent partition GUID")));
             return null;
         });
 
@@ -1148,8 +1140,7 @@
             Name = articlePatch.IncludeName ? new Name(articlePatch.Name ?? "Article name") : null,
             Description = articlePatch.IncludeDescription ? new Description(articlePatch.Description ?? "") : null,
             ShelfLife = null,
-            RemoveShelfLife =  null,
-            IsActive = OptionalBool(articlePatch.IncludeIsActive, articlePatch.IsActive)
+            RemoveShelfLife =  null
         };
 
         return request;
@@ -1406,7 +1397,6 @@
         articlePatch.Name = article.Name;
         articlePatch.Description = article.Description;
         articlePatch.PartitionsText = string.Join(Environment.NewLine, article.Partitions);
-        articlePatch.IsActive = article.IsActive;
         OpenActionDialog(OperationIds.Patch);
     }
 
@@ -1417,7 +1407,6 @@
         itemUpdate.Guid = item.Guid.ToString("D");
         itemUpdate.PartitionsText = string.Join(Environment.NewLine, item.Partitions);
         itemUpdate.ParentContainerGuid = item.ParentContainerGuid?.ToString("D") ?? string.Empty;
-        itemUpdate.IsActive = item.IsActive;
         OpenActionDialog(OperationIds.Update);
     }
 
@@ -1466,7 +1455,6 @@
         partitionUpdate.Name = partition.Name;
         partitionUpdate.Description = partition.Description;
         partitionUpdate.ParentPartitionGuid = partition.ParentPartitionGuid?.ToString("D") ?? string.Empty;
-        partitionUpdate.IsActive = partition.IsActive;
         OpenActionDialog(OperationIds.Update);
     }
 
@@ -1799,7 +1787,6 @@
             @DetailValue("Guid", article.Guid.ToString("D"))
             @DetailValue("Description", article.Description)
             @DetailValue("Shelf life", FormatDuration(article.ShelfLife))
-            @DetailValue("Active", article.IsActive ? "Yes" : "No")
         </div>
         <section class="detail-section">
             <h4>Color</h4>
@@ -1845,7 +1832,6 @@
             @DetailValue("Article", item.ArticleGuid.ToString("D"))
             @DetailValue("Production", item.ProductionDate?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
             @DetailValue("Parent container", item.ParentContainerGuid?.ToString("D"))
-            @DetailValue("Active", item.IsActive ? "Yes" : "No")
         </div>
         @GuidCollection("Partitions", item.Partitions))
     </section>;
@@ -1901,7 +1887,6 @@
             @DetailValue("Guid", partition.Guid.ToString("D"))
             @DetailValue("Description", partition.Description)
             @DetailValue("Parent", partition.ParentPartitionGuid?.ToString("D"))
-            @DetailValue("Active", partition.IsActive ? "Yes" : "No"))
         </div>
     </section>;
 

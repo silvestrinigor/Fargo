@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -10,7 +9,7 @@ namespace Fargo.Core.Users;
 /// Represents a user in the system.
 /// </summary>
 public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
-    IPartitionedGuids, IPermissionUser, IActivable
+    IPartitionedGuids, IPermissionUser
 {
     /// <summary>
     /// Gets or sets the unique nameid of the user.
@@ -36,11 +35,6 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     /// Gets or sets the value indicating whether the user is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
-
-    /// <summary>
-    /// Gets the value indicating the user is the main admin user.
-    /// </summary>
-    public bool IsSystemAdmin => Guid == FargoDefaultGuids.AdminUserGuid;
 
     /// <summary>
     /// Gets or sets the hashed password of the user.
