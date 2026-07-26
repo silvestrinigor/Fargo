@@ -9,15 +9,6 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleVariation
 {
-    private ArticleVariation()
-    {
-    }
-
-    internal ArticleVariation(Article fromArticle)
-    {
-        FromArticle = fromArticle;
-    }
-
     /// <summary>
     /// Gets the unique identifier of the source article.
     /// </summary>
@@ -35,4 +26,13 @@ public sealed class ArticleVariation
             field = value;
         }
     } = null!;
+
+    private ArticleVariation()
+    {
+    }
+
+    internal ArticleVariation(Article fromArticle)
+    {
+        FromArticle = fromArticle;
+    }
 }

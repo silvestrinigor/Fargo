@@ -28,77 +28,22 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.OwnsOne(x => x.Container, container =>
         {
-            container.ToTable("ArticleContainers");
-
-            container.WithOwner().HasForeignKey("ArticleGuid");
-
-            container.Property(x => x.MaxMass)
-                .HasConversion<MassStringConverter>()
-                .HasMaxLength(50)
-                .IsRequired(false);
+            container.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Variation, variation =>
         {
-            variation.ToTable("ArticleVariations");
-
-            variation.WithOwner().HasForeignKey("ArticleGuid");
-
-            variation.Property(x => x.FromArticleGuid).IsRequired();
-
-            variation.HasOne(x => x.FromArticle)
-                .WithMany()
-                .HasForeignKey(x => x.FromArticleGuid)
-                .OnDelete(DeleteBehavior.Restrict);
+            variation.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Pack, pack =>
         {
-            pack.ToTable("ArticlePacks");
-
-            pack.WithOwner().HasForeignKey("ArticleGuid");
-
-            pack.Property(x => x.FromArticleGuid).IsRequired();
-
-            pack.HasOne(x => x.FromArticle)
-                .WithMany()
-                .HasForeignKey(x => x.FromArticleGuid)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            pack.Property(x => x.Quantity)
-                .IsRequired();
+            pack.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Kit, kit =>
         {
-            kit.ToTable("ArticleKits");
-
-            kit.WithOwner().HasForeignKey("ArticleGuid");
-
-            kit.OwnsMany(x => x.Components, component =>
-            {
-                component.ToTable("ArticleKitPacks");
-
-                component.WithOwner().HasForeignKey("KitArticleGuid");
-
-                component.Property<Guid>("Guid");
-                component.HasKey("Guid");
-
-                component.Property(x => x.ArticleGuid)
-                    .HasColumnName("FromArticleGuid")
-                    .IsRequired();
-
-                component.HasOne(x => x.Article)
-                    .WithMany()
-                    .HasForeignKey(x => x.ArticleGuid)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                component.Property(x => x.Quantity)
-                    .IsRequired();
-
-                component.HasIndex("KitArticleGuid", nameof(ArticleKitComponent.ArticleGuid))
-                    .IsUnique();
-            });
+            kit.WithOwner().HasForeignKey();
 
             kit.WithOwner();
         });

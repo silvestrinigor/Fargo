@@ -8,7 +8,7 @@ public sealed class UserGroupPartitionAccessConfiguration : IEntityTypeConfigura
 {
     public void Configure(EntityTypeBuilder<UserGroupPartitionAccess> builder)
     {
-        builder.ToTable("UserGroupPartitionAccesses");
+        builder.ToTable("user_group_partition_accesses");
 
         builder.HasKey(x => x.Guid);
 
