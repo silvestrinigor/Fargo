@@ -9,10 +9,5 @@ namespace Fargo.Application.Articles;
 /// <param name="ArticleBarcode">
 /// Article barcode information.
 /// </param>
-/// <param name="AsOfDateTime">
-/// Temporal query date.
-/// </param>
 public sealed record ArticleByBarcodeQuery(
-    Barcode ArticleBarcode,
-    DateTimeOffset? AsOfDateTime = null
-) : IQuery<ArticleDto?>;
+    Barcode ArticleBarcode) : IQuery<ArticleDto?>;

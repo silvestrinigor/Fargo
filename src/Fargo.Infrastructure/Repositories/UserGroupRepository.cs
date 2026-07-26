@@ -39,14 +39,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
 
     public async Task<UserGroupDto?> GetInfoByGuidAsync(
         Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var userGroup = await ApplyPartitionFilter(
                 userGroups
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
@@ -59,14 +57,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
 
     public async Task<IReadOnlyCollection<UserGroupDto>> GetManyInfoAsync(
         Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 userGroups
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)

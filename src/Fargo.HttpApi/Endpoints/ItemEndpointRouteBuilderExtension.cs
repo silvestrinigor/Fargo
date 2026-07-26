@@ -48,12 +48,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<ItemDto>, NotFound>> GetSingleItem(
         Guid itemGuid,
-        DateTimeOffset? temporalAsOf,
         IQueryHandler<ItemSingleQuery, ItemDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new ItemSingleQuery(itemGuid, temporalAsOf);
+        var query = new ItemSingleQuery(itemGuid);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -77,7 +76,6 @@ public static class ItemEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItem(
-        DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
@@ -92,7 +90,6 @@ public static class ItemEndpointRouteBuilderExtension
 
         var query = new ItemsQuery(
             withPagination,
-            temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 

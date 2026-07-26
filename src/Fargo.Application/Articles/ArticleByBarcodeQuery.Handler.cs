@@ -20,7 +20,7 @@ public sealed class ArticleByBarcodeQueryHandler(
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var article = await articleRepository.GetInfoByBarcodeAsync(
-            query.ArticleBarcode, query.AsOfDateTime,
+            query.ArticleBarcode,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true, cancellationToken);
 

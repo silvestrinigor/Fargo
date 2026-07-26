@@ -51,11 +51,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<ArticleDto>, NotFound>> GetArticleByGuidAsync(
         Guid articleGuid,
-        DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByGuidQuery, ArticleDto?> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ArticleByGuidQuery(articleGuid, temporalAsOf);
+        var query = new ArticleByGuidQuery(articleGuid);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -80,11 +79,10 @@ public static class ArticleEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<ArticleDto>, NotFound>> GetArticleByBarcodeAsync(
         Barcode articleBarcode,
-        DateTimeOffset? temporalAsOf,
         IQueryHandler<ArticleByBarcodeQuery, ArticleDto?> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ArticleByBarcodeQuery(articleBarcode, temporalAsOf);
+        var query = new ArticleByBarcodeQuery(articleBarcode);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -108,7 +106,6 @@ public static class ArticleEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticleAsync(
-        DateTimeOffset? temporalAsOfDateTime,
         Page? page, Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
@@ -120,7 +117,6 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var query = new ArticlesQuery(
             withPagination,
-            temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 

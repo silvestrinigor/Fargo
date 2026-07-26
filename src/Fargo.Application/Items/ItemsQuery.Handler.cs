@@ -32,7 +32,7 @@ public sealed class ItemsQueryHandler(
                 query.NotChildOfAnyPartition);
 
         var items = await itemRepository.GetManyInfo(
-            pagination, query.TemporalAsOfDateTime,
+            pagination,
             childOfAnyOfThesePartitions, notChildOfAnyPartition,
             cancellationToken);
 

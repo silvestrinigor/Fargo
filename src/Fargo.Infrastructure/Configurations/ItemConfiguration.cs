@@ -8,7 +8,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 {
     public void Configure(EntityTypeBuilder<Item> builder)
     {
-        builder.ToTable(t => t.IsTemporal());
+        builder.ToTable("items");
 
         builder.HasKey(x => x.Guid);
 

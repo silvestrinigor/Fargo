@@ -28,7 +28,7 @@ public sealed class PartitionsQueryHandler(
                 query.NotChildOfAnyPartition);
 
         var partitions = await partitionRepository.GetManyInfo(
-            query.WithPagination, query.TemporalAsOfDateTime, childOfAnyOfThesePartitions,
+            query.WithPagination, childOfAnyOfThesePartitions,
             notChildOfAnyPartition, cancellationToken);
 
         logger.ManyQueryCompleted(

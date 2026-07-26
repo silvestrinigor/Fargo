@@ -29,7 +29,7 @@ public sealed class UserGroupsQueryHandler(
                 query.NotChildOfAnyPartition);
 
         var userGroups = await userGroupRepository.GetManyInfoAsync(
-            query.WithPagination, query.TemporalAsOfDateTime,
+            query.WithPagination,
             childOfAnyOfThesePartitions, notChildOfAnyPartition,
             cancellationToken);
 

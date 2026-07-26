@@ -73,14 +73,12 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public async Task<ArticleDto?> GetInfoByGuidAsync(
         Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var article = await ApplyPartitionFilter(
                 articles
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
@@ -93,14 +91,12 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public async Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode barcode,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var query = ApplyPartitionFilter(
             articles
-                .TemporalAsOfIfProvided(asOfDateTime)
                 .AsNoTracking(),
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
@@ -112,14 +108,12 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
         Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 articles
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)

@@ -49,12 +49,11 @@ public static class UserEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<UserDto>, NotFound>> GetSingleUser(
         Guid userGuid,
-        DateTimeOffset? temporalAsOf,
         IQueryHandler<UserSingleQuery, UserDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new UserSingleQuery(userGuid, temporalAsOf);
+        var query = new UserSingleQuery(userGuid);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -79,7 +78,6 @@ public static class UserEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<IReadOnlyCollection<UserDto>>, NoContent>> GetManyUser(
-        DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
@@ -94,7 +92,6 @@ public static class UserEndpointRouteBuilderExtension
 
         var query = new UsersQuery(
             withPagination,
-            temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 

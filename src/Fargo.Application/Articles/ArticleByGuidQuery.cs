@@ -12,6 +12,5 @@ namespace Fargo.Application.Articles;
 /// Temporal query date.
 /// </param>
 public sealed record ArticleByGuidQuery(
-    Guid ArticleGuid,
-    DateTimeOffset? AsOfDateTime = null
+    Guid ArticleGuid
 ) : IQuery<ArticleDto?>;

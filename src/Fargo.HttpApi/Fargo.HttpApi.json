@@ -22,14 +22,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -125,14 +117,6 @@
               "type": "string",
               "example": "7891234567895:Ean13"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -161,14 +145,6 @@
         "description": "Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.",
         "operationId": "GetArticles",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -275,14 +251,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -369,14 +337,6 @@
         "description": "Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.",
         "operationId": "GetItems",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -488,14 +448,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -582,14 +534,6 @@
         "description": "Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.",
         "operationId": "GetUsers",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -701,14 +645,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -795,14 +731,6 @@
         "description": "Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.",
         "operationId": "GetUserGroups",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -914,14 +842,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -1008,14 +928,6 @@
         "description": "Retrieves a paginated list of partitions. Supports optional temporal queries.",
         "operationId": "GetPartitions",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",

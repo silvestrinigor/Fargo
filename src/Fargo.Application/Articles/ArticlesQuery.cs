@@ -19,7 +19,6 @@ namespace Fargo.Application.Articles;
 /// </param>
 public sealed record ArticlesQuery(
     Pagination WithPagination,
-    DateTimeOffset? TemporalAsOfDateTime = null,
     IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
     bool? NotChildOfAnyPartition = null
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;

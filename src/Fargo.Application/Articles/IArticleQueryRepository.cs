@@ -31,7 +31,6 @@ public interface IArticleQueryRepository
     /// </returns>
     Task<ArticleDto?> GetInfoByGuidAsync(
         Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
@@ -59,7 +58,6 @@ public interface IArticleQueryRepository
     /// </returns>
     Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode barcode,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
@@ -87,7 +85,6 @@ public interface IArticleQueryRepository
     /// </returns>
     Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
         Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);

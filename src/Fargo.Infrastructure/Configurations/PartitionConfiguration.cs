@@ -8,8 +8,6 @@ public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
 {
     public void Configure(EntityTypeBuilder<Partition> builder)
     {
-        builder.ToTable(t => t.IsTemporal());
-
         builder.HasKey(x => x.Guid);
 
         builder.Property(x => x.Name).IsRequired();

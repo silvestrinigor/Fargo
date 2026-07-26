@@ -8,7 +8,7 @@ public sealed class UserGroupPermissionConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<UserGroupPermission> builder)
     {
-        builder.ToTable("UserGroupPermissions", tableBuilder => tableBuilder.IsTemporal());
+        builder.ToTable("UserGroupPermissions");
 
         builder.HasKey(x => x.Guid);
 

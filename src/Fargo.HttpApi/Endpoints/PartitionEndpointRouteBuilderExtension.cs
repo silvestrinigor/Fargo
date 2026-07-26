@@ -49,12 +49,11 @@ public static class PartitionEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<PartitionDto>, NotFound>> GetSinglePartition(
         Guid partitionGuid,
-        DateTimeOffset? temporalAsOf,
         IQueryHandler<PartitionSingleQuery, PartitionDto?> handler,
         CancellationToken cancellationToken
     )
     {
-        var query = new PartitionSingleQuery(partitionGuid, temporalAsOf);
+        var query = new PartitionSingleQuery(partitionGuid);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -79,7 +78,6 @@ public static class PartitionEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NoContent>> GetManyPartition(
-        DateTimeOffset? temporalAsOfDateTime,
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
@@ -93,7 +91,6 @@ public static class PartitionEndpointRouteBuilderExtension
 
         var query = new PartitionsQuery(
             withPagination,
-            temporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 
