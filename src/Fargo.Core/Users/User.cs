@@ -80,12 +80,6 @@ public class User : Entity, IPartitioned
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public EntityType GetEntityType() => EntityType.User;
-
-    /// <summary>
     /// Resets the password expiration date based on the user's
     /// <see cref="DefaultPasswordExpirationPeriod"/>.
     ///
