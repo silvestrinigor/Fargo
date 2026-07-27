@@ -1,11 +1,9 @@
-using Fargo.Core.Entities;
-
 namespace Fargo.Core.Partitions;
 
 /// <summary>
 /// Represents an entity that is associated with one or more partitions.
 /// </summary>
-public interface IPartitioned : IEntity
+public interface IPartitioned
 {
     /// <summary>
     /// Gets the partitions associated with the entity.

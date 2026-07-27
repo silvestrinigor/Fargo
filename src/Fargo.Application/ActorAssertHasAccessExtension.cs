@@ -1,4 +1,5 @@
 using Fargo.Application;
+using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 
 namespace Fargo.Core.Actors;
@@ -6,7 +7,7 @@ namespace Fargo.Core.Actors;
 public static class ActorAssertHasAccessExtension
 {
     public static void ThrowIfAccessDenied<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : IPartitioned
+        where TEntity : Entity, IPartitioned
     {
         if (!actor.HasAccess(entity))
         {
