@@ -12,7 +12,7 @@ namespace Fargo.Core.Actors;
 /// Authorization is evaluated against the actor's permissions and partition
 /// access, while auditing is handled separately by the infrastructure layer.
 /// </remarks>
-public sealed class Actor : IActor
+public sealed class Actor
 {
     public ActorId ActorId { get; }
 
@@ -41,7 +41,7 @@ public sealed class Actor : IActor
         return partitionAccessGuids.Contains(partitionGuid);
     }
 
-    public bool HasAccess(IPartition partition)
+    public bool HasAccess(Partition partition)
     {
         return HasPartitionAccess(partition.Guid);
     }
@@ -54,15 +54,5 @@ public sealed class Actor : IActor
         }
 
         return partitioned.Partitions.Any(p => partitionAccessGuids.Contains(p.Guid));
-    }
-
-    public bool HasAccess(IPartitionedGuids partitioned)
-    {
-        if (partitioned.PartitionGuids.Count == 0)
-        {
-            return true;
-        }
-
-        return partitioned.PartitionGuids.Any(partitionAccessGuids.Contains);
     }
 }

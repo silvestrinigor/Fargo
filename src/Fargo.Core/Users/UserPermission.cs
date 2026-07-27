@@ -17,7 +17,7 @@ namespace Fargo.Core.Users;
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="User"/> entity.
 /// </remarks>
-public class UserPermission : Entity, IPermission
+public class UserPermission : Entity
 {
     /// <summary>
     /// Gets the unique identifier of the user that owns this permission.

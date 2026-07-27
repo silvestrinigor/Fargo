@@ -238,7 +238,7 @@ public class Article : Entity, IPartitioned
     }
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 
     #endregion
 

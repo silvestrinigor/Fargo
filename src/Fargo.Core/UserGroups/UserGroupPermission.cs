@@ -1,6 +1,5 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Shared;
-using Fargo.Core.Users;
 
 namespace Fargo.Core.UserGroups;
 
@@ -18,7 +17,7 @@ namespace Fargo.Core.UserGroups;
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="UserGroup"/> entity.
 /// </remarks>
-public class UserGroupPermission : Entity, IPermission
+public class UserGroupPermission : Entity
 {
     /// <summary>
     /// Gets the unique identifier of the user group that owns this permission.

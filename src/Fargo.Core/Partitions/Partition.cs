@@ -25,7 +25,7 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IPartition
+public class Partition : Entity
 {
     public static Partition CreatePartition(Name name, Description? description = null)
         => new(name, description);

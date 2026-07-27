@@ -18,7 +18,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IPartitioned, IPartitionUser, IPermissionUser
+public class UserGroup : Entity, IPartitioned, IPartitionUser
 {
     private UserGroup()
     {
@@ -58,9 +58,6 @@ public class UserGroup : Entity, IPartitioned, IPartitionUser, IPermissionUser
         get => userGroupPermissions;
         init => userGroupPermissions = [.. value];
     }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
     private readonly List<UserGroupPermission> userGroupPermissions = [];
 
@@ -111,7 +108,7 @@ public class UserGroup : Entity, IPartitioned, IPartitionUser, IPermissionUser
     public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
