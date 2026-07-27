@@ -1753,21 +1753,19 @@
       "Nameid": { },
       "PartitionCreateDto": {
         "required": [
-          "name"
+          "name",
+          "parentPartitionGuid"
         ],
         "type": "object",
         "properties": {
           "name": {
             "$ref": "#/components/schemas/Name"
           },
-          "description": { },
           "parentPartitionGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": "string",
             "format": "uuid"
-          }
+          },
+          "description": { }
         }
       },
       "PartitionDto": {

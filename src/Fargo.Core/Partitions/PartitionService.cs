@@ -47,20 +47,13 @@ public class PartitionService(
     /// <exception cref="PartitionCircularHierarchyFargoDomainException">
     /// Thrown when assigning the parent would create a circular hierarchy.
     /// </exception>
-    public async Task SetParentPartition(
+    public async Task ValidateHierarchyParentPartition(
         Partition parentPartition,
         Partition memberPartition,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(parentPartition);
         ArgumentNullException.ThrowIfNull(memberPartition);
-
-        if (parentPartition.Guid == memberPartition.Guid)
-        {
-            throw new PartitionCannotBeOwnParentFargoCoreException(
-                memberPartition.Guid
-            );
-        }
 
         var createsCircularHierarchy =
             await CreatesCircularHierarchy(
@@ -76,8 +69,6 @@ public class PartitionService(
                 memberPartition.Guid
             );
         }
-
-        memberPartition.ParentPartition = parentPartition;
     }
 
     private async Task<bool> CreatesCircularHierarchy(

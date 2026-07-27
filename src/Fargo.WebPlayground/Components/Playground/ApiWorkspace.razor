@@ -995,13 +995,10 @@
             return selectedPartition is null ? "Partition not found." : selectedPartition;
         });
 
-    private async Task CreatePartitionAsync() => await RunAsync(
-        OperationIds.Create,
-        "Partition created",
-        async client => await client.Partitions.CreateAsync(new PartitionCreateDto(
-            new Name("Nametest"),
-            null,
-            ParseNullableGuid(partitionCreate.ParentPartitionGuid, "Parent partition GUID"))));
+    private async Task CreatePartitionAsync()
+    {
+        
+    }
 
     private async Task UpdatePartitionAsync() => await RunAsync(
         OperationIds.Update,

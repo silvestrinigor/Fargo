@@ -18,7 +18,7 @@ public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
 
         builder
             .HasOne(x => x.ParentPartition)
-            .WithMany(p => p.PartitionMembers)
+            .WithMany(p => p.ChildPartitions)
             .HasForeignKey(x => x.ParentPartitionGuid)
             .OnDelete(DeleteBehavior.Restrict);
     }

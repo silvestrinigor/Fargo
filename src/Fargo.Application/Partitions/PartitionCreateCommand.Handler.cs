@@ -1,5 +1,4 @@
 using Fargo.Application.Identity;
-using Fargo.Core;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -9,7 +8,6 @@ namespace Fargo.Application.Partitions;
 
 public sealed class PartitionCreateCommandHandler(
     ActorService actorService,
-    PartitionService partitionService,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
     ICurrentActor currentActor,
@@ -28,30 +26,22 @@ public sealed class PartitionCreateCommandHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
 
-        var create = command.Create;
+        var parentPartition = await partitionRepository.GetByGuidAsync(command.Create.ParentPartitionGuid, cancellationToken);
 
-        var partition = Partition.CreatePartition(create.Name);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, command.Create.ParentPartitionGuid, EntityType.Partition);
 
-        partition.Description = create.Description ?? Description.Empty;
+        actor.ThrowIfAccessDeniedToPartition(parentPartition);
 
-        var parentPartitionGuid = create.ParentPartitionGuid ?? FargoDefaultGuids.GlobalPartitionGuid;
+        var newPartition = Partition.CreatePartition(command.Create.Name, parentPartition);
 
-        if (partition.ParentPartitionGuid != parentPartitionGuid)
-        {
-            var parentPartition = await partitionRepository.GetByGuidAsync(parentPartitionGuid, cancellationToken);
+        newPartition.Description = command.Create.Description ?? Description.Empty;
 
-            EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
-
-            await partitionService.SetParentPartition(
-                parentPartition, partition, cancellationToken);
-        }
-
-        partitionRepository.Add(partition);
+        partitionRepository.Add(newPartition);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(partition.Guid, currentActor.ActorId);
+        logger.CreateCompleted(newPartition.Guid, currentActor.ActorId);
 
-        return partition.Guid;
+        return newPartition.Guid;
     }
 }

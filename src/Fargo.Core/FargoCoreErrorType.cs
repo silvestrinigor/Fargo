@@ -74,4 +74,9 @@ public enum FargoCoreErrorType
     /// 
     /// </summary>
     ItemCircularContainerHierarchy = 13,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    GlobalPartitionCannotBePartOfAnotherPartition = 14
 }

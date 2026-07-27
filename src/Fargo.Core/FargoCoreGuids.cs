@@ -3,7 +3,7 @@ namespace Fargo.Core;
 /// <summary>
 /// 
 /// </summary>
-public static class FargoDefaultGuids
+public static class FargoCoreGuids
 {
     public const string SystemGuidString = "00000000-0000-0000-0000-000000000001";
 

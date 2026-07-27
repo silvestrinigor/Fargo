@@ -80,7 +80,7 @@ public class UserGroupService(
         ArgumentNullException.ThrowIfNull(actor);
         ArgumentNullException.ThrowIfNull(actorUserGroupGuids);
 
-        if (userGroup.Guid == FargoDefaultGuids.AdminUserGroupGuid)
+        if (userGroup.Guid == FargoCoreGuids.AdminUserGroupGuid)
         {
             throw new DeleteDefaultAdministratorsUserGroupFargoCoreException();
         }
