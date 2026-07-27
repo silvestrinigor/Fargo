@@ -1,5 +1,4 @@
 using Fargo.Application;
-using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 
 namespace Fargo.Core.Actors;
@@ -7,20 +6,20 @@ namespace Fargo.Core.Actors;
 public static class ActorAssertHasAccessExtension
 {
     public static void ThrowIfAccessDenied<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : IPartitioned, IEntityTyped
+        where TEntity : IPartitioned
     {
         if (!actor.HasAccess(entity))
         {
-            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid);
         }
     }
 
     public static void ThrowIfAccessDeniedToPartition<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : IPartition, IEntityTyped
+        where TEntity : IPartition
     {
         if (!actor.HasAccess(entity))
         {
-            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid);
         }
     }
 }

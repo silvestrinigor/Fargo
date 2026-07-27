@@ -8,7 +8,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
+public class User : Entity, IPartitioned, IPartitionUser,
     IPartitionedGuids, IPermissionUser
 {
     /// <summary>

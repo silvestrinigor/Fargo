@@ -17,7 +17,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IEntityTyped, IPartitioned
+public class Article : Entity, IPartitioned
 {
     /// <summary>
     /// Gets or sets the name of the article.
