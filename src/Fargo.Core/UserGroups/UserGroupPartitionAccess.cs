@@ -18,7 +18,7 @@ namespace Fargo.Core.UserGroups;
 /// <see cref="IModifiableMember"/>, meaning that any modification to this
 /// entity should update the audit metadata of the parent <see cref="UserGroup"/>.
 /// </remarks>
-public class UserGroupPartitionAccess : Entity, IPartitionAccess
+public class UserGroupPartitionAccess : Entity
 {
     /// <summary>
     /// Gets the unique identifier of the user group associated with this access entry.

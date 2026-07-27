@@ -8,7 +8,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IPartitioned, IPartitionUser
+public class User : Entity, IPartitioned
 {
     /// <summary>
     /// Gets or sets the unique nameid of the user.
@@ -181,9 +181,6 @@ public class User : Entity, IPartitioned, IPartitionUser
         get => partitionAccesses;
         init => partitionAccesses = [.. value];
     }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<IPartitionAccess> IPartitionUser.PartitionAccesses => PartitionAccesses;
 
     private readonly List<UserPartitionAccess> partitionAccesses = [];
 
