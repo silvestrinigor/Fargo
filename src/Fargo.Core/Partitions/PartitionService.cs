@@ -1,52 +1,8 @@
 namespace Fargo.Core.Partitions;
 
-/// <summary>
-/// Provides domain operations related to partition retrieval
-/// and partition-based access evaluation.
-/// </summary>
-/// <remarks>
-/// This service encapsulates logic for retrieving partitions while enforcing
-/// access rules based on the effective partition access of a <see cref="Fargo.Core.Users.User"/>.
-///
-/// Effective access may be granted either:
-/// <list type="bullet">
-/// <item>
-/// <description>directly to the user</description>
-/// </item>
-/// <item>
-/// <description>indirectly through one of the user's <see cref="Fargo.Core.UserGroups.UserGroup"/> memberships</description>
-/// </item>
-/// </list>
-///
-/// Access inheritance flows from parent to child. This means that a user
-/// with access to a parent partition also has access to all of its descendant
-/// partitions. Access does not flow from child to parent.
-/// </remarks>
 public class PartitionService(
     IPartitionRepository partitionRepository)
 {
-    /// <summary>
-    /// Sets the parent partition of a member partition.
-    /// </summary>
-    /// <param name="parentPartition">
-    /// The partition that will become the parent.
-    /// </param>
-    /// <param name="memberPartition">
-    /// The partition that will become a child of <paramref name="parentPartition"/>.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="parentPartition"/> or
-    /// <paramref name="memberPartition"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="PartitionCannotBeOwnParentFargoCoreException">
-    /// Thrown when a partition is assigned as its own parent.
-    /// </exception>
-    /// <exception cref="PartitionCircularHierarchyFargoDomainException">
-    /// Thrown when assigning the parent would create a circular hierarchy.
-    /// </exception>
     public async Task ValidateHierarchyParentPartition(
         Partition parentPartition,
         Partition memberPartition,

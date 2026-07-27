@@ -8,6 +8,7 @@ namespace Fargo.Application.Partitions;
 
 public sealed class PartitionUpdateCommandHandler(
     ActorService actorService,
+    PartitionService partitionService,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
     ICurrentActor currentActor,
@@ -26,14 +27,27 @@ public sealed class PartitionUpdateCommandHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.EditPartition);
 
-        var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
+        var partitionToEdit = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(partition, command.PartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToEdit, command.PartitionGuid, EntityType.Partition);
 
-        actor.ThrowIfAccessDeniedToPartition(partition);
+        actor.ThrowIfAccessDeniedToPartition(partitionToEdit);
+
+        if (command.Update.ParentPartitionGuid is { } parentPartitionGuidToSet)
+        {
+            var parentPartitionToSet = await partitionRepository.GetByGuidAsync(parentPartitionGuidToSet, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartitionToSet, parentPartitionGuidToSet, EntityType.Partition);
+
+            actor.ThrowIfAccessDeniedToPartition(parentPartitionToSet);
+
+            await partitionService.ValidateHierarchyParentPartition(parentPartitionToSet, partitionToEdit, cancellationToken);
+
+            partitionToEdit.SetParentPartition(parentPartitionToSet);
+        }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(partition.Guid, currentActor.ActorId);
+        logger.UpdateCompleted(partitionToEdit.Guid, currentActor.ActorId);
     }
 }
