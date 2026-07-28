@@ -2019,6 +2019,16 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2259,19 +2269,13 @@
           "firstName": { },
           "lastName": { },
           "description": { },
-          "password": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "isActive": {
             "type": [
               "null",
               "boolean"
             ]
           },
-          "permissions": {
+          "permissionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2280,14 +2284,26 @@
               "$ref": "#/components/schemas/UserPermissionUpdateDto"
             }
           },
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "permissionsToRemove": {
             "type": [
               "null",
-              "string"
-            ]
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UserPermissionUpdateDto"
+            }
           },
-          "partitions": {
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
             "type": [
               "null",
               "array"
@@ -2298,6 +2314,36 @@
             }
           },
           "userGroupsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "userGroupsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToRemove": {
             "type": [
               "null",
               "array"

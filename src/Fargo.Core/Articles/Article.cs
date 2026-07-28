@@ -80,14 +80,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     public Density? Density => Mass / Volume;
 
-    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
-    {
-        Mass = mass;
-        LengthX = lengthX;
-        LengthY = lengthY;
-        LengthZ = lengthZ;
-    }
-
     /// <summary>
     /// EAN-13 barcode, or <see langword="null"/> when absent.
     /// </summary>
@@ -138,8 +130,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     public DataMatrix? DataMatrix { get; set; }
 
-    #region Variation
-
     /// <summary>
     /// Gets the variation info associated with the article.
     /// When <see langword="null"/>, no variation constraint is defined.
@@ -151,10 +141,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     [MemberNotNullWhen(true, nameof(Variation))]
     public bool IsVariation => Variation is not null;
-
-    #endregion
-
-    #region Pack
 
     /// <summary>
     /// Gets the pack info associated with the article.
@@ -168,10 +154,6 @@ public class Article : Entity, IPartitioned
     [MemberNotNullWhen(true, nameof(Pack))]
     public bool IsPack => Pack is not null;
 
-    #endregion Pack
-
-    #region Kit
-
     /// <summary>
     /// Gets the kit info associated with the article.
     /// When <see langword="null"/>, no kit constraint is defined.
@@ -183,10 +165,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     [MemberNotNullWhen(true, nameof(Kit))]
     public bool IsKit => Kit is not null;
-
-    #endregion Kit
-
-    #region Container
 
     /// <summary>
     /// Gets the container constraints associated with the article.
@@ -200,10 +178,6 @@ public class Article : Entity, IPartitioned
     [MemberNotNullWhen(true, nameof(Container))]
     public bool IsContainer => Container is not null;
 
-    #endregion Container
-
-    #region Partition
-
     /// <summary>
     /// Gets the partitions associated with the article.
     /// </summary>
@@ -215,30 +189,8 @@ public class Article : Entity, IPartitioned
 
     private readonly List<Partition> partitions = [];
 
-    public void AddPartition(Partition partition)
-    {
-        if (partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
-        partitions.Add(partition);
-    }
-
-    public void RemovePartition(Partition partition)
-    {
-        if (!partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
-        partitions.Remove(partition);
-    }
-
     /// <inheritdoc />
     IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
-
-    #endregion
 
     private Article()
     {
@@ -330,5 +282,33 @@ public class Article : Entity, IPartitioned
         };
 
         return articleContainer;
+    }
+
+    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
+    {
+        Mass = mass;
+        LengthX = lengthX;
+        LengthY = lengthY;
+        LengthZ = lengthZ;
+    }
+
+    public void AddPartition(Partition partition)
+    {
+        if (partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        if (!partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        partitions.Remove(partition);
     }
 }

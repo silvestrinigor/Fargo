@@ -7,10 +7,13 @@ public sealed record UserUpdateDto(
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,
-    string? Password = null,
     bool? IsActive = null,
-    IReadOnlyCollection<UserPermissionUpdateDto>? Permissions = null,
-    TimeSpan? DefaultPasswordExpirationPeriod = null,
-    IReadOnlyCollection<Guid>? Partitions = null,
-    IReadOnlyCollection<Guid>? UserGroupsToAdd = null
+    IReadOnlyCollection<UserPermissionUpdateDto>? PermissionsToAdd = null,
+    IReadOnlyCollection<UserPermissionUpdateDto>? PermissionsToRemove = null,
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionsToRemove = null,
+    IReadOnlyCollection<Guid>? UserGroupsToAdd = null,
+    IReadOnlyCollection<Guid>? UserGroupsToRemove = null,
+    IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionAccessesToRemove = null
 );

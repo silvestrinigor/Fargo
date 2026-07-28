@@ -9,6 +9,14 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleKit
 {
+    /// <summary>
+    /// Gets the components that compose the kit.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the collection contains null components, or contains duplicated source articles.
+    /// </exception>
+    public IReadOnlyCollection<ArticleKitComponent> Components { get; private set; } = [];
+
     private ArticleKit()
     {
     }
@@ -17,14 +25,6 @@ public sealed class ArticleKit
     {
         SetComponents(components);
     }
-
-    /// <summary>
-    /// Gets the components that compose the kit.
-    /// </summary>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the collection contains null components, or contains duplicated source articles.
-    /// </exception>
-    public IReadOnlyCollection<ArticleKitComponent> Components { get; private set; } = [];
 
     private void SetComponents(IReadOnlyCollection<ArticleKitComponent> components)
     {

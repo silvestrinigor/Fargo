@@ -11,5 +11,6 @@ public sealed record UserCreateDto(
     IReadOnlyCollection<UserPermissionUpdateDto>? PermissionsToAdd = null,
     TimeSpan? DefaultPasswordExpirationTimeSpan = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
-    IReadOnlyCollection<Guid>? UserGroupsToAdd = null
+    IReadOnlyCollection<Guid>? UserGroupsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null
 );

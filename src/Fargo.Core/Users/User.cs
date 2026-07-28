@@ -71,6 +71,33 @@ public class User : Entity, IPartitioned
     /// </summary>
     public IReadOnlyCollection<UserPermission> Permissions => permissions;
 
+    private readonly List<UserGroup> userGroups = [];
+
+    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
+
+    /// <summary>
+    /// Gets the read-only collection of partitions the user has access to.
+    /// </summary>
+    /// <remarks>
+    /// Partitions define logical boundaries in the system.
+    /// A user can access entities that have no partition (public), or that
+    /// belong to at least one partition to which the user has been granted access.
+    /// </remarks>
+    public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses
+    {
+        get => partitionAccesses;
+        init => partitionAccesses = [.. value];
+    }
+
+    private readonly List<UserPartitionAccess> partitionAccesses = [];
+
+    private readonly List<Partition> partitions = [];
+
+    /// <summary>
+    /// Gets the partitions associated with the user entity.
+    /// </summary>
+    public IReadOnlyCollection<Partition> Partitions => partitions;
+
     private User()
     {
     }
@@ -96,6 +123,61 @@ public class User : Entity, IPartitioned
         };
 
         return user;
+    }
+
+    public void AddPartition(Partition partition)
+    {
+        partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        partitions.Remove(partition);
+    }
+
+    public void AddUserGroup(UserGroup userGroup)
+    {
+        userGroups.Add(userGroup);
+    }
+
+    public void RemoveUserGroup(UserGroup userGroup)
+    {
+        userGroups.Remove(userGroup);
+    }
+
+    /// <summary>
+    /// Grants access to the specified partition for the user.
+    /// </summary>
+    /// <param name="partition">The partition to grant access to.</param>
+    public void AddPartitionAccess(Partition partition)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
+        {
+            return;
+        }
+
+        var partitionAccess = new UserPartitionAccess
+        {
+            User = this,
+            Partition = partition
+        };
+
+        partitionAccesses.Add(partitionAccess);
+    }
+
+    public void RemovePartitionAccess(Partition partition)
+    {
+        var userPartition =
+            partitionAccesses.SingleOrDefault(x => x == partition);
+
+        if (userPartition == null)
+        {
+            return;
+        }
+
+        partitionAccesses.Remove(userPartition);
     }
 
     /// <summary>
@@ -166,91 +248,5 @@ public class User : Entity, IPartitioned
         }
 
         permissions.Remove(userPermission);
-    }
-
-    private readonly List<UserGroup> userGroups = [];
-
-    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
-
-    /// <summary>
-    /// Gets the read-only collection of partitions the user has access to.
-    /// </summary>
-    /// <remarks>
-    /// Partitions define logical boundaries in the system.
-    /// A user can access entities that have no partition (public), or that
-    /// belong to at least one partition to which the user has been granted access.
-    /// </remarks>
-    public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses
-    {
-        get => partitionAccesses;
-        init => partitionAccesses = [.. value];
-    }
-
-    private readonly List<UserPartitionAccess> partitionAccesses = [];
-
-    /// <summary>
-    /// Grants access to the specified partition for the user.
-    /// </summary>
-    /// <param name="partition">The partition to grant access to.</param>
-    public void AddPartitionAccess(Partition partition)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
-        {
-            return;
-        }
-
-        var partitionAccess = new UserPartitionAccess
-        {
-            User = this,
-            Partition = partition
-        };
-
-        partitionAccesses.Add(partitionAccess);
-    }
-
-    /// <summary>
-    /// Removes access to the specified partition from the user.
-    /// </summary>
-    /// <param name="partitionGuid">The partition identifier.</param>
-    public void RemovePartitionAccess(Guid partitionGuid)
-    {
-        var userPartition =
-            partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
-
-        if (userPartition == null)
-        {
-            return;
-        }
-
-        partitionAccesses.Remove(userPartition);
-    }
-
-    private readonly List<Partition> partitions = [];
-
-    /// <summary>
-    /// Gets the partitions associated with the user entity.
-    /// </summary>
-    public IReadOnlyCollection<Partition> Partitions => partitions;
-
-    public void AddPartition(Partition partition)
-    {
-        partitions.Add(partition);
-    }
-
-    public void RemovePartition(Partition partition)
-    {
-        partitions.Remove(partition);
-    }
-
-    public void AddUserGroup(UserGroup userGroup)
-    {
-        userGroups.Add(userGroup);
-    }
-
-    public void RemoveUserGroup(UserGroup userGroup)
-    {
-        userGroups.Remove(userGroup);
     }
 }

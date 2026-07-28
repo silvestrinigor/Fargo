@@ -1,10 +1,10 @@
 namespace Fargo.Application.Users;
 
-public sealed class ActorCannotDeleteTheirOwnUser : FargoApplicationException
+public sealed class UserCannotDeleteTheirOwnUserFargoApplicationException : FargoApplicationException
 {
     public Guid UserGuid { get; }
 
-    public ActorCannotDeleteTheirOwnUser(
+    public UserCannotDeleteTheirOwnUserFargoApplicationException(
         Guid userGuid) : base(
             $"Actor cannot delete their own user '{userGuid}'",
             FargoApplicationErrorType.ActorCannotDeleteTheirOwnUser)

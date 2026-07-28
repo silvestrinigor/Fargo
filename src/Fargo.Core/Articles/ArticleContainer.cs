@@ -11,15 +11,6 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleContainer
 {
-    private ArticleContainer()
-    {
-    }
-
-    public ArticleContainer(Mass? maxMass)
-    {
-        SetMaxMass(maxMass);
-    }
-
     /// <summary>
     /// Gets or sets the maximum mass allowed inside the container.
     /// </summary>
@@ -30,6 +21,15 @@ public sealed class ArticleContainer
     /// Thrown when the value is less than or equal to zero.
     /// </exception>
     public Mass? MaxMass { get; private set; }
+
+    private ArticleContainer()
+    {
+    }
+
+    public ArticleContainer(Mass? maxMass)
+    {
+        SetMaxMass(maxMass);
+    }
 
     public void SetMaxMass(Mass? maxMass)
     {

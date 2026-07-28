@@ -13,9 +13,7 @@ public sealed class UserSingleQueryHandler(
 ) : IQueryHandler<UserSingleQuery, UserDto?>
 {
     public async Task<UserDto?> HandleAsync(
-        UserSingleQuery query,
-        CancellationToken cancellationToken = default
-    )
+        UserSingleQuery query, CancellationToken cancellationToken = default)
     {
         logger.SingleQueryStarted(query.UserGuid, currentActor.ActorId);
 

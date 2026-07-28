@@ -83,6 +83,20 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
+        if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
+        {
+            foreach (var partitionGuid in partitionAccessesToAdd.Distinct())
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                user.AddPartitionAccess(partition);
+            }
+        }
+
         userRepository.Add(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
