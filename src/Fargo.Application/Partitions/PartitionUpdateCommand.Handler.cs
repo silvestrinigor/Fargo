@@ -33,6 +33,10 @@ public sealed class PartitionUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(partitionToEdit);
 
+        partitionToEdit.Name = command.Update.Name ?? partitionToEdit.Name;
+
+        partitionToEdit.Description = command.Update.Description ?? partitionToEdit.Description;
+
         if (command.Update.ParentPartitionGuid is { } parentPartitionGuidToSet)
         {
             var parentPartitionToSet = await partitionRepository.GetByGuidAsync(parentPartitionGuidToSet, cancellationToken);

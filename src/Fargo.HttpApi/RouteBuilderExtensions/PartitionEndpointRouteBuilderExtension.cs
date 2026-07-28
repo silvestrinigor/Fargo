@@ -39,7 +39,7 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapGet("/{partitionGuid:guid}", GetSinglePartition)
             .WithName("GetPartition")
             .WithSummary("Gets a single partition")
-            .WithDescription("Retrieves a single partition by its unique identifier. Optionally allows querying historical data using temporal tables.")
+            .WithDescription("Retrieves a single partition by its unique identifier.")
             .Produces<PartitionDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
@@ -50,8 +50,7 @@ public static class PartitionEndpointRouteBuilderExtension
     private static async Task<Results<Ok<PartitionDto>, NotFound>> GetSinglePartition(
         Guid partitionGuid,
         IQueryHandler<PartitionSingleQuery, PartitionDto?> handler,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var query = new PartitionSingleQuery(partitionGuid);
 
@@ -69,7 +68,7 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyPartition)
             .WithName("GetPartitions")
             .WithSummary("Gets multiple partitions")
-            .WithDescription("Retrieves a paginated list of partitions. Supports optional temporal queries.")
+            .WithDescription("Retrieves a paginated list of partitions.")
             .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
@@ -78,16 +77,16 @@ public static class PartitionEndpointRouteBuilderExtension
     }
 
     private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NoContent>> GetManyPartition(
-        int? page,
-        int? limit,
+        Page? page,
+        Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
         bool? notChildOfAnyPartition,
         IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>> handler,
         CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(
-            new Page(page ?? Page.FirstPage.Value),
-            new Limit(limit ?? Limit.MaxLimit.Value));
+            page ?? Page.FirstPage,
+            limit ?? Limit.MaxLimit);
 
         var query = new PartitionsQuery(
             withPagination,
@@ -113,7 +112,7 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapPost("/", CreatePartition)
             .WithName("CreatePartition")
             .WithSummary("Creates a new partition")
-            .WithDescription("Creates a new partition under an optional parent (defaults to the global partition). Returns the generated identifier.")
+            .WithDescription("Creates a new partition under an parent. Returns the generated identifier.")
             .Produces<Guid>(StatusCodes.Status200OK);
 
         return builder;
@@ -140,7 +139,7 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapPatch("/{partitionGuid:guid}", UpdatePartition)
             .WithName("UpdatePartition")
             .WithSummary("Updates an existing partition")
-            .WithDescription("Updates partition properties. Only fields provided in the body are applied; null fields are ignored.")
+            .WithDescription("Updates partition properties.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -168,7 +167,7 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapDelete("/{partitionGuid:guid}", DeletePartition)
             .WithName("DeletePartition")
             .WithSummary("Deletes a partition")
-            .WithDescription("Deletes the specified partition from the system. The global partition cannot be deleted.")
+            .WithDescription("Deletes the specified partition from the system.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
