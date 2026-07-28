@@ -54,7 +54,7 @@ public sealed class UserGroupCreateCommandHandler(
 
                 EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessDeniedToPartition(partition);
+                actor.ThrowIfAccessDenied(partition);
 
                 userGroup.AddPartition(partition);
             }

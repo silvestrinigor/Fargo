@@ -7,8 +7,7 @@ namespace Fargo.Core.UserGroups;
 /// Provides domain validation and business rules
 /// related to <see cref="UserGroup"/> entities.
 /// </summary>
-public class UserGroupService(
-    IUserGroupRepository userGroupRepository)
+public class UserGroupService(IUserGroupRepository userGroupRepository)
 {
     /// <summary>
     /// Validates the rules required to create a new <see cref="UserGroup"/>.

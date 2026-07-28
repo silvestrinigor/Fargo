@@ -11,7 +11,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (hasItems)
         {
-            throw new ArticleDeleteWithItemsAssociatedFargoDomainException(article.Guid);
+            throw new ArticleDeleteWithItemsAssociatedFargoCoreException(article.Guid);
         }
 
         var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticle(

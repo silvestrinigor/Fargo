@@ -9,8 +9,7 @@ namespace Fargo.Application.Partitions;
 public sealed class PartitionCreateCommandHandler(
     ActorService actorService,
     IPartitionRepository partitionRepository,
-    IUnitOfWork unitOfWork,
-    ICurrentActor currentActor,
+    IUnitOfWork unitOfWork, ICurrentActor currentActor,
     ILogger<PartitionCreateCommandHandler> logger
 ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
@@ -30,7 +29,7 @@ public sealed class PartitionCreateCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, command.Create.ParentPartitionGuid, EntityType.Partition);
 
-        actor.ThrowIfAccessDeniedToPartition(parentPartition);
+        actor.ThrowIfAccessDenied(parentPartition);
 
         var newPartition = Partition.CreatePartition(command.Create.Name, parentPartition);
 

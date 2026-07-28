@@ -4,7 +4,7 @@ namespace Fargo.Core.Articles;
 /// Exception thrown when an attempt is made to delete an article
 /// that still has items associated with it.
 /// </summary>
-public sealed class ArticleDeleteWithItemsAssociatedFargoDomainException(Guid articleGuid)
+public sealed class ArticleDeleteWithItemsAssociatedFargoCoreException(Guid articleGuid)
     : FargoCoreException(
         $"Article '{articleGuid}' cannot be deleted because it has associated items.",
         FargoCoreErrorType.CannotDeleteArticleWithItemsAssociated)

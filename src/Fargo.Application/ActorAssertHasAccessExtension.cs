@@ -15,8 +15,7 @@ public static class ActorAssertHasAccessExtension
         }
     }
 
-    public static void ThrowIfAccessDeniedToPartition<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : Partition
+    public static void ThrowIfAccessDenied(this Actor actor, Partition entity)
     {
         if (!actor.HasAccess(entity))
         {

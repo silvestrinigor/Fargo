@@ -31,4 +31,6 @@ public enum FargoApplicationErrorType
     /// 
     /// </summary>
     ActorCannotDeleteTheirOwnUser = 5,
+
+    CannotDeletePartitionWithNotParentPartition = 6,
 }

@@ -4,6 +4,7 @@ using Fargo.Core.Items;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Core.Partitions;
 
@@ -59,6 +60,9 @@ public class Partition : Entity
     /// enabling access inheritance from parent to child.
     /// </remarks>
     public Partition? ParentPartition { get; private set; }
+
+    [MemberNotNullWhen(true, nameof(ParentPartitionGuid))]
+    public bool HasParentPartition => ParentPartitionGuid is not null;
 
     private readonly List<Partition> childPartitions = [];
 

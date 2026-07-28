@@ -17,7 +17,8 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     public void Remove(Partition partition) => partitions.Remove(partition);
 
     public Task<Partition?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => partitions.SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
+        => partitions
+        .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
 
     public async Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
@@ -149,4 +150,33 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             partitionGuids.Contains(partition.ParentPartitionGuid.Value));
     }
 
+    public async Task<bool> HasAnyAssociatedEntity(Guid partitionGuid, CancellationToken cancellationToken = default)
+    {
+        if (await partitions.AnyAsync(p => p.ParentPartitionGuid == partitionGuid, cancellationToken))
+        {
+            return true;
+        }
+
+        if (await context.Articles.AnyAsync(a => a.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        {
+            return true;
+        }
+
+        if (await context.Users.AnyAsync(u => u.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        {
+            return true;
+        }
+
+        if (await context.UserGroups.AnyAsync(u => u.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        {
+            return true;
+        }
+
+        if (await context.Items.AnyAsync(i => i.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

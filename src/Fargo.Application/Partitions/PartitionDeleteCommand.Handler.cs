@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Partitions;
 
 public sealed class PartitionDeleteCommandHandler(
+    PartitionService partitionService,
     ActorService actorService,
     IPartitionRepository partitionRepository,
     ICurrentActor currentActor,
@@ -26,13 +27,28 @@ public sealed class PartitionDeleteCommandHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.DeletePartition);
 
-        var partition = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
+        var partitionToDelete = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(partition, command.PartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToDelete, command.PartitionGuid, EntityType.Partition);
 
-        actor.ThrowIfAccessDeniedToPartition(partition);
+        actor.ThrowIfAccessDenied(partitionToDelete);
 
-        partitionRepository.Remove(partition);
+        if (!partitionToDelete.HasParentPartition)
+        {
+            throw new FargoApplicationException(
+                "Cannot delete a partition with no parent partition.",
+                FargoApplicationErrorType.CannotDeletePartitionWithNotParentPartition);
+        }
+
+        var parentPartition = await partitionRepository.GetByGuidAsync(partitionToDelete.ParentPartitionGuid.Value, cancellationToken);
+
+        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, partitionToDelete.ParentPartitionGuid.Value, EntityType.Partition);
+
+        actor.ThrowIfAccessDenied(parentPartition);
+
+        await partitionService.ValidatePartitionDelete(partitionToDelete, cancellationToken);
+
+        partitionRepository.Remove(partitionToDelete);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

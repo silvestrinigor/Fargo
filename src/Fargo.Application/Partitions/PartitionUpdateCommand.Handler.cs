@@ -31,7 +31,7 @@ public sealed class PartitionUpdateCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToEdit, command.PartitionGuid, EntityType.Partition);
 
-        actor.ThrowIfAccessDeniedToPartition(partitionToEdit);
+        actor.ThrowIfAccessDenied(partitionToEdit);
 
         if (command.Update.ParentPartitionGuid is { } parentPartitionGuidToSet)
         {
@@ -39,7 +39,7 @@ public sealed class PartitionUpdateCommandHandler(
 
             EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartitionToSet, parentPartitionGuidToSet, EntityType.Partition);
 
-            actor.ThrowIfAccessDeniedToPartition(parentPartitionToSet);
+            actor.ThrowIfAccessDenied(parentPartitionToSet);
 
             await partitionService.ValidateHierarchyParentPartition(parentPartitionToSet, partitionToEdit, cancellationToken);
 

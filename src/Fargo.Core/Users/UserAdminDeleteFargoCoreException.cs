@@ -6,10 +6,9 @@ namespace Fargo.Core.Users;
 /// <remarks>
 /// The main administrator user is a critical system entity and cannot be deleted.
 /// </remarks>
-public sealed class DeleteMainAdminUserFargoCoreException()
+public sealed class UserAdminDeleteFargoCoreException()
     : FargoCoreException(
         $"The main administrator user {FargoCoreGuids.AdminUserGuid} cannot be deleted.",
         FargoCoreErrorType.CannotDeleteMainAdminUser)
 {
-    public static Guid AdminGuid => FargoCoreGuids.AdminUserGuid;
 }

@@ -47,4 +47,19 @@ public class PartitionService(IPartitionRepository partitionRepository)
 
         return descendantPartitionGuids.Contains(candidateParentPartition.Guid);
     }
+
+    public async Task ValidatePartitionDelete(Partition partition, CancellationToken cancellationToken = default)
+    {
+        if (partition.IsGlobalPartition)
+        {
+            throw new PartitionGlobalDeleteFargoCoreException();
+        }
+
+        var hasAssociatedEntities = await partitionRepository.HasAnyAssociatedEntity(partition.Guid, cancellationToken);
+
+        if (hasAssociatedEntities)
+        {
+            throw new PartitionDeleteWithEntitiesAssociatedFargoCoreException(partition.Guid);
+        }
+    }
 }

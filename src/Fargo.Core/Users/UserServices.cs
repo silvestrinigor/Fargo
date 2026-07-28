@@ -30,13 +30,13 @@ public class UserService(
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="user"></param>
-    /// <exception cref="FargoCoreException"></exception>
+    /// <param name="user">The user that will be deleted.</param>
+    /// <exception cref="UserAdminDeleteFargoCoreException"></exception>
     public static void ValidateUserCanBeDeleted(User user)
     {
         if (user.Guid == FargoCoreGuids.AdminUserGuid)
         {
-            throw new DeleteMainAdminUserFargoCoreException();
+            throw new UserAdminDeleteFargoCoreException();
         }
     }
 }

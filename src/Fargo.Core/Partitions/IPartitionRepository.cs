@@ -40,4 +40,6 @@ public interface IPartitionRepository
     /// Removes a partition from the persistence context.
     /// </summary>
     void Remove(Partition partition);
+
+    Task<bool> HasAnyAssociatedEntity(Guid partitionGuid, CancellationToken cancellationToken = default);
 }

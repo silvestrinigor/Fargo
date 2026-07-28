@@ -78,5 +78,10 @@ public enum FargoCoreErrorType
     /// <summary>
     /// 
     /// </summary>
-    GlobalPartitionCannotBePartOfAnotherPartition = 14
+    GlobalPartitionCannotBePartOfAnotherPartition = 14,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    CannotDeletePartitionWithEntitiesAssociated = 15,
 }

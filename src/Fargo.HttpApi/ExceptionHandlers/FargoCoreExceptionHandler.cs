@@ -29,7 +29,7 @@ public sealed class FargoCoreExceptionHandler : IExceptionHandler
 
                     break;
 
-                case DeleteMainAdminUserFargoCoreException ex:
+                case UserAdminDeleteFargoCoreException ex:
 
                     problem = new ProblemDetails
                     {
