@@ -3,7 +3,7 @@ using Fargo.Application.Shared.Users;
 using Fargo.Application.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.RouteBuilderExtensions;
+namespace Fargo.HttpApi.Endpoints;
 
 public static class UserEndpointRouteBuilderExtension
 {

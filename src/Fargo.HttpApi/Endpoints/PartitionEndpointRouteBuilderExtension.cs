@@ -3,7 +3,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Fargo.HttpApi.RouteBuilderExtensions;
+namespace Fargo.HttpApi.Endpoints;
 
 public static class PartitionEndpointRouteBuilderExtension
 {
