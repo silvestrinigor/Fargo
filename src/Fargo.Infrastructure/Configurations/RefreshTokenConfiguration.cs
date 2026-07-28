@@ -9,8 +9,6 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
-        builder.ToTable(t => t.IsTemporal());
-
         builder.HasKey(x => x.Guid);
 
         builder.HasIndex(x => x.TokenHash).IsUnique();

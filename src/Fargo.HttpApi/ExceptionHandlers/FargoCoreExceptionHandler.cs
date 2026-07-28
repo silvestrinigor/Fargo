@@ -1,4 +1,5 @@
 using Fargo.Core;
+using Fargo.Core.Articles;
 using Fargo.Core.Users;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,18 @@ public sealed class FargoCoreExceptionHandler : IExceptionHandler
                         Status = StatusCodes.Status403Forbidden,
                         Title = "Cannot delete main admin user.",
                     };
+
+                    break;
+
+                case ArticleBarcodeAlreadyInUseFargoCoreException ex:
+
+                    problem = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status400BadRequest,
+                        Title = "Article barcode is already in use.",
+                    };
+
+                    problem.Extensions.Add("barcode", ex.Barcode);
 
                     break;
 

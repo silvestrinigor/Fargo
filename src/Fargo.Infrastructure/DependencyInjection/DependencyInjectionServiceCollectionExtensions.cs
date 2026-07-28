@@ -62,19 +62,19 @@ public static class DependencyInjectionServiceCollectionExtensions
             .AddScoped<IUnitOfWork, UnitOfWork>();
 
         public IServiceCollection AddFargoDbContext() => services
-            .AddDbContext<FargoDbContext>((sp, opt) => UsesFargoSqlServer(sp, opt));
+            .AddDbContext<FargoDbContext>((sp, opt) => UsesFargoNpgsql(sp, opt));
 
         public void AddFargoConnectionStringOptions(IConfiguration configuration) => services
             .AddOptions<ConnectionStringOptions>()
             .Bind(configuration.GetSection(ConnectionStringOptions.SectionName));
 
-        public static void UsesFargoSqlServer(IServiceProvider sp, DbContextOptionsBuilder opt)
+        public static void UsesFargoNpgsql(IServiceProvider sp, DbContextOptionsBuilder opt)
         {
             var options = sp
                 .GetRequiredService<IOptions<ConnectionStringOptions>>()
                 .Value;
 
-            opt.UseSqlServer(options.Fargo);
+            opt.UseNpgsql(options.Fargo).UseSnakeCaseNamingConvention();
         }
 
         public void AddFargoRepositories() => services

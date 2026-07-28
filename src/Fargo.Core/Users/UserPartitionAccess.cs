@@ -18,7 +18,7 @@ namespace Fargo.Core.Users;
 /// <see cref="IModifiableMember"/>, meaning that any modification to this
 /// entity should update the audit metadata of the parent <see cref="User"/>.
 /// </remarks>
-public class UserPartitionAccess : Entity, IPartitionAccess
+public class UserPartitionAccess : Entity
 {
     /// <summary>
     /// Gets the unique identifier of the user associated with this access entry.

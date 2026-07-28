@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -9,8 +8,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
-    IPartitionedGuids, IPermissionUser, IActivable
+public class User : Entity, IPartitioned
 {
     /// <summary>
     /// Gets or sets the unique nameid of the user.
@@ -36,11 +34,6 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     /// Gets or sets the value indicating whether the user is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
-
-    /// <summary>
-    /// Gets the value indicating the user is the main admin user.
-    /// </summary>
-    public bool IsSystemAdmin => Guid == FargoDefaultGuids.AdminUserGuid;
 
     /// <summary>
     /// Gets or sets the hashed password of the user.
@@ -80,20 +73,11 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
         init => permissions = [.. value];
     }
 
-    /// <inheritdoc />
-    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
-
     private readonly List<UserPermission> permissions = [];
 
     public User()
     {
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public EntityType GetEntityType() => EntityType.User;
 
     /// <summary>
     /// Resets the password expiration date based on the user's
@@ -192,9 +176,6 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
         init => partitionAccesses = [.. value];
     }
 
-    /// <inheritdoc />
-    IReadOnlyCollection<IPartitionAccess> IPartitionUser.PartitionAccesses => PartitionAccesses;
-
     private readonly List<UserPartitionAccess> partitionAccesses = [];
 
     /// <summary>
@@ -241,9 +222,7 @@ public class User : Entity, IEntityTyped, IPartitioned, IPartitionUser,
     /// </summary>
     public PartitionCollection Partitions { get; init; } = [];
 
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
-
-    public IReadOnlyCollection<Guid> PartitionGuids => [.. Partitions.Select(p => p.Guid)];
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 
     public void AddPartition(Partition partition)
     {

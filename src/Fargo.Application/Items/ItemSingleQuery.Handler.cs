@@ -20,7 +20,7 @@ public sealed class ItemSingleQueryHandler(
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var item = await itemRepository.GetInfoByGuid(
-            query.ItemGuid, query.AsOfDateTime,
+            query.ItemGuid,
             actor.PartitionAccessGuids, notChildOfAnyPartition: true,
             cancellationToken);
 

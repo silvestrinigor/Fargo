@@ -59,14 +59,12 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public async Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var item = await ApplyPartitionFilter(
                 items
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
@@ -79,14 +77,12 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 items
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
@@ -128,5 +124,4 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return query.Where(item =>
             item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
-
 }

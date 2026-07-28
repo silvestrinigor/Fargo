@@ -22,14 +22,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -125,14 +117,6 @@
               "type": "string",
               "example": "7891234567895:Ean13"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -161,14 +145,6 @@
         "description": "Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.",
         "operationId": "GetArticles",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -275,14 +251,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -369,14 +337,6 @@
         "description": "Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.",
         "operationId": "GetItems",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -488,14 +448,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -582,14 +534,6 @@
         "description": "Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.",
         "operationId": "GetUsers",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -701,14 +645,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -795,14 +731,6 @@
         "description": "Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.",
         "operationId": "GetUserGroups",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -914,14 +842,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          {
-            "name": "temporalAsOf",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
           }
         ],
         "responses": {
@@ -1008,14 +928,6 @@
         "description": "Retrieves a paginated list of partitions. Supports optional temporal queries.",
         "operationId": "GetPartitions",
         "parameters": [
-          {
-            "name": "temporalAsOfDateTime",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -1300,6 +1212,15 @@
               }
             ]
           },
+          "kitComponents": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ArticleKitComponentDto"
+            }
+          },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
@@ -1331,12 +1252,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1349,8 +1264,7 @@
           "color",
           "metrics",
           "barcodes",
-          "partitions",
-          "isActive"
+          "partitions"
         ],
         "type": "object",
         "properties": {
@@ -1393,9 +1307,22 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      },
+      "ArticleKitComponentDto": {
+        "required": [
+          "articleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "format": "uuid"
           },
-          "isActive": {
-            "type": "boolean"
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
           }
         }
       },
@@ -1546,12 +1473,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1726,12 +1647,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1741,8 +1656,7 @@
           "articleGuid",
           "productionDate",
           "parentContainerGuid",
-          "partitions",
-          "isActive"
+          "partitions"
         ],
         "type": "object",
         "properties": {
@@ -1774,9 +1688,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": "boolean"
           }
         }
       },
@@ -1799,12 +1710,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },
@@ -1848,21 +1753,19 @@
       "Nameid": { },
       "PartitionCreateDto": {
         "required": [
-          "name"
+          "name",
+          "parentPartitionGuid"
         ],
         "type": "object",
         "properties": {
           "name": {
             "$ref": "#/components/schemas/Name"
           },
-          "description": { },
           "parentPartitionGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": "string",
             "format": "uuid"
-          }
+          },
+          "description": { }
         }
       },
       "PartitionDto": {
@@ -1870,8 +1773,7 @@
           "guid",
           "name",
           "description",
-          "parentPartitionGuid",
-          "isActive"
+          "parentPartitionGuid"
         ],
         "type": "object",
         "properties": {
@@ -1891,9 +1793,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "isActive": {
-            "type": "boolean"
           }
         }
       },
@@ -1908,12 +1807,6 @@
               "string"
             ],
             "format": "uuid"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           }
         }
       },

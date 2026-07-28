@@ -6,7 +6,7 @@ using Fargo.Core.Users;
 namespace Fargo.Core.Actors;
 
 public sealed class ActorService(
-    IUserRepository userRepository, IPartitionRepository partitionRepository) : IActorService
+    IUserRepository userRepository, IPartitionRepository partitionRepository)
 {
     public async Task<Actor?> GetActorByActorIdAsync(ActorId actorId, CancellationToken cancellationToken = default)
     {

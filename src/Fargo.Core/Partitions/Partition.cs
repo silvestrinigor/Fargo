@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
@@ -9,7 +8,7 @@ using Fargo.Core.Users;
 namespace Fargo.Core.Partitions;
 
 /// <summary>
-/// Represents a partition used to isolate and scope access to domain entities.
+/// Represents a partition used to isolate and scope access to core entities.
 /// </summary>
 /// <remarks>
 /// Partitions define hierarchical access boundaries in the system.
@@ -26,25 +25,12 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity, IEntityTyped, IPartition, IActivable
+public class Partition : Entity
 {
-    public static Partition CreatePartition(Name name, Description? description = null)
-        => new(name, description);
-
-    private Partition()
-    {
-    }
-
-    public Partition(Name name, Description? description = null)
-    {
-        Name = name;
-        Description = description ?? Description.Empty;
-    }
-
     /// <summary>
     /// Gets or sets the name of the partition.
     /// </summary>
-    public Name Name { get; set; }
+    public required Name Name { get; set; }
 
     /// <summary>
     /// Gets or sets the description of the partition.
@@ -52,13 +38,9 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the partition is active.
+    /// Gets the value indicating whether the partition is the global partition.
     /// </summary>
-    public bool IsActive { get; set; } = true;
-
-    public EntityType GetEntityType() => EntityType.Partition;
-
-    #region ParentPartition
+    public bool IsGlobalPartition => Guid == FargoCoreGuids.GlobalPartitionGuid;
 
     /// <summary>
     /// Gets the unique identifier of the parent partition, if any.
@@ -85,23 +67,16 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     /// <item><description>Enforce consistency of parent-child relationships</description></item>
     /// <item><description>Ensure domain invariants are validated before changes are applied</description></item>
     /// </list>
-    ///
-    /// Setting this property automatically updates <see cref="ParentPartitionGuid"/>
-    /// to keep both properties consistent.
     /// </remarks>
     public Partition? ParentPartition
     {
         get;
-        internal set
-        {
-            ParentPartitionGuid = value?.Guid;
-            field = value;
-        }
+        private set;
     }
 
-    #endregion ParentPartition
-
     #region ChildPartition
+
+    private readonly List<Partition> childPartitions = [];
 
     /// <summary>
     /// Gets the child partitions that belong to the current partition.
@@ -113,17 +88,17 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     /// The collection is primarily used for navigation and persistence mapping.
     /// Domain logic should not rely on directly mutating this collection.
     /// </remarks>
-    public IReadOnlyCollection<Partition> PartitionMembers
+    public IReadOnlyCollection<Partition> ChildPartitions
     {
-        get => partitionMembers;
-        init => partitionMembers = [.. value];
+        get => childPartitions;
+        private init => childPartitions = [.. value];
     }
 
-    private readonly List<Partition> partitionMembers = [];
-
-    #endregion ChildPartition
+    #endregion
 
     #region Article
+
+    private readonly List<Article> articleMembers = [];
 
     /// <summary>
     /// Gets the articles associated with the current partition.
@@ -137,14 +112,14 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     public IReadOnlyCollection<Article> ArticleMembers
     {
         get => articleMembers;
-        init => articleMembers = [.. value];
+        private init => articleMembers = [.. value];
     }
 
-    private readonly List<Article> articleMembers = [];
-
-    #endregion Article
+    #endregion
 
     #region Item
+
+    private readonly List<Item> itemMembers = [];
 
     /// <summary>
     /// Gets the items associated with the current partition.
@@ -156,14 +131,14 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     public IReadOnlyCollection<Item> ItemMembers
     {
         get => itemMembers;
-        init => itemMembers = [.. value];
+        private init => itemMembers = [.. value];
     }
 
-    private readonly List<Item> itemMembers = [];
-
-    #endregion Item
+    #endregion
 
     #region User
+
+    private readonly List<User> userMembers = [];
 
     /// <summary>
     /// Gets the users associated with the current partition.
@@ -177,14 +152,14 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     public IReadOnlyCollection<User> UserMembers
     {
         get => userMembers;
-        init => userMembers = [.. value];
+        private init => userMembers = [.. value];
     }
 
-    private readonly List<User> userMembers = [];
-
-    #endregion User
+    #endregion
 
     #region UserGroup
+
+    private readonly List<UserGroup> userGroupMembers = [];
 
     /// <summary>
     /// Gets the user groups associated with the current partition.
@@ -196,11 +171,65 @@ public class Partition : Entity, IEntityTyped, IPartition, IActivable
     public IReadOnlyCollection<UserGroup> UserGroupMembers
     {
         get => userGroupMembers;
-        init => userGroupMembers = [.. value];
+        private init => userGroupMembers = [.. value];
     }
 
-    private readonly List<UserGroup> userGroupMembers = [];
+    #endregion
 
-    #endregion UserGroup
+    public void SetParentPartition(Partition parentPartition)
+    {
+        if (IsGlobalPartition)
+        {
+            throw new FargoCoreException(
+                "Global partition cannot be part of another partition.",
+                FargoCoreErrorType.GlobalPartitionCannotBePartOfAnotherPartition);
+        }
 
+        if (parentPartition.Guid == Guid)
+        {
+            throw new PartitionCannotBeOwnParentFargoCoreException(Guid);
+        }
+
+        ParentPartition = parentPartition;
+
+        ParentPartitionGuid = parentPartition.Guid;
+    }
+
+    private Partition()
+    {
+    }
+
+    /// <summary>
+    /// Creates a new partition.
+    /// </summary>
+    /// <param name="name">The name of the partition.</param>
+    /// <param name="parentPartition">The parent partition of the partition.</param>
+    /// <returns></returns>
+    public static Partition CreatePartition(Name name, Partition parentPartition)
+    {
+        var partition = new Partition
+        {
+            Name = name
+        };
+
+        partition.SetParentPartition(parentPartition);
+
+        return partition;
+    }
+
+    /// <summary>
+    /// Creates a new global partition.
+    /// </summary>
+    /// <param name="name">The name of the global partition.</param>
+    /// <returns></returns>
+    public static Partition CreateGlobalPartition(Name name)
+    {
+        var globalPartition = new Partition
+        {
+            Guid = FargoCoreGuids.GlobalPartitionGuid,
+            Name = name
+        };
+
+        return globalPartition;
+    }
 }

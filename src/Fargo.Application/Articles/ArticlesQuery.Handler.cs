@@ -30,7 +30,7 @@ public sealed class ArticlesQueryHandler(
                 query.NotChildOfAnyPartition);
 
         var articles = await articleRepository.GetManyInfoAsync(
-            query.WithPagination, query.TemporalAsOfDateTime,
+            query.WithPagination,
             childOfAnyOfThesePartitions, notChildOfAnyPartition,
             cancellationToken);
 

@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
@@ -19,7 +18,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : Entity, IEntityTyped, IPartitioned, IPartitionUser, IPermissionUser, IActivable
+public class UserGroup : Entity, IPartitioned
 {
     private UserGroup()
     {
@@ -59,9 +58,6 @@ public class UserGroup : Entity, IEntityTyped, IPartitioned, IPartitionUser, IPe
         get => userGroupPermissions;
         init => userGroupPermissions = [.. value];
     }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<IPermission> IPermissionUser.Permissions => Permissions;
 
     private readonly List<UserGroupPermission> userGroupPermissions = [];
 
@@ -112,7 +108,7 @@ public class UserGroup : Entity, IEntityTyped, IPartitioned, IPartitionUser, IPe
     public PartitionCollection Partitions { get; init; } = [];
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
@@ -126,9 +122,6 @@ public class UserGroup : Entity, IEntityTyped, IPartitioned, IPartitionUser, IPe
         get => partitionAccesses;
         init => partitionAccesses = [.. value];
     }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<IPartitionAccess> IPartitionUser.PartitionAccesses => PartitionAccesses;
 
     private readonly List<UserGroupPartitionAccess> partitionAccesses = [];
 

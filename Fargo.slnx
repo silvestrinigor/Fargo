@@ -13,8 +13,6 @@
     <Project Path="src/Fargo.HttpApi/Fargo.HttpApi.csproj" />
     <Project Path="tst/Fargo.HttpApi.Tests/Fargo.HttpApi.Tests.csproj" />
     <Project Path="src/Fargo.HttpClient/Fargo.HttpClient.csproj" />
-
-    <Project Path="src/Fargo.WebIdentity/Fargo.WebIdentity.csproj" />
     <Project Path="src/Fargo.WebPlayground/Fargo.WebPlayground.csproj" />
 
     <Project Path="src/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />

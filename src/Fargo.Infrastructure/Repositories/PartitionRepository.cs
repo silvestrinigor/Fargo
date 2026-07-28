@@ -21,14 +21,12 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
     public async Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var partition = await ApplyPartitionFilter(
                 partitions
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
@@ -41,14 +39,12 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
-        DateTimeOffset? asOfDateTime = null,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 partitions
-                    .TemporalAsOfIfProvided(asOfDateTime)
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
                 notChildOfAnyPartition)
@@ -66,22 +62,22 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
-            WITH PartitionTree AS
-            (
-                SELECT [Guid], [ParentPartitionGuid]
-                FROM [Partitions]
-                WHERE [Guid] = {partitionGuid}
+        WITH RECURSIVE partition_tree AS
+        (
+            SELECT guid, parent_partition_guid
+            FROM partitions
+            WHERE guid = {partitionGuid}
 
-                UNION ALL
+            UNION ALL
 
-                SELECT child.[Guid], child.[ParentPartitionGuid]
-                FROM [Partitions] AS child
-                INNER JOIN PartitionTree AS parent
-                    ON child.[ParentPartitionGuid] = parent.[Guid]
-            )
-            SELECT [Guid]
-            FROM PartitionTree
-            """;
+            SELECT child.guid, child.parent_partition_guid
+            FROM partitions AS child
+            INNER JOIN partition_tree AS parent
+                ON child.parent_partition_guid = parent.guid
+        )
+        SELECT guid
+        FROM partition_tree
+        """;
 
         var guids = await context.Database
             .SqlQuery<Guid>(query)

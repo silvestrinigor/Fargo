@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Drawing;
-using UnitsNet;
 
 namespace Fargo.Infrastructure.Configurations;
 
@@ -13,16 +12,9 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 {
     public void Configure(EntityTypeBuilder<Article> builder)
     {
-        builder.ToTable("Articles", t => t.IsTemporal(ttb =>
-        {
-            ttb.UseHistoryTable("ArticlesHistory");
-            ttb.HasPeriodStart("PeriodStart").HasColumnName("PeriodStart");
-            ttb.HasPeriodEnd("PeriodEnd").HasColumnName("PeriodEnd");
-        }));
+        builder.ToTable("articles");
 
         builder.HasKey(x => x.Guid);
-
-        builder.Ignore(x => x.ArticleType);
 
         builder.Property(x => x.Name).IsRequired();
 
@@ -36,83 +28,22 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.OwnsOne(x => x.Container, container =>
         {
-            container.ToTable("ArticleContainers");
-
-            container.WithOwner().HasForeignKey("ArticleGuid");
-
-            container.Property(x => x.MaxMass)
-                .HasConversion<MassStringConverter>()
-                .HasMaxLength(50)
-                .IsRequired(false);
+            container.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Variation, variation =>
         {
-            variation.ToTable("ArticleVariations");
-
-            variation.WithOwner().HasForeignKey("ArticleGuid");
-
-            variation.Property(x => x.FromArticleGuid).IsRequired();
-
-            variation.HasOne(x => x.FromArticle)
-                .WithMany()
-                .HasForeignKey(x => x.FromArticleGuid)
-                .OnDelete(DeleteBehavior.Restrict);
+            variation.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Pack, pack =>
         {
-            pack.ToTable("ArticlePacks");
-
-            pack.WithOwner().HasForeignKey("ArticleGuid");
-
-            pack.Property(x => x.FromArticleGuid).IsRequired();
-
-            pack.HasOne(x => x.FromArticle)
-                .WithMany()
-                .HasForeignKey(x => x.FromArticleGuid)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            pack.Property(x => x.Quantity)
-                .HasConversion(
-                    x => x.Amount,
-                    x => Scalar.FromAmount(x))
-                .IsRequired();
+            pack.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Kit, kit =>
         {
-            kit.ToTable("ArticleKits");
-
-            kit.WithOwner().HasForeignKey("ArticleGuid");
-
-            kit.OwnsMany(x => x.Components, component =>
-            {
-                component.ToTable("ArticleKitPacks");
-
-                component.WithOwner().HasForeignKey("KitArticleGuid");
-
-                component.Property<Guid>("Guid");
-                component.HasKey("Guid");
-
-                component.Property(x => x.ArticleGuid)
-                    .HasColumnName("FromArticleGuid")
-                    .IsRequired();
-
-                component.HasOne(x => x.Article)
-                    .WithMany()
-                    .HasForeignKey(x => x.ArticleGuid)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                component.Property(x => x.Quantity)
-                    .HasConversion(
-                        x => x.Amount,
-                        x => Scalar.FromAmount(x))
-                    .IsRequired();
-
-                component.HasIndex("KitArticleGuid", nameof(ArticleKitComponent.ArticleGuid))
-                    .IsUnique();
-            });
+            kit.WithOwner().HasForeignKey();
 
             kit.WithOwner();
         });
@@ -177,48 +108,64 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 v => v != null ? DataMatrix.FromStorage(v) : null))
             .HasMaxLength(DataMatrix.MaxLength);
 
-        builder.HasIndex(x => x.Ean13).IsUnique().HasFilter("[Ean13] IS NOT NULL");
+        builder.HasIndex(x => x.Ean13)
+            .IsUnique()
+            .HasFilter("ean13 IS NOT NULL");
 
-        builder.HasIndex(x => x.Ean8).IsUnique().HasFilter("[Ean8] IS NOT NULL");
+        builder.HasIndex(x => x.Ean8)
+            .IsUnique()
+            .HasFilter("ean8 IS NOT NULL");
 
-        builder.HasIndex(x => x.UpcA).IsUnique().HasFilter("[UpcA] IS NOT NULL");
+        builder.HasIndex(x => x.UpcA)
+            .IsUnique()
+            .HasFilter("upc_a IS NOT NULL");
 
-        builder.HasIndex(x => x.UpcE).IsUnique().HasFilter("[UpcE] IS NOT NULL");
+        builder.HasIndex(x => x.UpcE)
+            .IsUnique()
+            .HasFilter("upc_e IS NOT NULL");
 
-        builder.HasIndex(x => x.Code128).IsUnique().HasFilter("[Code128] IS NOT NULL");
+        builder.HasIndex(x => x.Code128)
+            .IsUnique()
+            .HasFilter("code128 IS NOT NULL");
 
-        builder.HasIndex(x => x.Code39).IsUnique().HasFilter("[Code39] IS NOT NULL");
+        builder.HasIndex(x => x.Code39)
+            .IsUnique()
+            .HasFilter("code39 IS NOT NULL");
 
-        builder.HasIndex(x => x.Itf14).IsUnique().HasFilter("[Itf14] IS NOT NULL");
+        builder.HasIndex(x => x.Itf14)
+            .IsUnique()
+            .HasFilter("itf14 IS NOT NULL");
 
-        builder.HasIndex(x => x.Gs1128).IsUnique().HasFilter("[Gs1128] IS NOT NULL");
+        builder.HasIndex(x => x.Gs1128)
+            .IsUnique()
+            .HasFilter("gs1128 IS NOT NULL");
 
-        builder.HasIndex(x => x.QrCode).IsUnique().HasFilter("[QrCode] IS NOT NULL");
+        builder.HasIndex(x => x.QrCode)
+            .IsUnique()
+            .HasFilter("qr_code IS NOT NULL");
 
-        builder.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("[DataMatrix] IS NOT NULL");
+        builder.HasIndex(x => x.DataMatrix)
+            .IsUnique()
+            .HasFilter("data_matrix IS NOT NULL");
 
         builder.Property(x => x.Mass)
             .HasConversion<MassStringConverter>()
             .HasMaxLength(50)
-            .HasColumnName("Mass")
             .IsRequired(false);
 
         builder.Property(x => x.LengthX)
             .HasConversion<LengthStringConverter>()
             .HasMaxLength(50)
-            .HasColumnName("LengthX")
             .IsRequired(false);
 
         builder.Property(x => x.LengthY)
             .HasConversion<LengthStringConverter>()
             .HasMaxLength(50)
-            .HasColumnName("LengthY")
             .IsRequired(false);
 
         builder.Property(x => x.LengthZ)
             .HasConversion<LengthStringConverter>()
             .HasMaxLength(50)
-            .HasColumnName("LengthZ")
             .IsRequired(false);
 
         builder.Property(x => x.ShelfLife)

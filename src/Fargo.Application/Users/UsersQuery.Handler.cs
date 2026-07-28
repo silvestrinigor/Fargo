@@ -30,7 +30,6 @@ public sealed class UsersQueryHandler(
 
         var users = await userRepository.GetManyInfoAsync(
             query.WithPagination,
-            query.TemporalAsOfDateTime,
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition,
             cancellationToken);

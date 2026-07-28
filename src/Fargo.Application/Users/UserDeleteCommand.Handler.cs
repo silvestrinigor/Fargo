@@ -32,6 +32,11 @@ public sealed class UserDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(user);
 
+        if (actor.ActorId.Guid == user.Guid)
+        {
+            throw new ActorCannotDeleteTheirOwnUser(user.Guid);
+        }
+
         UserService.ValidateUserCanBeDeleted(user);
 
         userRepository.Remove(user);

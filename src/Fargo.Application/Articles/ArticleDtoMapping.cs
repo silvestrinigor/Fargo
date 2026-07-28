@@ -29,6 +29,5 @@ public static class ArticleDtoMapping
                 article.Gs1128,
                 article.QrCode,
                 article.DataMatrix),
-            article.Partitions.Select(partition => partition.Guid).ToArray(),
-            article.IsActive);
+            article.Partitions.Select(partition => partition.Guid).ToArray());
 }

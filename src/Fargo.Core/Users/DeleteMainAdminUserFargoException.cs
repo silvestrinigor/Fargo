@@ -8,8 +8,8 @@ namespace Fargo.Core.Users;
 /// </remarks>
 public sealed class DeleteMainAdminUserFargoCoreException()
     : FargoCoreException(
-        $"The main administrator user {FargoDefaultGuids.AdminUserGuid} cannot be deleted.",
+        $"The main administrator user {FargoCoreGuids.AdminUserGuid} cannot be deleted.",
         FargoCoreErrorType.CannotDeleteMainAdminUser)
 {
-    public static Guid AdminGuid => FargoDefaultGuids.AdminUserGuid;
+    public static Guid AdminGuid => FargoCoreGuids.AdminUserGuid;
 }

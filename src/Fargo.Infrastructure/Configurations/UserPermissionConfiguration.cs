@@ -8,8 +8,6 @@ public class UserPermissionConfiguration : IEntityTypeConfiguration<UserPermissi
 {
     public void Configure(EntityTypeBuilder<UserPermission> builder)
     {
-        builder.ToTable(t => t.IsTemporal());
-
         builder.HasKey(x => x.Guid);
 
         builder.HasAlternateKey(x => new { x.UserGuid, x.Action });

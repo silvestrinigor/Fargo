@@ -22,7 +22,7 @@ public sealed class PartitionSingleQueryHandler(
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
 
         var partition = await partitionRepository.GetInfoByGuid(
-            query.PartitionGuid, query.AsOfDateTime,
+            query.PartitionGuid,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true, cancellationToken);
 

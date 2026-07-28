@@ -202,8 +202,6 @@ public sealed class ArticlePatchCommandHandler(
             }
         }
 
-        article.IsActive = articleUpdateDto.IsActive ?? article.IsActive;
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.UpdateCompleted(article.Guid, actor.ActorId);

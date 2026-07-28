@@ -8,13 +8,13 @@ public sealed class ItemService(IItemRepository itemRepository)
     /// <summary>
     /// Places an item inside a container item.
     /// </summary>
-    /// <exception cref="ItemCannotBeOwnContainerFargoDomainException">
+    /// <exception cref="ItemCannotBeOwnContainerFargoCoreException">
     /// Thrown when an item is assigned as its own container.
     /// </exception>
-    /// <exception cref="ItemParentIsNotContainerFargoDomainException">
+    /// <exception cref="ItemIsNotContainerFargoCoreException">
     /// Thrown when the parent item is not backed by a container article.
     /// </exception>
-    /// <exception cref="ItemCircularContainerHierarchyFargoDomainException">
+    /// <exception cref="ItemCircularContainerHierarchyFargoCoreException">
     /// Thrown when assigning the container would create a circular hierarchy.
     /// </exception>
     public async Task MoveToContainer(
@@ -27,12 +27,12 @@ public sealed class ItemService(IItemRepository itemRepository)
 
         if (parentContainerItem.Guid == memberItem.Guid)
         {
-            throw new ItemCannotBeOwnContainerFargoDomainException(memberItem.Guid);
+            throw new ItemCannotBeOwnContainerFargoCoreException(memberItem.Guid);
         }
 
         if (!parentContainerItem.Article.IsContainer)
         {
-            throw new ItemParentIsNotContainerFargoDomainException(parentContainerItem.Guid);
+            throw new ItemIsNotContainerFargoCoreException(parentContainerItem.Guid);
         }
 
         var descendantItemGuids = await itemRepository.GetContainerDescendantGuids(
@@ -42,7 +42,7 @@ public sealed class ItemService(IItemRepository itemRepository)
 
         if (descendantItemGuids.Contains(parentContainerItem.Guid))
         {
-            throw new ItemCircularContainerHierarchyFargoDomainException(
+            throw new ItemCircularContainerHierarchyFargoCoreException(
                 parentContainerItem.Guid,
                 memberItem.Guid);
         }

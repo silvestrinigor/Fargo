@@ -9,6 +9,7 @@ using Fargo.Core.Users;
 using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
+using UnitsNet;
 
 namespace Fargo.Infrastructure.Persistence;
 
@@ -26,7 +27,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<User> Users { get; set; }
 
-    public DbSet<UserPermission> UserPermission { get; set; }
+    public DbSet<UserPermission> UserPermissions { get; set; }
 
     public DbSet<UserGroup> UserGroups { get; set; }
 
@@ -76,11 +77,21 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
             .Properties<LastName>()
             .HaveMaxLength(LastName.MaxLength)
             .HaveConversion<LastNameStringConverter>();
+
+        configurationBuilder
+            .Properties<Mass>()
+            .HaveConversion<MassStringConverter>();
+
+        configurationBuilder
+            .Properties<Scalar>()
+            .HaveConversion<ScalarDoubleConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 

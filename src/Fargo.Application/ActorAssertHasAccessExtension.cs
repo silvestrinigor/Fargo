@@ -7,20 +7,20 @@ namespace Fargo.Core.Actors;
 public static class ActorAssertHasAccessExtension
 {
     public static void ThrowIfAccessDenied<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : IPartitioned, IEntityTyped
+        where TEntity : Entity, IPartitioned
     {
         if (!actor.HasAccess(entity))
         {
-            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid);
         }
     }
 
     public static void ThrowIfAccessDeniedToPartition<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : IPartition, IEntityTyped
+        where TEntity : Partition
     {
         if (!actor.HasAccess(entity))
         {
-            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid, entity.GetEntityType());
+            throw new AccessDeniedFargoApplicationException(actor.ActorId, entity.Guid);
         }
     }
 }

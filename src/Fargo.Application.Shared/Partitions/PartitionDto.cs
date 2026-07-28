@@ -6,6 +6,5 @@ public sealed record PartitionDto(
     Guid Guid,
     Name Name,
     Description Description,
-    Guid? ParentPartitionGuid,
-    bool IsActive
+    Guid? ParentPartitionGuid
 );

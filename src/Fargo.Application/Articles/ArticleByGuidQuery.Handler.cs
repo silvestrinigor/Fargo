@@ -21,7 +21,6 @@ public sealed class ArticleByGuidQueryHandler(
 
         var article = await articleRepository.GetInfoByGuidAsync(
             query.ArticleGuid,
-            query.AsOfDateTime,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true,
             cancellationToken);

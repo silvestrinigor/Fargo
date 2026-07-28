@@ -11,5 +11,4 @@ public sealed record ArticleDto(
     Color? Color,
     ArticleMetricsDto Metrics,
     ArticleBarcodesDto Barcodes,
-    IReadOnlyCollection<Guid> Partitions,
-    bool IsActive);
+    IReadOnlyCollection<Guid> Partitions);

@@ -38,5 +38,4 @@ public sealed record ArticleUpdateDto(
     DataMatrix? DataMatrix = null,
     bool? RemoveDataMatrix = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
-    IReadOnlyCollection<Guid>? PartitionsToRemove = null,
-    bool? IsActive = null);
+    IReadOnlyCollection<Guid>? PartitionsToRemove = null);

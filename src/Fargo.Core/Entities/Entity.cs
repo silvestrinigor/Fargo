@@ -12,7 +12,7 @@ namespace Fargo.Core.Entities;
 /// This class also overloads equality operators (== and !=)
 /// to provide value semantics based on identity.
 /// </summary>
-public abstract class Entity : IEntity
+public abstract class Entity
 {
     /// <summary>
     /// Gets the unique identifier of the entity.

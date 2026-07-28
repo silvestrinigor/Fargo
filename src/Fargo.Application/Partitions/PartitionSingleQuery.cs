@@ -3,6 +3,5 @@ using Fargo.Application.Shared.Partitions;
 namespace Fargo.Application.Partitions;
 
 public sealed record PartitionSingleQuery(
-    Guid PartitionGuid,
-    DateTimeOffset? AsOfDateTime = null
+    Guid PartitionGuid
 ) : IQuery<PartitionDto?>;

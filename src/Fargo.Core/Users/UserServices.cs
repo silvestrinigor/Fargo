@@ -34,7 +34,7 @@ public class UserService(
     /// <exception cref="FargoCoreException"></exception>
     public static void ValidateUserCanBeDeleted(User user)
     {
-        if (user.Guid == FargoDefaultGuids.AdminUserGuid)
+        if (user.Guid == FargoCoreGuids.AdminUserGuid)
         {
             throw new DeleteMainAdminUserFargoCoreException();
         }

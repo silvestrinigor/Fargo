@@ -31,24 +31,22 @@ public sealed class InitializeSystemCommandHandler(
             return;
         }
 
-        var globalPartition = await partitionRepository.GetByGuidAsync(FargoDefaultGuids.GlobalPartitionGuid, cancellationToken);
+        var globalPartition = await partitionRepository.GetByGuidAsync(FargoCoreGuids.GlobalPartitionGuid, cancellationToken);
 
         var globalPartitionCreated = false;
 
         if (globalPartition is null)
         {
-            globalPartition = new Partition(command.GlobalPartitionName)
-            {
-                Guid = FargoDefaultGuids.GlobalPartitionGuid,
-                Description = command.GlobalPartitionDescription
-            };
+            globalPartition = Partition.CreateGlobalPartition(command.GlobalPartitionName);
+
+            globalPartition.Description = command.GlobalPartitionDescription;
 
             partitionRepository.Add(globalPartition);
 
             globalPartitionCreated = true;
         }
 
-        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoDefaultGuids.AdminUserGroupGuid, cancellationToken);
+        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreGuids.AdminUserGroupGuid, cancellationToken);
 
         var allActions = Enum.GetValues<ActionType>();
 
@@ -58,7 +56,7 @@ public sealed class InitializeSystemCommandHandler(
         {
             administratorsGroup = new UserGroup(command.UserGroupAdministratorsNameid)
             {
-                Guid = FargoDefaultGuids.AdminUserGroupGuid,
+                Guid = FargoCoreGuids.AdminUserGroupGuid,
                 Description = command.UserGroupAdministratorsDescription
             };
 
@@ -80,7 +78,7 @@ public sealed class InitializeSystemCommandHandler(
 
         var admin = new User
         {
-            Guid = FargoDefaultGuids.AdminUserGuid,
+            Guid = FargoCoreGuids.AdminUserGuid,
             Nameid = command.UserAdminNameid,
             Description = command.UserAdminDescription,
             PasswordHash = passwordHash

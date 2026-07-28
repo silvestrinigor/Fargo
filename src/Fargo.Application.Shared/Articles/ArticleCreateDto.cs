@@ -29,5 +29,4 @@ public sealed record ArticleCreateDto(
     Gs1128? Gs1128 = null,
     QrCode? QrCode = null,
     DataMatrix? DataMatrix = null,
-    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
-    bool? IsActive = null);
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null);

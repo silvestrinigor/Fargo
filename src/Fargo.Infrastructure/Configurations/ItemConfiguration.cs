@@ -8,7 +8,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 {
     public void Configure(EntityTypeBuilder<Item> builder)
     {
-        builder.ToTable(t => t.IsTemporal());
+        builder.ToTable("items");
 
         builder.HasKey(x => x.Guid);
 
@@ -22,9 +22,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
         builder.HasIndex(x => x.ArticleGuid);
 
         builder.Property(x => x.ProductionDate).IsRequired(false);
-
-        builder.Property(x => x.IsActive)
-            .HasDefaultValue(true);
 
         builder.Property(x => x.ParentContainerGuid).IsRequired(false);
 

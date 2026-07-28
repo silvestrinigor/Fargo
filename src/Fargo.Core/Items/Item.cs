@@ -1,4 +1,3 @@
-using Fargo.Core.Activables;
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
@@ -23,7 +22,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IEntityTyped, IPartitioned, IActivable
+public class Item : Entity, IPartitioned
 {
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
@@ -96,11 +95,6 @@ public class Item : Entity, IEntityTyped, IPartitioned, IActivable
     /// </summary>
     public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
 
-    /// <summary>
-    /// Gets a value indicating whether the item is active.
-    /// </summary>
-    public bool IsActive { get; set; } = true;
-
     public EntityType GetEntityType() => EntityType.Item;
 
     #region Container
@@ -123,7 +117,7 @@ public class Item : Entity, IEntityTyped, IPartitioned, IActivable
         {
             if (value?.Item.Guid == Guid)
             {
-                throw new ItemCannotBeOwnContainerFargoDomainException(Guid);
+                throw new ItemCannotBeOwnContainerFargoCoreException(Guid);
             }
 
             ParentContainerGuid = value?.Item.Guid;
@@ -164,7 +158,7 @@ public class Item : Entity, IEntityTyped, IPartitioned, IActivable
     }
 
     /// <inheritdoc />
-    IReadOnlyCollection<IPartition> IPartitioned.Partitions => Partitions;
+    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
 
     #endregion  Partition
 }

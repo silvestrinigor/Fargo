@@ -48,12 +48,14 @@ public sealed class UserCreateCommandHandler(
 
         user.MarkPasswordChangeAsRequired();
 
-        if (command.Create.PermissionsToAdd is { } permissions)
+        if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
             var requestedActions = permissions.Select(p => p.Action).Distinct().ToHashSet();
 
             foreach (var action in requestedActions)
             {
+                actor.ThrowIfPermissionDenied(action);
+
                 user.AddPermission(action);
             }
         }
