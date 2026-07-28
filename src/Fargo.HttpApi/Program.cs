@@ -1,9 +1,9 @@
-using Fargo.Application.DependencyInjection;
-using Fargo.HttpApi.Endpoints;
+using Fargo.Application.Extensions;
+using Fargo.HttpApi.RouteBuilderExtensions;
 using Fargo.HttpApi.ExceptionHandlers;
-using Fargo.HttpApi.Json;
-using Fargo.HttpApi.OpenApi;
-using Fargo.HttpApi.Routes;
+using Fargo.HttpApi.JsonConfig;
+using Fargo.HttpApi.OpenApiExtensions;
+using Fargo.HttpApi.RouteConstraints;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,7 +14,7 @@ builder.AddFargoServiceDefaults();
 
 builder.Services.AddResponseCompression();
 
-builder.Services.AddFargoRoutes();
+builder.Services.AddFargoRouteConstraints();
 
 builder.Services.AddFargoOpenApi();
 

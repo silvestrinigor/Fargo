@@ -1,0 +1,19 @@
+using Fargo.Core.Users;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Fargo.Infrastructure.EntityTypeConfigurations;
+
+public sealed class UserPartitionAccessConfiguration : IEntityTypeConfiguration<UserPartitionAccess>
+{
+    public void Configure(EntityTypeBuilder<UserPartitionAccess> builder)
+    {
+        builder.ToTable("user_partition_accesses");
+
+        builder.HasKey(x => x.Guid);
+
+        builder.HasOne(a => a.Partition).WithMany().HasForeignKey(a => a.PartitionGuid);
+
+        builder.HasOne(a => a.User).WithMany(g => g.PartitionAccesses).HasForeignKey(a => a.UserGuid);
+    }
+}

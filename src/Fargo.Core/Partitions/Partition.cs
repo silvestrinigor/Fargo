@@ -57,24 +57,8 @@ public class Partition : Entity
     /// <remarks>
     /// The parent partition defines the hierarchical relationship between partitions,
     /// enabling access inheritance from parent to child.
-    ///
-    /// This property has an <see langword="internal"/> setter to ensure that changes
-    /// to the partition hierarchy are controlled by the domain.
-    ///
-    /// Direct modification from outside the domain is restricted in order to:
-    /// <list type="bullet">
-    /// <item><description>Prevent circular hierarchies</description></item>
-    /// <item><description>Enforce consistency of parent-child relationships</description></item>
-    /// <item><description>Ensure domain invariants are validated before changes are applied</description></item>
-    /// </list>
     /// </remarks>
-    public Partition? ParentPartition
-    {
-        get;
-        private set;
-    }
-
-    #region ChildPartition
+    public Partition? ParentPartition { get; private set; }
 
     private readonly List<Partition> childPartitions = [];
 
@@ -88,15 +72,7 @@ public class Partition : Entity
     /// The collection is primarily used for navigation and persistence mapping.
     /// Domain logic should not rely on directly mutating this collection.
     /// </remarks>
-    public IReadOnlyCollection<Partition> ChildPartitions
-    {
-        get => childPartitions;
-        private init => childPartitions = [.. value];
-    }
-
-    #endregion
-
-    #region Article
+    public IReadOnlyCollection<Partition> ChildPartitions => childPartitions;
 
     private readonly List<Article> articleMembers = [];
 
@@ -109,15 +85,7 @@ public class Partition : Entity
     /// Domain operations should interact with articles through their own
     /// aggregates and repositories.
     /// </remarks>
-    public IReadOnlyCollection<Article> ArticleMembers
-    {
-        get => articleMembers;
-        private init => articleMembers = [.. value];
-    }
-
-    #endregion
-
-    #region Item
+    public IReadOnlyCollection<Article> ArticleMembers => articleMembers;
 
     private readonly List<Item> itemMembers = [];
 
@@ -128,15 +96,7 @@ public class Partition : Entity
     /// This collection represents the items that belong to the partition.
     /// It is primarily intended for persistence navigation and relationship mapping.
     /// </remarks>
-    public IReadOnlyCollection<Item> ItemMembers
-    {
-        get => itemMembers;
-        private init => itemMembers = [.. value];
-    }
-
-    #endregion
-
-    #region User
+    public IReadOnlyCollection<Item> ItemMembers => itemMembers;
 
     private readonly List<User> userMembers = [];
 
@@ -149,15 +109,7 @@ public class Partition : Entity
     /// Authorization logic should rely on domain services or repositories
     /// rather than manipulating this collection directly.
     /// </remarks>
-    public IReadOnlyCollection<User> UserMembers
-    {
-        get => userMembers;
-        private init => userMembers = [.. value];
-    }
-
-    #endregion
-
-    #region UserGroup
+    public IReadOnlyCollection<User> UserMembers => userMembers;
 
     private readonly List<UserGroup> userGroupMembers = [];
 
@@ -168,32 +120,7 @@ public class Partition : Entity
     /// This collection represents user groups linked to the partition.
     /// It is primarily used for persistence navigation and relationship mapping.
     /// </remarks>
-    public IReadOnlyCollection<UserGroup> UserGroupMembers
-    {
-        get => userGroupMembers;
-        private init => userGroupMembers = [.. value];
-    }
-
-    #endregion
-
-    public void SetParentPartition(Partition parentPartition)
-    {
-        if (IsGlobalPartition)
-        {
-            throw new FargoCoreException(
-                "Global partition cannot be part of another partition.",
-                FargoCoreErrorType.GlobalPartitionCannotBePartOfAnotherPartition);
-        }
-
-        if (parentPartition.Guid == Guid)
-        {
-            throw new PartitionCannotBeOwnParentFargoCoreException(Guid);
-        }
-
-        ParentPartition = parentPartition;
-
-        ParentPartitionGuid = parentPartition.Guid;
-    }
+    public IReadOnlyCollection<UserGroup> UserGroupMembers => userGroupMembers;
 
     private Partition()
     {
@@ -231,5 +158,24 @@ public class Partition : Entity
         };
 
         return globalPartition;
+    }
+
+    public void SetParentPartition(Partition parentPartition)
+    {
+        if (IsGlobalPartition)
+        {
+            throw new FargoCoreException(
+                "Global partition cannot be part of another partition.",
+                FargoCoreErrorType.GlobalPartitionCannotBePartOfAnotherPartition);
+        }
+
+        if (parentPartition.Guid == Guid)
+        {
+            throw new PartitionCannotBeOwnParentFargoCoreException(Guid);
+        }
+
+        ParentPartition = parentPartition;
+
+        ParentPartitionGuid = parentPartition.Guid;
     }
 }

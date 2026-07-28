@@ -1,7 +1,6 @@
 namespace Fargo.Core.Partitions;
 
-public class PartitionService(
-    IPartitionRepository partitionRepository)
+public class PartitionService(IPartitionRepository partitionRepository)
 {
     public async Task ValidateHierarchyParentPartition(
         Partition parentPartition,

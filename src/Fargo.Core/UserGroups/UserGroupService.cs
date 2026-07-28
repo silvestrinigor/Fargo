@@ -82,7 +82,7 @@ public class UserGroupService(
 
         if (userGroup.Guid == FargoCoreGuids.AdminUserGroupGuid)
         {
-            throw new DeleteDefaultAdministratorsUserGroupFargoCoreException();
+            throw new UserGroupAdministratorsDeleteFargoCoreException();
         }
     }
 }

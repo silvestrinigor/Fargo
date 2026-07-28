@@ -50,8 +50,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     public Color? Color { get; set; }
 
-    public EntityType GetEntityType() => EntityType.Article;
-
     /// <summary>
     /// Gets the X dimension of the article.
     /// </summary>

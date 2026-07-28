@@ -54,11 +54,9 @@ public sealed class InitializeSystemCommandHandler(
 
         if (administratorsGroup is null)
         {
-            administratorsGroup = new UserGroup(command.UserGroupAdministratorsNameid)
-            {
-                Guid = FargoCoreGuids.AdminUserGroupGuid,
-                Description = command.UserGroupAdministratorsDescription
-            };
+            administratorsGroup = UserGroup.CreateAdministratorsUserGroup(command.UserGroupAdministratorsNameid);
+
+            administratorsGroup.Description = command.UserGroupAdministratorsDescription;
 
             administratorsGroup.AddPartitionAccess(globalPartition);
 
@@ -76,13 +74,9 @@ public sealed class InitializeSystemCommandHandler(
 
         var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
-        var admin = new User
-        {
-            Guid = FargoCoreGuids.AdminUserGuid,
-            Nameid = command.UserAdminNameid,
-            Description = command.UserAdminDescription,
-            PasswordHash = passwordHash
-        };
+        var admin = User.CreateAdministratorUser(command.UserAdminNameid, passwordHash);
+
+        admin.Description = command.UserAdminDescription;
 
         admin.AddPartitionAccess(globalPartition);
 

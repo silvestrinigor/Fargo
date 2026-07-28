@@ -1,0 +1,28 @@
+using Fargo.Core.Identity;
+using Fargo.Core.Users;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Fargo.Infrastructure.EntityTypeConfigurations;
+
+public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
+{
+    public void Configure(EntityTypeBuilder<RefreshToken> builder)
+    {
+        builder.HasKey(x => x.Guid);
+
+        builder.HasIndex(x => x.TokenHash).IsUnique();
+
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.UserGuid)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(x => x.ReplacedByTokenHash);
+
+        builder.Property(x => x.ExpiresAt);
+
+        builder.Property(x => x.RevokedAt);
+    }
+}

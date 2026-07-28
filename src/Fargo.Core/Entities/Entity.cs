@@ -30,7 +30,7 @@ public abstract class Entity
     public Guid Guid
     {
         get;
-        init
+        internal init
         {
             if (value == Guid.Empty)
             {

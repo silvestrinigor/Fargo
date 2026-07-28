@@ -138,6 +138,8 @@ public class Item : Entity, IPartitioned
 
     #region  Partition
 
+    private readonly List<Partition> partitions = [];
+
     /// <summary>
     /// Gets the partitions associated with the item.
     /// </summary>
@@ -145,16 +147,16 @@ public class Item : Entity, IPartitioned
     /// These partitions define the partition scope of the item and are used
     /// in partition-based access evaluation.
     /// </remarks>
-    public PartitionCollection Partitions { get; init; } = [];
+    public IReadOnlyCollection<Partition> Partitions => partitions;
 
     public void AddPartition(Partition partition)
     {
-        Partitions.Add(partition);
+        partitions.Add(partition);
     }
 
     public void RemovePartition(Partition partition)
     {
-        Partitions.Remove(partition);
+        partitions.Remove(partition);
     }
 
     /// <inheritdoc />

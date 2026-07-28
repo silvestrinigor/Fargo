@@ -61,22 +61,41 @@ public class User : Entity, IPartitioned
     /// </summary>
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
 
+    private readonly List<UserPermission> permissions = [];
+
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
     ///
     /// Each permission represents an allowed <see cref="ActionType"/>
     /// that the user can perform without considering group memberships.
     /// </summary>
-    public IReadOnlyCollection<UserPermission> Permissions
+    public IReadOnlyCollection<UserPermission> Permissions => permissions;
+
+    private User()
     {
-        get => permissions;
-        init => permissions = [.. value];
     }
 
-    private readonly List<UserPermission> permissions = [];
-
-    public User()
+    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
     {
+        var user = new User
+        {
+            Nameid = nameid,
+            PasswordHash = passwordHash
+        };
+
+        return user;
+    }
+
+    public static User CreateAdministratorUser(Nameid nameid, PasswordHash passwordHash)
+    {
+        var user = new User
+        {
+            Guid = FargoCoreGuids.AdminUserGuid,
+            Nameid = nameid,
+            PasswordHash = passwordHash
+        };
+
+        return user;
     }
 
     /// <summary>
@@ -149,18 +168,9 @@ public class User : Entity, IPartitioned
         permissions.Remove(userPermission);
     }
 
-    /// <summary>
-    /// Gets the collection of groups the user belongs to.
-    /// </summary>
-    /// <remarks>
-    /// User groups provide additional permissions and partition access
-    /// that are inherited by the user.
-    ///
-    /// Effective authorization for a user is typically the combination of:
-    /// - Direct permissions and partition access
-    /// - Permissions and partition access inherited from groups
-    /// </remarks>
-    public UserGroupCollection UserGroups { get; init; } = [];
+    private readonly List<UserGroup> userGroups = [];
+
+    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
 
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
@@ -217,30 +227,30 @@ public class User : Entity, IPartitioned
         partitionAccesses.Remove(userPartition);
     }
 
+    private readonly List<Partition> partitions = [];
+
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
-    public PartitionCollection Partitions { get; init; } = [];
-
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
+    public IReadOnlyCollection<Partition> Partitions => partitions;
 
     public void AddPartition(Partition partition)
     {
-        Partitions.Add(partition);
+        partitions.Add(partition);
     }
 
     public void RemovePartition(Partition partition)
     {
-        Partitions.Remove(partition);
+        partitions.Remove(partition);
     }
 
     public void AddUserGroup(UserGroup userGroup)
     {
-        UserGroups.Add(userGroup);
+        userGroups.Add(userGroup);
     }
 
     public void RemoveUserGroup(UserGroup userGroup)
     {
-        UserGroups.Remove(userGroup);
+        userGroups.Remove(userGroup);
     }
 }

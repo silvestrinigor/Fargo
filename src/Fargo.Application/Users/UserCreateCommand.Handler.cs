@@ -31,20 +31,15 @@ public sealed class UserCreateCommandHandler(
 
         await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var user = new User
-        {
-            Nameid = command.Create.Nameid,
+        var user = User.CreateUser(command.Create.Nameid, userPasswordHash);
 
-            FirstName = command.Create.FirstName ?? null,
+        user.FirstName = command.Create.FirstName ?? null;
 
-            LastName = command.Create.LastName ?? null,
+        user.LastName = command.Create.LastName ?? null;
 
-            PasswordHash = userPasswordHash,
+        user.Description = command.Create.Description ?? Description.Empty;
 
-            Description = command.Create.Description ?? Description.Empty,
-
-            DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null
-        };
+        user.DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null;
 
         user.MarkPasswordChangeAsRequired();
 
