@@ -22,7 +22,7 @@ public class Article : Entity, IPartitioned
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
-    public Name Name { get; set; }
+    public required Name Name { get; set; }
 
     /// <summary>
     /// Gets or sets the description of the article.
@@ -36,7 +36,7 @@ public class Article : Entity, IPartitioned
     /// <summary>
     /// Gets the type of the article.
     /// </summary>
-    public ArticleType ArticleType { get; }
+    public ArticleType ArticleType { get; private set; }
 
     /// <summary>
     /// Gets or sets the shelf life of the article.
@@ -240,43 +240,8 @@ public class Article : Entity, IPartitioned
 
     #endregion
 
-    // EF
     private Article()
     {
-    }
-
-    internal Article(Name name)
-    {
-        Name = name;
-        ArticleType = ArticleType.Default;
-    }
-
-    internal Article(Name name, ArticleVariation variation)
-        : this(name)
-    {
-        Variation = variation;
-        ArticleType = ArticleType.Variation;
-    }
-
-    internal Article(Name name, ArticlePack pack)
-        : this(name)
-    {
-        Pack = pack;
-        ArticleType = ArticleType.Pack;
-    }
-
-    internal Article(Name name, ArticleKit kit)
-        : this(name)
-    {
-        Kit = kit;
-        ArticleType = ArticleType.Kit;
-    }
-
-    internal Article(Name name, ArticleContainer container)
-        : this(name)
-    {
-        Container = container;
-        ArticleType = ArticleType.Container;
     }
 
     /// <summary>
@@ -286,7 +251,13 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticle(Name name)
     {
-        return new Article(name);
+        var article = new Article
+        {
+            Name = name,
+            ArticleType = ArticleType.Default
+        };
+
+        return article;
     }
 
     /// <summary>
@@ -297,7 +268,14 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleVariation(Name name, Article fromArticle)
     {
-        return new Article(name, new ArticleVariation(fromArticle));
+        var articleVariation = new Article
+        {
+            Name = name,
+            Variation = new ArticleVariation(fromArticle),
+            ArticleType = ArticleType.Variation
+        };
+
+        return articleVariation;
     }
 
     /// <summary>
@@ -309,7 +287,14 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
     {
-        return new Article(name, new ArticlePack(fromArticle, quantity));
+        var articlePack = new Article
+        {
+            Name = name,
+            Pack = new ArticlePack(fromArticle, quantity),
+            ArticleType = ArticleType.Pack
+        };
+
+        return articlePack;
     }
 
     /// <summary>
@@ -320,7 +305,14 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> kitComponents)
     {
-        return new Article(name, new ArticleKit(kitComponents));
+        var articleKit = new Article
+        {
+            Name = name,
+            Kit = new ArticleKit(kitComponents),
+            ArticleType = ArticleType.Kit
+        };
+
+        return articleKit;
     }
 
     /// <summary>
@@ -330,6 +322,13 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleContainer(Name name)
     {
-        return new Article(name, new ArticleContainer(null));
+        var articleContainer = new Article
+        {
+            Name = name,
+            Container = new ArticleContainer(null),
+            ArticleType = ArticleType.Container
+        };
+
+        return articleContainer;
     }
 }
