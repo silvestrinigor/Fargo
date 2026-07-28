@@ -10,16 +10,11 @@ internal static partial class ArticleByBarcodeQueryHandlerLogs
         Level = LogLevel.Debug,
         Message = "Article query by barcode flow started for article '{articleBarcode}' by actor '{actorId}'.")]
     public static partial void QueryByBarcodeStarted(
-        this ILogger logger,
-        Barcode articleBarcode,
-        ActorId actorId);
+        this ILogger logger, Barcode articleBarcode, ActorId actorId);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
         Message = "Article query by barcode flow completed for article '{articleBarcode}' by actor '{actorId}'. Found: {found}.")]
     public static partial void QueryByBarcodeCompleted(
-        this ILogger logger,
-        Barcode articleBarcode,
-        ActorId actorId,
-        bool found);
+        this ILogger logger, Barcode articleBarcode, ActorId actorId, bool found);
 }

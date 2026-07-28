@@ -5,7 +5,7 @@ namespace Fargo.Core;
 /// </summary>
 public class FargoCoreException : Exception
 {
-    private const string defaultExceptionMessage = "Fargo exception.";
+    private const string defaultExceptionMessage = "Fargo core exception.";
 
     /// <summary>
     /// 

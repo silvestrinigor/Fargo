@@ -14,9 +14,6 @@ public interface IArticleQueryRepository
     /// <param name="entityGuid">
     /// Article unique identifier.
     /// </param>
-    /// <param name="asOfDateTime">
-    /// Temporal query date.
-    /// </param>
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
     /// </param>
@@ -38,11 +35,8 @@ public interface IArticleQueryRepository
     /// <summary>
     /// Retrieves article information by barcode.
     /// </summary>
-    /// <param name="articleBarcode">
+    /// <param name="barcode">
     /// Article barcode information.
-    /// </param>
-    /// <param name="asOfDateTime">
-    /// Temporal query date.
     /// </param>
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
@@ -67,9 +61,6 @@ public interface IArticleQueryRepository
     /// </summary>
     /// <param name="pagination">
     /// Pagination configuration.
-    /// </param>
-    /// <param name="asOfDateTime">
-    /// Temporal query date.
     /// </param>
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
