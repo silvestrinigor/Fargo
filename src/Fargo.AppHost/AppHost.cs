@@ -8,7 +8,7 @@ var postgres = builder
     .AddPostgres("fargo-postgres")
     .WithLifetime(ContainerLifetime.Persistent);
 
-var databaseFargo = postgres.AddDatabase("fargo-database");
+var databaseFargo = postgres.AddDatabase("fargo");
 
 var serviceMigrations = builder
     .AddProject<Projects.Fargo_ServiceMigration>("fargo-migration")
