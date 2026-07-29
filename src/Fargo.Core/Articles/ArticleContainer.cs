@@ -11,6 +11,8 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleContainer
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the maximum mass allowed inside the container.
     /// </summary>
@@ -22,13 +24,8 @@ public sealed class ArticleContainer
     /// </exception>
     public Mass? MaxMass { get; private set; }
 
-    private ArticleContainer()
+    internal ArticleContainer()
     {
-    }
-
-    public ArticleContainer(Mass? maxMass)
-    {
-        SetMaxMass(maxMass);
     }
 
     public void SetMaxMass(Mass? maxMass)

@@ -1,10 +1,8 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Shared.Barcodes;
-using Fargo.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Drawing;
 
 namespace Fargo.Infrastructure.EntityTypeConfigurations;
 
@@ -16,37 +14,13 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.HasKey(x => x.Guid);
 
-        builder.Property(x => x.Name).IsRequired();
+        builder.HasOne(x => x.Container).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(x => x.Description).IsRequired();
+        builder.HasOne(x => x.Variation).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(x => x.Color)
-            .HasConversion(
-                x => x.HasValue ? x.Value.ToArgb() : (int?)null,
-                x => x.HasValue ? Color.FromArgb(x.Value) : null)
-            .IsRequired(false);
+        builder.HasOne(x => x.Pack).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
 
-        builder.OwnsOne(x => x.Container, container =>
-        {
-        });
-
-        builder.OwnsOne(x => x.Variation, variation =>
-        {
-            variation.HasOne(x => x.FromArticle).WithMany().HasForeignKey(x => x.FromArticleGuid);
-        });
-
-        builder.OwnsOne(x => x.Pack, pack =>
-        {
-            pack.HasOne(x => x.FromArticle).WithMany().HasForeignKey(x => x.FromArticleGuid);
-        });
-
-        builder.OwnsOne(x => x.Kit, kit =>
-        {
-            kit.OwnsMany(x => x.Components, components =>
-            {
-                components.HasOne(c => c.Article).WithMany().HasForeignKey(c => c.ArticleGuid);
-            });
-        });
+        builder.HasOne(x => x.Kit).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(x => x.Ean13)
             .HasConversion(new ValueConverter<Ean13?, string?>(
@@ -108,71 +82,25 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 v => v != null ? DataMatrix.FromStorage(v) : null))
             .HasMaxLength(DataMatrix.MaxLength);
 
-        builder.HasIndex(x => x.Ean13)
-            .IsUnique()
-            .HasFilter("ean13 IS NOT NULL");
+        builder.HasIndex(x => x.Ean13).IsUnique().HasFilter("ean13 IS NOT NULL");
 
-        builder.HasIndex(x => x.Ean8)
-            .IsUnique()
-            .HasFilter("ean8 IS NOT NULL");
+        builder.HasIndex(x => x.Ean8).IsUnique().HasFilter("ean8 IS NOT NULL");
 
-        builder.HasIndex(x => x.UpcA)
-            .IsUnique()
-            .HasFilter("upc_a IS NOT NULL");
+        builder.HasIndex(x => x.UpcA).IsUnique().HasFilter("upc_a IS NOT NULL");
 
-        builder.HasIndex(x => x.UpcE)
-            .IsUnique()
-            .HasFilter("upc_e IS NOT NULL");
+        builder.HasIndex(x => x.UpcE).IsUnique().HasFilter("upc_e IS NOT NULL");
 
-        builder.HasIndex(x => x.Code128)
-            .IsUnique()
-            .HasFilter("code128 IS NOT NULL");
+        builder.HasIndex(x => x.Code128).IsUnique().HasFilter("code128 IS NOT NULL");
 
-        builder.HasIndex(x => x.Code39)
-            .IsUnique()
-            .HasFilter("code39 IS NOT NULL");
+        builder.HasIndex(x => x.Code39).IsUnique().HasFilter("code39 IS NOT NULL");
 
-        builder.HasIndex(x => x.Itf14)
-            .IsUnique()
-            .HasFilter("itf14 IS NOT NULL");
+        builder.HasIndex(x => x.Itf14).IsUnique().HasFilter("itf14 IS NOT NULL");
 
-        builder.HasIndex(x => x.Gs1128)
-            .IsUnique()
-            .HasFilter("gs1128 IS NOT NULL");
+        builder.HasIndex(x => x.Gs1128).IsUnique().HasFilter("gs1128 IS NOT NULL");
 
-        builder.HasIndex(x => x.QrCode)
-            .IsUnique()
-            .HasFilter("qr_code IS NOT NULL");
+        builder.HasIndex(x => x.QrCode).IsUnique().HasFilter("qr_code IS NOT NULL");
 
-        builder.HasIndex(x => x.DataMatrix)
-            .IsUnique()
-            .HasFilter("data_matrix IS NOT NULL");
-
-        builder.Property(x => x.Mass)
-            .HasConversion<MassStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
-
-        builder.Property(x => x.LengthX)
-            .HasConversion<LengthStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
-
-        builder.Property(x => x.LengthY)
-            .HasConversion<LengthStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
-
-        builder.Property(x => x.LengthZ)
-            .HasConversion<LengthStringConverter>()
-            .HasMaxLength(50)
-            .IsRequired(false);
-
-        builder.Property(x => x.ShelfLife)
-            .HasConversion(
-                x => x.HasValue ? (long?)x.Value.Ticks : null,
-                x => x.HasValue ? (TimeSpan?)TimeSpan.FromTicks(x.Value) : null)
-            .IsRequired(false);
+        builder.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("data_matrix IS NOT NULL");
 
         builder.HasMany(a => a.Partitions).WithMany();
     }

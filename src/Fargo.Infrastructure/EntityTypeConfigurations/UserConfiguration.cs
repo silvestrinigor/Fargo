@@ -14,16 +14,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(x => x.Nameid).IsUnique();
 
-        builder.Property(x => x.DefaultPasswordExpirationPeriod)
-            .HasConversion(
-                x => x.HasValue ? x.Value.Ticks : (long?)null,
-                x => x.HasValue ? TimeSpan.FromTicks(x.Value) : null);
-
         builder.Property(x => x.AuthVersion)
             .HasDefaultValueSql("gen_random_uuid()")
             .IsRequired();
-
-        builder.Property(x => x.Permissions);
 
         builder.HasMany(x => x.UserGroups).WithMany();
 

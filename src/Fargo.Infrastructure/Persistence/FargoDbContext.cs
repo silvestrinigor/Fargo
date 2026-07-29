@@ -8,7 +8,9 @@ using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.EntityTypeConfigurations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 using UnitsNet;
 
 namespace Fargo.Infrastructure.Persistence;
@@ -69,15 +71,39 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
             .HaveConversion<MassStringConverter>();
 
         configurationBuilder
+            .Properties<Length>()
+            .HaveConversion<LengthStringConverter>();
+
+        configurationBuilder
             .Properties<Scalar>()
             .HaveConversion<ScalarDoubleConverter>();
+
+        configurationBuilder
+            .Properties<Color>()
+            .HaveConversion<ColorArgbConverter>();
+
+        configurationBuilder
+            .Properties<TimeSpan>()
+            .HaveConversion<TimeSpanTicksConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ArticleVariationConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticlePackConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleKitConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleKitComponentConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
+
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ItemContainerConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 

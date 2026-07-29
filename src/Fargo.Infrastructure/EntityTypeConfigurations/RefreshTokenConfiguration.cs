@@ -14,10 +14,10 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.HasIndex(x => x.TokenHash).IsUnique();
 
         builder
-            .HasOne<User>()
-            .WithMany()
-            .HasForeignKey(x => x.UserGuid)
-            .OnDelete(DeleteBehavior.Cascade);
+        .HasOne<User>()
+        .WithMany()
+        .HasForeignKey(x => x.UserGuid)
+        .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.ReplacedByTokenHash);
 

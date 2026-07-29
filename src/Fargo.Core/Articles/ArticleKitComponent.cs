@@ -8,6 +8,8 @@ namespace Fargo.Core.Articles;
 /// </summary>
 public sealed class ArticleKitComponent
 {
+    public Guid Guid { get; private set; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets the unique identifier of the source article included in the kit.
     /// </summary>

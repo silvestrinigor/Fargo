@@ -9,6 +9,8 @@ namespace Fargo.Core.Items;
 /// </remarks>
 public sealed class ItemContainer
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     public ItemContainer()
     {
     }

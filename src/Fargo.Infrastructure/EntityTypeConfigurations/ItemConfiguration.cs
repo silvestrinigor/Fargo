@@ -12,24 +12,15 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasKey(x => x.Guid);
 
-        builder
-            .HasOne(x => x.Article)
-            .WithMany()
-            .HasForeignKey(x => x.ArticleGuid)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasIndex(x => x.ArticleGuid);
 
-        builder.OwnsOne(i => i.Container, container =>
-        {
-        });
-
-        builder.HasOne(i => i.ParentContainer)
-            .WithMany()
-            .HasForeignKey(i => i.ParentContainerGuid)
-            .OnDelete(DeleteBehavior.SetNull);
-
         builder.HasIndex(x => x.ParentContainerGuid);
+
+        builder.HasOne(x => x.Article).WithMany().HasForeignKey(x => x.ArticleGuid).OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(i => i.Container).WithOne().HasForeignKey<Item>("article_guid").OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(i => i.ParentContainer).WithMany().HasForeignKey(i => i.ParentContainerGuid).OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(i => i.Partitions).WithMany();
     }

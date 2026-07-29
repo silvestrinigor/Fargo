@@ -277,7 +277,7 @@ public class Article : Entity, IPartitioned
         var articleContainer = new Article
         {
             Name = name,
-            Container = new ArticleContainer(null),
+            Container = new ArticleContainer(),
             ArticleType = ArticleType.Container
         };
 

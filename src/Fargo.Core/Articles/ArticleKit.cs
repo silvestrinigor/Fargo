@@ -9,6 +9,8 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleKit
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets the components that compose the kit.
     /// </summary>
