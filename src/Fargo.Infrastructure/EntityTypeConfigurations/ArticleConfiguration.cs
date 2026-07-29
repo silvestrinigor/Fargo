@@ -34,18 +34,25 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.OwnsOne(x => x.Variation, variation =>
         {
             variation.WithOwner().HasForeignKey();
+
+            variation.HasOne(x => x.FromArticle);
         });
 
         builder.OwnsOne(x => x.Pack, pack =>
         {
             pack.WithOwner().HasForeignKey();
+
+            pack.Property(x => x.FromArticleGuid).IsRequired();
+
+            pack.HasOne(x => x.FromArticle);
+
+            pack.Property(x => x.Quantity)
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.Kit, kit =>
         {
             kit.WithOwner().HasForeignKey();
-
-            kit.WithOwner();
         });
 
         builder.Property(x => x.Ean13)
