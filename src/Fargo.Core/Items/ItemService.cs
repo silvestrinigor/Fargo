@@ -1,38 +1,17 @@
 namespace Fargo.Core.Items;
 
-/// <summary>
-/// Provides domain operations for moving items between item containers.
-/// </summary>
 public sealed class ItemService(IItemRepository itemRepository)
 {
-    /// <summary>
-    /// Places an item inside a container item.
-    /// </summary>
-    /// <exception cref="ItemCannotBeOwnContainerFargoCoreException">
-    /// Thrown when an item is assigned as its own container.
-    /// </exception>
-    /// <exception cref="ItemIsNotContainerFargoCoreException">
-    /// Thrown when the parent item is not backed by a container article.
-    /// </exception>
-    /// <exception cref="ItemCircularContainerHierarchyFargoCoreException">
-    /// Thrown when assigning the container would create a circular hierarchy.
-    /// </exception>
-    public async Task MoveToContainer(
-        Item parentContainerItem,
-        Item memberItem,
-        CancellationToken cancellationToken = default)
+    public async Task MoveToContainer(Item parentContainerItem, Item memberItem, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(parentContainerItem);
-        ArgumentNullException.ThrowIfNull(memberItem);
-
         if (parentContainerItem.Guid == memberItem.Guid)
         {
-            throw new ItemCannotBeOwnContainerFargoCoreException(memberItem.Guid);
+            throw new FargoCoreException($"Item '{memberItem.Guid}' cannot be its own container.");
         }
 
         if (!parentContainerItem.Article.IsContainer)
         {
-            throw new ItemIsNotContainerFargoCoreException(parentContainerItem.Guid);
+            throw new FargoCoreException($"Item '{parentContainerItem.Guid}' is not a container.");
         }
 
         var descendantItemGuids = await itemRepository.GetContainerDescendantGuids(
@@ -42,21 +21,16 @@ public sealed class ItemService(IItemRepository itemRepository)
 
         if (descendantItemGuids.Contains(parentContainerItem.Guid))
         {
-            throw new ItemCircularContainerHierarchyFargoCoreException(
-                parentContainerItem.Guid,
-                memberItem.Guid);
+            throw new FargoCoreException(
+                $"Item '{memberItem.Guid}' cannot be assigned to container " +
+                $"'{parentContainerItem.Guid}' because this would create a circular hierarchy.");
         }
 
         memberItem.ParentContainer = parentContainerItem;
     }
 
-    /// <summary>
-    /// Clears the parent container relationship, leaving the item outside any container.
-    /// </summary>
     public static void RemoveFromContainer(Item item)
     {
-        ArgumentNullException.ThrowIfNull(item);
-
         item.ParentContainer = null;
     }
 }

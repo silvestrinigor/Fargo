@@ -119,7 +119,7 @@ public class Item : IEntity, IPartitioned
         {
             if (value?.Guid == Guid)
             {
-                throw new ItemCannotBeOwnContainerFargoCoreException(Guid);
+                throw new FargoCoreException($"Item '{Guid}' cannot be its own container.");
             }
 
             ParentContainerGuid = value?.Guid;
