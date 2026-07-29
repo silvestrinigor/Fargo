@@ -114,13 +114,13 @@ public class Partition : IEntity
         if (IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "Global partition cannot be part of another partition.",
-                FargoCoreErrorType.GlobalPartitionCannotBePartOfAnotherPartition);
+                "Global partition cannot be a part of another partition.", FargoCoreErrorType.None);
         }
 
         if (parentPartition.Guid == Guid)
         {
-            throw new PartitionCannotBeOwnParentFargoCoreException(Guid);
+            throw new FargoCoreException(
+                "Parent partition cannot be the own partition.", FargoCoreErrorType.None);
         }
 
         ParentPartition = parentPartition;
