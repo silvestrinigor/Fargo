@@ -10,34 +10,22 @@ public interface IUserRepository
     /// <summary>
     /// Gets a user by its unique identifier.
     /// </summary>
-    Task<User?> GetByGuidAsync(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default
-    );
+    Task<User?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a user by their unique <see cref="Nameid"/>.
     /// </summary>
-    Task<User?> GetByNameidAsync(
-        Nameid nameid,
-        CancellationToken cancellationToken = default
-    );
+    Task<User?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a user with the specified identifier exists.
     /// </summary>
-    Task<bool> ExistsByGuid(
-        Guid guid,
-        CancellationToken cancellationToken = default
-    );
+    Task<bool> ExistsByGuid(Guid guid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a user with the specified <see cref="Nameid"/> already exists.
     /// </summary>
-    Task<bool> ExistsByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default
-    );
+    Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new user to the persistence context.

@@ -10,6 +10,9 @@ namespace Fargo.Core.Users;
 /// </summary>
 public class User : IEntity, IPartitioned
 {
+    /// <summary>
+    /// Gets the unique identifier of the user.
+    /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
