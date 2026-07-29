@@ -6,20 +6,18 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 {
     public async Task AssertArticleCanBeDeletedAsync(Article article, CancellationToken cancellationToken = default)
     {
-        var hasItems = await articleRepository.HasItemsAssociatedAsync(
-            article.Guid, cancellationToken);
+        var hasItems = await articleRepository.HasItemsAssociatedAsync(article.Guid, cancellationToken);
 
         if (hasItems)
         {
-            throw new ArticleDeleteWithItemsAssociatedFargoCoreException(article.Guid);
+            throw new FargoCoreException($"Article '{article.Guid}' cannot be deleted because it has associated items.");
         }
 
-        var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticle(
-            article.Guid, cancellationToken);
+        var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticle(article.Guid, cancellationToken);
 
         if (isArticleDependence)
         {
-            throw new ArticleDeleteIsDependencyOfAnotherArticle(article.Guid);
+            throw new FargoCoreException($"Article '{article.Guid}' cannot be deleted because it is a dependency of another article.");
         }
     }
 
@@ -29,8 +27,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(ean13.ToString(), BarcodeFormat.Ean13));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -40,8 +37,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(ean8.ToString(), BarcodeFormat.Ean8));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -51,8 +47,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(upcA.ToString(), BarcodeFormat.UpcA));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -62,8 +57,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(upcE.ToString(), BarcodeFormat.UpcE));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -73,8 +67,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(code128.ToString(), BarcodeFormat.Code128));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -84,8 +77,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(code39.ToString(), BarcodeFormat.Code39));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -95,8 +87,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(itf14.ToString(), BarcodeFormat.Itf14));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -106,8 +97,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(gs1128.ToString(), BarcodeFormat.Gs1128));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -117,8 +107,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(qrCode.ToString(), BarcodeFormat.QrCode));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 
@@ -128,8 +117,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
 
         if (exists)
         {
-            throw new ArticleBarcodeAlreadyInUseFargoCoreException(
-                new Barcode(dataMatrix.ToString(), BarcodeFormat.DataMatrix));
+            throw new FargoCoreException($"Article barcode already in use.");
         }
     }
 }
