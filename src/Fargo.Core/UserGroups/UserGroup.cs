@@ -11,18 +11,18 @@ namespace Fargo.Core.UserGroups;
 /// A user group defines a set of permissions that determine which actions
 /// its members are allowed to perform.
 ///
-/// A user group is partitioned data and may belong to multiple
-/// <see cref="Partition"/> instances.
-///
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
 public class UserGroup : IEntity, IPartitioned
 {
+    /// <summary>
+    /// Gets the unique identifier of the user group.
+    /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
-    /// Gets or sets the unique NAMEID of the user group.
+    /// Gets or sets the unique nameid of the user group.
     /// </summary>
     public Nameid Nameid { get; set; }
 
@@ -32,7 +32,7 @@ public class UserGroup : IEntity, IPartitioned
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets a value indicating whether the user group is active.
+    /// Gets or sets the value indicating whether the user group is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
 
@@ -45,6 +45,9 @@ public class UserGroup : IEntity, IPartitioned
 
     private readonly List<Partition> partitions = [];
 
+    /// <summary>
+    /// Gets the partition associated with the user group.
+    /// </summary>
     public IReadOnlyCollection<Partition> Partitions => partitions;
 
     private readonly List<Partition> partitionAccesses = [];
@@ -62,6 +65,9 @@ public class UserGroup : IEntity, IPartitioned
     {
     }
 
+    /// <summary>
+    /// Creates a new user group.
+    /// </summary>
     public static UserGroup CreateUserGroup(Nameid nameid)
     {
         var usergroup = new UserGroup
@@ -72,6 +78,9 @@ public class UserGroup : IEntity, IPartitioned
         return usergroup;
     }
 
+    /// <summary>
+    /// Creates the administrators user group.
+    /// </summary>
     public static UserGroup CreateAdministratorsUserGroup(Nameid nameid)
     {
         var administratorsUsergroup = new UserGroup
@@ -89,13 +98,6 @@ public class UserGroup : IEntity, IPartitioned
     /// <param name="partition">The partition to grant access to.</param>
     public void AddPartitionAccess(Partition partition)
     {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        if (partitionAccesses.Any(x => x.Guid == partition.Guid))
-        {
-            return;
-        }
-
         partitionAccesses.Add(partition);
     }
 
@@ -104,17 +106,9 @@ public class UserGroup : IEntity, IPartitioned
     /// Removes partition access from the user group if it exists.
     /// </summary>
     /// <param name="partitionGuid">The identifier of the partition to remove.</param>
-    public void RemovePartitionAccess(Guid partitionGuid)
+    public void RemovePartitionAccess(Partition partition)
     {
-        var userGroupPartition =
-            partitionAccesses.SingleOrDefault(x => x.Guid == partitionGuid);
-
-        if (userGroupPartition == null)
-        {
-            return;
-        }
-
-        partitionAccesses.Remove(userGroupPartition);
+        partitionAccesses.Remove(partition);
     }
 
     public void AddPartition(Partition partition)
