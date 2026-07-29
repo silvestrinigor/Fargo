@@ -6,7 +6,7 @@ var environmentName = builder.Environment.EnvironmentName;
 
 var postgres = builder
     .AddPostgres("fargo-postgres")
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Session);
 
 var databaseFargo = postgres.AddDatabase("fargo");
 
