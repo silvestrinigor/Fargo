@@ -24,6 +24,9 @@ namespace Fargo.Core.Partitions;
 /// </remarks>
 public class Partition : IEntity
 {
+    /// <summary>
+    /// Gets the unique identifier of the partition
+    /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
@@ -59,6 +62,9 @@ public class Partition : IEntity
     /// </remarks>
     public Partition? ParentPartition { get; private set; }
 
+    /// <summary>
+    /// Gets the value indicating whether the partition has a parent partition.
+    /// </summary>
     [MemberNotNullWhen(true, nameof(ParentPartitionGuid))]
     public bool HasParentPartition => ParentPartitionGuid is not null;
 
@@ -100,6 +106,9 @@ public class Partition : IEntity
         return globalPartition;
     }
 
+    /// <summary>
+    /// Sets the parent partition.
+    /// </summary>
     public void SetParentPartition(Partition parentPartition)
     {
         if (IsGlobalPartition)

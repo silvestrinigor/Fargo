@@ -19,6 +19,9 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public class Article : IEntity, IPartitioned
 {
+    /// <summary>
+    /// Gets the unique identifier of the article.
+    /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
@@ -191,12 +194,7 @@ public class Article : IEntity, IPartitioned
 
     private readonly List<Partition> partitions = [];
 
-    /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
-
-    private Article()
-    {
-    }
+    private Article() { }
 
     /// <summary>
     /// Creates a new article.
@@ -296,21 +294,11 @@ public class Article : IEntity, IPartitioned
 
     public void AddPartition(Partition partition)
     {
-        if (partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
         partitions.Add(partition);
     }
 
     public void RemovePartition(Partition partition)
     {
-        if (!partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
         partitions.Remove(partition);
     }
 }
