@@ -47,7 +47,7 @@ public class Item : Entity, IPartitioned
     {
         if (article.IsContainer)
         {
-            Container = new ItemContainer(this);
+            Container = new ItemContainer();
         }
 
         Article = article;
@@ -110,17 +110,17 @@ public class Item : Entity, IPartitioned
     /// <summary>
     /// Gets the parent container of the current item, if any.
     /// </summary>
-    public ItemContainer? ParentContainer
+    public Item? ParentContainer
     {
         get;
         internal set
         {
-            if (value?.Item.Guid == Guid)
+            if (value?.Guid == Guid)
             {
                 throw new ItemCannotBeOwnContainerFargoCoreException(Guid);
             }
 
-            ParentContainerGuid = value?.Item.Guid;
+            ParentContainerGuid = value?.Guid;
             field = value;
         }
     }

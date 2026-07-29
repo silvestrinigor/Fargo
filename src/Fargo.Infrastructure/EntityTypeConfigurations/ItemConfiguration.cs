@@ -16,18 +16,13 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
             .HasOne(x => x.Article)
             .WithMany()
             .HasForeignKey(x => x.ArticleGuid)
-            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(x => x.ArticleGuid);
 
-        builder.Property(x => x.ProductionDate).IsRequired(false);
-
-        builder.Property(x => x.ParentContainerGuid).IsRequired(false);
-
-        builder.HasOne(i => i.Container)
-            .WithOne(c => c.Item)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.OwnsOne(i => i.Container, container =>
+        {
+        });
 
         builder.HasOne(i => i.ParentContainer)
             .WithMany()
@@ -36,10 +31,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasIndex(x => x.ParentContainerGuid);
 
-        builder.Ignore(x => x.ParentContainer);
-
-        builder.Ignore(x => x.Container);
-
-        builder.HasMany(i => i.Partitions).WithMany(p => p.ItemMembers);
+        builder.HasMany(i => i.Partitions).WithMany();
     }
 }

@@ -1,9 +1,5 @@
-using Fargo.Core.Articles;
 using Fargo.Core.Entities;
-using Fargo.Core.Items;
 using Fargo.Core.Shared;
-using Fargo.Core.UserGroups;
-using Fargo.Core.Users;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Core.Partitions;
@@ -63,68 +59,6 @@ public class Partition : Entity
 
     [MemberNotNullWhen(true, nameof(ParentPartitionGuid))]
     public bool HasParentPartition => ParentPartitionGuid is not null;
-
-    private readonly List<Partition> childPartitions = [];
-
-    /// <summary>
-    /// Gets the child partitions that belong to the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents the hierarchical relationship between partitions.
-    /// Each member partition has the current partition as its parent.
-    ///
-    /// The collection is primarily used for navigation and persistence mapping.
-    /// Domain logic should not rely on directly mutating this collection.
-    /// </remarks>
-    public IReadOnlyCollection<Partition> ChildPartitions => childPartitions;
-
-    private readonly List<Article> articleMembers = [];
-
-    /// <summary>
-    /// Gets the articles associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents the articles that belong to the partition.
-    /// It is mainly used for persistence navigation and relationship mapping.
-    /// Domain operations should interact with articles through their own
-    /// aggregates and repositories.
-    /// </remarks>
-    public IReadOnlyCollection<Article> ArticleMembers => articleMembers;
-
-    private readonly List<Item> itemMembers = [];
-
-    /// <summary>
-    /// Gets the items associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents the items that belong to the partition.
-    /// It is primarily intended for persistence navigation and relationship mapping.
-    /// </remarks>
-    public IReadOnlyCollection<Item> ItemMembers => itemMembers;
-
-    private readonly List<User> userMembers = [];
-
-    /// <summary>
-    /// Gets the users associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents users that have membership or association
-    /// with the partition. It is mainly used for persistence navigation.
-    /// Authorization logic should rely on domain services or repositories
-    /// rather than manipulating this collection directly.
-    /// </remarks>
-    public IReadOnlyCollection<User> UserMembers => userMembers;
-
-    private readonly List<UserGroup> userGroupMembers = [];
-
-    /// <summary>
-    /// Gets the user groups associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents user groups linked to the partition.
-    /// It is primarily used for persistence navigation and relationship mapping.
-    /// </remarks>
-    public IReadOnlyCollection<UserGroup> UserGroupMembers => userGroupMembers;
 
     private Partition()
     {

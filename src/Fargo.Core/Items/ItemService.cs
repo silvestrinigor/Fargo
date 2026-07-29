@@ -47,7 +47,7 @@ public sealed class ItemService(IItemRepository itemRepository)
                 memberItem.Guid);
         }
 
-        memberItem.ParentContainer = new ItemContainer(parentContainerItem);
+        memberItem.ParentContainer = parentContainerItem;
     }
 
     /// <summary>

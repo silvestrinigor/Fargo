@@ -28,31 +28,24 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.OwnsOne(x => x.Container, container =>
         {
-            container.WithOwner().HasForeignKey();
         });
 
         builder.OwnsOne(x => x.Variation, variation =>
         {
-            variation.WithOwner().HasForeignKey();
-
-            variation.HasOne(x => x.FromArticle);
+            variation.HasOne(x => x.FromArticle).WithMany().HasForeignKey(x => x.FromArticleGuid);
         });
 
         builder.OwnsOne(x => x.Pack, pack =>
         {
-            pack.WithOwner().HasForeignKey();
-
-            pack.Property(x => x.FromArticleGuid).IsRequired();
-
-            pack.HasOne(x => x.FromArticle);
-
-            pack.Property(x => x.Quantity)
-                .IsRequired();
+            pack.HasOne(x => x.FromArticle).WithMany().HasForeignKey(x => x.FromArticleGuid);
         });
 
         builder.OwnsOne(x => x.Kit, kit =>
         {
-            kit.WithOwner().HasForeignKey();
+            kit.OwnsMany(x => x.Components, components =>
+            {
+                components.HasOne(c => c.Article).WithMany().HasForeignKey(c => c.ArticleGuid);
+            });
         });
 
         builder.Property(x => x.Ean13)
@@ -181,6 +174,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
                 x => x.HasValue ? (TimeSpan?)TimeSpan.FromTicks(x.Value) : null)
             .IsRequired(false);
 
-        builder.HasMany(a => a.Partitions).WithMany(p => p.ArticleMembers);
+        builder.HasMany(a => a.Partitions).WithMany();
     }
 }
