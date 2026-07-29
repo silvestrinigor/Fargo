@@ -8,8 +8,10 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IPartitioned
+public class User : IEntity, IPartitioned
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>

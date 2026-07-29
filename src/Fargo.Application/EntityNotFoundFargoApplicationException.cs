@@ -18,7 +18,7 @@ public class EntityNotFoundFargoApplicationException : FargoApplicationException
         EntityType = entityType;
     }
 
-    public static void ThrowIfNull([NotNull] Entity? entity, Guid entityGuid, EntityType type)
+    public static void ThrowIfNull([NotNull] IEntity? entity, Guid entityGuid, EntityType type)
     {
         if (entity is null)
         {

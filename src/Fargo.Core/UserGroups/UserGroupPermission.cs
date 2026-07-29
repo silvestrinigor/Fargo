@@ -17,8 +17,10 @@ namespace Fargo.Core.UserGroups;
 /// that any changes to this permission will propagate auditing updates
 /// to the parent <see cref="UserGroup"/> entity.
 /// </remarks>
-public class UserGroupPermission : Entity
+public class UserGroupPermission : IEntity
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets the unique identifier of the user group that owns this permission.
     /// </summary>

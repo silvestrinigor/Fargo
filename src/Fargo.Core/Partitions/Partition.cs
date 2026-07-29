@@ -22,8 +22,10 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity
+public class Partition : IEntity
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the name of the partition.
     /// </summary>

@@ -17,8 +17,10 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IPartitioned
+public class Article : IEntity, IPartitioned
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
