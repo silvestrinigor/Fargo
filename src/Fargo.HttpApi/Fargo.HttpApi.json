@@ -1833,15 +1833,10 @@
       },
       "Permission": {
         "required": [
-          "guid",
           "action"
         ],
         "type": "object",
         "properties": {
-          "guid": {
-            "type": "string",
-            "format": "uuid"
-          },
           "action": {
             "$ref": "#/components/schemas/ActionType"
           }

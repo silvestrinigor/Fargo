@@ -11,7 +11,7 @@ public static class UserGroupDtoMappings
         userGroup.Guid,
         userGroup.Nameid,
         userGroup.Description,
-        userGroup.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
+        userGroup.Permissions.Select(permission => new Permission(permission.Action)).ToArray(),
         userGroup.Partitions.Select(partition => partition.Guid).ToArray(),
         userGroup.IsActive);
 }

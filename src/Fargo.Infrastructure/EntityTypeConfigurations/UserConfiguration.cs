@@ -23,10 +23,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasDefaultValueSql("gen_random_uuid()")
             .IsRequired();
 
-        builder.HasMany(x => x.Permissions)
-            .WithOne(x => x.User)
-            .HasForeignKey(x => x.UserGuid)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.Permissions);
 
         builder.HasMany(x => x.UserGroups).WithMany();
 

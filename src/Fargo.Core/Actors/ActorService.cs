@@ -54,7 +54,7 @@ public sealed class ActorService(
 
         var permissions = new HashSet<ActionType>(
             user.Permissions.Select(
-                permission => permission.Action));
+                permission => permission));
 
         foreach (var group in user.UserGroups.Where(group => group.IsActive))
         {

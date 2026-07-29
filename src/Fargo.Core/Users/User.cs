@@ -61,7 +61,7 @@ public class User : Entity, IPartitioned
     /// </summary>
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
 
-    private readonly List<UserPermission> permissions = [];
+    private readonly List<ActionType> permissions = [];
 
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
@@ -69,7 +69,7 @@ public class User : Entity, IPartitioned
     /// Each permission represents an allowed <see cref="ActionType"/>
     /// that the user can perform without considering group memberships.
     /// </summary>
-    public IReadOnlyCollection<UserPermission> Permissions => permissions;
+    public IReadOnlyCollection<ActionType> Permissions => permissions;
 
     private readonly List<UserGroup> userGroups = [];
 
@@ -206,18 +206,12 @@ public class User : Entity, IPartitioned
     /// <param name="action">The action type to allow.</param>
     public void AddPermission(ActionType action)
     {
-        if (permissions.Any(x => x.Action == action))
+        if (permissions.Any(x => x == action))
         {
             return;
         }
 
-        var userPermission = new UserPermission
-        {
-            Action = action,
-            User = this
-        };
-
-        permissions.Add(userPermission);
+        permissions.Add(action);
     }
 
     /// <summary>
@@ -226,13 +220,6 @@ public class User : Entity, IPartitioned
     /// <param name="action">The action type to remove.</param>
     public void RemovePermission(ActionType action)
     {
-        var userPermission = permissions.SingleOrDefault(x => x.Action == action);
-
-        if (userPermission == null)
-        {
-            return;
-        }
-
-        permissions.Remove(userPermission);
+        permissions.Remove(action);
     }
 }

@@ -81,8 +81,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-        modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
-
         modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserGroupPermissionConfiguration());
