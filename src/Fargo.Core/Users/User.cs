@@ -83,13 +83,13 @@ public class User : Entity, IPartitioned
     /// A user can access entities that have no partition (public), or that
     /// belong to at least one partition to which the user has been granted access.
     /// </remarks>
-    public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses
+    public IReadOnlyCollection<Partition> PartitionAccesses
     {
         get => partitionAccesses;
         init => partitionAccesses = [.. value];
     }
 
-    private readonly List<UserPartitionAccess> partitionAccesses = [];
+    private readonly List<Partition> partitionAccesses = [];
 
     private readonly List<Partition> partitions = [];
 
@@ -153,31 +153,17 @@ public class User : Entity, IPartitioned
     {
         ArgumentNullException.ThrowIfNull(partition);
 
-        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
+        if (partitionAccesses.Any(x => x.Guid == partition.Guid))
         {
             return;
         }
 
-        var partitionAccess = new UserPartitionAccess
-        {
-            User = this,
-            Partition = partition
-        };
-
-        partitionAccesses.Add(partitionAccess);
+        partitionAccesses.Add(partition);
     }
 
     public void RemovePartitionAccess(Partition partition)
     {
-        var userPartition =
-            partitionAccesses.SingleOrDefault(x => x == partition);
-
-        if (userPartition == null)
-        {
-            return;
-        }
-
-        partitionAccesses.Remove(userPartition);
+        partitionAccesses.Remove(partition);
     }
 
     /// <summary>

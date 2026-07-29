@@ -28,7 +28,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(x => x.UserGuid)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(x => x.UserGroups).WithMany(x => x.Users);
+        builder.HasMany(x => x.UserGroups).WithMany();
 
         builder.HasMany(u => u.Partitions).WithMany();
 

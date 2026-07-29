@@ -1,7 +1,6 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
-using Fargo.Core.Users;
 
 namespace Fargo.Core.UserGroups;
 
@@ -46,7 +45,7 @@ public class UserGroup : Entity, IPartitioned
 
     public IReadOnlyCollection<Partition> Partitions => partitions;
 
-    private readonly List<UserGroupPartitionAccess> partitionAccesses = [];
+    private readonly List<Partition> partitionAccesses = [];
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
@@ -55,19 +54,7 @@ public class UserGroup : Entity, IPartitioned
     /// These entries define which partitions the group has access to and are
     /// used in access evaluation logic.
     /// </remarks>
-    public IReadOnlyCollection<UserGroupPartitionAccess> PartitionAccesses => partitionAccesses;
-
-    private readonly List<User> users = [];
-
-    /// <summary>
-    /// Gets the read-only collection of users associated with the user group.
-    /// </summary>
-    /// <remarks>
-    /// Represents users that belong to the group.
-    /// This collection is intended for navigation and persistence purposes.
-    /// Membership changes should be controlled through explicit domain behaviors.
-    /// </remarks>
-    public IReadOnlyCollection<User> Users => users;
+    public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
 
     private UserGroup()
     {
@@ -102,18 +89,12 @@ public class UserGroup : Entity, IPartitioned
     {
         ArgumentNullException.ThrowIfNull(partition);
 
-        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
+        if (partitionAccesses.Any(x => x.Guid == partition.Guid))
         {
             return;
         }
 
-        var partitionAccess = new UserGroupPartitionAccess
-        {
-            UserGroup = this,
-            Partition = partition
-        };
-
-        partitionAccesses.Add(partitionAccess);
+        partitionAccesses.Add(partition);
     }
 
 
@@ -124,7 +105,7 @@ public class UserGroup : Entity, IPartitioned
     public void RemovePartitionAccess(Guid partitionGuid)
     {
         var userGroupPartition =
-            partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
+            partitionAccesses.SingleOrDefault(x => x.Guid == partitionGuid);
 
         if (userGroupPartition == null)
         {

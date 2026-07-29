@@ -90,9 +90,5 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
 
         modelBuilder.ApplyConfiguration(new PartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
     }
 }
