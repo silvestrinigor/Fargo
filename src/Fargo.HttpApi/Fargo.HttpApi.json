@@ -11,7 +11,7 @@
           "Articles"
         ],
         "summary": "Gets a single article by guid",
-        "description": "Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single article by its unique identifier.",
         "operationId": "GetArticle",
         "parameters": [
           {
@@ -142,7 +142,7 @@
           "Articles"
         ],
         "summary": "Gets multiple articles",
-        "description": "Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.",
+        "description": "Retrieves a paginated list of articles.",
         "operationId": "GetArticles",
         "parameters": [
           {
