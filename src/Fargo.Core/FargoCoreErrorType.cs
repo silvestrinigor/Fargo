@@ -1,8 +1,5 @@
 namespace Fargo.Core;
 
-/// <summary>
-/// 
-/// </summary>
 public enum FargoCoreErrorType
 {
     /// <summary>

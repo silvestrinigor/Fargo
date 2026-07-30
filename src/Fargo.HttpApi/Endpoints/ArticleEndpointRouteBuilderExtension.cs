@@ -42,7 +42,7 @@ public static class ArticleEndpointRouteBuilderExtension
         builder.MapGet("/{articleGuid:guid}", GetArticleByGuidAsync)
             .WithName("GetArticle")
             .WithSummary("Gets a single article by guid")
-            .WithDescription("Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.")
+            .WithDescription("Retrieves a single article by its unique identifier.")
             .Produces<ArticleDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -98,7 +98,7 @@ public static class ArticleEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyArticleAsync)
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
-            .WithDescription("Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.")
+            .WithDescription("Retrieves a paginated list of articles.")
             .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 

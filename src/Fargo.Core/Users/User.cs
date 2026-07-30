@@ -80,6 +80,8 @@ public class User : IEntity, IPartitioned
 
     public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
 
+    private readonly List<Partition> partitionAccesses = [];
+
     /// <summary>
     /// Gets the read-only collection of partitions the user has access to.
     /// </summary>
@@ -88,13 +90,7 @@ public class User : IEntity, IPartitioned
     /// A user can access entities that have no partition (public), or that
     /// belong to at least one partition to which the user has been granted access.
     /// </remarks>
-    public IReadOnlyCollection<Partition> PartitionAccesses
-    {
-        get => partitionAccesses;
-        init => partitionAccesses = [.. value];
-    }
-
-    private readonly List<Partition> partitionAccesses = [];
+    public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
 
     private readonly List<Partition> partitions = [];
 
