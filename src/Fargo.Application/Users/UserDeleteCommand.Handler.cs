@@ -33,7 +33,7 @@ public sealed class UserDeleteCommandHandler(
 
         if (actor.ActorId.Guid == user.Guid)
         {
-            throw new UserCannotDeleteTheirOwnUserFargoApplicationException(user.Guid);
+            throw new FargoApplicationException($"The user '{user.Guid}' cannot delete their own user.");
         }
 
         UserService.ValidateUserCanBeDeleted(user);

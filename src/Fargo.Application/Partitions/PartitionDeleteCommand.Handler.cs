@@ -35,9 +35,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         if (!partitionToDelete.HasParentPartition)
         {
-            throw new FargoApplicationException(
-                "Cannot delete a partition with no parent partition.",
-                FargoApplicationErrorType.CannotDeletePartitionWithNotParentPartition);
+            throw new FargoApplicationException("Cannot delete a partition with no parent partition.");
         }
 
         var parentPartition = await partitionRepository.GetByGuidAsync(partitionToDelete.ParentPartitionGuid.Value, cancellationToken);
