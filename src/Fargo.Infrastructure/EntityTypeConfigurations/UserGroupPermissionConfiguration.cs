@@ -18,15 +18,6 @@ public sealed class UserGroupPermissionConfiguration : IEntityTypeConfiguration<
             x.Action
         });
 
-        builder.Property(x => x.Guid)
-            .ValueGeneratedNever();
-
-        builder.Property(x => x.UserGroupGuid)
-            .IsRequired();
-
-        builder.Property(x => x.Action)
-            .IsRequired();
-
         builder.HasOne(x => x.UserGroup)
             .WithMany(x => x.Permissions)
             .HasForeignKey(x => x.UserGroupGuid)

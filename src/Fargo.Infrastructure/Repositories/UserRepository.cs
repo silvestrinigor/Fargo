@@ -73,7 +73,6 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
         => query
-            .Include(user => user.Permissions)
             .Include(user => user.UserGroups)
                 .ThenInclude(group => group.Permissions)
             .Include(user => user.UserGroups)

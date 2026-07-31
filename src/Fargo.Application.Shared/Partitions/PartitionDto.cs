@@ -6,5 +6,6 @@ public sealed record PartitionDto(
     Guid Guid,
     Name Name,
     Description Description,
-    Guid? ParentPartitionGuid
+    Guid? ParentPartitionGuid,
+    bool? IsGlobalPartition
 );

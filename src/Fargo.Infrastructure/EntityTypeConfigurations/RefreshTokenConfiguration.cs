@@ -18,11 +18,5 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         .WithMany()
         .HasForeignKey(x => x.UserGuid)
         .OnDelete(DeleteBehavior.Cascade);
-
-        builder.Property(x => x.ReplacedByTokenHash);
-
-        builder.Property(x => x.ExpiresAt);
-
-        builder.Property(x => x.RevokedAt);
     }
 }

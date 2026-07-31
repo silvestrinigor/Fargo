@@ -41,7 +41,7 @@ public sealed class FargoWriteDesignTimeDbContextFactory
     {
         var optionsBuilder = new DbContextOptionsBuilder<FargoDbContext>();
 
-        optionsBuilder.UseNpgsql();
+        optionsBuilder.UseNpgsql().UseSnakeCaseNamingConvention();
 
         return new FargoDbContext(optionsBuilder.Options);
     }

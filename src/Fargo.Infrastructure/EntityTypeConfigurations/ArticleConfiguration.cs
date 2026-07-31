@@ -14,13 +14,13 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.HasKey(x => x.Guid);
 
-        builder.HasOne(x => x.Container).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Container).WithOne().OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(x => x.Variation).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Variation).WithOne().OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(x => x.Pack).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Pack).WithOne().OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(x => x.Kit).WithOne().HasForeignKey<Article>("article_guid").OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Kit).WithOne().OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(x => x.Ean13)
             .HasConversion(new ValueConverter<Ean13?, string?>(

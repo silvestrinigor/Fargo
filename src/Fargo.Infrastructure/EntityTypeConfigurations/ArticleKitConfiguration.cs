@@ -12,6 +12,8 @@ public class ArticleKitConfiguration : IEntityTypeConfiguration<ArticleKit>
 
         builder.HasKey(k => k.Guid);
 
+        builder.HasOne<Article>().WithOne().HasForeignKey<Article>("article_guid");
+
         builder.HasMany(k => k.Components).WithOne();
     }
 }
