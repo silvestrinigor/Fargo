@@ -182,7 +182,7 @@ public sealed class ArticlePatchCommandHandler(
 
                 EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessDeniedToPartition(partition);
+                actor.ThrowIfAccessDenied(partition);
 
                 article.AddPartition(partition);
             }
@@ -196,7 +196,7 @@ public sealed class ArticlePatchCommandHandler(
 
                 EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessDeniedToPartition(partition);
+                actor.ThrowIfAccessDenied(partition);
 
                 article.RemovePartition(partition);
             }

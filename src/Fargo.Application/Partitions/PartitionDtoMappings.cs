@@ -6,7 +6,8 @@ namespace Fargo.Application.Partitions;
 
 public static class PartitionDtoMappings
 {
-    public static readonly Expression<Func<Partition, PartitionDto>> Projection = partition => new PartitionDto(
+    public static readonly Expression<Func<Partition, PartitionDto>> Projection = partition
+        => new PartitionDto(
         partition.Guid,
         partition.Name,
         partition.Description,

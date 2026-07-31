@@ -8,20 +8,7 @@ namespace Fargo.Core.Articles;
 /// </summary>
 public sealed class ArticleKitComponent
 {
-    private ArticleKitComponent()
-    {
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="article"></param>
-    /// <param name="quantity"></param>
-    public ArticleKitComponent(Article article, Scalar quantity)
-    {
-        Article = article;
-        SetQuantity(quantity);
-    }
+    public Guid Guid { get; private set; } = Guid.NewGuid();
 
     /// <summary>
     /// Gets the unique identifier of the source article included in the kit.
@@ -45,6 +32,21 @@ public sealed class ArticleKitComponent
     /// Gets the quantity of the source article included in the kit.
     /// </summary>
     public Scalar Quantity { get; private set; }
+
+    private ArticleKitComponent()
+    {
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="article"></param>
+    /// <param name="quantity"></param>
+    public ArticleKitComponent(Article article, Scalar quantity)
+    {
+        Article = article;
+        SetQuantity(quantity);
+    }
 
     public void SetQuantity(Scalar quantity)
     {

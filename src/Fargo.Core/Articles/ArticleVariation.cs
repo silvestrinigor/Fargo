@@ -9,6 +9,8 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleVariation
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets the unique identifier of the source article.
     /// </summary>

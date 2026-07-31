@@ -12,7 +12,6 @@
     <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
   </PropertyGroup>
 
-
   <ItemGroup>
     <Content Include="Properties\launchSettings.json" />
   </ItemGroup>

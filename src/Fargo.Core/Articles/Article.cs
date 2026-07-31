@@ -17,12 +17,17 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : Entity, IPartitioned
+public class Article : IEntity, IPartitioned
 {
+    /// <summary>
+    /// Gets the unique identifier of the article.
+    /// </summary>
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
-    public Name Name { get; set; }
+    public required Name Name { get; set; }
 
     /// <summary>
     /// Gets or sets the description of the article.
@@ -36,7 +41,7 @@ public class Article : Entity, IPartitioned
     /// <summary>
     /// Gets the type of the article.
     /// </summary>
-    public ArticleType ArticleType { get; }
+    public ArticleType ArticleType { get; private set; }
 
     /// <summary>
     /// Gets or sets the shelf life of the article.
@@ -49,8 +54,6 @@ public class Article : Entity, IPartitioned
     /// When <see langword="null"/>, no color constraint is defined.
     /// </summary>
     public Color? Color { get; set; }
-
-    public EntityType GetEntityType() => EntityType.Article;
 
     /// <summary>
     /// Gets the X dimension of the article.
@@ -81,14 +84,6 @@ public class Article : Entity, IPartitioned
     /// Gets the density of the article.
     /// </summary>
     public Density? Density => Mass / Volume;
-
-    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
-    {
-        Mass = mass;
-        LengthX = lengthX;
-        LengthY = lengthY;
-        LengthZ = lengthZ;
-    }
 
     /// <summary>
     /// EAN-13 barcode, or <see langword="null"/> when absent.
@@ -140,8 +135,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     public DataMatrix? DataMatrix { get; set; }
 
-    #region Variation
-
     /// <summary>
     /// Gets the variation info associated with the article.
     /// When <see langword="null"/>, no variation constraint is defined.
@@ -153,10 +146,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     [MemberNotNullWhen(true, nameof(Variation))]
     public bool IsVariation => Variation is not null;
-
-    #endregion
-
-    #region Pack
 
     /// <summary>
     /// Gets the pack info associated with the article.
@@ -170,10 +159,6 @@ public class Article : Entity, IPartitioned
     [MemberNotNullWhen(true, nameof(Pack))]
     public bool IsPack => Pack is not null;
 
-    #endregion Pack
-
-    #region Kit
-
     /// <summary>
     /// Gets the kit info associated with the article.
     /// When <see langword="null"/>, no kit constraint is defined.
@@ -185,10 +170,6 @@ public class Article : Entity, IPartitioned
     /// </summary>
     [MemberNotNullWhen(true, nameof(Kit))]
     public bool IsKit => Kit is not null;
-
-    #endregion Kit
-
-    #region Container
 
     /// <summary>
     /// Gets the container constraints associated with the article.
@@ -202,10 +183,6 @@ public class Article : Entity, IPartitioned
     [MemberNotNullWhen(true, nameof(Container))]
     public bool IsContainer => Container is not null;
 
-    #endregion Container
-
-    #region Partition
-
     /// <summary>
     /// Gets the partitions associated with the article.
     /// </summary>
@@ -217,69 +194,7 @@ public class Article : Entity, IPartitioned
 
     private readonly List<Partition> partitions = [];
 
-    public void AddPartition(Partition partition)
-    {
-        if (partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
-        partitions.Add(partition);
-    }
-
-    public void RemovePartition(Partition partition)
-    {
-        if (!partitions.Any(p => p.Guid == partition.Guid))
-        {
-            return;
-        }
-
-        partitions.Remove(partition);
-    }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
-
-    #endregion
-
-    // EF
-    private Article()
-    {
-    }
-
-    internal Article(Name name)
-    {
-        Name = name;
-        ArticleType = ArticleType.Default;
-    }
-
-    internal Article(Name name, ArticleVariation variation)
-        : this(name)
-    {
-        Variation = variation;
-        ArticleType = ArticleType.Variation;
-    }
-
-    internal Article(Name name, ArticlePack pack)
-        : this(name)
-    {
-        Pack = pack;
-        ArticleType = ArticleType.Pack;
-    }
-
-    internal Article(Name name, ArticleKit kit)
-        : this(name)
-    {
-        Kit = kit;
-        ArticleType = ArticleType.Kit;
-    }
-
-    internal Article(Name name, ArticleContainer container)
-        : this(name)
-    {
-        Container = container;
-        ArticleType = ArticleType.Container;
-    }
+    private Article() { }
 
     /// <summary>
     /// Creates a new article.
@@ -288,7 +203,13 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticle(Name name)
     {
-        return new Article(name);
+        var article = new Article
+        {
+            Name = name,
+            ArticleType = ArticleType.Default
+        };
+
+        return article;
     }
 
     /// <summary>
@@ -299,7 +220,14 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleVariation(Name name, Article fromArticle)
     {
-        return new Article(name, new ArticleVariation(fromArticle));
+        var articleVariation = new Article
+        {
+            Name = name,
+            Variation = new ArticleVariation(fromArticle),
+            ArticleType = ArticleType.Variation
+        };
+
+        return articleVariation;
     }
 
     /// <summary>
@@ -311,7 +239,14 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
     {
-        return new Article(name, new ArticlePack(fromArticle, quantity));
+        var articlePack = new Article
+        {
+            Name = name,
+            Pack = new ArticlePack(fromArticle, quantity),
+            ArticleType = ArticleType.Pack
+        };
+
+        return articlePack;
     }
 
     /// <summary>
@@ -322,7 +257,14 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> kitComponents)
     {
-        return new Article(name, new ArticleKit(kitComponents));
+        var articleKit = new Article
+        {
+            Name = name,
+            Kit = new ArticleKit(kitComponents),
+            ArticleType = ArticleType.Kit
+        };
+
+        return articleKit;
     }
 
     /// <summary>
@@ -332,6 +274,31 @@ public class Article : Entity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleContainer(Name name)
     {
-        return new Article(name, new ArticleContainer(null));
+        var articleContainer = new Article
+        {
+            Name = name,
+            Container = new ArticleContainer(),
+            ArticleType = ArticleType.Container
+        };
+
+        return articleContainer;
+    }
+
+    public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
+    {
+        Mass = mass;
+        LengthX = lengthX;
+        LengthY = lengthY;
+        LengthZ = lengthZ;
+    }
+
+    public void AddPartition(Partition partition)
+    {
+        partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        partitions.Remove(partition);
     }
 }

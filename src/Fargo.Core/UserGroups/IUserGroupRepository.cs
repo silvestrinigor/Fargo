@@ -10,26 +10,17 @@ public interface IUserGroupRepository
     /// <summary>
     /// Gets a user group by its unique identifier.
     /// </summary>
-    Task<UserGroup?> GetByGuidAsync(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default
-    );
+    Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a user group by its unique <see cref="Nameid"/>.
     /// </summary>
-    Task<UserGroup?> GetByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default
-    );
+    Task<UserGroup?> GetByNameid(Nameid nameid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a user group with the specified <see cref="Nameid"/> already exists.
     /// </summary>
-    Task<bool> ExistsByNameid(
-        Nameid nameid,
-        CancellationToken cancellationToken = default
-    );
+    Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new user group to the persistence context.

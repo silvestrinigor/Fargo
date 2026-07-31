@@ -1,6 +1,4 @@
 using Fargo.Core;
-using Fargo.Core.Articles;
-using Fargo.Core.Users;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,54 +11,14 @@ public sealed class FargoCoreExceptionHandler : IExceptionHandler
     {
         if (exception is FargoCoreException coreException)
         {
-            ProblemDetails problem;
-
-            switch (coreException)
+            ProblemDetails problem = coreException switch
             {
-                case UserNameidAlreadyExistsFargoCoreException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "User nameid is already in use.",
-                    };
-
-                    problem.Extensions.Add("nameId", ex.Nameid);
-
-                    break;
-
-                case DeleteMainAdminUserFargoCoreException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status403Forbidden,
-                        Title = "Cannot delete main admin user.",
-                    };
-
-                    break;
-
-                case ArticleBarcodeAlreadyInUseFargoCoreException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "Article barcode is already in use.",
-                    };
-
-                    problem.Extensions.Add("barcode", ex.Barcode);
-
-                    break;
-
-                default:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "Core exception."
-                    };
-
-                    break;
-            }
+                _ => new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Core exception."
+                },
+            };
 
             problem.Detail = coreException.Message;
 

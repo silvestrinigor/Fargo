@@ -1,9 +1,6 @@
-using Fargo.Core.Articles;
 using Fargo.Core.Entities;
-using Fargo.Core.Items;
 using Fargo.Core.Shared;
-using Fargo.Core.UserGroups;
-using Fargo.Core.Users;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Core.Partitions;
 
@@ -25,8 +22,13 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : Entity
+public class Partition : IEntity
 {
+    /// <summary>
+    /// Gets the unique identifier of the partition
+    /// </summary>
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the name of the partition.
     /// </summary>
@@ -57,143 +59,14 @@ public class Partition : Entity
     /// <remarks>
     /// The parent partition defines the hierarchical relationship between partitions,
     /// enabling access inheritance from parent to child.
-    ///
-    /// This property has an <see langword="internal"/> setter to ensure that changes
-    /// to the partition hierarchy are controlled by the domain.
-    ///
-    /// Direct modification from outside the domain is restricted in order to:
-    /// <list type="bullet">
-    /// <item><description>Prevent circular hierarchies</description></item>
-    /// <item><description>Enforce consistency of parent-child relationships</description></item>
-    /// <item><description>Ensure domain invariants are validated before changes are applied</description></item>
-    /// </list>
     /// </remarks>
-    public Partition? ParentPartition
-    {
-        get;
-        private set;
-    }
-
-    #region ChildPartition
-
-    private readonly List<Partition> childPartitions = [];
+    public Partition? ParentPartition { get; private set; }
 
     /// <summary>
-    /// Gets the child partitions that belong to the current partition.
+    /// Gets the value indicating whether the partition has a parent partition.
     /// </summary>
-    /// <remarks>
-    /// This collection represents the hierarchical relationship between partitions.
-    /// Each member partition has the current partition as its parent.
-    ///
-    /// The collection is primarily used for navigation and persistence mapping.
-    /// Domain logic should not rely on directly mutating this collection.
-    /// </remarks>
-    public IReadOnlyCollection<Partition> ChildPartitions
-    {
-        get => childPartitions;
-        private init => childPartitions = [.. value];
-    }
-
-    #endregion
-
-    #region Article
-
-    private readonly List<Article> articleMembers = [];
-
-    /// <summary>
-    /// Gets the articles associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents the articles that belong to the partition.
-    /// It is mainly used for persistence navigation and relationship mapping.
-    /// Domain operations should interact with articles through their own
-    /// aggregates and repositories.
-    /// </remarks>
-    public IReadOnlyCollection<Article> ArticleMembers
-    {
-        get => articleMembers;
-        private init => articleMembers = [.. value];
-    }
-
-    #endregion
-
-    #region Item
-
-    private readonly List<Item> itemMembers = [];
-
-    /// <summary>
-    /// Gets the items associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents the items that belong to the partition.
-    /// It is primarily intended for persistence navigation and relationship mapping.
-    /// </remarks>
-    public IReadOnlyCollection<Item> ItemMembers
-    {
-        get => itemMembers;
-        private init => itemMembers = [.. value];
-    }
-
-    #endregion
-
-    #region User
-
-    private readonly List<User> userMembers = [];
-
-    /// <summary>
-    /// Gets the users associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents users that have membership or association
-    /// with the partition. It is mainly used for persistence navigation.
-    /// Authorization logic should rely on domain services or repositories
-    /// rather than manipulating this collection directly.
-    /// </remarks>
-    public IReadOnlyCollection<User> UserMembers
-    {
-        get => userMembers;
-        private init => userMembers = [.. value];
-    }
-
-    #endregion
-
-    #region UserGroup
-
-    private readonly List<UserGroup> userGroupMembers = [];
-
-    /// <summary>
-    /// Gets the user groups associated with the current partition.
-    /// </summary>
-    /// <remarks>
-    /// This collection represents user groups linked to the partition.
-    /// It is primarily used for persistence navigation and relationship mapping.
-    /// </remarks>
-    public IReadOnlyCollection<UserGroup> UserGroupMembers
-    {
-        get => userGroupMembers;
-        private init => userGroupMembers = [.. value];
-    }
-
-    #endregion
-
-    public void SetParentPartition(Partition parentPartition)
-    {
-        if (IsGlobalPartition)
-        {
-            throw new FargoCoreException(
-                "Global partition cannot be part of another partition.",
-                FargoCoreErrorType.GlobalPartitionCannotBePartOfAnotherPartition);
-        }
-
-        if (parentPartition.Guid == Guid)
-        {
-            throw new PartitionCannotBeOwnParentFargoCoreException(Guid);
-        }
-
-        ParentPartition = parentPartition;
-
-        ParentPartitionGuid = parentPartition.Guid;
-    }
+    [MemberNotNullWhen(true, nameof(ParentPartitionGuid))]
+    public bool HasParentPartition => ParentPartitionGuid is not null;
 
     private Partition()
     {
@@ -231,5 +104,27 @@ public class Partition : Entity
         };
 
         return globalPartition;
+    }
+
+    /// <summary>
+    /// Sets the parent partition.
+    /// </summary>
+    public void SetParentPartition(Partition parentPartition)
+    {
+        if (IsGlobalPartition)
+        {
+            throw new FargoCoreException(
+                "Global partition cannot be a part of another partition.", FargoCoreErrorType.None);
+        }
+
+        if (parentPartition.Guid == Guid)
+        {
+            throw new FargoCoreException(
+                "Parent partition cannot be the own partition.", FargoCoreErrorType.None);
+        }
+
+        ParentPartition = parentPartition;
+
+        ParentPartitionGuid = parentPartition.Guid;
     }
 }

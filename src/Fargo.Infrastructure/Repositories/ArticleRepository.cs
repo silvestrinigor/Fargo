@@ -16,12 +16,6 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     private readonly DbSet<Item> items = context.Items;
 
-    private readonly DbSet<ArticleVariation> variations = context.ArticleVariations;
-
-    private readonly DbSet<ArticlePack> articlePacks = context.ArticlePacks;
-
-    private readonly DbSet<ArticleKit> articleKits = context.ArticleKits;
-
     public void Add(Article article) => articles.Add(article);
 
     public void Remove(Article article) => articles.Remove(article);
@@ -31,9 +25,9 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public async Task<bool> IsDependenceOfAnotherArticle(Guid articleGuid, CancellationToken cancellationToken = default)
     {
-        return await variations.AnyAsync(v => v.FromArticleGuid == articleGuid, cancellationToken)
-            || await articlePacks.AnyAsync(p => p.FromArticleGuid == articleGuid, cancellationToken)
-            || await articleKits.AnyAsync(k => k.Components.Any(c => c.ArticleGuid == articleGuid), cancellationToken);
+        return await articles.AnyAsync(v => v.IsVariation && v.Variation.FromArticleGuid == articleGuid, cancellationToken)
+            || await articles.AnyAsync(p => p.IsPack && p.Pack.FromArticleGuid == articleGuid, cancellationToken)
+            || await articles.AnyAsync(k => k.IsKit && k.Kit.Components.Any(c => c.ArticleGuid == articleGuid), cancellationToken);
     }
 
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)

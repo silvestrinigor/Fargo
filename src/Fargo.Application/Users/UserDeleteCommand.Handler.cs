@@ -15,8 +15,7 @@ public sealed class UserDeleteCommandHandler(
 ) : ICommandHandler<UserDeleteCommand>
 {
     public async Task HandleAsync(
-        UserDeleteCommand command,
-        CancellationToken cancellationToken = default)
+        UserDeleteCommand command, CancellationToken cancellationToken = default)
     {
         logger.UserDeleteCompleted(command.UserGuid, currentActor.ActorId);
 
@@ -34,7 +33,7 @@ public sealed class UserDeleteCommandHandler(
 
         if (actor.ActorId.Guid == user.Guid)
         {
-            throw new ActorCannotDeleteTheirOwnUser(user.Guid);
+            throw new FargoApplicationException($"The user '{user.Guid}' cannot delete their own user.");
         }
 
         UserService.ValidateUserCanBeDeleted(user);

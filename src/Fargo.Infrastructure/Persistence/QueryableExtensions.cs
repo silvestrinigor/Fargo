@@ -35,9 +35,8 @@ public static class QueryableExtensions
     /// Entity Framework).
     /// </remarks>
     public static IQueryable<TEntity> WithPagination<TEntity>(
-            this IQueryable<TEntity> query,
-            Pagination pagination
-            )
+        this IQueryable<TEntity> query,
+        Pagination pagination)
         => query
             .Skip(pagination.Skip)
             .Take(pagination.Take);

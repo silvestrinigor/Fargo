@@ -15,7 +15,7 @@ public static class UserDtoMappings
         user.Description,
         user.DefaultPasswordExpirationPeriod,
         user.RequirePasswordChangeAt,
-        user.Permissions.Select(permission => new Permission(permission.Guid, permission.Action)).ToArray(),
+        user.Permissions.Select(permission => new Permission(permission)).ToArray(),
         user.Partitions.Select(partition => partition.Guid).ToArray(),
         user.UserGroups.Select(group => group.Guid).ToArray(),
         user.IsActive);

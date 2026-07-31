@@ -38,14 +38,14 @@ public sealed class ActorService(
         }
 
         var partitionAccessGuids = user.PartitionAccesses
-            .Select(p => p.PartitionGuid)
+            .Select(p => p.Guid)
             .ToHashSet();
 
         partitionAccessGuids.UnionWith(
             user.UserGroups
                 .Where(g => g.IsActive)
                 .SelectMany(g => g.PartitionAccesses)
-                .Select(p => p.PartitionGuid));
+                .Select(p => p.Guid));
 
         var partitionDescendantAccessGuids = await partitionRepository.GetDescendantGuids(
             partitionGuids: partitionAccessGuids,
@@ -54,7 +54,7 @@ public sealed class ActorService(
 
         var permissions = new HashSet<ActionType>(
             user.Permissions.Select(
-                permission => permission.Action));
+                permission => permission));
 
         foreach (var group in user.UserGroups.Where(group => group.IsActive))
         {

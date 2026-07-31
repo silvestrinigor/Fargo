@@ -15,6 +15,5 @@ namespace Fargo.Core.Shared;
 /// The action that the permission allows to be performed.
 /// </param>
 public sealed record Permission(
-    Guid Guid,
     ActionType Action
 );

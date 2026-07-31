@@ -24,14 +24,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         => userGroups
             .Include(userGroup => userGroup.Permissions)
             .Include(userGroup => userGroup.Partitions)
-            .Include(userGroup => userGroup.Users)
             .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
 
     public Task<UserGroup?> GetByNameid(Nameid nameid, CancellationToken cancellationToken = default)
         => userGroups
             .Include(userGroup => userGroup.Permissions)
             .Include(userGroup => userGroup.Partitions)
-            .Include(userGroup => userGroup.Users)
             .SingleOrDefaultAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);
 
     public Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default)

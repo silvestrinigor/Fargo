@@ -9,35 +9,9 @@ namespace Fargo.Core.Items;
 /// </remarks>
 public sealed class ItemContainer
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
 
-#pragma warning disable CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
-    private ItemContainer()
-#pragma warning restore CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
+    public ItemContainer()
     {
-    }
-
-    /// <summary>
-    /// Initializes a new item container for the specified item.
-    /// </summary>
-    /// <param name="item">The item that owns this container information.</param>
-    public ItemContainer(Item item)
-    {
-        Item = item;
-    }
-
-    public Guid ItemGuid { get; private init; }
-
-    /// <summary>
-    /// Gets the item that owns this container information.
-    /// </summary>
-    public Item Item
-    {
-        get;
-        private init
-        {
-            ItemGuid = value.Guid;
-
-            field = value;
-        }
     }
 }

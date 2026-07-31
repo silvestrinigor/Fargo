@@ -13,8 +13,7 @@ public sealed class UsersQueryHandler(
 ) : IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>
 {
     public async Task<IReadOnlyCollection<UserDto>> HandleAsync(
-        UsersQuery query,
-        CancellationToken cancellationToken = default)
+        UsersQuery query, CancellationToken cancellationToken = default)
     {
         logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
 
@@ -34,7 +33,9 @@ public sealed class UsersQueryHandler(
             notChildOfAnyPartition,
             cancellationToken);
 
-        logger.ManyQueryCompleted(currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0, childOfAnyOfThesePartitions?.Count ?? 0, users.Count);
+        logger.ManyQueryCompleted(
+            currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0, users.Count);
 
         return users;
     }

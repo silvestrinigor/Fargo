@@ -8,8 +8,13 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IPartitioned
+public class User : IEntity, IPartitioned
 {
+    /// <summary>
+    /// Gets the unique identifier of the user.
+    /// </summary>
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>
@@ -61,22 +66,105 @@ public class User : Entity, IPartitioned
     /// </summary>
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
 
+    private readonly List<ActionType> permissions = [];
+
     /// <summary>
     /// Gets the read-only collection of permissions assigned directly to the user.
     ///
     /// Each permission represents an allowed <see cref="ActionType"/>
     /// that the user can perform without considering group memberships.
     /// </summary>
-    public IReadOnlyCollection<UserPermission> Permissions
+    public IReadOnlyCollection<ActionType> Permissions => permissions;
+
+    private readonly List<UserGroup> userGroups = [];
+
+    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
+
+    private readonly List<Partition> partitionAccesses = [];
+
+    /// <summary>
+    /// Gets the read-only collection of partitions the user has access to.
+    /// </summary>
+    /// <remarks>
+    /// Partitions define logical boundaries in the system.
+    /// A user can access entities that have no partition (public), or that
+    /// belong to at least one partition to which the user has been granted access.
+    /// </remarks>
+    public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
+
+    private readonly List<Partition> partitions = [];
+
+    /// <summary>
+    /// Gets the partitions associated with the user entity.
+    /// </summary>
+    public IReadOnlyCollection<Partition> Partitions => partitions;
+
+    private User()
     {
-        get => permissions;
-        init => permissions = [.. value];
     }
 
-    private readonly List<UserPermission> permissions = [];
-
-    public User()
+    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
     {
+        var user = new User
+        {
+            Nameid = nameid,
+            PasswordHash = passwordHash
+        };
+
+        return user;
+    }
+
+    public static User CreateAdministratorUser(Nameid nameid, PasswordHash passwordHash)
+    {
+        var user = new User
+        {
+            Guid = FargoCoreGuids.AdminUserGuid,
+            Nameid = nameid,
+            PasswordHash = passwordHash
+        };
+
+        return user;
+    }
+
+    public void AddPartition(Partition partition)
+    {
+        partitions.Add(partition);
+    }
+
+    public void RemovePartition(Partition partition)
+    {
+        partitions.Remove(partition);
+    }
+
+    public void AddUserGroup(UserGroup userGroup)
+    {
+        userGroups.Add(userGroup);
+    }
+
+    public void RemoveUserGroup(UserGroup userGroup)
+    {
+        userGroups.Remove(userGroup);
+    }
+
+    /// <summary>
+    /// Grants access to the specified partition for the user.
+    /// </summary>
+    /// <param name="partition">The partition to grant access to.</param>
+    public void AddPartitionAccess(Partition partition)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        if (partitionAccesses.Any(x => x.Guid == partition.Guid))
+        {
+            return;
+        }
+
+        partitionAccesses.Add(partition);
+    }
+
+    public void RemovePartitionAccess(Partition partition)
+    {
+        partitionAccesses.Remove(partition);
     }
 
     /// <summary>
@@ -119,18 +207,12 @@ public class User : Entity, IPartitioned
     /// <param name="action">The action type to allow.</param>
     public void AddPermission(ActionType action)
     {
-        if (permissions.Any(x => x.Action == action))
+        if (permissions.Any(x => x == action))
         {
             return;
         }
 
-        var userPermission = new UserPermission
-        {
-            Action = action,
-            User = this
-        };
-
-        permissions.Add(userPermission);
+        permissions.Add(action);
     }
 
     /// <summary>
@@ -139,108 +221,6 @@ public class User : Entity, IPartitioned
     /// <param name="action">The action type to remove.</param>
     public void RemovePermission(ActionType action)
     {
-        var userPermission = permissions.SingleOrDefault(x => x.Action == action);
-
-        if (userPermission == null)
-        {
-            return;
-        }
-
-        permissions.Remove(userPermission);
-    }
-
-    /// <summary>
-    /// Gets the collection of groups the user belongs to.
-    /// </summary>
-    /// <remarks>
-    /// User groups provide additional permissions and partition access
-    /// that are inherited by the user.
-    ///
-    /// Effective authorization for a user is typically the combination of:
-    /// - Direct permissions and partition access
-    /// - Permissions and partition access inherited from groups
-    /// </remarks>
-    public UserGroupCollection UserGroups { get; init; } = [];
-
-    /// <summary>
-    /// Gets the read-only collection of partitions the user has access to.
-    /// </summary>
-    /// <remarks>
-    /// Partitions define logical boundaries in the system.
-    /// A user can access entities that have no partition (public), or that
-    /// belong to at least one partition to which the user has been granted access.
-    /// </remarks>
-    public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses
-    {
-        get => partitionAccesses;
-        init => partitionAccesses = [.. value];
-    }
-
-    private readonly List<UserPartitionAccess> partitionAccesses = [];
-
-    /// <summary>
-    /// Grants access to the specified partition for the user.
-    /// </summary>
-    /// <param name="partition">The partition to grant access to.</param>
-    public void AddPartitionAccess(Partition partition)
-    {
-        ArgumentNullException.ThrowIfNull(partition);
-
-        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
-        {
-            return;
-        }
-
-        var partitionAccess = new UserPartitionAccess
-        {
-            User = this,
-            Partition = partition
-        };
-
-        partitionAccesses.Add(partitionAccess);
-    }
-
-    /// <summary>
-    /// Removes access to the specified partition from the user.
-    /// </summary>
-    /// <param name="partitionGuid">The partition identifier.</param>
-    public void RemovePartitionAccess(Guid partitionGuid)
-    {
-        var userPartition =
-            partitionAccesses.SingleOrDefault(x => x.PartitionGuid == partitionGuid);
-
-        if (userPartition == null)
-        {
-            return;
-        }
-
-        partitionAccesses.Remove(userPartition);
-    }
-
-    /// <summary>
-    /// Gets the partitions associated with the user entity.
-    /// </summary>
-    public PartitionCollection Partitions { get; init; } = [];
-
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
-
-    public void AddPartition(Partition partition)
-    {
-        Partitions.Add(partition);
-    }
-
-    public void RemovePartition(Partition partition)
-    {
-        Partitions.Remove(partition);
-    }
-
-    public void AddUserGroup(UserGroup userGroup)
-    {
-        UserGroups.Add(userGroup);
-    }
-
-    public void RemoveUserGroup(UserGroup userGroup)
-    {
-        UserGroups.Remove(userGroup);
+        permissions.Remove(action);
     }
 }

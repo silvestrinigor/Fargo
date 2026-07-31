@@ -6,9 +6,10 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.Converters;
+using Fargo.Infrastructure.EntityTypeConfigurations;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 using UnitsNet;
 
 namespace Fargo.Infrastructure.Persistence;
@@ -17,29 +18,15 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 {
     public DbSet<Article> Articles { get; set; }
 
-    public DbSet<ArticleVariation> ArticleVariations { get; set; }
-
-    public DbSet<ArticlePack> ArticlePacks { get; set; }
-
-    public DbSet<ArticleKit> ArticleKits { get; set; }
-
     public DbSet<Item> Items { get; set; }
 
     public DbSet<User> Users { get; set; }
 
-    public DbSet<UserPermission> UserPermissions { get; set; }
-
     public DbSet<UserGroup> UserGroups { get; set; }
-
-    public DbSet<UserGroupPermission> UserGroupPermissions { get; set; }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public DbSet<Partition> Partitions { get; set; }
-
-    public DbSet<UserPartitionAccess> UserPartitionAccesses { get; set; }
-
-    public DbSet<UserGroupPartitionAccess> UserGroupPartitionAccesses { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -83,13 +70,33 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
             .HaveConversion<MassStringConverter>();
 
         configurationBuilder
+            .Properties<Length>()
+            .HaveConversion<LengthStringConverter>();
+
+        configurationBuilder
             .Properties<Scalar>()
             .HaveConversion<ScalarDoubleConverter>();
+
+        configurationBuilder
+            .Properties<Color>()
+            .HaveConversion<ColorArgbConverter>();
+
+        configurationBuilder
+            .Properties<TimeSpan>()
+            .HaveConversion<TimeSpanTicksConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleVariationConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticlePackConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleKitConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleKitComponentConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
 
@@ -99,8 +106,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-        modelBuilder.ApplyConfiguration(new UserPermissionConfiguration());
-
         modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserGroupPermissionConfiguration());
@@ -108,9 +113,5 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
 
         modelBuilder.ApplyConfiguration(new PartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
     }
 }

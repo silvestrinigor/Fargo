@@ -22,8 +22,10 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : Entity, IPartitioned
+public class Item : IEntity, IPartitioned
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
         => new(article, productionDate);
 
@@ -47,7 +49,7 @@ public class Item : Entity, IPartitioned
     {
         if (article.IsContainer)
         {
-            Container = new ItemContainer(this);
+            Container = new ItemContainer();
         }
 
         Article = article;
@@ -110,17 +112,17 @@ public class Item : Entity, IPartitioned
     /// <summary>
     /// Gets the parent container of the current item, if any.
     /// </summary>
-    public ItemContainer? ParentContainer
+    public Item? ParentContainer
     {
         get;
         internal set
         {
-            if (value?.Item.Guid == Guid)
+            if (value?.Guid == Guid)
             {
-                throw new ItemCannotBeOwnContainerFargoCoreException(Guid);
+                throw new FargoCoreException($"Item '{Guid}' cannot be its own container.");
             }
 
-            ParentContainerGuid = value?.Item.Guid;
+            ParentContainerGuid = value?.Guid;
             field = value;
         }
     }
@@ -138,6 +140,8 @@ public class Item : Entity, IPartitioned
 
     #region  Partition
 
+    private readonly List<Partition> partitions = [];
+
     /// <summary>
     /// Gets the partitions associated with the item.
     /// </summary>
@@ -145,16 +149,16 @@ public class Item : Entity, IPartitioned
     /// These partitions define the partition scope of the item and are used
     /// in partition-based access evaluation.
     /// </remarks>
-    public PartitionCollection Partitions { get; init; } = [];
+    public IReadOnlyCollection<Partition> Partitions => partitions;
 
     public void AddPartition(Partition partition)
     {
-        Partitions.Add(partition);
+        partitions.Add(partition);
     }
 
     public void RemovePartition(Partition partition)
     {
-        Partitions.Remove(partition);
+        partitions.Remove(partition);
     }
 
     /// <inheritdoc />

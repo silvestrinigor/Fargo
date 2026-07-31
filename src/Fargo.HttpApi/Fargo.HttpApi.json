@@ -11,7 +11,7 @@
           "Articles"
         ],
         "summary": "Gets a single article by guid",
-        "description": "Retrieves a single article by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single article by its unique identifier.",
         "operationId": "GetArticle",
         "parameters": [
           {
@@ -142,7 +142,7 @@
           "Articles"
         ],
         "summary": "Gets multiple articles",
-        "description": "Retrieves a paginated list of articles. Supports optional temporal queries and partition filters, including public articles without partitions.",
+        "description": "Retrieves a paginated list of articles.",
         "operationId": "GetArticles",
         "parameters": [
           {
@@ -831,7 +831,7 @@
           "Partitions"
         ],
         "summary": "Gets a single partition",
-        "description": "Retrieves a single partition by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single partition by its unique identifier.",
         "operationId": "GetPartition",
         "parameters": [
           {
@@ -865,7 +865,7 @@
           "Partitions"
         ],
         "summary": "Updates an existing partition",
-        "description": "Updates partition properties. Only fields provided in the body are applied; null fields are ignored.",
+        "description": "Updates partition properties.",
         "operationId": "UpdatePartition",
         "parameters": [
           {
@@ -899,7 +899,7 @@
           "Partitions"
         ],
         "summary": "Deletes a partition",
-        "description": "Deletes the specified partition from the system. The global partition cannot be deleted.",
+        "description": "Deletes the specified partition from the system.",
         "operationId": "DeletePartition",
         "parameters": [
           {
@@ -925,31 +925,26 @@
           "Partitions"
         ],
         "summary": "Gets multiple partitions",
-        "description": "Retrieves a paginated list of partitions. Supports optional temporal queries.",
+        "description": "Retrieves a paginated list of partitions.",
         "operationId": "GetPartitions",
         "parameters": [
           {
             "name": "page",
             "in": "query",
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
             }
           },
           {
             "name": "limit",
             "in": "query",
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1000
             }
           },
           {
@@ -995,7 +990,7 @@
           "Partitions"
         ],
         "summary": "Creates a new partition",
-        "description": "Creates a new partition under an optional parent (defaults to the global partition). Returns the generated identifier.",
+        "description": "Creates a new partition under an parent. Returns the generated identifier.",
         "operationId": "CreatePartition",
         "requestBody": {
           "content": {
@@ -1838,15 +1833,10 @@
       },
       "Permission": {
         "required": [
-          "guid",
           "action"
         ],
         "type": "object",
         "properties": {
-          "guid": {
-            "type": "string",
-            "format": "uuid"
-          },
           "action": {
             "$ref": "#/components/schemas/ActionType"
           }
@@ -2016,6 +2006,16 @@
             }
           },
           "userGroupsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToAdd": {
             "type": [
               "null",
               "array"
@@ -2264,19 +2264,13 @@
           "firstName": { },
           "lastName": { },
           "description": { },
-          "password": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "isActive": {
             "type": [
               "null",
               "boolean"
             ]
           },
-          "permissions": {
+          "permissionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2285,14 +2279,26 @@
               "$ref": "#/components/schemas/UserPermissionUpdateDto"
             }
           },
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "permissionsToRemove": {
             "type": [
               "null",
-              "string"
-            ]
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UserPermissionUpdateDto"
+            }
           },
-          "partitions": {
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
             "type": [
               "null",
               "array"
@@ -2303,6 +2309,36 @@
             }
           },
           "userGroupsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "userGroupsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToRemove": {
             "type": [
               "null",
               "array"

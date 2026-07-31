@@ -180,7 +180,7 @@ public sealed class ArticleCreateCommandHandler(
 
                 EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessDeniedToPartition(partition);
+                actor.ThrowIfAccessDenied(partition);
 
                 article.AddPartition(partition);
             }

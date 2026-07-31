@@ -9,14 +9,7 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleKit
 {
-    private ArticleKit()
-    {
-    }
-
-    public ArticleKit(IReadOnlyCollection<ArticleKitComponent> components)
-    {
-        SetComponents(components);
-    }
+    public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
     /// Gets the components that compose the kit.
@@ -25,6 +18,15 @@ public sealed class ArticleKit
     /// Thrown when the collection contains null components, or contains duplicated source articles.
     /// </exception>
     public IReadOnlyCollection<ArticleKitComponent> Components { get; private set; } = [];
+
+    private ArticleKit()
+    {
+    }
+
+    public ArticleKit(IReadOnlyCollection<ArticleKitComponent> components)
+    {
+        SetComponents(components);
+    }
 
     private void SetComponents(IReadOnlyCollection<ArticleKitComponent> components)
     {

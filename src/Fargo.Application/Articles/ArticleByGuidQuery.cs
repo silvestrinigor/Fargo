@@ -8,9 +8,4 @@ namespace Fargo.Application.Articles;
 /// <param name="ArticleGuid">
 /// Article unique identifier.
 /// </param>
-/// <param name="AsOfDateTime">
-/// Temporal query date.
-/// </param>
-public sealed record ArticleByGuidQuery(
-    Guid ArticleGuid
-) : IQuery<ArticleDto?>;
+public sealed record ArticleByGuidQuery(Guid ArticleGuid) : IQuery<ArticleDto?>;

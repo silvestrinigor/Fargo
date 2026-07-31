@@ -15,6 +15,5 @@ internal static partial class UserCreateCommandHandlerLogs
         Level = LogLevel.Information,
         Message = "User create mutation completed for user {userGuid} by actor {actorId}.")]
     public static partial void UserCreateCompleted(
-        this ILogger logger,
-        Guid userGuid, ActorId actorId);
+        this ILogger logger, Guid userGuid, ActorId actorId);
 }

@@ -9,8 +9,10 @@ namespace Fargo.Core.Identity;
 /// Refresh tokens are long-lived credentials associated with a user
 /// and can be rotated or invalidated when replaced.
 /// </summary>
-public sealed class RefreshToken : Entity
+public sealed class RefreshToken : IEntity
 {
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
     /// <summary>
     /// Default number of days before a refresh token expires.
     /// </summary>

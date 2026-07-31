@@ -9,15 +9,11 @@ internal static partial class UserUpdateCommandHandlerLogs
         Level = LogLevel.Information,
         Message = "User update flow started for user {userGuid} by actor {actorId}.")]
     public static partial void UpdateStarted(
-        this ILogger logger,
-        Guid userGuid,
-        ActorId actorId);
+        this ILogger logger, Guid userGuid, ActorId actorId);
 
     [LoggerMessage(
         Level = LogLevel.Information,
         Message = "User update mutation completed for user {userGuid} by actor {actorId}.")]
     public static partial void UpdateCompleted(
-        this ILogger logger,
-        Guid userGuid,
-        ActorId actorId);
+        this ILogger logger, Guid userGuid, ActorId actorId);
 }

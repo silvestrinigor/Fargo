@@ -31,20 +31,15 @@ public sealed class UserCreateCommandHandler(
 
         await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var user = new User
-        {
-            Nameid = command.Create.Nameid,
+        var user = User.CreateUser(command.Create.Nameid, userPasswordHash);
 
-            FirstName = command.Create.FirstName ?? null,
+        user.FirstName = command.Create.FirstName ?? null;
 
-            LastName = command.Create.LastName ?? null,
+        user.LastName = command.Create.LastName ?? null;
 
-            PasswordHash = userPasswordHash,
+        user.Description = command.Create.Description ?? Description.Empty;
 
-            Description = command.Create.Description ?? Description.Empty,
-
-            DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null
-        };
+        user.DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null;
 
         user.MarkPasswordChangeAsRequired();
 
@@ -68,7 +63,7 @@ public sealed class UserCreateCommandHandler(
 
                 EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
 
-                actor.ThrowIfAccessDeniedToPartition(partition);
+                actor.ThrowIfAccessDenied(partition);
 
                 user.AddPartition(partition);
             }
@@ -85,6 +80,20 @@ public sealed class UserCreateCommandHandler(
                 actor.ThrowIfAccessDenied(userGroup);
 
                 user.AddUserGroup(userGroup);
+            }
+        }
+
+        if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
+        {
+            foreach (var partitionGuid in partitionAccessesToAdd.Distinct())
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                user.AddPartitionAccess(partition);
             }
         }
 

@@ -9,5 +9,4 @@ namespace Fargo.Application.Articles;
 /// <param name="ArticleBarcode">
 /// Article barcode information.
 /// </param>
-public sealed record ArticleByBarcodeQuery(
-    Barcode ArticleBarcode) : IQuery<ArticleDto?>;
+public sealed record ArticleByBarcodeQuery(Barcode ArticleBarcode) : IQuery<ArticleDto?>;

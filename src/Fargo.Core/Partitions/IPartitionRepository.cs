@@ -8,28 +8,19 @@ public interface IPartitionRepository
     /// <summary>
     /// Retrieves a partition by its unique identifier.
     /// </summary>
-    Task<Partition?> GetByGuidAsync(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default
-    );
+    Task<Partition?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the unique identifiers of all descendant partitions of a given partition.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-        Guid partitionGuid,
-        bool includeRoot = true,
-        CancellationToken cancellationToken = default
-    );
+        Guid partitionGuid, bool includeRoot = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the unique identifiers of all descendant partitions of the specified root partitions.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
-        IReadOnlyCollection<Guid> partitionGuids,
-        bool includeRoots = true,
-        CancellationToken cancellationToken = default
-    );
+        IReadOnlyCollection<Guid> partitionGuids, bool includeRoots = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new partition to the persistence context.
@@ -40,4 +31,9 @@ public interface IPartitionRepository
     /// Removes a partition from the persistence context.
     /// </summary>
     void Remove(Partition partition);
+
+    /// <summary>
+    /// Retrieves the value indicating whether the partition has any other associated entity.
+    /// </summary>
+    Task<bool> HasAnyAssociatedEntity(Guid partitionGuid, CancellationToken cancellationToken = default);
 }
