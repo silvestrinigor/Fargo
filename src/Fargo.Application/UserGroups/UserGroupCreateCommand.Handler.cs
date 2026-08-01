@@ -35,6 +35,8 @@ public sealed class UserGroupCreateCommandHandler(
 
         userGroup.Description = command.Create.Description ?? Description.Empty;
 
+        userGroup.IsActive = command.Create.IsActive ?? true;
+
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
             var requestedActions = permissions.Distinct();

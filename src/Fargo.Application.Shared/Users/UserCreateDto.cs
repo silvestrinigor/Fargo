@@ -8,6 +8,7 @@ public sealed record UserCreateDto(
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,
+    bool? IsActive = null,
     IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
     TimeSpan? DefaultPasswordExpirationTimeSpan = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
