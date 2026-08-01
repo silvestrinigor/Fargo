@@ -14,7 +14,9 @@ public sealed class FargoApplicationExceptionHandler(
         CancellationToken cancellationToken)
     {
         if (exception is not FargoApplicationException appException)
+        {
             return false;
+        }
 
         ProblemDetails problem;
 

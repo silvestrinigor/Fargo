@@ -14,7 +14,9 @@ public sealed class FargoCoreExceptionHandler(
         CancellationToken cancellationToken)
     {
         if (exception is not FargoCoreException coreException)
+        {
             return false;
+        }
 
         var problem = new ProblemDetails
         {
