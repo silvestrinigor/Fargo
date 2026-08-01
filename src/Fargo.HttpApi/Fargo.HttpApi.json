@@ -1838,17 +1838,6 @@
           }
         }
       },
-      "Permission": {
-        "required": [
-          "action"
-        ],
-        "type": "object",
-        "properties": {
-          "action": {
-            "$ref": "#/components/schemas/ActionType"
-          }
-        }
-      },
       "QuantityInfoOfScalarUnit": {
         "required": [
           "unitInfos",
@@ -2186,7 +2175,7 @@
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Permission"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "partitions": {

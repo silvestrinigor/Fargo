@@ -36,12 +36,11 @@ public class UserGroup : IEntity, IPartitioned
     /// </summary>
     public bool IsActive { get; set; } = true;
 
-    private readonly List<UserGroupPermission> userGroupPermissions = [];
+    public bool IsAdminUserGroup => Guid == FargoCoreGuids.AdminUserGroupGuid;
 
-    /// <summary>
-    /// Gets the read-only collection of permissions assigned to the user group.
-    /// </summary>
-    public IReadOnlyCollection<UserGroupPermission> Permissions => userGroupPermissions;
+    private readonly List<ActionType> permissions = [];
+
+    public IReadOnlyCollection<ActionType> Permissions => permissions;
 
     private readonly List<Partition> partitions = [];
 
@@ -127,18 +126,7 @@ public class UserGroup : IEntity, IPartitioned
     /// <param name="action">The action to grant to the user group.</param>
     public void AddPermission(ActionType action)
     {
-        if (userGroupPermissions.Any(x => x.Action == action))
-        {
-            return;
-        }
-
-        var userGroupPermission = new UserGroupPermission
-        {
-            Action = action,
-            UserGroup = this
-        };
-
-        userGroupPermissions.Add(userGroupPermission);
+        permissions.Add(action);
     }
 
     /// <summary>
@@ -147,14 +135,6 @@ public class UserGroup : IEntity, IPartitioned
     /// <param name="action">The action to remove from the user group.</param>
     public void RemovePermission(ActionType action)
     {
-        var userGroupPermission = userGroupPermissions
-            .SingleOrDefault(x => x.Action == action);
-
-        if (userGroupPermission == null)
-        {
-            return;
-        }
-
-        userGroupPermissions.Remove(userGroupPermission);
+        permissions.Remove(action);
     }
 }

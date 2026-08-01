@@ -1437,7 +1437,7 @@
         userGroupUpdate.PartitionsText = string.Join(Environment.NewLine, userGroup.Partitions);
         userGroupUpdate.IsActive = userGroup.IsActive;
         userGroupUpdate.Permissions.Clear();
-        foreach (var permission in userGroup.Permissions.Select(static permission => permission.Action))
+        foreach (var permission in userGroup.Permissions.Select(static permission => permission))
         {
             userGroupUpdate.Permissions.Add(permission);
         }
@@ -1868,7 +1868,7 @@
             @DetailValue("Description", userGroup.Description)
             @DetailValue("Active", userGroup.IsActive ? "Yes" : "No")
         </div>
-        @PermissionCollection("Permissions", userGroup.Permissions.Select(static permission => permission.Action))
+        @PermissionCollection("Permissions", userGroup.Permissions.Select(static permission => permission))
         @GuidCollection("Partitions", userGroup.Partitions))
     </section>;
 

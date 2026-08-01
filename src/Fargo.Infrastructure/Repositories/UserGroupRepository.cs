@@ -22,7 +22,6 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
 
     public Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => userGroups
-            .Include(userGroup => userGroup.Permissions)
             .Include(userGroup => userGroup.Partitions)
             .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
 

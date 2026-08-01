@@ -22,10 +22,7 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.Property(x => x.IsActive).IsRequired();
 
-        builder.HasMany(x => x.Permissions)
-            .WithOne(x => x.UserGroup)
-            .HasForeignKey(x => x.UserGroupGuid)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.Permissions).HasColumnType("jsonb");
 
         builder.HasMany(g => g.Partitions).WithMany();
     }
