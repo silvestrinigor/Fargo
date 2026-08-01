@@ -1,4 +1,4 @@
-@userGuid = 2d9ffdf1-fe42-4886-bd18-9ecd1588d4cb
+@userGuid = 00000000-0000-0000-0000-000000000004
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get
@@ -39,7 +39,8 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "description": "Updated user"
+  "description": "Updated user",
+  "partitionAccessesToRemove": 1,
 }
 
 ###

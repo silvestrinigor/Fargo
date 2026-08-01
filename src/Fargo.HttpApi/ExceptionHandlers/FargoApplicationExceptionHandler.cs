@@ -24,6 +24,8 @@ public sealed class FargoApplicationExceptionHandler(
         {
             case AccessDeniedFargoApplicationException ex:
 
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status403Forbidden,
@@ -39,6 +41,8 @@ public sealed class FargoApplicationExceptionHandler(
 
             case PermissionDeniedFargoApplicationException ex:
 
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status403Forbidden,
@@ -52,6 +56,8 @@ public sealed class FargoApplicationExceptionHandler(
                 break;
 
             case EntityNotFoundFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
 
                 problem = new ProblemDetails
                 {
@@ -67,6 +73,8 @@ public sealed class FargoApplicationExceptionHandler(
 
             case ActorNotFoundFargoApplicationException ex:
 
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status403Forbidden,
@@ -79,6 +87,8 @@ public sealed class FargoApplicationExceptionHandler(
                 break;
 
             default:
+
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
 
                 problem = new ProblemDetails
                 {
