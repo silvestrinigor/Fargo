@@ -940,30 +940,9 @@
             return selectedUserGroup is null ? "User group not found." : selectedUserGroup;
         });
 
-    private async Task CreateUserGroupAsync() => await RunAsync(
-        OperationIds.Create,
-        "User group created",
-        async client => await client.UserGroups.CreateAsync(new UserGroupCreateDto(
-            RequiredText(userGroupCreate.Nameid, "Nameid"),
-            null,
-            ToUserGroupPermissions(userGroupCreate.Permissions),
-            ParseGuidList(userGroupCreate.PartitionsText, "Partitions"))));
+    private async Task CreateUserGroupAsync() => _ = 1;
 
-    private async Task UpdateUserGroupAsync() => await RunAsync(
-        OperationIds.Update,
-        "User group updated",
-        async client =>
-        {
-            await client.UserGroups.UpdateAsync(
-                RequiredGuid(userGroupUpdate.Guid, "User group GUID"),
-                new UserGroupUpdateDto(
-                    OptionalText(userGroupUpdate.IncludeNameid, userGroupUpdate.Nameid),
-                    null,
-                    OptionalBool(userGroupUpdate.IncludeIsActive, userGroupUpdate.IsActive),
-                    userGroupUpdate.IncludePermissions ? ToUserGroupPermissions(userGroupUpdate.Permissions) : null,
-                    userGroupUpdate.IncludePartitions ? ParseGuidList(userGroupUpdate.PartitionsText, "Partitions") : null));
-            return null;
-        });
+    private async Task UpdateUserGroupAsync() => _ = 1;
 
     private async Task DeleteUserGroupAsync() => await RunAsync(
         OperationIds.Delete,

@@ -2117,10 +2117,10 @@
         "type": "object",
         "properties": {
           "nameid": {
-            "type": "string"
+            "$ref": "#/components/schemas/Nameid"
           },
           "description": { },
-          "permissions": {
+          "permissionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2130,6 +2130,16 @@
             }
           },
           "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToAdd": {
             "type": [
               "null",
               "array"
@@ -2149,7 +2159,8 @@
           "isActive",
           "isAdminUserGroup",
           "permissions",
-          "partitions"
+          "partitions",
+          "partitionAccesses"
         ],
         "type": "object",
         "properties": {
@@ -2181,6 +2192,13 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "partitionAccesses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2189,15 +2207,23 @@
           "nameid",
           "description",
           "isActive",
-          "permissions",
-          "partitions"
+          "permissionsToAdd",
+          "permissionsToRemove",
+          "partitionsToAdd",
+          "partitionsToRemove",
+          "partitionAccessesToAdd",
+          "partitionAccessesToRemove"
         ],
         "type": "object",
         "properties": {
           "nameid": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Nameid"
+              }
             ]
           },
           "description": {
@@ -2216,7 +2242,7 @@
               "boolean"
             ]
           },
-          "permissions": {
+          "permissionsToAdd": {
             "type": [
               "null",
               "array"
@@ -2225,7 +2251,46 @@
               "$ref": "#/components/schemas/ActionType"
             }
           },
-          "partitions": {
+          "permissionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToRemove": {
             "type": [
               "null",
               "array"

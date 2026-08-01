@@ -9,5 +9,6 @@ public sealed record UserGroupDto(
     bool IsActive,
     bool IsAdminUserGroup,
     IReadOnlyCollection<ActionType> Permissions,
-    IReadOnlyCollection<Guid> Partitions
+    IReadOnlyCollection<Guid> Partitions,
+    IReadOnlyCollection<Guid> PartitionAccesses
 );

@@ -3,9 +3,13 @@ using Fargo.Core.Shared;
 namespace Fargo.Application.Shared.UserGroups;
 
 public sealed record UserGroupUpdateDto(
-    string? Nameid,
+    Nameid? Nameid,
     Description? Description,
     bool? IsActive,
-    IReadOnlyCollection<ActionType>? Permissions,
-    IReadOnlyCollection<Guid>? Partitions
+    IReadOnlyCollection<ActionType>? PermissionsToAdd,
+    IReadOnlyCollection<ActionType>? PermissionsToRemove,
+    IReadOnlyCollection<Guid>? PartitionsToAdd,
+    IReadOnlyCollection<Guid>? PartitionsToRemove,
+    IReadOnlyCollection<Guid>? PartitionAccessesToAdd,
+    IReadOnlyCollection<Guid>? PartitionAccessesToRemove
 );
