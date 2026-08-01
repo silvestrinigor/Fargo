@@ -329,6 +329,8 @@ namespace Fargo.Infrastructure.Migrations
                     gs1128 = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: true),
                     qr_code = table.Column<string>(type: "character varying(2953)", maxLength: 2953, nullable: true),
                     data_matrix = table.Column<string>(type: "character varying(2335)", maxLength: 2335, nullable: true),
+                    variation_guid = table.Column<Guid>(type: "uuid", nullable: true),
+                    pack_guid = table.Column<Guid>(type: "uuid", nullable: true),
                     article_guid = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
@@ -347,17 +349,15 @@ namespace Fargo.Infrastructure.Migrations
                         principalColumn: "guid",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_articles_article_packs_article_guid",
-                        column: x => x.article_guid,
+                        name: "fk_articles_article_packs_pack_guid",
+                        column: x => x.pack_guid,
                         principalTable: "article_packs",
-                        principalColumn: "guid",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "guid");
                     table.ForeignKey(
-                        name: "fk_articles_article_variations_article_guid",
-                        column: x => x.article_guid,
+                        name: "fk_articles_article_variations_variation_guid",
+                        column: x => x.variation_guid,
                         principalTable: "article_variations",
-                        principalColumn: "guid",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "guid");
                 });
 
             migrationBuilder.CreateTable(
@@ -498,6 +498,11 @@ namespace Fargo.Infrastructure.Migrations
                 filter: "itf14 IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "ix_articles_pack_guid",
+                table: "articles",
+                column: "pack_guid");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_articles_qr_code",
                 table: "articles",
                 column: "qr_code",
@@ -517,6 +522,11 @@ namespace Fargo.Infrastructure.Migrations
                 column: "upc_e",
                 unique: true,
                 filter: "upc_e IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_articles_variation_guid",
+                table: "articles",
+                column: "variation_guid");
 
             migrationBuilder.CreateIndex(
                 name: "ix_item_partition_partitions_guid",
@@ -606,7 +616,7 @@ namespace Fargo.Infrastructure.Migrations
                 column: "from_article_guid",
                 principalTable: "articles",
                 principalColumn: "guid",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "fk_article_partition_articles_article_guid",
@@ -622,7 +632,7 @@ namespace Fargo.Infrastructure.Migrations
                 column: "from_article_guid",
                 principalTable: "articles",
                 principalColumn: "guid",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />

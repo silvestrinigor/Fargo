@@ -119,6 +119,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<Guid?>("PackGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pack_guid");
+
                     b.Property<string>("QrCode")
                         .HasMaxLength(2953)
                         .HasColumnType("character varying(2953)")
@@ -137,6 +141,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)")
                         .HasColumnName("upc_e");
+
+                    b.Property<Guid?>("VariationGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variation_guid");
 
                     b.Property<Guid?>("article_guid")
                         .HasColumnType("uuid")
@@ -180,6 +188,9 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_articles_itf14")
                         .HasFilter("itf14 IS NOT NULL");
 
+                    b.HasIndex("PackGuid")
+                        .HasDatabaseName("ix_articles_pack_guid");
+
                     b.HasIndex("QrCode")
                         .IsUnique()
                         .HasDatabaseName("ix_articles_qr_code")
@@ -194,6 +205,9 @@ namespace Fargo.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_articles_upc_e")
                         .HasFilter("upc_e IS NOT NULL");
+
+                    b.HasIndex("VariationGuid")
+                        .HasDatabaseName("ix_articles_variation_guid");
 
                     b.HasIndex("article_guid")
                         .IsUnique()
@@ -678,6 +692,16 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Articles.Article", b =>
                 {
+                    b.HasOne("Fargo.Core.Articles.ArticlePack", "Pack")
+                        .WithMany()
+                        .HasForeignKey("PackGuid")
+                        .HasConstraintName("fk_articles_article_packs_pack_guid");
+
+                    b.HasOne("Fargo.Core.Articles.ArticleVariation", "Variation")
+                        .WithMany()
+                        .HasForeignKey("VariationGuid")
+                        .HasConstraintName("fk_articles_article_variations_variation_guid");
+
                     b.HasOne("Fargo.Core.Articles.ArticleContainer", "Container")
                         .WithOne()
                         .HasForeignKey("Fargo.Core.Articles.Article", "article_guid")
@@ -689,18 +713,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasForeignKey("Fargo.Core.Articles.Article", "article_guid")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_articles_article_kits_article_guid");
-
-                    b.HasOne("Fargo.Core.Articles.ArticlePack", "Pack")
-                        .WithOne()
-                        .HasForeignKey("Fargo.Core.Articles.Article", "article_guid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_articles_article_packs_article_guid");
-
-                    b.HasOne("Fargo.Core.Articles.ArticleVariation", "Variation")
-                        .WithOne()
-                        .HasForeignKey("Fargo.Core.Articles.Article", "article_guid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_articles_article_variations_article_guid");
 
                     b.Navigation("Container");
 
@@ -733,7 +745,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
                         .WithMany()
                         .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_article_packs_articles_from_article_guid");
 
@@ -745,7 +757,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
                         .WithMany()
                         .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_article_variations_articles_from_article_guid");
 

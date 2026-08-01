@@ -1768,7 +1768,8 @@
           "guid",
           "name",
           "description",
-          "parentPartitionGuid"
+          "parentPartitionGuid",
+          "isGlobalPartition"
         ],
         "type": "object",
         "properties": {
@@ -1788,6 +1789,12 @@
               "string"
             ],
             "format": "uuid"
+          },
+          "isGlobalPartition": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           }
         }
       },

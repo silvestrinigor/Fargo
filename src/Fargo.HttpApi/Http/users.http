@@ -1,0 +1,50 @@
+@userGuid = 33333333-3333-3333-3333-333333333333
+@partitionGuid = 55555555-5555-5555-5555-555555555555
+
+### Get
+
+GET {{host}}/users/{{userGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### List
+
+GET {{host}}/users?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###
+
+### Create
+
+POST {{host}}/users
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "nameid": "john",
+  "password": {
+    "value": "Password123!"
+  },
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+###
+
+### Update
+
+PUT {{host}}/users/{{userGuid}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "description": "Updated user"
+}
+
+###
+
+### Delete
+
+DELETE {{host}}/users/{{userGuid}}
+Authorization: Bearer {{jwt}}

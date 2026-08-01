@@ -1,0 +1,46 @@
+@partitionGuid = 55555555-5555-5555-5555-555555555555
+@parentPartitionGuid = 66666666-6666-6666-6666-666666666666
+
+### Get
+
+GET {{host}}/partitions/{{partitionGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### List
+
+GET {{host}}/partitions?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###
+
+### Create
+
+POST {{host}}/partitions
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "name": "Warehouse A",
+  "parentPartitionGuid": "{{parentPartitionGuid}}"
+}
+
+###
+
+### Update
+
+PATCH {{host}}/partitions/{{partitionGuid}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "description": "Updated partition"
+}
+
+###
+
+### Delete
+
+DELETE {{host}}/partitions/{{partitionGuid}}
+Authorization: Bearer {{jwt}}
