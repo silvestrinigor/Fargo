@@ -1,4 +1,4 @@
-@userGuid = 33333333-3333-3333-3333-333333333333
+@userGuid = 00000000-0000-0000-0000-000000000004
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get
@@ -23,9 +23,7 @@ Content-Type: application/json
 
 {
   "nameid": "john",
-  "password": {
-    "value": "Password123!"
-  },
+  "password": "Password123!",
   "firstName": "John",
   "lastName": "Doe"
 }

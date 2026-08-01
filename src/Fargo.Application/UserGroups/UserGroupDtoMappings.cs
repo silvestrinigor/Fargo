@@ -10,8 +10,9 @@ public static class UserGroupDtoMappings
         userGroup.Guid,
         userGroup.Nameid,
         userGroup.Description,
-        userGroup.Permissions,
-        userGroup.Partitions.Select(partition => partition.Guid).ToArray(),
         userGroup.IsActive,
-        userGroup.IsAdminUserGroup);
+        userGroup.IsAdminUserGroup,
+        userGroup.Permissions,
+        userGroup.Partitions.Select(partition => partition.Guid).ToArray()
+    );
 }

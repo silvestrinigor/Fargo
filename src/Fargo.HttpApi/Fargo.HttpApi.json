@@ -1812,17 +1812,7 @@
           }
         }
       },
-      "Password": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
+      "Password": { },
       "PasswordUpdateDto": {
         "required": [
           "newPassword",
@@ -2030,14 +2020,14 @@
           "firstName",
           "lastName",
           "description",
+          "isActive",
+          "isAdmin",
           "defaultPasswordExpirationPeriod",
           "requirePasswordChangeAt",
           "permissions",
           "partitions",
           "partitionAccesses",
-          "userGroups",
-          "isActive",
-          "isAdmin"
+          "userGroups"
         ],
         "type": "object",
         "properties": {
@@ -2070,6 +2060,12 @@
           },
           "description": {
             "$ref": "#/components/schemas/Description"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isAdmin": {
+            "type": "boolean"
           },
           "defaultPasswordExpirationPeriod": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -2111,12 +2107,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "isAdmin": {
-            "type": "boolean"
           }
         }
       },
@@ -2156,9 +2146,10 @@
           "guid",
           "nameid",
           "description",
+          "isActive",
+          "isAdminUserGroup",
           "permissions",
-          "partitions",
-          "isActive"
+          "partitions"
         ],
         "type": "object",
         "properties": {
@@ -2172,6 +2163,12 @@
           "description": {
             "$ref": "#/components/schemas/Description"
           },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isAdminUserGroup": {
+            "type": "boolean"
+          },
           "permissions": {
             "type": "array",
             "items": {
@@ -2184,9 +2181,6 @@
               "type": "string",
               "format": "uuid"
             }
-          },
-          "isActive": {
-            "type": "boolean"
           }
         }
       },

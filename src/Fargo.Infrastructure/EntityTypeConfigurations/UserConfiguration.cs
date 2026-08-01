@@ -14,10 +14,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(x => x.Nameid).IsUnique();
 
-        builder.Property(x => x.AuthVersion)
-            .HasDefaultValueSql("gen_random_uuid()")
-            .IsRequired();
-
         builder.Property(x => x.Permissions).HasColumnType("jsonb");
 
         builder.HasMany(x => x.UserGroups).WithMany();
