@@ -8,7 +8,7 @@ public sealed record UserCreateDto(
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,
-    IReadOnlyCollection<UserPermissionUpdateDto>? PermissionsToAdd = null,
+    IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
     TimeSpan? DefaultPasswordExpirationTimeSpan = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
     IReadOnlyCollection<Guid>? UserGroupsToAdd = null,

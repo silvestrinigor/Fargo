@@ -41,6 +41,11 @@ public class User : IEntity, IPartitioned
     public bool IsActive { get; set; } = true;
 
     /// <summary>
+    /// Gets a value indicating whether the user is the main admin.
+    /// </summary>
+    public bool IsAdmin => Guid == FargoCoreGuids.AdminUserGuid;
+
+    /// <summary>
     /// Gets or sets the hashed password of the user.
     /// </summary>
     public required PasswordHash PasswordHash { get; set; }
@@ -207,11 +212,6 @@ public class User : IEntity, IPartitioned
     /// <param name="action">The action type to allow.</param>
     public void AddPermission(ActionType action)
     {
-        if (permissions.Any(x => x == action))
-        {
-            return;
-        }
-
         permissions.Add(action);
     }
 

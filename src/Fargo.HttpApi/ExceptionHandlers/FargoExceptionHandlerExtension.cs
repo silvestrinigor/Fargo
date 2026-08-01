@@ -8,6 +8,8 @@ public static class FargoExceptionHandlerExtension
 
         services.AddExceptionHandler<FargoCoreExceptionHandler>();
 
+        services.AddExceptionHandler<BadRequestExceptionHandler>();
+
         return services;
     }
 }

@@ -1,5 +1,6 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ public sealed class UserGroupUpdateCommandHandler(
     ActorService actorService,
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
+    IPartitionRepository partitionRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<UserGroupUpdateCommandHandler> logger
@@ -35,27 +37,92 @@ public sealed class UserGroupUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(userGroup);
 
-        if (update.Nameid is not null)
+        if (update.Nameid is not null && userGroup.Nameid != update.Nameid)
         {
-            Nameid nameid;
+            await userGroupService.ValidateUserGroupNameidIsAvailableAsync(update.Nameid.Value, cancellationToken);
 
-            try
-            {
-                nameid = new Nameid(update.Nameid);
-            }
-            catch (ArgumentException)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (userGroup.Nameid != nameid)
-            {
-                await userGroupService.ValidateUserGroupNameidChange(userGroup, nameid, cancellationToken);
-                userGroup.Nameid = nameid;
-            }
+            userGroup.Nameid = update.Nameid.Value;
         }
 
         userGroup.Description = update.Description ?? userGroup.Description;
+
+        userGroup.IsActive = update.IsActive ?? userGroup.IsActive;
+
+        if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
+        {
+            foreach (var permission in permissionsToAdd.Distinct())
+            {
+                actor.ThrowIfPermissionDenied(permission);
+
+                userGroup.AddPermission(permission);
+            }
+        }
+
+        if (command.Update.PermissionsToRemove is { Count: > 0 } permissionsToRemove)
+        {
+            foreach (var permission in permissionsToRemove.Distinct())
+            {
+                actor.ThrowIfPermissionDenied(permission);
+
+                userGroup.RemovePermission(permission);
+            }
+        }
+
+        if (command.Update.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
+        {
+            foreach (var partitionGuid in partitionsToAdd.Distinct())
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                userGroup.AddPartition(partition);
+            }
+        }
+
+        if (command.Update.PartitionsToRemove is { Count: > 0 } partitionsToRemove)
+        {
+            foreach (var partitionGuid in partitionsToRemove.Distinct())
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                userGroup.RemovePartition(partition);
+            }
+        }
+
+        if (command.Update.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
+        {
+            foreach (var partitionGuid in partitionAccessesToAdd)
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                userGroup.AddPartitionAccess(partition);
+            }
+        }
+
+        if (command.Update.PartitionAccessesToRemove is { Count: > 0 } partitionAccessesToRemove)
+        {
+            foreach (var partitionGuid in partitionAccessesToRemove)
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                userGroup.RemovePartitionAccess(partition);
+            }
+        }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

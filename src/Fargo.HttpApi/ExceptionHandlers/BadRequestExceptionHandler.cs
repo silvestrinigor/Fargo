@@ -1,10 +1,9 @@
-using Fargo.Core;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.ExceptionHandlers;
 
-public sealed class FargoCoreExceptionHandler(
+public sealed class BadRequestExceptionHandler(
     IProblemDetailsService problemDetailsService)
     : IExceptionHandler
 {
@@ -13,7 +12,7 @@ public sealed class FargoCoreExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not FargoCoreException coreException)
+        if (exception is not BadHttpRequestException badRequest)
         {
             return false;
         }
@@ -23,13 +22,10 @@ public sealed class FargoCoreExceptionHandler(
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Core exception.",
-            Detail = coreException.Message,
-            Instance = httpContext.Request.Path,
+            Title = "Invalid request",
+            Detail = badRequest.InnerException?.Message ?? badRequest.Message,
+            Instance = httpContext.Request.Path
         };
-
-        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        problem.Extensions["coreErrorType"] = coreException.ErrorType;
 
         await problemDetailsService.WriteAsync(new ProblemDetailsContext
         {

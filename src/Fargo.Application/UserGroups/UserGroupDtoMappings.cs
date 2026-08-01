@@ -1,5 +1,4 @@
 using Fargo.Application.Shared.UserGroups;
-using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 using System.Linq.Expressions;
 
@@ -11,7 +10,10 @@ public static class UserGroupDtoMappings
         userGroup.Guid,
         userGroup.Nameid,
         userGroup.Description,
-        userGroup.Permissions.Select(permission => new Permission(permission.Action)).ToArray(),
+        userGroup.IsActive,
+        userGroup.IsAdminUserGroup,
+        userGroup.Permissions,
         userGroup.Partitions.Select(partition => partition.Guid).ToArray(),
-        userGroup.IsActive);
+        userGroup.PartitionAccesses.Select(partition => partition.Guid).ToArray()
+    );
 }

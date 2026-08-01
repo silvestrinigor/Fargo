@@ -29,24 +29,25 @@ public sealed class UserGroupCreateCommandHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUserGroup);
 
-        Nameid nameid;
+        await userGroupService.ValidateUserGroupNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var create = command.Create;
+        var userGroup = UserGroup.CreateUserGroup(command.Create.Nameid);
 
-        try
+        userGroup.Description = command.Create.Description ?? Description.Empty;
+
+        if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
-            nameid = new Nameid(create.Nameid);
+            var requestedActions = permissions.Distinct();
+
+            foreach (var action in requestedActions)
+            {
+                actor.ThrowIfPermissionDenied(action);
+
+                userGroup.AddPermission(action);
+            }
         }
-        catch (ArgumentException ex)
-        {
-            throw new InvalidOperationException(ex.Message);
-        }
 
-        var userGroup = UserGroup.CreateUserGroup(nameid);
-
-        userGroup.Description = create.Description ?? Description.Empty;
-
-        if (create.PartitionsToAdd is { Count: > 0 } partitions)
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
             {
@@ -60,7 +61,19 @@ public sealed class UserGroupCreateCommandHandler(
             }
         }
 
-        await userGroupService.ValidateUserGroupCreate(userGroup, cancellationToken);
+        if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
+        {
+            foreach (var partitionGuid in partitionAccessesToAdd.Distinct())
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                userGroup.AddPartitionAccess(partition);
+            }
+        }
 
         userGroupRepository.Add(userGroup);
 

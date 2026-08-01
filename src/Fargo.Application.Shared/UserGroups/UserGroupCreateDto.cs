@@ -3,8 +3,9 @@ using Fargo.Core.Shared;
 namespace Fargo.Application.Shared.UserGroups;
 
 public sealed record UserGroupCreateDto(
-    string Nameid,
+    Nameid Nameid,
     Description? Description = null,
-    IReadOnlyCollection<UserGroupPermissionUpdateDto>? Permissions = null,
-    IReadOnlyCollection<Guid>? PartitionsToAdd = null
+    IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null
 );

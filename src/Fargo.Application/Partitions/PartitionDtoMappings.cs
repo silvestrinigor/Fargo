@@ -11,5 +11,6 @@ public static class PartitionDtoMappings
         partition.Guid,
         partition.Name,
         partition.Description,
-        partition.ParentPartitionGuid);
+        partition.ParentPartitionGuid,
+        partition.IsGlobalPartition);
 }

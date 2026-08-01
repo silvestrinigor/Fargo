@@ -1,0 +1,45 @@
+### Login
+
+POST {{host}}/identity/login
+Content-Type: application/json
+
+{
+  "nameid": "admin",
+  "password": "Senha123@"
+}
+
+###
+
+### Refresh
+
+POST {{host}}/identity/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Logout
+
+POST {{host}}/identity/logout
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Change password
+
+PUT {{host}}/identity/password
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Password123!",
+  "newPassword": "Password456!"
+}

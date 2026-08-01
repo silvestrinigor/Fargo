@@ -4,95 +4,113 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.ExceptionHandlers;
 
-public sealed class FargoApplicationExceptionHandler : IExceptionHandler
+public sealed class FargoApplicationExceptionHandler(
+    IProblemDetailsService problemDetailsService)
+    : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
-        HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+        HttpContext httpContext,
+        Exception exception,
+        CancellationToken cancellationToken)
     {
-        if (exception is FargoApplicationException appException)
+        if (exception is not FargoApplicationException appException)
         {
-            ProblemDetails problem;
-
-            switch (appException)
-            {
-                case AccessDeniedFargoApplicationException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status403Forbidden,
-                        Title = "Access denied.",
-                    };
-
-                    problem.Extensions.Add("actorId", ex.ActorId);
-
-                    problem.Extensions.Add("entityGuid", ex.EntityGuid);
-
-                    problem.Extensions.Add("entityType", ex.EntityType);
-
-                    break;
-
-                case PermissionDeniedFargoApplicationException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status403Forbidden,
-                        Title = "Permission denied.",
-                    };
-
-                    problem.Extensions.Add("actorId", ex.ActorId);
-
-                    problem.Extensions.Add("actionType", ex.ActionType);
-
-                    break;
-
-                case EntityNotFoundFargoApplicationException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status404NotFound,
-                        Title = "Entity not found.",
-                    };
-
-                    problem.Extensions.Add("entityGuid", ex.EntityGuid);
-
-                    problem.Extensions.Add("entityType", ex.EntityType);
-
-                    break;
-
-                case ActorNotFoundFargoApplicationException ex:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status403Forbidden,
-                        Title = "Actor not found.",
-                    };
-
-                    problem.Extensions.Add("actorId", ex.ActorId);
-
-                    break;
-
-                default:
-
-                    problem = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "Core exception."
-                    };
-
-                    break;
-            }
-
-            problem.Detail = appException.Message;
-
-            problem.Instance = httpContext.Request.Path;
-
-            problem.Extensions.TryAdd("traceId", httpContext.TraceIdentifier);
-
-            problem.Extensions.TryAdd("appErrorType", appException.ErrorType);
-
-            return true;
+            return false;
         }
 
-        return false;
+        ProblemDetails problem;
+
+        switch (appException)
+        {
+            case AccessDeniedFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Access denied.",
+                    Detail = ex.Message,
+                    Instance = httpContext.Request.Path,
+                };
+
+                problem.Extensions["actorId"] = ex.ActorId;
+                problem.Extensions["entityGuid"] = ex.EntityGuid;
+                problem.Extensions["entityType"] = ex.EntityType;
+                break;
+
+            case PermissionDeniedFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Permission denied.",
+                    Detail = ex.Message,
+                    Instance = httpContext.Request.Path,
+                };
+
+                problem.Extensions["actorId"] = ex.ActorId;
+                problem.Extensions["actionType"] = ex.ActionType;
+                break;
+
+            case EntityNotFoundFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Entity not found.",
+                    Detail = ex.Message,
+                    Instance = httpContext.Request.Path,
+                };
+
+                problem.Extensions["entityGuid"] = ex.EntityGuid;
+                problem.Extensions["entityType"] = ex.EntityType;
+                break;
+
+            case ActorNotFoundFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Actor not found.",
+                    Detail = ex.Message,
+                    Instance = httpContext.Request.Path,
+                };
+
+                problem.Extensions["actorId"] = ex.ActorId;
+                break;
+
+            default:
+
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Application error.",
+                    Detail = appException.Message,
+                    Instance = httpContext.Request.Path,
+                };
+
+                break;
+        }
+
+        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
+        problem.Extensions["appErrorType"] = appException.ErrorType;
+
+        await problemDetailsService.WriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
+            ProblemDetails = problem,
+            Exception = exception,
+        });
+
+        return true;
     }
 }

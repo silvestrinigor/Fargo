@@ -1,0 +1,56 @@
+@articleGuid = 11111111-1111-1111-1111-111111111111
+@partitionGuid = 55555555-5555-5555-5555-555555555555
+
+### Get by Guid
+
+GET {{host}}/articles/{{articleGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### Get by Barcode
+
+GET {{host}}/articles/7891234567895:Ean13
+Authorization: Bearer {{jwt}}
+
+###
+
+### List
+
+GET {{host}}/articles?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###
+
+### Create
+
+POST {{host}}/articles
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "name": "Coca Cola 2L",
+  "description": "PET Bottle",
+  "partitionsToAdd": [
+    "{{partitionGuid}}"
+  ]
+}
+
+###
+
+### Patch
+
+PATCH {{host}}/articles/{{articleGuid}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "description": "Updated description"
+}
+
+###
+
+### Delete
+
+DELETE {{host}}/articles/{{articleGuid}}
+Authorization: Bearer {{jwt}}

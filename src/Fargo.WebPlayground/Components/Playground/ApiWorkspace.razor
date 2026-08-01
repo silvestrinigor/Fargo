@@ -940,30 +940,9 @@
             return selectedUserGroup is null ? "User group not found." : selectedUserGroup;
         });
 
-    private async Task CreateUserGroupAsync() => await RunAsync(
-        OperationIds.Create,
-        "User group created",
-        async client => await client.UserGroups.CreateAsync(new UserGroupCreateDto(
-            RequiredText(userGroupCreate.Nameid, "Nameid"),
-            null,
-            ToUserGroupPermissions(userGroupCreate.Permissions),
-            ParseGuidList(userGroupCreate.PartitionsText, "Partitions"))));
+    private async Task CreateUserGroupAsync() => _ = 1;
 
-    private async Task UpdateUserGroupAsync() => await RunAsync(
-        OperationIds.Update,
-        "User group updated",
-        async client =>
-        {
-            await client.UserGroups.UpdateAsync(
-                RequiredGuid(userGroupUpdate.Guid, "User group GUID"),
-                new UserGroupUpdateDto(
-                    OptionalText(userGroupUpdate.IncludeNameid, userGroupUpdate.Nameid),
-                    null,
-                    OptionalBool(userGroupUpdate.IncludeIsActive, userGroupUpdate.IsActive),
-                    userGroupUpdate.IncludePermissions ? ToUserGroupPermissions(userGroupUpdate.Permissions) : null,
-                    userGroupUpdate.IncludePartitions ? ParseGuidList(userGroupUpdate.PartitionsText, "Partitions") : null));
-            return null;
-        });
+    private async Task UpdateUserGroupAsync() => _ = 1;
 
     private async Task DeleteUserGroupAsync() => await RunAsync(
         OperationIds.Delete,
@@ -1176,15 +1155,15 @@
             ParseGuidList(form.ChildPartitionsText, "Child partitions"),
             form.NotChildOfAnyPartition ? true : null);
 
-    private static IReadOnlyCollection<UserPermissionUpdateDto>? ToUserPermissions(HashSet<ActionType> permissions)
+    private static IReadOnlyCollection<ActionType>? ToUserPermissions(HashSet<ActionType> permissions)
         => permissions.Count == 0
             ? null
-            : permissions.Select(static action => new UserPermissionUpdateDto(action)).ToArray();
+            : permissions;
 
-    private static IReadOnlyCollection<UserGroupPermissionUpdateDto>? ToUserGroupPermissions(HashSet<ActionType> permissions)
+    private static IReadOnlyCollection<ActionType>? ToUserGroupPermissions(HashSet<ActionType> permissions)
         => permissions.Count == 0
             ? null
-            : permissions.Select(static action => new UserGroupPermissionUpdateDto(action)).ToArray();
+            : permissions;
 
     private static IReadOnlyCollection<Guid> ParseGuidList(string? value, string label)
         => SplitLines(value)
@@ -1420,7 +1399,7 @@
         userUpdate.UserGroupsText = string.Join(Environment.NewLine, user.UserGroups);
         userUpdate.IsActive = user.IsActive;
         userUpdate.Permissions.Clear();
-        foreach (var permission in user.Permissions.Select(static permission => permission.Action))
+        foreach (var permission in user.Permissions)
         {
             userUpdate.Permissions.Add(permission);
         }
@@ -1437,7 +1416,7 @@
         userGroupUpdate.PartitionsText = string.Join(Environment.NewLine, userGroup.Partitions);
         userGroupUpdate.IsActive = userGroup.IsActive;
         userGroupUpdate.Permissions.Clear();
-        foreach (var permission in userGroup.Permissions.Select(static permission => permission.Action))
+        foreach (var permission in userGroup.Permissions.Select(static permission => permission))
         {
             userGroupUpdate.Permissions.Add(permission);
         }
@@ -1850,7 +1829,7 @@
             @DetailValue("Password change required", user.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
             @DetailValue("Active", user.IsActive ? "Yes" : "No")
         </div>
-        @PermissionCollection("Permissions", user.Permissions.Select(static permission => permission.Action))
+        @PermissionCollection("Permissions", user.Permissions)
         @GuidCollection("Partitions", user.Partitions)
         @GuidCollection("User groups", user.UserGroups))
     </section>;
@@ -1868,7 +1847,7 @@
             @DetailValue("Description", userGroup.Description)
             @DetailValue("Active", userGroup.IsActive ? "Yes" : "No")
         </div>
-        @PermissionCollection("Permissions", userGroup.Permissions.Select(static permission => permission.Action))
+        @PermissionCollection("Permissions", userGroup.Permissions.Select(static permission => permission))
         @GuidCollection("Partitions", userGroup.Partitions))
     </section>;
 

@@ -1,0 +1,51 @@
+@userGuid = 00000000-0000-0000-0000-000000000004
+@partitionGuid = 55555555-5555-5555-5555-555555555555
+
+### Get
+
+GET {{host}}/users/{{userGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### List
+
+GET {{host}}/users?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###
+
+### Create
+
+POST {{host}}/users
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "nameid": "igor5",
+  "password": "Password123!",
+  "firstName": "Igor",
+  "lastName": "Doe",
+  "description": "Test.",
+  "partitionAccessesToAdd": ["00000000-0000-0000-0000-000000000002"]
+}
+
+###
+
+### Update
+
+PUT {{host}}/users/{{userGuid}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "description": "Updated user",
+  "partitionAccessesToRemove": 1,
+}
+
+###
+
+### Delete
+
+DELETE {{host}}/users/{{userGuid}}
+Authorization: Bearer {{jwt}}

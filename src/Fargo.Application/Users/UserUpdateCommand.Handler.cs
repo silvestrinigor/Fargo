@@ -56,9 +56,9 @@ public sealed class UserUpdateCommandHandler(
         {
             foreach (var permission in permissionsToAdd.Distinct())
             {
-                actor.ThrowIfPermissionDenied(permission.Action);
+                actor.ThrowIfPermissionDenied(permission);
 
-                user.AddPermission(permission.Action);
+                user.AddPermission(permission);
             }
         }
 
@@ -66,9 +66,9 @@ public sealed class UserUpdateCommandHandler(
         {
             foreach (var permission in permissionsToRemove.Distinct())
             {
-                actor.ThrowIfPermissionDenied(permission.Action);
+                actor.ThrowIfPermissionDenied(permission);
 
-                user.RemovePermission(permission.Action);
+                user.RemovePermission(permission);
             }
         }
 

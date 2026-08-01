@@ -8,33 +8,14 @@ namespace Fargo.Core.UserGroups;
 /// </summary>
 public class UserGroupService(IUserGroupRepository userGroupRepository)
 {
-    /// <summary>
-    /// Validates the rules required to create a new <see cref="UserGroup"/>.
-    /// </summary>
-    public async Task ValidateUserGroupCreate(UserGroup userGroup, CancellationToken cancellationToken = default)
+    public async Task ValidateUserGroupNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
-        var alreadyExistsWithName = await userGroupRepository.ExistsByNameid(userGroup.Nameid, cancellationToken);
-
-        if (alreadyExistsWithName)
-        {
-            throw new FargoCoreException(
-                $"A user group with nameid '{userGroup.Nameid}' already exists.", FargoCoreErrorType.None);
-        }
-    }
-
-    public async Task ValidateUserGroupNameidChange(UserGroup userGroup, Nameid nameid, CancellationToken cancellationToken = default)
-    {
-        if (userGroup.Nameid == nameid)
-        {
-            return;
-        }
-
         var alreadyExistsWithName = await userGroupRepository.ExistsByNameid(nameid, cancellationToken);
 
         if (alreadyExistsWithName)
         {
             throw new FargoCoreException(
-                $"A user group with nameid '{userGroup.Nameid}' already exists.", FargoCoreErrorType.None);
+                $"The userGroup nameid '{nameid}' is already in use.", FargoCoreErrorType.None);
         }
     }
 

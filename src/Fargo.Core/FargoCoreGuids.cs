@@ -2,10 +2,6 @@ namespace Fargo.Core;
 
 public static class FargoCoreGuids
 {
-    public const string SystemGuidString = "00000000-0000-0000-0000-000000000001";
-
-    public static Guid SystemGuid => new(SystemGuidString);
-
     public const string GlobalPartitionGuidString = "00000000-0000-0000-0000-000000000002";
 
     public static Guid GlobalPartitionGuid => new(GlobalPartitionGuidString);

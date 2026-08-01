@@ -3,6 +3,7 @@ using System;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    partial class FargoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801171449_UserPermissions")]
+    partial class UserPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -481,11 +484,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("nameid");
 
-                    b.PrimitiveCollection<string>("Permissions")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("permissions");
-
                     b.HasKey("Guid")
                         .HasName("pk_user_groups");
 
@@ -496,6 +494,30 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("user_groups", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroupPermission", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("guid");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("integer")
+                        .HasColumnName("action");
+
+                    b.Property<Guid>("UserGroupGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_group_guid");
+
+                    b.HasKey("Guid")
+                        .HasName("pk_user_group_permissions");
+
+                    b.HasAlternateKey("UserGroupGuid", "Action")
+                        .HasName("ak_user_group_permissions_user_group_guid_action");
+
+                    b.ToTable("user_group_permissions", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Users.User", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -504,8 +526,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnName("guid");
 
                     b.Property<Guid>("AuthVersion")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("auth_version");
+                        .HasColumnName("auth_version")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<long?>("DefaultPasswordExpirationPeriod")
                         .HasColumnType("bigint")
@@ -802,6 +826,18 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentPartition");
                 });
 
+            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroupPermission", b =>
+                {
+                    b.HasOne("Fargo.Core.UserGroups.UserGroup", "UserGroup")
+                        .WithMany("Permissions")
+                        .HasForeignKey("UserGroupGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_permissions_user_groups_user_group_guid");
+
+                    b.Navigation("UserGroup");
+                });
+
             modelBuilder.Entity("ItemPartition", b =>
                 {
                     b.HasOne("Fargo.Core.Items.Item", null)
@@ -895,6 +931,8 @@ namespace Fargo.Infrastructure.Migrations
             modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
                 {
                     b.Navigation("PartitionAccesses");
+
+                    b.Navigation("Permissions");
                 });
 #pragma warning restore 612, 618
         }

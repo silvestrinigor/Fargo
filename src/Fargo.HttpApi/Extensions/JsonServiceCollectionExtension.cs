@@ -11,6 +11,7 @@ public static class JsonServiceCollectionExtension
             services.ConfigureHttpJsonOptions(options =>
             {
                 options.SerializerOptions.Converters.Add(new NameJsonConverter());
+                options.SerializerOptions.Converters.Add(new PasswordJsonConverter());
                 options.SerializerOptions.Converters.Add(new DescriptionJsonConverter());
                 options.SerializerOptions.Converters.Add(new LimitJsonConverter());
                 options.SerializerOptions.Converters.Add(new PageJsonConverter());

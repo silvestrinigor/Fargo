@@ -1,0 +1,48 @@
+@partitionGuid = 00000000-0000-0000-0000-000000000002
+@parentPartitionGuid = 4e181b46-7e3e-4e38-b07f-385f9fea3169
+
+### Get
+
+GET {{host}}/partitions/{{partitionGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### List
+
+GET {{host}}/partitions?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###
+
+### Create
+
+POST {{host}}/partitions
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "name": "Warehouse C",
+  "description": "This is a description.",
+  "parentPartitionGuid": "{{parentPartitionGuid}}"
+}
+
+###
+
+### Update
+
+PATCH {{host}}/partitions/{{partitionGuid}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "description": "Updated partition",
+  "parentPartitionGuid": "{{parentPartitionGuid}}"
+}
+
+###
+
+### Delete
+
+DELETE {{host}}/partitions/{{partitionGuid}}
+Authorization: Bearer {{jwt}}

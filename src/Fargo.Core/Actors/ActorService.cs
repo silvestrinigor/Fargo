@@ -52,14 +52,11 @@ public sealed class ActorService(
             includeRoots: true,
             cancellationToken);
 
-        var permissions = new HashSet<ActionType>(
-            user.Permissions.Select(
-                permission => permission));
+        var permissions = new HashSet<ActionType>(user.Permissions);
 
         foreach (var group in user.UserGroups.Where(group => group.IsActive))
         {
-            permissions.UnionWith(
-                group.Permissions.Select(permission => permission.Action));
+            permissions.UnionWith(group.Permissions);
         }
 
         var actorId = new ActorId(user.Guid, ActorType.User);

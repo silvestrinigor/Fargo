@@ -1,0 +1,45 @@
+@userGroupGuid = 44444444-4444-4444-4444-444444444444
+@partitionGuid = 55555555-5555-5555-5555-555555555555
+
+### Get
+
+GET {{host}}/user-groups/{{userGroupGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### List
+
+GET {{host}}/user-groups?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###
+
+### Create
+
+POST {{host}}/user-groups
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "nameid": "Administrators"
+}
+
+###
+
+### Update
+
+PUT {{host}}/user-groups/{{userGroupGuid}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "description": "Updated group"
+}
+
+###
+
+### Delete
+
+DELETE {{host}}/user-groups/{{userGroupGuid}}
+Authorization: Bearer {{jwt}}

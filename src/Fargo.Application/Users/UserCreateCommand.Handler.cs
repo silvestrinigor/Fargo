@@ -45,7 +45,7 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
-            var requestedActions = permissions.Select(p => p.Action).Distinct().ToHashSet();
+            var requestedActions = permissions.Distinct();
 
             foreach (var action in requestedActions)
             {

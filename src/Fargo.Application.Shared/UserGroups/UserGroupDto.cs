@@ -6,6 +6,9 @@ public sealed record UserGroupDto(
     Guid Guid,
     Nameid Nameid,
     Description Description,
-    IReadOnlyCollection<Permission> Permissions,
+    bool IsActive,
+    bool IsAdminUserGroup,
+    IReadOnlyCollection<ActionType> Permissions,
     IReadOnlyCollection<Guid> Partitions,
-    bool IsActive);
+    IReadOnlyCollection<Guid> PartitionAccesses
+);
