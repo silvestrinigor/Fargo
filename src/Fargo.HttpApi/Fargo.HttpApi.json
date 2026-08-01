@@ -1971,7 +1971,7 @@
               "array"
             ],
             "items": {
-              "$ref": "#/components/schemas/UserPermissionUpdateDto"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "defaultPasswordExpirationTimeSpan": {
@@ -2126,7 +2126,7 @@
               "array"
             ],
             "items": {
-              "$ref": "#/components/schemas/UserGroupPermissionUpdateDto"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "partitionsToAdd": {
@@ -2184,17 +2184,6 @@
           }
         }
       },
-      "UserGroupPermissionUpdateDto": {
-        "required": [
-          "action"
-        ],
-        "type": "object",
-        "properties": {
-          "action": {
-            "$ref": "#/components/schemas/ActionType"
-          }
-        }
-      },
       "UserGroupUpdateDto": {
         "required": [
           "nameid",
@@ -2233,7 +2222,7 @@
               "array"
             ],
             "items": {
-              "$ref": "#/components/schemas/UserGroupPermissionUpdateDto"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "partitions": {
@@ -2245,17 +2234,6 @@
               "type": "string",
               "format": "uuid"
             }
-          }
-        }
-      },
-      "UserPermissionUpdateDto": {
-        "required": [
-          "action"
-        ],
-        "type": "object",
-        "properties": {
-          "action": {
-            "$ref": "#/components/schemas/ActionType"
           }
         }
       },
@@ -2278,7 +2256,7 @@
               "array"
             ],
             "items": {
-              "$ref": "#/components/schemas/UserPermissionUpdateDto"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "permissionsToRemove": {
@@ -2287,7 +2265,7 @@
               "array"
             ],
             "items": {
-              "$ref": "#/components/schemas/UserPermissionUpdateDto"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "partitionsToAdd": {

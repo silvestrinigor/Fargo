@@ -6,6 +6,6 @@ public sealed record UserGroupUpdateDto(
     string? Nameid,
     Description? Description,
     bool? IsActive,
-    IReadOnlyCollection<UserGroupPermissionUpdateDto>? Permissions,
+    IReadOnlyCollection<ActionType>? Permissions,
     IReadOnlyCollection<Guid>? Partitions
 );

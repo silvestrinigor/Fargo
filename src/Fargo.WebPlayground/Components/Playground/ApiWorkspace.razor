@@ -1176,15 +1176,15 @@
             ParseGuidList(form.ChildPartitionsText, "Child partitions"),
             form.NotChildOfAnyPartition ? true : null);
 
-    private static IReadOnlyCollection<UserPermissionUpdateDto>? ToUserPermissions(HashSet<ActionType> permissions)
+    private static IReadOnlyCollection<ActionType>? ToUserPermissions(HashSet<ActionType> permissions)
         => permissions.Count == 0
             ? null
-            : permissions.Select(static action => new UserPermissionUpdateDto(action)).ToArray();
+            : permissions;
 
-    private static IReadOnlyCollection<UserGroupPermissionUpdateDto>? ToUserGroupPermissions(HashSet<ActionType> permissions)
+    private static IReadOnlyCollection<ActionType>? ToUserGroupPermissions(HashSet<ActionType> permissions)
         => permissions.Count == 0
             ? null
-            : permissions.Select(static action => new UserGroupPermissionUpdateDto(action)).ToArray();
+            : permissions;
 
     private static IReadOnlyCollection<Guid> ParseGuidList(string? value, string label)
         => SplitLines(value)

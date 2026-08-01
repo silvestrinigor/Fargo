@@ -1,4 +1,4 @@
-@userGuid = 00000000-0000-0000-0000-000000000004
+@userGuid = 2d9ffdf1-fe42-4886-bd18-9ecd1588d4cb
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get
@@ -22,10 +22,12 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "nameid": "john",
+  "nameid": "igor5",
   "password": "Password123!",
-  "firstName": "John",
-  "lastName": "Doe"
+  "firstName": "Igor",
+  "lastName": "Doe",
+  "description": "Test.",
+  "partitionAccessesToAdd": ["00000000-0000-0000-0000-000000000002"]
 }
 
 ###
