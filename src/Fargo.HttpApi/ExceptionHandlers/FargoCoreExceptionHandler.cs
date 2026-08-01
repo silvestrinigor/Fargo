@@ -4,33 +4,36 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.HttpApi.ExceptionHandlers;
 
-public sealed class FargoCoreExceptionHandler : IExceptionHandler
+public sealed class FargoCoreExceptionHandler(
+    IProblemDetailsService problemDetailsService)
+    : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
-        HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+        HttpContext httpContext,
+        Exception exception,
+        CancellationToken cancellationToken)
     {
-        if (exception is FargoCoreException coreException)
+        if (exception is not FargoCoreException coreException)
+            return false;
+
+        var problem = new ProblemDetails
         {
-            ProblemDetails problem = coreException switch
-            {
-                _ => new ProblemDetails
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Core exception."
-                },
-            };
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Core exception.",
+            Detail = coreException.Message,
+            Instance = httpContext.Request.Path,
+        };
 
-            problem.Detail = coreException.Message;
+        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
+        problem.Extensions["coreErrorType"] = coreException.ErrorType;
 
-            problem.Instance = httpContext.Request.Path;
+        await problemDetailsService.WriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
+            ProblemDetails = problem,
+            Exception = exception,
+        });
 
-            problem.Extensions.TryAdd("traceId", httpContext.TraceIdentifier);
-
-            problem.Extensions.TryAdd("coreErrorType", coreException.ErrorType);
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 }

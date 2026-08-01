@@ -2045,8 +2045,10 @@
           "requirePasswordChangeAt",
           "permissions",
           "partitions",
+          "partitionAccesses",
           "userGroups",
-          "isActive"
+          "isActive",
+          "isAdmin"
         ],
         "type": "object",
         "properties": {
@@ -2097,10 +2099,17 @@
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Permission"
+              "$ref": "#/components/schemas/ActionType"
             }
           },
           "partitions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccesses": {
             "type": "array",
             "items": {
               "type": "string",
@@ -2115,6 +2124,9 @@
             }
           },
           "isActive": {
+            "type": "boolean"
+          },
+          "isAdmin": {
             "type": "boolean"
           }
         }

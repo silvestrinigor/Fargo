@@ -1420,7 +1420,7 @@
         userUpdate.UserGroupsText = string.Join(Environment.NewLine, user.UserGroups);
         userUpdate.IsActive = user.IsActive;
         userUpdate.Permissions.Clear();
-        foreach (var permission in user.Permissions.Select(static permission => permission.Action))
+        foreach (var permission in user.Permissions)
         {
             userUpdate.Permissions.Add(permission);
         }
@@ -1850,7 +1850,7 @@
             @DetailValue("Password change required", user.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
             @DetailValue("Active", user.IsActive ? "Yes" : "No")
         </div>
-        @PermissionCollection("Permissions", user.Permissions.Select(static permission => permission.Action))
+        @PermissionCollection("Permissions", user.Permissions)
         @GuidCollection("Partitions", user.Partitions)
         @GuidCollection("User groups", user.UserGroups))
     </section>;

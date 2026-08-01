@@ -10,7 +10,9 @@ public sealed record UserDto(
     Description Description,
     TimeSpan? DefaultPasswordExpirationPeriod,
     DateTimeOffset? RequirePasswordChangeAt,
-    IReadOnlyCollection<Permission> Permissions,
+    IReadOnlyCollection<ActionType> Permissions,
     IReadOnlyCollection<Guid> Partitions,
+    IReadOnlyCollection<Guid> PartitionAccesses,
     IReadOnlyCollection<Guid> UserGroups,
-    bool IsActive);
+    bool IsActive,
+    bool IsAdmin);

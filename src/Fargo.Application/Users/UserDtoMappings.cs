@@ -1,5 +1,4 @@
 using Fargo.Application.Shared.Users;
-using Fargo.Core.Shared;
 using Fargo.Core.Users;
 using System.Linq.Expressions;
 
@@ -15,8 +14,10 @@ public static class UserDtoMappings
         user.Description,
         user.DefaultPasswordExpirationPeriod,
         user.RequirePasswordChangeAt,
-        user.Permissions.Select(permission => new Permission(permission)).ToArray(),
+        user.Permissions,
         user.Partitions.Select(partition => partition.Guid).ToArray(),
+        user.PartitionAccesses.Select(partition => partition.Guid).ToArray(),
         user.UserGroups.Select(group => group.Guid).ToArray(),
-        user.IsActive);
+        user.IsActive,
+        user.IsAdmin);
 }

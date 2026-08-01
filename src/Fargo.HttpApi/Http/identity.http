@@ -5,13 +5,8 @@ Content-Type: application/json
 
 {
   "nameid": "admin",
-  "password": "Password123@"
+  "password": "Senha123@"
 }
-
-> {%
-client.global.set("jwt", response.body.accessToken);
-client.global.set("refreshToken", response.body.refreshToken);
-%}
 
 ###
 
@@ -23,11 +18,6 @@ Content-Type: application/json
 {
   "refreshToken": "{{refreshToken}}"
 }
-
-> {%
-client.global.set("jwt", response.body.accessToken);
-client.global.set("refreshToken", response.body.refreshToken);
-%}
 
 ###
 

@@ -1,5 +1,5 @@
-@partitionGuid = 55555555-5555-5555-5555-555555555555
-@parentPartitionGuid = 66666666-6666-6666-6666-666666666666
+@partitionGuid = 00000000-0000-0000-0000-000000000002
+@parentPartitionGuid = 4e181b46-7e3e-4e38-b07f-385f9fea3169
 
 ### Get
 
@@ -22,7 +22,8 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "Warehouse A",
+  "name": "Warehouse C",
+  "description": "This is a description.",
   "parentPartitionGuid": "{{parentPartitionGuid}}"
 }
 
@@ -35,7 +36,8 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "description": "Updated partition"
+  "description": "Updated partition",
+  "parentPartitionGuid": "{{parentPartitionGuid}}"
 }
 
 ###

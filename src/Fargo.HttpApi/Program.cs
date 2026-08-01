@@ -37,9 +37,9 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
-app.UseResponseCompression();
-
 app.UseExceptionHandler();
+
+app.UseResponseCompression();
 
 app.UseStatusCodePages();
 
