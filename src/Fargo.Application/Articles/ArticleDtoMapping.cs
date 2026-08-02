@@ -18,7 +18,7 @@ public static class ArticleDtoMapping
                 article.Dimension.X,
                 article.Dimension.Y,
                 article.Dimension.Z),
-            new ArticleBarcodesDto(
+            new ArticleBarcodeDto(
                 article.Barcode.Ean13,
                 article.Barcode.Ean8,
                 article.Barcode.UpcA,

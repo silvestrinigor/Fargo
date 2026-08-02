@@ -45,129 +45,129 @@ public sealed class ArticlePatchCommandHandler(
             articleUpdateDto.RemoveMass is true
                 ? null : articleUpdateDto.Mass ?? article.Mass,
 
-            articleUpdateDto.RemoveLengthX is true
-                ? null : articleUpdateDto.LengthX ?? article.Dimension.X,
+            articleUpdateDto.Dimension?.RemoveLengthX is true
+                ? null : articleUpdateDto.Dimension?.LengthX ?? article.Dimension.X,
 
-            articleUpdateDto.RemoveLengthY is true
-                ? null : articleUpdateDto.LengthY ?? article.Dimension.Y,
+            articleUpdateDto.Dimension?.RemoveLengthY is true
+                ? null : articleUpdateDto.Dimension?.LengthY ?? article.Dimension.Y,
 
-            articleUpdateDto.RemoveLengthZ is true
-                ? null : articleUpdateDto.LengthZ ?? article.Dimension.Z);
+            articleUpdateDto.Dimension?.RemoveLengthZ is true
+                ? null : articleUpdateDto.Dimension?.LengthZ ?? article.Dimension.Z);
 
-        if (articleUpdateDto.RemoveEan13 is true)
+        if (articleUpdateDto.Barcode?.RemoveEan13 is true)
         {
             article.Barcode.Ean13 = null;
         }
 
-        else if (articleUpdateDto.Ean13 is { } ean13)
+        else if (articleUpdateDto.Barcode?.Ean13 is { } ean13)
         {
             await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
         }
 
-        if (articleUpdateDto.RemoveEan8 is true)
+        if (articleUpdateDto.Barcode?.RemoveEan8 is true)
         {
             article.Barcode.Ean8 = null;
         }
 
-        else if (articleUpdateDto.Ean8 is { } ean8)
+        else if (articleUpdateDto.Barcode?.Ean8 is { } ean8)
         {
             await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
 
             article.Barcode.Ean8 = ean8;
         }
 
-        if (articleUpdateDto.RemoveUpcA is true)
+        if (articleUpdateDto.Barcode?.RemoveUpcA is true)
         {
             article.Barcode.UpcA = null;
         }
 
-        else if (articleUpdateDto.UpcA is { } upcA)
+        else if (articleUpdateDto.Barcode?.UpcA is { } upcA)
         {
             await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
 
             article.Barcode.UpcA = upcA;
         }
 
-        if (articleUpdateDto.RemoveUpcE is true)
+        if (articleUpdateDto.Barcode?.RemoveUpcE is true)
         {
             article.Barcode.UpcE = null;
         }
 
-        else if (articleUpdateDto.UpcE is { } upcE)
+        else if (articleUpdateDto.Barcode?.UpcE is { } upcE)
         {
             await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
 
             article.Barcode.UpcE = upcE;
         }
 
-        if (articleUpdateDto.RemoveCode128 is true)
+        if (articleUpdateDto.Barcode?.RemoveCode128 is true)
         {
             article.Barcode.Code128 = null;
         }
 
-        else if (articleUpdateDto.Code128 is { } code128)
+        else if (articleUpdateDto.Barcode?.Code128 is { } code128)
         {
             await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
 
             article.Barcode.Code128 = code128;
         }
 
-        if (articleUpdateDto.RemoveCode39 is true)
+        if (articleUpdateDto.Barcode?.RemoveCode39 is true)
         {
             article.Barcode.Code39 = null;
         }
 
-        else if (articleUpdateDto.Code39 is { } code39)
+        else if (articleUpdateDto.Barcode?.Code39 is { } code39)
         {
             await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
 
             article.Barcode.Code39 = code39;
         }
 
-        if (articleUpdateDto.RemoveItf14 is true)
+        if (articleUpdateDto.Barcode?.RemoveItf14 is true)
         {
             article.Barcode.Itf14 = null;
         }
 
-        else if (articleUpdateDto.Itf14 is { } itf14)
+        else if (articleUpdateDto.Barcode?.Itf14 is { } itf14)
         {
             await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
 
             article.Barcode.Itf14 = itf14;
         }
 
-        if (articleUpdateDto.RemoveGs1128 is true)
+        if (articleUpdateDto.Barcode?.RemoveGs1128 is true)
         {
             article.Barcode.Gs1128 = null;
         }
 
-        else if (articleUpdateDto.Gs1128 is { } gs1128)
+        else if (articleUpdateDto.Barcode?.Gs1128 is { } gs1128)
         {
             await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
 
             article.Barcode.Gs1128 = gs1128;
         }
 
-        if (articleUpdateDto.RemoveQrCode is true)
+        if (articleUpdateDto.Barcode?.RemoveQrCode is true)
         {
             article.Barcode.QrCode = null;
         }
 
-        else if (articleUpdateDto.QrCode is { } qrCode)
+        else if (articleUpdateDto.Barcode?.QrCode is { } qrCode)
         {
             await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
 
             article.Barcode.QrCode = qrCode;
         }
 
-        if (articleUpdateDto.RemoveDataMatrix is true)
+        if (articleUpdateDto.Barcode?.RemoveDataMatrix is true)
         {
             article.Barcode.DataMatrix = null;
         }
 
-        else if (articleUpdateDto.DataMatrix is { } dataMatrix)
+        else if (articleUpdateDto.Barcode?.DataMatrix is { } dataMatrix)
         {
             await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
 

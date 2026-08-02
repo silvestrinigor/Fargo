@@ -110,29 +110,29 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
 
         Mass = dto.Mass;
 
-        LengthX = dto.LengthX;
+        LengthX = dto.Dimension?.LengthX;
 
-        LengthY = dto.LengthY;
+        LengthY = dto.Dimension?.LengthY;
 
-        LengthZ = dto.LengthZ;
+        LengthZ = dto.Dimension?.LengthZ;
 
-        Ean13 = dto.Ean13;
+        Ean13 = dto.Barcode?.Ean13;
 
-        Ean8 = dto.Ean8;
+        Ean8 = dto.Barcode?.Ean8;
 
-        UpcA = dto.UpcA;
+        UpcA = dto.Barcode?.UpcA;
 
-        UpcE = dto.UpcE;
+        UpcE = dto.Barcode?.UpcE;
 
-        Code39 = dto.Code39;
+        Code39 = dto.Barcode?.Code39;
 
-        Itf14 = dto.Itf14;
+        Itf14 = dto.Barcode?.Itf14;
 
-        Gs1128 = dto.Gs1128;
+        Gs1128 = dto.Barcode?.Gs1128;
 
-        QrCode = dto.QrCode;
+        QrCode = dto.Barcode?.QrCode;
 
-        DataMatrix = dto.DataMatrix;
+        DataMatrix = dto.Barcode?.DataMatrix;
 
         PartitionsToAdd = dto.PartitionsToAdd;
     }

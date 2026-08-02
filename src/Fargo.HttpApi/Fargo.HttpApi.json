@@ -1155,7 +1155,7 @@
       "AmountOfSubstanceUnit": {
         "type": "integer"
       },
-      "ArticleBarcodesDto": {
+      "ArticleBarcodeDto": {
         "type": "object",
         "properties": {
           "ean13": { },
@@ -1170,257 +1170,9 @@
           "dataMatrix": { }
         }
       },
-      "ArticleCreateDto": {
-        "required": [
-          "name"
-        ],
+      "ArticleBarcodeUpdateDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "$ref": "#/components/schemas/Name"
-          },
-          "description": { },
-          "articleType": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleType"
-              }
-            ]
-          },
-          "fromArticle": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "packQuantity": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Scalar"
-              }
-            ]
-          },
-          "kitComponents": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ArticleKitComponentDto"
-            }
-          },
-          "shelfLife": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "color": { },
-          "mass": { },
-          "lengthX": { },
-          "lengthY": { },
-          "lengthZ": { },
-          "ean13": { },
-          "ean8": { },
-          "upcA": { },
-          "upcE": { },
-          "code128": { },
-          "code39": { },
-          "itf14": { },
-          "gs1128": { },
-          "qrCode": { },
-          "dataMatrix": { },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        }
-      },
-      "ArticleDimensionDto": {
-        "required": [
-          "lengthX",
-          "lengthY",
-          "lengthZ"
-        ],
-        "type": "object",
-        "properties": {
-          "lengthX": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Length"
-              }
-            ]
-          },
-          "lengthY": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Length"
-              }
-            ]
-          },
-          "lengthZ": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Length"
-              }
-            ]
-          }
-        }
-      },
-      "ArticleDto": {
-        "required": [
-          "guid",
-          "name",
-          "description",
-          "shelfLife",
-          "color",
-          "mass",
-          "dimension",
-          "barcodes",
-          "partitions"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "$ref": "#/components/schemas/Name"
-          },
-          "description": {
-            "$ref": "#/components/schemas/Description"
-          },
-          "shelfLife": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "color": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Color"
-              }
-            ]
-          },
-          "mass": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Mass"
-              }
-            ]
-          },
-          "dimension": {
-            "$ref": "#/components/schemas/ArticleDimensionDto"
-          },
-          "barcodes": {
-            "$ref": "#/components/schemas/ArticleBarcodesDto"
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        }
-      },
-      "ArticleKitComponentDto": {
-        "required": [
-          "articleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "$ref": "#/components/schemas/Scalar"
-          }
-        }
-      },
-      "ArticleType": {
-        "type": "integer"
-      },
-      "ArticleUpdateDto": {
-        "type": "object",
-        "properties": {
-          "name": { },
-          "description": { },
-          "shelfLife": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "removeShelfLife": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "mass": { },
-          "removeMass": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "lengthX": { },
-          "removeLengthX": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "lengthY": { },
-          "removeLengthY": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "lengthZ": { },
-          "removeLengthZ": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
           "ean13": { },
           "removeEan13": {
             "type": [
@@ -1489,6 +1241,259 @@
             "type": [
               "null",
               "boolean"
+            ]
+          }
+        }
+      },
+      "ArticleCreateDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "description": { },
+          "articleType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleType"
+              }
+            ]
+          },
+          "fromArticle": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "packQuantity": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Scalar"
+              }
+            ]
+          },
+          "kitComponents": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ArticleKitComponentDto"
+            }
+          },
+          "shelfLife": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "color": { },
+          "mass": { },
+          "dimension": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleDimensionDto"
+              }
+            ]
+          },
+          "barcode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleBarcodeDto"
+              }
+            ]
+          },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ArticleDimensionDto": {
+        "type": "object",
+        "properties": {
+          "lengthX": { },
+          "lengthY": { },
+          "lengthZ": { }
+        }
+      },
+      "ArticleDimensionUpdateDto": {
+        "type": "object",
+        "properties": {
+          "lengthX": { },
+          "removeLengthX": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "lengthY": { },
+          "removeLengthY": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "lengthZ": { },
+          "removeLengthZ": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "ArticleDto": {
+        "required": [
+          "guid",
+          "name",
+          "description",
+          "shelfLife",
+          "color",
+          "mass",
+          "dimension",
+          "barcodes",
+          "partitions"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description"
+          },
+          "shelfLife": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "color": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Color"
+              }
+            ]
+          },
+          "mass": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Mass"
+              }
+            ]
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/ArticleDimensionDto"
+          },
+          "barcodes": {
+            "$ref": "#/components/schemas/ArticleBarcodeDto"
+          },
+          "partitions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ArticleKitComponentDto": {
+        "required": [
+          "articleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "ArticleType": {
+        "type": "integer"
+      },
+      "ArticleUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": { },
+          "description": { },
+          "shelfLife": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removeShelfLife": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "mass": { },
+          "removeMass": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "dimension": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleDimensionUpdateDto"
+              }
+            ]
+          },
+          "barcode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleBarcodeUpdateDto"
+              }
             ]
           },
           "partitionsToAdd": {
@@ -1751,7 +1756,6 @@
         }
       },
       "LastName": { },
-      "Length": { },
       "LengthUnit": {
         "type": "integer"
       },

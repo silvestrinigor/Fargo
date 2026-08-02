@@ -12,6 +12,6 @@ public sealed record ArticleDto(
     Color? Color,
     Mass? Mass,
     ArticleDimensionDto Dimension,
-    ArticleBarcodesDto Barcodes,
+    ArticleBarcodeDto Barcodes,
     IReadOnlyCollection<Guid> Partitions
 );
