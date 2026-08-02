@@ -22,6 +22,9 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasOne(i => i.ParentContainer).WithMany().HasForeignKey(i => i.ParentContainerGuid).OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasMany(i => i.Partitions).WithMany();
+        builder.HasMany(i => i.Partitions).WithMany().UsingEntity(j =>
+        {
+            j.ToTable("item_partitions");
+        });
     }
 }

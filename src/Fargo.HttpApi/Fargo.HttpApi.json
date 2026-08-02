@@ -1965,6 +1965,12 @@
           "firstName": { },
           "lastName": { },
           "description": { },
+          "isActive": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
           "permissionsToAdd": {
             "type": [
               "null",
@@ -2120,6 +2126,12 @@
             "$ref": "#/components/schemas/Nameid"
           },
           "description": { },
+          "isActive": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
           "permissionsToAdd": {
             "type": [
               "null",

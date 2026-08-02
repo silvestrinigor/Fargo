@@ -5,6 +5,7 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
 using Microsoft.Extensions.Logging;
+using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
@@ -62,7 +63,7 @@ public sealed class ArticleCreateCommandHandler(
 
             case ArticleType.Kit:
                 {
-                    var kitComponents = new List<ArticleKitComponent>();
+                    var kitComponents = new List<(Article, Scalar)>();
 
                     foreach (var kdo in command.KitComponents!)
                     {
@@ -72,7 +73,7 @@ public sealed class ArticleCreateCommandHandler(
 
                         actor.ThrowIfAccessDenied(fromArticle);
 
-                        var kit = new ArticleKitComponent(fromArticle, kdo.Quantity);
+                        var kit = (fromArticle, kdo.Quantity);
 
                         kitComponents.Add(kit);
                     }

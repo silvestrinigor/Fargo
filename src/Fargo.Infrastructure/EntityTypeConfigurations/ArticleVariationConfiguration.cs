@@ -10,7 +10,9 @@ public class ArticleVariationConfiguration : IEntityTypeConfiguration<ArticleVar
     {
         builder.ToTable("article_variations");
 
-        builder.HasKey(v => v.Guid);
+        builder.HasKey(v => v.VariationArticleGuid);
+
+        builder.HasOne(v => v.VariationArticle).WithOne(a => a.Variation).HasForeignKey<ArticleVariation>(v => v.VariationArticleGuid);
 
         builder.HasOne(a => a.FromArticle).WithMany().HasForeignKey(a => a.FromArticleGuid);
     }

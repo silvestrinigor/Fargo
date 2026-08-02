@@ -159,17 +159,13 @@ public class Article : IEntity, IPartitioned
     [MemberNotNullWhen(true, nameof(Pack))]
     public bool IsPack => Pack is not null;
 
-    /// <summary>
-    /// Gets the kit info associated with the article.
-    /// When <see langword="null"/>, no kit constraint is defined.
-    /// </summary>
-    public ArticleKit? Kit { get; private init; }
+    public IReadOnlyCollection<ArticleKitComponent>? KitComponents { get; private init; }
 
     /// <summary>
     /// Gets a value indicating whether this article represents a kit.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Kit))]
-    public bool IsKit => Kit is not null;
+    [MemberNotNullWhen(true, nameof(KitComponents))]
+    public bool IsKit => KitComponents is not null;
 
     /// <summary>
     /// Gets the container constraints associated with the article.
@@ -196,6 +192,43 @@ public class Article : IEntity, IPartitioned
 
     private Article() { }
 
+    private Article(Article variationFromArticle)
+    {
+        Variation = new ArticleVariation(variationFromArticle, this);
+        ArticleType = ArticleType.Variation;
+    }
+
+    private Article(Article packFromArticle, Scalar quantity)
+    {
+        Pack = new ArticlePack(this, packFromArticle, quantity);
+        ArticleType = ArticleType.Pack;
+    }
+
+    private Article(IReadOnlyCollection<(Article, Scalar)> articleKitComponentsValues)
+    {
+        var kitComponents = new List<ArticleKitComponent>();
+
+        foreach (var component in articleKitComponentsValues)
+        {
+            kitComponents.Add(new ArticleKitComponent(this, component.Item1, component.Item2));
+        }
+
+        KitComponents = kitComponents;
+
+        ArticleType = ArticleType.Kit;
+    }
+
+    private Article(bool isContainer)
+    {
+        if (isContainer)
+        {
+            Container = new ArticleContainer(this);
+            ArticleType = ArticleType.Container;
+        }
+
+        ArticleType = ArticleType.Default;
+    }
+
     /// <summary>
     /// Creates a new article.
     /// </summary>
@@ -220,11 +253,9 @@ public class Article : IEntity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleVariation(Name name, Article fromArticle)
     {
-        var articleVariation = new Article
+        var articleVariation = new Article(fromArticle)
         {
             Name = name,
-            Variation = new ArticleVariation(fromArticle),
-            ArticleType = ArticleType.Variation
         };
 
         return articleVariation;
@@ -239,11 +270,9 @@ public class Article : IEntity, IPartitioned
     /// <returns></returns>
     public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
     {
-        var articlePack = new Article
+        var articlePack = new Article(fromArticle, quantity)
         {
             Name = name,
-            Pack = new ArticlePack(fromArticle, quantity),
-            ArticleType = ArticleType.Pack
         };
 
         return articlePack;
@@ -255,13 +284,11 @@ public class Article : IEntity, IPartitioned
     /// <param name="name">The name of the article.</param>
     /// <param name="kitComponents"></param>
     /// <returns></returns>
-    public static Article NewArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> kitComponents)
+    public static Article NewArticleKit(Name name, IReadOnlyCollection<(Article, Scalar)> kitComponents)
     {
-        var articleKit = new Article
+        var articleKit = new Article(kitComponents)
         {
-            Name = name,
-            Kit = new ArticleKit(kitComponents),
-            ArticleType = ArticleType.Kit
+            Name = name
         };
 
         return articleKit;
@@ -274,11 +301,9 @@ public class Article : IEntity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleContainer(Name name)
     {
-        var articleContainer = new Article
+        var articleContainer = new Article(isContainer: true)
         {
             Name = name,
-            Container = new ArticleContainer(),
-            ArticleType = ArticleType.Container
         };
 
         return articleContainer;

@@ -10,8 +10,8 @@ public class ArticleContainerConfiguration : IEntityTypeConfiguration<ArticleCon
     {
         builder.ToTable("article_containers");
 
-        builder.HasOne<Article>().WithOne(a => a.Container).HasForeignKey<Article>("article_guid");
+        builder.HasKey(c => c.ArticleGuid);
 
-        builder.HasKey(c => c.Guid);
+        builder.HasOne(c => c.Article).WithOne(a => a.Container).HasForeignKey<ArticleContainer>(c => c.ArticleGuid);
     }
 }

@@ -14,14 +14,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.HasKey(x => x.Guid);
 
-        builder.HasOne(x => x.Container).WithOne().OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.Variation).WithOne().OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.Pack).WithOne().OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.Kit).WithOne().OnDelete(DeleteBehavior.Restrict);
-
         builder.Property(x => x.Ean13)
             .HasConversion(new ValueConverter<Ean13?, string?>(
                 v => v.HasValue ? v.Value.Code : null,
@@ -102,6 +94,9 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.HasIndex(x => x.DataMatrix).IsUnique().HasFilter("data_matrix IS NOT NULL");
 
-        builder.HasMany(a => a.Partitions).WithMany();
+        builder.HasMany(a => a.Partitions).WithMany().UsingEntity(j =>
+        {
+            j.ToTable("article_partitions");
+        });
     }
 }

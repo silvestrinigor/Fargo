@@ -27,7 +27,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     {
         return await articles.AnyAsync(v => v.IsVariation && v.Variation.FromArticleGuid == articleGuid, cancellationToken)
             || await articles.AnyAsync(p => p.IsPack && p.Pack.FromArticleGuid == articleGuid, cancellationToken)
-            || await articles.AnyAsync(k => k.IsKit && k.Kit.Components.Any(c => c.ArticleGuid == articleGuid), cancellationToken);
+            || await articles.AnyAsync(k => k.IsKit && k.KitComponents.Any(c => c.FromArticleGuid == articleGuid), cancellationToken);
     }
 
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)

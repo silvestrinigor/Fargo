@@ -14,16 +14,16 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.HasIndex(x => x.Nameid).IsUnique();
 
-        builder.Property(x => x.Guid).ValueGeneratedNever();
-
-        builder.Property(x => x.Nameid).IsRequired();
-
-        builder.Property(x => x.Description).IsRequired();
-
-        builder.Property(x => x.IsActive).IsRequired();
-
         builder.Property(x => x.Permissions).HasColumnType("jsonb");
 
-        builder.HasMany(g => g.Partitions).WithMany();
+        builder.HasMany(g => g.Partitions).WithMany().UsingEntity(p =>
+        {
+            p.ToTable("user_group_partitions");
+        });
+
+        builder.HasMany(g => g.PartitionAccesses).WithMany().UsingEntity(p =>
+        {
+            p.ToTable("user_group_partition_accesses");
+        });
     }
 }

@@ -10,8 +10,10 @@ public class ArticleKitComponentConfiguration : IEntityTypeConfiguration<Article
     {
         builder.ToTable("article_kit_components");
 
-        builder.HasKey(c => c.Guid);
+        builder.HasKey(c => c.KitArticleGuid);
 
-        builder.HasOne(c => c.Article).WithMany().HasForeignKey(c => c.ArticleGuid);
+        builder.HasOne(c => c.KitArticle).WithMany(k => k.KitComponents).HasForeignKey(c => c.KitArticleGuid);
+
+        builder.HasOne(c => c.FromArticle).WithMany().HasForeignKey(c => c.FromArticleGuid);
     }
 }
