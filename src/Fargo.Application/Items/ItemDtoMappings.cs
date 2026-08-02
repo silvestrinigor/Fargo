@@ -9,7 +9,6 @@ public static class ItemDtoMappings
     public static readonly Expression<Func<Item, ItemDto>> Projection = item => new ItemDto(
         item.Guid,
         item.ArticleGuid,
-        item.ProductionDate,
         item.ParentItemContainerGuid,
         item.Partitions.Select(partition => partition.Guid).ToArray());
 }

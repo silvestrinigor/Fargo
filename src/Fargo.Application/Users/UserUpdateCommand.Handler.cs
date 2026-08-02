@@ -120,7 +120,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.RemovePartition(partition);
+                user.RemovePartition(partition.Guid);
             }
         }
 
@@ -148,7 +148,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(userGroup);
 
-                user.RemoveUserGroup(userGroup);
+                user.RemoveUserGroup(userGroup.Guid);
             }
         }
 
@@ -176,7 +176,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.RemovePartitionAccess(partition);
+                user.RemovePartitionAccess(partition.Guid);
             }
         }
 

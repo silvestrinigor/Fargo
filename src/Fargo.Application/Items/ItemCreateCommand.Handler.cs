@@ -34,7 +34,7 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ThrowIfAccessDenied(article);
 
-        var item = Item.CreateItem(article, command.Create.ProductionDate);
+        var item = Item.CreateItem(article);
 
         itemRepository.Add(item);
 

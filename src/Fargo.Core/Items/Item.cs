@@ -23,34 +23,10 @@ namespace Fargo.Core.Items;
 /// </remarks>
 public class Item : IEntity, IPartitioned
 {
+    /// <summary>
+    /// Gets the unique identifier of the item.
+    /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
-
-    public static Item CreateItem(Article article, DateTimeOffset? productionDate = null)
-        => new(article, productionDate);
-
-    /// <summary>
-    /// Initializes a new item entity.
-    /// </summary>
-    /// <remarks>
-    /// Required by Entity Framework.
-    /// </remarks>
-#pragma warning disable CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
-    private Item()
-#pragma warning restore CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new item entity associated with the specified article.
-    /// </summary>
-    /// <param name="article">The article associated with the item.</param>
-    private Item(Article article, DateTimeOffset? productionDate = null)
-    {
-        Article = article;
-        ProductionDate = productionDate;
-    }
-
-    #region Article
 
     /// <summary>
     /// Gets the unique identifier of the associated <see cref="Article"/>.
@@ -63,35 +39,8 @@ public class Item : IEntity, IPartitioned
     /// <remarks>
     /// The associated article defines the descriptive classification of the item,
     /// but does not determine the partition access scope of this entity.
-    ///
-    /// When this property is initialized, <see cref="ArticleGuid"/> is
-    /// automatically set to the identifier of the assigned article.
     /// </remarks>
-    public Article Article
-    {
-        get;
-        init
-        {
-            ArticleGuid = value.Guid;
-            field = value;
-        }
-    }
-
-    #endregion Article
-
-    /// <summary>
-    /// Gets the date on which this item was produced.
-    /// When <see langword="null"/>, the production date is unknown.
-    /// </summary>
-    public DateTimeOffset? ProductionDate { get; init; }
-
-    /// <summary>
-    /// Gets the date the item will expire.
-    /// When <see langword="null"/>, the expiration date is unknown.
-    /// </summary>
-    public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
-
-    #region Container
+    public Article Article { get; private init; }
 
     /// <summary>
     /// Gets the unique identifier of the parent container item.
@@ -102,26 +51,9 @@ public class Item : IEntity, IPartitioned
     public Guid? ParentItemContainerGuid { get; private set; }
 
     /// <summary>
-    /// Gets the parent container of the current item, if any.
+    /// Gets the parent container item, if any.
     /// </summary>
-    public Item? ParentItemContainer
-    {
-        get;
-        internal set
-        {
-            if (value?.Guid == Guid)
-            {
-                throw new FargoCoreException($"Item '{Guid}' cannot be its own container.");
-            }
-
-            ParentItemContainerGuid = value?.Guid;
-            field = value;
-        }
-    }
-
-    #endregion Container
-
-    private readonly List<Partition> partitions = [];
+    public Item? ParentItemContainer { get; private set; }
 
     /// <summary>
     /// Gets the partitions associated with the item.
@@ -131,12 +63,82 @@ public class Item : IEntity, IPartitioned
     /// in partition-based access evaluation.
     /// </remarks>
     public IReadOnlyCollection<Partition> Partitions => partitions;
+    private readonly List<Partition> partitions = [];
 
+    /// <summary>
+    /// Initializes a new item entity.
+    /// </summary>
+    /// <remarks>
+    /// Required by Entity Framework.
+    /// </remarks>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    private Item()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new item entity associated with the specified article.
+    /// </summary>
+    /// <param name="article">The article associated with the item.</param>
+    private Item(Article article)
+    {
+        Article = article;
+        ArticleGuid = article.Guid;
+    }
+
+    /// <summary>
+    /// Creates a new item associated with the specified <paramref name="article"/>.
+    /// </summary>
+    /// <param name="article">The article associated with the item.</param>
+    /// <returns>A new <see cref="Item"/> instance.</returns>
+    public static Item CreateItem(Article article)
+        => new(article);
+
+    /// <summary>
+    /// Sets the parent container of the item.
+    /// </summary>
+    /// <param name="item">The parent container item.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown if the specified item is the current item.
+    /// </exception>
+    internal void SetParentItemContainer(Item item)
+    {
+        if (item.Guid == Guid)
+        {
+            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.");
+        }
+
+        ParentItemContainer = item;
+        ParentItemContainerGuid = item.Guid;
+    }
+
+    /// <summary>
+    /// Removes the item from its parent container.
+    /// </summary>
+    /// <remarks>
+    /// After calling this method, the item is no longer contained within another
+    /// item.
+    /// </remarks>
+    public void RemoveItemFromContainer()
+    {
+        ParentItemContainer = null;
+        ParentItemContainerGuid = null;
+    }
+
+    /// <summary>
+    /// Associates the item with the specified partition.
+    /// </summary>
+    /// <param name="partition">The partition to associate.</param>
     public void AddPartition(Partition partition)
     {
         partitions.Add(partition);
     }
 
+    /// <summary>
+    /// Removes the association between the item and the specified partition.
+    /// </summary>
+    /// <param name="partition">The partition to remove.</param>
     public void RemovePartition(Partition partition)
     {
         partitions.Remove(partition);

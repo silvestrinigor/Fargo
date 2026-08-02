@@ -1642,13 +1642,6 @@
             "type": "string",
             "format": "uuid"
           },
-          "productionDate": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
           "partitions": {
             "type": [
               "null",
@@ -1665,7 +1658,6 @@
         "required": [
           "guid",
           "articleGuid",
-          "productionDate",
           "parentContainerGuid",
           "partitions"
         ],
@@ -1678,13 +1670,6 @@
           "articleGuid": {
             "type": "string",
             "format": "uuid"
-          },
-          "productionDate": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
           },
           "parentContainerGuid": {
             "type": [
