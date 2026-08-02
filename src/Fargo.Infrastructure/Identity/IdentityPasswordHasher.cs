@@ -29,11 +29,11 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// A <see cref="PasswordHash"/> containing the hashed representation
     /// of the provided password.
     /// </returns>
-    public PasswordHash Hash(string password)
+    public string Hash(string password)
     {
         var passwordHashString = _hasher.HashPassword(null!, password);
 
-        return new PasswordHash(passwordHashString);
+        return passwordHashString;
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>,
     /// since both indicate that the password is valid.
     /// </remarks>
-    public bool Verify(PasswordHash hashedPassword, string providedPassword)
+    public bool Verify(string hashedPassword, string providedPassword)
     {
         var result = _hasher.VerifyHashedPassword(
             null!,

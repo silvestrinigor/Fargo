@@ -61,7 +61,7 @@ public sealed class UserUpdateCommandHandler(
 
                 var passwordHash = passwordHasher.Hash(auth.Password);
 
-                user.Authentication.PasswordHash = passwordHash;
+                user.Authentication.PasswordHash = new(passwordHash);
 
                 user.Authentication.MarkPasswordChangeAsRequired();
             }

@@ -13,7 +13,7 @@ public interface IPasswordHasher
     /// </summary>
     /// <param name="password">The plaintext password string.</param>
     /// <returns>A <see cref="PasswordHash"/> representing the hashed password.</returns>
-    PasswordHash Hash(string password);
+    string Hash(string password);
 
     /// <summary>
     /// Verifies whether the provided password matches the stored hash.
@@ -23,5 +23,5 @@ public interface IPasswordHasher
     /// <returns>
     /// <see langword="true"/> if the password matches the hash; otherwise, <see langword="false"/>.
     /// </returns>
-    bool Verify(PasswordHash hashedPassword, string providedPassword);
+    bool Verify(string hashedPassword, string providedPassword);
 }
