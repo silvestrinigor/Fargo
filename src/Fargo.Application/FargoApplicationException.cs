@@ -5,7 +5,7 @@ namespace Fargo.Application;
 /// </summary>
 public class FargoApplicationException : Exception
 {
-    private const string defaultExceptionMessage = "Fargo exception.";
+    private const string defaultExceptionMessage = "Fargo application exception.";
 
     /// <summary>
     /// 

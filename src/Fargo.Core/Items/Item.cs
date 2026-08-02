@@ -1,7 +1,6 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
 
 namespace Fargo.Core.Items;
 
@@ -92,8 +91,6 @@ public class Item : IEntity, IPartitioned
     /// </summary>
     public DateTimeOffset? ExpirationDate => ProductionDate + Article.ShelfLife;
 
-    public EntityType GetEntityType() => EntityType.Item;
-
     #region Container
 
     /// <summary>
@@ -124,8 +121,6 @@ public class Item : IEntity, IPartitioned
 
     #endregion Container
 
-    #region  Partition
-
     private readonly List<Partition> partitions = [];
 
     /// <summary>
@@ -146,9 +141,4 @@ public class Item : IEntity, IPartitioned
     {
         partitions.Remove(partition);
     }
-
-    /// <inheritdoc />
-    IReadOnlyCollection<Partition> IPartitioned.Partitions => Partitions;
-
-    #endregion  Partition
 }
