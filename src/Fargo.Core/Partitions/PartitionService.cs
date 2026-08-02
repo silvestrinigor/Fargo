@@ -1,11 +1,24 @@
 namespace Fargo.Core.Partitions;
 
+/// <summary>
+/// Partition core service.
+/// </summary>
 public class PartitionService(IPartitionRepository partitionRepository)
 {
-    public async Task ValidateHierarchyParentPartition(
+    /// <summary>
+    /// Validates that <paramref name="parentPartition"/> can be assigned as the
+    /// parent of <paramref name="memberPartition"/>.
+    /// </summary>
+    /// <param name="parentPartition">The candidate parent partition.</param>
+    /// <param name="memberPartition">The partition whose parent is being assigned.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown if assigning the parent would create a circular hierarchy.
+    /// </exception>
+    public async Task ValidateParentPartitionAssignmentAsync(
         Partition parentPartition, Partition memberPartition, CancellationToken cancellationToken = default)
     {
-        var createsCircularHierarchy = await CreatesCircularHierarchy(
+        var createsCircularHierarchy = await WouldCreateCircularHierarchyAsync(
             parentPartition, memberPartition.Guid, cancellationToken);
 
         if (createsCircularHierarchy)
@@ -17,7 +30,7 @@ public class PartitionService(IPartitionRepository partitionRepository)
         }
     }
 
-    private async Task<bool> CreatesCircularHierarchy(
+    private async Task<bool> WouldCreateCircularHierarchyAsync(
         Partition candidateParentPartition, Guid memberPartitionGuid, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(candidateParentPartition);
@@ -34,7 +47,15 @@ public class PartitionService(IPartitionRepository partitionRepository)
         return descendantPartitionGuids.Contains(candidateParentPartition.Guid);
     }
 
-    public async Task ValidatePartitionDelete(Partition partition, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Validates that the specified <paramref name="partition"/> can be deleted.
+    /// </summary>
+    /// <param name="partition">The partition to validate.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown if the partition is the global partition or if it has associated entities.
+    /// </exception>
+    public async Task ValidatePartitionCanBeDeletedAsync(Partition partition, CancellationToken cancellationToken = default)
     {
         if (partition.IsGlobalPartition)
         {

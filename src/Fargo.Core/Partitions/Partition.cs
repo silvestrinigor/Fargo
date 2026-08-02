@@ -1,6 +1,5 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Shared;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Core.Partitions;
 
@@ -25,9 +24,14 @@ namespace Fargo.Core.Partitions;
 public class Partition : IEntity
 {
     /// <summary>
-    /// Gets the unique identifier of the partition
+    /// Gets the unique identifier of the partition.
     /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets the value indicating whether the partition is the global partition.
+    /// </summary>
+    public bool IsGlobalPartition => Guid == FargoCoreGuids.GlobalPartitionGuid;
 
     /// <summary>
     /// Gets or sets the name of the partition.
@@ -38,11 +42,6 @@ public class Partition : IEntity
     /// Gets or sets the description of the partition.
     /// </summary>
     public Description Description { get; set; } = Description.Empty;
-
-    /// <summary>
-    /// Gets the value indicating whether the partition is the global partition.
-    /// </summary>
-    public bool IsGlobalPartition => Guid == FargoCoreGuids.GlobalPartitionGuid;
 
     /// <summary>
     /// Gets the unique identifier of the parent partition, if any.
@@ -62,12 +61,6 @@ public class Partition : IEntity
     /// </remarks>
     public Partition? ParentPartition { get; private set; }
 
-    /// <summary>
-    /// Gets the value indicating whether the partition has a parent partition.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(ParentPartitionGuid))]
-    public bool HasParentPartition => ParentPartitionGuid is not null;
-
     private Partition()
     {
     }
@@ -76,8 +69,8 @@ public class Partition : IEntity
     /// Creates a new partition.
     /// </summary>
     /// <param name="name">The name of the partition.</param>
-    /// <param name="parentPartition">The parent partition of the partition.</param>
-    /// <returns></returns>
+    /// <param name="parentPartition">The parent partition.</param>
+    /// <returns>A new <see cref="Partition"/> instance.</returns>
     public static Partition CreatePartition(Name name, Partition parentPartition)
     {
         var partition = new Partition
@@ -91,10 +84,10 @@ public class Partition : IEntity
     }
 
     /// <summary>
-    /// Creates a new global partition.
+    /// Creates the global partition.
     /// </summary>
     /// <param name="name">The name of the global partition.</param>
-    /// <returns></returns>
+    /// <returns>The global <see cref="Partition"/>.</returns>
     public static Partition CreateGlobalPartition(Name name)
     {
         var globalPartition = new Partition
@@ -107,20 +100,22 @@ public class Partition : IEntity
     }
 
     /// <summary>
-    /// Sets the parent partition.
+    /// Creates the global partition.
     /// </summary>
+    /// <param name="name">The name of the global partition.</param>
+    /// <returns>The global <see cref="Partition"/>.</returns>
     public void SetParentPartition(Partition parentPartition)
     {
         if (IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "Global partition cannot be a part of another partition.", FargoCoreErrorType.None);
+                "The global partition cannot have a parent partition.", FargoCoreErrorType.None);
         }
 
         if (parentPartition.Guid == Guid)
         {
             throw new FargoCoreException(
-                "Parent partition cannot be the own partition.", FargoCoreErrorType.None);
+                "A partition cannot be its own parent.", FargoCoreErrorType.None);
         }
 
         ParentPartition = parentPartition;

@@ -33,7 +33,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(partitionToDelete);
 
-        if (!partitionToDelete.HasParentPartition)
+        if (partitionToDelete.ParentPartitionGuid is null)
         {
             throw new FargoApplicationException("Cannot delete a partition with no parent partition.");
         }
@@ -44,7 +44,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(parentPartition);
 
-        await partitionService.ValidatePartitionDelete(partitionToDelete, cancellationToken);
+        await partitionService.ValidatePartitionCanBeDeletedAsync(partitionToDelete, cancellationToken);
 
         partitionRepository.Remove(partitionToDelete);
 
