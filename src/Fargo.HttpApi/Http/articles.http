@@ -1,4 +1,4 @@
-@articleGuid = 7359b80e-34ad-45ae-8416-3cce92ccdd1d
+@articleGuid = d4ec8a27-f7a0-44b5-ae09-b3b7b72afade
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get by Guid
@@ -30,7 +30,8 @@ Content-Type: application/json
 
 {
   "name": "Coca Cola 2L",
-  "description": "PET Bottle"
+  "description": "PET Bottle",
+  "partitionsToAdd": ["00000000-0000-0000-0000-000000000002"]
 }
 
 ###

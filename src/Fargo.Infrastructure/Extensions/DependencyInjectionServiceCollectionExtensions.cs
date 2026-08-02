@@ -74,7 +74,13 @@ public static class DependencyInjectionServiceCollectionExtensions
                 .GetRequiredService<IOptions<ConnectionStringOptions>>()
                 .Value;
 
-            opt.UseNpgsql(options.Fargo).UseSnakeCaseNamingConvention();
+            opt.UseNpgsql(
+                options.Fargo,
+                npgsqlOptions =>
+                {
+                    npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
+                }
+            ).UseSnakeCaseNamingConvention();
         }
 
         public void AddFargoRepositories() => services
