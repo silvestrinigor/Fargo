@@ -26,11 +26,11 @@ public sealed class ItemService(IItemRepository itemRepository)
                 $"'{parentContainerItem.Guid}' because this would create a circular hierarchy.");
         }
 
-        memberItem.ParentContainer = parentContainerItem;
+        memberItem.ParentItemContainer = parentContainerItem;
     }
 
     public static void RemoveFromContainer(Item item)
     {
-        item.ParentContainer = null;
+        item.ParentItemContainer = null;
     }
 }

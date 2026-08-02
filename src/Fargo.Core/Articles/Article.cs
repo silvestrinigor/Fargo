@@ -2,7 +2,6 @@ using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Barcodes;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using UnitsNet;
@@ -75,6 +74,8 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     public Mass? Mass { get; private set; }
 
+    public ArticleBarcode Barcode { get; private init; }
+
     /// <summary>
     /// Gets the volume of the article.
     /// </summary>
@@ -84,56 +85,6 @@ public class Article : IEntity, IPartitioned
     /// Gets the density of the article.
     /// </summary>
     public Density? Density => Mass / Volume;
-
-    /// <summary>
-    /// EAN-13 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Ean13? Ean13 { get; set; }
-
-    /// <summary>
-    /// EAN-8 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Ean8? Ean8 { get; set; }
-
-    /// <summary>
-    /// UPC-A barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public UpcA? UpcA { get; set; }
-
-    /// <summary>
-    /// UPC-E barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public UpcE? UpcE { get; set; }
-
-    /// <summary>
-    /// Code 128 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Code128? Code128 { get; set; }
-
-    /// <summary>
-    /// Code 39 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Code39? Code39 { get; set; }
-
-    /// <summary>
-    /// ITF-14 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Itf14? Itf14 { get; set; }
-
-    /// <summary>
-    /// GS1-128 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Gs1128? Gs1128 { get; set; }
-
-    /// <summary>
-    /// QR Code barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public QrCode? QrCode { get; set; }
-
-    /// <summary>
-    /// Data Matrix barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public DataMatrix? DataMatrix { get; set; }
 
     /// <summary>
     /// Gets the variation info associated with the article.
@@ -190,18 +141,23 @@ public class Article : IEntity, IPartitioned
 
     private readonly List<Partition> partitions = [];
 
-    private Article() { }
+    private Article()
+    {
+        Barcode = new ArticleBarcode(this);
+    }
 
     private Article(Article variationFromArticle)
     {
         Variation = new ArticleVariation(variationFromArticle, this);
         ArticleType = ArticleType.Variation;
+        Barcode = new ArticleBarcode(this);
     }
 
     private Article(Article packFromArticle, Scalar quantity)
     {
         Pack = new ArticlePack(this, packFromArticle, quantity);
         ArticleType = ArticleType.Pack;
+        Barcode = new ArticleBarcode(this);
     }
 
     private Article(IReadOnlyCollection<(Article, Scalar)> articleKitComponentsValues)
@@ -216,6 +172,7 @@ public class Article : IEntity, IPartitioned
         KitComponents = kitComponents;
 
         ArticleType = ArticleType.Kit;
+        Barcode = new ArticleBarcode(this);
     }
 
     private Article(bool isContainer)
@@ -227,6 +184,7 @@ public class Article : IEntity, IPartitioned
         }
 
         ArticleType = ArticleType.Default;
+        Barcode = new ArticleBarcode(this);
     }
 
     /// <summary>

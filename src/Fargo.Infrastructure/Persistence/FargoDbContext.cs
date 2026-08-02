@@ -90,6 +90,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ArticleBarcodeConfiguration());
+
         modelBuilder.ApplyConfiguration(new ArticleVariationConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticlePackConfiguration());
@@ -99,8 +101,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemContainerConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 

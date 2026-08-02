@@ -10,6 +10,6 @@ public static class ItemDtoMappings
         item.Guid,
         item.ArticleGuid,
         item.ProductionDate,
-        item.ParentContainerGuid,
+        item.ParentItemContainerGuid,
         item.Partitions.Select(partition => partition.Guid).ToArray());
 }

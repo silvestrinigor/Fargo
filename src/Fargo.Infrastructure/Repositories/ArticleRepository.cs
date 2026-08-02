@@ -32,38 +32,39 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => articles
+            .Include(article => article.Barcode)
             .Include(article => article.Partitions)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
 
     public Task<bool> ExistsByEan13Async(Ean13 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Ean13 == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.Ean13 == code, cancellationToken);
 
     public Task<bool> ExistsByEan8Async(Ean8 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Ean8 == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.Ean8 == code, cancellationToken);
 
     public Task<bool> ExistsByUpcEAsync(UpcE code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.UpcE == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.UpcE == code, cancellationToken);
 
     public Task<bool> ExistsByUpcAAsync(UpcA code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.UpcA == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.UpcA == code, cancellationToken);
 
     public Task<bool> ExistsByCode128Async(Code128 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Code128 == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.Code128 == code, cancellationToken);
 
     public Task<bool> ExistsByCode39Async(Code39 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Code39 == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.Code39 == code, cancellationToken);
 
     public Task<bool> ExistsByItf14Async(Itf14 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Itf14 == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.Itf14 == code, cancellationToken);
 
     public Task<bool> ExistsByGs1128Async(Gs1128 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Gs1128 == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.Gs1128 == code, cancellationToken);
 
     public Task<bool> ExistsByQrCodeAsync(QrCode code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.QrCode == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.QrCode == code, cancellationToken);
 
     public Task<bool> ExistsByDataMatrixAsync(DataMatrix code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.DataMatrix == code, cancellationToken);
+        => articles.AnyAsync(article => article.Barcode.DataMatrix == code, cancellationToken);
 
     public async Task<ArticleDto?> GetInfoByGuidAsync(
         Guid entityGuid,
@@ -160,52 +161,52 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             case BarcodeFormat.Ean13:
                 {
                     var code = Ean13.FromBarcode(barcode);
-                    return query.Where(article => article.Ean13 == code);
+                    return query.Where(article => article.Barcode.Ean13 == code);
                 }
             case BarcodeFormat.Ean8:
                 {
                     var code = Ean8.FromBarcode(barcode);
-                    return query.Where(article => article.Ean8 == code);
+                    return query.Where(article => article.Barcode.Ean8 == code);
                 }
             case BarcodeFormat.UpcA:
                 {
                     var code = UpcA.FromBarcode(barcode);
-                    return query.Where(article => article.UpcA == code);
+                    return query.Where(article => article.Barcode.UpcA == code);
                 }
             case BarcodeFormat.UpcE:
                 {
                     var code = UpcE.FromBarcode(barcode);
-                    return query.Where(article => article.UpcE == code);
+                    return query.Where(article => article.Barcode.UpcE == code);
                 }
             case BarcodeFormat.Code128:
                 {
                     var code = Code128.FromBarcode(barcode);
-                    return query.Where(article => article.Code128 == code);
+                    return query.Where(article => article.Barcode.Code128 == code);
                 }
             case BarcodeFormat.Code39:
                 {
                     var code = Code39.FromBarcode(barcode);
-                    return query.Where(article => article.Code39 == code);
+                    return query.Where(article => article.Barcode.Code39 == code);
                 }
             case BarcodeFormat.Itf14:
                 {
                     var code = Itf14.FromBarcode(barcode);
-                    return query.Where(article => article.Itf14 == code);
+                    return query.Where(article => article.Barcode.Itf14 == code);
                 }
             case BarcodeFormat.Gs1128:
                 {
                     var code = Gs1128.FromBarcode(barcode);
-                    return query.Where(article => article.Gs1128 == code);
+                    return query.Where(article => article.Barcode.Gs1128 == code);
                 }
             case BarcodeFormat.QrCode:
                 {
                     var code = QrCode.FromBarcode(barcode);
-                    return query.Where(article => article.QrCode == code);
+                    return query.Where(article => article.Barcode.QrCode == code);
                 }
             case BarcodeFormat.DataMatrix:
                 {
                     var code = DataMatrix.FromBarcode(barcode);
-                    return query.Where(article => article.DataMatrix == code);
+                    return query.Where(article => article.Barcode.DataMatrix == code);
                 }
             default:
                 throw new ArgumentOutOfRangeException(nameof(barcode), barcode.Format, "Unsupported barcode type.");

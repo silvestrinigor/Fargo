@@ -3,6 +3,7 @@ using System;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    partial class FargoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802002127_ItemParentContainerTableName")]
+    partial class ItemParentContainerTableName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,15 +55,50 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("article_type");
 
+                    b.Property<string>("Code128")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("code128");
+
+                    b.Property<string>("Code39")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("code39");
+
                     b.Property<int?>("Color")
                         .HasColumnType("integer")
                         .HasColumnName("color");
+
+                    b.Property<string>("DataMatrix")
+                        .HasMaxLength(2335)
+                        .HasColumnType("character varying(2335)")
+                        .HasColumnName("data_matrix");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<string>("Ean13")
+                        .HasMaxLength(13)
+                        .HasColumnType("character varying(13)")
+                        .HasColumnName("ean13");
+
+                    b.Property<string>("Ean8")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("ean8");
+
+                    b.Property<string>("Gs1128")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("gs1128");
+
+                    b.Property<string>("Itf14")
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)")
+                        .HasColumnName("itf14");
 
                     b.Property<string>("LengthX")
                         .HasColumnType("text")
@@ -84,61 +122,14 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
-                    b.Property<long?>("ShelfLife")
-                        .HasColumnType("bigint")
-                        .HasColumnName("shelf_life");
-
-                    b.HasKey("Guid")
-                        .HasName("pk_articles");
-
-                    b.ToTable("articles", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleBarcode", b =>
-                {
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<string>("Code128")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("code128");
-
-                    b.Property<string>("Code39")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("code39");
-
-                    b.Property<string>("DataMatrix")
-                        .HasMaxLength(2335)
-                        .HasColumnType("character varying(2335)")
-                        .HasColumnName("data_matrix");
-
-                    b.Property<string>("Ean13")
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)")
-                        .HasColumnName("ean13");
-
-                    b.Property<string>("Ean8")
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
-                        .HasColumnName("ean8");
-
-                    b.Property<string>("Gs1128")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("gs1128");
-
-                    b.Property<string>("Itf14")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("itf14");
-
                     b.Property<string>("QrCode")
                         .HasMaxLength(2953)
                         .HasColumnType("character varying(2953)")
                         .HasColumnName("qr_code");
+
+                    b.Property<long?>("ShelfLife")
+                        .HasColumnType("bigint")
+                        .HasColumnName("shelf_life");
 
                     b.Property<string>("UpcA")
                         .HasMaxLength(12)
@@ -150,60 +141,60 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(8)")
                         .HasColumnName("upc_e");
 
-                    b.HasKey("ArticleGuid")
-                        .HasName("pk_article_barcodes");
+                    b.HasKey("Guid")
+                        .HasName("pk_articles");
 
                     b.HasIndex("Code128")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_code128")
+                        .HasDatabaseName("ix_articles_code128")
                         .HasFilter("code128 IS NOT NULL");
 
                     b.HasIndex("Code39")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_code39")
+                        .HasDatabaseName("ix_articles_code39")
                         .HasFilter("code39 IS NOT NULL");
 
                     b.HasIndex("DataMatrix")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_data_matrix")
+                        .HasDatabaseName("ix_articles_data_matrix")
                         .HasFilter("data_matrix IS NOT NULL");
 
                     b.HasIndex("Ean13")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_ean13")
+                        .HasDatabaseName("ix_articles_ean13")
                         .HasFilter("ean13 IS NOT NULL");
 
                     b.HasIndex("Ean8")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_ean8")
+                        .HasDatabaseName("ix_articles_ean8")
                         .HasFilter("ean8 IS NOT NULL");
 
                     b.HasIndex("Gs1128")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_gs1128")
+                        .HasDatabaseName("ix_articles_gs1128")
                         .HasFilter("gs1128 IS NOT NULL");
 
                     b.HasIndex("Itf14")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_itf14")
+                        .HasDatabaseName("ix_articles_itf14")
                         .HasFilter("itf14 IS NOT NULL");
 
                     b.HasIndex("QrCode")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_qr_code")
+                        .HasDatabaseName("ix_articles_qr_code")
                         .HasFilter("qr_code IS NOT NULL");
 
                     b.HasIndex("UpcA")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_upc_a")
+                        .HasDatabaseName("ix_articles_upc_a")
                         .HasFilter("upc_a IS NOT NULL");
 
                     b.HasIndex("UpcE")
                         .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_upc_e")
+                        .HasDatabaseName("ix_articles_upc_e")
                         .HasFilter("upc_e IS NOT NULL");
 
-                    b.ToTable("article_barcodes", (string)null);
+                    b.ToTable("articles", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Articles.ArticleContainer", b =>
@@ -628,18 +619,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasConstraintName("fk_article_partitions_partitions_partitions_guid");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleBarcode", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithOne("Barcode")
-                        .HasForeignKey("Fargo.Core.Articles.ArticleBarcode", "ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_barcodes_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
             modelBuilder.Entity("Fargo.Core.Articles.ArticleContainer", b =>
                 {
                     b.HasOne("Fargo.Core.Articles.Article", "Article")
@@ -860,9 +839,6 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Articles.Article", b =>
                 {
-                    b.Navigation("Barcode")
-                        .IsRequired();
-
                     b.Navigation("Container");
 
                     b.Navigation("KitComponents");

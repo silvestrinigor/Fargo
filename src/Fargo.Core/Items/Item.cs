@@ -47,11 +47,6 @@ public class Item : IEntity, IPartitioned
     /// <param name="article">The article associated with the item.</param>
     private Item(Article article, DateTimeOffset? productionDate = null)
     {
-        if (article.IsContainer)
-        {
-            Container = new ItemContainer();
-        }
-
         Article = article;
         ProductionDate = productionDate;
     }
@@ -107,12 +102,12 @@ public class Item : IEntity, IPartitioned
     /// <remarks>
     /// When <see langword="null"/>, the item is not currently inside another item container.
     /// </remarks>
-    public Guid? ParentContainerGuid { get; private set; }
+    public Guid? ParentItemContainerGuid { get; private set; }
 
     /// <summary>
     /// Gets the parent container of the current item, if any.
     /// </summary>
-    public Item? ParentContainer
+    public Item? ParentItemContainer
     {
         get;
         internal set
@@ -122,18 +117,9 @@ public class Item : IEntity, IPartitioned
                 throw new FargoCoreException($"Item '{Guid}' cannot be its own container.");
             }
 
-            ParentContainerGuid = value?.Guid;
+            ParentItemContainerGuid = value?.Guid;
             field = value;
         }
-    }
-
-    /// <summary>
-    /// Gets the container information of the current item, if the current item is a container.
-    /// </summary>
-    public ItemContainer? Container
-    {
-        get;
-        private init;
     }
 
     #endregion Container
