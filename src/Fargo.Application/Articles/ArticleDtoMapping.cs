@@ -13,11 +13,11 @@ public static class ArticleDtoMapping
             article.Description,
             article.ShelfLife,
             article.Color,
-            new ArticleMetricsDto(
-                article.Mass,
-                article.LengthX,
-                article.LengthY,
-                article.LengthZ),
+            article.Mass,
+            new ArticleDimensionDto(
+                article.Dimension.X,
+                article.Dimension.Y,
+                article.Dimension.Z),
             new ArticleBarcodesDto(
                 article.Barcode.Ean13,
                 article.Barcode.Ean8,

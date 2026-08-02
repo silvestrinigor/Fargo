@@ -92,6 +92,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new ArticleBarcodeConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ArticleDimensionConfiguration());
+
         modelBuilder.ApplyConfiguration(new ArticleVariationConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticlePackConfiguration());

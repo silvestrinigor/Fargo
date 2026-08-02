@@ -54,37 +54,24 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     public Color? Color { get; set; }
 
-    /// <summary>
-    /// Gets the X dimension of the article.
-    /// </summary>
-    public Length? LengthX { get; private set; }
-
-    /// <summary>
-    /// Gets the Y dimension of the article.
-    /// </summary>
-    public Length? LengthY { get; private set; }
-
-    /// <summary>
-    /// Gets the Z dimension of the article.
-    /// </summary>
-    public Length? LengthZ { get; private set; }
+    public ArticleDimension Dimension { get; private init; }
 
     /// <summary>
     /// Gets the physical mass of the article.
     /// </summary>
     public Mass? Mass { get; private set; }
 
-    public ArticleBarcode Barcode { get; private init; }
-
     /// <summary>
     /// Gets the volume of the article.
     /// </summary>
-    public Volume? Volume => LengthX * LengthY * LengthZ;
+    public Volume? Volume => Dimension.X * Dimension.Y * Dimension.Z;
 
     /// <summary>
     /// Gets the density of the article.
     /// </summary>
     public Density? Density => Mass / Volume;
+
+    public ArticleBarcode Barcode { get; private init; }
 
     /// <summary>
     /// Gets the variation info associated with the article.
@@ -144,6 +131,7 @@ public class Article : IEntity, IPartitioned
     private Article()
     {
         Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
     }
 
     private Article(Article variationFromArticle)
@@ -151,6 +139,7 @@ public class Article : IEntity, IPartitioned
         Variation = new ArticleVariation(variationFromArticle, this);
         ArticleType = ArticleType.Variation;
         Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
     }
 
     private Article(Article packFromArticle, Scalar quantity)
@@ -158,6 +147,7 @@ public class Article : IEntity, IPartitioned
         Pack = new ArticlePack(this, packFromArticle, quantity);
         ArticleType = ArticleType.Pack;
         Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
     }
 
     private Article(IReadOnlyCollection<(Article, Scalar)> articleKitComponentsValues)
@@ -173,6 +163,7 @@ public class Article : IEntity, IPartitioned
 
         ArticleType = ArticleType.Kit;
         Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
     }
 
     private Article(bool isContainer)
@@ -185,6 +176,7 @@ public class Article : IEntity, IPartitioned
 
         ArticleType = ArticleType.Default;
         Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
     }
 
     /// <summary>
@@ -270,9 +262,7 @@ public class Article : IEntity, IPartitioned
     public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
     {
         Mass = mass;
-        LengthX = lengthX;
-        LengthY = lengthY;
-        LengthZ = lengthZ;
+        Dimension.SetDimensions(lengthX, lengthY, lengthZ);
     }
 
     public void AddPartition(Partition partition)

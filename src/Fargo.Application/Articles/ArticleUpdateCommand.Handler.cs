@@ -46,13 +46,13 @@ public sealed class ArticlePatchCommandHandler(
                 ? null : articleUpdateDto.Mass ?? article.Mass,
 
             articleUpdateDto.RemoveLengthX is true
-                ? null : articleUpdateDto.LengthX ?? article.LengthX,
+                ? null : articleUpdateDto.LengthX ?? article.Dimension.X,
 
             articleUpdateDto.RemoveLengthY is true
-                ? null : articleUpdateDto.LengthY ?? article.LengthY,
+                ? null : articleUpdateDto.LengthY ?? article.Dimension.Y,
 
             articleUpdateDto.RemoveLengthZ is true
-                ? null : articleUpdateDto.LengthZ ?? article.LengthZ);
+                ? null : articleUpdateDto.LengthZ ?? article.Dimension.Z);
 
         if (articleUpdateDto.RemoveEan13 is true)
         {

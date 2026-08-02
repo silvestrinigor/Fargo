@@ -1122,7 +1122,7 @@
         return request;
     }
 
-    private static ArticleMetricsDto? BuildArticleMetrics(ArticleMetricsForm form)
+    private static ArticleDimensionDto? BuildArticleMetrics(ArticleMetricsForm form)
     {
         return null;
     }
@@ -1771,10 +1771,10 @@
         <section class="detail-section">
             <h4>Metrics</h4>
             <div class="detail-grid">
-                @DetailValue("Mass", article.Metrics.Mass.ToString())
-                @DetailValue("Length X", article.Metrics.LengthX.ToString())
-                @DetailValue("Length Y", article.Metrics.LengthY.ToString())
-                @DetailValue("Length Z", article.Metrics.LengthZ.ToString())
+                @DetailValue("Mass", article.Mass.ToString())
+                @DetailValue("Length X", article.Dimension.LengthX.ToString())
+                @DetailValue("Length Y", article.Dimension.LengthY.ToString())
+                @DetailValue("Length Z", article.Dimension.LengthZ.ToString())
             </div>
         </section>
         <section class="detail-section">

@@ -1250,6 +1250,46 @@
           }
         }
       },
+      "ArticleDimensionDto": {
+        "required": [
+          "lengthX",
+          "lengthY",
+          "lengthZ"
+        ],
+        "type": "object",
+        "properties": {
+          "lengthX": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Length"
+              }
+            ]
+          },
+          "lengthY": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Length"
+              }
+            ]
+          },
+          "lengthZ": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Length"
+              }
+            ]
+          }
+        }
+      },
       "ArticleDto": {
         "required": [
           "guid",
@@ -1257,7 +1297,8 @@
           "description",
           "shelfLife",
           "color",
-          "metrics",
+          "mass",
+          "dimension",
           "barcodes",
           "partitions"
         ],
@@ -1290,8 +1331,18 @@
               }
             ]
           },
-          "metrics": {
-            "$ref": "#/components/schemas/ArticleMetricsDto"
+          "mass": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Mass"
+              }
+            ]
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/ArticleDimensionDto"
           },
           "barcodes": {
             "$ref": "#/components/schemas/ArticleBarcodesDto"
@@ -1319,15 +1370,6 @@
           "quantity": {
             "$ref": "#/components/schemas/Scalar"
           }
-        }
-      },
-      "ArticleMetricsDto": {
-        "type": "object",
-        "properties": {
-          "mass": { },
-          "lengthX": { },
-          "lengthY": { },
-          "lengthZ": { }
         }
       },
       "ArticleType": {
@@ -1709,6 +1751,7 @@
         }
       },
       "LastName": { },
+      "Length": { },
       "LengthUnit": {
         "type": "integer"
       },
@@ -1741,6 +1784,7 @@
       "LuminousIntensityUnit": {
         "type": "integer"
       },
+      "Mass": { },
       "MassUnit": {
         "type": "integer"
       },
