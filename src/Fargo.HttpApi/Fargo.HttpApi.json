@@ -1245,6 +1245,12 @@
           }
         }
       },
+      "ArticleContainerDto": {
+        "type": "object",
+        "properties": {
+          "maxMass": { }
+        }
+      },
       "ArticleCreateDto": {
         "required": [
           "name"
@@ -1371,10 +1377,15 @@
           "guid",
           "name",
           "description",
+          "articleType",
           "shelfLife",
           "color",
           "mass",
           "dimension",
+          "variation",
+          "pack",
+          "kitComponents",
+          "container",
           "barcodes",
           "partitions"
         ],
@@ -1389,6 +1400,9 @@
           },
           "description": {
             "$ref": "#/components/schemas/Description"
+          },
+          "articleType": {
+            "$ref": "#/components/schemas/ArticleType"
           },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -1420,6 +1434,45 @@
           "dimension": {
             "$ref": "#/components/schemas/ArticleDimensionDto"
           },
+          "variation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleVariationDto"
+              }
+            ]
+          },
+          "pack": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticlePackDto"
+              }
+            ]
+          },
+          "kitComponents": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ArticleKitComponentDto"
+            }
+          },
+          "container": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleContainerDto"
+              }
+            ]
+          },
           "barcodes": {
             "$ref": "#/components/schemas/ArticleBarcodeDto"
           },
@@ -1440,6 +1493,22 @@
         "type": "object",
         "properties": {
           "articleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "ArticlePackDto": {
+        "required": [
+          "fromArticleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "fromArticleGuid": {
             "type": "string",
             "format": "uuid"
           },
@@ -1515,6 +1584,18 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      },
+      "ArticleVariationDto": {
+        "required": [
+          "fromArticleGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "fromArticleGuid": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },

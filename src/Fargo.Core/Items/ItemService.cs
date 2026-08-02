@@ -1,3 +1,5 @@
+using Fargo.Core.Shared.Articles;
+
 namespace Fargo.Core.Items;
 
 public sealed class ItemService(IItemRepository itemRepository)
@@ -9,7 +11,7 @@ public sealed class ItemService(IItemRepository itemRepository)
             throw new FargoCoreException($"Item '{memberItem.Guid}' cannot be its own container.");
         }
 
-        if (!parentContainerItem.Article.IsContainer)
+        if (parentContainerItem.Article.ArticleType != ArticleType.Container)
         {
             throw new FargoCoreException($"Item '{parentContainerItem.Guid}' is not a container.");
         }

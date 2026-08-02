@@ -11,6 +11,7 @@ public static class ArticleDtoMapping
             article.Guid,
             article.Name,
             article.Description,
+            article.ArticleType,
             article.ShelfLife,
             article.Color,
             article.Mass,
@@ -18,6 +19,22 @@ public static class ArticleDtoMapping
                 article.Dimension.X,
                 article.Dimension.Y,
                 article.Dimension.Z),
+            article.Variation != null
+                ? new ArticleVariationDto(
+                article.Variation.FromArticleGuid)
+                : null,
+            article.Pack != null
+                ? new ArticlePackDto(
+                    article.Pack.FromArticleGuid,
+                    article.Pack.Quantity)
+                : null,
+            article.KitComponents != null
+                ? article.KitComponents
+                    .Select(k => new ArticleKitComponentDto(k.FromArticleGuid, k.Quantity)).ToArray()
+                : null,
+            article.Container != null
+                ? new ArticleContainerDto(article.Container.MaxMass)
+                : null,
             new ArticleBarcodeDto(
                 article.Barcode.Ean13,
                 article.Barcode.Ean8,

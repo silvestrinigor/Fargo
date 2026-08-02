@@ -2,7 +2,6 @@ using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using UnitsNet;
 
@@ -80,42 +79,20 @@ public class Article : IEntity, IPartitioned
     public ArticleVariation? Variation { get; private init; }
 
     /// <summary>
-    /// Gets a value indicating whether this article is a variation of another article.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(Variation))]
-    public bool IsVariation => Variation is not null;
-
-    /// <summary>
     /// Gets the pack info associated with the article.
     /// When <see langword="null"/>, no pack constraint is defined.
     /// </summary>
     public ArticlePack? Pack { get; private init; }
 
-    /// <summary>
-    /// Gets a value indicating whether this article represents a pack.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(Pack))]
-    public bool IsPack => Pack is not null;
+    private readonly List<ArticleKitComponent>? kitComponents = [];
 
-    public IReadOnlyCollection<ArticleKitComponent>? KitComponents { get; private init; }
-
-    /// <summary>
-    /// Gets a value indicating whether this article represents a kit.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(KitComponents))]
-    public bool IsKit => KitComponents is not null;
+    public IReadOnlyCollection<ArticleKitComponent>? KitComponents => kitComponents;
 
     /// <summary>
     /// Gets the container constraints associated with the article.
     /// When <see langword="null"/>, the article is not a container.
     /// </summary>
     public ArticleContainer? Container { get; private set; }
-
-    /// <summary>
-    /// Gets a value indicating whether this article represents a container.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(Container))]
-    public bool IsContainer => Container is not null;
 
     /// <summary>
     /// Gets the partitions associated with the article.
@@ -152,14 +129,14 @@ public class Article : IEntity, IPartitioned
 
     private Article(IReadOnlyCollection<(Article, Scalar)> articleKitComponentsValues)
     {
-        var kitComponents = new List<ArticleKitComponent>();
+        var kitComponentsIn = new List<ArticleKitComponent>();
 
         foreach (var component in articleKitComponentsValues)
         {
-            kitComponents.Add(new ArticleKitComponent(this, component.Item1, component.Item2));
+            kitComponentsIn.Add(new ArticleKitComponent(this, component.Item1, component.Item2));
         }
 
-        KitComponents = kitComponents;
+        kitComponents = kitComponentsIn;
 
         ArticleType = ArticleType.Kit;
         Barcode = new ArticleBarcode(this);
