@@ -1271,20 +1271,23 @@
               }
             ]
           },
-          "fromArticle": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "packQuantity": {
+          "variation": {
             "oneOf": [
               {
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/Scalar"
+                "$ref": "#/components/schemas/ArticleVariationDto"
+              }
+            ]
+          },
+          "pack": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticlePackDto"
               }
             ]
           },
@@ -1296,6 +1299,16 @@
             "items": {
               "$ref": "#/components/schemas/ArticleKitComponentDto"
             }
+          },
+          "container": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ArticleContainerDto"
+              }
+            ]
           },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
