@@ -1,4 +1,4 @@
-namespace Fargo.Core;
+namespace Fargo.Core.Security;
 
 /// <summary>
 /// Represents a hashed password stored in the system.

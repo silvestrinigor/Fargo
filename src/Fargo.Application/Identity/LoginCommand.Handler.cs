@@ -1,5 +1,6 @@
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Identity;
+using Fargo.Core.Security;
 using Fargo.Core.Shared;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -7,10 +8,14 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Identity;
 
 public sealed class LoginCommandHandler(
-    IUserRepository userRepository, IPasswordHasher passwordHasher,
-    ITokenGenerator tokenGenerator, IRefreshTokenGenerator refreshTokenGenerator,
-    ITokenHasher tokenHasher, IRefreshTokenRepository refreshTokenRepository,
-    IUnitOfWork unitOfWork, ILogger<LoginCommandHandler> logger
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    ITokenGenerator tokenGenerator,
+    IRefreshTokenGenerator refreshTokenGenerator,
+    ITokenHasher tokenHasher,
+    IRefreshTokenRepository refreshTokenRepository,
+    IUnitOfWork unitOfWork,
+    ILogger<LoginCommandHandler> logger
 ) : ICommandHandler<LoginCommand, AuthResult>
 {
     public async Task<AuthResult> HandleAsync(

@@ -1,5 +1,6 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
+using Fargo.Core.Security;
 using Fargo.Core.Shared;
 using Fargo.Core.UserGroups;
 

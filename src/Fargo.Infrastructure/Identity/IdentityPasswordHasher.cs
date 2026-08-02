@@ -1,5 +1,4 @@
-using Fargo.Core;
-using Fargo.Core.Users;
+using Fargo.Core.Security;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fargo.Infrastructure.Security;

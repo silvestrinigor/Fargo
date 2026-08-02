@@ -1,4 +1,4 @@
-namespace Fargo.Core.Users;
+namespace Fargo.Core.Security;
 
 /// <summary>
 /// Defines the contract for password hashing operations.

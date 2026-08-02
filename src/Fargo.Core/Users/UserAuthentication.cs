@@ -1,3 +1,5 @@
+using Fargo.Core.Security;
+
 namespace Fargo.Core.Users;
 
 /// <summary>
