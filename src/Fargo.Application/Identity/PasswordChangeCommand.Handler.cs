@@ -59,7 +59,7 @@ public sealed class PasswordChangeCommandHandler(
         }
 
         // TODO: ChangePasswordHash should validate if the actor is the user or the actor has access to change another user password.
-        user.Authentication.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
+        user.Authentication.PasswordHash = new(passwordHasher.Hash(command.Passwords.NewPassword));
 
         user.Authentication.ResetPasswordExpiration();
 
