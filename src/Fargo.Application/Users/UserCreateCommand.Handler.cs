@@ -39,6 +39,8 @@ public sealed class UserCreateCommandHandler(
 
         user.Description = command.Create.Description ?? Description.Empty;
 
+        user.IsActive = command.Create.IsActive ?? true;
+
         user.DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null;
 
         user.MarkPasswordChangeAsRequired();

@@ -14,14 +14,15 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasIndex(x => x.ArticleGuid);
 
-        builder.HasIndex(x => x.ParentContainerGuid);
+        builder.HasIndex(x => x.ParentItemContainerGuid);
 
         builder.HasOne(x => x.Article).WithMany().HasForeignKey(x => x.ArticleGuid).OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(i => i.Container).WithOne().HasForeignKey<Item>("article_guid").OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(i => i.ParentItemContainer).WithMany().HasForeignKey(i => i.ParentItemContainerGuid).OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasOne(i => i.ParentContainer).WithMany().HasForeignKey(i => i.ParentContainerGuid).OnDelete(DeleteBehavior.SetNull);
-
-        builder.HasMany(i => i.Partitions).WithMany();
+        builder.HasMany(i => i.Partitions).WithMany().UsingEntity(j =>
+        {
+            j.ToTable("item_partitions");
+        });
     }
 }

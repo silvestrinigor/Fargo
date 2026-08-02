@@ -2,8 +2,8 @@ using UnitsNet;
 
 namespace Fargo.Application.Shared.Articles;
 
-public sealed record ArticleMetricsDto(
-    Mass? Mass = null,
+public sealed record ArticleDimensionDto(
     Length? LengthX = null,
     Length? LengthY = null,
-    Length? LengthZ = null);
+    Length? LengthZ = null
+);

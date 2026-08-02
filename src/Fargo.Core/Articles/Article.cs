@@ -2,7 +2,6 @@ using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Barcodes;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using UnitsNet;
@@ -55,20 +54,7 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     public Color? Color { get; set; }
 
-    /// <summary>
-    /// Gets the X dimension of the article.
-    /// </summary>
-    public Length? LengthX { get; private set; }
-
-    /// <summary>
-    /// Gets the Y dimension of the article.
-    /// </summary>
-    public Length? LengthY { get; private set; }
-
-    /// <summary>
-    /// Gets the Z dimension of the article.
-    /// </summary>
-    public Length? LengthZ { get; private set; }
+    public ArticleDimension Dimension { get; private init; }
 
     /// <summary>
     /// Gets the physical mass of the article.
@@ -78,62 +64,14 @@ public class Article : IEntity, IPartitioned
     /// <summary>
     /// Gets the volume of the article.
     /// </summary>
-    public Volume? Volume => LengthX * LengthY * LengthZ;
+    public Volume? Volume => Dimension.X * Dimension.Y * Dimension.Z;
 
     /// <summary>
     /// Gets the density of the article.
     /// </summary>
     public Density? Density => Mass / Volume;
 
-    /// <summary>
-    /// EAN-13 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Ean13? Ean13 { get; set; }
-
-    /// <summary>
-    /// EAN-8 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Ean8? Ean8 { get; set; }
-
-    /// <summary>
-    /// UPC-A barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public UpcA? UpcA { get; set; }
-
-    /// <summary>
-    /// UPC-E barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public UpcE? UpcE { get; set; }
-
-    /// <summary>
-    /// Code 128 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Code128? Code128 { get; set; }
-
-    /// <summary>
-    /// Code 39 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Code39? Code39 { get; set; }
-
-    /// <summary>
-    /// ITF-14 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Itf14? Itf14 { get; set; }
-
-    /// <summary>
-    /// GS1-128 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Gs1128? Gs1128 { get; set; }
-
-    /// <summary>
-    /// QR Code barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public QrCode? QrCode { get; set; }
-
-    /// <summary>
-    /// Data Matrix barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public DataMatrix? DataMatrix { get; set; }
+    public ArticleBarcode Barcode { get; private init; }
 
     /// <summary>
     /// Gets the variation info associated with the article.
@@ -159,17 +97,13 @@ public class Article : IEntity, IPartitioned
     [MemberNotNullWhen(true, nameof(Pack))]
     public bool IsPack => Pack is not null;
 
-    /// <summary>
-    /// Gets the kit info associated with the article.
-    /// When <see langword="null"/>, no kit constraint is defined.
-    /// </summary>
-    public ArticleKit? Kit { get; private init; }
+    public IReadOnlyCollection<ArticleKitComponent>? KitComponents { get; private init; }
 
     /// <summary>
     /// Gets a value indicating whether this article represents a kit.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Kit))]
-    public bool IsKit => Kit is not null;
+    [MemberNotNullWhen(true, nameof(KitComponents))]
+    public bool IsKit => KitComponents is not null;
 
     /// <summary>
     /// Gets the container constraints associated with the article.
@@ -194,7 +128,56 @@ public class Article : IEntity, IPartitioned
 
     private readonly List<Partition> partitions = [];
 
-    private Article() { }
+    private Article()
+    {
+        Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
+    }
+
+    private Article(Article variationFromArticle)
+    {
+        Variation = new ArticleVariation(variationFromArticle, this);
+        ArticleType = ArticleType.Variation;
+        Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
+    }
+
+    private Article(Article packFromArticle, Scalar quantity)
+    {
+        Pack = new ArticlePack(this, packFromArticle, quantity);
+        ArticleType = ArticleType.Pack;
+        Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
+    }
+
+    private Article(IReadOnlyCollection<(Article, Scalar)> articleKitComponentsValues)
+    {
+        var kitComponents = new List<ArticleKitComponent>();
+
+        foreach (var component in articleKitComponentsValues)
+        {
+            kitComponents.Add(new ArticleKitComponent(this, component.Item1, component.Item2));
+        }
+
+        KitComponents = kitComponents;
+
+        ArticleType = ArticleType.Kit;
+        Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
+    }
+
+    private Article(bool isContainer)
+    {
+        if (isContainer)
+        {
+            Container = new ArticleContainer(this);
+            ArticleType = ArticleType.Container;
+        }
+
+        ArticleType = ArticleType.Default;
+        Barcode = new ArticleBarcode(this);
+        Dimension = new ArticleDimension(this);
+    }
 
     /// <summary>
     /// Creates a new article.
@@ -220,11 +203,9 @@ public class Article : IEntity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleVariation(Name name, Article fromArticle)
     {
-        var articleVariation = new Article
+        var articleVariation = new Article(fromArticle)
         {
             Name = name,
-            Variation = new ArticleVariation(fromArticle),
-            ArticleType = ArticleType.Variation
         };
 
         return articleVariation;
@@ -239,11 +220,9 @@ public class Article : IEntity, IPartitioned
     /// <returns></returns>
     public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
     {
-        var articlePack = new Article
+        var articlePack = new Article(fromArticle, quantity)
         {
             Name = name,
-            Pack = new ArticlePack(fromArticle, quantity),
-            ArticleType = ArticleType.Pack
         };
 
         return articlePack;
@@ -255,13 +234,11 @@ public class Article : IEntity, IPartitioned
     /// <param name="name">The name of the article.</param>
     /// <param name="kitComponents"></param>
     /// <returns></returns>
-    public static Article NewArticleKit(Name name, IReadOnlyCollection<ArticleKitComponent> kitComponents)
+    public static Article NewArticleKit(Name name, IReadOnlyCollection<(Article, Scalar)> kitComponents)
     {
-        var articleKit = new Article
+        var articleKit = new Article(kitComponents)
         {
-            Name = name,
-            Kit = new ArticleKit(kitComponents),
-            ArticleType = ArticleType.Kit
+            Name = name
         };
 
         return articleKit;
@@ -274,11 +251,9 @@ public class Article : IEntity, IPartitioned
     /// <returns></returns>
     public static Article NewArticleContainer(Name name)
     {
-        var articleContainer = new Article
+        var articleContainer = new Article(isContainer: true)
         {
             Name = name,
-            Container = new ArticleContainer(),
-            ArticleType = ArticleType.Container
         };
 
         return articleContainer;
@@ -287,9 +262,7 @@ public class Article : IEntity, IPartitioned
     public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
     {
         Mass = mass;
-        LengthX = lengthX;
-        LengthY = lengthY;
-        LengthZ = lengthZ;
+        Dimension.SetDimensions(lengthX, lengthY, lengthZ);
     }
 
     public void AddPartition(Partition partition)

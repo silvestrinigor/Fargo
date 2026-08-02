@@ -12,7 +12,9 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticlePack
 {
-    public Guid Guid { get; private init; } = Guid.NewGuid();
+    public Guid PackArticleGuid { get; private set; }
+
+    public Article PackArticle { get; private set; } = null!;
 
     /// <summary>
     /// Gets the unique identifier of the source article contained in the pack.
@@ -22,15 +24,7 @@ public sealed class ArticlePack
     /// <summary>
     /// Gets the article from which this pack is composed.
     /// </summary>
-    public Article FromArticle
-    {
-        get;
-        private set
-        {
-            FromArticleGuid = value.Guid;
-            field = value;
-        }
-    } = null!;
+    public Article FromArticle { get; private set; } = null!;
 
     /// <summary>
     /// Gets or sets the quantity of the source article represented by the pack.
@@ -47,9 +41,12 @@ public sealed class ArticlePack
     {
     }
 
-    public ArticlePack(Article fromArticle, Scalar quantity)
+    public ArticlePack(Article packArticle, Article fromArticle, Scalar quantity)
     {
+        PackArticle = packArticle;
+        PackArticleGuid = packArticle.Guid;
         FromArticle = fromArticle;
+        FromArticleGuid = fromArticle.Guid;
         SetQuantity(quantity);
     }
 

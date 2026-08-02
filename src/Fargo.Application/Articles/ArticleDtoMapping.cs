@@ -13,21 +13,21 @@ public static class ArticleDtoMapping
             article.Description,
             article.ShelfLife,
             article.Color,
-            new ArticleMetricsDto(
-                article.Mass,
-                article.LengthX,
-                article.LengthY,
-                article.LengthZ),
-            new ArticleBarcodesDto(
-                article.Ean13,
-                article.Ean8,
-                article.UpcA,
-                article.UpcE,
-                article.Code128,
-                article.Code39,
-                article.Itf14,
-                article.Gs1128,
-                article.QrCode,
-                article.DataMatrix),
+            article.Mass,
+            new ArticleDimensionDto(
+                article.Dimension.X,
+                article.Dimension.Y,
+                article.Dimension.Z),
+            new ArticleBarcodeDto(
+                article.Barcode.Ean13,
+                article.Barcode.Ean8,
+                article.Barcode.UpcA,
+                article.Barcode.UpcE,
+                article.Barcode.Code128,
+                article.Barcode.Code39,
+                article.Barcode.Itf14,
+                article.Barcode.Gs1128,
+                article.Barcode.QrCode,
+                article.Barcode.DataMatrix),
             article.Partitions.Select(partition => partition.Guid).ToArray());
 }

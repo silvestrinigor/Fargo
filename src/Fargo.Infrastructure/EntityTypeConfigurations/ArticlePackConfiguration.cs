@@ -10,7 +10,9 @@ public class ArticlePackConfiguration : IEntityTypeConfiguration<ArticlePack>
     {
         builder.ToTable("article_packs");
 
-        builder.HasKey(p => p.Guid);
+        builder.HasKey(p => p.PackArticleGuid);
+
+        builder.HasOne(p => p.PackArticle).WithOne(a => a.Pack).HasForeignKey<ArticlePack>(p => p.PackArticleGuid);
 
         builder.HasOne(a => a.FromArticle).WithMany().HasForeignKey(a => a.FromArticleGuid);
     }

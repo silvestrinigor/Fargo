@@ -2,7 +2,7 @@ using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.Application.Shared.Articles;
 
-public sealed record ArticleBarcodesDto(
+public sealed record ArticleBarcodeDto(
     Ean13? Ean13 = null,
     Ean8? Ean8 = null,
     UpcA? UpcA = null,
@@ -12,4 +12,5 @@ public sealed record ArticleBarcodesDto(
     Itf14? Itf14 = null,
     Gs1128? Gs1128 = null,
     QrCode? QrCode = null,
-    DataMatrix? DataMatrix = null);
+    DataMatrix? DataMatrix = null
+);

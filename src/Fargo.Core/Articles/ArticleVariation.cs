@@ -9,7 +9,9 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleVariation
 {
-    public Guid Guid { get; private init; } = Guid.NewGuid();
+    public Guid VariationArticleGuid { get; private init; }
+
+    public Article VariationArticle { get; private init; } = null!;
 
     /// <summary>
     /// Gets the unique identifier of the source article.
@@ -19,22 +21,15 @@ public sealed class ArticleVariation
     /// <summary>
     /// Gets the article from which this variation originates.
     /// </summary>
-    public Article FromArticle
-    {
-        get;
-        private init
-        {
-            FromArticleGuid = value.Guid;
-            field = value;
-        }
-    } = null!;
+    public Article FromArticle { get; private init; } = null!;
 
     private ArticleVariation()
     {
     }
 
-    internal ArticleVariation(Article fromArticle)
+    internal ArticleVariation(Article fromArticle, Article variationArticle)
     {
         FromArticle = fromArticle;
+        FromArticleGuid = fromArticle.Guid;
     }
 }

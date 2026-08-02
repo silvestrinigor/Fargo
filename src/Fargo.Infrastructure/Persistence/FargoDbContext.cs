@@ -90,19 +90,19 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     {
         modelBuilder.ApplyConfiguration(new ArticleConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ArticleBarcodeConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ArticleDimensionConfiguration());
+
         modelBuilder.ApplyConfiguration(new ArticleVariationConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticlePackConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticleKitConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticleKitComponentConfiguration());
 
         modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemContainerConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 

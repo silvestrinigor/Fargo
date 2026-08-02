@@ -3,6 +3,7 @@ using System;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    partial class FargoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802015435_ArticleBarcodesSeparateTable")]
+    partial class ArticleBarcodesSeparateTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,6 +64,18 @@ namespace Fargo.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<string>("LengthX")
+                        .HasColumnType("text")
+                        .HasColumnName("length_x");
+
+                    b.Property<string>("LengthY")
+                        .HasColumnType("text")
+                        .HasColumnName("length_y");
+
+                    b.Property<string>("LengthZ")
+                        .HasColumnType("text")
+                        .HasColumnName("length_z");
 
                     b.Property<string>("Mass")
                         .HasColumnType("text")
@@ -208,30 +223,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasName("pk_article_containers");
 
                     b.ToTable("article_containers", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleDimension", b =>
-                {
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<string>("X")
-                        .HasColumnType("text")
-                        .HasColumnName("x");
-
-                    b.Property<string>("Y")
-                        .HasColumnType("text")
-                        .HasColumnName("y");
-
-                    b.Property<string>("Z")
-                        .HasColumnType("text")
-                        .HasColumnName("z");
-
-                    b.HasKey("ArticleGuid")
-                        .HasName("pk_article_dimensions");
-
-                    b.ToTable("article_dimensions", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Articles.ArticleKitComponent", b =>
@@ -664,18 +655,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Article");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleDimension", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithOne("Dimension")
-                        .HasForeignKey("Fargo.Core.Articles.ArticleDimension", "ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_dimensions_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
             modelBuilder.Entity("Fargo.Core.Articles.ArticleKitComponent", b =>
                 {
                     b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
@@ -888,9 +867,6 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Container");
-
-                    b.Navigation("Dimension")
-                        .IsRequired();
 
                     b.Navigation("KitComponents");
 

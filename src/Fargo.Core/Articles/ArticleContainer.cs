@@ -11,7 +11,9 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleContainer
 {
-    public Guid Guid { get; private init; } = Guid.NewGuid();
+    public Guid ArticleGuid { get; private init; }
+
+    public Article Article { get; private init; }
 
     /// <summary>
     /// Gets or sets the maximum mass allowed inside the container.
@@ -24,8 +26,14 @@ public sealed class ArticleContainer
     /// </exception>
     public Mass? MaxMass { get; private set; }
 
-    internal ArticleContainer()
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    private ArticleContainer() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+    internal ArticleContainer(Article article)
     {
+        Article = article;
+        ArticleGuid = article.Guid;
     }
 
     public void SetMaxMass(Mass? maxMass)

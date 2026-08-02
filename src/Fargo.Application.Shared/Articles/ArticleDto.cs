@@ -1,5 +1,6 @@
 using Fargo.Core.Shared;
 using System.Drawing;
+using UnitsNet;
 
 namespace Fargo.Application.Shared.Articles;
 
@@ -9,6 +10,8 @@ public sealed record ArticleDto(
     Description Description,
     TimeSpan? ShelfLife,
     Color? Color,
-    ArticleMetricsDto Metrics,
-    ArticleBarcodesDto Barcodes,
-    IReadOnlyCollection<Guid> Partitions);
+    Mass? Mass,
+    ArticleDimensionDto Dimension,
+    ArticleBarcodeDto Barcodes,
+    IReadOnlyCollection<Guid> Partitions
+);
