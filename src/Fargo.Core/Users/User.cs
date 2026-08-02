@@ -21,6 +21,11 @@ public class User : IEntity, IPartitioned
     public bool IsAdmin => Guid == FargoCoreGuids.AdminUserGuid;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the user account is active.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>
     public required Nameid Nameid { get; set; }
@@ -41,40 +46,39 @@ public class User : IEntity, IPartitioned
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets or sets the value indicating whether the user is active.
+    /// Gets the authentication information associated with the user.
     /// </summary>
-    public bool IsActive { get; set; } = true;
-
     public UserAuthentication Authentication { get; private init; }
 
     /// <summary>
     /// Gets the permissions assigned directly to the user.
+    /// Permissions inherited from user groups are not included.
     /// </summary>
     public IReadOnlyCollection<ActionType> Permissions => permissions;
-
     private readonly List<ActionType> permissions = [];
 
     /// <summary>
     /// Gets the user groups to which the user belongs.
     /// </summary>
     public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
-
     private readonly List<UserGroup> userGroups = [];
 
     /// <summary>
-    /// Gets the partitions the user is allowed to access.
+    /// Gets the partitions to which the user has been granted direct access.
     /// </summary>
     public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
-
     private readonly List<Partition> partitionAccesses = [];
 
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
     public IReadOnlyCollection<Partition> Partitions => partitions;
-
     private readonly List<Partition> partitions = [];
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="User"/> class.
+    /// Intended only for entity creation through factory methods and Entity Framework.
+    /// </summary>
     private User()
     {
         Authentication = new UserAuthentication(this);
@@ -84,7 +88,6 @@ public class User : IEntity, IPartitioned
     /// Creates a new user.
     /// </summary>
     /// <param name="nameid">The user's unique name identifier.</param>
-    /// <param name="passwordHash">The hashed password.</param>
     /// <returns>A new <see cref="User"/> instance.</returns>
     public static User CreateUser(Nameid nameid)
     {
@@ -115,16 +118,35 @@ public class User : IEntity, IPartitioned
         return user;
     }
 
+    /// <summary>
+    /// Associates the user with the specified partition.
+    /// If the partition is already associated, no action is taken.
+    /// </summary>
+    /// <param name="partition">The partition to associate.</param>
     public void AddPartition(Partition partition)
     {
+        if (partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
         partitions.Add(partition);
     }
 
-    public void RemovePartition(Partition partition)
+    /// <summary>
+    /// Removes the association between the user and the specified partition.
+    /// </summary>
+    /// <param name="partitionGuid">The identifier of the partition to remove.</param>
+    public void RemovePartition(Guid partitionGuid)
     {
-        partitions.Remove(partition);
+        partitions.RemoveAll(p => p.Guid == partitionGuid);
     }
 
+    /// <summary>
+    /// Adds the user to the specified user group.
+    /// If the user already belongs to the group, no action is taken.
+    /// </summary>
+    /// <param name="userGroup">The user group to add.</param>
     public void AddUserGroup(UserGroup userGroup)
     {
         if (userGroups.Any(x => x.Guid == userGroup.Guid))
@@ -135,9 +157,13 @@ public class User : IEntity, IPartitioned
         userGroups.Add(userGroup);
     }
 
-    public void RemoveUserGroup(UserGroup userGroup)
+    /// <summary>
+    /// Removes the user from the specified user group.
+    /// </summary>
+    /// <param name="userGroupGuid">The identifier of the user group to remove.</param>
+    public void RemoveUserGroup(Guid userGroupGuid)
     {
-        userGroups.Remove(userGroup);
+        userGroups.RemoveAll(g => g.Guid == userGroupGuid);
     }
 
     /// <summary>
@@ -156,9 +182,13 @@ public class User : IEntity, IPartitioned
         partitionAccesses.Add(partition);
     }
 
-    public void RemovePartitionAccess(Partition partition)
+    /// <summary>
+    /// Revokes the user's access to the specified partition.
+    /// </summary>
+    /// <param name="partitionGuid">The identifier of the partition.</param>
+    public void RemovePartitionAccess(Guid partitionGuid)
     {
-        partitionAccesses.Remove(partition);
+        partitionAccesses.RemoveAll(p => p.Guid == partitionGuid);
     }
 
     /// <summary>

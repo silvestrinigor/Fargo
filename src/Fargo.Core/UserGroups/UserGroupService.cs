@@ -3,11 +3,20 @@ using Fargo.Core.Shared;
 namespace Fargo.Core.UserGroups;
 
 /// <summary>
-/// Provides domain validation and business rules
-/// related to <see cref="UserGroup"/> entities.
+/// User group core service.
 /// </summary>
 public class UserGroupService(IUserGroupRepository userGroupRepository)
 {
+    /// <summary>
+    /// Validates that the specified <paramref name="nameid"/> is available for use
+    /// by a user group.
+    /// </summary>
+    /// <param name="nameid">The name identifier to validate.</param>
+    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when another user group already uses the specified
+    /// <paramref name="nameid"/>.
+    /// </exception>
     public async Task ValidateUserGroupNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
         var alreadyExistsWithName = await userGroupRepository.ExistsByNameid(nameid, cancellationToken);
@@ -20,8 +29,12 @@ public class UserGroupService(IUserGroupRepository userGroupRepository)
     }
 
     /// <summary>
-    /// Validates whether a user group can be deleted.
+    /// Validates that the specified <paramref name="userGroup"/> can be deleted.
     /// </summary>
+    /// <param name="userGroup">The user group to validate.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown if the user group is the default administrators group.
+    /// </exception>
     public static void ValidateUserGroupDelete(UserGroup userGroup)
     {
         if (userGroup.Guid == FargoCoreGuids.AdminUserGroupGuid)

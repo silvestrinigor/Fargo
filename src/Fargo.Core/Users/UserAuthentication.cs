@@ -1,9 +1,18 @@
 namespace Fargo.Core.Users;
 
+/// <summary>
+/// Represents the authentication information associated with a user.
+/// </summary>
 public class UserAuthentication
 {
+    /// <summary>
+    /// Gets the unique identifier of the associated user.
+    /// </summary>
     public Guid UserGuid { get; private init; }
 
+    /// <summary>
+    /// Gets the user that owns this authentication information.
+    /// </summary>
     public User User { get; private init; }
 
     /// <summary>
@@ -12,17 +21,17 @@ public class UserAuthentication
     public PasswordHash? PasswordHash { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the default password expiration perid.
+    /// Gets or sets the amount of time before a password expires.
     /// </summary>
     public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the required date to change the password.
+    /// Gets or sets the date and time after which the user must change their password.
     /// </summary>
     public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
     /// <summary>
-    /// Gets a value indicating whether it is necessary to change password.
+    /// Gets a value indicating whether the user is required to change their password.
     /// </summary>
     public bool IsPasswordChangeRequired
         => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
@@ -30,7 +39,7 @@ public class UserAuthentication
     /// <summary>
     /// Gets the current authentication version of the user.
     ///
-    /// Changing this value invalidates previously issued authentication tokens.
+    /// Changing this value invalidates all previously issued authentication tokens.
     /// </summary>
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
 
@@ -65,14 +74,19 @@ public class UserAuthentication
     /// Marks the user's password as requiring an immediate change.
     /// </summary>
     /// <remarks>
-    /// After calling this method, <see cref="IsPasswordChangeRequired"/> will return <c>true</c>
-    /// until the password is updated and a new expiration date is set.
+    /// After calling this method, <see cref="IsPasswordChangeRequired"/> returns
+    /// <see langword="true"/> until the password is changed and its expiration
+    /// is reset.
     /// </remarks>
     public void MarkPasswordChangeAsRequired()
     {
         RequirePasswordChangeAt = DateTimeOffset.UtcNow;
     }
 
+    /// <summary>
+    /// Generates a new authentication version, invalidating all previously issued
+    /// authentication tokens.
+    /// </summary>
     public void RotateAuthVersion()
     {
         AuthVersion = Guid.NewGuid();
