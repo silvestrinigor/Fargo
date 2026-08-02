@@ -16,6 +16,11 @@ public class User : IEntity, IPartitioned
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
+    /// Gets a value indicating whether the user is the main admin.
+    /// </summary>
+    public bool IsAdmin => Guid == FargoCoreGuids.AdminUserGuid;
+
+    /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>
     public required Nameid Nameid { get; set; }
@@ -40,93 +45,74 @@ public class User : IEntity, IPartitioned
     /// </summary>
     public bool IsActive { get; set; } = true;
 
-    /// <summary>
-    /// Gets a value indicating whether the user is the main admin.
-    /// </summary>
-    public bool IsAdmin => Guid == FargoCoreGuids.AdminUserGuid;
+    public UserAuthentication Authentication { get; private init; }
 
     /// <summary>
-    /// Gets or sets the hashed password of the user.
+    /// Gets the permissions assigned directly to the user.
     /// </summary>
-    public required PasswordHash PasswordHash { get; set; }
-
-    /// <summary>
-    /// Gets or sets the default password expiration perid.
-    /// </summary>
-    public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
-
-    /// <summary>
-    /// Gets or sets the required date to change the password.
-    /// </summary>
-    public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
-
-    /// <summary>
-    /// Gets a value indicating whether it is necessary to change password.
-    /// </summary>
-    public bool IsPasswordChangeRequired
-        => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Guid AuthVersion { get; private set; } = Guid.NewGuid();
+    public IReadOnlyCollection<ActionType> Permissions => permissions;
 
     private readonly List<ActionType> permissions = [];
 
     /// <summary>
-    /// Gets the read-only collection of permissions assigned directly to the user.
-    ///
-    /// Each permission represents an allowed <see cref="ActionType"/>
-    /// that the user can perform without considering group memberships.
+    /// Gets the user groups to which the user belongs.
     /// </summary>
-    public IReadOnlyCollection<ActionType> Permissions => permissions;
+    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
 
     private readonly List<UserGroup> userGroups = [];
 
-    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
-
-    private readonly List<Partition> partitionAccesses = [];
-
     /// <summary>
-    /// Gets the read-only collection of partitions the user has access to.
+    /// Gets the partitions the user is allowed to access.
     /// </summary>
-    /// <remarks>
-    /// Partitions define logical boundaries in the system.
-    /// A user can access entities that have no partition (public), or that
-    /// belong to at least one partition to which the user has been granted access.
-    /// </remarks>
     public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
 
-    private readonly List<Partition> partitions = [];
+    private readonly List<Partition> partitionAccesses = [];
 
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
     public IReadOnlyCollection<Partition> Partitions => partitions;
 
+    private readonly List<Partition> partitions = [];
+
     private User()
     {
+        Authentication = new UserAuthentication(this);
     }
 
+    /// <summary>
+    /// Creates a new user.
+    /// </summary>
+    /// <param name="nameid">The user's unique name identifier.</param>
+    /// <param name="passwordHash">The hashed password.</param>
+    /// <returns>A new <see cref="User"/> instance.</returns>
     public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
     {
         var user = new User
         {
-            Nameid = nameid,
-            PasswordHash = passwordHash
+            Nameid = nameid
         };
+
+        user.Authentication.PasswordHash = passwordHash;
 
         return user;
     }
 
+    /// <summary>
+    /// Creates the built-in administrator user.
+    /// </summary>
+    /// <param name="nameid">The administrator's unique name identifier.</param>
+    /// <param name="passwordHash">The hashed password.</param>
+    /// <returns>The built-in administrator user.</returns>
     public static User CreateAdministratorUser(Nameid nameid, PasswordHash passwordHash)
     {
         var user = new User
         {
             Guid = FargoCoreGuids.AdminUserGuid,
-            Nameid = nameid,
-            PasswordHash = passwordHash
+            Nameid = nameid
         };
+
+        user.Authentication.PasswordHash = passwordHash;
 
         return user;
     }
@@ -143,6 +129,11 @@ public class User : IEntity, IPartitioned
 
     public void AddUserGroup(UserGroup userGroup)
     {
+        if (userGroups.Any(x => x.Guid == userGroup.Guid))
+        {
+            return;
+        }
+
         userGroups.Add(userGroup);
     }
 
@@ -173,46 +164,15 @@ public class User : IEntity, IPartitioned
     }
 
     /// <summary>
-    /// Resets the password expiration date based on the user's
-    /// <see cref="DefaultPasswordExpirationPeriod"/>.
-    ///
-    /// The new expiration date is calculated by adding the configured
-    /// default expiration interval to the current UTC time.
-    ///
-    /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
-    /// immediately.
-    /// </summary>
-    /// <remarks>
-    /// This method is typically used after the user successfully changes
-    /// their own password.
-    /// </remarks>
-    public void ResetPasswordExpiration()
-        => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationPeriod;
-
-    /// <summary>
-    /// Marks the user's password as requiring an immediate change.
-    /// </summary>
-    /// <remarks>
-    /// After calling this method, <see cref="IsPasswordChangeRequired"/> will return <c>true</c>
-    /// until the password is updated and a new expiration date is set.
-    /// </remarks>
-    public void MarkPasswordChangeAsRequired()
-    {
-        RequirePasswordChangeAt = DateTimeOffset.UtcNow;
-    }
-
-    public void RotateAuthVersion()
-    {
-        AuthVersion = Guid.NewGuid();
-    }
-
-    /// <summary>
     /// Adds a permission to the user if it does not already exist.
     /// </summary>
     /// <param name="action">The action type to allow.</param>
     public void AddPermission(ActionType action)
     {
-        permissions.Add(action);
+        if (!permissions.Contains(action))
+        {
+            permissions.Add(action);
+        }
     }
 
     /// <summary>
@@ -221,6 +181,6 @@ public class User : IEntity, IPartitioned
     /// <param name="action">The action type to remove.</param>
     public void RemovePermission(ActionType action)
     {
-        permissions.Remove(action);
+        permissions.RemoveAll(x => x == action);
     }
 }

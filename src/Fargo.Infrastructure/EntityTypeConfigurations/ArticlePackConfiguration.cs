@@ -12,8 +12,16 @@ public class ArticlePackConfiguration : IEntityTypeConfiguration<ArticlePack>
 
         builder.HasKey(p => p.PackArticleGuid);
 
-        builder.HasOne(p => p.PackArticle).WithOne(a => a.Pack).HasForeignKey<ArticlePack>(p => p.PackArticleGuid);
+        builder
+        .HasOne(p => p.PackArticle)
+        .WithOne(a => a.Pack)
+        .HasForeignKey<ArticlePack>(p => p.PackArticleGuid)
+        .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(a => a.FromArticle).WithMany().HasForeignKey(a => a.FromArticleGuid);
+        builder
+        .HasOne(a => a.FromArticle)
+        .WithMany()
+        .HasForeignKey(a => a.FromArticleGuid)
+        .OnDelete(DeleteBehavior.Restrict);
     }
 }

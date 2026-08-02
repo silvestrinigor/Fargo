@@ -16,9 +16,17 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
 
         builder.HasIndex(x => x.ParentItemContainerGuid);
 
-        builder.HasOne(x => x.Article).WithMany().HasForeignKey(x => x.ArticleGuid).OnDelete(DeleteBehavior.Restrict);
+        builder
+        .HasOne(x => x.Article)
+        .WithMany()
+        .HasForeignKey(x => x.ArticleGuid)
+        .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(i => i.ParentItemContainer).WithMany().HasForeignKey(i => i.ParentItemContainerGuid).OnDelete(DeleteBehavior.SetNull);
+        builder
+        .HasOne(i => i.ParentItemContainer)
+        .WithMany()
+        .HasForeignKey(i => i.ParentItemContainerGuid)
+        .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(i => i.Partitions).WithMany().UsingEntity(j =>
         {

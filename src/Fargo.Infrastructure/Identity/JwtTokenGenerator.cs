@@ -59,7 +59,7 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenG
             new(ClaimTypes.NameIdentifier, user.Guid.ToString()),
             new(ClaimTypes.Name, user.Nameid.ToString() ?? string.Empty),
             new(JwtRegisteredClaimNames.Sub, user.Guid.ToString()),
-            new(FargoJwtClaims.AuthVersion, user.AuthVersion.ToString()),
+            new(FargoJwtClaims.AuthVersion, user.Authentication.AuthVersion.ToString()),
         };
 
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(

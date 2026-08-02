@@ -47,8 +47,9 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        var isValid = passwordHasher.Verify(
-            user.PasswordHash, command.Password);
+        var isValid = user.Authentication.PasswordHash != null
+            && passwordHasher.Verify(
+                user.Authentication.PasswordHash.Value, command.Password);
 
         if (!isValid)
         {
@@ -57,7 +58,7 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        if (user.IsPasswordChangeRequired)
+        if (user.Authentication.IsPasswordChangeRequired)
         {
             logger.LoginRejectedPasswordChangeRequired(user.Guid);
 

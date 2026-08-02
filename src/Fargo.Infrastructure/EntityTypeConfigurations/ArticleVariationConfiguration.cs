@@ -12,8 +12,16 @@ public class ArticleVariationConfiguration : IEntityTypeConfiguration<ArticleVar
 
         builder.HasKey(v => v.VariationArticleGuid);
 
-        builder.HasOne(v => v.VariationArticle).WithOne(a => a.Variation).HasForeignKey<ArticleVariation>(v => v.VariationArticleGuid);
+        builder
+        .HasOne(v => v.VariationArticle)
+        .WithOne(a => a.Variation)
+        .HasForeignKey<ArticleVariation>(v => v.VariationArticleGuid)
+        .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(a => a.FromArticle).WithMany().HasForeignKey(a => a.FromArticleGuid);
+        builder
+        .HasOne(a => a.FromArticle)
+        .WithMany()
+        .HasForeignKey(a => a.FromArticleGuid)
+        .OnDelete(DeleteBehavior.Restrict);
     }
 }

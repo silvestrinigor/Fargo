@@ -12,6 +12,10 @@ public class ArticleContainerConfiguration : IEntityTypeConfiguration<ArticleCon
 
         builder.HasKey(c => c.ArticleGuid);
 
-        builder.HasOne(c => c.Article).WithOne(a => a.Container).HasForeignKey<ArticleContainer>(c => c.ArticleGuid);
+        builder
+        .HasOne(c => c.Article)
+        .WithOne(a => a.Container)
+        .HasForeignKey<ArticleContainer>(c => c.ArticleGuid)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

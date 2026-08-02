@@ -55,7 +55,7 @@ public sealed class RefreshCommandHandler(
             throw new UnauthorizedAccessException();
         }
 
-        if (user.IsPasswordChangeRequired)
+        if (user.Authentication.IsPasswordChangeRequired)
         {
             storedOldRefreshToken.Revoke();
             await unitOfWork.SaveChangesAsync(cancellationToken);

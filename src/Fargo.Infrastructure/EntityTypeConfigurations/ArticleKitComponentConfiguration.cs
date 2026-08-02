@@ -12,8 +12,16 @@ public class ArticleKitComponentConfiguration : IEntityTypeConfiguration<Article
 
         builder.HasKey(c => c.KitArticleGuid);
 
-        builder.HasOne(c => c.KitArticle).WithMany(k => k.KitComponents).HasForeignKey(c => c.KitArticleGuid);
+        builder
+        .HasOne(c => c.KitArticle)
+        .WithMany(k => k.KitComponents)
+        .HasForeignKey(c => c.KitArticleGuid)
+        .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(c => c.FromArticle).WithMany().HasForeignKey(c => c.FromArticleGuid);
+        builder
+        .HasOne(c => c.FromArticle)
+        .WithMany()
+        .HasForeignKey(c => c.FromArticleGuid)
+        .OnDelete(DeleteBehavior.Restrict);
     }
 }

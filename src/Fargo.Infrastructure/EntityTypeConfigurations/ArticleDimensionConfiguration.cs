@@ -12,6 +12,10 @@ public class ArticleDimensionConfiguration : IEntityTypeConfiguration<ArticleDim
 
         builder.HasKey(x => x.ArticleGuid);
 
-        builder.HasOne(d => d.Article).WithOne(a => a.Dimension).HasForeignKey<ArticleDimension>(d => d.ArticleGuid);
+        builder
+        .HasOne(d => d.Article)
+        .WithOne(a => a.Dimension)
+        .HasForeignKey<ArticleDimension>(d => d.ArticleGuid)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

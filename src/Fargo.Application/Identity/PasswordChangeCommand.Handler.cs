@@ -38,7 +38,8 @@ public sealed class PasswordChangeCommandHandler(
 
         var currentPassword = command.Passwords.CurrentPassword;
 
-        var isValid = passwordHasher.Verify(user.PasswordHash, currentPassword);
+        var isValid = user.Authentication.PasswordHash is not null
+            && passwordHasher.Verify(user.Authentication.PasswordHash.Value, currentPassword);
 
         if (!isValid)
         {
@@ -58,11 +59,11 @@ public sealed class PasswordChangeCommandHandler(
         }
 
         // TODO: ChangePasswordHash should validate if the actor is the user or the actor has access to change another user password.
-        user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
+        user.Authentication.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
 
-        user.ResetPasswordExpiration();
+        user.Authentication.ResetPasswordExpiration();
 
-        user.RotateAuthVersion();
+        user.Authentication.RotateAuthVersion();
 
         var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
 

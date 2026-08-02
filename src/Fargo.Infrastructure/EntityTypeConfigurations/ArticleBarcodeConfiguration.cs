@@ -14,7 +14,7 @@ public class ArticleBarcodeConfiguration : IEntityTypeConfiguration<ArticleBarco
 
         builder.HasKey(x => x.ArticleGuid);
 
-        builder.HasOne(b => b.Article).WithOne(a => a.Barcode).HasForeignKey<ArticleBarcode>(b => b.ArticleGuid);
+        builder.HasOne(b => b.Article).WithOne(a => a.Barcode).HasForeignKey<ArticleBarcode>(b => b.ArticleGuid).OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.Ean13)
             .HasConversion(new ValueConverter<Ean13?, string?>(
