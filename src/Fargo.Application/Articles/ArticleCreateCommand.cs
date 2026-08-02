@@ -100,6 +100,10 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
             throw new ArgumentException("Article type not supported.", nameof(dto));
         }
 
+        Name = dto.Name;
+
+        Description = dto.Description;
+
         ShelfLife = dto.ShelfLife;
 
         Color = dto.Color;
