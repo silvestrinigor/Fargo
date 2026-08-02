@@ -1152,9 +1152,6 @@
       "ActionType": {
         "type": "integer"
       },
-      "AmountOfSubstanceUnit": {
-        "type": "integer"
-      },
       "ArticleBarcodeDto": {
         "type": "object",
         "properties": {
@@ -1632,131 +1629,9 @@
           }
         }
       },
-      "BaseDimensions": {
-        "required": [
-          "length",
-          "mass",
-          "time",
-          "current",
-          "temperature",
-          "amount",
-          "luminousIntensity"
-        ],
-        "type": "object",
-        "properties": {
-          "length": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "mass": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "time": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "current": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "temperature": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "luminousIntensity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          }
-        }
-      },
-      "BaseUnits": {
-        "type": "object",
-        "properties": {
-          "length": {
-            "$ref": "#/components/schemas/LengthUnit"
-          },
-          "mass": {
-            "$ref": "#/components/schemas/MassUnit"
-          },
-          "time": {
-            "$ref": "#/components/schemas/DurationUnit"
-          },
-          "current": {
-            "$ref": "#/components/schemas/ElectricCurrentUnit"
-          },
-          "temperature": {
-            "$ref": "#/components/schemas/TemperatureUnit"
-          },
-          "amount": {
-            "$ref": "#/components/schemas/AmountOfSubstanceUnit"
-          },
-          "luminousIntensity": {
-            "$ref": "#/components/schemas/LuminousIntensityUnit"
-          },
-          "isFullyDefined": {
-            "type": "boolean"
-          }
-        }
-      },
       "Color": { },
       "Description": { },
-      "DurationUnit": {
-        "type": "integer"
-      },
-      "ElectricCurrentUnit": {
-        "type": "integer"
-      },
       "FirstName": { },
-      "IQuantityOfScalarUnit": {
-        "type": "object",
-        "properties": {
-          "unit": {
-            "$ref": "#/components/schemas/ScalarUnit"
-          },
-          "quantityInfo": {
-            "$ref": "#/components/schemas/QuantityInfoOfScalarUnit"
-          },
-          "dimensions": {
-            "$ref": "#/components/schemas/BaseDimensions"
-          },
-          "value": {
-            "$ref": "#/components/schemas/QuantityValue"
-          }
-        }
-      },
       "ItemCreateDto": {
         "required": [
           "articleGuid"
@@ -1850,9 +1725,6 @@
         }
       },
       "LastName": { },
-      "LengthUnit": {
-        "type": "integer"
-      },
       "LoginDto": {
         "required": [
           "nameid",
@@ -1879,13 +1751,7 @@
           }
         }
       },
-      "LuminousIntensityUnit": {
-        "type": "integer"
-      },
       "Mass": { },
-      "MassUnit": {
-        "type": "integer"
-      },
       "Name": { },
       "Nameid": { },
       "PartitionCreateDto": {
@@ -1970,49 +1836,6 @@
           }
         }
       },
-      "QuantityInfoOfScalarUnit": {
-        "required": [
-          "unitInfos",
-          "zero",
-          "name",
-          "baseDimensions"
-        ],
-        "type": "object",
-        "properties": {
-          "unitInfos": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UnitInfoOfScalarUnit"
-            }
-          },
-          "baseUnitInfo": {
-            "$ref": "#/components/schemas/UnitInfoOfScalarUnit"
-          },
-          "zero": {
-            "$ref": "#/components/schemas/IQuantityOfScalarUnit"
-          },
-          "unitType": {
-            "$ref": "#/components/schemas/ScalarUnit"
-          },
-          "name": {
-            "type": "string"
-          },
-          "valueType": {
-            "$ref": "#/components/schemas/Type"
-          },
-          "baseDimensions": {
-            "$ref": "#/components/schemas/BaseDimensions"
-          }
-        }
-      },
-      "QuantityValue": {
-        "type": "object",
-        "properties": {
-          "isDecimal": {
-            "type": "boolean"
-          }
-        }
-      },
       "RefreshDto": {
         "required": [
           "refreshToken"
@@ -2024,73 +1847,8 @@
           }
         }
       },
-      "Scalar": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "double"
-          },
-          "unit": {
-            "$ref": "#/components/schemas/ScalarUnit"
-          },
-          "quantityInfo": {
-            "$ref": "#/components/schemas/QuantityInfoOfScalarUnit"
-          },
-          "dimensions": {
-            "$ref": "#/components/schemas/BaseDimensions"
-          },
-          "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "double"
-          }
-        }
-      },
-      "ScalarUnit": {
-        "type": "integer"
-      },
-      "TemperatureUnit": {
-        "type": "integer"
-      },
+      "Scalar": { },
       "Token": { },
-      "Type": { },
-      "UnitInfoOfScalarUnit": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/ScalarUnit"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "pluralName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "baseUnits": {
-            "$ref": "#/components/schemas/BaseUnits"
-          },
-          "quantityName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
       "UserCreateDto": {
         "required": [
           "nameid",

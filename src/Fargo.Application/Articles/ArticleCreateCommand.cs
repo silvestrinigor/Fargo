@@ -11,19 +11,21 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
     {
         Create = dto;
 
-        if (dto.ArticleType is ArticleType.Variation
-            || dto.ArticleType is ArticleType.Pack
-            || dto.ArticleType is ArticleType.Kit)
+        if (dto.ArticleType is ArticleType.Variation)
         {
             if (dto.Variation?.FromArticleGuid is null)
             {
-                throw new ArgumentException(
-                    "From article should be informed when article type is pack, variation or kit.", nameof(dto));
+                throw new ArgumentException(nameof(dto));
             }
         }
 
         if (dto.ArticleType is ArticleType.Pack)
         {
+            if (dto.Pack?.FromArticleGuid is null)
+            {
+                throw new ArgumentException(nameof(dto));
+            }
+
             if (dto.Pack?.Quantity is null)
             {
                 throw new ArgumentException(
@@ -40,7 +42,7 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
             }
         }
 
-        if (dto.ArticleType is not ArticleType.Default && dto.ArticleType is not ArticleType.Variation
+        if (dto.ArticleType is not null && dto.ArticleType is not ArticleType.Default && dto.ArticleType is not ArticleType.Variation
             && dto.ArticleType is not ArticleType.Pack && dto.ArticleType is not ArticleType.Kit
             && dto.ArticleType is not ArticleType.Container)
         {
