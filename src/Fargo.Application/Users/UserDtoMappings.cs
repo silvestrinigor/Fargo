@@ -14,8 +14,9 @@ public static class UserDtoMappings
         user.Description,
         user.IsActive,
         user.IsAdmin,
-        user.Authentication.DefaultPasswordExpirationPeriod,
-        user.Authentication.RequirePasswordChangeAt,
+        new UserAuthenticationDto(
+            user.Authentication.DefaultPasswordExpirationPeriod,
+            user.Authentication.RequirePasswordChangeAt),
         user.Permissions,
         user.Partitions.Select(partition => partition.Guid).ToArray(),
         user.PartitionAccesses.Select(partition => partition.Guid).ToArray(),

@@ -12,6 +12,7 @@ public sealed class UserUpdateCommandHandler(
     UserService userService,
     ActorService actorService,
     IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
     ICurrentActor currentActor,
@@ -51,6 +52,29 @@ public sealed class UserUpdateCommandHandler(
         user.Description = command.Update.Description ?? user.Description;
 
         user.IsActive = command.Update.IsActive ?? user.IsActive;
+
+        if (command.Update.Authentication is { } auth)
+        {
+            if (auth.Password is not null)
+            {
+                actor.ThrowIfPermissionDenied(ActionType.ChangeAnotherUserPassword);
+
+                var passwordHash = passwordHasher.Hash(auth.Password);
+
+                user.Authentication.PasswordHash = passwordHash;
+
+                user.Authentication.MarkPasswordChangeAsRequired();
+            }
+
+            if (auth.DefaultPasswordExpirationPeriod is not null)
+            {
+                user.Authentication.DefaultPasswordExpirationPeriod = auth.DefaultPasswordExpirationPeriod;
+            }
+            else if (auth.RemoveDefaultPasswordExpirationPeriod is true)
+            {
+                user.Authentication.DefaultPasswordExpirationPeriod = null;
+            }
+        }
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {

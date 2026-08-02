@@ -86,14 +86,12 @@ public class User : IEntity, IPartitioned
     /// <param name="nameid">The user's unique name identifier.</param>
     /// <param name="passwordHash">The hashed password.</param>
     /// <returns>A new <see cref="User"/> instance.</returns>
-    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
+    public static User CreateUser(Nameid nameid)
     {
         var user = new User
         {
             Nameid = nameid
         };
-
-        user.Authentication.PasswordHash = passwordHash;
 
         return user;
     }

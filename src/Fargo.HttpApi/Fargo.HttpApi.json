@@ -1820,7 +1820,6 @@
           }
         }
       },
-      "Password": { },
       "PasswordUpdateDto": {
         "required": [
           "newPassword",
@@ -1849,18 +1848,65 @@
       },
       "Scalar": { },
       "Token": { },
+      "UserAuthenticationCreateDto": {
+        "type": "object",
+        "properties": {
+          "password": { },
+          "defaultPasswordExpirationPeriod": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "UserAuthenticationDto": {
+        "type": "object",
+        "properties": {
+          "defaultPasswordExpirationPeriod": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "requirePasswordChangeAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "UserAuthenticationUpdateDto": {
+        "type": "object",
+        "properties": {
+          "password": { },
+          "defaultPasswordExpirationPeriod": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removeDefaultPasswordExpirationPeriod": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      },
       "UserCreateDto": {
         "required": [
-          "nameid",
-          "password"
+          "nameid"
         ],
         "type": "object",
         "properties": {
           "nameid": {
             "$ref": "#/components/schemas/Nameid"
-          },
-          "password": {
-            "$ref": "#/components/schemas/Password"
           },
           "firstName": { },
           "lastName": { },
@@ -1871,6 +1917,16 @@
               "boolean"
             ]
           },
+          "authentication": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/UserAuthenticationCreateDto"
+              }
+            ]
+          },
           "permissionsToAdd": {
             "type": [
               "null",
@@ -1879,13 +1935,6 @@
             "items": {
               "$ref": "#/components/schemas/ActionType"
             }
-          },
-          "defaultPasswordExpirationTimeSpan": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
           },
           "partitionsToAdd": {
             "type": [
@@ -1928,8 +1977,7 @@
           "description",
           "isActive",
           "isAdmin",
-          "defaultPasswordExpirationPeriod",
-          "requirePasswordChangeAt",
+          "authentication",
           "permissions",
           "partitions",
           "partitionAccesses",
@@ -1973,19 +2021,8 @@
           "isAdmin": {
             "type": "boolean"
           },
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "requirePasswordChangeAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
+          "authentication": {
+            "$ref": "#/components/schemas/UserAuthenticationDto"
           },
           "permissions": {
             "type": "array",
@@ -2225,6 +2262,16 @@
             "type": [
               "null",
               "boolean"
+            ]
+          },
+          "authentication": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/UserAuthenticationUpdateDto"
+              }
             ]
           },
           "permissionsToAdd": {

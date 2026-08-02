@@ -1825,8 +1825,8 @@
             @DetailValue("First name", user.FirstName)
             @DetailValue("Last name", user.LastName)
             @DetailValue("Description", user.Description)
-            @DetailValue("Password expiration", FormatDuration(user.DefaultPasswordExpirationPeriod))
-            @DetailValue("Password change required", user.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
+            @DetailValue("Password expiration", FormatDuration(user.Authentication.DefaultPasswordExpirationPeriod))
+            @DetailValue("Password change required", user.Authentication.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
             @DetailValue("Active", user.IsActive ? "Yes" : "No")
         </div>
         @PermissionCollection("Permissions", user.Permissions)

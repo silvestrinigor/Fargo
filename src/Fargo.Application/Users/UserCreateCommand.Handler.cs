@@ -27,11 +27,9 @@ public sealed class UserCreateCommandHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUser);
 
-        var userPasswordHash = passwordHasher.Hash(command.Create.Password);
-
         await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var user = User.CreateUser(command.Create.Nameid, userPasswordHash);
+        var user = User.CreateUser(command.Create.Nameid);
 
         user.FirstName = command.Create.FirstName ?? null;
 
@@ -41,7 +39,11 @@ public sealed class UserCreateCommandHandler(
 
         user.IsActive = command.Create.IsActive ?? true;
 
-        user.Authentication.DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null;
+        user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
+
+        user.Authentication.PasswordHash = command.Create.Authentication?.Password != null
+            ? passwordHasher.Hash(command.Create.Authentication.Password)
+            : null;
 
         user.Authentication.MarkPasswordChangeAsRequired();
 

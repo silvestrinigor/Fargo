@@ -4,13 +4,12 @@ namespace Fargo.Application.Shared.Users;
 
 public sealed record UserCreateDto(
     Nameid Nameid,
-    Password Password,
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,
     bool? IsActive = null,
+    UserAuthenticationCreateDto? Authentication = null,
     IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
-    TimeSpan? DefaultPasswordExpirationTimeSpan = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
     IReadOnlyCollection<Guid>? UserGroupsToAdd = null,
     IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null
