@@ -19,11 +19,11 @@ public sealed class ArticleCreateCommandHandler(
     public async Task<Guid> HandleAsync(
         ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.ActorId);
+        logger.CreateStarted(currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateArticle);
 
@@ -191,7 +191,7 @@ public sealed class ArticleCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(article.Guid, actor.ActorId);
+        logger.CreateCompleted(article.Guid, actor.Guid);
 
         return article.Guid;
     }

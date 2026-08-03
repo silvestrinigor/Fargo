@@ -26,11 +26,11 @@ public sealed class UserUpdateCommandHandler(
         UserUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.UserGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.UserGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
@@ -186,6 +186,6 @@ public sealed class UserUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(command.UserGuid, currentActor.ActorId);
+        logger.UpdateCompleted(command.UserGuid, currentActor.Guid);
     }
 }

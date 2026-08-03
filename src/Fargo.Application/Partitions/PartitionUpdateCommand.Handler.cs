@@ -19,11 +19,11 @@ public sealed class PartitionUpdateCommandHandler(
         PartitionUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.PartitionGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.PartitionGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditPartition);
 
@@ -52,6 +52,6 @@ public sealed class PartitionUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(partitionToEdit.Guid, currentActor.ActorId);
+        logger.UpdateCompleted(partitionToEdit.Guid, currentActor.Guid);
     }
 }

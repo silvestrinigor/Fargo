@@ -19,13 +19,13 @@ public sealed class PasswordChangeCommandHandler(
         PasswordChangeCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.PasswordChangeStarted(currentActor.ActorId.Guid);
+        logger.PasswordChangeStarted(currentActor.Guid);
 
-        var user = await userRepository.GetByGuidAsync(currentActor.ActorId.Guid, cancellationToken);
+        var user = await userRepository.GetByGuidAsync(currentActor.Guid, cancellationToken);
 
         if (user is null)
         {
-            logger.PasswordChangeUserNotFound(currentActor.ActorId.Guid);
+            logger.PasswordChangeUserNotFound(currentActor.Guid);
 
             throw new UnauthorizedAccessException();
         }

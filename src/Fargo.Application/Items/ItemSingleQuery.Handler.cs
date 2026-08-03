@@ -13,18 +13,18 @@ public sealed class ItemSingleQueryHandler(
     public async Task<ItemDto?> HandleAsync(
         ItemSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.ItemGuid, currentActor.ActorId);
+        logger.SingleQueryStarted(query.ItemGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var item = await itemRepository.GetInfoByGuid(
             query.ItemGuid,
             actor.PartitionAccessGuids, notChildOfAnyPartition: true,
             cancellationToken);
 
-        logger.SingleQueryCompleted(query.ItemGuid, actor.ActorId, item is not null);
+        logger.SingleQueryCompleted(query.ItemGuid, actor.Guid, item is not null);
 
         return item;
     }

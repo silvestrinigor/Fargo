@@ -17,11 +17,11 @@ public sealed class UserGroupSingleQueryHandler(
         CancellationToken cancellationToken = default
     )
     {
-        logger.SingleQueryStarted(query.UserGroupGuid, currentActor.ActorId);
+        logger.SingleQueryStarted(query.UserGroupGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var userGroup = await userGroupRepository.GetInfoByGuidAsync(
             query.UserGroupGuid,
@@ -29,7 +29,7 @@ public sealed class UserGroupSingleQueryHandler(
             notChildOfAnyPartition: true,
             cancellationToken);
 
-        logger.SingleQueryCompleted(query.UserGroupGuid, currentActor.ActorId, userGroup is not null);
+        logger.SingleQueryCompleted(query.UserGroupGuid, currentActor.Guid, userGroup is not null);
 
         return userGroup;
     }

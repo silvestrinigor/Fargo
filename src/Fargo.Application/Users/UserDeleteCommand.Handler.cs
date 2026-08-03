@@ -1,6 +1,7 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actors;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 
@@ -17,11 +18,11 @@ public sealed class UserDeleteCommandHandler(
     public async Task HandleAsync(
         UserDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UserDeleteCompleted(command.UserGuid, currentActor.ActorId);
+        logger.UserDeleteCompleted(command.UserGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteUser);
 
@@ -31,7 +32,7 @@ public sealed class UserDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(user);
 
-        if (actor.ActorId.Guid == user.Guid)
+        if (actor.Guid == user.Guid && actor.ActorType == ActorType.User)
         {
             throw new FargoApplicationException($"The user '{user.Guid}' cannot delete their own user.");
         }
@@ -42,6 +43,6 @@ public sealed class UserDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UserDeleteCompleted(command.UserGuid, currentActor.ActorId);
+        logger.UserDeleteCompleted(command.UserGuid, currentActor.Guid);
     }
 }

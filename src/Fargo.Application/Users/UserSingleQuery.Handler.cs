@@ -15,11 +15,11 @@ public sealed class UserSingleQueryHandler(
     public async Task<UserDto?> HandleAsync(
         UserSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.UserGuid, currentActor.ActorId);
+        logger.SingleQueryStarted(query.UserGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var user = await userRepository.GetInfoByGuidAsync(
             query.UserGuid,
@@ -27,7 +27,7 @@ public sealed class UserSingleQueryHandler(
             notChildOfAnyPartition: true,
             cancellationToken);
 
-        logger.SingleQueryCompleted(query.UserGuid, currentActor.ActorId, user is not null);
+        logger.SingleQueryCompleted(query.UserGuid, currentActor.Guid, user is not null);
 
         return user;
     }

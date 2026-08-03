@@ -6,19 +6,23 @@ namespace Fargo.Application;
 
 public class ActorNotFoundFargoApplicationException : FargoApplicationException
 {
-    public ActorId ActorId { get; init; }
+    public Guid ActorGuid { get; }
 
-    public ActorNotFoundFargoApplicationException(ActorId actorId)
-        : base($"Actor '{actorId}' was not found.", FargoApplicationErrorType.ActorNotFound)
+    public ActorType ActorType { get; }
+
+    public ActorNotFoundFargoApplicationException(Guid actorGuid, ActorType actorType)
+        : base($"Actor '{actorGuid}' was not found.", FargoApplicationErrorType.ActorNotFound)
     {
-        ActorId = actorId;
+        ActorGuid = actorGuid;
+
+        ActorType = actorType;
     }
 
-    public static void ThrowIfNull([NotNull] Actor? actor, ActorId actorId)
+    public static void ThrowIfNull([NotNull] Actor? actor, Guid actorGuid, ActorType actorType)
     {
         if (actor is null)
         {
-            throw new ActorNotFoundFargoApplicationException(actorId);
+            throw new ActorNotFoundFargoApplicationException(actorGuid, actorType);
         }
     }
 }

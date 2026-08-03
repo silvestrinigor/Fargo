@@ -5,16 +5,20 @@ namespace Fargo.Application;
 
 public class AccessDeniedFargoApplicationException : FargoApplicationException
 {
-    public ActorId ActorId { get; }
+    public Guid ActorGuid { get; }
+
+    public ActorType ActorType { get; }
 
     public Guid EntityGuid { get; }
 
     public EntityType EntityType { get; }
 
-    public AccessDeniedFargoApplicationException(ActorId actorId, Guid entityGuid)
-        : base($"Access to entity '{entityGuid}' denied for actor '{actorId}'")
+    public AccessDeniedFargoApplicationException(Guid actorGuid, ActorType actorType, Guid entityGuid)
+        : base($"Access to entity '{entityGuid}' denied for actor '{actorGuid}'")
     {
-        ActorId = actorId;
+        ActorGuid = actorGuid;
+
+        ActorType = actorType;
 
         EntityGuid = entityGuid;
     }

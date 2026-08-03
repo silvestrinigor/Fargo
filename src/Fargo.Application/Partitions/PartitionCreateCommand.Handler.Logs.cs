@@ -7,15 +7,15 @@ internal static partial class PartitionCreateCommandHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Partition create flow started by actor {actorId}.")]
+        Message = "Partition create flow started by actor {actorGuid}.")]
     public static partial void CreateStarted(
         this ILogger logger,
-        ActorId actorId);
+        Guid actorGuid);
 
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Partition create mutation completed for partition {partitionGuid} by actor {actorId}.")]
+        Message = "Partition create mutation completed for partition {partitionGuid} by actor {actorGuid}.")]
     public static partial void CreateCompleted(
         this ILogger logger,
-        Guid partitionGuid, ActorId actorId);
+        Guid partitionGuid, Guid actorGuid);
 }

@@ -14,26 +14,27 @@ namespace Fargo.Core.Actors;
 /// </remarks>
 public sealed class Actor
 {
-    public ActorId ActorId { get; }
+    public Guid Guid { get; }
 
-    private readonly ISet<ActionType> permissionActionTypes;
+    public ActorType ActorType { get; }
 
-    public IReadOnlySet<ActionType> PermissionActionTypes => permissionActionTypes.AsReadOnly();
-
-    private readonly ISet<Guid> partitionAccessGuids;
+    public IReadOnlySet<ActionType> Permissions => permissions.AsReadOnly();
+    private readonly ISet<ActionType> permissions;
 
     public IReadOnlySet<Guid> PartitionAccessGuids => partitionAccessGuids.AsReadOnly();
+    private readonly ISet<Guid> partitionAccessGuids;
 
-    internal Actor(ActorId actorId, ISet<ActionType> permissions, ISet<Guid> partitionAccess)
+    internal Actor(Guid actorGuid, ActorType actorType, ISet<ActionType> permissions, ISet<Guid> partitionAccess)
     {
-        ActorId = actorId;
-        permissionActionTypes = permissions;
+        Guid = actorGuid;
+        ActorType = actorType;
+        this.permissions = permissions;
         partitionAccessGuids = partitionAccess;
     }
 
     public bool HasPermission(ActionType action)
     {
-        return permissionActionTypes.Contains(action);
+        return permissions.Contains(action);
     }
 
     public bool HasPartitionAccess(Guid partitionGuid)

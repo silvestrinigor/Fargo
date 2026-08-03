@@ -5,14 +5,18 @@ namespace Fargo.Application;
 
 public class PermissionDeniedFargoApplicationException : FargoApplicationException
 {
-    public ActorId ActorId { get; }
+    public Guid ActorGuid { get; }
+
+    public ActorType ActorType { get; }
 
     public ActionType ActionType { get; }
 
-    public PermissionDeniedFargoApplicationException(ActorId actorId, ActionType actionType)
-        : base($"Action '{actionType}' permission denied for actor '{actorId}'")
+    public PermissionDeniedFargoApplicationException(Guid actorGuid, ActorType actorType, ActionType actionType)
+        : base($"Action '{actionType}' permission denied for actor '{actorGuid}'")
     {
-        ActorId = actorId;
+        ActorGuid = actorGuid;
+
+        ActorType = actorType;
 
         ActionType = actionType;
     }

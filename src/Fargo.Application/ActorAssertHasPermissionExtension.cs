@@ -9,7 +9,7 @@ public static class ActorAssertHasPermissionExtension
     {
         if (!actor.HasPermission(action))
         {
-            throw new PermissionDeniedFargoApplicationException(actor.ActorId, action);
+            throw new PermissionDeniedFargoApplicationException(actor.Guid, actor.ActorType, action);
         }
     }
 }

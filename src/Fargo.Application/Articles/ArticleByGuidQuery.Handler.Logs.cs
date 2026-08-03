@@ -7,18 +7,18 @@ internal static partial class ArticleByGuidQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Article single query started for article '{articleGuid}' by actor '{actorId}'.")]
+        Message = "Article single query started for article '{articleGuid}' by actor '{actorGuid}'.")]
     public static partial void QueryByGuidStarted(
         this ILogger logger,
         Guid articleGuid,
-        ActorId actorId);
+        Guid actorGuid);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Article single query completed for article '{articleGuid}' by actor '{actorId}'. Found: {found}.")]
+        Message = "Article single query completed for article '{articleGuid}' by actor '{actorGuid}'. Found: {found}.")]
     public static partial void QueryByGuidCompleted(
         this ILogger logger,
         Guid articleGuid,
-        ActorId actorId,
+        Guid actorGuid,
         bool found);
 }

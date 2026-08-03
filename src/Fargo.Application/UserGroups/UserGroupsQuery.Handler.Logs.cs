@@ -7,16 +7,20 @@ internal static partial class UserGroupsQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "User groups query started for actor {actorId}. Page: {page}. Limit: {limit}.")]
+        Message = "User groups query started for actor {actorGuid}. Page: {page}. Limit: {limit}.")]
     public static partial void ManyQueryStarted(
-        this ILogger logger, ActorId actorId,
-        Page page, Limit limit);
+        this ILogger logger,
+        Guid actorGuid,
+        Page page,
+        Limit limit);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "User groups query completed for actor {actorId}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
+        Message = "User groups query completed for actor {actorGuid}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
     public static partial void ManyQueryCompleted(
-        this ILogger logger, ActorId actorId,
-        int requestedPartitionCount, int effectivePartitionCount,
+        this ILogger logger,
+        Guid actorGuid,
+        int requestedPartitionCount,
+        int effectivePartitionCount,
         int resultCount);
 }

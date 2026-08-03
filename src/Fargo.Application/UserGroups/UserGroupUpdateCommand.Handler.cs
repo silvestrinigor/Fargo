@@ -23,11 +23,11 @@ public sealed class UserGroupUpdateCommandHandler(
     {
         var update = command.Update;
 
-        logger.UpdateStarted(command.UserGroupGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.UserGroupGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUserGroup);
 
@@ -126,6 +126,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(command.UserGroupGuid, currentActor.ActorId);
+        logger.UpdateCompleted(command.UserGroupGuid, currentActor.Guid);
     }
 }

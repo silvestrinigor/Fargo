@@ -18,11 +18,11 @@ public sealed class ItemUpdateCommandHandler(
         ItemUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ItemGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.ItemGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditItem);
 
@@ -34,6 +34,6 @@ public sealed class ItemUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(item.Guid, currentActor.ActorId);
+        logger.UpdateCompleted(item.Guid, currentActor.Guid);
     }
 }

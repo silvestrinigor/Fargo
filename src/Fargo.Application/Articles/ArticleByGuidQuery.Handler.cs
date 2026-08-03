@@ -13,11 +13,11 @@ public sealed class ArticleByGuidQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        logger.QueryByGuidStarted(query.ArticleGuid, currentActor.ActorId);
+        logger.QueryByGuidStarted(query.ArticleGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var article = await articleRepository.GetInfoByGuidAsync(
             query.ArticleGuid,
@@ -25,7 +25,7 @@ public sealed class ArticleByGuidQueryHandler(
             notChildOfAnyPartition: true,
             cancellationToken);
 
-        logger.QueryByGuidCompleted(query.ArticleGuid, currentActor.ActorId, found: article is not null);
+        logger.QueryByGuidCompleted(query.ArticleGuid, currentActor.Guid, found: article is not null);
 
         return article;
     }

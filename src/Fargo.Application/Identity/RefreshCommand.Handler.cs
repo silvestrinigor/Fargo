@@ -83,11 +83,9 @@ public sealed class RefreshCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var actorUserId = new ActorId(storedOldRefreshToken.UserGuid, ActorType.User);
+        var actorUser = await actorService.GetActorByGuidAndTypeAsync(user.Guid, ActorType.User, cancellationToken);
 
-        var actorUser = await actorService.GetActorByActorIdAsync(actorUserId, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, actorUserId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, user.Guid, ActorType.User);
 
         logger.RefreshCompleted(user.Guid);
 

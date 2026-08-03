@@ -7,13 +7,13 @@ internal static partial class ItemSingleQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Item single query started for item {itemGuid} by actor {actorId}.")]
+        Message = "Item single query started for item {itemGuid} by actor {actorGuid}.")]
     public static partial void SingleQueryStarted(
-        this ILogger logger, Guid itemGuid, ActorId actorId);
+        this ILogger logger, Guid itemGuid, Guid actorGuid);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Item single query completed for item {itemGuid} by actor {actorID}. Found: {found}.")]
+        Message = "Item single query completed for item {itemGuid} by actor {actorGuid}. Found: {found}.")]
     public static partial void SingleQueryCompleted(
-        this ILogger logger, Guid itemGuid, ActorId actorId, bool found);
+        this ILogger logger, Guid itemGuid, Guid actorGuid, bool found);
 }

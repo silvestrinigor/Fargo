@@ -5,30 +5,19 @@ using Fargo.Core.Users;
 
 namespace Fargo.Core.Actors;
 
-public sealed class ActorService(
-    IUserRepository userRepository, IPartitionRepository partitionRepository)
+public sealed class ActorService(IUserRepository userRepository, IPartitionRepository partitionRepository)
 {
-    public async Task<Actor?> GetActorByActorIdAsync(ActorId actorId, CancellationToken cancellationToken = default)
+    public async Task<Actor?> GetActorByGuidAndTypeAsync(Guid actorGuid, ActorType actorType, CancellationToken cancellationToken = default)
     {
-        if (actorId.ActorType == ActorType.User)
+        if (actorType == ActorType.User)
         {
-            return await GetUserActorByGuid(actorId.Guid, cancellationToken);
-        }
-
-        else if (actorId.ActorType == ActorType.Application)
-        {
-            return await GetApplicationActorByGuid(actorId.Guid, cancellationToken);
+            return await GetUserActorByGuidAsync(actorGuid, cancellationToken);
         }
 
         return null;
     }
 
-    private async Task<Actor?> GetApplicationActorByGuid(Guid guid, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    private async Task<Actor?> GetUserActorByGuid(Guid guid, CancellationToken cancellationToken = default)
+    private async Task<Actor?> GetUserActorByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
     {
         var user = await userRepository.GetByGuidAsync(guid, cancellationToken);
 
@@ -59,8 +48,6 @@ public sealed class ActorService(
             permissions.UnionWith(group.Permissions);
         }
 
-        var actorId = new ActorId(user.Guid, ActorType.User);
-
-        return new Actor(actorId, permissions, partitionDescendantAccessGuids.ToHashSet());
+        return new Actor(user.Guid, ActorType.User, permissions, partitionDescendantAccessGuids.ToHashSet());
     }
 }

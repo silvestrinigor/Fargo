@@ -14,11 +14,11 @@ public sealed class ArticleDeleteCommandHandler(
     public async Task HandleAsync(
         ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.ArticleGuid, currentActor.ActorId);
+        logger.DeleteStarted(command.ArticleGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteArticle);
 
@@ -34,6 +34,6 @@ public sealed class ArticleDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(article.Guid, currentActor.ActorId);
+        logger.DeleteCompleted(article.Guid, currentActor.Guid);
     }
 }

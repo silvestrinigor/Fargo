@@ -19,11 +19,11 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.PartitionGuid, currentActor.ActorId);
+        logger.DeleteStarted(command.PartitionGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.DeletePartition);
 
@@ -50,6 +50,6 @@ public sealed class PartitionDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(command.PartitionGuid, currentActor.ActorId);
+        logger.DeleteCompleted(command.PartitionGuid, currentActor.Guid);
     }
 }

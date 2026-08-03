@@ -34,7 +34,8 @@ public sealed class FargoApplicationExceptionHandler(
                     Instance = httpContext.Request.Path,
                 };
 
-                problem.Extensions["actorId"] = ex.ActorId;
+                problem.Extensions["actorGuid"] = ex.ActorGuid;
+                problem.Extensions["actorType"] = ex.ActorType;
                 problem.Extensions["entityGuid"] = ex.EntityGuid;
                 problem.Extensions["entityType"] = ex.EntityType;
                 break;
@@ -51,7 +52,7 @@ public sealed class FargoApplicationExceptionHandler(
                     Instance = httpContext.Request.Path,
                 };
 
-                problem.Extensions["actorId"] = ex.ActorId;
+                problem.Extensions["actorId"] = ex.ActorGuid;
                 problem.Extensions["actionType"] = ex.ActionType;
                 break;
 
@@ -83,7 +84,9 @@ public sealed class FargoApplicationExceptionHandler(
                     Instance = httpContext.Request.Path,
                 };
 
-                problem.Extensions["actorId"] = ex.ActorId;
+                problem.Extensions["actorGuid"] = ex.ActorGuid;
+                problem.Extensions["actorType"] = ex.ActorType;
+
                 break;
 
             default:

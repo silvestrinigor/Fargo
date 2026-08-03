@@ -18,11 +18,11 @@ public sealed class ArticlePatchCommandHandler(
         ArticleUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ArticleGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.ArticleGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditArticle);
 
@@ -204,6 +204,6 @@ public sealed class ArticlePatchCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(article.Guid, actor.ActorId);
+        logger.UpdateCompleted(article.Guid, actor.Guid);
     }
 }
