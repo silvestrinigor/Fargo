@@ -1,9 +1,12 @@
 namespace Fargo.Application;
 
+/// <summary>
+/// Defines the categories of errors that can be associated with a <see cref="FargoApplicationErrorType"/>.
+/// </summary>
 public enum FargoApplicationErrorType
 {
     /// <summary>
-    /// 
+    /// No specific error category.
     /// </summary>
     None = 0,
 
