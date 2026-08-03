@@ -15,7 +15,7 @@ public sealed class InitializeSystemCommandHandler(
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
     ILogger<InitializeSystemCommandHandler> logger
-    ) : ICommandHandler<InitializeSystemCommand>
+) : ICommandHandler<InitializeSystemCommand>
 {
     public async Task HandleAsync(
         InitializeSystemCommand command,

@@ -12,9 +12,8 @@ public static class PartitionQueryFilter
     /// <param name="requestedPartitionGuids"></param>
     /// <param name="notChildOfAnyPartition"></param>
     /// <returns></returns>
-    public static (
-        IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions,
-        bool? NotChildOfAnyPartition) ForPartitionedEntities(
+    public static (IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions, bool? NotChildOfAnyPartition)
+        ForPartitionedEntities(
             IReadOnlyCollection<Guid> actorPartitionGuids,
             IReadOnlyCollection<Guid>? requestedPartitionGuids,
             bool? notChildOfAnyPartition)

@@ -12,4 +12,5 @@ namespace Fargo.Application.Identity;
 /// The date and time when the access token expires.
 /// </param>
 public record TokenGenerateResult(
-    Token AccessToken, DateTimeOffset ExpiresAt);
+    Token AccessToken,
+    DateTimeOffset ExpiresAt);
