@@ -104,13 +104,13 @@ public class Partition : IEntity
         if (IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "The global partition cannot have a parent partition.", FargoCoreErrorType.None);
+                "The global partition cannot have a parent partition.", FargoCoreErrorType.InvalidOperation);
         }
 
         if (parentPartition.Guid == Guid)
         {
             throw new FargoCoreException(
-                "A partition cannot be its own parent.", FargoCoreErrorType.None);
+                "A partition cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
         }
 
         ParentPartition = parentPartition;

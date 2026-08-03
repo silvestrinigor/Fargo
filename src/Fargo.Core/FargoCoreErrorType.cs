@@ -9,4 +9,14 @@ public enum FargoCoreErrorType
     /// No specific error category.
     /// </summary>
     None = 0,
+
+    /// <summary>
+    /// The operation is invalid.
+    /// </summary>
+    InvalidOperation = 1,
+
+    /// <summary>
+    /// The argument is invalid.
+    /// </summary>
+    InvalidArgument = 2,
 }

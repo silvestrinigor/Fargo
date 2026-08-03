@@ -58,7 +58,7 @@ public class PartitionTests
     }
 
     [Fact]
-    public void SetParentPartition_WhenNewParentPartitionIsValid()
+    public void SetParentPartition_WhenNewParentPartitionIsValid_ShouldSetParentPartition()
     {
         var globalPartition = CreateGlobalPartition();
         var partition = CreatePartition(globalPartition);
@@ -68,6 +68,30 @@ public class PartitionTests
 
         Assert.Equal(partition2, partition.ParentPartition);
         Assert.Equal(partition2.Guid, partition.ParentPartitionGuid);
+    }
+
+    [Fact]
+    public void SetParentPartition_WhenMemberPartitionIsGlobalPartition_ShouldThrowException()
+    {
+        var globalPartition = CreateGlobalPartition();
+        var partition = CreatePartition(globalPartition);
+
+        void function() => globalPartition.SetParentPartition(partition);
+
+        var ex = Assert.Throws<FargoCoreException>(() => function());
+        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+    }
+
+    [Fact]
+    public void SetParentPartition_WhenPartitionMemberIsEqualParentPartition_ShouldThrowException()
+    {
+        var globalPartition = CreateGlobalPartition();
+        var partition = CreatePartition(globalPartition);
+
+        void function() => partition.SetParentPartition(partition);
+
+        var ex = Assert.Throws<FargoCoreException>(() => function());
+        Assert.Equal(FargoCoreErrorType.InvalidArgument, ex.ErrorType);
     }
 
     private static Partition CreateGlobalPartition()
