@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared;
+namespace Fargo.Core.Shared.Security;
 
 /// <summary>
 /// Represents a validated plaintext password.

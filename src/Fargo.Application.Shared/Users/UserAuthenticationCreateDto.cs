@@ -1,4 +1,4 @@
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Security;
 
 namespace Fargo.Application.Shared.Users;
 
