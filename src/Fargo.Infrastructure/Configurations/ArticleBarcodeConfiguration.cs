@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Fargo.Infrastructure.EntityTypeConfigurations;
+namespace Fargo.Infrastructure.Configurations;
 
 public class ArticleBarcodeConfiguration : IEntityTypeConfiguration<ArticleBarcode>
 {

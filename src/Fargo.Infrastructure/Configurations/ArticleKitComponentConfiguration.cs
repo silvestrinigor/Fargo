@@ -2,7 +2,7 @@ using Fargo.Core.Articles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fargo.Infrastructure.EntityTypeConfigurations;
+namespace Fargo.Infrastructure.Configurations;
 
 public class ArticleKitComponentConfiguration : IEntityTypeConfiguration<ArticleKitComponent>
 {

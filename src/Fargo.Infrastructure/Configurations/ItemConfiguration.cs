@@ -2,7 +2,7 @@ using Fargo.Core.Items;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fargo.Infrastructure.EntityTypeConfigurations;
+namespace Fargo.Infrastructure.Configurations;
 
 public class ItemConfiguration : IEntityTypeConfiguration<Item>
 {

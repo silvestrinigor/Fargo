@@ -2,7 +2,7 @@ using Fargo.Core.UserGroups;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fargo.Infrastructure.EntityTypeConfigurations;
+namespace Fargo.Infrastructure.Configurations;
 
 public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 {

@@ -2,7 +2,7 @@ using Fargo.Core.Partitions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fargo.Infrastructure.EntityTypeConfigurations;
+namespace Fargo.Infrastructure.Configurations;
 
 public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
 {
