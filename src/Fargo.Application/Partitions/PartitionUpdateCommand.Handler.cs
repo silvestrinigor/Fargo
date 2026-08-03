@@ -46,9 +46,7 @@ public sealed class PartitionUpdateCommandHandler(
 
             actor.ThrowIfAccessDenied(parentPartitionToSet);
 
-            await partitionService.ValidateParentPartitionAssignmentAsync(parentPartitionToSet, partitionToEdit, cancellationToken);
-
-            partitionToEdit.SetParentPartition(parentPartitionToSet);
+            await partitionService.InsertIntoPartitionAsync(parentPartitionToSet, partitionToEdit, cancellationToken);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

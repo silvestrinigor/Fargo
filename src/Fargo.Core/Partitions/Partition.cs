@@ -99,12 +99,7 @@ public class Partition : IEntity
         return globalPartition;
     }
 
-    /// <summary>
-    /// Creates the global partition.
-    /// </summary>
-    /// <param name="name">The name of the global partition.</param>
-    /// <returns>The global <see cref="Partition"/>.</returns>
-    public void SetParentPartition(Partition parentPartition)
+    internal void SetParentPartition(Partition parentPartition)
     {
         if (IsGlobalPartition)
         {

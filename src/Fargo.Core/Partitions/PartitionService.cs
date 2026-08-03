@@ -6,7 +6,7 @@ namespace Fargo.Core.Partitions;
 public class PartitionService(IPartitionRepository partitionRepository)
 {
     /// <summary>
-    /// Validates that <paramref name="parentPartition"/> can be assigned as the
+    /// Set and validates that <paramref name="parentPartition"/> can be assigned as the
     /// parent of <paramref name="memberPartition"/>.
     /// </summary>
     /// <param name="parentPartition">The candidate parent partition.</param>
@@ -15,7 +15,7 @@ public class PartitionService(IPartitionRepository partitionRepository)
     /// <exception cref="FargoCoreException">
     /// Thrown if assigning the parent would create a circular hierarchy.
     /// </exception>
-    public async Task ValidateParentPartitionAssignmentAsync(
+    public async Task InsertIntoPartitionAsync(
         Partition parentPartition, Partition memberPartition, CancellationToken cancellationToken = default)
     {
         var createsCircularHierarchy = await WouldCreateCircularHierarchyAsync(
@@ -28,6 +28,8 @@ public class PartitionService(IPartitionRepository partitionRepository)
                 $"'{parentPartition.Guid}' because this would create a circular hierarchy.",
                 FargoCoreErrorType.None);
         }
+
+        memberPartition.SetParentPartition(parentPartition);
     }
 
     private async Task<bool> WouldCreateCircularHierarchyAsync(
