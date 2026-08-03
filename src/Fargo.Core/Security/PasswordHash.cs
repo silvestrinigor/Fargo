@@ -1,25 +1,31 @@
 namespace Fargo.Core.Security;
 
 /// <summary>
-/// Represents a hashed password stored in the system.
-///
-/// This value object guarantees that the stored value is a valid
-/// password hash produced by the hashing infrastructure.
-/// The plaintext password should never be persisted.
+/// Represents a hashed password value stored by the system.
 /// </summary>
+/// <remarks>
+/// This value object ensures that the stored value is not empty and conforms
+/// to the expected hash format constraints.
+///
+/// Plaintext passwords should never be persisted.
+/// </remarks>
 public readonly struct PasswordHash : IEquatable<PasswordHash>
 {
     /// <summary>
-    /// Minimum allowed length for the password hash.
+    /// Gets the underlying hash string.
     /// </summary>
-    public const int MinLength = 50;
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the struct is not properly initialized.
+    /// </exception>
+    public string Value
+        => value ?? throw new InvalidOperationException("Password hash value must be set.");
+
+    private readonly string value;
 
     /// <summary>
     /// Maximum allowed length for the password hash.
     /// </summary>
     public const int MaxLength = 512;
-
-    private readonly string value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PasswordHash"/> value object.
@@ -36,15 +42,6 @@ public readonly struct PasswordHash : IEquatable<PasswordHash>
         Validate(value);
         this.value = value;
     }
-
-    /// <summary>
-    /// Gets the underlying hash string.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the struct is not properly initialized.
-    /// </exception>
-    public string Value
-        => value ?? throw new InvalidOperationException("Password hash value must be set.");
 
     /// <summary>
     /// Creates a <see cref="PasswordHash"/> from the specified string.
@@ -83,16 +80,10 @@ public readonly struct PasswordHash : IEquatable<PasswordHash>
         => !left.Equals(right);
 
     /// <summary>
-    /// Returns the string representation of the password hash.
+    /// Returns a masked representation of the password hash.
     /// </summary>
     public override string ToString()
-        => Value;
-
-    /// <summary>
-    /// Implicitly converts a <see cref="PasswordHash"/> to <see cref="string"/>.
-    /// </summary>
-    public static implicit operator string(PasswordHash passwordHash)
-        => passwordHash.Value;
+        => "[REDACTED]";
 
     /// <summary>
     /// Explicitly converts a <see cref="string"/> to <see cref="PasswordHash"/>.
@@ -112,22 +103,12 @@ public readonly struct PasswordHash : IEquatable<PasswordHash>
                 nameof(value));
         }
 
-        if (value.Length < MinLength || value.Length > MaxLength)
+        if (value.Length > MaxLength)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(value),
                 value.Length,
-                $"Password hash length must be between {MinLength} and {MaxLength} characters.");
-        }
-
-        foreach (var c in value)
-        {
-            if (char.IsWhiteSpace(c))
-            {
-                throw new ArgumentException(
-                    "Password hash cannot contain whitespace.",
-                    nameof(value));
-            }
+                $"Password hash length must not be greater than {MaxLength} characters.");
         }
     }
 }
