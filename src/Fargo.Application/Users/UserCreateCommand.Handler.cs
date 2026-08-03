@@ -43,7 +43,7 @@ public sealed class UserCreateCommandHandler(
         user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
         user.Authentication.PasswordHash = command.Create.Authentication?.Password != null
-            ? new(passwordHasher.Hash(command.Create.Authentication.Password))
+            ? passwordHasher.Hash(new(command.Create.Authentication.Password))
             : null;
 
         user.Authentication.MarkPasswordChangeAsRequired();

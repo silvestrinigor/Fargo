@@ -60,9 +60,11 @@ public sealed class UserUpdateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(ActionType.ChangeAnotherUserPassword);
 
-                var passwordHash = passwordHasher.Hash(auth.Password);
+                var password = new Password(auth.Password);
 
-                user.Authentication.PasswordHash = new(passwordHash);
+                var passwordHash = passwordHasher.Hash(password);
+
+                user.Authentication.PasswordHash = passwordHash;
 
                 user.Authentication.MarkPasswordChangeAsRequired();
             }
