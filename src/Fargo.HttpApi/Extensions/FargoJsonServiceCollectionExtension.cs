@@ -1,8 +1,8 @@
 using Fargo.Infrastructure.Converters;
 
-namespace Fargo.HttpApi.JsonConfig;
+namespace Fargo.HttpApi.Extensions;
 
-public static class JsonServiceCollectionExtension
+public static class FargoJsonServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {

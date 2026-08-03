@@ -1,4 +1,6 @@
-namespace Fargo.HttpApi.RouteConstraints;
+using Fargo.HttpApi.Routes;
+
+namespace Fargo.HttpApi.Extensions;
 
 public static class FargoRouteServiceCollectionExtension
 {

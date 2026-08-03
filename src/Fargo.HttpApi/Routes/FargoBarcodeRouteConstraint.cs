@@ -1,7 +1,7 @@
 using Fargo.Core.Shared.Barcodes;
 using System.Globalization;
 
-namespace Fargo.HttpApi.RouteConstraints;
+namespace Fargo.HttpApi.Routes;
 
 public sealed class FargoBarcodeRouteConstraint : IRouteConstraint
 {

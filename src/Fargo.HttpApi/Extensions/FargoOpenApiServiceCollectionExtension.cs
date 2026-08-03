@@ -3,9 +3,9 @@ using Fargo.Core.Shared.Barcodes;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
 
-namespace Fargo.HttpApi.OpenApiExtensions;
+namespace Fargo.HttpApi.Extensions;
 
-public static class OpenApiServiceCollectionExtension
+public static class FargoOpenApiServiceCollectionExtension
 {
     extension(IServiceCollection services)
     {
