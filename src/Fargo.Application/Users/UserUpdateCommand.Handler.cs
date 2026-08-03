@@ -2,7 +2,7 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Entities;
 using Fargo.Core.Shared.Security;
 using Fargo.Core.UserGroups;

@@ -3,6 +3,7 @@ using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;

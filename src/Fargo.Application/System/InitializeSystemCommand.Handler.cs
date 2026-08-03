@@ -1,7 +1,7 @@
 using Fargo.Core;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
