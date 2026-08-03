@@ -13,7 +13,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 {
     private readonly DbSet<User> users = context.Users;
 
-    public Task<bool> Any(CancellationToken cancellationToken = default)
+    public Task<bool> AnyAsync(CancellationToken cancellationToken = default)
         => users.AnyAsync(cancellationToken);
 
     public void Add(User user) => users.Add(user);
@@ -28,10 +28,10 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         => IncludeAggregate(users)
             .SingleOrDefaultAsync(user => user.Nameid == nameid, cancellationToken);
 
-    public Task<bool> ExistsByGuid(Guid guid, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
         => users.AnyAsync(user => user.Guid == guid, cancellationToken);
 
-    public Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => users.AnyAsync(user => user.Nameid == nameid, cancellationToken);
 
     public async Task<UserDto?> GetInfoByGuidAsync(

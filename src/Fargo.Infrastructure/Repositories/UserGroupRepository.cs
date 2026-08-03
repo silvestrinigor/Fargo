@@ -13,7 +13,7 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
 {
     private readonly DbSet<UserGroup> userGroups = context.UserGroups;
 
-    public Task<bool> Any(CancellationToken cancellationToken = default)
+    public Task<bool> AnyAsync(CancellationToken cancellationToken = default)
         => userGroups.AnyAsync(cancellationToken);
 
     public void Add(UserGroup userGroup) => userGroups.Add(userGroup);
@@ -25,13 +25,13 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             .Include(userGroup => userGroup.Partitions)
             .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
 
-    public Task<UserGroup?> GetByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+    public Task<UserGroup?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => userGroups
             .Include(userGroup => userGroup.Permissions)
             .Include(userGroup => userGroup.Partitions)
             .SingleOrDefaultAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);
 
-    public Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => userGroups.AnyAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);
 
     public async Task<UserGroupDto?> GetInfoByGuidAsync(

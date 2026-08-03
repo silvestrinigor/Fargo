@@ -41,7 +41,7 @@ public class PartitionService(IPartitionRepository partitionRepository)
         }
 
         var descendantPartitionGuids =
-            await partitionRepository.GetDescendantGuids(
+            await partitionRepository.GetDescendantGuidsAsync(
                 memberPartitionGuid, false, cancellationToken);
 
         return descendantPartitionGuids.Contains(candidateParentPartition.Guid);
@@ -64,7 +64,7 @@ public class PartitionService(IPartitionRepository partitionRepository)
                 FargoCoreErrorType.None);
         }
 
-        var hasAssociatedEntities = await partitionRepository.HasAnyAssociatedEntity(partition.Guid, cancellationToken);
+        var hasAssociatedEntities = await partitionRepository.HasAnyAssociatedEntityAsync(partition.Guid, cancellationToken);
 
         if (hasAssociatedEntities)
         {

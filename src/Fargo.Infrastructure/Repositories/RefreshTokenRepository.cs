@@ -13,17 +13,17 @@ public sealed class RefreshTokenRepository(FargoDbContext context) : IRefreshTok
         refreshTokens.Add(refreshToken);
     }
 
-    public async Task<RefreshToken?> GetByGuid(Guid entityGuid, CancellationToken cancellationToken = default)
+    public async Task<RefreshToken?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
     {
         return await refreshTokens.Where(r => r.Guid == entityGuid).SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<RefreshToken?> GetByTokenHash(TokenHash tokenHash, CancellationToken cancellationToken = default)
+    public async Task<RefreshToken?> GetByTokenHashAsync(TokenHash tokenHash, CancellationToken cancellationToken = default)
     {
         return await refreshTokens.Where(r => r.TokenHash == tokenHash).SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<RefreshToken>> GetByUserGuid(
+    public async Task<IReadOnlyCollection<RefreshToken>> GetByUserGuidAsync(
         Guid userGuid,
         CancellationToken cancellationToken = default)
     {

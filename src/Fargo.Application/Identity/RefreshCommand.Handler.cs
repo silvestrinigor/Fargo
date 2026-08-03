@@ -26,7 +26,7 @@ public sealed class RefreshCommandHandler(
 
         var oldRefreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
-        var storedOldRefreshToken = await refreshTokenRepository.GetByTokenHash(oldRefreshTokenHash, cancellationToken);
+        var storedOldRefreshToken = await refreshTokenRepository.GetByTokenHashAsync(oldRefreshTokenHash, cancellationToken);
 
         if (storedOldRefreshToken == null || !storedOldRefreshToken.IsUsable)
         {

@@ -13,13 +13,13 @@ public interface IPartitionRepository
     /// <summary>
     /// Retrieves the unique identifiers of all descendant partitions of a given partition.
     /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+    Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
         Guid partitionGuid, bool includeRoot = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the unique identifiers of all descendant partitions of the specified root partitions.
     /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+    Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
         IReadOnlyCollection<Guid> partitionGuids, bool includeRoots = true, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -35,5 +35,5 @@ public interface IPartitionRepository
     /// <summary>
     /// Retrieves the value indicating whether the partition has any other associated entity.
     /// </summary>
-    Task<bool> HasAnyAssociatedEntity(Guid partitionGuid, CancellationToken cancellationToken = default);
+    Task<bool> HasAnyAssociatedEntityAsync(Guid partitionGuid, CancellationToken cancellationToken = default);
 }

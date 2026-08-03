@@ -29,7 +29,7 @@ public sealed class ItemService(IItemRepository itemRepository)
             throw new FargoCoreException($"Item '{parentContainerItem.Guid}' is not a container item.");
         }
 
-        var descendantItemGuids = await itemRepository.GetContainerDescendantGuids(
+        var descendantItemGuids = await itemRepository.GetContainerDescendantGuidsAsync(
             memberItem.Guid,
             includeRoot: false,
             cancellationToken);

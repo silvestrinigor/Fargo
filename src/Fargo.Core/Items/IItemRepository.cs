@@ -13,7 +13,7 @@ public interface IItemRepository
     /// <summary>
     /// Retrieves the unique identifiers of all items contained under a given item.
     /// </summary>
-    Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
+    Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuidsAsync(
         Guid itemGuid,
         bool includeRoot = true,
         CancellationToken cancellationToken = default);

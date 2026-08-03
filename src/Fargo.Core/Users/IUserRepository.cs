@@ -20,12 +20,12 @@ public interface IUserRepository
     /// <summary>
     /// Determines whether a user with the specified identifier exists.
     /// </summary>
-    Task<bool> ExistsByGuid(Guid guid, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByGuidAsync(Guid guid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a user with the specified <see cref="Nameid"/> already exists.
     /// </summary>
-    Task<bool> ExistsByNameid(Nameid nameid, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new user to the persistence context.
@@ -40,5 +40,5 @@ public interface IUserRepository
     /// <summary>
     /// Determines whether any users exist in the system.
     /// </summary>
-    Task<bool> Any(CancellationToken cancellationToken = default);
+    Task<bool> AnyAsync(CancellationToken cancellationToken = default);
 }

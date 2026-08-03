@@ -52,9 +52,11 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
+        var password = new Password(command.Password);
+
         var isValid = user.Authentication.PasswordHash != null
             && passwordHasher.Verify(
-                user.Authentication.PasswordHash.Value, command.Password);
+                user.Authentication.PasswordHash.Value, password);
 
         if (!isValid)
         {

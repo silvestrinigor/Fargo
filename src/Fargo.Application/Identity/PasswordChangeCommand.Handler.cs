@@ -66,7 +66,7 @@ public sealed class PasswordChangeCommandHandler(
 
         user.Authentication.RotateAuthVersion();
 
-        var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
+        var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.Guid, cancellationToken);
 
         foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
         {

@@ -1,4 +1,5 @@
 using Fargo.Core.Security;
+using Fargo.Core.Shared;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fargo.Infrastructure.Security;
@@ -28,11 +29,11 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// A <see cref="PasswordHash"/> containing the hashed representation
     /// of the provided password.
     /// </returns>
-    public string Hash(string password)
+    public PasswordHash Hash(Password password)
     {
         var passwordHashString = _hasher.HashPassword(null!, password);
 
-        return passwordHashString;
+        return new(passwordHashString);
     }
 
     /// <summary>
@@ -54,11 +55,11 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
     /// <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>,
     /// since both indicate that the password is valid.
     /// </remarks>
-    public bool Verify(string hashedPassword, string providedPassword)
+    public bool Verify(PasswordHash hashedPassword, Password providedPassword)
     {
         var result = _hasher.VerifyHashedPassword(
             null!,
-            hashedPassword,
+            hashedPassword.Value,
             providedPassword
         );
 

@@ -1,3 +1,5 @@
+using Fargo.Core.Shared;
+
 namespace Fargo.Core.Security;
 
 /// <summary>
@@ -13,7 +15,7 @@ public interface IPasswordHasher
     /// </summary>
     /// <param name="password">The plaintext password string.</param>
     /// <returns>A <see cref="PasswordHash"/> representing the hashed password.</returns>
-    string Hash(string password);
+    PasswordHash Hash(Password password);
 
     /// <summary>
     /// Verifies whether the provided password matches the stored hash.
@@ -23,5 +25,5 @@ public interface IPasswordHasher
     /// <returns>
     /// <see langword="true"/> if the password matches the hash; otherwise, <see langword="false"/>.
     /// </returns>
-    bool Verify(string hashedPassword, string providedPassword);
+    bool Verify(PasswordHash hashedPassword, Password providedPassword);
 }

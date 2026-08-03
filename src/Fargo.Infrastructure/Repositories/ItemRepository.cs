@@ -22,7 +22,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             .Include(item => item.Partitions)
             .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
 
-    public async Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
+    public async Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuidsAsync(
         Guid itemGuid,
         bool includeRoot = true,
         CancellationToken cancellationToken = default)

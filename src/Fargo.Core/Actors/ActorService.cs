@@ -47,7 +47,7 @@ public sealed class ActorService(
                 .SelectMany(g => g.PartitionAccesses)
                 .Select(p => p.Guid));
 
-        var partitionDescendantAccessGuids = await partitionRepository.GetDescendantGuids(
+        var partitionDescendantAccessGuids = await partitionRepository.GetDescendantGuidsAsync(
             partitionGuids: partitionAccessGuids,
             includeRoots: true,
             cancellationToken);

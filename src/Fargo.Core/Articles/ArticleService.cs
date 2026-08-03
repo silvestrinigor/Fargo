@@ -13,7 +13,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
             throw new FargoCoreException($"Article '{article.Guid}' cannot be deleted because it has associated items.");
         }
 
-        var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticle(article.Guid, cancellationToken);
+        var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticleAsync(article.Guid, cancellationToken);
 
         if (isArticleDependence)
         {

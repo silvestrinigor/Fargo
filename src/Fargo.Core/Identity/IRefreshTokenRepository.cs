@@ -16,7 +16,7 @@ public interface IRefreshTokenRepository
     /// <returns>
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
-    Task<RefreshToken?> GetByGuid(
+    Task<RefreshToken?> GetByGuidAsync(
         Guid entityGuid,
         CancellationToken cancellationToken = default);
 
@@ -28,10 +28,10 @@ public interface IRefreshTokenRepository
     /// <returns>
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
-    Task<RefreshToken?> GetByTokenHash(
+    Task<RefreshToken?> GetByTokenHashAsync(
         TokenHash tokenHash, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<RefreshToken>> GetByUserGuid(
+    Task<IReadOnlyCollection<RefreshToken>> GetByUserGuidAsync(
         Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -23,7 +23,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
         => items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
 
-    public async Task<bool> IsDependenceOfAnotherArticle(Guid articleGuid, CancellationToken cancellationToken = default)
+    public async Task<bool> IsDependenceOfAnotherArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
     {
         return await articles.AnyAsync(v => v.Variation != null && v.Variation.FromArticleGuid == articleGuid, cancellationToken)
             || await articles.AnyAsync(p => p.Pack != null && p.Pack.FromArticleGuid == articleGuid, cancellationToken)

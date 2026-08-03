@@ -23,7 +23,7 @@ public sealed class InitializeSystemCommandHandler(
     {
         logger.InitializeSystemStarted();
 
-        var anyUser = await userRepository.Any(cancellationToken);
+        var anyUser = await userRepository.AnyAsync(cancellationToken);
 
         if (anyUser)
         {

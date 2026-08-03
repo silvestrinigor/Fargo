@@ -19,7 +19,7 @@ public class UserGroupService(IUserGroupRepository userGroupRepository)
     /// </exception>
     public async Task ValidateUserGroupNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
-        var alreadyExistsWithName = await userGroupRepository.ExistsByNameid(nameid, cancellationToken);
+        var alreadyExistsWithName = await userGroupRepository.ExistsByNameidAsync(nameid, cancellationToken);
 
         if (alreadyExistsWithName)
         {

@@ -57,7 +57,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         return result;
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
         Guid partitionGuid,
         bool includeRoot = true,
         CancellationToken cancellationToken = default)
@@ -92,7 +92,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         return guids;
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
         IReadOnlyCollection<Guid> partitionGuids,
         bool includeRoots = true,
         CancellationToken cancellationToken = default)
@@ -106,7 +106,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
         foreach (var partitionGuid in partitionGuids.Distinct())
         {
-            var descendants = await GetDescendantGuids(
+            var descendants = await GetDescendantGuidsAsync(
                 partitionGuid,
                 includeRoots,
                 cancellationToken);
@@ -150,7 +150,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             partitionGuids.Contains(partition.ParentPartitionGuid.Value));
     }
 
-    public async Task<bool> HasAnyAssociatedEntity(Guid partitionGuid, CancellationToken cancellationToken = default)
+    public async Task<bool> HasAnyAssociatedEntityAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
         if (await partitions.AnyAsync(p => p.ParentPartitionGuid == partitionGuid, cancellationToken))
         {
