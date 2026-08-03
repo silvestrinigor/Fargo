@@ -11,16 +11,6 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
-    public void Add(Article article)
-    {
-        context.Articles.Add(article);
-    }
-
-    public void Remove(Article article)
-    {
-        context.Articles.Remove(article);
-    }
-
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
     {
         return context.Articles
@@ -77,6 +67,16 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public Task<bool> ExistsByDataMatrixAsync(DataMatrix code, CancellationToken cancellationToken = default)
         => context.Articles.AnyAsync(article => article.Barcode.DataMatrix == code, cancellationToken);
+
+    public void Add(Article article)
+    {
+        context.Articles.Add(article);
+    }
+
+    public void Remove(Article article)
+    {
+        context.Articles.Remove(article);
+    }
 
     public async Task<ArticleDto?> GetInfoByGuidAsync(
         Guid articleGuid,

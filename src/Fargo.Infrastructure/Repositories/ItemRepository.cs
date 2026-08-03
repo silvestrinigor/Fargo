@@ -10,10 +10,6 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
-    public void Add(Item item) => context.Items.Add(item);
-
-    public void Remove(Item item) => context.Items.Remove(item);
-
     public Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
         => context.Items
             .Include(item => item.Article)
@@ -54,6 +50,10 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
         return guids;
     }
+
+    public void Add(Item item) => context.Items.Add(item);
+
+    public void Remove(Item item) => context.Items.Remove(item);
 
     public Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,
