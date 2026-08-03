@@ -14,14 +14,14 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
     {
         return context.Articles
-            .Include(article => article.Variation)
-            .Include(article => article.Pack)
-            .Include(article => article.KitComponents)
-            .Include(article => article.Container)
-            .Include(article => article.Barcode)
-            .Include(article => article.Dimension)
-            .Include(article => article.Partitions)
-            .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
+        .Include(article => article.Variation)
+        .Include(article => article.Pack)
+        .Include(article => article.KitComponents)
+        .Include(article => article.Container)
+        .Include(article => article.Barcode)
+        .Include(article => article.Dimension)
+        .Include(article => article.Partitions)
+        .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
     }
 
     public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
