@@ -2,6 +2,7 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Items;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;

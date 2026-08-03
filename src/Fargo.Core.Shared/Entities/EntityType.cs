@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared;
+namespace Fargo.Core.Shared.Entities;
 
 /// <summary>
 /// Represents a entity type.

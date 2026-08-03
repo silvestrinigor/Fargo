@@ -3,6 +3,7 @@ using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;

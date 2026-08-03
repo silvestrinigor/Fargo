@@ -2,6 +2,7 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.UserGroups;
 using Microsoft.Extensions.Logging;
 
