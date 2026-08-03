@@ -9,8 +9,7 @@ namespace Fargo.Core.Actors;
 /// </summary>
 /// <remarks>
 /// An actor abstracts the authenticated user responsible for an action.
-/// Authorization is evaluated against the actor's permissions and partition
-/// access, while auditing is handled separately by the infrastructure layer.
+/// Authorization is evaluated against the actor's permissions and partition access.
 /// </remarks>
 public sealed class Actor
 {

@@ -53,6 +53,8 @@ public class Article : IEntity, IPartitionedReadOnly
     /// </summary>
     public Color? Color { get; set; }
 
+    public ArticleBarcode Barcode { get; private init; }
+
     public ArticleDimension Dimension { get; private init; }
 
     /// <summary>
@@ -69,8 +71,6 @@ public class Article : IEntity, IPartitionedReadOnly
     /// Gets the density of the article.
     /// </summary>
     public Density? Density => Mass / Volume;
-
-    public ArticleBarcode Barcode { get; private init; }
 
     /// <summary>
     /// Gets the variation info associated with the article.
