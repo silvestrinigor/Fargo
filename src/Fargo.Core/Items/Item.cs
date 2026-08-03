@@ -21,7 +21,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : IEntity, IPartitioned
+public class Item : IEntity, IPartitionedReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the item.

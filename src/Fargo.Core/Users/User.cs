@@ -9,7 +9,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : IEntity, IPartitioned
+public class User : IEntity, IPartitionedReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the user.

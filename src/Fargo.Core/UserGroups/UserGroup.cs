@@ -14,7 +14,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : IEntity, IPartitioned
+public class UserGroup : IEntity, IPartitionedReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the user group.

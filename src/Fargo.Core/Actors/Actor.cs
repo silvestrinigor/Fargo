@@ -46,7 +46,7 @@ public sealed class Actor
         return HasPartitionAccess(partition.Guid);
     }
 
-    public bool HasAccess(IPartitioned partitioned)
+    public bool HasAccess(IPartitionedReadOnly partitioned)
     {
         if (partitioned.Partitions.Count == 0)
         {
