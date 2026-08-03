@@ -1,4 +1,3 @@
-using Fargo.Core.Shared.Actors;
 using Fargo.Core.Shared.Barcodes;
 using Microsoft.Extensions.Logging;
 
