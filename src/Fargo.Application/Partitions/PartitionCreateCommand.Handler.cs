@@ -1,9 +1,9 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Entities;
+using Fargo.Core.Shared.Informations;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;

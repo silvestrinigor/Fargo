@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-namespace Fargo.Core.Shared;
+namespace Fargo.Core.Shared.Informations;
 
 /// <summary>
 /// Represents a validated first name.

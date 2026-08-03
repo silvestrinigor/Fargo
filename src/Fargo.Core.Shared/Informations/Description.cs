@@ -2,58 +2,50 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-namespace Fargo.Core.Shared;
+namespace Fargo.Core.Shared.Informations;
 
 /// <summary>
-/// Represents a validated name.
+/// Represents a validated textual description.
 /// </summary>
-public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<Name>, IFormattable, ISpanFormattable, IUtf8SpanParsable<Name>, IUtf8SpanFormattable
+public readonly struct Description : IEquatable<Description>, IParsable<Description>, ISpanParsable<Description>, IFormattable, ISpanFormattable, IUtf8SpanParsable<Description>, IUtf8SpanFormattable
 {
-    /// <summary>
-    /// Maximum length.
-    /// </summary>
-    public const int MaxLength = 100;
-
     /// <summary>
     /// Minimum length.
     /// </summary>
-    public const int MinLength = 3;
+    public const int MinLength = 0;
+
+    /// <summary>
+    /// Maximum length.
+    /// </summary>
+    public const int MaxLength = 500;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Description"/> value object.
+    /// </summary>
+    /// <param name="value">The textual description.</param>
+    public Description(string value)
+    {
+        Validate(value);
+        this.value = value;
+    }
 
     private readonly string? value;
 
     /// <summary>
-    /// Initializes a name.
-    /// </summary>
-    public Name(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            throw new ArgumentException(
-                "Name cannot be null, empty, or whitespace.",
-                nameof(value));
-        }
-
-        if (value.Length < MinLength || value.Length > MaxLength)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(value),
-                value,
-                $"Name length must be between {MinLength} and {MaxLength} characters.");
-        }
-
-        this.value = value;
-    }
-
-    /// <summary>
-    /// Gets the value.
+    /// Gets the underlying string value of the description.
     /// </summary>
     public string Value
-        => value ?? throw new InvalidOperationException("Name not initialized.");
+        => value ?? throw new InvalidOperationException("Description not initialized.");
 
     /// <summary>
-    /// Creates a name from a string.
+    /// Gets an empty description.
     /// </summary>
-    public static Name FromString(string value)
+    public static Description Empty => new(string.Empty);
+
+    /// <summary>
+    /// Creates a new <see cref="Description"/> from the specified string.
+    /// </summary>
+    public static Description FromString(string value)
         => new(value);
 
     /// <inheritdoc />
@@ -63,13 +55,17 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider)
     {
-        format ??= "G";
+        if (string.IsNullOrWhiteSpace(format))
+        {
+            return Value;
+        }
+
+        var culture = formatProvider as CultureInfo;
 
         return format switch
         {
-            "G" => Value,
-            "U" => Value.ToUpper(formatProvider as CultureInfo),
-            "L" => Value.ToLower(formatProvider as CultureInfo),
+            "U" => Value.ToUpper(culture),
+            "L" => Value.ToLower(culture),
             _ => throw new FormatException($"Unsupported format '{format}'.")
         };
     }
@@ -81,9 +77,9 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
         ReadOnlySpan<char> format,
         IFormatProvider? provider)
     {
-        string formatted = ToString(
-            format.IsEmpty ? "G" : format.ToString(),
-            provider);
+        string formatted = format.IsEmpty
+            ? Value
+            : ToString(format.ToString(), provider);
 
         if (formatted.AsSpan().TryCopyTo(destination))
         {
@@ -102,9 +98,9 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
         ReadOnlySpan<char> format,
         IFormatProvider? provider)
     {
-        string formatted = ToString(
-            format.IsEmpty ? "G" : format.ToString(),
-            provider);
+        string formatted = format.IsEmpty
+            ? Value
+            : ToString(format.ToString(), provider);
 
         return Encoding.UTF8.TryGetBytes(
             formatted,
@@ -113,12 +109,12 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
     }
 
     /// <inheritdoc />
-    public bool Equals(Name other)
+    public bool Equals(Description other)
         => string.Equals(value, other.value, StringComparison.Ordinal);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
-        => obj is Name other && Equals(other);
+        => obj is Description other && Equals(other);
 
     /// <inheritdoc />
     public override int GetHashCode()
@@ -127,42 +123,42 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
             : value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
-    /// Determines whether two names are equal.
+    /// Determines whether two descriptions are equal.
     /// </summary>
-    public static bool operator ==(Name left, Name right)
+    public static bool operator ==(Description left, Description right)
         => left.Equals(right);
 
     /// <summary>
-    /// Determines whether two names are different.
+    /// Determines whether two descriptions are different.
     /// </summary>
-    public static bool operator !=(Name left, Name right)
+    public static bool operator !=(Description left, Description right)
         => !left.Equals(right);
 
     /// <summary>
-    /// Converts a name to a string.
+    /// Implicitly converts a <see cref="Description"/> to <see cref="string"/>.
     /// </summary>
-    public static implicit operator string(Name name)
-        => name.Value;
+    public static implicit operator string(Description description)
+        => description.Value;
 
     /// <summary>
-    /// Converts a string to a name.
+    /// Explicitly converts a <see cref="string"/> to <see cref="Description"/>.
     /// </summary>
-    public static explicit operator Name(string value)
+    public static explicit operator Description(string value)
         => new(value);
 
     /// <inheritdoc />
-    public static Name Parse(string s, IFormatProvider? provider)
+    public static Description Parse(string s, IFormatProvider? provider)
         => new(s);
 
     /// <inheritdoc />
     public static bool TryParse(
         [NotNullWhen(true)] string? s,
         IFormatProvider? provider,
-        out Name result)
+        out Description result)
     {
         try
         {
-            result = new Name(s!);
+            result = new Description(s!);
             return true;
         }
         catch
@@ -173,7 +169,7 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
     }
 
     /// <inheritdoc />
-    public static Name Parse(
+    public static Description Parse(
         ReadOnlySpan<char> s,
         IFormatProvider? provider)
         => new(s.ToString());
@@ -182,11 +178,11 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
     public static bool TryParse(
         ReadOnlySpan<char> s,
         IFormatProvider? provider,
-        out Name result)
+        out Description result)
     {
         try
         {
-            result = new Name(s.ToString());
+            result = new Description(s.ToString());
             return true;
         }
         catch
@@ -197,25 +193,25 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
     }
 
     /// <inheritdoc />
-    public static Name Parse(
+    public static Description Parse(
         ReadOnlySpan<byte> utf8Text,
         IFormatProvider? provider)
     {
         string value = Encoding.UTF8.GetString(utf8Text);
-        return new Name(value);
+        return new Description(value);
     }
 
     /// <inheritdoc />
     public static bool TryParse(
         ReadOnlySpan<byte> utf8Text,
         IFormatProvider? provider,
-        out Name result)
+        out Description result)
     {
         try
         {
             string value = Encoding.UTF8.GetString(utf8Text);
 
-            result = new Name(value);
+            result = new Description(value);
             return true;
         }
         catch
@@ -224,4 +220,21 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
             return false;
         }
     }
+
+    /// <summary>
+    /// Validates the specified description value.
+    /// </summary>
+    private static void Validate(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        if (value.Length < MinLength || value.Length > MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value,
+                $"Description length must be between {MinLength} and {MaxLength} characters.");
+        }
+    }
 }
+

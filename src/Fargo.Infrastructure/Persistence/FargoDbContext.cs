@@ -3,7 +3,7 @@ using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Converters;

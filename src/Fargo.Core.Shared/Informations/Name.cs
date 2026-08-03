@@ -2,19 +2,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-namespace Fargo.Core.Shared;
+namespace Fargo.Core.Shared.Informations;
 
 /// <summary>
-/// Represents a validated last name.
+/// Represents a validated name.
 /// </summary>
-public readonly struct LastName :
-    IEquatable<LastName>,
-    IParsable<LastName>,
-    ISpanParsable<LastName>,
-    IFormattable,
-    ISpanFormattable,
-    IUtf8SpanParsable<LastName>,
-    IUtf8SpanFormattable
+public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<Name>, IFormattable, ISpanFormattable, IUtf8SpanParsable<Name>, IUtf8SpanFormattable
 {
     /// <summary>
     /// Maximum length.
@@ -24,33 +17,29 @@ public readonly struct LastName :
     /// <summary>
     /// Minimum length.
     /// </summary>
-    public const int MinLength = 2;
+    public const int MinLength = 3;
 
     private readonly string? value;
 
     /// <summary>
-    /// Initializes a last name.
+    /// Initializes a name.
     /// </summary>
-    public LastName(string value)
+    public Name(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
             throw new ArgumentException(
-                "Last name cannot be null, empty, or whitespace.",
+                "Name cannot be null, empty, or whitespace.",
                 nameof(value));
         }
-
-        value = value.Trim();
 
         if (value.Length < MinLength || value.Length > MaxLength)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(value),
                 value,
-                $"Last name length must be between {MinLength} and {MaxLength} characters.");
+                $"Name length must be between {MinLength} and {MaxLength} characters.");
         }
-
-        ValidateCharacters(value);
 
         this.value = value;
     }
@@ -59,12 +48,12 @@ public readonly struct LastName :
     /// Gets the value.
     /// </summary>
     public string Value
-        => value ?? throw new InvalidOperationException("Last name not initialized.");
+        => value ?? throw new InvalidOperationException("Name not initialized.");
 
     /// <summary>
-    /// Creates a last name from a string.
+    /// Creates a name from a string.
     /// </summary>
-    public static LastName FromString(string value)
+    public static Name FromString(string value)
         => new(value);
 
     /// <inheritdoc />
@@ -124,12 +113,12 @@ public readonly struct LastName :
     }
 
     /// <inheritdoc />
-    public bool Equals(LastName other)
+    public bool Equals(Name other)
         => string.Equals(value, other.value, StringComparison.Ordinal);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
-        => obj is LastName other && Equals(other);
+        => obj is Name other && Equals(other);
 
     /// <inheritdoc />
     public override int GetHashCode()
@@ -138,68 +127,53 @@ public readonly struct LastName :
             : value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
-    /// Determines whether two last names are equal.
+    /// Determines whether two names are equal.
     /// </summary>
-    public static bool operator ==(LastName left, LastName right)
+    public static bool operator ==(Name left, Name right)
         => left.Equals(right);
 
     /// <summary>
-    /// Determines whether two last names are different.
+    /// Determines whether two names are different.
     /// </summary>
-    public static bool operator !=(LastName left, LastName right)
+    public static bool operator !=(Name left, Name right)
         => !left.Equals(right);
 
     /// <summary>
-    /// Converts a last name to a string.
+    /// Converts a name to a string.
     /// </summary>
-    public static implicit operator string(LastName lastName)
-        => lastName.Value;
+    public static implicit operator string(Name name)
+        => name.Value;
 
     /// <summary>
-    /// Converts a string to a last name.
+    /// Converts a string to a name.
     /// </summary>
-    public static explicit operator LastName(string value)
+    public static explicit operator Name(string value)
         => new(value);
 
     /// <inheritdoc />
-    public static LastName Parse(string s, IFormatProvider? provider)
+    public static Name Parse(string s, IFormatProvider? provider)
         => new(s);
 
     /// <inheritdoc />
     public static bool TryParse(
         [NotNullWhen(true)] string? s,
         IFormatProvider? provider,
-        out LastName result)
+        out Name result)
     {
-        result = default;
-
-        if (string.IsNullOrWhiteSpace(s))
-        {
-            return false;
-        }
-
-        s = s.Trim();
-
-        if (s.Length < MinLength || s.Length > MaxLength)
-        {
-            return false;
-        }
-
         try
         {
-            ValidateCharacters(s);
-
-            result = new LastName(s);
+            result = new Name(s!);
             return true;
         }
         catch
         {
+            result = default;
             return false;
         }
     }
 
     /// <inheritdoc />
-    public static LastName Parse(
+    public static Name Parse(
         ReadOnlySpan<char> s,
         IFormatProvider? provider)
         => new(s.ToString());
@@ -208,60 +182,46 @@ public readonly struct LastName :
     public static bool TryParse(
         ReadOnlySpan<char> s,
         IFormatProvider? provider,
-        out LastName result)
-        => TryParse(s.ToString(), provider, out result);
+        out Name result)
+    {
+        try
+        {
+            result = new Name(s.ToString());
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
 
     /// <inheritdoc />
-    public static LastName Parse(
+    public static Name Parse(
         ReadOnlySpan<byte> utf8Text,
         IFormatProvider? provider)
-        => new(Encoding.UTF8.GetString(utf8Text));
+    {
+        string value = Encoding.UTF8.GetString(utf8Text);
+        return new Name(value);
+    }
 
     /// <inheritdoc />
     public static bool TryParse(
         ReadOnlySpan<byte> utf8Text,
         IFormatProvider? provider,
-        out LastName result)
+        out Name result)
     {
-        string value = Encoding.UTF8.GetString(utf8Text);
-
-        return TryParse(value, provider, out result);
-    }
-
-    /// <summary>
-    /// Validates the value.
-    /// </summary>
-    private static void ValidateCharacters(string value)
-    {
-        var previousWasSeparator = false;
-
-        for (var i = 0; i < value.Length; i++)
+        try
         {
-            var current = value[i];
-            var isSeparator = current == ' ' || current == '-';
+            string value = Encoding.UTF8.GetString(utf8Text);
 
-            if (char.IsLetter(current))
-            {
-                previousWasSeparator = false;
-                continue;
-            }
-
-            if (isSeparator)
-            {
-                if (i == 0 || i == value.Length - 1 || previousWasSeparator)
-                {
-                    throw new ArgumentException(
-                        "Last name cannot start or end with a separator, or contain consecutive separators.",
-                        nameof(value));
-                }
-
-                previousWasSeparator = true;
-                continue;
-            }
-
-            throw new ArgumentException(
-                "Last name can contain only letters, spaces, or hyphens.",
-                nameof(value));
+            result = new Name(value);
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
         }
     }
 }

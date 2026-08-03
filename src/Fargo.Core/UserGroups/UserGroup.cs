@@ -1,7 +1,7 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
 using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.UserGroups;
 
