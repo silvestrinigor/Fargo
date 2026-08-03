@@ -10,14 +10,12 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
-    private readonly DbSet<Item> items = context.Items;
+    public void Add(Item item) => context.Items.Add(item);
 
-    public void Add(Item item) => items.Add(item);
-
-    public void Remove(Item item) => items.Remove(item);
+    public void Remove(Item item) => context.Items.Remove(item);
 
     public Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => items
+        => context.Items
             .Include(item => item.Article)
             .Include(item => item.Partitions)
             .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
@@ -57,22 +55,23 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return guids;
     }
 
-    public async Task<ItemDto?> GetInfoByGuid(
+    public Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var item = await ApplyPartitionFilter(
-                items
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+        var queryFiltered = ApplyPartitionFilter(
+            context.Items.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
+
+        var itemTask = queryFiltered
             .Where(item => item.Guid == entityGuid)
             .Select(ItemDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return item;
+        return itemTask;
     }
 
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
@@ -81,17 +80,18 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
-                items
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+        var queryFiltered = ApplyPartitionFilter(
+            context.Items.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
+
+        var item = await queryFiltered
             .OrderBy(item => item.Guid)
             .WithPagination(pagination)
             .Select(ItemDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return item;
     }
 
     private static IQueryable<Item> ApplyPartitionFilter(

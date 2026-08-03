@@ -2,103 +2,117 @@ using Fargo.Application;
 using Fargo.Application.Articles;
 using Fargo.Application.Shared.Articles;
 using Fargo.Core.Articles;
-using Fargo.Core.Items;
 using Fargo.Core.Shared.Barcodes;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fargo.Infrastructure.Articles;
+namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ArticleRepository(FargoDbContext context) : IArticleRepository, IArticleQueryRepository
 {
-    private readonly DbSet<Article> articles = context.Articles;
-
-    private readonly DbSet<Item> items = context.Items;
-
-    public void Add(Article article) => articles.Add(article);
-
-    public void Remove(Article article) => articles.Remove(article);
-
-    public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
-        => items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
-
-    public async Task<bool> IsDependenceOfAnotherArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+    public void Add(Article article)
     {
-        return await articles.AnyAsync(v => v.Variation != null && v.Variation.FromArticleGuid == articleGuid, cancellationToken)
-            || await articles.AnyAsync(p => p.Pack != null && p.Pack.FromArticleGuid == articleGuid, cancellationToken)
-            || await articles.AnyAsync(k => k.KitComponents != null && k.KitComponents.Any(c => c.FromArticleGuid == articleGuid), cancellationToken);
+        context.Articles.Add(article);
+    }
+
+    public void Remove(Article article)
+    {
+        context.Articles.Remove(article);
     }
 
     public Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => articles
+    {
+        return context.Articles
+            .Include(article => article.Variation)
+            .Include(article => article.Pack)
+            .Include(article => article.KitComponents)
+            .Include(article => article.Container)
             .Include(article => article.Barcode)
+            .Include(article => article.Dimension)
             .Include(article => article.Partitions)
             .SingleOrDefaultAsync(article => article.Guid == entityGuid, cancellationToken);
+    }
+
+    public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+    {
+        return context.Items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
+    }
+
+    public Task<bool> IsDependenceOfAnotherArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+    {
+        return context.Articles.AnyAsync(a =>
+            (a.Variation != null && a.Variation.FromArticleGuid == articleGuid)
+            || (a.Pack != null && a.Pack.FromArticleGuid == articleGuid)
+            || (a.KitComponents != null && a.KitComponents.Any(c => c.FromArticleGuid == articleGuid)),
+            cancellationToken);
+    }
 
     public Task<bool> ExistsByEan13Async(Ean13 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.Ean13 == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.Ean13 == code, cancellationToken);
 
     public Task<bool> ExistsByEan8Async(Ean8 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.Ean8 == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.Ean8 == code, cancellationToken);
 
     public Task<bool> ExistsByUpcEAsync(UpcE code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.UpcE == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.UpcE == code, cancellationToken);
 
     public Task<bool> ExistsByUpcAAsync(UpcA code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.UpcA == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.UpcA == code, cancellationToken);
 
     public Task<bool> ExistsByCode128Async(Code128 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.Code128 == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.Code128 == code, cancellationToken);
 
     public Task<bool> ExistsByCode39Async(Code39 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.Code39 == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.Code39 == code, cancellationToken);
 
     public Task<bool> ExistsByItf14Async(Itf14 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.Itf14 == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.Itf14 == code, cancellationToken);
 
     public Task<bool> ExistsByGs1128Async(Gs1128 code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.Gs1128 == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.Gs1128 == code, cancellationToken);
 
     public Task<bool> ExistsByQrCodeAsync(QrCode code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.QrCode == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.QrCode == code, cancellationToken);
 
     public Task<bool> ExistsByDataMatrixAsync(DataMatrix code, CancellationToken cancellationToken = default)
-        => articles.AnyAsync(article => article.Barcode.DataMatrix == code, cancellationToken);
+        => context.Articles.AnyAsync(article => article.Barcode.DataMatrix == code, cancellationToken);
 
     public async Task<ArticleDto?> GetInfoByGuidAsync(
-        Guid entityGuid,
+        Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var article = await ApplyPartitionFilter(
-                articles
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
-            .Where(article => article.Guid == entityGuid)
+        var articleQueryFiltered = ApplyPartitionFilter(
+            context.Articles.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
+
+        var article = await articleQueryFiltered
+            .Where(article => article.Guid == articleGuid)
             .Select(ArticleDtoMapping.Projection)
             .SingleOrDefaultAsync(cancellationToken);
 
         return article;
     }
 
-    public async Task<ArticleDto?> GetInfoByBarcodeAsync(
+    public Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode barcode,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyPartitionFilter(
-            articles
-                .AsNoTracking(),
+        var articleQueryFiltered = ApplyPartitionFilter(
+            context.Articles.AsNoTracking(),
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 
-        return await ApplyBarcodeFilter(query, barcode)
+        var articleTask = ApplyBarcodeFilter(articleQueryFiltered, barcode)
             .Select(ArticleDtoMapping.Projection)
             .SingleOrDefaultAsync(cancellationToken);
+
+        return articleTask;
     }
 
     public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
@@ -107,24 +121,24 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
-                articles
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+        var articleQueryFiltered = ApplyPartitionFilter(
+            context.Articles.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
+
+        var article = await articleQueryFiltered
             .OrderBy(article => article.Guid)
             .WithPagination(pagination)
             .Select(ArticleDtoMapping.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return article;
     }
 
     private static IQueryable<Article> ApplyPartitionFilter(
         IQueryable<Article> query,
         IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notChildOfAnyPartition
-    )
+        bool? notChildOfAnyPartition)
     {
         if (partitionGuids is null)
         {
@@ -152,9 +166,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-    private static IQueryable<Article> ApplyBarcodeFilter(
-        IQueryable<Article> query,
-        Barcode barcode)
+    private static IQueryable<Article> ApplyBarcodeFilter(IQueryable<Article> query, Barcode barcode)
     {
         switch (barcode.Format)
         {
