@@ -2,10 +2,24 @@ using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.Core.Articles;
 
+/// <summary>
+/// Represents the collection of barcodes associated with an <see cref="Article"/>.
+/// </summary>
+/// <remarks>
+/// An article may have multiple barcode formats assigned simultaneously.
+/// Each barcode type is optional and uniquely identifies the same article
+/// using a different standard.
+/// </remarks>
 public class ArticleBarcode
 {
+    /// <summary>
+    /// Gets the unique identifier of the associated article.
+    /// </summary>
     public Guid ArticleGuid { get; private init; }
 
+    /// <summary>
+    /// Gets the article associated with these barcodes.
+    /// </summary>
     public Article Article { get; private init; }
 
     /// <summary>
@@ -14,55 +28,24 @@ public class ArticleBarcode
     public Ean13? Ean13 { get; set; }
 
     /// <summary>
-    /// EAN-8 barcode, or <see langword="null"/> when absent.
+    /// Initializes a new <see cref="ArticleBarcode"/> instance.
     /// </summary>
-    public Ean8? Ean8 { get; set; }
-
-    /// <summary>
-    /// UPC-A barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public UpcA? UpcA { get; set; }
-
-    /// <summary>
-    /// UPC-E barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public UpcE? UpcE { get; set; }
-
-    /// <summary>
-    /// Code 128 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Code128? Code128 { get; set; }
-
-    /// <summary>
-    /// Code 39 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Code39? Code39 { get; set; }
-
-    /// <summary>
-    /// ITF-14 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Itf14? Itf14 { get; set; }
-
-    /// <summary>
-    /// GS1-128 barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public Gs1128? Gs1128 { get; set; }
-
-    /// <summary>
-    /// QR Code barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public QrCode? QrCode { get; set; }
-
-    /// <summary>
-    /// Data Matrix barcode, or <see langword="null"/> when absent.
-    /// </summary>
-    public DataMatrix? DataMatrix { get; set; }
-
+    /// <remarks>
+    /// Required by Entity Framework.
+    /// </remarks>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    private ArticleBarcode() { }
+    private ArticleBarcode()
+    {
+    }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    public ArticleBarcode(Article article)
+    /// <summary>
+    /// Initializes a new barcode collection for the specified article.
+    /// </summary>
+    /// <param name="article">
+    /// The article associated with the barcode collection.
+    /// </param>
+    internal ArticleBarcode(Article article)
     {
         Article = article;
         ArticleGuid = article.Guid;

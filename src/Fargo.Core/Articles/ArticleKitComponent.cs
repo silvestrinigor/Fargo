@@ -6,10 +6,20 @@ namespace Fargo.Core.Articles;
 /// <summary>
 /// Defines one component of a kit article.
 /// </summary>
+/// <remarks>
+/// A kit component associates a source <see cref="Article"/> with a quantity,
+/// indicating that the source article is included in a kit article.
+/// </remarks>
 public sealed class ArticleKitComponent
 {
+    // <summary>
+    /// Gets the unique identifier of the kit article.
+    /// </summary>
     public Guid KitArticleGuid { get; private init; }
 
+    /// <summary>
+    /// Gets the kit article that owns this component.
+    /// </summary>
     public Article KitArticle { get; private init; } = null!;
 
     /// <summary>
@@ -18,7 +28,7 @@ public sealed class ArticleKitComponent
     public Guid FromArticleGuid { get; private set; }
 
     /// <summary>
-    /// Gets the source article included in the kit.
+    /// Gets the article included as a component of the kit.
     /// </summary>
     public Article FromArticle { get; private init; } = null!;
 
@@ -27,16 +37,43 @@ public sealed class ArticleKitComponent
     /// </summary>
     public Scalar Quantity { get; private set; }
 
+    /// <summary>
+    /// Initializes a new <see cref="ArticleKitComponent"/> instance.
+    /// </summary>
+    /// <remarks>
+    /// Required by Entity Framework.
+    /// </remarks>
     private ArticleKitComponent()
     {
     }
 
-    public ArticleKitComponent(Article kitArticle, Article fromArticle, Scalar quantity)
+    /// <summary>
+    /// Initializes a new kit component.
+    /// </summary>
+    /// <param name="kitArticle">
+    /// The kit article.
+    /// </param>
+    /// <param name="fromArticle">
+    /// The article included in the kit.
+    /// </param>
+    /// <param name="quantity">
+    /// The quantity of the article included in the kit.
+    /// </param>
+    internal ArticleKitComponent(Article kitArticle, Article fromArticle, Scalar quantity)
     {
+        if (kitArticle.Guid == fromArticle.Guid)
+        {
+            throw new FargoCoreException(
+                "A kit cannot contain itself.",
+                FargoCoreErrorType.InvalidArgument);
+        }
+
         KitArticle = kitArticle;
         KitArticleGuid = kitArticle.Guid;
+
         FromArticle = fromArticle;
         FromArticleGuid = fromArticle.Guid;
+
         SetQuantity(quantity);
     }
 

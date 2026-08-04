@@ -22,12 +22,7 @@ public class PartitionServiceTests
         var partition2 = CreatePartition(globalPartition);
         partitionRepository.GetDescendantGuidsAsync(partition2.Guid).Returns(Task.FromResult<IReadOnlyCollection<Guid>>([]));
 
-        await partitionService.InsertIntoPartitionAsync(partition1, partition2);
-
-        Assert.Equal(partition1, partition2.ParentPartition);
-        Assert.Equal(partition1.Guid, partition2.ParentPartitionGuid);
-        Assert.Equal(globalPartition, partition1.ParentPartition);
-        Assert.Equal(globalPartition.Guid, partition1.ParentPartitionGuid);
+        await partitionService.ValidateParentPartitionAssignmentAsync(partition1, partition2);
     }
 
     private static Partition CreateGlobalPartition()

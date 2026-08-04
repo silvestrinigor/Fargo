@@ -1155,16 +1155,7 @@
       "ArticleBarcodeDto": {
         "type": "object",
         "properties": {
-          "ean13": { },
-          "ean8": { },
-          "upcA": { },
-          "upcE": { },
-          "code128": { },
-          "code39": { },
-          "itf14": { },
-          "gs1128": { },
-          "qrCode": { },
-          "dataMatrix": { }
+          "ean13": { }
         }
       },
       "ArticleBarcodeUpdateDto": {
@@ -1172,69 +1163,6 @@
         "properties": {
           "ean13": { },
           "removeEan13": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "ean8": { },
-          "removeEan8": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "upcA": { },
-          "removeUpcA": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "upcE": { },
-          "removeUpcE": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "code128": { },
-          "removeCode128": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "code39": { },
-          "removeCode39": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "itf14": { },
-          "removeItf14": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "gs1128": { },
-          "removeGs1128": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "qrCode": { },
-          "removeQrCode": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "dataMatrix": { },
-          "removeDataMatrix": {
             "type": [
               "null",
               "boolean"

@@ -107,72 +107,9 @@ public sealed class ArticleCreateCommandHandler(
 
         if (command.Create.Barcode?.Ean13 is { } ean13)
         {
-            await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
+            await articleService.ValidateBarcodeIsAvailableAsync(ean13.ToBarcode(), cancellationToken);
 
             article.Barcode.Ean13 = ean13;
-        }
-
-        if (command.Create.Barcode?.Ean8 is { } ean8)
-        {
-            await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
-
-            article.Barcode.Ean8 = ean8;
-        }
-
-        if (command.Create.Barcode?.UpcA is { } upcA)
-        {
-            await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
-
-            article.Barcode.UpcA = upcA;
-        }
-
-        if (command.Create.Barcode?.UpcE is { } upcE)
-        {
-            await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
-
-            article.Barcode.UpcE = upcE;
-        }
-
-        if (command.Create.Barcode?.Code128 is { } code128)
-        {
-            await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
-
-            article.Barcode.Code128 = code128;
-        }
-
-        if (command.Create.Barcode?.Code39 is { } code39)
-        {
-            await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
-
-            article.Barcode.Code39 = code39;
-        }
-
-        if (command.Create.Barcode?.Itf14 is { } itf14)
-        {
-            await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
-
-            article.Barcode.Itf14 = itf14;
-        }
-
-        if (command.Create.Barcode?.Gs1128 is { } gs1128)
-        {
-            await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
-
-            article.Barcode.Gs1128 = gs1128;
-        }
-
-        if (command.Create.Barcode?.QrCode is { } qrCode)
-        {
-            await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
-
-            article.Barcode.QrCode = qrCode;
-        }
-
-        if (command.Create.Barcode?.DataMatrix is { } dataMatrix)
-        {
-            await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
-
-            article.Barcode.DataMatrix = dataMatrix;
         }
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitionsToAdd)

@@ -24,15 +24,6 @@ public static class FargoJsonServiceCollectionExtension
                 options.SerializerOptions.Converters.Add(new DensityJsonConverter());
                 options.SerializerOptions.Converters.Add(new ColorJsonConverter());
                 options.SerializerOptions.Converters.Add(new Ean13JsonConverter());
-                options.SerializerOptions.Converters.Add(new Ean8JsonConverter());
-                options.SerializerOptions.Converters.Add(new UpcAJsonConverter());
-                options.SerializerOptions.Converters.Add(new UpcEJsonConverter());
-                options.SerializerOptions.Converters.Add(new Code128JsonConverter());
-                options.SerializerOptions.Converters.Add(new Code39JsonConverter());
-                options.SerializerOptions.Converters.Add(new Itf14JsonConverter());
-                options.SerializerOptions.Converters.Add(new Gs1128JsonConverter());
-                options.SerializerOptions.Converters.Add(new QrCodeJsonConverter());
-                options.SerializerOptions.Converters.Add(new DataMatrixJsonConverter());
                 options.SerializerOptions.Converters.Add(new ScalarJsonConverter());
             });
 

@@ -1,4 +1,4 @@
-@articleGuid = 9a496658-2645-4f3c-8e4b-9fb27a704257
+@articleGuid = 1505c95c-abcd-45d4-b1e8-246c77b07d5d
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get by Guid
@@ -31,12 +31,10 @@ Content-Type: application/json
 {
   "name": "Coca Cola 2L",
   "description": "PET Bottle",
-  "articleType": 3,
-  "pack": {
-    "fromArticleGuid": "9a496658-2645-4f3c-8e4b-9fb27a704257",
-    "quantity": 2
-  },
-  "partitionsToAdd": ["00000000-0000-0000-0000-000000000002"]
+  "articleType": 1,
+  "barcode": {
+    "ean13": "1234567891234"
+  }
 }
 
 ###

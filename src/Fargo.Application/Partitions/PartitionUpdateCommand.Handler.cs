@@ -16,9 +16,7 @@ public sealed class PartitionUpdateCommandHandler(
     ILogger<PartitionUpdateCommandHandler> logger
 ) : ICommandHandler<PartitionUpdateCommand>
 {
-    public async Task HandleAsync(
-        PartitionUpdateCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task HandleAsync(PartitionUpdateCommand command, CancellationToken cancellationToken = default)
     {
         logger.UpdateStarted(command.PartitionGuid, currentActor.Guid);
 
@@ -46,7 +44,9 @@ public sealed class PartitionUpdateCommandHandler(
 
             actor.ThrowIfAccessDenied(parentPartitionToSet);
 
-            await partitionService.InsertIntoPartitionAsync(parentPartitionToSet, partitionToEdit, cancellationToken);
+            await partitionService.ValidateParentPartitionAssignmentAsync(parentPartitionToSet, partitionToEdit, cancellationToken);
+
+            partitionToEdit.SetParentPartition(parentPartitionToSet);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

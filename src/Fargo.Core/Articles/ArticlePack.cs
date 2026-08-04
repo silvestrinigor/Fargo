@@ -12,44 +12,80 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticlePack
 {
-    public Guid PackArticleGuid { get; private set; }
+    /// <summary>
+    /// Gets the unique identifier of the pack article.
+    /// </summary>
+    public Guid PackArticleGuid { get; private init; }
 
-    public Article PackArticle { get; private set; } = null!;
+    /// <summary>
+    /// Gets the pack article.
+    /// </summary>
+    public Article PackArticle { get; private init; } = null!;
 
     /// <summary>
     /// Gets the unique identifier of the source article contained in the pack.
     /// </summary>
-    public Guid FromArticleGuid { get; private set; }
+    public Guid FromArticleGuid { get; private init; }
 
     /// <summary>
     /// Gets the article from which this pack is composed.
     /// </summary>
-    public Article FromArticle { get; private set; } = null!;
+    public Article FromArticle { get; private init; } = null!;
 
     /// <summary>
-    /// Gets or sets the quantity of the source article represented by the pack.
+    /// Gets the quantity of the source article represented by the pack.
     /// </summary>
-    /// <remarks>
-    /// The quantity must be greater than zero.
-    /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the quantity is less than or equal to zero.
-    /// </exception>
     public Scalar Quantity { get; private set; }
 
+    /// <summary>
+    /// Initializes a new <see cref="ArticlePack"/> instance.
+    /// </summary>
+    /// <remarks>
+    /// Required by Entity Framework.
+    /// </remarks>
     private ArticlePack()
     {
     }
 
-    public ArticlePack(Article packArticle, Article fromArticle, Scalar quantity)
+    /// <summary>
+    /// Initializes a new pack relationship.
+    /// </summary>
+    /// <param name="packArticle">
+    /// The pack article.
+    /// </param>
+    /// <param name="fromArticle">
+    /// The article represented by the pack.
+    /// </param>
+    /// <param name="quantity">
+    /// The quantity of the source article represented by the pack.
+    /// </param>
+    internal ArticlePack(Article packArticle, Article fromArticle, Scalar quantity)
     {
+        if (packArticle.Guid == fromArticle.Guid)
+        {
+            throw new FargoCoreException(
+                "A pack cannot reference itself.",
+                FargoCoreErrorType.InvalidArgument);
+        }
+
         PackArticle = packArticle;
         PackArticleGuid = packArticle.Guid;
+
         FromArticle = fromArticle;
         FromArticleGuid = fromArticle.Guid;
+
         SetQuantity(quantity);
     }
 
+    /// <summary>
+    /// Sets the quantity of the source article represented by the pack.
+    /// </summary>
+    /// <param name="quantity">
+    /// The quantity of the source article.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="quantity"/> is less than or equal to zero.
+    /// </exception>
     public void SetQuantity(Scalar quantity)
     {
         if (quantity <= 0.Amount())

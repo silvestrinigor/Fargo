@@ -36,15 +36,6 @@ public static class ArticleDtoMapping
                 ? new ArticleContainerDto(article.Container.MaxMass)
                 : null,
             new ArticleBarcodeDto(
-                article.Barcode.Ean13,
-                article.Barcode.Ean8,
-                article.Barcode.UpcA,
-                article.Barcode.UpcE,
-                article.Barcode.Code128,
-                article.Barcode.Code39,
-                article.Barcode.Itf14,
-                article.Barcode.Gs1128,
-                article.Barcode.QrCode,
-                article.Barcode.DataMatrix),
+                article.Barcode.Ean13),
             article.Partitions.Select(partition => partition.Guid).ToArray());
 }

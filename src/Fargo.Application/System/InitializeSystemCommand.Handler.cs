@@ -77,6 +77,8 @@ public sealed class InitializeSystemCommandHandler(
 
         var admin = User.CreateAdministratorUser(command.UserAdminNameid, passwordHash);
 
+        admin.Authentication.PasswordHash = passwordHash;
+
         admin.Description = command.UserAdminDescription;
 
         admin.AddPartitionAccess(globalPartition);

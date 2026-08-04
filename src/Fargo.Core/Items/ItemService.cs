@@ -3,30 +3,49 @@ using Fargo.Core.Shared.Articles;
 namespace Fargo.Core.Items;
 
 /// <summary>
-/// Item core service.
+/// Provides domain operations and validation rules for <see cref="Item"/> entities.
 /// </summary>
 public sealed class ItemService(IItemRepository itemRepository)
 {
     /// <summary>
-    /// Moves an item into the specified container.
+    /// Ensures that the specified container can be assigned as the parent of the specified item.
     /// </summary>
-    /// <param name="parentContainerItem">The destination container item.</param>
-    /// <param name="memberItem">The item to move.</param>
-    /// <param name="cancellationToken">A token used to cancel the operation.</param>
-    /// <exception cref="FargoCoreException">
-    /// Thrown if the destination is not a container, if the item is assigned to
-    /// itself, or if the operation would create a circular container hierarchy.
+    /// <param name="parentContainerItem">
+    /// The candidate parent container.
+    /// </param>
+    /// <param name="memberItem">
+    /// The item whose parent container is being assigned.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when either argument is <see langword="null"/>.
     /// </exception>
-    public async Task MoveToContainerAsync(Item parentContainerItem, Item memberItem, CancellationToken cancellationToken = default)
+    /// <exception cref="FargoCoreException">
+    /// Thrown if the destination item is not a container, if the item is assigned
+    /// to itself, or if the assignment would create a circular hierarchy.
+    /// </exception>
+    public async Task ValidateParentContainerAssignmentAsync(
+        Item parentContainerItem,
+        Item memberItem,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(parentContainerItem);
+        ArgumentNullException.ThrowIfNull(memberItem);
+
         if (parentContainerItem.Guid == memberItem.Guid)
         {
-            throw new FargoCoreException($"Item '{memberItem.Guid}' cannot be assigned to itself as a container.");
+            throw new FargoCoreException(
+                $"Item '{memberItem.Guid}' cannot be assigned to itself as a container.",
+                FargoCoreErrorType.InvalidArgument);
         }
 
         if (parentContainerItem.Article.ArticleType != ArticleType.Container)
         {
-            throw new FargoCoreException($"Item '{parentContainerItem.Guid}' is not a container item.");
+            throw new FargoCoreException(
+                $"Item '{parentContainerItem.Guid}' is not a container item.",
+                FargoCoreErrorType.InvalidArgument);
         }
 
         var descendantItemGuids = await itemRepository.GetContainerDescendantGuidsAsync(
@@ -37,10 +56,8 @@ public sealed class ItemService(IItemRepository itemRepository)
         if (descendantItemGuids.Contains(parentContainerItem.Guid))
         {
             throw new FargoCoreException(
-                $"Item '{memberItem.Guid}' cannot be assigned to container " +
-                $"'{parentContainerItem.Guid}' because this would create a circular hierarchy.");
+                $"Item '{memberItem.Guid}' cannot be assigned to container '{parentContainerItem.Guid}' because this would create a circular hierarchy.",
+                FargoCoreErrorType.InvalidOperation);
         }
-
-        memberItem.SetParentItemContainer(parentContainerItem);
     }
 }

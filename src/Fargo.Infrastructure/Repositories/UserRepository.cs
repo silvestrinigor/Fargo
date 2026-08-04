@@ -73,13 +73,14 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
         => query
-            .Include(user => user.UserGroups)
-                .ThenInclude(group => group.PartitionAccesses)
-            .Include(user => user.UserGroups)
-                .ThenInclude(group => group.Partitions)
-            .Include(user => user.PartitionAccesses)
-            .Include(user => user.Partitions)
-            .AsSplitQuery();
+        .Include(user => user.UserGroups)
+            .ThenInclude(group => group.PartitionAccesses)
+        .Include(user => user.UserGroups)
+            .ThenInclude(group => group.Partitions)
+        .Include(user => user.PartitionAccesses)
+        .Include(user => user.Partitions)
+        .Include(user => user.Authentication)
+        .AsSplitQuery();
 
     private static IQueryable<User> ApplyPartitionFilter(
         IQueryable<User> query,

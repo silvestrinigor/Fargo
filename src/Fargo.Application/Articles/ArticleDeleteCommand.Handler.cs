@@ -29,7 +29,7 @@ public sealed class ArticleDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(article);
 
-        await articleService.AssertArticleCanBeDeletedAsync(article, cancellationToken);
+        await articleService.ValidateArticleCanBeDeletedAsync(article, cancellationToken);
 
         articleRepository.Remove(article);
 

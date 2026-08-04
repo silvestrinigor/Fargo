@@ -51,12 +51,16 @@ public class Item : IEntity, IPartitionedReadOnly
     public Guid? ParentItemContainerGuid { get; private set; }
 
     /// <summary>
-    /// Gets the parent container item, if any.
+    /// Gets the container item that directly contains this item, if any.
     /// </summary>
+    /// <remarks>
+    /// A <see langword="null"/> value indicates that the item is not currently
+    /// contained within another item.
+    /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
     /// <summary>
-    /// Gets the partitions associated with the item.
+    /// Gets the partitions directly associated with the item.
     /// </summary>
     /// <remarks>
     /// These partitions define the partition scope of the item and are used
@@ -96,13 +100,17 @@ public class Item : IEntity, IPartitionedReadOnly
         => new(article);
 
     /// <summary>
-    /// Sets the parent container of the item.
+    /// Assigns the specified container item as the parent of the current item.
     /// </summary>
-    /// <param name="item">The parent container item.</param>
-    /// <exception cref="FargoCoreException">
-    /// Thrown if the specified item is the current item.
-    /// </exception>
-    internal void SetParentItemContainer(Item item)
+    /// <param name="item">
+    /// The parent container item.
+    /// </param>
+    /// <remarks>
+    /// Repository-dependent validation, such as preventing circular container
+    /// hierarchies and verifying that the parent is a container item, must be
+    /// performed before calling this method.
+    /// </remarks>
+    public void SetParentItemContainer(Item item)
     {
         if (item.Guid == Guid)
         {
@@ -132,15 +140,22 @@ public class Item : IEntity, IPartitionedReadOnly
     /// <param name="partition">The partition to associate.</param>
     public void AddPartition(Partition partition)
     {
+        if (partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
         partitions.Add(partition);
     }
 
     /// <summary>
     /// Removes the association between the item and the specified partition.
     /// </summary>
-    /// <param name="partition">The partition to remove.</param>
-    public void RemovePartition(Partition partition)
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to remove.
+    /// </param>
+    public void RemovePartition(Guid partitionGuid)
     {
-        partitions.Remove(partition);
+        partitions.RemoveAll(p => p.Guid == partitionGuid);
     }
 }

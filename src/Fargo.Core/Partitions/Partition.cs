@@ -29,7 +29,7 @@ public class Partition : IEntity
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
-    /// Gets the value indicating whether the partition is the global partition.
+    /// Gets a value indicating whether this is the global partition.
     /// </summary>
     public bool IsGlobalPartition => Guid == FargoCoreGuids.GlobalPartitionGuid;
 
@@ -47,8 +47,8 @@ public class Partition : IEntity
     /// Gets the unique identifier of the parent partition, if any.
     /// </summary>
     /// <remarks>
-    /// A <see langword="null"/> value indicates that the current partition
-    /// is a root partition in the hierarchy.
+    /// A <see langword="null"/> value indicates that the partition is the
+    /// global partition, which is the root of the partition hierarchy.
     /// </remarks>
     public Guid? ParentPartitionGuid { get; private set; }
 
@@ -61,6 +61,10 @@ public class Partition : IEntity
     /// </remarks>
     public Partition? ParentPartition { get; private set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Partition"/> class.
+    /// Intended only for factory methods and Entity Framework.
+    /// </summary>
     private Partition()
     {
     }
@@ -69,7 +73,9 @@ public class Partition : IEntity
     /// Creates a new partition.
     /// </summary>
     /// <param name="name">The name of the partition.</param>
-    /// <param name="parentPartition">The parent partition.</param>
+    /// <param name="parentPartition">
+    /// The parent of the newly created partition.
+    /// </param>
     /// <returns>A new <see cref="Partition"/> instance.</returns>
     public static Partition CreatePartition(Name name, Partition parentPartition)
     {
@@ -99,7 +105,17 @@ public class Partition : IEntity
         return globalPartition;
     }
 
-    internal void SetParentPartition(Partition parentPartition)
+    /// <summary>
+    /// Assigns the specified partition as the parent of the current partition.
+    /// </summary>
+    /// <param name="parentPartition">
+    /// The partition to assign as the parent.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to assign a parent to the global partition or when
+    /// attempting to assign the partition as its own parent.
+    /// </exception>
+    public void SetParentPartition(Partition parentPartition)
     {
         if (IsGlobalPartition)
         {
