@@ -42,6 +42,10 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </summary>
     public Description Description { get; set; } = Description.Empty;
 
+    public Guid? ParentUserGroupGuid { get; private set; }
+
+    public UserGroup? ParentUserGroup { get; private set; }
+
     /// <summary>
     /// Gets the permissions granted to the user group.
     /// </summary>
@@ -240,5 +244,32 @@ public class UserGroup : IEntity, IPartitionedReadOnly
         }
 
         IsActive = false;
+    }
+
+    public void SetParentUserGroup(UserGroup parentUserGroup)
+    {
+        if (IsAdminUserGroup)
+        {
+            throw new FargoCoreException(
+                "Administrators user group cannot be added inside another user group.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        if (parentUserGroup.Guid == Guid)
+        {
+            throw new FargoCoreException(
+                "A user group cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
+        }
+
+        ParentUserGroup = parentUserGroup;
+
+        ParentUserGroupGuid = parentUserGroup.Guid;
+    }
+
+    public void RemoveFromParentUserGroup()
+    {
+        ParentUserGroup = null;
+
+        ParentUserGroupGuid = null;
     }
 }

@@ -102,4 +102,40 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+        WITH RECURSIVE user_group_tree AS
+        (
+            SELECT guid, parent_user_group_guid
+            FROM user_groups
+            WHERE guid = {userGroupGuid}
+
+            UNION ALL
+
+            SELECT child.guid, child.parent_user_group_guid
+            FROM user_groups AS child
+            INNER JOIN user_group_tree AS parent
+                ON child.parent_user_group_guid = parent.guid
+        )
+        SELECT guid
+        FROM user_group_tree
+        """;
+
+        var guids = await context.Database
+            .SqlQuery<Guid>(query)
+            .ToListAsync(cancellationToken);
+
+        if (!includeRoot)
+        {
+            guids.RemoveAll(guid => guid == userGroupGuid);
+        }
+
+        return guids;
+    }
+
+    public Task<bool> AnyChildUserGroupAsync(Guid parentUserGroupGuid, CancellationToken cancellationToken = default)
+    {
+        return context.UserGroups.AnyAsync(u => u.ParentUserGroupGuid == parentUserGroupGuid, cancellationToken);
+    }
 }

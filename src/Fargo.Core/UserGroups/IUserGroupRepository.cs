@@ -36,4 +36,9 @@ public interface IUserGroupRepository
     /// Determines whether any user groups exist in the system.
     /// </summary>
     Task<bool> AnyAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
+        Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default);
+
+    Task<bool> AnyChildUserGroupAsync(Guid parentUserGroupGuid, CancellationToken cancellationToken = default);
 }

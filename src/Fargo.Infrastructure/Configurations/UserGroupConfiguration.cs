@@ -16,6 +16,12 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.Property(x => x.Permissions).HasColumnType("jsonb");
 
+        builder
+        .HasOne(x => x.ParentUserGroup)
+        .WithMany()
+        .HasForeignKey(x => x.ParentUserGroupGuid)
+        .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasMany(g => g.Partitions).WithMany().UsingEntity(p =>
         {
             p.ToTable("user_group_partitions");

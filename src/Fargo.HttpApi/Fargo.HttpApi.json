@@ -1982,6 +1982,13 @@
               "boolean"
             ]
           },
+          "parentUserGroup": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "permissionsToAdd": {
             "type": [
               "null",
@@ -2020,6 +2027,7 @@
           "description",
           "isActive",
           "isAdminUserGroup",
+          "parentPartition",
           "permissions",
           "partitions",
           "partitionAccesses"
@@ -2041,6 +2049,13 @@
           },
           "isAdminUserGroup": {
             "type": "boolean"
+          },
+          "parentPartition": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "permissions": {
             "type": "array",
@@ -2069,6 +2084,8 @@
           "nameid",
           "description",
           "isActive",
+          "parentUserGroup",
+          "removeParentUserGroup",
           "permissionsToAdd",
           "permissionsToRemove",
           "partitionsToAdd",
@@ -2099,6 +2116,19 @@
             ]
           },
           "isActive": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "parentUserGroup": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "removeParentUserGroup": {
             "type": [
               "null",
               "boolean"

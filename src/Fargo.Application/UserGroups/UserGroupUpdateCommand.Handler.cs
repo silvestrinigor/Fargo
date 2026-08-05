@@ -54,6 +54,23 @@ public sealed class UserGroupUpdateCommandHandler(
             userGroup.Deactivate();
         }
 
+        if (command.Update.ParentUserGroup is { } parentUserGroupGuid)
+        {
+            var parentUserGroup = await userGroupRepository.GetByGuidAsync(parentUserGroupGuid, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid, EntityType.UserGroup);
+
+            actor.ThrowIfAccessDenied(parentUserGroup);
+
+            await userGroupService.ValidateParentUserGroupAssignmentAsync(parentUserGroup, userGroup, cancellationToken);
+
+            userGroup.SetParentUserGroup(parentUserGroup);
+        }
+        else if (command.Update.RemoveParentUserGroup is true)
+        {
+            userGroup.RemoveFromParentUserGroup();
+        }
+
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {
             foreach (var permission in permissionsToAdd.Distinct())

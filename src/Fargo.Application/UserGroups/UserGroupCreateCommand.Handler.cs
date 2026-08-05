@@ -46,6 +46,17 @@ public sealed class UserGroupCreateCommandHandler(
             userGroup.Deactivate();
         }
 
+        if (command.Create.ParentUserGroup is { } parentUserGroupGuid)
+        {
+            var parentUserGroup = await userGroupRepository.GetByGuidAsync(parentUserGroupGuid, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid, EntityType.UserGroup);
+
+            actor.ThrowIfAccessDenied(parentUserGroup);
+
+            userGroup.SetParentUserGroup(parentUserGroup);
+        }
+
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
             var requestedActions = permissions.Distinct();

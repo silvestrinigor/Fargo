@@ -28,19 +28,55 @@ public class UserGroupService(IUserGroupRepository userGroupRepository)
         }
     }
 
-    /// <summary>
-    /// Validates that the specified <paramref name="userGroup"/> can be deleted.
-    /// </summary>
-    /// <param name="userGroup">The user group to validate.</param>
-    /// <exception cref="FargoCoreException">
-    /// Thrown if the user group is the default administrators group.
-    /// </exception>
-    public static void ValidateUserGroupDelete(UserGroup userGroup)
+    public async Task ValidateUserGroupDelete(UserGroup userGroup, CancellationToken cancellationToken = default)
     {
         if (userGroup.Guid == FargoCoreWellKnowGuids.AdminUserGroupGuid)
         {
             throw new FargoCoreException(
                 "The default administrators user group cannot be deleted.", FargoCoreErrorType.None);
         }
+
+        var anyChildUserGroup = await userGroupRepository.AnyChildUserGroupAsync(userGroup.Guid, cancellationToken);
+
+        if (anyChildUserGroup)
+        {
+            throw new FargoCoreException(
+                $"User group '{userGroup.Guid}' cannot be deleted because it has child user groups.",
+                FargoCoreErrorType.None);
+        }
+    }
+
+    public async Task ValidateParentUserGroupAssignmentAsync(
+        UserGroup parentUserGroup, UserGroup memberUserGroup, CancellationToken cancellationToken = default)
+    {
+        var createsCircularHierarchy = await CreatesCircularHierarchyAsync(
+            parentUserGroup, memberUserGroup.Guid, cancellationToken);
+
+        if (createsCircularHierarchy)
+        {
+            CircularHierarchy(memberUserGroup.Guid, parentUserGroup.Guid);
+        }
+    }
+
+    private static FargoCoreException CircularHierarchy(Guid parent, Guid child) =>
+        new(
+            $"User group '{child}' cannot be assigned to parent '{parent}' because this would create a circular hierarchy.",
+            FargoCoreErrorType.None);
+
+    private async Task<bool> CreatesCircularHierarchyAsync(
+        UserGroup candidateParentUserGroup, Guid memberUserGroupGuid, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(candidateParentUserGroup);
+
+        if (candidateParentUserGroup.Guid == memberUserGroupGuid)
+        {
+            return true;
+        }
+
+        var descendantUserGroupGuids =
+            await userGroupRepository.GetDescendantGuidsAsync(
+                memberUserGroupGuid, false, cancellationToken);
+
+        return descendantUserGroupGuids.Contains(candidateParentUserGroup.Guid);
     }
 }

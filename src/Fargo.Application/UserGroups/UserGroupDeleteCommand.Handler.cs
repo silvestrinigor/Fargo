@@ -9,6 +9,7 @@ namespace Fargo.Application.UserGroups;
 
 public sealed class UserGroupDeleteCommandHandler(
     ActorService actorService,
+    UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
@@ -33,7 +34,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(userGroup);
 
-        UserGroupService.ValidateUserGroupDelete(userGroup);
+        await userGroupService.ValidateUserGroupDelete(userGroup, cancellationToken);
 
         userGroupRepository.Remove(userGroup);
 
