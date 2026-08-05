@@ -6,16 +6,16 @@ namespace Fargo.Core.Tests.Partitions;
 public class PartitionTests
 {
     [Fact]
-    public void CreateGlobalPartition_WhenValidParams_ShouldBeGlobalPartition()
+    public void CreateGlobalPartition_WhenValid_ShouldBeGlobalPartition()
     {
-        var partition = CreateGlobalPartition();
+        var partition = Partition.CreateGlobalPartition(default);
 
         Assert.Equal(FargoCoreWellKnowGuids.GlobalPartitionGuid, partition.Guid);
         Assert.True(partition.IsGlobalPartition);
     }
 
     [Fact]
-    public void CreateGlobalPartition_WhenValidParams_ShouldSetName()
+    public void CreateGlobalPartition_WhenValid_ShouldSetName()
     {
         var name = new Name("New test partition");
 
@@ -25,31 +25,31 @@ public class PartitionTests
     }
 
     [Fact]
-    public void CreateNormalPartition_WhenValidParams_ShouldNotBeGlobalPartition()
+    public void CreateNormalPartition_WhenValid_ShouldNotBeGlobalPartition()
     {
-        var globalPartition = CreateGlobalPartition();
+        var globalPartition = Partition.CreateGlobalPartition(default);
 
-        var partition = CreatePartition(globalPartition);
+        var partition = Partition.CreatePartition(default, globalPartition);
 
         Assert.NotEqual(FargoCoreWellKnowGuids.GlobalPartitionGuid, partition.Guid);
         Assert.False(partition.IsGlobalPartition);
     }
 
     [Fact]
-    public void CreateNormalPartition_WhenValidParams_ShouldSetParentPartition()
+    public void CreateNormalPartition_WhenValid_ShouldSetParentPartition()
     {
-        var globalPartition = CreateGlobalPartition();
+        var globalPartition = Partition.CreateGlobalPartition(default);
 
-        var partition = CreatePartition(globalPartition);
+        var partition = Partition.CreatePartition(default, globalPartition);
 
         Assert.Equal(globalPartition, partition.ParentPartition);
         Assert.Equal(globalPartition.Guid, partition.ParentPartitionGuid);
     }
 
     [Fact]
-    public void CreateNormalPartition_WhenValidParams_ShouldSetName()
+    public void CreateNormalPartition_WhenValid_ShouldSetName()
     {
-        var globalPartition = CreateGlobalPartition();
+        var globalPartition = Partition.CreateGlobalPartition(default);
         var name = new Name("New test partition");
 
         var partition = Partition.CreatePartition(name, globalPartition);
@@ -58,11 +58,11 @@ public class PartitionTests
     }
 
     [Fact]
-    public void SetParentPartition_WhenNewParentPartitionIsValid_ShouldSetParentPartition()
+    public void SetParentPartition_WhenValid_ShouldSetParentPartition()
     {
-        var globalPartition = CreateGlobalPartition();
-        var partition = CreatePartition(globalPartition);
-        var partition2 = CreatePartition(globalPartition);
+        var globalPartition = Partition.CreateGlobalPartition(default);
+        var partition = Partition.CreatePartition(default, globalPartition);
+        var partition2 = Partition.CreatePartition(default, globalPartition);
 
         partition.SetParentPartition(partition2);
 
@@ -73,8 +73,8 @@ public class PartitionTests
     [Fact]
     public void SetParentPartition_WhenMemberPartitionIsGlobalPartition_ShouldThrowException()
     {
-        var globalPartition = CreateGlobalPartition();
-        var partition = CreatePartition(globalPartition);
+        var globalPartition = Partition.CreateGlobalPartition(default);
+        var partition = Partition.CreatePartition(default, globalPartition);
 
         void function() => globalPartition.SetParentPartition(partition);
 
@@ -85,22 +85,12 @@ public class PartitionTests
     [Fact]
     public void SetParentPartition_WhenPartitionMemberIsEqualParentPartition_ShouldThrowException()
     {
-        var globalPartition = CreateGlobalPartition();
-        var partition = CreatePartition(globalPartition);
+        var globalPartition = Partition.CreateGlobalPartition(default);
+        var partition = Partition.CreatePartition(default, globalPartition);
 
         void function() => partition.SetParentPartition(partition);
 
         var ex = Assert.Throws<FargoCoreException>(() => function());
         Assert.Equal(FargoCoreErrorType.InvalidArgument, ex.ErrorType);
-    }
-
-    private static Partition CreateGlobalPartition()
-    {
-        return Partition.CreateGlobalPartition(new("Global test partition"));
-    }
-
-    private static Partition CreatePartition(Partition parentPartition)
-    {
-        return Partition.CreatePartition(new("New test partition"), parentPartition);
     }
 }
