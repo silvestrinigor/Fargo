@@ -1,8 +1,6 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Shared.Barcodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fargo.Infrastructure.Configurations;
 

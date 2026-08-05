@@ -42,7 +42,6 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         Barcode barcode,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(barcode);
 
         return ApplyBarcodeFilter(context.Articles, barcode)
             .AnyAsync(cancellationToken);
@@ -148,7 +147,6 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     private static IQueryable<Article> ApplyBarcodeFilter(IQueryable<Article> query, Barcode barcode)
     {
-        ArgumentNullException.ThrowIfNull(barcode);
 
         return barcode.Format switch
         {

@@ -3,16 +3,16 @@ using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.Configurations;
+using Fargo.Infrastructure.Converters;
+using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
 using UnitsNet;
-using Fargo.Core.Shared.Barcodes;
-using Fargo.Infrastructure.ValueConverters;
 
 namespace Fargo.Infrastructure.Persistence;
 
