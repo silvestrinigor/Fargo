@@ -47,13 +47,12 @@ public static class DependencyInjectionServiceCollectionExtensions
             return services;
         }
 
-        private IServiceCollection AddFargoJwtOptions(
-                IConfiguration configuration)
+        private IServiceCollection AddFargoJwtOptions(IConfiguration configuration)
         {
             services
-                .AddOptions<JwtOptions>()
-                .Bind(configuration.GetSection(JwtOptions.SectionName))
-                .ValidateDataAnnotations();
+            .AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations();
 
             return services;
         }
@@ -70,9 +69,7 @@ public static class DependencyInjectionServiceCollectionExtensions
 
         public static void UsesFargoNpgsql(IServiceProvider sp, DbContextOptionsBuilder opt)
         {
-            var options = sp
-                .GetRequiredService<IOptions<ConnectionStringOptions>>()
-                .Value;
+            var options = sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value;
 
             opt.UseNpgsql(
                 options.Fargo,

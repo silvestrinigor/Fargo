@@ -8,7 +8,6 @@ using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Configurations;
-using Fargo.Infrastructure.Converters;
 using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
