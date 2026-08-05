@@ -7,11 +7,11 @@ public static class FargoResourceBuilderExtensions
         string environmentName)
     {
         return resource
-            .WithEnvironment(
-                "ASPNETCORE_ENVIRONMENT",
-                environmentName)
-            .WithEnvironment(
-                "DOTNET_ENVIRONMENT",
-                environmentName);
+        .WithEnvironment(
+            "ASPNETCORE_ENVIRONMENT",
+            environmentName)
+        .WithEnvironment(
+            "DOTNET_ENVIRONMENT",
+            environmentName);
     }
 }
