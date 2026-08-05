@@ -44,7 +44,14 @@ public sealed class UserCreateCommandHandler(
 
         user.Description = command.Create.Description ?? Description.Empty;
 
-        user.IsActive = command.Create.IsActive ?? true;
+        if (command.Create.IsActive is true)
+        {
+            user.Activate();
+        }
+        else if (command.Create.IsActive is false)
+        {
+            user.Deactivate();
+        }
 
         user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
