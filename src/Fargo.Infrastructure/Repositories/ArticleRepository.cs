@@ -151,7 +151,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return barcode.Format switch
         {
             BarcodeFormat.Ean13 =>
-                query.Where(a => a.Barcode.Ean13 == new Ean13(barcode.Code)),
+                query.Where(a => a.Barcode.Ean13 == new Ean13(barcode.Value)),
 
             _ => throw new ArgumentOutOfRangeException(
                 nameof(barcode),

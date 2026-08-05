@@ -17,7 +17,12 @@ public readonly struct FirstName : IEquatable<FirstName>, IParsable<FirstName>, 
     /// <summary>
     /// Minimum allowed length for a first name.
     /// </summary>
-    public const int MinLength = 2;
+    public const int MinLength = 1;
+
+    /// <summary>
+    /// Gets the first name string value.
+    /// </summary>
+    public string Value { get; } = "A";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FirstName"/> struct.
@@ -51,20 +56,8 @@ public readonly struct FirstName : IEquatable<FirstName>, IParsable<FirstName>, 
 
         ValidateCharacters(value);
 
-        this.value = value;
+        Value = value;
     }
-
-    private readonly string? value;
-
-    /// <summary>
-    /// Gets the value.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the value object was not properly initialized.
-    /// This protects against the default struct state.
-    /// </exception>
-    public string Value
-        => value ?? throw new InvalidOperationException("First name not initialized.");
 
     /// <summary>
     /// Creates a first name from a string.
@@ -130,7 +123,7 @@ public readonly struct FirstName : IEquatable<FirstName>, IParsable<FirstName>, 
 
     /// <inheritdoc />
     public bool Equals(FirstName other)
-        => string.Equals(value, other.value, StringComparison.Ordinal);
+        => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
@@ -138,9 +131,7 @@ public readonly struct FirstName : IEquatable<FirstName>, IParsable<FirstName>, 
 
     /// <inheritdoc />
     public override int GetHashCode()
-        => value is null
-            ? 0
-            : value.GetHashCode(StringComparison.Ordinal);
+        => Value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether two first names are equal.

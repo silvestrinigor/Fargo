@@ -117,3 +117,4 @@ public sealed class FargoApplicationExceptionHandler(
         return true;
     }
 }
+

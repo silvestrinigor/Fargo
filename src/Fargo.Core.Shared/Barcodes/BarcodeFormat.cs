@@ -6,6 +6,11 @@ namespace Fargo.Core.Shared.Barcodes;
 public enum BarcodeFormat
 {
     /// <summary>
+    /// Format not defined.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
     /// EAN-13 — 13-digit retail barcode.
     /// </summary>
     Ean13 = 1,

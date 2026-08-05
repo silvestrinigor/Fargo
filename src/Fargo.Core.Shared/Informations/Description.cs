@@ -10,14 +10,14 @@ namespace Fargo.Core.Shared.Informations;
 public readonly struct Description : IEquatable<Description>, IParsable<Description>, ISpanParsable<Description>, IFormattable, ISpanFormattable, IUtf8SpanParsable<Description>, IUtf8SpanFormattable
 {
     /// <summary>
-    /// Minimum length.
-    /// </summary>
-    public const int MinLength = 0;
-
-    /// <summary>
-    /// Maximum length.
+    /// Description maximum length.
     /// </summary>
     public const int MaxLength = 500;
+
+    /// <summary>
+    /// Gets string value of the description.
+    /// </summary>
+    public string Value { get; } = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Description"/> value object.
@@ -26,16 +26,8 @@ public readonly struct Description : IEquatable<Description>, IParsable<Descript
     public Description(string value)
     {
         Validate(value);
-        this.value = value;
+        Value = value;
     }
-
-    private readonly string? value;
-
-    /// <summary>
-    /// Gets the underlying string value of the description.
-    /// </summary>
-    public string Value
-        => value ?? throw new InvalidOperationException("Description not initialized.");
 
     /// <summary>
     /// Gets an empty description.
@@ -110,7 +102,7 @@ public readonly struct Description : IEquatable<Description>, IParsable<Descript
 
     /// <inheritdoc />
     public bool Equals(Description other)
-        => string.Equals(value, other.value, StringComparison.Ordinal);
+        => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
@@ -118,9 +110,7 @@ public readonly struct Description : IEquatable<Description>, IParsable<Descript
 
     /// <inheritdoc />
     public override int GetHashCode()
-        => value is null
-            ? 0
-            : value.GetHashCode(StringComparison.Ordinal);
+        => Value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether two descriptions are equal.
@@ -228,13 +218,12 @@ public readonly struct Description : IEquatable<Description>, IParsable<Descript
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        if (value.Length < MinLength || value.Length > MaxLength)
+        if (value.Length > MaxLength)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(value),
                 value,
-                $"Description length must be between {MinLength} and {MaxLength} characters.");
+                $"Description length must be shorter or equal to {MaxLength} characters.");
         }
     }
 }
-

@@ -8,16 +8,12 @@ public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
     /// <summary>
     /// Gets the raw barcode value.
     /// </summary>
-    public string Code => code ?? throw new InvalidOperationException("Barcode not initialized.");
-    private readonly string code;
+    public string Value { get; } = string.Empty;
 
     /// <summary>
     /// Gets the barcode format.
     /// </summary>
-    public BarcodeFormat Format => code is null
-        ? throw new InvalidOperationException("Barcode not initialized.")
-        : format;
-    private readonly BarcodeFormat format;
+    public BarcodeFormat Format { get; } = BarcodeFormat.None;
 
     /// <summary>
     /// Initializes a new barcode value.
@@ -31,23 +27,22 @@ public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
     {
         Validate(code, format);
 
-        this.code = code;
-        this.format = format;
+        Value = code;
+        Format = format;
     }
 
     public bool Equals(Barcode other)
         => Format == other.Format &&
-           string.Equals(Code, other.Code, StringComparison.Ordinal);
+           string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     public override bool Equals(object? obj)
         => obj is Barcode other && Equals(other);
 
     public override int GetHashCode()
         => HashCode.Combine(
-            format,
-            code?.GetHashCode(StringComparison.Ordinal));
+            Format, Value?.GetHashCode(StringComparison.Ordinal));
 
-    public override string ToString() => $"{Code}:{Format}";
+    public override string ToString() => $"{Value}:{Format}";
 
     public static Barcode Parse(string s, IFormatProvider? provider)
     {
