@@ -37,7 +37,14 @@ public sealed class UserGroupCreateCommandHandler(
 
         userGroup.Description = command.Create.Description ?? Description.Empty;
 
-        userGroup.IsActive = command.Create.IsActive ?? true;
+        if (command.Create.IsActive is true)
+        {
+            userGroup.Activate();
+        }
+        else if (command.Create.IsActive is false)
+        {
+            userGroup.Deactivate();
+        }
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {

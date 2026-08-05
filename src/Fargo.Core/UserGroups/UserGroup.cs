@@ -25,7 +25,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Gets or sets the value indicating whether the user group is active.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
 
     /// <summary>
     /// Gets a value indicating whether this is the built-in administrators user group.
@@ -113,11 +113,24 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     }
 
     /// <summary>
-    /// Removes partition access from the user group if it exists.
+    /// Revokes the user group's access to the specified partition.
     /// </summary>
-    /// <param name="partitionGuid">The identifier of the partition to remove.</param>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition whose access should be revoked.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to revoke the administrators user group's access to
+    /// the global partition.
+    /// </exception>
     public void RemovePartitionAccess(Guid partitionGuid)
     {
+        if (IsAdminUserGroup && partitionGuid == FargoCoreGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                "Cannot revoke the administrators user group's access to the global partition.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
         partitionAccesses.RemoveAll(p => p.Guid == partitionGuid);
     }
 
@@ -125,8 +138,19 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// Associates the user group with the specified partition if it is not already associated.
     /// </summary>
     /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to associate the administrators user group with a
+    /// non-global partition.
+    /// </exception>
     public void AddPartition(Partition partition)
     {
+        if (IsAdminUserGroup && !partition.IsGlobalPartition)
+        {
+            throw new FargoCoreException(
+                "Cannot associate the administrators user group with a non-global partition.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
         if (partitions.Any(p => p.Guid == partition.Guid))
         {
             return;
@@ -138,9 +162,22 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Removes the association between the user group and the specified partition.
     /// </summary>
-    /// <param name="partitionGuid">The identifier of the partition to remove.</param>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to remove.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to remove the administrators user group from the
+    /// global partition.
+    /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
+        if (IsAdminUserGroup && partitionGuid == FargoCoreGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                "Cannot remove the administrators user group from the global partition.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
         partitions.RemoveAll(p => p.Guid == partitionGuid);
     }
 
@@ -159,11 +196,49 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     }
 
     /// <summary>
-    /// Removes a permission from the user group if it exists.
+    /// Removes the specified permission from the user group.
     /// </summary>
-    /// <param name="action">The action to remove from the user group.</param>
+    /// <param name="action">
+    /// The permission to remove from the user group.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to remove a permission from the administrators user group.
+    /// </exception>
     public void RemovePermission(ActionType action)
     {
+        if (IsAdminUserGroup)
+        {
+            throw new FargoCoreException(
+                "Cannot remove any permission from the administrators user group.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
         permissions.RemoveAll(a => a == action);
+    }
+
+    /// <summary>
+    /// Activates the user group.
+    /// </summary>
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
+    /// <summary>
+    /// Deactivates the user group.
+    /// </summary>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to deactivate the administrators user group.
+    /// </exception>
+    public void Deactivate()
+    {
+        if (IsAdminUserGroup)
+        {
+            throw new FargoCoreException(
+                "Cannot deactivate the administrators user group.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        IsActive = false;
     }
 }

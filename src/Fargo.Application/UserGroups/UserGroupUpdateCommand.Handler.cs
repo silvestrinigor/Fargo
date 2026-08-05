@@ -22,8 +22,6 @@ public sealed class UserGroupUpdateCommandHandler(
         UserGroupUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var update = command.Update;
-
         logger.UpdateStarted(command.UserGroupGuid, currentActor.Guid);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
@@ -38,16 +36,23 @@ public sealed class UserGroupUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(userGroup);
 
-        if (update.Nameid is not null && userGroup.Nameid != update.Nameid)
+        if (command.Update.Nameid is not null && userGroup.Nameid != command.Update.Nameid)
         {
-            await userGroupService.ValidateUserGroupNameidIsAvailableAsync(update.Nameid.Value, cancellationToken);
+            await userGroupService.ValidateUserGroupNameidIsAvailableAsync(command.Update.Nameid.Value, cancellationToken);
 
-            userGroup.Nameid = update.Nameid.Value;
+            userGroup.Nameid = command.Update.Nameid.Value;
         }
 
-        userGroup.Description = update.Description ?? userGroup.Description;
+        userGroup.Description = command.Update.Description ?? userGroup.Description;
 
-        userGroup.IsActive = update.IsActive ?? userGroup.IsActive;
+        if (command.Update.IsActive is true)
+        {
+            userGroup.Activate();
+        }
+        else if (command.Update.IsActive is false)
+        {
+            userGroup.Deactivate();
+        }
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {
