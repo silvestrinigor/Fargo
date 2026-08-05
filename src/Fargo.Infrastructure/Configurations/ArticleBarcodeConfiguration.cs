@@ -20,12 +20,6 @@ public class ArticleBarcodeConfiguration : IEntityTypeConfiguration<ArticleBarco
         .HasForeignKey<ArticleBarcode>(b => b.ArticleGuid)
         .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.Ean13)
-            .HasConversion(new ValueConverter<Ean13?, string?>(
-                v => v.HasValue ? v.Value.Code : null,
-                v => v != null ? new Ean13(v) : null))
-            .HasMaxLength(Ean13.CodeLength);
-
         builder.HasIndex(x => x.Ean13).IsUnique().HasFilter("ean13 IS NOT NULL");
     }
 }
