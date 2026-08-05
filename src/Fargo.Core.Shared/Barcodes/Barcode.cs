@@ -105,6 +105,6 @@ public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
 
     public static Barcode FromEan13(Ean13 ean13)
     {
-        return new Barcode(ean13.Code, BarcodeFormat.Ean13);
+        return new Barcode(ean13.Value, BarcodeFormat.Ean13);
     }
 }

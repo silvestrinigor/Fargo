@@ -17,9 +17,12 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
     /// <summary>
     /// Minimum length.
     /// </summary>
-    public const int MinLength = 3;
+    public const int MinLength = 1;
 
-    private readonly string? value;
+    /// <summary>
+    /// Gets the name string value.
+    /// </summary>
+    public string Value { get; } = "C";
 
     /// <summary>
     /// Initializes a name.
@@ -41,14 +44,8 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
                 $"Name length must be between {MinLength} and {MaxLength} characters.");
         }
 
-        this.value = value;
+        Value = value;
     }
-
-    /// <summary>
-    /// Gets the value.
-    /// </summary>
-    public string Value
-        => value ?? throw new InvalidOperationException("Name not initialized.");
 
     /// <summary>
     /// Creates a name from a string.
@@ -114,7 +111,7 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
 
     /// <inheritdoc />
     public bool Equals(Name other)
-        => string.Equals(value, other.value, StringComparison.Ordinal);
+        => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
@@ -122,9 +119,7 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
 
     /// <inheritdoc />
     public override int GetHashCode()
-        => value is null
-            ? 0
-            : value.GetHashCode(StringComparison.Ordinal);
+        => Value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether two names are equal.

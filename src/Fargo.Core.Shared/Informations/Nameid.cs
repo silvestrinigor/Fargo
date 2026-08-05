@@ -5,7 +5,7 @@ using System.Text;
 namespace Fargo.Core.Shared.Informations;
 
 /// <summary>
-/// Represents a validated nameid.
+/// Represents a nameid.
 /// </summary>
 public readonly struct Nameid :
     IEquatable<Nameid>,
@@ -26,7 +26,10 @@ public readonly struct Nameid :
     /// </summary>
     public const int MinLength = 3;
 
-    private readonly string? value;
+    /// <summary>
+    /// Gets the value.
+    /// </summary>
+    public string Value { get; } = "aaa";
 
     /// <summary>
     /// Initializes a nameid.
@@ -34,14 +37,8 @@ public readonly struct Nameid :
     public Nameid(string value)
     {
         Validate(value);
-        this.value = value.ToLowerInvariant();
+        Value = value.ToLowerInvariant();
     }
-
-    /// <summary>
-    /// Gets the value.
-    /// </summary>
-    public string Value
-        => value ?? throw new InvalidOperationException("Nameid not initialized.");
 
     /// <summary>
     /// Creates a nameid from a string.
@@ -107,7 +104,7 @@ public readonly struct Nameid :
 
     /// <inheritdoc />
     public bool Equals(Nameid other)
-        => string.Equals(value, other.value, StringComparison.OrdinalIgnoreCase);
+        => string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
@@ -115,9 +112,7 @@ public readonly struct Nameid :
 
     /// <inheritdoc />
     public override int GetHashCode()
-        => value is null
-            ? 0
-            : StringComparer.OrdinalIgnoreCase.GetHashCode(value);
+        => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
     /// <summary>
     /// Determines whether two nameids are equal.

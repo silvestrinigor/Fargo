@@ -6,27 +6,27 @@ namespace Fargo.Core.Shared.Entities;
 public enum EntityType
 {
     /// <summary>
-    /// Article.
+    /// Article entity.
     /// <summary>
     Article = 0,
 
     /// <summary>
-    /// Item.
+    /// Item entity.
     /// <summary>
     Item = 1,
 
     /// <summary>
-    /// User.
+    /// User entity.
     /// <summary>
     User = 2,
 
     /// <summary>
-    /// User group.
+    /// User group entity.
     /// <summary>
     UserGroup = 3,
 
     /// <summary>
-    /// Partition.
+    /// Partition entity.
     /// <summary>
     Partition = 4
 }

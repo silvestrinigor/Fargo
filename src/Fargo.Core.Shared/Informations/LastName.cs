@@ -17,16 +17,19 @@ public readonly struct LastName :
     IUtf8SpanFormattable
 {
     /// <summary>
-    /// Maximum length.
+    /// Maximum last name length.
     /// </summary>
     public const int MaxLength = 100;
 
     /// <summary>
-    /// Minimum length.
+    /// Minimum last name length.
     /// </summary>
-    public const int MinLength = 2;
+    public const int MinLength = 1;
 
-    private readonly string? value;
+    /// <summary>
+    /// Gets the last name string value.
+    /// </summary>
+    public string Value { get; } = "B";
 
     /// <summary>
     /// Initializes a last name.
@@ -52,14 +55,8 @@ public readonly struct LastName :
 
         ValidateCharacters(value);
 
-        this.value = value;
+        Value = value;
     }
-
-    /// <summary>
-    /// Gets the value.
-    /// </summary>
-    public string Value
-        => value ?? throw new InvalidOperationException("Last name not initialized.");
 
     /// <summary>
     /// Creates a last name from a string.
@@ -125,7 +122,7 @@ public readonly struct LastName :
 
     /// <inheritdoc />
     public bool Equals(LastName other)
-        => string.Equals(value, other.value, StringComparison.Ordinal);
+        => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
@@ -133,9 +130,7 @@ public readonly struct LastName :
 
     /// <inheritdoc />
     public override int GetHashCode()
-        => value is null
-            ? 0
-            : value.GetHashCode(StringComparison.Ordinal);
+        => Value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether two last names are equal.

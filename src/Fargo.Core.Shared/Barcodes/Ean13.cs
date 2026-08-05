@@ -14,8 +14,7 @@ public readonly struct Ean13 : IEquatable<Ean13>
     /// <summary>
     /// Gets the barcode code string.
     /// </summary>
-    public string Code => code ?? throw new InvalidOperationException("Ean13 not initialized.");
-    private readonly string? code;
+    public string Value { get; } = "0000000000000";
 
     public Ean13(string value)
     {
@@ -26,16 +25,16 @@ public readonly struct Ean13 : IEquatable<Ean13>
             throw new ArgumentException($"EAN-13 code must be exactly {CodeLength} digits.", nameof(value));
         }
 
-        code = value;
+        Value = value;
     }
 
-    public bool Equals(Ean13 other) => string.Equals(code, other.code, StringComparison.Ordinal);
+    public bool Equals(Ean13 other) => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     public override bool Equals(object? obj) => obj is Ean13 other && Equals(other);
 
-    public override int GetHashCode() => code is null ? 0 : code.GetHashCode(StringComparison.Ordinal);
+    public override int GetHashCode() => Value is null ? 0 : Value.GetHashCode(StringComparison.Ordinal);
 
-    public override string ToString() => Code;
+    public override string ToString() => Value;
 
     /// <summary>
     /// Determines whether two <see cref="Ean13"/> instances are equal.
@@ -55,5 +54,5 @@ public readonly struct Ean13 : IEquatable<Ean13>
     /// <summary>
     /// Implicitly converts an <see cref="Ean13"/> to its string representation.
     /// </summary>
-    public static implicit operator string(Ean13 barcode) => barcode.Code;
+    public static implicit operator string(Ean13 barcode) => barcode.Value;
 }

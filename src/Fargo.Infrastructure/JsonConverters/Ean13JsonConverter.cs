@@ -10,7 +10,7 @@ public sealed class Ean13JsonConverter : JsonConverter<Ean13>
         => new(BarcodeJsonConverter.ReadString(ref reader, nameof(Ean13)));
 
     public override void Write(Utf8JsonWriter writer, Ean13 value, JsonSerializerOptions options)
-        => writer.WriteStringValue(value.Code);
+        => writer.WriteStringValue(value.Value);
 }
 
 file static class BarcodeJsonConverter
