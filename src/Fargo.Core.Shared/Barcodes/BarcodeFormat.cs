@@ -1,7 +1,7 @@
 namespace Fargo.Core.Shared.Barcodes;
 
 /// <summary>
-/// Represents the barcode format (symbology) of a barcode.
+/// Represents the barcode format of a barcode.
 /// </summary>
 public enum BarcodeFormat
 {

@@ -4,7 +4,7 @@ namespace Fargo.Core.Shared.Barcodes;
 /// EAN-13 barcode value assigned to an article.
 /// Code must be exactly 13 digits.
 /// </summary>
-public readonly struct Ean13 : IBarcodeType, IEquatable<Ean13>
+public readonly struct Ean13 : IEquatable<Ean13>
 {
     /// <summary>
     /// Gets the const EAN-13 length.
@@ -17,8 +17,6 @@ public readonly struct Ean13 : IBarcodeType, IEquatable<Ean13>
     public string Code => code ?? throw new InvalidOperationException("Ean13 not initialized.");
     private readonly string? code;
 
-    public BarcodeFormat BarcodeFormat => BarcodeFormat.Ean13;
-
     public Ean13(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
@@ -30,11 +28,6 @@ public readonly struct Ean13 : IBarcodeType, IEquatable<Ean13>
 
         code = value;
     }
-
-    /// <summary>
-    /// Creates a generic barcode from this <see cref="Ean13"/>.
-    /// </summary>
-    public Barcode ToBarcode() => new(Code, BarcodeFormat.Ean13);
 
     public bool Equals(Ean13 other) => string.Equals(code, other.code, StringComparison.Ordinal);
 

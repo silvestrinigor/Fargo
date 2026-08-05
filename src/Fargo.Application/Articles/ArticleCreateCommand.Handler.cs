@@ -4,6 +4,7 @@ using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Barcodes;
 using Fargo.Core.Shared.Entities;
 using Fargo.Core.Shared.Informations;
 using Microsoft.Extensions.Logging;
@@ -107,7 +108,7 @@ public sealed class ArticleCreateCommandHandler(
 
         if (command.Create.Barcode?.Ean13 is { } ean13)
         {
-            await articleService.ValidateBarcodeIsAvailableAsync(ean13.ToBarcode(), cancellationToken);
+            await articleService.ValidateBarcodeIsAvailableAsync(Barcode.FromEan13(ean13), cancellationToken);
 
             article.Barcode.Ean13 = ean13;
         }
