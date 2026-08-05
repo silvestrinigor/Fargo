@@ -1,4 +1,4 @@
-using Fargo.Infrastructure.Converters;
+using Fargo.Infrastructure.JsonConverters;
 
 namespace Fargo.HttpApi.Extensions;
 

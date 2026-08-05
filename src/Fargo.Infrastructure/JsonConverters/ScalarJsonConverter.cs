@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
 
+namespace Fargo.Infrastructure.JsonConverters;
+
 public sealed class ScalarJsonConverter : JsonConverter<Scalar>
 {
     public override Scalar Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

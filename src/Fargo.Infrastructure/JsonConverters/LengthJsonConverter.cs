@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Fargo.Infrastructure.Converters;
+namespace Fargo.Infrastructure.JsonConverters;
 
 /// <summary>
 /// Serializes and deserializes <see cref="Length"/> as <c>{ "value": number, "unit": string }</c>.
