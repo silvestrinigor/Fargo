@@ -20,7 +20,7 @@ public class User : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Gets a value indicating whether the user is the main admin.
     /// </summary>
-    public bool IsAdmin => Guid == FargoCoreGuids.AdminUserGuid;
+    public bool IsAdmin => Guid == FargoCoreWellKnowGuids.AdminUserGuid;
 
     /// <summary>
     /// Gets a value indicating whether the user account is active.
@@ -111,7 +111,7 @@ public class User : IEntity, IPartitionedReadOnly
     {
         var user = new User
         {
-            Guid = FargoCoreGuids.AdminUserGuid,
+            Guid = FargoCoreWellKnowGuids.AdminUserGuid,
             Nameid = nameid
         };
 
@@ -156,7 +156,7 @@ public class User : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
-        if (IsAdmin && partitionGuid == FargoCoreGuids.GlobalPartitionGuid)
+        if (IsAdmin && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
                 "Cannot remove the admin user from the global partition.",
@@ -193,7 +193,7 @@ public class User : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemoveUserGroup(Guid userGroupGuid)
     {
-        if (IsAdmin && userGroupGuid == FargoCoreGuids.AdminUserGroupGuid)
+        if (IsAdmin && userGroupGuid == FargoCoreWellKnowGuids.AdminUserGroupGuid)
         {
             throw new FargoCoreException(
                 "Cannot remove the admin user from the administrators user group.",
@@ -231,7 +231,7 @@ public class User : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePartitionAccess(Guid partitionGuid)
     {
-        if (IsAdmin && partitionGuid == FargoCoreGuids.GlobalPartitionGuid)
+        if (IsAdmin && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
                 "Cannot remove the global partition access from the admin user.",

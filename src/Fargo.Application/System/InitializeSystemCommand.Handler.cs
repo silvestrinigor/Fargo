@@ -32,7 +32,7 @@ public sealed class InitializeSystemCommandHandler(
             return;
         }
 
-        var globalPartition = await partitionRepository.GetByGuidAsync(FargoCoreGuids.GlobalPartitionGuid, cancellationToken);
+        var globalPartition = await partitionRepository.GetByGuidAsync(FargoCoreWellKnowGuids.GlobalPartitionGuid, cancellationToken);
 
         var globalPartitionCreated = false;
 
@@ -47,7 +47,7 @@ public sealed class InitializeSystemCommandHandler(
             globalPartitionCreated = true;
         }
 
-        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreGuids.AdminUserGroupGuid, cancellationToken);
+        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreWellKnowGuids.AdminUserGroupGuid, cancellationToken);
 
         var allActions = Enum.GetValues<ActionType>();
 

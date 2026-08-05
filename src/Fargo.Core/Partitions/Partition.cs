@@ -31,7 +31,7 @@ public class Partition : IEntity
     /// <summary>
     /// Gets a value indicating whether this is the global partition.
     /// </summary>
-    public bool IsGlobalPartition => Guid == FargoCoreGuids.GlobalPartitionGuid;
+    public bool IsGlobalPartition => Guid == FargoCoreWellKnowGuids.GlobalPartitionGuid;
 
     /// <summary>
     /// Gets or sets the name of the partition.
@@ -98,7 +98,7 @@ public class Partition : IEntity
     {
         var globalPartition = new Partition
         {
-            Guid = FargoCoreGuids.GlobalPartitionGuid,
+            Guid = FargoCoreWellKnowGuids.GlobalPartitionGuid,
             Name = name
         };
 

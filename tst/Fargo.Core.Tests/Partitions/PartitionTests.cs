@@ -10,7 +10,7 @@ public class PartitionTests
     {
         var partition = CreateGlobalPartition();
 
-        Assert.Equal(FargoCoreGuids.GlobalPartitionGuid, partition.Guid);
+        Assert.Equal(FargoCoreWellKnowGuids.GlobalPartitionGuid, partition.Guid);
         Assert.True(partition.IsGlobalPartition);
     }
 
@@ -31,7 +31,7 @@ public class PartitionTests
 
         var partition = CreatePartition(globalPartition);
 
-        Assert.NotEqual(FargoCoreGuids.GlobalPartitionGuid, partition.Guid);
+        Assert.NotEqual(FargoCoreWellKnowGuids.GlobalPartitionGuid, partition.Guid);
         Assert.False(partition.IsGlobalPartition);
     }
 

@@ -30,7 +30,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Gets a value indicating whether this is the built-in administrators user group.
     /// </summary>
-    public bool IsAdminUserGroup => Guid == FargoCoreGuids.AdminUserGroupGuid;
+    public bool IsAdminUserGroup => Guid == FargoCoreWellKnowGuids.AdminUserGroupGuid;
 
     /// <summary>
     /// Gets or sets the unique nameid of the user group.
@@ -91,7 +91,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     {
         var administratorsUsergroup = new UserGroup
         {
-            Guid = FargoCoreGuids.AdminUserGroupGuid,
+            Guid = FargoCoreWellKnowGuids.AdminUserGroupGuid,
             Nameid = nameid
         };
 
@@ -124,7 +124,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePartitionAccess(Guid partitionGuid)
     {
-        if (IsAdminUserGroup && partitionGuid == FargoCoreGuids.GlobalPartitionGuid)
+        if (IsAdminUserGroup && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
                 "Cannot revoke the administrators user group's access to the global partition.",
@@ -171,7 +171,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
-        if (IsAdminUserGroup && partitionGuid == FargoCoreGuids.GlobalPartitionGuid)
+        if (IsAdminUserGroup && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
                 "Cannot remove the administrators user group from the global partition.",

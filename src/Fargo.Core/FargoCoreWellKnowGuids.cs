@@ -3,7 +3,7 @@ namespace Fargo.Core;
 /// <summary>
 /// Provides well-known system GUIDs used by Fargo.
 /// </summary>
-public static class FargoCoreGuids
+public static class FargoCoreWellKnowGuids
 {
     /// <summary>
     /// The string representation of the global partition identifier.

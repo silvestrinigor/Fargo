@@ -36,7 +36,7 @@ public class UserService(IUserRepository userRepository)
     /// </exception>
     public static void ValidateUserCanBeDeleted(User user)
     {
-        if (user.Guid == FargoCoreGuids.AdminUserGuid)
+        if (user.Guid == FargoCoreWellKnowGuids.AdminUserGuid)
         {
             throw new FargoCoreException("The main administrator user cannot be deleted.", FargoCoreErrorType.None);
         }
