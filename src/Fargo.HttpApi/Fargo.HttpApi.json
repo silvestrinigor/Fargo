@@ -1570,7 +1570,14 @@
             "type": "string",
             "format": "uuid"
           },
-          "partitions": {
+          "parentItemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "partitionsToAdd": {
             "type": [
               "null",
               "array"
@@ -1616,24 +1623,40 @@
         }
       },
       "ItemUpdateDto": {
-        "required": [
-          "partitions"
-        ],
         "type": "object",
         "properties": {
-          "partitions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "parentContainerGuid": {
+          "parentItemContainerGuid": {
             "type": [
               "null",
               "string"
             ],
             "format": "uuid"
+          },
+          "removeFromParentItemContainer": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },

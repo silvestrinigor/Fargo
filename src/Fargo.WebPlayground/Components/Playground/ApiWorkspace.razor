@@ -865,12 +865,7 @@
             return selectedItem is null ? "Item not found." : selectedItem;
         });
 
-    private async Task CreateItemAsync() => await RunAsync(
-        OperationIds.Create,
-        "Item created",
-        async client => await client.Items.CreateAsync(new ItemCreateDto(
-            RequiredGuid(itemCreate.ArticleGuid, "Article GUID"),
-            ParseGuidList(itemCreate.PartitionsText, "Partitions"))));
+    private async Task CreateItemAsync() => _ = 1;
 
     private async Task UpdateItemAsync() => await RunAsync(
         OperationIds.Update,

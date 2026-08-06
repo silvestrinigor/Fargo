@@ -11,7 +11,6 @@ namespace Fargo.Application.Items;
 
 public sealed class ItemCreateCommandHandler(
     ActorService actorService,
-    ItemService itemService,
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
