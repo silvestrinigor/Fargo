@@ -27,14 +27,14 @@ public class PartitionService(IPartitionRepository partitionRepository)
 
         if (createsCircularHierarchy)
         {
-            CircularHierarchy(memberPartition.Guid, parentPartition.Guid);
+            ThrowCircularHierarchy(parentPartition.Guid, memberPartition.Guid);
         }
     }
 
-    private static FargoCoreException CircularHierarchy(Guid parent, Guid child) =>
-        new(
+    private static void ThrowCircularHierarchy(Guid parent, Guid child) =>
+        throw new FargoCoreException(
             $"Partition '{child}' cannot be assigned to parent '{parent}' because this would create a circular hierarchy.",
-            FargoCoreErrorType.None);
+            FargoCoreErrorType.InvalidOperation);
 
     /// <summary>
     /// Determines whether assigning the specified partition as a parent

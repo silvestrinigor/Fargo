@@ -78,7 +78,7 @@ public class PartitionTests
 
         void function() => globalPartition.SetParentPartition(partition);
 
-        var ex = Assert.Throws<FargoCoreException>(() => function());
+        var ex = Assert.Throws<FargoCoreException>(function);
         Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
     }
 
@@ -90,7 +90,7 @@ public class PartitionTests
 
         void function() => partition.SetParentPartition(partition);
 
-        var ex = Assert.Throws<FargoCoreException>(() => function());
+        var ex = Assert.Throws<FargoCoreException>(function);
         Assert.Equal(FargoCoreErrorType.InvalidArgument, ex.ErrorType);
     }
 }

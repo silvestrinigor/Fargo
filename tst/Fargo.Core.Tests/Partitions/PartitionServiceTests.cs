@@ -24,4 +24,21 @@ public class PartitionServiceTests
 
         await partitionService.ValidateParentPartitionAssignmentAsync(partition1, partition2);
     }
+
+    [Fact]
+    public async Task InsertIntoPartitionAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
+    {
+        var globalPartition = Partition.CreateGlobalPartition(default);
+        var partition1 = Partition.CreatePartition(default, globalPartition);
+        var partition2 = Partition.CreatePartition(default, partition1);
+        var partition3 = Partition.CreatePartition(default, partition2);
+        partitionRepository
+        .GetDescendantGuidsAsync(partition1.Guid, includeRoot: false, Arg.Any<CancellationToken>())
+        .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([partition2.Guid, partition3.Guid]));
+
+        async Task function() => await partitionService.ValidateParentPartitionAssignmentAsync(partition3, partition1);
+
+        var ex = await Assert.ThrowsAsync<FargoCoreException>(function);
+        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+    }
 }
