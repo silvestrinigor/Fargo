@@ -1,46 +1,15 @@
 namespace Fargo.Core.Security;
 
-/// <summary>
-/// Represents a hashed password value stored by the system.
-/// </summary>
-/// <remarks>
-/// This value object ensures that the stored value is not empty and conforms
-/// to the expected hash format constraints.
-///
-/// Plaintext passwords should never be persisted.
-/// </remarks>
 public readonly struct PasswordHash : IEquatable<PasswordHash>
 {
-    /// <summary>
-    /// Gets the underlying hash string.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the struct is not properly initialized.
-    /// </exception>
-    public string Value
-        => value ?? throw new InvalidOperationException("Password hash value must be set.");
+    public string Value { get; } = "AAAAAAAAAAAAAAAAAAAAAAA";
 
-    private readonly string value;
-
-    /// <summary>
-    /// Maximum allowed length for the password hash.
-    /// </summary>
     public const int MaxLength = 512;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PasswordHash"/> value object.
-    /// </summary>
-    /// <param name="value">The hashed password value.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the value is null, empty, or contains invalid characters.
-    /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the value length is outside the allowed range.
-    /// </exception>
     public PasswordHash(string value)
     {
         Validate(value);
-        this.value = value;
+        Value = value;
     }
 
     /// <summary>
@@ -53,7 +22,7 @@ public readonly struct PasswordHash : IEquatable<PasswordHash>
     /// Determines whether the current password hash is equal to another password hash.
     /// </summary>
     public bool Equals(PasswordHash other)
-        => string.Equals(value, other.value, StringComparison.Ordinal);
+        => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether the current password hash is equal to the specified object.
@@ -65,7 +34,7 @@ public readonly struct PasswordHash : IEquatable<PasswordHash>
     /// Returns a hash code for the current password hash.
     /// </summary>
     public override int GetHashCode()
-        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+        => Value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether two <see cref="PasswordHash"/> instances are equal.

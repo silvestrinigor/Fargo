@@ -11,7 +11,7 @@ public static class UserGroupDtoMappings
         userGroup.Nameid,
         userGroup.Description,
         userGroup.IsActive,
-        userGroup.IsAdminUserGroup,
+        userGroup.IsAdministrators,
         userGroup.ParentUserGroupGuid,
         userGroup.Permissions,
         userGroup.Partitions.Select(partition => partition.Guid).ToArray(),

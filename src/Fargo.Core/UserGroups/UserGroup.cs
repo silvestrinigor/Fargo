@@ -30,7 +30,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Gets a value indicating whether this is the built-in administrators user group.
     /// </summary>
-    public bool IsAdminUserGroup => Guid == FargoCoreWellKnowGuids.AdminUserGroupGuid;
+    public bool IsAdministrators => Guid == FargoCoreWellKnowGuids.AdminUserGroupGuid;
 
     /// <summary>
     /// Gets or sets the unique nameid of the user group.
@@ -128,7 +128,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePartitionAccess(Guid partitionGuid)
     {
-        if (IsAdminUserGroup && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        if (IsAdministrators && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
                 "Cannot revoke the administrators user group's access to the global partition.",
@@ -148,7 +148,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void AddPartition(Partition partition)
     {
-        if (IsAdminUserGroup && !partition.IsGlobalPartition)
+        if (IsAdministrators && !partition.IsGlobalPartition)
         {
             throw new FargoCoreException(
                 "Cannot associate the administrators user group with a non-global partition.",
@@ -175,7 +175,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
-        if (IsAdminUserGroup && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        if (IsAdministrators && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
                 "Cannot remove the administrators user group from the global partition.",
@@ -210,7 +210,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void RemovePermission(ActionType action)
     {
-        if (IsAdminUserGroup)
+        if (IsAdministrators)
         {
             throw new FargoCoreException(
                 "Cannot remove any permission from the administrators user group.",
@@ -236,7 +236,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </exception>
     public void Deactivate()
     {
-        if (IsAdminUserGroup)
+        if (IsAdministrators)
         {
             throw new FargoCoreException(
                 "Cannot deactivate the administrators user group.",
@@ -248,7 +248,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
 
     public void SetParentUserGroup(UserGroup parentUserGroup)
     {
-        if (IsAdminUserGroup)
+        if (IsAdministrators)
         {
             throw new FargoCoreException(
                 "Administrators user group cannot be added inside another user group.",
