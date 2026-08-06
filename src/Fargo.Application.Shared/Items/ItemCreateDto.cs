@@ -2,4 +2,6 @@ namespace Fargo.Application.Shared.Items;
 
 public sealed record ItemCreateDto(
     Guid ArticleGuid,
-    IReadOnlyCollection<Guid>? Partitions = null);
+    Guid? ParentItemContainerGuid = null,
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null
+);

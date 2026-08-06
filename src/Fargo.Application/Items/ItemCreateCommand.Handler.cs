@@ -2,6 +2,7 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
+using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
@@ -10,8 +11,10 @@ namespace Fargo.Application.Items;
 
 public sealed class ItemCreateCommandHandler(
     ActorService actorService,
+    ItemService itemService,
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<ItemCreateCommandHandler> logger
@@ -36,6 +39,31 @@ public sealed class ItemCreateCommandHandler(
         actor.ThrowIfAccessDenied(article);
 
         var item = Item.CreateItem(article);
+
+        if (command.Create.ParentItemContainerGuid is { } parentItemContainerGuid)
+        {
+            var parentItemContainer = await itemRepository.GetByGuidAsync(parentItemContainerGuid, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentItemContainer, parentItemContainerGuid, EntityType.Item);
+
+            actor.ThrowIfAccessDenied(parentItemContainer);
+
+            item.SetParentItemContainer(parentItemContainer);
+        }
+
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitionGuids)
+        {
+            foreach (var partitionGuid in partitionGuids)
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                item.AddPartition(partition);
+            }
+        }
 
         itemRepository.Add(item);
 
