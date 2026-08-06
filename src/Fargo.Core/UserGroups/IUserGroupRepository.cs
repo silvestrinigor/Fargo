@@ -13,11 +13,6 @@ public interface IUserGroupRepository
     Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets a user group by its unique <see cref="Nameid"/>.
-    /// </summary>
-    Task<UserGroup?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Determines whether a user group with the specified <see cref="Nameid"/> already exists.
     /// </summary>
     Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default);

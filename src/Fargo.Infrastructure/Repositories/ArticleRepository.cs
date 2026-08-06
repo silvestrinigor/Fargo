@@ -26,25 +26,24 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     public Task<bool> HasItemsAssociatedAsync(Guid articleGuid, CancellationToken cancellationToken = default)
     {
-        return context.Items.AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
+        return context.Items
+        .AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
     }
 
     public Task<bool> IsDependenceOfAnotherArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
     {
-        return context.Articles.AnyAsync(a =>
+        return context.Articles
+        .AnyAsync(a =>
             (a.Variation != null && a.Variation.FromArticleGuid == articleGuid)
             || (a.Pack != null && a.Pack.FromArticleGuid == articleGuid)
             || (a.KitComponents != null && a.KitComponents.Any(c => c.FromArticleGuid == articleGuid)),
             cancellationToken);
     }
 
-    public Task<bool> ExistsByBarcodeAsync(
-        Barcode barcode,
-        CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByBarcodeAsync(Barcode barcode, CancellationToken cancellationToken = default)
     {
-
         return ApplyBarcodeFilter(context.Articles, barcode)
-            .AnyAsync(cancellationToken);
+        .AnyAsync(cancellationToken);
     }
 
     public void Add(Article article)
@@ -69,9 +68,9 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             notChildOfAnyPartition);
 
         var article = await articleQueryFiltered
-            .Where(article => article.Guid == articleGuid)
-            .Select(ArticleDtoMapping.Projection)
-            .SingleOrDefaultAsync(cancellationToken);
+        .Where(article => article.Guid == articleGuid)
+        .Select(ArticleDtoMapping.Projection)
+        .SingleOrDefaultAsync(cancellationToken);
 
         return article;
     }

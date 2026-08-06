@@ -21,15 +21,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public void Remove(UserGroup userGroup) => userGroups.Remove(userGroup);
 
     public Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => userGroups
-            .Include(userGroup => userGroup.Partitions)
-            .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
-
-    public Task<UserGroup?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
-        => userGroups
-            .Include(userGroup => userGroup.Permissions)
-            .Include(userGroup => userGroup.Partitions)
-            .SingleOrDefaultAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);
+    {
+        return userGroups
+        .Include(userGroup => userGroup.Partitions)
+        .Include(userGroup => userGroup.PartitionAccesses)
+        .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
+    }
 
     public Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => userGroups.AnyAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);

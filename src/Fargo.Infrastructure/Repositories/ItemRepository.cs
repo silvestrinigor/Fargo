@@ -11,10 +11,12 @@ namespace Fargo.Infrastructure.Repositories;
 public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
     public Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => context.Items
-            .Include(item => item.Article)
-            .Include(item => item.Partitions)
-            .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+    {
+        return context.Items
+        .Include(item => item.Article)
+        .Include(item => item.Partitions)
+        .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+    }
 
     public async Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuidsAsync(
         Guid itemGuid,

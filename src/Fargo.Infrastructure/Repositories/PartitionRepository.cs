@@ -16,10 +16,8 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
     public Task<Partition?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
     {
-        var partitionTask = context.Partitions
-            .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
-
-        return partitionTask;
+        return context.Partitions
+        .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
     }
 
     public Task<PartitionDto?> GetInfoByGuid(
@@ -33,12 +31,10 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             childOfAnyOfThesePartitions,
             notChildOfAnyPartition);
 
-        var partitionTask = queryFiltered
-            .Where(partition => partition.Guid == entityGuid)
-            .Select(PartitionDtoMappings.Projection)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return partitionTask;
+        return queryFiltered
+        .Where(partition => partition.Guid == entityGuid)
+        .Select(PartitionDtoMappings.Projection)
+        .SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(

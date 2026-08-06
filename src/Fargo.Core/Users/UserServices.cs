@@ -19,9 +19,9 @@ public class UserService(IUserRepository userRepository)
     /// </exception>
     public async Task ValidateUserNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
-        var userWithTheNameid = await userRepository.GetByNameidAsync(nameid, cancellationToken);
+        var nameidInUse = await userRepository.ExistsByNameidAsync(nameid, cancellationToken);
 
-        if (userWithTheNameid is not null)
+        if (nameidInUse)
         {
             throw new FargoCoreException($"A user with Nameid '{nameid}' already exists.", FargoCoreErrorType.None);
         }

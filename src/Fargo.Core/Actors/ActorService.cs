@@ -27,14 +27,14 @@ public sealed class ActorService(IUserRepository userRepository, IPartitionRepos
         }
 
         var partitionAccessGuids = user.PartitionAccesses
-            .Select(p => p.Guid)
-            .ToHashSet();
+        .Select(p => p.Guid)
+        .ToHashSet();
 
         partitionAccessGuids.UnionWith(
             user.UserGroups
-                .Where(g => g.IsActive)
-                .SelectMany(g => g.PartitionAccesses)
-                .Select(p => p.Guid));
+            .Where(g => g.IsActive)
+            .SelectMany(g => g.PartitionAccesses)
+            .Select(p => p.Guid));
 
         var partitionDescendantAccessGuids = await partitionRepository.GetDescendantGuidsAsync(
             partitionGuids: partitionAccessGuids,

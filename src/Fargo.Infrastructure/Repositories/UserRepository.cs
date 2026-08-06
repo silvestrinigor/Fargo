@@ -28,9 +28,6 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         => IncludeAggregate(users)
             .SingleOrDefaultAsync(user => user.Nameid == nameid, cancellationToken);
 
-    public Task<bool> ExistsByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
-        => users.AnyAsync(user => user.Guid == guid, cancellationToken);
-
     public Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => users.AnyAsync(user => user.Nameid == nameid, cancellationToken);
 
@@ -74,9 +71,9 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
         => query
         .Include(user => user.UserGroups)
-            .ThenInclude(group => group.PartitionAccesses)
+        .ThenInclude(group => group.PartitionAccesses)
         .Include(user => user.UserGroups)
-            .ThenInclude(group => group.Partitions)
+        .ThenInclude(group => group.Partitions)
         .Include(user => user.PartitionAccesses)
         .Include(user => user.Partitions)
         .Include(user => user.Authentication)
