@@ -54,14 +54,14 @@ public class UserGroupService(IUserGroupRepository userGroupRepository)
 
         if (createsCircularHierarchy)
         {
-            CircularHierarchy(memberUserGroup.Guid, parentUserGroup.Guid);
+            ThrowCircularHierarchy(memberUserGroup.Guid, parentUserGroup.Guid);
         }
     }
 
-    private static FargoCoreException CircularHierarchy(Guid parent, Guid child) =>
-        new(
+    private static void ThrowCircularHierarchy(Guid parent, Guid child) =>
+        throw new FargoCoreException(
             $"User group '{child}' cannot be assigned to parent '{parent}' because this would create a circular hierarchy.",
-            FargoCoreErrorType.None);
+            FargoCoreErrorType.InvalidOperation);
 
     private async Task<bool> CreatesCircularHierarchyAsync(
         UserGroup candidateParentUserGroup, Guid memberUserGroupGuid, CancellationToken cancellationToken)

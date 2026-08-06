@@ -1,5 +1,3 @@
-using Fargo.Core.Shared.Articles;
-
 namespace Fargo.Core.Items;
 
 /// <summary>
@@ -33,20 +31,6 @@ public sealed class ItemService(IItemRepository itemRepository)
     {
         ArgumentNullException.ThrowIfNull(parentContainerItem);
         ArgumentNullException.ThrowIfNull(memberItem);
-
-        if (parentContainerItem.Guid == memberItem.Guid)
-        {
-            throw new FargoCoreException(
-                $"Item '{memberItem.Guid}' cannot be assigned to itself as a container.",
-                FargoCoreErrorType.InvalidArgument);
-        }
-
-        if (parentContainerItem.Article.ArticleType != ArticleType.Container)
-        {
-            throw new FargoCoreException(
-                $"Item '{parentContainerItem.Guid}' is not a container item.",
-                FargoCoreErrorType.InvalidArgument);
-        }
 
         var descendantItemGuids = await itemRepository.GetContainerDescendantGuidsAsync(
             memberItem.Guid,

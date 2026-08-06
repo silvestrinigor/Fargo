@@ -1,6 +1,7 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared.Articles;
 
 namespace Fargo.Core.Items;
 
@@ -102,7 +103,7 @@ public class Item : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Assigns the specified container item as the parent of the current item.
     /// </summary>
-    /// <param name="item">
+    /// <param name="itemContainer">
     /// The parent container item.
     /// </param>
     /// <remarks>
@@ -110,15 +111,22 @@ public class Item : IEntity, IPartitionedReadOnly
     /// hierarchies and verifying that the parent is a container item, must be
     /// performed before calling this method.
     /// </remarks>
-    public void SetParentItemContainer(Item item)
+    public void SetParentItemContainer(Item itemContainer)
     {
-        if (item.Guid == Guid)
+        if (itemContainer.Guid == Guid)
         {
             throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.");
         }
 
-        ParentItemContainer = item;
-        ParentItemContainerGuid = item.Guid;
+        if (itemContainer.Article.ArticleType != ArticleType.Container)
+        {
+            throw new FargoCoreException(
+                $"Item '{itemContainer.Guid}' is not a container item.",
+                FargoCoreErrorType.InvalidArgument);
+        }
+
+        ParentItemContainer = itemContainer;
+        ParentItemContainerGuid = itemContainer.Guid;
     }
 
     /// <summary>
