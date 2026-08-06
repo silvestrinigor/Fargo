@@ -12,7 +12,7 @@ public interface IArticleRepository
     /// </summary>
     Task<Article?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
-    Task<bool> ExistsByBarcodeAsync(Barcode barcode, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByEan13Async(Ean13 ean13, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether the specified article has any associated items.

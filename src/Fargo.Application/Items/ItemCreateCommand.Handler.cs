@@ -19,9 +19,7 @@ public sealed class ItemCreateCommandHandler(
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
-    public async Task<Guid> HandleAsync(
-        ItemCreateCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
     {
         logger.CreateStarted(command.Create.ArticleGuid, currentActor.Guid);
 

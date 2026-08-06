@@ -40,10 +40,10 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             cancellationToken);
     }
 
-    public Task<bool> ExistsByBarcodeAsync(Barcode barcode, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByEan13Async(Ean13 ean13, CancellationToken cancellationToken = default)
     {
-        return ApplyBarcodeFilter(context.Articles, barcode)
-        .AnyAsync(cancellationToken);
+        return context.Articles
+        .AnyAsync(a => a.Barcode.Ean13 == ean13, cancellationToken);
     }
 
     public void Add(Article article)

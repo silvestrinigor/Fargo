@@ -28,9 +28,9 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task ValidateBarcodeIsAvailableAsync(Barcode barcode, CancellationToken cancellationToken = default)
+    public async Task ValidateEan13IsAvailableAsync(Ean13 ean13, CancellationToken cancellationToken = default)
     {
-        var exists = await articleRepository.ExistsByBarcodeAsync(barcode, cancellationToken);
+        var exists = await articleRepository.ExistsByEan13Async(ean13, cancellationToken);
 
         if (exists)
         {
