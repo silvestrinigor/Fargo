@@ -47,8 +47,8 @@ public class Partition : IEntity
     /// Gets the unique identifier of the parent partition, if any.
     /// </summary>
     /// <remarks>
-    /// A <see langword="null"/> value indicates that the partition is the
-    /// global partition, which is the root of the partition hierarchy.
+    /// A <see langword="null"/> value indicates that this is the global partition,
+    /// which is the root of the partition hierarchy.
     /// </remarks>
     public Guid? ParentPartitionGuid { get; private set; }
 
@@ -70,7 +70,7 @@ public class Partition : IEntity
     }
 
     /// <summary>
-    /// Creates a new partition.
+    /// Creates a new child partition.
     /// </summary>
     /// <param name="name">The name of the partition.</param>
     /// <param name="parentPartition">
@@ -111,22 +111,34 @@ public class Partition : IEntity
     /// <param name="parentPartition">
     /// The partition to assign as the parent.
     /// </param>
+    /// <remarks>
+    /// This method validates only invariants that can be enforced by this
+    /// <see cref="Partition"/> instance. It does <b>not</b> validate the overall
+    /// partition hierarchy or detect circular parent-child relationships.
+    ///
+    /// Before calling this method, the application should validate the proposed
+    /// assignment using <see cref="PartitionService"/> to ensure that assigning
+    /// <paramref name="parentPartition"/> as the parent will not introduce an
+    /// invalid hierarchy.
+    /// </remarks>
     /// <exception cref="FargoCoreException">
     /// Thrown when attempting to assign a parent to the global partition or when
     /// attempting to assign the partition as its own parent.
     /// </exception>
     public void SetParentPartition(Partition parentPartition)
     {
+        ArgumentNullException.ThrowIfNull(parentPartition);
+
         if (IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "The global partition cannot have a parent partition.", FargoCoreErrorType.InvalidOperation);
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot have a parent partition.", FargoCoreErrorType.InvalidOperation);
         }
 
         if (parentPartition.Guid == Guid)
         {
             throw new FargoCoreException(
-                "A partition cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
+                $"The partition partition '{Guid}' cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
         }
 
         ParentPartition = parentPartition;

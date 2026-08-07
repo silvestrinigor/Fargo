@@ -1,7 +1,8 @@
 namespace Fargo.Core.Partitions;
 
 /// <summary>
-/// Provides domain operations and validation rules for <see cref="Partition"/> entities.
+/// Provides domain operations and validations that require access to
+/// <see cref="Partition"/> persistence or multiple partitions.
 /// </summary>
 /// <remarks>
 /// This service contains business rules that require repository access and
@@ -10,31 +11,47 @@ namespace Fargo.Core.Partitions;
 public sealed class PartitionService(IPartitionRepository partitionRepository)
 {
     /// <summary>
-    /// Ensures that assigning the specified parent partition to the specified
-    /// member partition would not create a circular hierarchy.
+    /// Validates that assigning the specified parent partition to the specified
+    /// child partition would result in a valid partition hierarchy.
     /// </summary>
-    /// <param name="parentPartition">The candidate parent partition.</param>
-    /// <param name="memberPartition">The partition whose parent is being assigned.</param>
-    /// <param name="cancellationToken">A token used to cancel the operation.</param>
-    /// <exception cref="FargoCoreException">
-    /// Thrown if assigning the parent would create a circular hierarchy.
+    /// <param name="parentPartition">
+    /// The partition that will become the parent.
+    /// </param>
+    /// <param name="childPartition">
+    /// The partition that will become the child.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentPartition"/> or
+    /// <paramref name="childPartition"/> is <see langword="null"/>.
     /// </exception>
-    public async Task ValidateParentPartitionAssignmentAsync(
-        Partition parentPartition, Partition memberPartition, CancellationToken cancellationToken = default)
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the assignment would create a circular partition hierarchy.
+    /// </exception>
+    /// <remarks>
+    /// This method should be called before
+    /// <see cref="Partition.SetParentPartition(Partition)"/> because validating
+    /// the complete hierarchy requires access to other partitions through the
+    /// repository.
+    /// </remarks>
+    public async Task ValidateParentPartitionHierarchyAssignmentAsync(
+        Partition parentPartition, Partition childPartition, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(parentPartition);
+        ArgumentNullException.ThrowIfNull(childPartition);
+
         var createsCircularHierarchy = await CreatesCircularHierarchyAsync(
-            parentPartition, memberPartition.Guid, cancellationToken);
+            parentPartition, childPartition.Guid, cancellationToken);
 
         if (createsCircularHierarchy)
         {
-            ThrowCircularHierarchy(parentPartition.Guid, memberPartition.Guid);
+            throw new FargoCoreException(
+                $"Partition '{childPartition.Guid}' cannot be assigned to parent partition '{parentPartition.Guid}' because this would create a circular hierarchy.",
+                FargoCoreErrorType.InvalidOperation);
         }
     }
-
-    private static void ThrowCircularHierarchy(Guid parent, Guid child) =>
-        throw new FargoCoreException(
-            $"Partition '{child}' cannot be assigned to parent '{parent}' because this would create a circular hierarchy.",
-            FargoCoreErrorType.InvalidOperation);
 
     /// <summary>
     /// Determines whether assigning the specified partition as a parent
@@ -80,11 +97,13 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
     /// </exception>
     public async Task ValidatePartitionCanBeDeletedAsync(Partition partition, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
         if (partition.IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "The global partition cannot be deleted.",
-                FargoCoreErrorType.None);
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot be deleted.",
+                FargoCoreErrorType.InvalidOperation);
         }
 
         var hasAssociatedEntities = await partitionRepository.HasAnyAssociatedEntityAsync(partition.Guid, cancellationToken);
@@ -93,7 +112,7 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         {
             throw new FargoCoreException(
                 $"Partition '{partition.Guid}' cannot be deleted because it has associated entities.",
-                FargoCoreErrorType.None);
+                FargoCoreErrorType.InvalidOperation);
         }
     }
 }

@@ -24,7 +24,7 @@ public class PartitionServiceTests
         .GetDescendantGuidsAsync(partition2.Guid, includeRoot: false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([]));
 
-        await partitionService.ValidateParentPartitionAssignmentAsync(partition1, partition2);
+        await partitionService.ValidateParentPartitionHierarchyAssignmentAsync(partition1, partition2);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class PartitionServiceTests
         .GetDescendantGuidsAsync(partition1.Guid, includeRoot: false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([partition2.Guid, partition3.Guid]));
 
-        async Task function() => await partitionService.ValidateParentPartitionAssignmentAsync(partition3, partition1);
+        async Task function() => await partitionService.ValidateParentPartitionHierarchyAssignmentAsync(partition3, partition1);
 
         var ex = await Assert.ThrowsAsync<FargoCoreException>(function);
         Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
