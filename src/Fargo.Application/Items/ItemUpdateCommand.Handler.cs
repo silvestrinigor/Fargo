@@ -44,13 +44,13 @@ public sealed class ItemUpdateCommandHandler(
 
             actor.ThrowIfAccessDenied(parentItemContainer);
 
-            await itemService.ValidateParentContainerAssignmentAsync(parentItemContainer, item, cancellationToken);
+            await itemService.ValidateParentItemContainerAssignmentAsync(parentItemContainer, item, cancellationToken);
 
             item.SetParentItemContainer(parentItemContainer);
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {
-            item.RemoveItemFromParentItemContainer();
+            item.RemoveParentItemContainer();
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionGuidsToAdd)

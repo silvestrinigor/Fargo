@@ -130,13 +130,13 @@ public class Item : IEntity, IPartitionedReadOnly
     }
 
     /// <summary>
-    /// Removes the item from its parent container.
+    /// Removes the item parent container.
     /// </summary>
     /// <remarks>
     /// After calling this method, the item is no longer contained within another
     /// item.
     /// </remarks>
-    public void RemoveItemFromParentItemContainer()
+    public void RemoveParentItemContainer()
     {
         ParentItemContainer = null;
         ParentItemContainerGuid = null;

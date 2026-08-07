@@ -24,7 +24,7 @@ public sealed class ItemService(IItemRepository itemRepository)
     /// Thrown if the destination item is not a container, if the item is assigned
     /// to itself, or if the assignment would create a circular hierarchy.
     /// </exception>
-    public async Task ValidateParentContainerAssignmentAsync(
+    public async Task ValidateParentItemContainerAssignmentAsync(
         Item parentContainerItem,
         Item memberItem,
         CancellationToken cancellationToken = default)
