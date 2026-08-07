@@ -44,9 +44,9 @@ public sealed class ItemUpdateCommandHandler(
 
             actor.ThrowIfAccessDenied(parentItemContainer);
 
-            await itemService.ValidateParentItemContainerAssignmentAsync(parentItemContainer, item, cancellationToken);
+            await itemService.ValidateParentItemContainerHierarchyAssignmentAsync(parentItemContainer, item, cancellationToken);
 
-            item.SetParentItemContainer(parentItemContainer);
+            item.PlaceInsideContainer(parentItemContainer);
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {

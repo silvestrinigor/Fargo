@@ -2,6 +2,7 @@ using Fargo.Application;
 using Fargo.Application.Items;
 using Fargo.Application.Shared.Items;
 using Fargo.Core.Items;
+using Fargo.Core.Shared.Articles;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -18,28 +19,37 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuidsAsync(
-        Guid itemGuid,
+    public async Task<IReadOnlyCollection<Guid>> GetContainedDescendantGuidsAsync(
+        Guid itemContainerGuid,
         bool includeRoot = true,
         CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
-            WITH ItemContainerTree AS
-            (
-                SELECT [Guid], [ParentContainerGuid]
-                FROM [Items]
-                WHERE [Guid] = {itemGuid}
+    WITH ItemTree AS
+    (
+        SELECT
+            item.[Guid],
+            item.[ParentContainerGuid],
+            item.[ArticleGuid]
+        FROM [Items] AS item
+        INNER JOIN [Articles] AS article
+            ON article.[Guid] = item.[ArticleGuid]
+        WHERE item.[Guid] = {itemContainerGuid}
+          AND article.[ArticleType] = {(int)ArticleType.Container}
 
-                UNION ALL
+        UNION ALL
 
-                SELECT child.[Guid], child.[ParentContainerGuid]
-                FROM [Items] AS child
-                INNER JOIN ItemContainerTree AS parent
-                    ON child.[ParentContainerGuid] = parent.[Guid]
-            )
-            SELECT [Guid]
-            FROM ItemContainerTree
-            """;
+        SELECT
+            child.[Guid],
+            child.[ParentContainerGuid],
+            child.[ArticleGuid]
+        FROM [Items] AS child
+        INNER JOIN ItemTree AS parent
+            ON child.[ParentContainerGuid] = parent.[Guid]
+    )
+    SELECT [Guid]
+    FROM ItemTree
+    """;
 
         var guids = await context.Database
             .SqlQuery<Guid>(query)
@@ -47,7 +57,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
         if (!includeRoot)
         {
-            guids.RemoveAll(guid => guid == itemGuid);
+            guids.Remove(itemContainerGuid);
         }
 
         return guids;

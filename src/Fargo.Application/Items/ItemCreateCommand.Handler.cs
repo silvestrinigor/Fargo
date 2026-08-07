@@ -45,7 +45,7 @@ public sealed class ItemCreateCommandHandler(
 
             actor.ThrowIfAccessDenied(parentItemContainer);
 
-            item.SetParentItemContainer(parentItemContainer);
+            item.PlaceInsideContainer(parentItemContainer);
         }
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitionGuids)

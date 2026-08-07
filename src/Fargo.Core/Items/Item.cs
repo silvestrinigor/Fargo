@@ -47,7 +47,8 @@ public class Item : IEntity, IPartitionedReadOnly
     /// Gets the unique identifier of the parent container item.
     /// </summary>
     /// <remarks>
-    /// When <see langword="null"/>, the item is not currently inside another item container.
+    /// A <see langword="null"/> value indicates that the item is not currently
+    /// placed inside another item.
     /// </remarks>
     public Guid? ParentItemContainerGuid { get; private set; }
 
@@ -55,8 +56,12 @@ public class Item : IEntity, IPartitionedReadOnly
     /// Gets the container item that directly contains this item, if any.
     /// </summary>
     /// <remarks>
+    /// Items can be placed inside container items, allowing nested containment
+    /// relationships where a container may itself be placed inside another
+    /// container.
+    ///
     /// A <see langword="null"/> value indicates that the item is not currently
-    /// contained within another item.
+    /// placed inside another item.
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
@@ -68,6 +73,7 @@ public class Item : IEntity, IPartitionedReadOnly
     /// in partition-based access evaluation.
     /// </remarks>
     public IReadOnlyCollection<Partition> Partitions => partitions;
+
     private readonly List<Partition> partitions = [];
 
     /// <summary>
@@ -107,38 +113,41 @@ public class Item : IEntity, IPartitionedReadOnly
     /// The parent container item.
     /// </param>
     /// <remarks>
-    /// Repository-dependent validation, such as preventing circular container
-    /// hierarchies and verifying that the parent is a container item, must be
-    /// performed before calling this method.
+    /// This method does not validate the complete item containment hierarchy.
+    /// The application should use <see cref="ItemService"/> to validate that
+    /// assigning the parent container does not create a circular hierarchy.
     /// </remarks>
-    public void SetParentItemContainer(Item itemContainer)
+    public void PlaceInsideContainer(Item itemContainer)
     {
+        ArgumentNullException.ThrowIfNull(itemContainer);
+
         if (itemContainer.Guid == Guid)
         {
-            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.");
+            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoCoreErrorType.InvalidArgument);
         }
 
         if (itemContainer.Article.ArticleType != ArticleType.Container)
         {
             throw new FargoCoreException(
-                $"Item '{itemContainer.Guid}' is not a container item.",
-                FargoCoreErrorType.InvalidArgument);
+                $"Item '{itemContainer.Guid}' is not a container item.", FargoCoreErrorType.InvalidArgument);
         }
 
         ParentItemContainer = itemContainer;
+
         ParentItemContainerGuid = itemContainer.Guid;
     }
 
     /// <summary>
-    /// Removes the item parent container.
+    /// Removes the parent container association from this item.
     /// </summary>
     /// <remarks>
-    /// After calling this method, the item is no longer contained within another
-    /// item.
+    /// After calling this method, the item is no longer placed inside another
+    /// container item.
     /// </remarks>
     public void RemoveParentItemContainer()
     {
         ParentItemContainer = null;
+
         ParentItemContainerGuid = null;
     }
 
