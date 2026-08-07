@@ -34,7 +34,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(userGroup);
 
-        await userGroupService.ValidateUserGroupDelete(userGroup, cancellationToken);
+        await userGroupService.ValidateUserGroupCanBeDeletedAsync(userGroup, cancellationToken);
 
         userGroupRepository.Remove(userGroup);
 

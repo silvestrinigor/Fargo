@@ -62,7 +62,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
             actor.ThrowIfAccessDenied(parentUserGroup);
 
-            await userGroupService.ValidateParentUserGroupAssignmentAsync(parentUserGroup, userGroup, cancellationToken);
+            await userGroupService.ValidateParentUserGroupAssignmentHierarchyAsync(parentUserGroup, userGroup, cancellationToken);
 
             userGroup.SetParentUserGroup(parentUserGroup);
         }

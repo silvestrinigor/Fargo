@@ -23,7 +23,7 @@ public class UserGroupServiceTests
         .GetDescendantUserGroupGuidsAsync(userGroup2.Guid, includeRoot: false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([]));
 
-        await userGroupService.ValidateParentUserGroupAssignmentAsync(userGroup1, userGroup2);
+        await userGroupService.ValidateParentUserGroupAssignmentHierarchyAsync(userGroup1, userGroup2);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class UserGroupServiceTests
         .GetDescendantUserGroupGuidsAsync(userGroup1.Guid, includeRoot: false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([userGroup2.Guid, userGroup3.Guid]));
 
-        async Task function() => await userGroupService.ValidateParentUserGroupAssignmentAsync(userGroup3, userGroup1);
+        async Task function() => await userGroupService.ValidateParentUserGroupAssignmentHierarchyAsync(userGroup3, userGroup1);
 
         var ex = await Assert.ThrowsAsync<FargoCoreException>(function);
         Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);

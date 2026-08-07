@@ -8,14 +8,16 @@ namespace Fargo.Core.UserGroups;
 public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 {
     /// <summary>
-    /// Validates that the specified <paramref name="nameid"/> is available for use
-    /// by a user group.
+    /// Validates that the specified <see cref="Nameid"/> is available for use by a
+    /// user group.
     /// </summary>
     /// <param name="nameid">The name identifier to validate.</param>
-    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
     /// <exception cref="FargoCoreException">
     /// Thrown when another user group already uses the specified
-    /// <paramref name="nameid"/>.
+    /// <see cref="Nameid"/>.
     /// </exception>
     public async Task ValidateUserGroupNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
@@ -23,17 +25,29 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 
         if (alreadyExistsWithName)
         {
-            throw new FargoCoreException(
-                $"The userGroup nameid '{nameid}' is already in use.", FargoCoreErrorType.None);
+            throw new FargoCoreException($"A user group with Nameid '{nameid}' already exists.", FargoCoreErrorType.InvalidOperation);
         }
     }
 
-    public async Task ValidateUserGroupDelete(UserGroup userGroup, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Validates that the specified user group can be deleted.
+    /// </summary>
+    /// <param name="userGroup">
+    /// The user group to validate.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to delete the built-in administrators user group
+    /// or when the user group has one or more child user groups.
+    /// </exception>
+    public async Task ValidateUserGroupCanBeDeletedAsync(UserGroup userGroup, CancellationToken cancellationToken = default)
     {
-        if (userGroup.Guid == FargoCoreWellKnowGuids.AdministratorsUserGroupGuid)
+        if (userGroup.IsAdministrators)
         {
             throw new FargoCoreException(
-                "The default administrators user group cannot be deleted.", FargoCoreErrorType.None);
+                $"The administrators user group '{userGroup.Guid}' cannot be deleted.", FargoCoreErrorType.InvalidOperation);
         }
 
         var anyChildUserGroup = await userGroupRepository.HasChildrenUserGroupAsync(userGroup.Guid, cancellationToken);
@@ -42,26 +56,49 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
         {
             throw new FargoCoreException(
                 $"User group '{userGroup.Guid}' cannot be deleted because it has child user groups.",
-                FargoCoreErrorType.None);
+                FargoCoreErrorType.InvalidOperation);
         }
     }
 
-    public async Task ValidateParentUserGroupAssignmentAsync(
-        UserGroup parentUserGroup, UserGroup memberUserGroup, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Validates that assigning the specified parent user group to the specified
+    /// child user group would result in a valid hierarchy.
+    /// </summary>
+    /// <param name="parentUserGroup">
+    /// The user group that will become the parent.
+    /// </param>
+    /// <param name="childUserGroup">
+    /// The user group that will become the child.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentUserGroup"/> or
+    /// <paramref name="childUserGroup"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the assignment would create a circular user group hierarchy.
+    /// </exception>
+    /// <remarks>
+    /// This method should be called before
+    /// <see cref="UserGroup.SetParentUserGroup(UserGroup)"/> because validating
+    /// the complete hierarchy requires access to other user groups through the
+    /// repository.
+    /// </remarks>
+    public async Task ValidateParentUserGroupAssignmentHierarchyAsync(
+        UserGroup parentUserGroup, UserGroup childUserGroup, CancellationToken cancellationToken = default)
     {
         var createsCircularHierarchy = await CreatesCircularHierarchyAsync(
-            parentUserGroup, memberUserGroup.Guid, cancellationToken);
+            parentUserGroup, childUserGroup.Guid, cancellationToken);
 
         if (createsCircularHierarchy)
         {
-            ThrowCircularHierarchy(memberUserGroup.Guid, parentUserGroup.Guid);
+            throw new FargoCoreException(
+                $"User group '{childUserGroup.Guid}' cannot be assigned to parent '{parentUserGroup.Guid}' because this would create a circular hierarchy.",
+                FargoCoreErrorType.InvalidOperation);
         }
     }
-
-    private static void ThrowCircularHierarchy(Guid parent, Guid child) =>
-        throw new FargoCoreException(
-            $"User group '{child}' cannot be assigned to parent '{parent}' because this would create a circular hierarchy.",
-            FargoCoreErrorType.InvalidOperation);
 
     private async Task<bool> CreatesCircularHierarchyAsync(
         UserGroup candidateParentUserGroup, Guid memberUserGroupGuid, CancellationToken cancellationToken)
