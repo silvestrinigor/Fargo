@@ -20,7 +20,7 @@ public sealed class IdentityPasswordHasher : IPasswordHasher
         var result = _hasher.VerifyHashedPassword(
             null!,
             hashedPassword.Value,
-            providedPassword
+            providedPassword.Value
         );
 
         return result != PasswordVerificationResult.Failed;

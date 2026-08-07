@@ -1,22 +1,47 @@
 namespace Fargo.Core.Security;
 
+/// <summary>
+/// Represents a cryptographic hash of a password.
+/// </summary>
+/// <remarks>
+/// This value object encapsulates a stored password hash.
+/// </remarks>
 public readonly struct PasswordHash : IEquatable<PasswordHash>
 {
-    public string Value { get; } = "AAAAAAAAAAAAAAAAAAAAAAA";
-
+    /// <summary>
+    /// The maximum allowed length, in characters, of a password hash.
+    /// </summary>
     public const int MaxLength = 512;
 
+    /// <summary>
+    /// Gets the underlying password hash value.
+    /// </summary>
+    /// <remarks>
+    /// This value is intended for persistence and password verification.
+    /// It should not be exposed to clients or written to logs.
+    /// </remarks>
+    public string Value { get; }
+
+    /// <summary>
+    /// Initializes a new <see cref="PasswordHash"/> instance with the specified
+    /// password hash.
+    /// </summary>
+    /// <param name="value">
+    /// The password hash value.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="value"/> is <see langword="null"/>, empty,
+    /// or consists only of white-space characters.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="value"/> exceeds
+    /// <see cref="MaxLength"/> characters.
+    /// </exception>
     public PasswordHash(string value)
     {
         Validate(value);
         Value = value;
     }
-
-    /// <summary>
-    /// Creates a <see cref="PasswordHash"/> from the specified string.
-    /// </summary>
-    public static PasswordHash FromString(string value)
-        => new(value);
 
     /// <summary>
     /// Determines whether the current password hash is equal to another password hash.
