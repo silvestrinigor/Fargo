@@ -4,7 +4,7 @@ namespace Fargo.Core.Shared.Barcodes;
 /// EAN-13 barcode value assigned to an article.
 /// Code must be exactly 13 digits.
 /// </summary>
-public readonly struct Ean13 : IEquatable<Ean13>
+public readonly struct Ean13 : IBarcode, IEquatable<Ean13>
 {
     /// <summary>
     /// Gets the const EAN-13 length.

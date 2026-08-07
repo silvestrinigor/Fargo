@@ -147,14 +147,14 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     private static IQueryable<Article> ApplyBarcodeFilter(IQueryable<Article> query, Barcode barcode)
     {
 
-        return barcode.Format switch
+        return barcode.BarcodeFormat switch
         {
             BarcodeFormat.Ean13 =>
-                query.Where(a => a.Barcode.Ean13 == new Ean13(barcode.Value)),
+                query.Where(a => a.Barcode.Ean13 == (Ean13)barcode.Value),
 
             _ => throw new ArgumentOutOfRangeException(
                 nameof(barcode),
-                barcode.Format,
+                barcode.BarcodeFormat,
                 "Unsupported barcode format.")
         };
     }

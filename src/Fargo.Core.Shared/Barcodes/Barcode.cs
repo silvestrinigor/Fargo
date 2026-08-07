@@ -1,57 +1,29 @@
 namespace Fargo.Core.Shared.Barcodes;
 
-/// <summary>
-/// Represents a barcode value together with its symbology format.
-/// </summary>
-public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
+public readonly struct Barcode : IParsable<Barcode>, IEquatable<Barcode>
 {
-    /// <summary>
-    /// Gets the raw barcode value.
-    /// </summary>
-    public string Value { get; } = string.Empty;
+    public IBarcode Value { get; } = new BarcodeNone();
 
-    /// <summary>
-    /// Gets the barcode format.
-    /// </summary>
-    public BarcodeFormat Format { get; } = BarcodeFormat.None;
+    public BarcodeFormat BarcodeFormat { get; } = BarcodeFormat.None;
 
-    /// <summary>
-    /// Initializes a new barcode value.
-    /// </summary>
-    /// <param name="code">The barcode value.</param>
-    /// <param name="format">The barcode symbology format.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the value is invalid for the specified format.
-    /// </exception>
-    public Barcode(string code, BarcodeFormat format)
+    public Barcode(IBarcode value, BarcodeFormat format)
     {
-        Validate(code, format);
+        ArgumentNullException.ThrowIfNull(value);
 
-        Value = code;
-        Format = format;
+        Value = value;
+        BarcodeFormat = format;
     }
 
-    public bool Equals(Barcode other)
-        => Format == other.Format &&
-           string.Equals(Value, other.Value, StringComparison.Ordinal);
-
-    public override bool Equals(object? obj)
-        => obj is Barcode other && Equals(other);
-
-    public override int GetHashCode()
-        => HashCode.Combine(
-            Format, Value?.GetHashCode(StringComparison.Ordinal));
-
-    public override string ToString() => $"{Value}:{Format}";
+    public override string ToString() => $"{Value}:{BarcodeFormat}";
 
     public static Barcode Parse(string s, IFormatProvider? provider)
     {
-        if (TryParse(s, provider, out var result))
+        if (!TryParse(s, provider, out var result))
         {
-            return result;
+            throw new FormatException($"Invalid barcode value: '{s}'.");
         }
 
-        throw new FormatException($"Invalid barcode value: '{s}'. Expected '{{code}}:{{format}}'.");
+        return result;
     }
 
     public static bool TryParse(string? s, IFormatProvider? provider, out Barcode result)
@@ -69,42 +41,35 @@ public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
             return false;
         }
 
-        var code = s[..separator];
+        var value = s[..separator];
         var formatText = s[(separator + 1)..];
 
-        if (string.IsNullOrWhiteSpace(code) ||
-            !Enum.TryParse<BarcodeFormat>(formatText, ignoreCase: true, out var format))
+        if (!Enum.TryParse<BarcodeFormat>(formatText, true, out var format))
         {
             return false;
         }
 
-        try
-        {
-            result = new Barcode(code, format);
-            return true;
-        }
-        catch (ArgumentException)
+        if (!BarcodeFactory.TryCreate(format, value, out var barcode))
         {
             return false;
         }
+
+        result = new Barcode(barcode, format);
+        return true;
     }
 
-    public static bool operator ==(Barcode left, Barcode right) => left.Equals(right);
+    public bool Equals(Barcode other)
+        => Value.Equals(other.Value) && BarcodeFormat.Equals(other.BarcodeFormat);
 
-    public static bool operator !=(Barcode left, Barcode right) => !left.Equals(right);
+    public override bool Equals(object? obj)
+        => obj is Barcode other && Equals(other);
 
-    private static void Validate(string code, BarcodeFormat format)
-    {
-        _ = format switch
-        {
-            BarcodeFormat.Ean13 => new Ean13(code),
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(format), format, "Unsupported barcode format."),
-        };
-    }
+    public override int GetHashCode()
+        => Value.GetHashCode();
 
-    public static Barcode FromEan13(Ean13 ean13)
-    {
-        return new Barcode(ean13.Value, BarcodeFormat.Ean13);
-    }
+    public static bool operator ==(Barcode left, Barcode right)
+        => left.Equals(right);
+
+    public static bool operator !=(Barcode left, Barcode right)
+        => !left.Equals(right);
 }
