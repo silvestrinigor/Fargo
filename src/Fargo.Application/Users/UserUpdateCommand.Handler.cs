@@ -4,7 +4,6 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Entities;
-using Fargo.Core.Shared.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -65,15 +64,13 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.Update.Authentication is { } auth)
         {
-            if (auth.Password is not null)
+            if (auth.Password is { } password)
             {
                 actor.ThrowIfPermissionDenied(ActionType.ChangeAnotherUserPassword);
 
-                var password = new Password(auth.Password);
-
                 var passwordHash = passwordHasher.Hash(password);
 
-                user.Authentication.PasswordHash = passwordHash;
+                user.Authentication.SetPasswordHash(passwordHash);
 
                 user.Authentication.MarkPasswordChangeAsRequired();
             }

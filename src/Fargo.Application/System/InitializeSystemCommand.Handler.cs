@@ -77,7 +77,7 @@ public sealed class InitializeSystemCommandHandler(
 
         var admin = User.CreateAdministratorUser(command.UserAdminNameid);
 
-        admin.Authentication.PasswordHash = passwordHash;
+        admin.Authentication.SetPasswordHash(passwordHash);
 
         admin.Description = command.UserAdminDescription;
 

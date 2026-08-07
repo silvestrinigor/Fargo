@@ -20,7 +20,7 @@ public class UserAuthentication
     /// <summary>
     /// Gets or sets the hashed password of the user.
     /// </summary>
-    public PasswordHash? PasswordHash { get; set; } = null;
+    public PasswordHash? PasswordHash { get; private set; } = null;
 
     /// <summary>
     /// Gets or sets the amount of time before a password expires.
@@ -92,5 +92,10 @@ public class UserAuthentication
     public void RotateAuthVersion()
     {
         AuthVersion = Guid.NewGuid();
+    }
+
+    public void SetPasswordHash(PasswordHash passwordHash)
+    {
+        PasswordHash = passwordHash;
     }
 }
