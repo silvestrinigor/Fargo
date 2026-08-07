@@ -108,7 +108,6 @@ public class User : IEntity, IPartitionedReadOnly
     /// Creates the built-in administrator user.
     /// </summary>
     /// <param name="nameid">The administrator's unique name identifier.</param>
-    /// <param name="passwordHash">The hashed password.</param>
     /// <returns>The built-in administrator user.</returns>
     public static User CreateAdministratorUser(Nameid nameid)
     {
