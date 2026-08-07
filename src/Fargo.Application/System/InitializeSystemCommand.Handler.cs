@@ -47,7 +47,7 @@ public sealed class InitializeSystemCommandHandler(
             globalPartitionCreated = true;
         }
 
-        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreWellKnowGuids.AdminUserGroupGuid, cancellationToken);
+        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreWellKnowGuids.AdministratorsUserGroupGuid, cancellationToken);
 
         var allActions = Enum.GetValues<ActionType>();
 

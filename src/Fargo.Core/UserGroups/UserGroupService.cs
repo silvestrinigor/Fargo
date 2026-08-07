@@ -30,7 +30,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 
     public async Task ValidateUserGroupDelete(UserGroup userGroup, CancellationToken cancellationToken = default)
     {
-        if (userGroup.Guid == FargoCoreWellKnowGuids.AdminUserGroupGuid)
+        if (userGroup.Guid == FargoCoreWellKnowGuids.AdministratorsUserGroupGuid)
         {
             throw new FargoCoreException(
                 "The default administrators user group cannot be deleted.", FargoCoreErrorType.None);

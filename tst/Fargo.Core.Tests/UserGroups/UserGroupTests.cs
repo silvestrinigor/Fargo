@@ -9,7 +9,7 @@ public class UserGroupTests
     {
         var administrators = UserGroup.CreateAdministratorsUserGroup(default);
 
-        Assert.Equal(FargoCoreWellKnowGuids.AdminUserGroupGuid, administrators.Guid);
+        Assert.Equal(FargoCoreWellKnowGuids.AdministratorsUserGroupGuid, administrators.Guid);
         Assert.True(administrators.IsAdministrators);
     }
 
@@ -18,7 +18,7 @@ public class UserGroupTests
     {
         var userGroup = UserGroup.CreateUserGroup(default);
 
-        Assert.NotEqual(FargoCoreWellKnowGuids.AdminUserGroupGuid, userGroup.Guid);
+        Assert.NotEqual(FargoCoreWellKnowGuids.AdministratorsUserGroupGuid, userGroup.Guid);
         Assert.False(userGroup.IsAdministrators);
     }
 }

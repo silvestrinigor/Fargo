@@ -30,7 +30,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Gets a value indicating whether this is the built-in administrators user group.
     /// </summary>
-    public bool IsAdministrators => Guid == FargoCoreWellKnowGuids.AdminUserGroupGuid;
+    public bool IsAdministrators => Guid == FargoCoreWellKnowGuids.AdministratorsUserGroupGuid;
 
     /// <summary>
     /// Gets or sets the unique nameid of the user group.
@@ -95,7 +95,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     {
         var administratorsUsergroup = new UserGroup
         {
-            Guid = FargoCoreWellKnowGuids.AdminUserGroupGuid,
+            Guid = FargoCoreWellKnowGuids.AdministratorsUserGroupGuid,
             Nameid = nameid
         };
 
