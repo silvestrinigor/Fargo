@@ -6,7 +6,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// The user core service.
 /// </summary>
-public class UserService(IUserRepository userRepository)
+public sealed class UserService(IUserRepository userRepository)
 {
     /// <summary>
     /// Validates that the specified <paramref name="nameid"/> is not already

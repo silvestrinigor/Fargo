@@ -7,7 +7,7 @@ namespace Fargo.Core.Partitions;
 /// This service contains business rules that require repository access and
 /// therefore cannot be enforced by the <see cref="Partition"/> aggregate alone.
 /// </remarks>
-public class PartitionService(IPartitionRepository partitionRepository)
+public sealed class PartitionService(IPartitionRepository partitionRepository)
 {
     /// <summary>
     /// Ensures that assigning the specified parent partition to the specified

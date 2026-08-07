@@ -5,7 +5,7 @@ namespace Fargo.Core.UserGroups;
 /// <summary>
 /// User group core service.
 /// </summary>
-public class UserGroupService(IUserGroupRepository userGroupRepository)
+public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 {
     /// <summary>
     /// Validates that the specified <paramref name="nameid"/> is available for use
