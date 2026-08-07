@@ -2,20 +2,24 @@ using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Users;
 
-
 /// <summary>
 /// The user core service.
 /// </summary>
 public sealed class UserService(IUserRepository userRepository)
 {
     /// <summary>
-    /// Validates that the specified <paramref name="nameid"/> is not already
-    /// assigned to another user.
+    /// Validates that the specified <see cref="Nameid"/> is not already assigned
+    /// to another user.
     /// </summary>
-    /// <param name="nameid">The user identifier to validate.</param>
-    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <param name="nameid">
+    /// The user identifier to validate.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
     /// <exception cref="FargoCoreException">
-    /// Thrown when another user already exists with the specified <paramref name="nameid"/>.
+    /// Thrown when another user already exists with the specified
+    /// <see cref="Nameid"/>.
     /// </exception>
     public async Task ValidateUserNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
@@ -23,7 +27,7 @@ public sealed class UserService(IUserRepository userRepository)
 
         if (nameidInUse)
         {
-            throw new FargoCoreException($"A user with Nameid '{nameid}' already exists.", FargoCoreErrorType.None);
+            throw new FargoCoreException($"A user with Nameid '{nameid}' already exists.", FargoCoreErrorType.InvalidOperation);
         }
     }
 
@@ -36,9 +40,9 @@ public sealed class UserService(IUserRepository userRepository)
     /// </exception>
     public static void ValidateUserCanBeDeleted(User user)
     {
-        if (user.Guid == FargoCoreWellKnowGuids.AdminUserGuid)
+        if (user.IsAdmin)
         {
-            throw new FargoCoreException("The main administrator user cannot be deleted.", FargoCoreErrorType.None);
+            throw new FargoCoreException($"The admin user '{user.Guid}' cannot be deleted.", FargoCoreErrorType.InvalidOperation);
         }
     }
 }
