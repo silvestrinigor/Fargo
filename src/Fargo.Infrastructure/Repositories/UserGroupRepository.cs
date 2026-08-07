@@ -99,7 +99,7 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
         WITH RECURSIVE user_group_tree AS
@@ -131,7 +131,7 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         return guids;
     }
 
-    public Task<bool> AnyChildUserGroupAsync(Guid parentUserGroupGuid, CancellationToken cancellationToken = default)
+    public Task<bool> HasChildrenUserGroupAsync(Guid parentUserGroupGuid, CancellationToken cancellationToken = default)
     {
         return context.UserGroups.AnyAsync(u => u.ParentUserGroupGuid == parentUserGroupGuid, cancellationToken);
     }

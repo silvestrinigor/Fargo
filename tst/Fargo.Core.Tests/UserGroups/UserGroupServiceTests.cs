@@ -20,7 +20,7 @@ public class UserGroupServiceTests
         var userGroup1 = UserGroup.CreateUserGroup(default);
         var userGroup2 = UserGroup.CreateUserGroup(default);
         userGroupRepository
-        .GetDescendantGuidsAsync(userGroup2.Guid, includeRoot: false, Arg.Any<CancellationToken>())
+        .GetDescendantUserGroupGuidsAsync(userGroup2.Guid, includeRoot: false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([]));
 
         await userGroupService.ValidateParentUserGroupAssignmentAsync(userGroup1, userGroup2);
@@ -35,7 +35,7 @@ public class UserGroupServiceTests
         userGroup2.SetParentUserGroup(userGroup1);
         userGroup3.SetParentUserGroup(userGroup2);
         userGroupRepository
-        .GetDescendantGuidsAsync(userGroup1.Guid, includeRoot: false, Arg.Any<CancellationToken>())
+        .GetDescendantUserGroupGuidsAsync(userGroup1.Guid, includeRoot: false, Arg.Any<CancellationToken>())
         .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([userGroup2.Guid, userGroup3.Guid]));
 
         async Task function() => await userGroupService.ValidateParentUserGroupAssignmentAsync(userGroup3, userGroup1);

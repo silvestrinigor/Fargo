@@ -42,20 +42,28 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// </summary>
     public Description Description { get; set; } = Description.Empty;
 
+    /// <summary>
+    /// Gets the unique identifier of the parent user group, if one is assigned.
+    /// </summary>
     public Guid? ParentUserGroupGuid { get; private set; }
 
+    /// <summary>
+    /// Gets the parent user group, if one is assigned.
+    /// </summary>
     public UserGroup? ParentUserGroup { get; private set; }
 
     /// <summary>
     /// Gets the permissions granted to the user group.
     /// </summary>
     public IReadOnlyCollection<ActionType> Permissions => permissions;
+
     private readonly List<ActionType> permissions = [];
 
     /// <summary>
     /// Gets the partitions associated with the user group.
     /// </summary>
     public IReadOnlyCollection<Partition> Partitions => partitions;
+
     private readonly List<Partition> partitions = [];
 
     /// <summary>
@@ -65,6 +73,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// These entries determine which partitions members of the group may access.
     /// </remarks>
     public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
+
     private readonly List<Partition> partitionAccesses = [];
 
     private UserGroup()
@@ -131,7 +140,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
         if (IsAdministrators && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
-                "Cannot revoke the administrators user group's access to the global partition.",
+                $"Cannot revoke the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' access to the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
                 FargoCoreErrorType.InvalidOperation);
         }
 
@@ -151,7 +160,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
         if (IsAdministrators && !partition.IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "Cannot associate the administrators user group with a non-global partition.",
+                $"Cannot associate the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' with the non-global partition '{partition.Guid}'.",
                 FargoCoreErrorType.InvalidOperation);
         }
 
@@ -178,7 +187,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
         if (IsAdministrators && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
-                "Cannot remove the administrators user group from the global partition.",
+                $"Cannot remove the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' from the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
                 FargoCoreErrorType.InvalidOperation);
         }
 
@@ -191,7 +200,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <param name="action">The action to grant to the user group.</param>
     public void AddPermission(ActionType action)
     {
-        if (permissions.Any(p => p == action))
+        if (permissions.Contains(action))
         {
             return;
         }
@@ -213,7 +222,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
         if (IsAdministrators)
         {
             throw new FargoCoreException(
-                "Cannot remove any permission from the administrators user group.",
+                $"Cannot revoke the permission '{action}' from the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}'.",
                 FargoCoreErrorType.InvalidOperation);
         }
 
@@ -239,37 +248,71 @@ public class UserGroup : IEntity, IPartitionedReadOnly
         if (IsAdministrators)
         {
             throw new FargoCoreException(
-                "Cannot deactivate the administrators user group.",
+                $"Cannot deactivate the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}'.",
                 FargoCoreErrorType.InvalidOperation);
         }
 
         IsActive = false;
     }
 
+    /// <summary>
+    /// Assigns the specified user group as the parent of this user group.
+    /// </summary>
+    /// <param name="parentUserGroup">
+    /// The user group to assign as the parent.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentUserGroup"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to assign a parent to the built-in administrators
+    /// user group, or when attempting to assign the user group as its own parent.
+    /// </exception>
+    /// <remarks>
+    /// This method validates only invariants that can be enforced by this
+    /// <see cref="UserGroup"/> instance. It does <b>not</b> validate the overall
+    /// user group hierarchy or detect cyclic parent-child relationships.
+    ///
+    /// Before calling this method, the application should validate the proposed
+    /// assignment using <see cref="UserGroupService"/> to ensure that assigning
+    /// <paramref name="parentUserGroup"/> as the parent will not introduce an
+    /// invalid hierarchy.
+    /// </remarks>
     public void SetParentUserGroup(UserGroup parentUserGroup)
     {
+        ArgumentNullException.ThrowIfNull(parentUserGroup);
+
         if (IsAdministrators)
         {
             throw new FargoCoreException(
-                "Administrators user group cannot be added inside another user group.",
+                $"Administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' cannot be added inside another user group '{parentUserGroup.Guid}'.",
                 FargoCoreErrorType.InvalidOperation);
         }
 
         if (parentUserGroup.Guid == Guid)
         {
             throw new FargoCoreException(
-                "A user group cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
+                $"The user group '{Guid}' cannot be its own parent.",
+                FargoCoreErrorType.InvalidArgument);
         }
 
         ParentUserGroup = parentUserGroup;
-
         ParentUserGroupGuid = parentUserGroup.Guid;
     }
 
+    /// <summary>
+    /// Removes the parent user group association from this user group.
+    /// </summary>
+    /// <remarks>
+    /// If the user group does not currently have a parent, this method has no
+    /// effect.
+    ///
+    /// A user group without a parent is considered a root user group within the
+    /// user group hierarchy.
+    /// </remarks>
     public void RemoveFromParentUserGroup()
     {
         ParentUserGroup = null;
-
         ParentUserGroupGuid = null;
     }
 }

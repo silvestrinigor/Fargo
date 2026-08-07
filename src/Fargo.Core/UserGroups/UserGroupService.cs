@@ -36,7 +36,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
                 "The default administrators user group cannot be deleted.", FargoCoreErrorType.None);
         }
 
-        var anyChildUserGroup = await userGroupRepository.AnyChildUserGroupAsync(userGroup.Guid, cancellationToken);
+        var anyChildUserGroup = await userGroupRepository.HasChildrenUserGroupAsync(userGroup.Guid, cancellationToken);
 
         if (anyChildUserGroup)
         {
@@ -74,7 +74,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
         }
 
         var descendantUserGroupGuids =
-            await userGroupRepository.GetDescendantGuidsAsync(
+            await userGroupRepository.GetDescendantUserGroupGuidsAsync(
                 memberUserGroupGuid, false, cancellationToken);
 
         return descendantUserGroupGuids.Contains(candidateParentUserGroup.Guid);
