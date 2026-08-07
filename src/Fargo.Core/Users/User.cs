@@ -1,6 +1,5 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Security;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
@@ -57,24 +56,28 @@ public class User : IEntity, IPartitionedReadOnly
     /// Permissions inherited from user groups are not included.
     /// </summary>
     public IReadOnlyCollection<ActionType> Permissions => permissions;
+
     private readonly List<ActionType> permissions = [];
 
     /// <summary>
     /// Gets the user groups to which the user belongs.
     /// </summary>
     public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
+
     private readonly List<UserGroup> userGroups = [];
 
     /// <summary>
     /// Gets the partitions to which the user has been granted direct access.
     /// </summary>
     public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
+
     private readonly List<Partition> partitionAccesses = [];
 
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
     public IReadOnlyCollection<Partition> Partitions => partitions;
+
     private readonly List<Partition> partitions = [];
 
     /// <summary>
@@ -107,15 +110,13 @@ public class User : IEntity, IPartitionedReadOnly
     /// <param name="nameid">The administrator's unique name identifier.</param>
     /// <param name="passwordHash">The hashed password.</param>
     /// <returns>The built-in administrator user.</returns>
-    public static User CreateAdministratorUser(Nameid nameid, PasswordHash passwordHash)
+    public static User CreateAdministratorUser(Nameid nameid)
     {
         var user = new User
         {
             Guid = FargoCoreWellKnowGuids.AdminUserGuid,
             Nameid = nameid
         };
-
-        user.Authentication.PasswordHash = passwordHash;
 
         return user;
     }

@@ -7,7 +7,7 @@ public class UserTests
     [Fact]
     public void CreateAdminUser_WhenValid_ShouldBeAdminUser()
     {
-        var admin = User.CreateAdministratorUser(default, default);
+        var admin = User.CreateAdministratorUser(default);
 
         Assert.Equal(FargoCoreWellKnowGuids.AdminUserGuid, admin.Guid);
         Assert.True(admin.IsAdmin);
