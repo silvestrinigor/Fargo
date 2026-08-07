@@ -3,18 +3,19 @@ using Fargo.Core.Shared.Identity;
 namespace Fargo.Core.Identity;
 
 /// <summary>
-/// Defines the contract for generating refresh tokens used
-/// in the authentication system.
+/// Defines the contract for generating refresh tokens used by the
+/// authentication system.
 ///
-/// Implementations are responsible for producing secure,
-/// cryptographically random tokens that can later be hashed
-/// and stored by the system.
+/// Implementations are responsible for generating cryptographically secure
+/// random tokens suitable for authentication workflows.
 /// </summary>
 public interface IRefreshTokenGenerator
 {
     /// <summary>
     /// Generates a new refresh token.
     /// </summary>
-    /// <returns>A newly generated <see cref="Token"/>.</returns>
+    /// <returns>
+    /// A newly generated <see cref="Token"/>.
+    /// </returns>
     Token Generate();
 }

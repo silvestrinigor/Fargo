@@ -16,9 +16,7 @@ public interface IRefreshTokenRepository
     /// <returns>
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
-    Task<RefreshToken?> GetByGuidAsync(
-        Guid entityGuid,
-        CancellationToken cancellationToken = default);
+    Task<RefreshToken?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a refresh token by its hashed token value.
@@ -28,11 +26,21 @@ public interface IRefreshTokenRepository
     /// <returns>
     /// The matching <see cref="RefreshToken"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
-    Task<RefreshToken?> GetByTokenHashAsync(
-        TokenHash tokenHash, CancellationToken cancellationToken = default);
+    Task<RefreshToken?> GetByTokenHashAsync(TokenHash tokenHash, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<RefreshToken>> GetByUserGuidAsync(
-        Guid userGuid, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Gets all refresh tokens associated with the specified user.
+    /// </summary>
+    /// <param name="userGuid">
+    /// The unique identifier of the user.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A read-only collection containing the refresh tokens associated with the user.
+    /// </returns>
+    Task<IReadOnlyCollection<RefreshToken>> GetByUserGuidAsync(Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new refresh token to the persistence context.

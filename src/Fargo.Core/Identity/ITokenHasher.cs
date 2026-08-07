@@ -3,11 +3,10 @@ using Fargo.Core.Shared.Identity;
 namespace Fargo.Core.Identity;
 
 /// <summary>
-/// Defines the contract for hashing security tokens.
+/// Defines the contract for hashing sensitive token values.
 ///
-/// Implementations are responsible for producing a deterministic
-/// hash of a token so that the system can safely store the hash
-/// instead of the plaintext token.
+/// Implementations are responsible for producing a deterministic hash of a
+/// token so that the system can store the hash instead of the original value.
 /// </summary>
 public interface ITokenHasher
 {
