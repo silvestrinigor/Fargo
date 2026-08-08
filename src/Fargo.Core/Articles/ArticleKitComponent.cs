@@ -35,7 +35,7 @@ public sealed class ArticleKitComponent
     /// <summary>
     /// Gets the quantity of the source article included in the kit.
     /// </summary>
-    public Scalar Quantity { get; private set; }
+    public Scalar Quantity { get; private init; }
 
     /// <summary>
     /// Initializes a new <see cref="ArticleKitComponent"/> instance.
@@ -74,10 +74,12 @@ public sealed class ArticleKitComponent
         FromArticle = fromArticle;
         FromArticleGuid = fromArticle.Guid;
 
-        SetQuantity(quantity);
+        ValidateQuantity(quantity);
+
+        Quantity = quantity;
     }
 
-    public void SetQuantity(Scalar quantity)
+    private void ValidateQuantity(Scalar quantity)
     {
         if (quantity <= 0.Amount())
         {
@@ -86,7 +88,5 @@ public sealed class ArticleKitComponent
                 quantity,
                 "A kit component quantity must be greater than zero.");
         }
-
-        Quantity = quantity;
     }
 }

@@ -30,7 +30,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         .AnyAsync(item => item.ArticleGuid == articleGuid, cancellationToken);
     }
 
-    public Task<bool> IsDependenceOfAnotherArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
+    public Task<bool> IsDependencyOfAnotherArticleAsync(Guid articleGuid, CancellationToken cancellationToken = default)
     {
         return context.Articles
         .AnyAsync(a =>

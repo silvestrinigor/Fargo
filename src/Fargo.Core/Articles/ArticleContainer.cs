@@ -63,7 +63,7 @@ public sealed class ArticleContainer
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when <paramref name="maxMass"/> is less than or equal to zero.
     /// </exception>
-    public void SetMaxMass(Mass? maxMass)
+    internal void SetMaxMass(Mass? maxMass)
     {
         if (maxMass is not null && maxMass.Value <= Mass.Zero)
         {

@@ -94,6 +94,7 @@ public class Article : IEntity, IPartitionedReadOnly
     /// Gets the components that compose the article kit.
     /// </summary>
     public IReadOnlyCollection<ArticleKitComponent> KitComponents => kitComponents;
+
     private readonly List<ArticleKitComponent> kitComponents = [];
 
     /// <summary>
@@ -276,6 +277,8 @@ public class Article : IEntity, IPartitionedReadOnly
     /// <param name="partition">The partition to associate.</param>
     public void AddPartition(Partition partition)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
         if (partitions.Any(p => p.Guid == partition.Guid))
         {
             return;

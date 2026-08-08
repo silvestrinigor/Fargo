@@ -3,12 +3,11 @@ using Fargo.Core.Shared.Barcodes;
 namespace Fargo.Core.Articles;
 
 /// <summary>
-/// Represents the collection of barcodes associated with an <see cref="Article"/>.
+/// Represents the barcode information associated with an <see cref="Article"/>.
 /// </summary>
 /// <remarks>
-/// An article may have multiple barcode formats assigned simultaneously.
-/// Each barcode type is optional and uniquely identifies the same article
-/// using a different standard.
+/// An article may have one or more barcodes, with each property representing
+/// a different barcode symbology. Each barcode is optional.
 /// </remarks>
 public class ArticleBarcode
 {
@@ -23,8 +22,12 @@ public class ArticleBarcode
     public Article Article { get; private init; }
 
     /// <summary>
-    /// EAN-13 barcode, or <see langword="null"/> when absent.
+    /// Gets or sets the EAN-13 barcode associated with the article.
     /// </summary>
+    /// <value>
+    /// The article's EAN-13 barcode, or <see langword="null"/> when no
+    /// EAN-13 barcode is assigned.
+    /// </value>
     public Ean13? Ean13 { get; set; }
 
     /// <summary>
@@ -40,10 +43,11 @@ public class ArticleBarcode
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     /// <summary>
-    /// Initializes a new barcode collection for the specified article.
+    /// Initializes a new instance of the <see cref="ArticleBarcode"/> class
+    /// for the specified article.
     /// </summary>
     /// <param name="article">
-    /// The article associated with the barcode collection.
+    /// The article to which the barcode information belongs.
     /// </param>
     internal ArticleBarcode(Article article)
     {

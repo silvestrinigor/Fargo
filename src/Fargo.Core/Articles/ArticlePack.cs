@@ -35,7 +35,7 @@ public sealed class ArticlePack
     /// <summary>
     /// Gets the quantity of the source article represented by the pack.
     /// </summary>
-    public Scalar Quantity { get; private set; }
+    public Scalar Quantity { get; private init; }
 
     /// <summary>
     /// Initializes a new <see cref="ArticlePack"/> instance.
@@ -74,19 +74,11 @@ public sealed class ArticlePack
         FromArticle = fromArticle;
         FromArticleGuid = fromArticle.Guid;
 
-        SetQuantity(quantity);
+        ValidateQuantity(quantity);
+        Quantity = quantity;
     }
 
-    /// <summary>
-    /// Sets the quantity of the source article represented by the pack.
-    /// </summary>
-    /// <param name="quantity">
-    /// The quantity of the source article.
-    /// </param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="quantity"/> is less than or equal to zero.
-    /// </exception>
-    public void SetQuantity(Scalar quantity)
+    internal void ValidateQuantity(Scalar quantity)
     {
         if (quantity <= 0.Amount())
         {
@@ -95,7 +87,5 @@ public sealed class ArticlePack
                 quantity,
                 "The pack quantity must be greater than zero.");
         }
-
-        Quantity = quantity;
     }
 }
