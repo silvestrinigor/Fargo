@@ -21,15 +21,5 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
         .WithMany()
         .HasForeignKey(x => x.ParentUserGroupGuid)
         .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasMany(g => g.Partitions).WithMany().UsingEntity(p =>
-        {
-            p.ToTable("user_group_partitions");
-        });
-
-        builder.HasMany(g => g.PartitionAccesses).WithMany().UsingEntity(p =>
-        {
-            p.ToTable("user_group_partition_accesses");
-        });
     }
 }

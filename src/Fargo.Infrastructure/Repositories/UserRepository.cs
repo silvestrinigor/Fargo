@@ -71,7 +71,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
         => query
-        .Include(user => user.UserGroups)
+        .Include(user => user.UserGroupMemberships)
         .Include(user => user.PartitionAccesses)
         .Include(user => user.Partitions)
         .Include(user => user.Authentication)
@@ -101,11 +101,11 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         {
             return query.Where(user =>
                 !user.Partitions.Any() ||
-                user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+                user.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(user =>
-            user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+            user.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUser(
@@ -137,26 +137,19 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
                 ON child.parent_user_group_guid = parent.guid
             WHERE parent.is_active = true
         )
-        SELECT DISTINCT pa.guid
-        FROM partition_accesses pa
-        WHERE pa.guid IN
-        (
-            -- Direct accesses
-            SELECT upa.partition_guid
-            FROM user_partition_accesses upa
-            INNER JOIN users u
-                ON u.guid = upa.user_guid
-            WHERE upa.user_guid = {userGuid}
-            AND u.is_active = true
+        SELECT upa.partition_guid
+        FROM user_partition_accesses upa
+        INNER JOIN users u
+            ON u.guid = upa.user_guid
+        WHERE upa.user_guid = {userGuid}
+        AND u.is_active = true
 
-            UNION
+        UNION
 
-            -- Accesses inherited from active groups
-            SELECT ugpa.partition_guid
-            FROM user_group_partition_accesses ugpa
-            INNER JOIN user_group_hierarchy ugh
-                ON ugh.guid = ugpa.user_group_guid
-        );
+        SELECT ugpa.partition_guid
+        FROM user_group_partition_accesses ugpa
+        INNER JOIN user_group_hierarchy ugh
+            ON ugh.guid = ugpa.user_group_guid;
         """;
 
         var guids = await context.Database

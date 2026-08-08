@@ -16,7 +16,7 @@ namespace Fargo.Core.UserGroups;
 /// A user may access the group only if they have access to at least one of the
 /// partitions associated with it, subject to additional authorization rules.
 /// </remarks>
-public class UserGroup : IEntity, IPartitionedReadOnly
+public class UserGroup : IEntity, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the user group.
@@ -63,19 +63,23 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <summary>
     /// Gets the partitions associated with the user group.
     /// </summary>
-    public IReadOnlyCollection<Partition> Partitions => partitions;
+    public IReadOnlyCollection<UserGroupPartition> Partitions => partitions;
 
-    private readonly List<Partition> partitions = [];
+    public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
+
+    private readonly List<UserGroupPartition> partitions = [];
 
     /// <summary>
     /// Gets the partition access entries associated with the user group.
     /// </summary>
     /// <remarks>
-    /// These entries determine which partitions members of the group may access.
+    /// These entries determine which partitions members of the group are granted
+    /// direct access to. Access to descendant partitions may be inherited through
+    /// the partition hierarchy.
     /// </remarks>
-    public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
+    public IReadOnlyCollection<UserGroupPartitionAccess> PartitionAccesses => partitionAccesses;
 
-    private readonly List<Partition> partitionAccesses = [];
+    private readonly List<UserGroupPartitionAccess> partitionAccesses = [];
 
     private UserGroup()
     {
@@ -118,12 +122,12 @@ public class UserGroup : IEntity, IPartitionedReadOnly
     /// <param name="partition">The partition to grant access to.</param>
     public void AddPartitionAccess(Partition partition)
     {
-        if (partitionAccesses.Any(p => p.Guid == partition.Guid))
+        if (partitionAccesses.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
         }
 
-        partitionAccesses.Add(partition);
+        partitionAccesses.Add(new UserGroupPartitionAccess(this, partition));
     }
 
     /// <summary>
@@ -145,7 +149,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        partitionAccesses.RemoveAll(p => p.Guid == partitionGuid);
+        partitionAccesses.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
     /// <summary>
@@ -165,12 +169,12 @@ public class UserGroup : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        if (partitions.Any(p => p.Guid == partition.Guid))
+        if (partitions.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
         }
 
-        partitions.Add(partition);
+        partitions.Add(new UserGroupPartition(this, partition));
     }
 
     /// <summary>
@@ -192,7 +196,7 @@ public class UserGroup : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        partitions.RemoveAll(p => p.Guid == partitionGuid);
+        partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
     /// <summary>

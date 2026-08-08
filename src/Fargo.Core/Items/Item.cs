@@ -23,7 +23,7 @@ namespace Fargo.Core.Items;
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
 /// </remarks>
-public class Item : IEntity, IPartitionedReadOnly
+public class Item : IEntity, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the item.
@@ -70,12 +70,14 @@ public class Item : IEntity, IPartitionedReadOnly
     /// Gets the partitions directly associated with the item.
     /// </summary>
     /// <remarks>
-    /// These partitions define the partition scope of the item and are used
-    /// in partition-based access evaluation.
+    /// These associations define the partition scope of the item and are used
+    /// during partition-based access evaluation.
     /// </remarks>
-    public IReadOnlyCollection<Partition> Partitions => partitions;
+    public IReadOnlyCollection<ItemPartition> Partitions => partitions;
 
-    private readonly List<Partition> partitions = [];
+    public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
+
+    private readonly List<ItemPartition> partitions = [];
 
     /// <summary>
     /// Initializes a new item entity.
@@ -158,12 +160,12 @@ public class Item : IEntity, IPartitionedReadOnly
     /// <param name="partition">The partition to associate.</param>
     public void AddPartition(Partition partition)
     {
-        if (partitions.Any(p => p.Guid == partition.Guid))
+        if (partitions.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
         }
 
-        partitions.Add(partition);
+        partitions.Add(new ItemPartition(this, partition));
     }
 
     /// <summary>
@@ -174,6 +176,6 @@ public class Item : IEntity, IPartitionedReadOnly
     /// </param>
     public void RemovePartition(Guid partitionGuid)
     {
-        partitions.RemoveAll(p => p.Guid == partitionGuid);
+        partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 }

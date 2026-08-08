@@ -92,11 +92,11 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         {
             return query.Where(userGroup =>
                 !userGroup.Partitions.Any() ||
-                userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+                userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(userGroup =>
-            userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+            userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)

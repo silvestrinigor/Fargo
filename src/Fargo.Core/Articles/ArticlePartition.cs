@@ -1,0 +1,54 @@
+using Fargo.Core.Partitions;
+
+namespace Fargo.Core.Articles;
+
+/// <summary>
+/// Represents an association between an article and a partition.
+/// </summary>
+/// <remarks>
+/// This association defines a partition that is directly assigned to the article
+/// and contributes to the article's partition scope.
+/// </remarks>
+public class ArticlePartition
+{
+    /// <summary>
+    /// Gets the unique identifier of the associated article.
+    /// </summary>
+    public Guid ArticleGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the associated article.
+    /// </summary>
+    public Article Article { get; private init; }
+
+    /// <summary>
+    /// Gets the unique identifier of the associated partition.
+    /// </summary>
+    public Guid PartitionGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the associated partition.
+    /// </summary>
+    public Partition Partition { get; private init; }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    private ArticlePartition() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+    /// <summary>
+    /// Initializes a new association between the specified article and partition.
+    /// </summary>
+    /// <param name="article">The article to associate with the partition.</param>
+    /// <param name="partition">The partition to associate with the article.</param>
+    internal ArticlePartition(Article article, Partition partition)
+    {
+        ArgumentNullException.ThrowIfNull(article);
+        ArgumentNullException.ThrowIfNull(partition);
+
+        Article = article;
+        ArticleGuid = article.Guid;
+
+        Partition = partition;
+        PartitionGuid = partition.Guid;
+    }
+}

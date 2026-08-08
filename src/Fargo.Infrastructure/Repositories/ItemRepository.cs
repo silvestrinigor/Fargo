@@ -130,10 +130,10 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         {
             return query.Where(item =>
                 !item.Partitions.Any() ||
-                item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+                item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(item =>
-            item.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+            item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 }

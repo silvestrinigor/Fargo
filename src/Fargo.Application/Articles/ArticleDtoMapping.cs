@@ -37,5 +37,5 @@ public static class ArticleDtoMapping
                 : null,
             new ArticleBarcodeDto(
                 article.Barcode.Ean13),
-            article.Partitions.Select(partition => partition.Guid).ToArray());
+            article.Partitions.Select(partition => partition.PartitionGuid).ToArray());
 }
