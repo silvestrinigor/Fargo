@@ -69,13 +69,7 @@ public sealed class RefreshCommandHandler(
 
         var newRefreshTokenHash = tokenHasher.Hash(rawNewRefreshToken);
 
-        var storedNewRefreshToken = new RefreshToken
-        {
-            UserGuid = user.Guid,
-            TokenHash = newRefreshTokenHash
-        };
-
-        storedOldRefreshToken.ReplaceWith(newRefreshTokenHash);
+        var storedNewRefreshToken = RefreshToken.Create(user.Guid, newRefreshTokenHash);
 
         refreshTokenRepository.Add(storedNewRefreshToken);
 
@@ -90,9 +84,8 @@ public sealed class RefreshCommandHandler(
         logger.RefreshCompleted(user.Guid);
 
         return new AuthResult(
-            newAccessTokenResult.AccessToken,
-            rawNewRefreshToken,
+            newAccessTokenResult.AccessToken.Value,
+            rawNewRefreshToken.Value,
             newAccessTokenResult.ExpiresAt);
     }
 }
-

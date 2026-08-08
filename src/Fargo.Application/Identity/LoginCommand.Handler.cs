@@ -79,18 +79,14 @@ public sealed class LoginCommandHandler(
 
         var refreshTokenHash = tokenHasher.Hash(rawRefreshToken);
 
-        var refreshToken = new RefreshToken
-        {
-            UserGuid = user.Guid,
-            TokenHash = refreshTokenHash
-        };
+        var refreshToken = RefreshToken.Create(user.Guid, refreshTokenHash);
 
         refreshTokenRepository.Add(refreshToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var authResult = new AuthResult(
-            accessTokenResult.AccessToken, rawRefreshToken, accessTokenResult.ExpiresAt);
+            accessTokenResult.AccessToken.Value, rawRefreshToken.Value, accessTokenResult.ExpiresAt);
 
         logger.LoginCompleted(command.Nameid);
 

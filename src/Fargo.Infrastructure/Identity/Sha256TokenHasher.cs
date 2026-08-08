@@ -29,7 +29,7 @@ public sealed class Sha256TokenHasher : ITokenHasher
     /// </returns>
     public TokenHash Hash(Token token)
     {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token.Value));
 
         var tokenHexStringHash = Convert.ToHexString(bytes);
 
