@@ -15,7 +15,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : IEntity, IPartitionedReadOnly
+public class Article : IEntity, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the article.
@@ -110,9 +110,11 @@ public class Article : IEntity, IPartitionedReadOnly
     /// These partitions define the partition scope of the article and are
     /// used in partition-based access evaluation.
     /// </remarks>
-    public IReadOnlyCollection<Partition> Partitions => partitions;
+    public IReadOnlyCollection<ArticlePartition> Partitions => partitions;
 
-    private readonly List<Partition> partitions = [];
+    public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
+
+    private readonly List<ArticlePartition> partitions = [];
 
     private Article()
     {
@@ -279,12 +281,12 @@ public class Article : IEntity, IPartitionedReadOnly
     {
         ArgumentNullException.ThrowIfNull(partition);
 
-        if (partitions.Any(p => p.Guid == partition.Guid))
+        if (partitions.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
         }
 
-        partitions.Add(partition);
+        partitions.Add(new ArticlePartition(this, partition));
     }
 
     /// <summary>
@@ -295,6 +297,6 @@ public class Article : IEntity, IPartitionedReadOnly
     /// </param>
     public void RemovePartition(Guid partitionGuid)
     {
-        partitions.RemoveAll(p => p.Guid == partitionGuid);
+        partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 }

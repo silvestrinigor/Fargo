@@ -108,6 +108,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ArticlePartitionConfiguration());
+
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemPartitionConfiguration());
