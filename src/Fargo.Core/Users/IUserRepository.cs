@@ -1,3 +1,4 @@
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Users;
@@ -31,6 +32,44 @@ public interface IUserRepository
     /// The matching <see cref="User"/> if found; otherwise, <see langword="null"/>.
     /// </returns>
     Task<User?> GetByNameidAsync(Nameid userNameid, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all partition access identifiers available to an active user,
+    /// including accesses granted directly and through active user groups
+    /// and their parent groups.
+    /// </summary>
+    /// <param name="userGuid">
+    /// The unique identifier of the user.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A collection containing the unique identifiers of all partitions
+    /// the user has access to. Returns an empty collection if the user is
+    /// inactive. Accesses granted through inactive user groups are excluded.
+    /// </returns>
+    Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUser(
+        Guid userGuid, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all action permissions available to an active user, including
+    /// permissions granted directly to the user and through active user groups
+    /// and their parent groups.
+    /// </summary>
+    /// <param name="userGuid">
+    /// The unique identifier of the user.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A collection containing all action permissions available to the user.
+    /// Returns an empty collection if the user is inactive. Permissions granted
+    /// through inactive user groups are excluded.
+    /// </returns>
+    Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUser(
+    Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a user with the specified <see cref="Nameid"/> already exists.

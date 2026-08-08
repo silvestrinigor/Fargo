@@ -34,6 +34,7 @@ public sealed class Actor
     /// Gets the identifiers of the partitions the actor is authorized to access.
     /// </summary>
     public IReadOnlySet<Guid> PartitionAccessGuids => partitionAccessGuids.AsReadOnly();
+
     private readonly ISet<Guid> partitionAccessGuids;
 
     internal Actor(

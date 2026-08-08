@@ -1,6 +1,7 @@
 using Fargo.Application;
 using Fargo.Application.Shared.Users;
 using Fargo.Application.Users;
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Informations;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Extensions;
@@ -110,4 +111,119 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             user.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
     }
 
+    public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUser(
+        Guid userGuid,
+        CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+        WITH RECURSIVE user_group_hierarchy AS
+        (
+            SELECT
+                ug.guid,
+                ug.parent_user_group_guid
+            FROM user_groups ug
+            INNER JOIN user_user_groups uug
+                ON uug.user_group_guid = ug.guid
+            INNER JOIN users u
+                ON u.guid = uug.user_guid
+            WHERE u.guid = {userGuid}
+            AND u.is_active = true
+            AND ug.is_active = true
+
+            UNION ALL
+
+            SELECT
+                parent.guid,
+                parent.parent_user_group_guid
+            FROM user_groups parent
+            INNER JOIN user_group_hierarchy child
+                ON child.parent_user_group_guid = parent.guid
+            WHERE parent.is_active = true
+        )
+        SELECT DISTINCT pa.guid
+        FROM partition_accesses pa
+        WHERE pa.guid IN
+        (
+            -- Direct accesses
+            SELECT upa.partition_guid
+            FROM user_partition_accesses upa
+            INNER JOIN users u
+                ON u.guid = upa.user_guid
+            WHERE upa.user_guid = {userGuid}
+            AND u.is_active = true
+
+            UNION
+
+            -- Accesses inherited from active groups
+            SELECT ugpa.partition_guid
+            FROM user_group_partition_accesses ugpa
+            INNER JOIN user_group_hierarchy ugh
+                ON ugh.guid = ugpa.user_group_guid
+        );
+        """;
+
+        var guids = await context.Database
+            .SqlQuery<Guid>(query)
+            .ToListAsync(cancellationToken);
+
+        return guids;
+    }
+
+    public async Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUser(
+        Guid userGuid,
+        CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+        WITH RECURSIVE user_group_hierarchy AS
+        (
+            -- Groups directly assigned to the user
+            SELECT
+                ug.guid,
+                ug.permissions,
+                ug.parent_user_group_guid
+            FROM user_groups ug
+            INNER JOIN user_user_groups uug
+                ON uug.user_group_guid = ug.guid
+            INNER JOIN users u
+                ON u.guid = uug.user_guid
+            WHERE u.guid = {userGuid}
+              AND u.is_active = true
+              AND ug.is_active = true
+
+            UNION ALL
+
+            -- Parent groups
+            SELECT
+                parent.guid,
+                parent.permissions,
+                parent.parent_user_group_guid
+            FROM user_groups parent
+            INNER JOIN user_group_hierarchy child
+                ON child.parent_user_group_guid = parent.guid
+            WHERE parent.is_active = true
+        ),
+        all_permissions AS
+        (
+            -- Direct user permissions
+            SELECT jsonb_array_elements_text(u.permissions))::integer AS permission
+            FROM users u
+            WHERE u.guid = {userGuid}
+              AND u.is_active = true
+
+            UNION ALL
+
+            -- Permissions inherited from groups
+            SELECT jsonb_array_elements_text(u.permissions))::integer AS permission
+            FROM user_group_hierarchy ugh
+        )
+        SELECT DISTINCT permission
+        FROM all_permissions;
+        """;
+
+        var permissions = await context.Database
+            .SqlQuery<ActionType>(query)
+            .ToListAsync(cancellationToken);
+
+        return permissions;
+    }
 }
