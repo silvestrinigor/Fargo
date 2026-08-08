@@ -1,4 +1,4 @@
-using Fargo.Core.Commom;
+using Fargo.Core.Common;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.UserGroups;

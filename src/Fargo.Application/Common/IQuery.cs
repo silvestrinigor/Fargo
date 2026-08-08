@@ -1,4 +1,4 @@
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 /// <summary>
 /// Represents a query in the application layer.

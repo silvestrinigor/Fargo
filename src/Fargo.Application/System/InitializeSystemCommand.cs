@@ -1,3 +1,4 @@
+using Fargo.Application.Common;
 using Fargo.Core.Shared.Informations;
 using Fargo.Core.Shared.Security;
 

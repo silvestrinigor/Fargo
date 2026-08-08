@@ -1,4 +1,4 @@
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 /// <summary>
 /// Defines the categories of errors that can be associated with a <see cref="FargoApplicationErrorType"/>.

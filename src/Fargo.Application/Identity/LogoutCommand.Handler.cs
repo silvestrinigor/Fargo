@@ -1,3 +1,4 @@
+using Fargo.Application.Common;
 using Fargo.Core.Identity;
 using Microsoft.Extensions.Logging;
 

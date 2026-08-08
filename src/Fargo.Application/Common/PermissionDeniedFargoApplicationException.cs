@@ -1,7 +1,7 @@
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Actors;
 
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 public class PermissionDeniedFargoApplicationException : FargoApplicationException
 {

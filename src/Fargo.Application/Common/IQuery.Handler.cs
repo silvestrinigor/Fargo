@@ -1,4 +1,4 @@
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 /// <summary>
 /// Defines a handler responsible for executing a query.

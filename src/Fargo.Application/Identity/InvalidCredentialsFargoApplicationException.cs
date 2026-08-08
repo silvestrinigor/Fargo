@@ -1,3 +1,5 @@
+using Fargo.Application.Common;
+
 namespace Fargo.Application.Identity;
 
 /// <summary>

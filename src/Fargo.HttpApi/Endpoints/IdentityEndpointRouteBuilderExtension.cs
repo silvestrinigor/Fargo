@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;

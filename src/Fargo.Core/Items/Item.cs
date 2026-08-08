@@ -1,5 +1,5 @@
 using Fargo.Core.Articles;
-using Fargo.Core.Commom;
+using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Articles;

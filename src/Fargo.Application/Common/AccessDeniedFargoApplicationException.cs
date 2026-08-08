@@ -1,7 +1,7 @@
 using Fargo.Core.Shared.Actors;
 using Fargo.Core.Shared.Entities;
 
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 public class AccessDeniedFargoApplicationException : FargoApplicationException
 {

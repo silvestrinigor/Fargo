@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 using Fargo.Application.System;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;

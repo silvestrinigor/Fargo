@@ -1,4 +1,4 @@
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 public static class PartitionQueryFilter
 {

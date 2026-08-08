@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Infrastructure.Persistence;

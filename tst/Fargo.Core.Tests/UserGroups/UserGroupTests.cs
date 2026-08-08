@@ -1,3 +1,4 @@
+using Fargo.Core.Common;
 using Fargo.Core.UserGroups;
 
 namespace Fargo.Core.Tests.UserGroups;

@@ -8,11 +8,6 @@ namespace Fargo.Application;
 /// <summary>
 /// Represents the page index used in paginated queries.
 /// </summary>
-/// <remarks>
-/// This value object ensures that page numbers remain within
-/// a valid range and supports automatic parsing from strings
-/// using <see cref="IParsable{TSelf}"/>.
-/// </remarks>
 public readonly struct Page
     : IParsable<Page>
 {
@@ -126,6 +121,7 @@ public readonly struct Page
         return true;
     }
 }
+
 /// <summary>
 /// Represents the maximum number of items returned in a paginated query.
 /// </summary>
