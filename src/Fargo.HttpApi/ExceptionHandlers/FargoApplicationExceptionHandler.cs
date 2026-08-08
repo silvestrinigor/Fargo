@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 

@@ -2,7 +2,7 @@ using Fargo.Core.Entities;
 using Fargo.Core.Shared.Entities;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 public class EntityNotFoundFargoApplicationException : FargoApplicationException
 {

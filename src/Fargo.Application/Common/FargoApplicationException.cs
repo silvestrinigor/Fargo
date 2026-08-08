@@ -1,4 +1,4 @@
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 /// <summary>
 /// Represents the base exception for errors thrown by the Fargo application.

@@ -1,7 +1,7 @@
-using Fargo.Application;
+using Fargo.Core.Actors;
 using Fargo.Core.Shared.Actions;
 
-namespace Fargo.Core.Actors;
+namespace Fargo.Application.Common;
 
 public static class ActorAssertHasPermissionExtension
 {

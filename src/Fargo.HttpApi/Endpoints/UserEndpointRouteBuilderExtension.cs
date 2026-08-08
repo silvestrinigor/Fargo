@@ -1,4 +1,5 @@
 using Fargo.Application;
+using Fargo.Application.Common;
 using Fargo.Application.Shared.Users;
 using Fargo.Application.Users;
 using Microsoft.AspNetCore.Http.HttpResults;

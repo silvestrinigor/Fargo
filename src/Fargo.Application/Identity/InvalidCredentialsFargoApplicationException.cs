@@ -1,3 +1,5 @@
+using Fargo.Application.Common;
+
 namespace Fargo.Application.Identity;
 
 /// <summary>
@@ -10,4 +12,4 @@ namespace Fargo.Application.Identity;
 /// condition was triggered.
 /// </remarks>
 public sealed class InvalidCredentialsFargoApplicationException()
-    : FargoApplicationException("The provided credentials are invalid.");
+    : FargoApplicationException("The provided credentials are invalid.", FargoApplicationErrorType.None);

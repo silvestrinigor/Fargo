@@ -1,3 +1,4 @@
+using Fargo.Core.Common;
 using Fargo.Core.Users;
 
 namespace Fargo.Core.Tests.Users;

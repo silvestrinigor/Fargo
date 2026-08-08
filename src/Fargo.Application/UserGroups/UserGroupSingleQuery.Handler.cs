@@ -1,3 +1,4 @@
+using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Shared.UserGroups;
 using Fargo.Core.Actors;

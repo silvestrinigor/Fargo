@@ -1,3 +1,4 @@
+using Fargo.Application.Common;
 using Fargo.Application.Shared.Partitions;
 
 namespace Fargo.Application.Partitions;

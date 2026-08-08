@@ -1,8 +1,8 @@
-using Fargo.Application;
+using Fargo.Core.Actors;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 
-namespace Fargo.Core.Actors;
+namespace Fargo.Application.Common;
 
 public static class ActorAssertHasAccessExtension
 {

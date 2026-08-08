@@ -2,7 +2,7 @@ using Fargo.Core.Actors;
 using Fargo.Core.Shared.Actors;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 public class ActorNotFoundFargoApplicationException : FargoApplicationException
 {

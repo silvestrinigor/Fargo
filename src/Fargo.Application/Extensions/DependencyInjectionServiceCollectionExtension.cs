@@ -1,4 +1,5 @@
 using Fargo.Application.Articles;
+using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;

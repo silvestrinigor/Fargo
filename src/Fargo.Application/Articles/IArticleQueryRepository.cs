@@ -11,7 +11,7 @@ public interface IArticleQueryRepository
     /// <summary>
     /// Retrieves article information by identifier.
     /// </summary>
-    /// <param name="entityGuid">
+    /// <param name="articleGuid">
     /// Article unique identifier.
     /// </param>
     /// <param name="childOfAnyOfThesePartitions">
@@ -27,7 +27,7 @@ public interface IArticleQueryRepository
     /// Article information if found; otherwise null.
     /// </returns>
     Task<ArticleDto?> GetInfoByGuidAsync(
-        Guid entityGuid,
+        Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
@@ -35,7 +35,7 @@ public interface IArticleQueryRepository
     /// <summary>
     /// Retrieves article information by barcode.
     /// </summary>
-    /// <param name="barcode">
+    /// <param name="articleBarcode">
     /// Article barcode information.
     /// </param>
     /// <param name="childOfAnyOfThesePartitions">
@@ -51,7 +51,7 @@ public interface IArticleQueryRepository
     /// Article information if found; otherwise null.
     /// </returns>
     Task<ArticleDto?> GetInfoByBarcodeAsync(
-        Barcode barcode,
+        Barcode articleBarcode,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
