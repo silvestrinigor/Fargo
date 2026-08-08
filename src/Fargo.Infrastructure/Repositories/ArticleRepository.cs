@@ -137,11 +137,11 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         {
             return query.Where(article =>
                 !article.Partitions.Any() ||
-                article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+                article.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(article =>
-            article.Partitions.Any(partition => partitionGuids.Contains(partition.Guid)));
+            article.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 
     private static IQueryable<Article> ApplyBarcodeFilter(IQueryable<Article> query, Barcode barcode)

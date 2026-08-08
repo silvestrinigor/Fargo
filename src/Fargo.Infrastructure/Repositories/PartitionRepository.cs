@@ -158,22 +158,22 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             return true;
         }
 
-        if (await context.Articles.AnyAsync(a => a.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        if (await context.Articles.AnyAsync(a => a.Partitions.Any(p => p.PartitionGuid == partitionGuid), cancellationToken))
         {
             return true;
         }
 
-        if (await context.Users.AnyAsync(u => u.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        if (await context.Users.AnyAsync(u => u.Partitions.Any(p => p.PartitionGuid == partitionGuid), cancellationToken))
         {
             return true;
         }
 
-        if (await context.UserGroups.AnyAsync(u => u.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        if (await context.UserGroups.AnyAsync(u => u.Partitions.Any(p => p.PartitionGuid == partitionGuid), cancellationToken))
         {
             return true;
         }
 
-        if (await context.Items.AnyAsync(i => i.Partitions.Any(p => p.Guid == partitionGuid), cancellationToken))
+        if (await context.Items.AnyAsync(i => i.Partitions.Any(p => p.PartitionGuid == partitionGuid), cancellationToken))
         {
             return true;
         }

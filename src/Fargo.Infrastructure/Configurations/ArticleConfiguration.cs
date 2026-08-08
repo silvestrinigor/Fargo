@@ -11,10 +11,5 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.ToTable("articles");
 
         builder.HasKey(x => x.Guid);
-
-        builder.HasMany(a => a.Partitions).WithMany().UsingEntity(j =>
-        {
-            j.ToTable("article_partitions");
-        });
     }
 }

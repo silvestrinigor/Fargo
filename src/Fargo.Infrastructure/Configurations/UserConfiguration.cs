@@ -15,15 +15,5 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.Nameid).IsUnique();
 
         builder.Property(x => x.Permissions).HasColumnType("jsonb");
-
-        builder.HasMany(u => u.Partitions).WithMany().UsingEntity(j =>
-        {
-            j.ToTable("user_partitions");
-        });
-
-        builder.HasMany(u => u.PartitionAccesses).WithMany().UsingEntity(j =>
-        {
-            j.ToTable("user_partition_accesses");
-        });
     }
 }
