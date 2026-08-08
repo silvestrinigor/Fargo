@@ -195,7 +195,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         all_permissions AS
         (
             -- Direct user permissions
-            SELECT jsonb_array_elements_text(u.permissions))::integer AS permission
+            SELECT jsonb_array_elements_text(u.permissions)::integer AS permission
             FROM users u
             WHERE u.guid = {userGuid}
               AND u.is_active = true
@@ -203,7 +203,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             UNION ALL
 
             -- Permissions inherited from groups
-            SELECT jsonb_array_elements_text(u.permissions))::integer AS permission
+            SELECT jsonb_array_elements_text(ugh.permissions)::integer AS permission
             FROM user_group_hierarchy ugh
         )
         SELECT DISTINCT permission
