@@ -5,7 +5,7 @@ Content-Type: application/json
 
 {
   "nameid": "igor6",
-  "password": "Password123!"
+  "password": "Password456!"
 }
 
 ###
@@ -40,6 +40,7 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
+  "nameid": "igor6",
   "currentPassword": "Password123!",
   "newPassword": "Password456!"
 }

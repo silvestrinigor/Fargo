@@ -22,7 +22,7 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "nameid": "igor6",
+  "nameid": "igor7",
   "authentication": { "password": "Password123!" },
   "firstName": "Igor",
   "lastName": "Doe",
