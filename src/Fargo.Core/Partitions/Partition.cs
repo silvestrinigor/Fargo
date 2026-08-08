@@ -1,3 +1,4 @@
+using Fargo.Core.Commom;
 using Fargo.Core.Entities;
 using Fargo.Core.Shared.Informations;
 

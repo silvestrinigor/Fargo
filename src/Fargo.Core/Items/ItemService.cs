@@ -1,3 +1,5 @@
+using Fargo.Core.Commom;
+
 namespace Fargo.Core.Items;
 
 /// <summary>

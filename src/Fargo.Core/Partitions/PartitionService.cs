@@ -1,3 +1,5 @@
+using Fargo.Core.Commom;
+
 namespace Fargo.Core.Partitions;
 
 /// <summary>
