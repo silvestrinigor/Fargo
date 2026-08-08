@@ -1,3 +1,4 @@
+using Fargo.Core.Commom;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 

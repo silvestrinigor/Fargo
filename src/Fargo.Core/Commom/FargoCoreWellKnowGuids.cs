@@ -1,4 +1,4 @@
-namespace Fargo.Core;
+namespace Fargo.Core.Commom;
 
 /// <summary>
 /// Provides well-known system GUIDs used by Fargo.

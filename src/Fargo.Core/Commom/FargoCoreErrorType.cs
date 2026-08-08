@@ -1,4 +1,4 @@
-namespace Fargo.Core;
+namespace Fargo.Core.Commom;
 
 /// <summary>
 /// Defines the categories of errors that can be associated with a <see cref="FargoCoreException"/>.

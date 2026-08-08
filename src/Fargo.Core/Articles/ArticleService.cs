@@ -1,3 +1,4 @@
+using Fargo.Core.Commom;
 using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.Core.Articles;

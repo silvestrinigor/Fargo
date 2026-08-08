@@ -1,3 +1,4 @@
+using Fargo.Core.Commom;
 using UnitsNet;
 
 namespace Fargo.Core.Articles;
