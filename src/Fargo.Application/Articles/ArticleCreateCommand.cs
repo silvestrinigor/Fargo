@@ -10,8 +10,6 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
 
     public ArticleCreateCommand(ArticleCreateDto dto)
     {
-        Create = dto;
-
         if (dto.ArticleType is ArticleType.Variation)
         {
             if (dto.Variation?.FromArticleGuid is null)
@@ -49,5 +47,7 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
         {
             throw new ArgumentException("Article type not supported.", nameof(dto));
         }
+
+        Create = dto;
     }
 }

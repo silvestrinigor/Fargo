@@ -11,8 +11,10 @@ public sealed class FargoBarcodeRouteConstraint : IRouteConstraint
         string routeKey,
         RouteValueDictionary values,
         RouteDirection routeDirection)
-        => values.TryGetValue(routeKey, out var value) &&
+    {
+        return values.TryGetValue(routeKey, out var value) &&
             Barcode.TryParse(
                 Convert.ToString(value, CultureInfo.InvariantCulture),
                 CultureInfo.InvariantCulture, out _);
+    }
 }
