@@ -7,7 +7,7 @@ namespace Fargo.Application.Common;
 public static class ActorAssertHasAccessExtension
 {
     public static void ThrowIfAccessDenied<TEntity>(this Actor actor, TEntity entity)
-        where TEntity : IEntity, IPartitionedReadOnly
+        where TEntity : IEntity, IPartitionedGuidsReadOnly
     {
         if (!actor.HasAccess(entity))
         {

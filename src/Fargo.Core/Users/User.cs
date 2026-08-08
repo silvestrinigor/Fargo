@@ -10,7 +10,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : IEntity, IPartitionedReadOnly
+public class User : IEntity, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the user.
@@ -61,25 +61,34 @@ public class User : IEntity, IPartitionedReadOnly
     private readonly List<ActionType> permissions = [];
 
     /// <summary>
-    /// Gets the user groups to which the user belongs.
+    /// Gets the user-group memberships associated with the user.
     /// </summary>
-    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
+    /// <remarks>
+    /// Each entry represents the user's membership in a specific user group.
+    /// </remarks>
+    public IReadOnlyCollection<UserUserGroup> UserGroupMemberships => userGroupMemberships;
 
-    private readonly List<UserGroup> userGroups = [];
+    private readonly List<UserUserGroup> userGroupMemberships = [];
 
     /// <summary>
     /// Gets the partitions to which the user has been granted direct access.
     /// </summary>
-    public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
+    /// <remarks>
+    /// Access to descendant partitions may be inherited through the partition
+    /// hierarchy and is not represented by this collection.
+    /// </remarks>
+    public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses => partitionAccesses;
 
-    private readonly List<Partition> partitionAccesses = [];
+    private readonly List<UserPartitionAccess> partitionAccesses = [];
 
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
-    public IReadOnlyCollection<Partition> Partitions => partitions;
+    public IReadOnlyCollection<UserPartition> Partitions => partitions;
 
-    private readonly List<Partition> partitions = [];
+    public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
+
+    private readonly List<UserPartition> partitions = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="User"/> class.
@@ -140,12 +149,12 @@ public class User : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        if (partitions.Any(p => p.Guid == partition.Guid))
+        if (partitions.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
         }
 
-        partitions.Add(partition);
+        partitions.Add(new UserPartition(this, partition));
     }
 
     /// <summary>
@@ -166,7 +175,7 @@ public class User : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        partitions.RemoveAll(p => p.Guid == partitionGuid);
+        partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
     /// <summary>
@@ -178,12 +187,12 @@ public class User : IEntity, IPartitionedReadOnly
     {
         ArgumentNullException.ThrowIfNull(userGroup);
 
-        if (userGroups.Any(x => x.Guid == userGroup.Guid))
+        if (userGroupMemberships.Any(x => x.UserGroupGuid == userGroup.Guid))
         {
             return;
         }
 
-        userGroups.Add(userGroup);
+        userGroupMemberships.Add(new UserUserGroup(this, userGroup));
     }
 
     /// <summary>
@@ -205,7 +214,7 @@ public class User : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        userGroups.RemoveAll(g => g.Guid == userGroupGuid);
+        userGroupMemberships.RemoveAll(g => g.UserGroupGuid == userGroupGuid);
     }
 
     /// <summary>
@@ -216,12 +225,12 @@ public class User : IEntity, IPartitionedReadOnly
     {
         ArgumentNullException.ThrowIfNull(partition);
 
-        if (partitionAccesses.Any(x => x.Guid == partition.Guid))
+        if (partitionAccesses.Any(x => x.PartitionGuid == partition.Guid))
         {
             return;
         }
 
-        partitionAccesses.Add(partition);
+        partitionAccesses.Add(new UserPartitionAccess(this, partition));
     }
 
     /// <summary>
@@ -243,7 +252,7 @@ public class User : IEntity, IPartitionedReadOnly
                 FargoCoreErrorType.InvalidOperation);
         }
 
-        partitionAccesses.RemoveAll(p => p.Guid == partitionGuid);
+        partitionAccesses.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
     /// <summary>

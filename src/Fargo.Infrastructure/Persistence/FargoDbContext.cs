@@ -114,6 +114,10 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new UserAuthenticationConfiguration());
 
+        modelBuilder.ApplyConfiguration(new UserUserGroupConfiguration());
+
+        modelBuilder.ApplyConfiguration(new UserPartitionAccessConfigurationConfiguration());
+
         modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
 
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());

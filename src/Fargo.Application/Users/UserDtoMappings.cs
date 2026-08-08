@@ -18,8 +18,8 @@ public static class UserDtoMappings
             user.Authentication.DefaultPasswordExpirationPeriod,
             user.Authentication.RequirePasswordChangeAt),
         user.Permissions,
-        user.Partitions.Select(partition => partition.Guid).ToArray(),
-        user.PartitionAccesses.Select(partition => partition.Guid).ToArray(),
-        user.UserGroups.Select(group => group.Guid).ToArray()
+        user.Partitions.Select(partition => partition.PartitionGuid).ToArray(),
+        user.PartitionAccesses.Select(partition => partition.PartitionGuid).ToArray(),
+        user.UserGroupMemberships.Select(group => group.UserGroupGuid).ToArray()
     );
 }

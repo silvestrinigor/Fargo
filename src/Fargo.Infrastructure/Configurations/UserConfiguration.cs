@@ -16,11 +16,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.Permissions).HasColumnType("jsonb");
 
-        builder.HasMany(x => x.UserGroups).WithMany().UsingEntity(j =>
-        {
-            j.ToTable("user_user_groups");
-        });
-
         builder.HasMany(u => u.Partitions).WithMany().UsingEntity(j =>
         {
             j.ToTable("user_partitions");
