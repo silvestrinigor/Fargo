@@ -4,8 +4,8 @@ POST {{host}}/identity/login
 Content-Type: application/json
 
 {
-  "nameid": "admin",
-  "password": "Senha123@"
+  "nameid": "igor5",
+  "password": "Password123!"
 }
 
 ###

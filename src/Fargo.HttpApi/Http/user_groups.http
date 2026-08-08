@@ -22,7 +22,8 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "nameid": "Administrators"
+  "nameid": "testusergr",
+  "parentUserGroup": "00000000-0000-0000-0000-000000000003"
 }
 
 ###
