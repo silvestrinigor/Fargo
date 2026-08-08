@@ -16,11 +16,11 @@ public sealed class UserGroupsQueryHandler(
         UserGroupsQuery query,
         CancellationToken cancellationToken = default)
     {
-        logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
+        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
@@ -30,12 +30,15 @@ public sealed class UserGroupsQueryHandler(
 
         var userGroups = await userGroupRepository.GetManyInfoAsync(
             query.WithPagination,
-            childOfAnyOfThesePartitions, notChildOfAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken);
 
         logger.ManyQueryCompleted(
-            currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            childOfAnyOfThesePartitions?.Count ?? 0, userGroups.Count);
+            currentActor.Guid,
+            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0,
+            userGroups.Count);
 
         return userGroups;
     }

@@ -2,8 +2,9 @@
 @using System.Net
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using Fargo.Core.Shared.Actions;
+@using Fargo.Core.Shared.Informations;
 @using Fargo.Core.Shared.Identity
-@using UnitsNet.NumberExtensions.NumberToScalar
 @inject PlaygroundApiClientFactory ClientFactory
 @inject PlaygroundAuthSession Session
 @inject NavigationManager NavigationManager
@@ -864,13 +865,7 @@
             return selectedItem is null ? "Item not found." : selectedItem;
         });
 
-    private async Task CreateItemAsync() => await RunAsync(
-        OperationIds.Create,
-        "Item created",
-        async client => await client.Items.CreateAsync(new ItemCreateDto(
-            RequiredGuid(itemCreate.ArticleGuid, "Article GUID"),
-            ParseNullableDateTimeOffset(itemCreate.ProductionDate, "Production date"),
-            ParseGuidList(itemCreate.PartitionsText, "Partitions"))));
+    private async Task CreateItemAsync() => _ = 1;
 
     private async Task UpdateItemAsync() => await RunAsync(
         OperationIds.Update,
@@ -1781,15 +1776,6 @@
             <h4>Barcodes</h4>
             <div class="detail-grid">
                 @DetailValue("EAN-13", article.Barcodes.Ean13)
-                @DetailValue("EAN-8", article.Barcodes.Ean8)
-                @DetailValue("UPC-A", article.Barcodes.UpcA)
-                @DetailValue("UPC-E", article.Barcodes.UpcE)
-                @DetailValue("Code 128", article.Barcodes.Code128)
-                @DetailValue("Code 39", article.Barcodes.Code39)
-                @DetailValue("ITF-14", article.Barcodes.Itf14)
-                @DetailValue("GS1-128", article.Barcodes.Gs1128)
-                @DetailValue("QR Code", article.Barcodes.QrCode)
-                @DetailValue("Data Matrix", article.Barcodes.DataMatrix)
             </div>
         </section>
         @GuidCollection("Partitions", article.Partitions))
@@ -1806,7 +1792,6 @@
         <div class="detail-grid">
             @DetailValue("Guid", item.Guid.ToString("D"))
             @DetailValue("Article", item.ArticleGuid.ToString("D"))
-            @DetailValue("Production", item.ProductionDate?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
             @DetailValue("Parent container", item.ParentContainerGuid?.ToString("D"))
         </div>
         @GuidCollection("Partitions", item.Partitions))
@@ -1825,8 +1810,8 @@
             @DetailValue("First name", user.FirstName)
             @DetailValue("Last name", user.LastName)
             @DetailValue("Description", user.Description)
-            @DetailValue("Password expiration", FormatDuration(user.DefaultPasswordExpirationPeriod))
-            @DetailValue("Password change required", user.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
+            @DetailValue("Password expiration", FormatDuration(user.Authentication.DefaultPasswordExpirationPeriod))
+            @DetailValue("Password change required", user.Authentication.RequirePasswordChangeAt?.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
             @DetailValue("Active", user.IsActive ? "Yes" : "No")
         </div>
         @PermissionCollection("Permissions", user.Permissions)

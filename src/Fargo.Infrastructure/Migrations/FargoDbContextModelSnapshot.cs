@@ -48,8 +48,8 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("guid");
 
-                    b.Property<int>("ArticleType")
-                        .HasColumnType("integer")
+                    b.Property<byte>("ArticleType")
+                        .HasColumnType("smallint")
                         .HasColumnName("article_type");
 
                     b.Property<int?>("Color")
@@ -88,108 +88,18 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("article_guid");
 
-                    b.Property<string>("Code128")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("code128");
-
-                    b.Property<string>("Code39")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("code39");
-
-                    b.Property<string>("DataMatrix")
-                        .HasMaxLength(2335)
-                        .HasColumnType("character varying(2335)")
-                        .HasColumnName("data_matrix");
-
                     b.Property<string>("Ean13")
                         .HasMaxLength(13)
                         .HasColumnType("character varying(13)")
                         .HasColumnName("ean13");
 
-                    b.Property<string>("Ean8")
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
-                        .HasColumnName("ean8");
-
-                    b.Property<string>("Gs1128")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("gs1128");
-
-                    b.Property<string>("Itf14")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("itf14");
-
-                    b.Property<string>("QrCode")
-                        .HasMaxLength(2953)
-                        .HasColumnType("character varying(2953)")
-                        .HasColumnName("qr_code");
-
-                    b.Property<string>("UpcA")
-                        .HasMaxLength(12)
-                        .HasColumnType("character varying(12)")
-                        .HasColumnName("upc_a");
-
-                    b.Property<string>("UpcE")
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
-                        .HasColumnName("upc_e");
-
                     b.HasKey("ArticleGuid")
                         .HasName("pk_article_barcodes");
-
-                    b.HasIndex("Code128")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_code128")
-                        .HasFilter("code128 IS NOT NULL");
-
-                    b.HasIndex("Code39")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_code39")
-                        .HasFilter("code39 IS NOT NULL");
-
-                    b.HasIndex("DataMatrix")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_data_matrix")
-                        .HasFilter("data_matrix IS NOT NULL");
 
                     b.HasIndex("Ean13")
                         .IsUnique()
                         .HasDatabaseName("ix_article_barcodes_ean13")
                         .HasFilter("ean13 IS NOT NULL");
-
-                    b.HasIndex("Ean8")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_ean8")
-                        .HasFilter("ean8 IS NOT NULL");
-
-                    b.HasIndex("Gs1128")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_gs1128")
-                        .HasFilter("gs1128 IS NOT NULL");
-
-                    b.HasIndex("Itf14")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_itf14")
-                        .HasFilter("itf14 IS NOT NULL");
-
-                    b.HasIndex("QrCode")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_qr_code")
-                        .HasFilter("qr_code IS NOT NULL");
-
-                    b.HasIndex("UpcA")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_upc_a")
-                        .HasFilter("upc_a IS NOT NULL");
-
-                    b.HasIndex("UpcE")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_upc_e")
-                        .HasFilter("upc_e IS NOT NULL");
 
                     b.ToTable("article_barcodes", (string)null);
                 });
@@ -310,11 +220,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
 
-                    b.Property<string>("ReplacedByTokenHash")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("replaced_by_token_hash");
-
                     b.Property<DateTimeOffset?>("RevokedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("revoked_at");
@@ -356,10 +261,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<Guid?>("ParentItemContainerGuid")
                         .HasColumnType("uuid")
                         .HasColumnName("parent_item_container_guid");
-
-                    b.Property<DateTimeOffset?>("ProductionDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("production_date");
 
                     b.HasKey("Guid")
                         .HasName("pk_items");
@@ -428,6 +329,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("nameid");
 
+                    b.Property<Guid?>("ParentUserGroupGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_user_group_guid");
+
                     b.PrimitiveCollection<string>("Permissions")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -440,6 +345,9 @@ namespace Fargo.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_user_groups_nameid");
 
+                    b.HasIndex("ParentUserGroupGuid")
+                        .HasDatabaseName("ix_user_groups_parent_user_group_guid");
+
                     b.ToTable("user_groups", (string)null);
                 });
 
@@ -449,14 +357,6 @@ namespace Fargo.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("guid");
-
-                    b.Property<Guid>("AuthVersion")
-                        .HasColumnType("uuid")
-                        .HasColumnName("auth_version");
-
-                    b.Property<long?>("DefaultPasswordExpirationPeriod")
-                        .HasColumnType("bigint")
-                        .HasColumnName("default_password_expiration_period");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -484,20 +384,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("nameid");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("password_hash");
-
                     b.PrimitiveCollection<string>("Permissions")
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("permissions");
-
-                    b.Property<DateTimeOffset?>("RequirePasswordChangeAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("require_password_change_at");
 
                     b.HasKey("Guid")
                         .HasName("pk_users");
@@ -507,6 +397,35 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_users_nameid");
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Users.UserAuthentication", b =>
+                {
+                    b.Property<Guid>("UserGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_guid");
+
+                    b.Property<Guid>("AuthVersion")
+                        .HasColumnType("uuid")
+                        .HasColumnName("auth_version");
+
+                    b.Property<long?>("DefaultPasswordExpirationPeriod")
+                        .HasColumnType("bigint")
+                        .HasColumnName("default_password_expiration_period");
+
+                    b.Property<string>("PasswordHash")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<DateTimeOffset?>("RequirePasswordChangeAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("require_password_change_at");
+
+                    b.HasKey("UserGuid")
+                        .HasName("pk_user_authentications");
+
+                    b.ToTable("user_authentications", (string)null);
                 });
 
             modelBuilder.Entity("ItemPartition", b =>
@@ -681,7 +600,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
                         .WithMany()
                         .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_article_kit_components_articles_from_article_guid");
 
@@ -702,7 +621,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
                         .WithMany()
                         .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_article_packs_articles_from_article_guid");
 
@@ -723,7 +642,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
                         .WithMany()
                         .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_article_variations_articles_from_article_guid");
 
@@ -778,6 +697,29 @@ namespace Fargo.Infrastructure.Migrations
                         .HasConstraintName("fk_partitions_partitions_parent_partition_guid");
 
                     b.Navigation("ParentPartition");
+                });
+
+            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
+                {
+                    b.HasOne("Fargo.Core.UserGroups.UserGroup", "ParentUserGroup")
+                        .WithMany()
+                        .HasForeignKey("ParentUserGroupGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_user_groups_user_groups_parent_user_group_guid");
+
+                    b.Navigation("ParentUserGroup");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Users.UserAuthentication", b =>
+                {
+                    b.HasOne("Fargo.Core.Users.User", "User")
+                        .WithOne("Authentication")
+                        .HasForeignKey("Fargo.Core.Users.UserAuthentication", "UserGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_authentications_users_user_guid");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ItemPartition", b =>
@@ -897,6 +839,12 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Pack");
 
                     b.Navigation("Variation");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Users.User", b =>
+                {
+                    b.Navigation("Authentication")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

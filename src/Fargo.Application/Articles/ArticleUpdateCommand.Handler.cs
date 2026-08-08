@@ -2,7 +2,8 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
@@ -18,11 +19,11 @@ public sealed class ArticlePatchCommandHandler(
         ArticleUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ArticleGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.ArticleGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditArticle);
 
@@ -61,117 +62,9 @@ public sealed class ArticlePatchCommandHandler(
 
         else if (articleUpdateDto.Barcode?.Ean13 is { } ean13)
         {
-            await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
+            await articleService.ValidateEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveEan8 is true)
-        {
-            article.Barcode.Ean8 = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.Ean8 is { } ean8)
-        {
-            await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
-
-            article.Barcode.Ean8 = ean8;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveUpcA is true)
-        {
-            article.Barcode.UpcA = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.UpcA is { } upcA)
-        {
-            await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
-
-            article.Barcode.UpcA = upcA;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveUpcE is true)
-        {
-            article.Barcode.UpcE = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.UpcE is { } upcE)
-        {
-            await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
-
-            article.Barcode.UpcE = upcE;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveCode128 is true)
-        {
-            article.Barcode.Code128 = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.Code128 is { } code128)
-        {
-            await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
-
-            article.Barcode.Code128 = code128;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveCode39 is true)
-        {
-            article.Barcode.Code39 = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.Code39 is { } code39)
-        {
-            await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
-
-            article.Barcode.Code39 = code39;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveItf14 is true)
-        {
-            article.Barcode.Itf14 = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.Itf14 is { } itf14)
-        {
-            await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
-
-            article.Barcode.Itf14 = itf14;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveGs1128 is true)
-        {
-            article.Barcode.Gs1128 = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.Gs1128 is { } gs1128)
-        {
-            await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
-
-            article.Barcode.Gs1128 = gs1128;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveQrCode is true)
-        {
-            article.Barcode.QrCode = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.QrCode is { } qrCode)
-        {
-            await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
-
-            article.Barcode.QrCode = qrCode;
-        }
-
-        if (articleUpdateDto.Barcode?.RemoveDataMatrix is true)
-        {
-            article.Barcode.DataMatrix = null;
-        }
-
-        else if (articleUpdateDto.Barcode?.DataMatrix is { } dataMatrix)
-        {
-            await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
-
-            article.Barcode.DataMatrix = dataMatrix;
         }
 
         if (articleUpdateDto.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
@@ -198,12 +91,12 @@ public sealed class ArticlePatchCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                article.RemovePartition(partition);
+                article.RemovePartition(partition.Guid);
             }
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(article.Guid, actor.ActorId);
+        logger.UpdateCompleted(article.Guid, actor.Guid);
     }
 }

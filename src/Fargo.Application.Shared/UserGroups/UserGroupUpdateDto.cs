@@ -1,4 +1,5 @@
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Application.Shared.UserGroups;
 
@@ -6,6 +7,8 @@ public sealed record UserGroupUpdateDto(
     Nameid? Nameid,
     Description? Description,
     bool? IsActive,
+    Guid? ParentUserGroup,
+    bool? RemoveParentUserGroup,
     IReadOnlyCollection<ActionType>? PermissionsToAdd,
     IReadOnlyCollection<ActionType>? PermissionsToRemove,
     IReadOnlyCollection<Guid>? PartitionsToAdd,

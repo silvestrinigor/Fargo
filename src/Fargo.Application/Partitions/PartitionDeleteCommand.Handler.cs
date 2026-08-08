@@ -1,7 +1,8 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
@@ -19,11 +20,11 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.PartitionGuid, currentActor.ActorId);
+        logger.DeleteStarted(command.PartitionGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.DeletePartition);
 
@@ -33,7 +34,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(partitionToDelete);
 
-        if (!partitionToDelete.HasParentPartition)
+        if (partitionToDelete.ParentPartitionGuid is null)
         {
             throw new FargoApplicationException("Cannot delete a partition with no parent partition.");
         }
@@ -44,12 +45,12 @@ public sealed class PartitionDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(parentPartition);
 
-        await partitionService.ValidatePartitionDelete(partitionToDelete, cancellationToken);
+        await partitionService.ValidatePartitionCanBeDeletedAsync(partitionToDelete, cancellationToken);
 
         partitionRepository.Remove(partitionToDelete);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(command.PartitionGuid, currentActor.ActorId);
+        logger.DeleteCompleted(command.PartitionGuid, currentActor.Guid);
     }
 }

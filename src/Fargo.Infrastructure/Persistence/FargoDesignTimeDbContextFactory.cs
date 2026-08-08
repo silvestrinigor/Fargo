@@ -41,7 +41,12 @@ public sealed class FargoWriteDesignTimeDbContextFactory
     {
         var optionsBuilder = new DbContextOptionsBuilder<FargoDbContext>();
 
-        optionsBuilder.UseNpgsql().UseSnakeCaseNamingConvention();
+        optionsBuilder.UseNpgsql(
+            npgsqlOptions =>
+            {
+                npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
+            }
+        ).UseSnakeCaseNamingConvention();
 
         return new FargoDbContext(optionsBuilder.Options);
     }

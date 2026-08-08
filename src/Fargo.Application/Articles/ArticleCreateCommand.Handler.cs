@@ -2,8 +2,10 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Entities;
+using Fargo.Core.Shared.Informations;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 
@@ -19,44 +21,44 @@ public sealed class ArticleCreateCommandHandler(
     public async Task<Guid> HandleAsync(
         ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.ActorId);
+        logger.CreateStarted(currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateArticle);
 
         Article article;
 
-        switch (command.ArticleType)
+        switch (command.Create.ArticleType ?? ArticleType.Default)
         {
             case ArticleType.Default:
-                article = Article.NewArticle(command.Name);
+                article = Article.NewArticle(command.Create.Name);
                 break;
 
             case ArticleType.Variation:
                 {
-                    var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
+                    var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Variation!.FromArticleGuid, cancellationToken);
 
-                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
+                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Variation.FromArticleGuid, EntityType.Article);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
-                    article = Article.NewArticleVariation(command.Name, fromArticle);
+                    article = Article.NewArticleVariation(command.Create.Name, fromArticle);
 
                     break;
                 }
 
             case ArticleType.Pack:
                 {
-                    var fromArticle = await articleRepository.GetByGuidAsync(command.FromArticle!.Value, cancellationToken);
+                    var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Pack!.FromArticleGuid, cancellationToken);
 
-                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.FromArticle.Value, EntityType.Article);
+                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Pack.FromArticleGuid, EntityType.Article);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
-                    article = Article.NewArticlePack(command.Name, fromArticle, command.PackQuantity!.Value);
+                    article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
 
                     break;
                 }
@@ -65,7 +67,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     var kitComponents = new List<(Article, Scalar)>();
 
-                    foreach (var kdo in command.KitComponents!)
+                    foreach (var kdo in command.Create.KitComponents!)
                     {
                         var fromArticle = await articleRepository.GetByGuidAsync(kdo.ArticleGuid, cancellationToken);
 
@@ -78,102 +80,39 @@ public sealed class ArticleCreateCommandHandler(
                         kitComponents.Add(kit);
                     }
 
-                    article = Article.NewArticleKit(command.Name, kitComponents);
+                    article = Article.NewArticleKit(command.Create.Name, kitComponents);
 
                     break;
                 }
 
-            case ArticleType.Container: article = Article.NewArticleContainer(command.Name); break;
+            case ArticleType.Container: article = Article.NewArticleContainer(command.Create.Name); break;
 
             default: throw new NotSupportedException("Not supported article type.");
         }
 
-        article.Description = command.Description ?? Description.Empty;
+        article.Description = command.Create.Description ?? Description.Empty;
 
-        article.ShelfLife = command.ShelfLife ?? null;
+        article.ShelfLife = command.Create.ShelfLife ?? null;
 
-        article.Color = command.Color ?? null;
+        article.Color = command.Create.Color ?? null;
 
         article.SetMetrics(
-            command.Mass ?? null,
+            command.Create.Mass ?? null,
 
-            command.LengthX ?? null,
+            command.Create.Dimension?.LengthX ?? null,
 
-            command.LengthY ?? null,
+            command.Create.Dimension?.LengthY ?? null,
 
-            command.LengthZ ?? null);
+            command.Create.Dimension?.LengthZ ?? null);
 
-        if (command.Ean13 is { } ean13)
+        if (command.Create.Barcode?.Ean13 is { } ean13)
         {
-            await articleService.AssertArticleEan13IsAvailableAsync(ean13, cancellationToken);
+            await articleService.ValidateEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
         }
 
-        if (command.Ean8 is { } ean8)
-        {
-            await articleService.AssertArticleEan8IsAvailableAsync(ean8, cancellationToken);
-
-            article.Barcode.Ean8 = ean8;
-        }
-
-        if (command.UpcA is { } upcA)
-        {
-            await articleService.AssertArticleUpcAIsAvailableAsync(upcA, cancellationToken);
-
-            article.Barcode.UpcA = upcA;
-        }
-
-        if (command.UpcE is { } upcE)
-        {
-            await articleService.AssertArticleUpcEIsAvailableAsync(upcE, cancellationToken);
-
-            article.Barcode.UpcE = upcE;
-        }
-
-        if (command.Code128 is { } code128)
-        {
-            await articleService.AssertArticleCode128IsAvailableAsync(code128, cancellationToken);
-
-            article.Barcode.Code128 = code128;
-        }
-
-        if (command.Code39 is { } code39)
-        {
-            await articleService.AssertArticleCode39IsAvailableAsync(code39, cancellationToken);
-
-            article.Barcode.Code39 = code39;
-        }
-
-        if (command.Itf14 is { } itf14)
-        {
-            await articleService.AssertArticleItf14IsAvailableAsync(itf14, cancellationToken);
-
-            article.Barcode.Itf14 = itf14;
-        }
-
-        if (command.Gs1128 is { } gs1128)
-        {
-            await articleService.AssertArticleGs1128IsAvailableAsync(gs1128, cancellationToken);
-
-            article.Barcode.Gs1128 = gs1128;
-        }
-
-        if (command.QrCode is { } qrCode)
-        {
-            await articleService.AssertArticleQrCodeIsAvailableAsync(qrCode, cancellationToken);
-
-            article.Barcode.QrCode = qrCode;
-        }
-
-        if (command.DataMatrix is { } dataMatrix)
-        {
-            await articleService.AssertArticleDataMatrixIsAvailableAsync(dataMatrix, cancellationToken);
-
-            article.Barcode.DataMatrix = dataMatrix;
-        }
-
-        if (command.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
         {
             foreach (var partitionGuid in partitionsToAdd.Distinct())
             {
@@ -191,7 +130,7 @@ public sealed class ArticleCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(article.Guid, actor.ActorId);
+        logger.CreateCompleted(article.Guid, actor.Guid);
 
         return article.Guid;
     }

@@ -19,11 +19,11 @@ public sealed class ItemsQueryHandler(
     {
         var pagination = query.WithPagination;
 
-        logger.ManyQueryStarted(currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
+        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
@@ -37,7 +37,7 @@ public sealed class ItemsQueryHandler(
             cancellationToken);
 
         logger.ManyQueryCompleted(
-            currentActor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            currentActor.Guid, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
             childOfAnyOfThesePartitions?.Count ?? 0, items.Count);
 
         return items;

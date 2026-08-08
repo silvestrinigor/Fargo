@@ -1,8 +1,8 @@
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Informations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Infrastructure.Converters;
+namespace Fargo.Infrastructure.JsonConverters;
 
 public sealed class FirstNameJsonConverter : JsonConverter<FirstName>
 {

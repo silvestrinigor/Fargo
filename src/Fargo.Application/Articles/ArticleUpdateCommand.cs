@@ -4,4 +4,5 @@ namespace Fargo.Application.Articles;
 
 public sealed record ArticleUpdateCommand(
     Guid ArticleGuid,
-    ArticleUpdateDto Article) : ICommand;
+    ArticleUpdateDto Article
+) : ICommand;

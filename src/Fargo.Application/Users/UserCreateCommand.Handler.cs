@@ -1,7 +1,10 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
+using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -9,29 +12,31 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserCreateCommandHandler(
-    ActorService actorService, UserService userService,
-    IUserRepository userRepository, IPartitionRepository partitionRepository,
-    IUserGroupRepository userGroupRepository, ICurrentActor currentActor,
-    IPasswordHasher passwordHasher, IUnitOfWork unitOfWork,
+    ActorService actorService,
+    UserService userService,
+    IUserRepository userRepository,
+    IPartitionRepository partitionRepository,
+    IUserGroupRepository userGroupRepository,
+    ICurrentActor currentActor,
+    IPasswordHasher passwordHasher,
+    IUnitOfWork unitOfWork,
     ILogger<UserCreateCommandHandler> logger
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
         UserCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UserCreateStarted(currentActor.ActorId);
+        logger.UserCreateStarted(currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUser);
 
-        var userPasswordHash = passwordHasher.Hash(command.Create.Password);
-
         await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var user = User.CreateUser(command.Create.Nameid, userPasswordHash);
+        var user = User.CreateUser(command.Create.Nameid);
 
         user.FirstName = command.Create.FirstName ?? null;
 
@@ -39,11 +44,25 @@ public sealed class UserCreateCommandHandler(
 
         user.Description = command.Create.Description ?? Description.Empty;
 
-        user.IsActive = command.Create.IsActive ?? true;
+        if (command.Create.IsActive is true)
+        {
+            user.Activate();
+        }
+        else if (command.Create.IsActive is false)
+        {
+            user.Deactivate();
+        }
 
-        user.DefaultPasswordExpirationPeriod = command.Create.DefaultPasswordExpirationTimeSpan ?? null;
+        user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
-        user.MarkPasswordChangeAsRequired();
+        if (command.Create.Authentication?.Password is { } password)
+        {
+            var passwordHash = passwordHasher.Hash(new(command.Create.Authentication.Password));
+
+            user.Authentication.SetPasswordHash(passwordHash);
+        }
+
+        user.Authentication.MarkPasswordChangeAsRequired();
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
@@ -103,7 +122,7 @@ public sealed class UserCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UserCreateCompleted(user.Guid, currentActor.ActorId);
+        logger.UserCreateCompleted(user.Guid, currentActor.Guid);
 
         return user.Guid;
     }

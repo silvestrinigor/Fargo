@@ -1,9 +1,6 @@
 using Fargo.Application.Extensions;
 using Fargo.HttpApi.Endpoints;
-using Fargo.HttpApi.ExceptionHandlers;
-using Fargo.HttpApi.JsonConfig;
-using Fargo.HttpApi.OpenApiExtensions;
-using Fargo.HttpApi.RouteConstraints;
+using Fargo.HttpApi.Extensions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

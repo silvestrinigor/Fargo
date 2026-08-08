@@ -19,7 +19,7 @@ public sealed class LogoutCommandHandler(
         var refreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
         var storedRefreshToken =
-            await refreshTokenRepository.GetByTokenHash(refreshTokenHash, cancellationToken);
+            await refreshTokenRepository.GetByTokenHashAsync(refreshTokenHash, cancellationToken);
 
         if (storedRefreshToken == null)
         {

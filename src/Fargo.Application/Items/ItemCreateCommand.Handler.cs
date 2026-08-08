@@ -2,7 +2,9 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
-using Fargo.Core.Shared;
+using Fargo.Core.Partitions;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
@@ -11,20 +13,19 @@ public sealed class ItemCreateCommandHandler(
     ActorService actorService,
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<ItemCreateCommandHandler> logger
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
-    public async Task<Guid> HandleAsync(
-        ItemCreateCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(command.Create.ArticleGuid, currentActor.ActorId);
+        logger.CreateStarted(command.Create.ArticleGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateItem);
 
@@ -34,13 +35,38 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ThrowIfAccessDenied(article);
 
-        var item = Item.CreateItem(article, command.Create.ProductionDate);
+        var item = Item.CreateItem(article);
+
+        if (command.Create.ParentItemContainerGuid is { } parentItemContainerGuid)
+        {
+            var parentItemContainer = await itemRepository.GetByGuidAsync(parentItemContainerGuid, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentItemContainer, parentItemContainerGuid, EntityType.Item);
+
+            actor.ThrowIfAccessDenied(parentItemContainer);
+
+            item.PlaceInsideContainer(parentItemContainer);
+        }
+
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitionGuids)
+        {
+            foreach (var partitionGuid in partitionGuids)
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                item.AddPartition(partition);
+            }
+        }
 
         itemRepository.Add(item);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(item.Guid, actor.ActorId, article.Guid);
+        logger.CreateCompleted(item.Guid, actor.Guid, article.Guid);
 
         return item.Guid;
     }

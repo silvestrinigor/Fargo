@@ -1,7 +1,9 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
+using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Microsoft.Extensions.Logging;
 
@@ -21,11 +23,11 @@ public sealed class UserGroupCreateCommandHandler(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.ActorId);
+        logger.CreateStarted(currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUserGroup);
 
@@ -35,7 +37,25 @@ public sealed class UserGroupCreateCommandHandler(
 
         userGroup.Description = command.Create.Description ?? Description.Empty;
 
-        userGroup.IsActive = command.Create.IsActive ?? true;
+        if (command.Create.IsActive is true)
+        {
+            userGroup.Activate();
+        }
+        else if (command.Create.IsActive is false)
+        {
+            userGroup.Deactivate();
+        }
+
+        if (command.Create.ParentUserGroup is { } parentUserGroupGuid)
+        {
+            var parentUserGroup = await userGroupRepository.GetByGuidAsync(parentUserGroupGuid, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid, EntityType.UserGroup);
+
+            actor.ThrowIfAccessDenied(parentUserGroup);
+
+            userGroup.SetParentUserGroup(parentUserGroup);
+        }
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
@@ -81,7 +101,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(userGroup.Guid, currentActor.ActorId);
+        logger.CreateCompleted(userGroup.Guid, currentActor.Guid);
 
         return userGroup.Guid;
     }

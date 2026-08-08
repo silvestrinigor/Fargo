@@ -1,6 +1,7 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 
 namespace Fargo.Core.Users;
@@ -8,7 +9,7 @@ namespace Fargo.Core.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : IEntity, IPartitioned
+public class User : IEntity, IPartitionedReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the user.
@@ -16,9 +17,19 @@ public class User : IEntity, IPartitioned
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
     /// <summary>
+    /// Gets a value indicating whether the user is the main admin.
+    /// </summary>
+    public bool IsAdmin => Guid == FargoCoreWellKnowGuids.AdminUserGuid;
+
+    /// <summary>
+    /// Gets a value indicating whether the user account is active.
+    /// </summary>
+    public bool IsActive { get; private set; } = true;
+
+    /// <summary>
     /// Gets or sets the unique nameid of the user.
     /// </summary>
-    public required Nameid Nameid { get; set; }
+    public Nameid Nameid { get; set; }
 
     /// <summary>
     /// Gets or sets the user's first name.
@@ -36,119 +47,164 @@ public class User : IEntity, IPartitioned
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets or sets the value indicating whether the user is active.
+    /// Gets the authentication information associated with the user.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public UserAuthentication Authentication { get; private init; }
 
     /// <summary>
-    /// Gets a value indicating whether the user is the main admin.
+    /// Gets the permissions assigned directly to the user.
+    /// Permissions inherited from user groups are not included.
     /// </summary>
-    public bool IsAdmin => Guid == FargoCoreGuids.AdminUserGuid;
-
-    /// <summary>
-    /// Gets or sets the hashed password of the user.
-    /// </summary>
-    public required PasswordHash PasswordHash { get; set; }
-
-    /// <summary>
-    /// Gets or sets the default password expiration perid.
-    /// </summary>
-    public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
-
-    /// <summary>
-    /// Gets or sets the required date to change the password.
-    /// </summary>
-    public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
-
-    /// <summary>
-    /// Gets a value indicating whether it is necessary to change password.
-    /// </summary>
-    public bool IsPasswordChangeRequired
-        => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Guid AuthVersion { get; private set; } = Guid.NewGuid();
+    public IReadOnlyCollection<ActionType> Permissions => permissions;
 
     private readonly List<ActionType> permissions = [];
 
     /// <summary>
-    /// Gets the read-only collection of permissions assigned directly to the user.
-    ///
-    /// Each permission represents an allowed <see cref="ActionType"/>
-    /// that the user can perform without considering group memberships.
+    /// Gets the user groups to which the user belongs.
     /// </summary>
-    public IReadOnlyCollection<ActionType> Permissions => permissions;
+    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
 
     private readonly List<UserGroup> userGroups = [];
 
-    public IReadOnlyCollection<UserGroup> UserGroups => userGroups;
-
-    private readonly List<Partition> partitionAccesses = [];
-
     /// <summary>
-    /// Gets the read-only collection of partitions the user has access to.
+    /// Gets the partitions to which the user has been granted direct access.
     /// </summary>
-    /// <remarks>
-    /// Partitions define logical boundaries in the system.
-    /// A user can access entities that have no partition (public), or that
-    /// belong to at least one partition to which the user has been granted access.
-    /// </remarks>
     public IReadOnlyCollection<Partition> PartitionAccesses => partitionAccesses;
 
-    private readonly List<Partition> partitions = [];
+    private readonly List<Partition> partitionAccesses = [];
 
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
     public IReadOnlyCollection<Partition> Partitions => partitions;
 
+    private readonly List<Partition> partitions = [];
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="User"/> class.
+    /// Intended only for entity creation through factory methods and Entity Framework.
+    /// </summary>
     private User()
     {
+        Authentication = new UserAuthentication(this);
     }
 
-    public static User CreateUser(Nameid nameid, PasswordHash passwordHash)
+    /// <summary>
+    /// Creates a new user.
+    /// </summary>
+    /// <param name="nameid">The user's unique name identifier.</param>
+    /// <returns>A new <see cref="User"/> instance.</returns>
+    public static User CreateUser(Nameid nameid)
     {
         var user = new User
         {
-            Nameid = nameid,
-            PasswordHash = passwordHash
+            Nameid = nameid
         };
 
         return user;
     }
 
-    public static User CreateAdministratorUser(Nameid nameid, PasswordHash passwordHash)
+    /// <summary>
+    /// Creates the built-in administrator user.
+    /// </summary>
+    /// <param name="nameid">The administrator's unique name identifier.</param>
+    /// <returns>The built-in administrator user.</returns>
+    public static User CreateAdministratorUser(Nameid nameid)
     {
         var user = new User
         {
-            Guid = FargoCoreGuids.AdminUserGuid,
-            Nameid = nameid,
-            PasswordHash = passwordHash
+            Guid = FargoCoreWellKnowGuids.AdminUserGuid,
+            Nameid = nameid
         };
 
         return user;
     }
 
+    /// <summary>
+    /// Associates the user with the specified partition.
+    /// If the partition is already associated, no action is taken.
+    /// </summary>
+    /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to associate an administrator with a non-global partition.
+    /// </exception>
     public void AddPartition(Partition partition)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        if (IsAdmin && !partition.IsGlobalPartition)
+        {
+            throw new FargoCoreException(
+                $"Cannot associate the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' with the non-global partition '{partition.Guid}'.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        if (partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
         partitions.Add(partition);
     }
 
-    public void RemovePartition(Partition partition)
+    /// <summary>
+    /// Removes the association between the user and the specified partition.
+    /// </summary>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to remove.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to remove an administrator from the global partition.
+    /// </exception>
+    public void RemovePartition(Guid partitionGuid)
     {
-        partitions.Remove(partition);
+        if (IsAdmin && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                $"Cannot remove the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' from the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        partitions.RemoveAll(p => p.Guid == partitionGuid);
     }
 
+    /// <summary>
+    /// Adds the user to the specified user group.
+    /// If the user already belongs to the group, no action is taken.
+    /// </summary>
+    /// <param name="userGroup">The user group to add.</param>
     public void AddUserGroup(UserGroup userGroup)
     {
+        ArgumentNullException.ThrowIfNull(userGroup);
+
+        if (userGroups.Any(x => x.Guid == userGroup.Guid))
+        {
+            return;
+        }
+
         userGroups.Add(userGroup);
     }
 
-    public void RemoveUserGroup(UserGroup userGroup)
+    /// <summary>
+    /// Removes the user from the specified user group.
+    /// </summary>
+    /// <param name="userGroupGuid">
+    /// The identifier of the user group to remove.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to remove an administrator from the administrators
+    /// user group.
+    /// </exception>
+    public void RemoveUserGroup(Guid userGroupGuid)
     {
-        userGroups.Remove(userGroup);
+        if (IsAdmin && userGroupGuid == FargoCoreWellKnowGuids.AdministratorsUserGroupGuid)
+        {
+            throw new FargoCoreException(
+                $"Cannot remove the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' from the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}'.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        userGroups.RemoveAll(g => g.Guid == userGroupGuid);
     }
 
     /// <summary>
@@ -167,43 +223,26 @@ public class User : IEntity, IPartitioned
         partitionAccesses.Add(partition);
     }
 
-    public void RemovePartitionAccess(Partition partition)
-    {
-        partitionAccesses.Remove(partition);
-    }
-
     /// <summary>
-    /// Resets the password expiration date based on the user's
-    /// <see cref="DefaultPasswordExpirationPeriod"/>.
-    ///
-    /// The new expiration date is calculated by adding the configured
-    /// default expiration interval to the current UTC time.
-    ///
-    /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
-    /// immediately.
+    /// Revokes the user's access to the specified partition.
     /// </summary>
-    /// <remarks>
-    /// This method is typically used after the user successfully changes
-    /// their own password.
-    /// </remarks>
-    public void ResetPasswordExpiration()
-        => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationPeriod;
-
-    /// <summary>
-    /// Marks the user's password as requiring an immediate change.
-    /// </summary>
-    /// <remarks>
-    /// After calling this method, <see cref="IsPasswordChangeRequired"/> will return <c>true</c>
-    /// until the password is updated and a new expiration date is set.
-    /// </remarks>
-    public void MarkPasswordChangeAsRequired()
+    /// <param name="partitionGuid">
+    /// The identifier of the partition whose access should be revoked.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to revoke the administrator's access to the global
+    /// partition.
+    /// </exception>
+    public void RemovePartitionAccess(Guid partitionGuid)
     {
-        RequirePasswordChangeAt = DateTimeOffset.UtcNow;
-    }
+        if (IsAdmin && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                $"Cannot revoke the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' access to the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
+                FargoCoreErrorType.InvalidOperation);
+        }
 
-    public void RotateAuthVersion()
-    {
-        AuthVersion = Guid.NewGuid();
+        partitionAccesses.RemoveAll(p => p.Guid == partitionGuid);
     }
 
     /// <summary>
@@ -212,15 +251,56 @@ public class User : IEntity, IPartitioned
     /// <param name="action">The action type to allow.</param>
     public void AddPermission(ActionType action)
     {
-        permissions.Add(action);
+        if (!permissions.Contains(action))
+        {
+            permissions.Add(action);
+        }
     }
 
     /// <summary>
-    /// Removes a permission from the user if it exists.
+    /// Removes the specified permission from the user, if it exists.
     /// </summary>
-    /// <param name="action">The action type to remove.</param>
+    /// <param name="action">
+    /// The permission to remove.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to remove a permission from an administrator.
+    /// </exception>
     public void RemovePermission(ActionType action)
     {
-        permissions.Remove(action);
+        if (IsAdmin)
+        {
+            throw new FargoCoreException(
+                $"Cannot revoke permission '{action}' from the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}'.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        permissions.RemoveAll(x => x == action);
+    }
+
+    /// <summary>
+    /// Activates the user.
+    /// </summary>
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
+    /// <summary>
+    /// Deactivates the user.
+    /// </summary>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to deactivate an administrator.
+    /// </exception>
+    public void Deactivate()
+    {
+        if (IsAdmin)
+        {
+            throw new FargoCoreException(
+                $"Cannot deactivate the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}'.",
+                FargoCoreErrorType.InvalidOperation);
+        }
+
+        IsActive = false;
     }
 }

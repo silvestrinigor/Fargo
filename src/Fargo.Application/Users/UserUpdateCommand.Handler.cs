@@ -1,7 +1,9 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -12,6 +14,7 @@ public sealed class UserUpdateCommandHandler(
     UserService userService,
     ActorService actorService,
     IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
     ICurrentActor currentActor,
@@ -23,11 +26,11 @@ public sealed class UserUpdateCommandHandler(
         UserUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.UserGuid, currentActor.ActorId);
+        logger.UpdateStarted(command.UserGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUser);
 
@@ -50,7 +53,37 @@ public sealed class UserUpdateCommandHandler(
 
         user.Description = command.Update.Description ?? user.Description;
 
-        user.IsActive = command.Update.IsActive ?? user.IsActive;
+        if (command.Update.IsActive is true)
+        {
+            user.Activate();
+        }
+        else if (command.Update.IsActive is false)
+        {
+            user.Deactivate();
+        }
+
+        if (command.Update.Authentication is { } auth)
+        {
+            if (auth.Password is { } password)
+            {
+                actor.ThrowIfPermissionDenied(ActionType.ChangeAnotherUserPassword);
+
+                var passwordHash = passwordHasher.Hash(password);
+
+                user.Authentication.SetPasswordHash(passwordHash);
+
+                user.Authentication.MarkPasswordChangeAsRequired();
+            }
+
+            if (auth.DefaultPasswordExpirationPeriod is not null)
+            {
+                user.Authentication.DefaultPasswordExpirationPeriod = auth.DefaultPasswordExpirationPeriod;
+            }
+            else if (auth.RemoveDefaultPasswordExpirationPeriod is true)
+            {
+                user.Authentication.DefaultPasswordExpirationPeriod = null;
+            }
+        }
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {
@@ -96,7 +129,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.RemovePartition(partition);
+                user.RemovePartition(partition.Guid);
             }
         }
 
@@ -124,7 +157,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(userGroup);
 
-                user.RemoveUserGroup(userGroup);
+                user.RemoveUserGroup(userGroup.Guid);
             }
         }
 
@@ -152,12 +185,12 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.RemovePartitionAccess(partition);
+                user.RemovePartitionAccess(partition.Guid);
             }
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(command.UserGuid, currentActor.ActorId);
+        logger.UpdateCompleted(command.UserGuid, currentActor.Guid);
     }
 }

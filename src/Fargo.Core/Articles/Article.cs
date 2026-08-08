@@ -1,8 +1,7 @@
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
-using System.Diagnostics.CodeAnalysis;
+using Fargo.Core.Shared.Informations;
 using System.Drawing;
 using UnitsNet;
 
@@ -16,7 +15,7 @@ namespace Fargo.Core.Articles;
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
 /// </remarks>
-public class Article : IEntity, IPartitioned
+public class Article : IEntity, IPartitionedReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the article.
@@ -54,6 +53,14 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     public Color? Color { get; set; }
 
+    /// <summary>
+    /// Gets the collection of barcodes associated with the article.
+    /// </summary>
+    public ArticleBarcode Barcode { get; private init; }
+
+    /// <summary>
+    /// Gets the physical dimensions of the article.
+    /// </summary>
     public ArticleDimension Dimension { get; private init; }
 
     /// <summary>
@@ -71,19 +78,11 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     public Density? Density => Mass / Volume;
 
-    public ArticleBarcode Barcode { get; private init; }
-
     /// <summary>
     /// Gets the variation info associated with the article.
     /// When <see langword="null"/>, no variation constraint is defined.
     /// </summary>
     public ArticleVariation? Variation { get; private init; }
-
-    /// <summary>
-    /// Gets a value indicating whether this article is a variation of another article.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(Variation))]
-    public bool IsVariation => Variation is not null;
 
     /// <summary>
     /// Gets the pack info associated with the article.
@@ -92,30 +91,17 @@ public class Article : IEntity, IPartitioned
     public ArticlePack? Pack { get; private init; }
 
     /// <summary>
-    /// Gets a value indicating whether this article represents a pack.
+    /// Gets the components that compose the article kit.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Pack))]
-    public bool IsPack => Pack is not null;
+    public IReadOnlyCollection<ArticleKitComponent> KitComponents => kitComponents;
 
-    public IReadOnlyCollection<ArticleKitComponent>? KitComponents { get; private init; }
-
-    /// <summary>
-    /// Gets a value indicating whether this article represents a kit.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(KitComponents))]
-    public bool IsKit => KitComponents is not null;
+    private readonly List<ArticleKitComponent> kitComponents = [];
 
     /// <summary>
     /// Gets the container constraints associated with the article.
     /// When <see langword="null"/>, the article is not a container.
     /// </summary>
     public ArticleContainer? Container { get; private set; }
-
-    /// <summary>
-    /// Gets a value indicating whether this article represents a container.
-    /// </summary>
-    [MemberNotNullWhen(true, nameof(Container))]
-    public bool IsContainer => Container is not null;
 
     /// <summary>
     /// Gets the partitions associated with the article.
@@ -135,55 +121,51 @@ public class Article : IEntity, IPartitioned
     }
 
     private Article(Article variationFromArticle)
+    : this()
     {
         Variation = new ArticleVariation(variationFromArticle, this);
         ArticleType = ArticleType.Variation;
-        Barcode = new ArticleBarcode(this);
-        Dimension = new ArticleDimension(this);
     }
 
     private Article(Article packFromArticle, Scalar quantity)
+    : this()
     {
         Pack = new ArticlePack(this, packFromArticle, quantity);
         ArticleType = ArticleType.Pack;
-        Barcode = new ArticleBarcode(this);
-        Dimension = new ArticleDimension(this);
     }
 
-    private Article(IReadOnlyCollection<(Article, Scalar)> articleKitComponentsValues)
+    private Article(IReadOnlyCollection<(Article, Scalar)> components)
+    : this()
     {
-        var kitComponents = new List<ArticleKitComponent>();
-
-        foreach (var component in articleKitComponentsValues)
+        foreach (var (article, quantity) in components)
         {
-            kitComponents.Add(new ArticleKitComponent(this, component.Item1, component.Item2));
+            kitComponents.Add(new ArticleKitComponent(this, article, quantity));
         }
 
-        KitComponents = kitComponents;
-
         ArticleType = ArticleType.Kit;
-        Barcode = new ArticleBarcode(this);
-        Dimension = new ArticleDimension(this);
     }
 
     private Article(bool isContainer)
+    : this()
     {
         if (isContainer)
         {
             Container = new ArticleContainer(this);
             ArticleType = ArticleType.Container;
         }
-
-        ArticleType = ArticleType.Default;
-        Barcode = new ArticleBarcode(this);
-        Dimension = new ArticleDimension(this);
+        else
+        {
+            ArticleType = ArticleType.Default;
+        }
     }
 
     /// <summary>
     /// Creates a new article.
     /// </summary>
     /// <param name="name">The name of the article.</param>
-    /// <returns></returns>
+    /// <returns>
+    /// A new <see cref="Article"/> instance.
+    /// </returns>
     public static Article NewArticle(Name name)
     {
         var article = new Article
@@ -200,7 +182,9 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     /// <param name="name">The name of the article.</param>
     /// <param name="fromArticle">The article this article is a variation of.</param>
-    /// <returns></returns>
+    /// <returns>
+    /// A new <see cref="Article"/> instance.
+    /// </returns>
     public static Article NewArticleVariation(Name name, Article fromArticle)
     {
         var articleVariation = new Article(fromArticle)
@@ -217,7 +201,9 @@ public class Article : IEntity, IPartitioned
     /// <param name="name">The name of the article.</param>
     /// <param name="fromArticle">The article this article is a pack of.</param>
     /// <param name="quantity"></param>
-    /// <returns></returns>
+    /// <returns>
+    /// A new <see cref="Article"/> instance.
+    /// </returns>
     public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
     {
         var articlePack = new Article(fromArticle, quantity)
@@ -233,7 +219,9 @@ public class Article : IEntity, IPartitioned
     /// </summary>
     /// <param name="name">The name of the article.</param>
     /// <param name="kitComponents"></param>
-    /// <returns></returns>
+    /// <returns>
+    /// A new <see cref="Article"/> instance.
+    /// </returns>
     public static Article NewArticleKit(Name name, IReadOnlyCollection<(Article, Scalar)> kitComponents)
     {
         var articleKit = new Article(kitComponents)
@@ -248,7 +236,9 @@ public class Article : IEntity, IPartitioned
     /// Creates a new article container.
     /// </summary>
     /// <param name="name"></param>
-    /// <returns></returns>
+    /// <returns>
+    /// A new <see cref="Article"/> instance.
+    /// </returns>
     public static Article NewArticleContainer(Name name)
     {
         var articleContainer = new Article(isContainer: true)
@@ -259,19 +249,52 @@ public class Article : IEntity, IPartitioned
         return articleContainer;
     }
 
+    /// <summary>
+    /// Sets the physical measurements of the article.
+    /// </summary>
+    /// <param name="mass">
+    /// The physical mass of the article.
+    /// </param>
+    /// <param name="lengthX">
+    /// The length along the X axis.
+    /// </param>
+    /// <param name="lengthY">
+    /// The length along the Y axis.
+    /// </param>
+    /// <param name="lengthZ">
+    /// The length along the Z axis.
+    /// </param>
     public void SetMetrics(Mass? mass, Length? lengthX, Length? lengthY, Length? lengthZ)
     {
         Mass = mass;
         Dimension.SetDimensions(lengthX, lengthY, lengthZ);
     }
 
+    /// <summary>
+    /// Associates the article with the specified partition.
+    /// If the association already exists, no action is taken.
+    /// </summary>
+    /// <param name="partition">The partition to associate.</param>
     public void AddPartition(Partition partition)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        if (partitions.Any(p => p.Guid == partition.Guid))
+        {
+            return;
+        }
+
         partitions.Add(partition);
     }
 
-    public void RemovePartition(Partition partition)
+    /// <summary>
+    /// Removes the association between the article and the specified partition.
+    /// </summary>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to remove.
+    /// </param>
+    public void RemovePartition(Guid partitionGuid)
     {
-        partitions.Remove(partition);
+        partitions.RemoveAll(p => p.Guid == partitionGuid);
     }
 }

@@ -1,7 +1,8 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.UserGroups;
 using Microsoft.Extensions.Logging;
 
@@ -21,13 +22,11 @@ public sealed class UserGroupUpdateCommandHandler(
         UserGroupUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        var update = command.Update;
+        logger.UpdateStarted(command.UserGroupGuid, currentActor.Guid);
 
-        logger.UpdateStarted(command.UserGroupGuid, currentActor.ActorId);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUserGroup);
 
@@ -37,16 +36,40 @@ public sealed class UserGroupUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(userGroup);
 
-        if (update.Nameid is not null && userGroup.Nameid != update.Nameid)
+        if (command.Update.Nameid is not null && userGroup.Nameid != command.Update.Nameid)
         {
-            await userGroupService.ValidateUserGroupNameidIsAvailableAsync(update.Nameid.Value, cancellationToken);
+            await userGroupService.ValidateUserGroupNameidIsAvailableAsync(command.Update.Nameid.Value, cancellationToken);
 
-            userGroup.Nameid = update.Nameid.Value;
+            userGroup.Nameid = command.Update.Nameid.Value;
         }
 
-        userGroup.Description = update.Description ?? userGroup.Description;
+        userGroup.Description = command.Update.Description ?? userGroup.Description;
 
-        userGroup.IsActive = update.IsActive ?? userGroup.IsActive;
+        if (command.Update.IsActive is true)
+        {
+            userGroup.Activate();
+        }
+        else if (command.Update.IsActive is false)
+        {
+            userGroup.Deactivate();
+        }
+
+        if (command.Update.ParentUserGroup is { } parentUserGroupGuid)
+        {
+            var parentUserGroup = await userGroupRepository.GetByGuidAsync(parentUserGroupGuid, cancellationToken);
+
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid, EntityType.UserGroup);
+
+            actor.ThrowIfAccessDenied(parentUserGroup);
+
+            await userGroupService.ValidateParentUserGroupAssignmentHierarchyAsync(parentUserGroup, userGroup, cancellationToken);
+
+            userGroup.SetParentUserGroup(parentUserGroup);
+        }
+        else if (command.Update.RemoveParentUserGroup is true)
+        {
+            userGroup.RemoveFromParentUserGroup();
+        }
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {
@@ -92,7 +115,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                userGroup.RemovePartition(partition);
+                userGroup.RemovePartition(partition.Guid);
             }
         }
 
@@ -120,12 +143,12 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                userGroup.RemovePartitionAccess(partition);
+                userGroup.RemovePartitionAccess(partition.Guid);
             }
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(command.UserGroupGuid, currentActor.ActorId);
+        logger.UpdateCompleted(command.UserGroupGuid, currentActor.Guid);
     }
 }

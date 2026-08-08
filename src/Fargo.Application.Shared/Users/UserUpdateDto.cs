@@ -1,4 +1,5 @@
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Application.Shared.Users;
 
@@ -8,6 +9,7 @@ public sealed record UserUpdateDto(
     LastName? LastName = null,
     Description? Description = null,
     bool? IsActive = null,
+    UserAuthenticationUpdateDto? Authentication = null,
     IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
     IReadOnlyCollection<ActionType>? PermissionsToRemove = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,

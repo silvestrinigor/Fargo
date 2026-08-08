@@ -1,13 +1,14 @@
-using Fargo.Core;
 using Fargo.Core.Articles;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Infrastructure.Converters;
-using Fargo.Infrastructure.EntityTypeConfigurations;
+using Fargo.Infrastructure.Configurations;
+using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
 using UnitsNet;
@@ -31,59 +32,64 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder
-            .Properties<Name>()
-            .HaveMaxLength(Name.MaxLength)
-            .HaveConversion<NameStringConverter>();
+        .Properties<Name>()
+        .HaveMaxLength(Name.MaxLength)
+        .HaveConversion<NameStringConverter>();
 
         configurationBuilder
-            .Properties<Description>()
-            .HaveMaxLength(Description.MaxLength)
-            .HaveConversion<DescriptionStringConverter>();
+        .Properties<Description>()
+        .HaveMaxLength(Description.MaxLength)
+        .HaveConversion<DescriptionStringConverter>();
 
         configurationBuilder
-            .Properties<Nameid>()
-            .HaveMaxLength(Nameid.MaxLength)
-            .HaveConversion<NameidStringConverter>();
+        .Properties<Nameid>()
+        .HaveMaxLength(Nameid.MaxLength)
+        .HaveConversion<NameidStringConverter>();
 
         configurationBuilder
-            .Properties<PasswordHash>()
-            .HaveMaxLength(PasswordHash.MaxLength)
-            .HaveConversion<PasswordHashStringConverter>();
+        .Properties<PasswordHash>()
+        .HaveMaxLength(PasswordHash.MaxLength)
+        .HaveConversion<PasswordHashStringConverter>();
 
         configurationBuilder
-            .Properties<TokenHash>()
-            .HaveMaxLength(TokenHash.MaxLength)
-            .HaveConversion<TokenHashStringConverter>();
+        .Properties<TokenHash>()
+        .HaveMaxLength(TokenHash.MaxLength)
+        .HaveConversion<TokenHashStringConverter>();
 
         configurationBuilder
-            .Properties<FirstName>()
-            .HaveMaxLength(FirstName.MaxLength)
-            .HaveConversion<FirstNameStringConverter>();
+        .Properties<FirstName>()
+        .HaveMaxLength(FirstName.MaxLength)
+        .HaveConversion<FirstNameStringConverter>();
 
         configurationBuilder
-            .Properties<LastName>()
-            .HaveMaxLength(LastName.MaxLength)
-            .HaveConversion<LastNameStringConverter>();
+        .Properties<LastName>()
+        .HaveMaxLength(LastName.MaxLength)
+        .HaveConversion<LastNameStringConverter>();
 
         configurationBuilder
-            .Properties<Mass>()
-            .HaveConversion<MassStringConverter>();
+        .Properties<Mass>()
+        .HaveConversion<MassStringConverter>();
 
         configurationBuilder
-            .Properties<Length>()
-            .HaveConversion<LengthStringConverter>();
+        .Properties<Length>()
+        .HaveConversion<LengthStringConverter>();
 
         configurationBuilder
-            .Properties<Scalar>()
-            .HaveConversion<ScalarDoubleConverter>();
+        .Properties<Scalar>()
+        .HaveConversion<ScalarDoubleConverter>();
 
         configurationBuilder
-            .Properties<Color>()
-            .HaveConversion<ColorArgbConverter>();
+        .Properties<Color>()
+        .HaveConversion<ColorArgbConverter>();
 
         configurationBuilder
-            .Properties<TimeSpan>()
-            .HaveConversion<TimeSpanTicksConverter>();
+        .Properties<TimeSpan>()
+        .HaveConversion<TimeSpanTicksConverter>();
+
+        configurationBuilder
+        .Properties<Ean13>()
+        .HaveMaxLength(Ean13.CodeLength)
+        .HaveConversion<Ean13StringConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -105,6 +111,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+
+        modelBuilder.ApplyConfiguration(new UserAuthenticationConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
 

@@ -2,10 +2,32 @@ using Fargo.Core.Shared.Barcodes;
 
 namespace Fargo.Core.Articles;
 
+/// <summary>
+/// Provides domain operations and validation rules for <see cref="Article"/> entities.
+/// </summary>
+/// <remarks>
+/// This service contains business rules that require repository access and
+/// therefore cannot be enforced by the <see cref="Article"/> entity alone.
+/// </remarks>
 public sealed class ArticleService(IArticleRepository articleRepository)
 {
-    public async Task AssertArticleCanBeDeletedAsync(Article article, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Validates that the specified article can be deleted.
+    /// </summary>
+    /// <param name="article">
+    /// The article to validate.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the article has associated items or is used as a dependency
+    /// by another article.
+    /// </exception>
+    public async Task ValidateArticleCanBeDeletedAsync(Article article, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(article);
+
         var hasItems = await articleRepository.HasItemsAssociatedAsync(article.Guid, cancellationToken);
 
         if (hasItems)
@@ -13,7 +35,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
             throw new FargoCoreException($"Article '{article.Guid}' cannot be deleted because it has associated items.");
         }
 
-        var isArticleDependence = await articleRepository.IsDependenceOfAnotherArticle(article.Guid, cancellationToken);
+        var isArticleDependence = await articleRepository.IsDependencyOfAnotherArticleAsync(article.Guid, cancellationToken);
 
         if (isArticleDependence)
         {
@@ -21,103 +43,28 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    public async Task AssertArticleEan13IsAvailableAsync(Ean13 ean13, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Validates that the specified EAN-13 barcode is available for assignment
+    /// to an article.
+    /// </summary>
+    /// <param name="ean13">
+    /// The EAN-13 barcode to validate.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the EAN-13 barcode is already assigned to another article.
+    /// </exception>
+    public async Task ValidateEan13IsAvailableAsync(Ean13 ean13, CancellationToken cancellationToken = default)
     {
         var exists = await articleRepository.ExistsByEan13Async(ean13, cancellationToken);
 
         if (exists)
         {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleEan8IsAvailableAsync(Ean8 ean8, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByEan8Async(ean8, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleUpcAIsAvailableAsync(UpcA upcA, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByUpcAAsync(upcA, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleUpcEIsAvailableAsync(UpcE upcE, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByUpcEAsync(upcE, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleCode128IsAvailableAsync(Code128 code128, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByCode128Async(code128, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleCode39IsAvailableAsync(Code39 code39, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByCode39Async(code39, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleItf14IsAvailableAsync(Itf14 itf14, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByItf14Async(itf14, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleGs1128IsAvailableAsync(Gs1128 gs1128, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByGs1128Async(gs1128, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleQrCodeIsAvailableAsync(QrCode qrCode, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByQrCodeAsync(qrCode, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
-        }
-    }
-
-    public async Task AssertArticleDataMatrixIsAvailableAsync(DataMatrix dataMatrix, CancellationToken cancellationToken = default)
-    {
-        var exists = await articleRepository.ExistsByDataMatrixAsync(dataMatrix, cancellationToken);
-
-        if (exists)
-        {
-            throw new FargoCoreException($"Article barcode already in use.");
+            throw new FargoCoreException(
+                $"The ean13 '{ean13}' is already assigned to another article.",
+                FargoCoreErrorType.InvalidOperation);
         }
     }
 }

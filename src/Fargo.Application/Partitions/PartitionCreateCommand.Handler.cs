@@ -1,7 +1,9 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
+using Fargo.Core.Shared.Informations;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
@@ -17,11 +19,11 @@ public sealed class PartitionCreateCommandHandler(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.ActorId);
+        logger.CreateStarted(currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
 
@@ -39,7 +41,7 @@ public sealed class PartitionCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(newPartition.Guid, currentActor.ActorId);
+        logger.CreateCompleted(newPartition.Guid, currentActor.Guid);
 
         return newPartition.Guid;
     }

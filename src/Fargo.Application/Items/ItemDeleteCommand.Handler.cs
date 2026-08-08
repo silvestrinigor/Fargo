@@ -1,7 +1,8 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Items;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
@@ -16,11 +17,11 @@ public sealed class ItemDeleteCommandHandler(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.ItemGuid, currentActor.ActorId);
+        logger.DeleteStarted(command.ItemGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteItem);
 
@@ -34,6 +35,6 @@ public sealed class ItemDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(item.Guid, currentActor.ActorId);
+        logger.DeleteCompleted(item.Guid, currentActor.Guid);
     }
 }

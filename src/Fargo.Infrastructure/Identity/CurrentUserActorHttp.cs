@@ -15,13 +15,13 @@ public sealed class CurrentUserActorHttp(IHttpContextAccessor httpContextAccesso
     public bool IsAuthenticated
         => Principal?.Identity?.IsAuthenticated == true;
 
-    public ActorId ActorId
+    public Guid Guid
     {
         get
         {
             if (!IsAuthenticated)
             {
-                return ActorId.Empty;
+                return Guid.Empty;
             }
 
             var id =
@@ -30,7 +30,9 @@ public sealed class CurrentUserActorHttp(IHttpContextAccessor httpContextAccesso
 
             var actorGuid = Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
 
-            return new ActorId(actorGuid, ActorType.User);
+            return actorGuid;
         }
     }
+
+    public ActorType ActorType => ActorType.User;
 }

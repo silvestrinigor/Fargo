@@ -1,4 +1,3 @@
-using Fargo.Core.Shared.Actors;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
@@ -7,15 +6,15 @@ internal static partial class UserGroupSingleQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "User group single query started for user group {userGroupGuid} by actor {actorId}.")]
+        Message = "User group single query started for user group {userGroupGuid} by actor {actorGuid}.")]
     public static partial void SingleQueryStarted(
         this ILogger logger,
-        Guid userGroupGuid, ActorId actorId);
+        Guid userGroupGuid, Guid actorGuid);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "User group single query completed for user group {userGroupGuid} by actor {actorId}. Found: {found}.")]
+        Message = "User group single query completed for user group {userGroupGuid} by actor {actorGuid}. Found: {found}.")]
     public static partial void SingleQueryCompleted(
         this ILogger logger, Guid userGroupGuid,
-        ActorId actorId, bool found);
+        Guid actorGuid, bool found);
 }

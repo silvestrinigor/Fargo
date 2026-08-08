@@ -2,6 +2,7 @@ using Fargo.Application;
 using Fargo.Application.Items;
 using Fargo.Application.Shared.Items;
 using Fargo.Core.Items;
+using Fargo.Core.Shared.Articles;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -10,40 +11,45 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
-    private readonly DbSet<Item> items = context.Items;
-
-    public void Add(Item item) => items.Add(item);
-
-    public void Remove(Item item) => items.Remove(item);
-
     public Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => items
-            .Include(item => item.Article)
-            .Include(item => item.Partitions)
-            .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+    {
+        return context.Items
+        .Include(item => item.Article)
+        .Include(item => item.Partitions)
+        .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+    }
 
-    public async Task<IReadOnlyCollection<Guid>> GetContainerDescendantGuids(
-        Guid itemGuid,
+    public async Task<IReadOnlyCollection<Guid>> GetContainedDescendantGuidsAsync(
+        Guid itemContainerGuid,
         bool includeRoot = true,
         CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
-            WITH ItemContainerTree AS
-            (
-                SELECT [Guid], [ParentContainerGuid]
-                FROM [Items]
-                WHERE [Guid] = {itemGuid}
+    WITH ItemTree AS
+    (
+        SELECT
+            item.[Guid],
+            item.[ParentContainerGuid],
+            item.[ArticleGuid]
+        FROM [Items] AS item
+        INNER JOIN [Articles] AS article
+            ON article.[Guid] = item.[ArticleGuid]
+        WHERE item.[Guid] = {itemContainerGuid}
+          AND article.[ArticleType] = {(int)ArticleType.Container}
 
-                UNION ALL
+        UNION ALL
 
-                SELECT child.[Guid], child.[ParentContainerGuid]
-                FROM [Items] AS child
-                INNER JOIN ItemContainerTree AS parent
-                    ON child.[ParentContainerGuid] = parent.[Guid]
-            )
-            SELECT [Guid]
-            FROM ItemContainerTree
-            """;
+        SELECT
+            child.[Guid],
+            child.[ParentContainerGuid],
+            child.[ArticleGuid]
+        FROM [Items] AS child
+        INNER JOIN ItemTree AS parent
+            ON child.[ParentContainerGuid] = parent.[Guid]
+    )
+    SELECT [Guid]
+    FROM ItemTree
+    """;
 
         var guids = await context.Database
             .SqlQuery<Guid>(query)
@@ -51,28 +57,33 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
         if (!includeRoot)
         {
-            guids.RemoveAll(guid => guid == itemGuid);
+            guids.Remove(itemContainerGuid);
         }
 
         return guids;
     }
 
-    public async Task<ItemDto?> GetInfoByGuid(
+    public void Add(Item item) => context.Items.Add(item);
+
+    public void Remove(Item item) => context.Items.Remove(item);
+
+    public Task<ItemDto?> GetInfoByGuid(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var item = await ApplyPartitionFilter(
-                items
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+        var queryFiltered = ApplyPartitionFilter(
+            context.Items.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
+
+        var itemTask = queryFiltered
             .Where(item => item.Guid == entityGuid)
             .Select(ItemDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return item;
+        return itemTask;
     }
 
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
@@ -81,17 +92,18 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
-                items
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+        var queryFiltered = ApplyPartitionFilter(
+            context.Items.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
+
+        var item = await queryFiltered
             .OrderBy(item => item.Guid)
             .WithPagination(pagination)
             .Select(ItemDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return item;
     }
 
     private static IQueryable<Item> ApplyPartitionFilter(

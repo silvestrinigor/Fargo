@@ -1,7 +1,8 @@
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
@@ -14,11 +15,11 @@ public sealed class ArticleDeleteCommandHandler(
     public async Task HandleAsync(
         ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.ArticleGuid, currentActor.ActorId);
+        logger.DeleteStarted(command.ArticleGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteArticle);
 
@@ -28,12 +29,12 @@ public sealed class ArticleDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(article);
 
-        await articleService.AssertArticleCanBeDeletedAsync(article, cancellationToken);
+        await articleService.ValidateArticleCanBeDeletedAsync(article, cancellationToken);
 
         articleRepository.Remove(article);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(article.Guid, currentActor.ActorId);
+        logger.DeleteCompleted(article.Guid, currentActor.Guid);
     }
 }

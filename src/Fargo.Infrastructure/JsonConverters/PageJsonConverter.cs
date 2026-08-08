@@ -2,7 +2,7 @@ using Fargo.Application;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Infrastructure.Converters;
+namespace Fargo.Infrastructure.JsonConverters;
 
 public sealed class PageJsonConverter : JsonConverter<Page>
 {

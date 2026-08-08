@@ -1,65 +1,31 @@
 namespace Fargo.Core.Shared.Barcodes;
 
-/// <summary>
-/// Barcode value with its symbology.
-/// </summary>
-public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
+public readonly struct Barcode : IParsable<Barcode>, IEquatable<Barcode>
 {
-    private readonly string code;
-    private readonly BarcodeFormat format;
+    public IBarcode Value { get; } = new BarcodeNone();
 
-    /// <exception cref="ArgumentException">
-    /// Thrown when the value is invalid for the provided format.
-    /// </exception>
-    public Barcode(string code, BarcodeFormat format)
+    public BarcodeFormat BarcodeFormat { get; } = BarcodeFormat.None;
+
+    public Barcode(IBarcode value, BarcodeFormat format)
     {
-        Validate(code, format);
+        ArgumentNullException.ThrowIfNull(value);
 
-        this.code = code;
-        this.format = format;
+        Value = value;
+        BarcodeFormat = format;
     }
 
-    /// <summary>Gets the barcode code string.</summary>
-    public string Code => code ?? throw new InvalidOperationException("Barcode not initialized.");
+    public override string ToString() => $"{Value}:{BarcodeFormat}";
 
-    /// <summary>Gets the barcode format.</summary>
-    public BarcodeFormat Format => code is null
-        ? throw new InvalidOperationException("Barcode not initialized.")
-        : format;
-
-    internal void EnsureFormat(BarcodeFormat expected, string paramName)
-    {
-        if (Format != expected)
-        {
-            throw new ArgumentException($"Barcode format must be {expected}.", paramName);
-        }
-    }
-
-    /// <inheritdoc />
-    public bool Equals(Barcode other)
-        => format == other.format && string.Equals(code, other.code, StringComparison.Ordinal);
-
-    /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is Barcode other && Equals(other);
-
-    /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(format, code is null ? 0 : code.GetHashCode(StringComparison.Ordinal));
-
-    /// <inheritdoc />
-    public override string ToString() => Code;
-
-    /// <summary>Parses a barcode route value in the format <c>{code}:{format}</c>.</summary>
     public static Barcode Parse(string s, IFormatProvider? provider)
     {
-        if (TryParse(s, provider, out var result))
+        if (!TryParse(s, provider, out var result))
         {
-            return result;
+            throw new FormatException($"Invalid barcode value: '{s}'.");
         }
 
-        throw new FormatException($"Invalid barcode value: '{s}'. Expected '{{code}}:{{format}}'.");
+        return result;
     }
 
-    /// <summary>Tries to parse a barcode route value in the format <c>{code}:{format}</c>.</summary>
     public static bool TryParse(string? s, IFormatProvider? provider, out Barcode result)
     {
         result = default;
@@ -75,68 +41,35 @@ public readonly struct Barcode : IEquatable<Barcode>, IParsable<Barcode>
             return false;
         }
 
-        var code = s[..separator];
+        var value = s[..separator];
         var formatText = s[(separator + 1)..];
 
-        if (string.IsNullOrWhiteSpace(code) ||
-            !Enum.TryParse<BarcodeFormat>(formatText, ignoreCase: true, out var format))
+        if (!Enum.TryParse<BarcodeFormat>(formatText, true, out var format))
         {
             return false;
         }
 
-        try
-        {
-            result = new Barcode(code, format);
-            return true;
-        }
-        catch (ArgumentException)
+        if (!BarcodeFactory.TryCreate(format, value, out var barcode))
         {
             return false;
         }
+
+        result = new Barcode(barcode, format);
+        return true;
     }
 
-    /// <summary>Determines whether two <see cref="Barcode"/> instances are equal.</summary>
-    public static bool operator ==(Barcode left, Barcode right) => left.Equals(right);
+    public bool Equals(Barcode other)
+        => Value.Equals(other.Value) && BarcodeFormat.Equals(other.BarcodeFormat);
 
-    /// <summary>Determines whether two <see cref="Barcode"/> instances are not equal.</summary>
-    public static bool operator !=(Barcode left, Barcode right) => !left.Equals(right);
+    public override bool Equals(object? obj)
+        => obj is Barcode other && Equals(other);
 
-    private static void Validate(string code, BarcodeFormat format)
-    {
-        switch (format)
-        {
-            case BarcodeFormat.Ean13:
-                _ = new Ean13(code);
-                break;
-            case BarcodeFormat.Ean8:
-                _ = new Ean8(code);
-                break;
-            case BarcodeFormat.UpcA:
-                _ = new UpcA(code);
-                break;
-            case BarcodeFormat.UpcE:
-                _ = new UpcE(code);
-                break;
-            case BarcodeFormat.Code128:
-                _ = new Code128(code);
-                break;
-            case BarcodeFormat.Code39:
-                _ = new Code39(code);
-                break;
-            case BarcodeFormat.Itf14:
-                _ = new Itf14(code);
-                break;
-            case BarcodeFormat.Gs1128:
-                _ = new Gs1128(code);
-                break;
-            case BarcodeFormat.QrCode:
-                _ = new QrCode(code);
-                break;
-            case BarcodeFormat.DataMatrix:
-                _ = new DataMatrix(code);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(format), format, "Unsupported barcode format.");
-        }
-    }
+    public override int GetHashCode()
+        => Value.GetHashCode();
+
+    public static bool operator ==(Barcode left, Barcode right)
+        => left.Equals(right);
+
+    public static bool operator !=(Barcode left, Barcode right)
+        => !left.Equals(right);
 }

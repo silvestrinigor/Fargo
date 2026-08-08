@@ -1,8 +1,13 @@
 namespace Fargo.Core.Shared.Actors;
 
+/// <summary>
+/// Represents the type of actor responsible for performing an action
+/// within the system.
+/// </summary>
 public enum ActorType : byte
 {
-    None = 0,
-    User = 1,
-    Application = 2
+    /// <summary>
+    /// Represents a human user authenticated in the system.
+    /// </summary>
+    User = 1
 }

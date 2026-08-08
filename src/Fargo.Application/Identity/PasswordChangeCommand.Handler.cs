@@ -1,5 +1,6 @@
 using Fargo.Core.Identity;
-using Fargo.Core.Shared;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Security;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 
@@ -18,13 +19,13 @@ public sealed class PasswordChangeCommandHandler(
         PasswordChangeCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.PasswordChangeStarted(currentActor.ActorId.Guid);
+        logger.PasswordChangeStarted(currentActor.Guid);
 
-        var user = await userRepository.GetByGuidAsync(currentActor.ActorId.Guid, cancellationToken);
+        var user = await userRepository.GetByGuidAsync(currentActor.Guid, cancellationToken);
 
         if (user is null)
         {
-            logger.PasswordChangeUserNotFound(currentActor.ActorId.Guid);
+            logger.PasswordChangeUserNotFound(currentActor.Guid);
 
             throw new UnauthorizedAccessException();
         }
@@ -38,7 +39,8 @@ public sealed class PasswordChangeCommandHandler(
 
         var currentPassword = command.Passwords.CurrentPassword;
 
-        var isValid = passwordHasher.Verify(user.PasswordHash, currentPassword);
+        var isValid = user.Authentication.PasswordHash is not null
+            && passwordHasher.Verify(user.Authentication.PasswordHash.Value, new(currentPassword));
 
         if (!isValid)
         {
@@ -57,14 +59,15 @@ public sealed class PasswordChangeCommandHandler(
             throw new UnauthorizedAccessException();
         }
 
+        var password = new Password(command.Passwords.NewPassword);
         // TODO: ChangePasswordHash should validate if the actor is the user or the actor has access to change another user password.
-        user.PasswordHash = passwordHasher.Hash(command.Passwords.NewPassword);
+        user.Authentication.SetPasswordHash(passwordHasher.Hash(password));
 
-        user.ResetPasswordExpiration();
+        user.Authentication.ResetPasswordExpiration();
 
-        user.RotateAuthVersion();
+        user.Authentication.RotateAuthVersion();
 
-        var refreshTokens = await refreshTokenRepository.GetByUserGuid(user.Guid, cancellationToken);
+        var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.Guid, cancellationToken);
 
         foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
         {

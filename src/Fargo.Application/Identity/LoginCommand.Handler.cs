@@ -1,16 +1,22 @@
 using Fargo.Application.Shared.Identity;
 using Fargo.Core.Identity;
-using Fargo.Core.Shared;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Informations;
+using Fargo.Core.Shared.Security;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
 public sealed class LoginCommandHandler(
-    IUserRepository userRepository, IPasswordHasher passwordHasher,
-    ITokenGenerator tokenGenerator, IRefreshTokenGenerator refreshTokenGenerator,
-    ITokenHasher tokenHasher, IRefreshTokenRepository refreshTokenRepository,
-    IUnitOfWork unitOfWork, ILogger<LoginCommandHandler> logger
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    ITokenGenerator tokenGenerator,
+    IRefreshTokenGenerator refreshTokenGenerator,
+    ITokenHasher tokenHasher,
+    IRefreshTokenRepository refreshTokenRepository,
+    IUnitOfWork unitOfWork,
+    ILogger<LoginCommandHandler> logger
 ) : ICommandHandler<LoginCommand, AuthResult>
 {
     public async Task<AuthResult> HandleAsync(
@@ -47,8 +53,11 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        var isValid = passwordHasher.Verify(
-            user.PasswordHash, command.Password);
+        var password = new Password(command.Password);
+
+        var isValid = user.Authentication.PasswordHash != null
+            && passwordHasher.Verify(
+                user.Authentication.PasswordHash.Value, password);
 
         if (!isValid)
         {
@@ -57,7 +66,7 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        if (user.IsPasswordChangeRequired)
+        if (user.Authentication.IsPasswordChangeRequired)
         {
             logger.LoginRejectedPasswordChangeRequired(user.Guid);
 
@@ -70,18 +79,14 @@ public sealed class LoginCommandHandler(
 
         var refreshTokenHash = tokenHasher.Hash(rawRefreshToken);
 
-        var refreshToken = new RefreshToken
-        {
-            UserGuid = user.Guid,
-            TokenHash = refreshTokenHash
-        };
+        var refreshToken = RefreshToken.Create(user.Guid, refreshTokenHash);
 
         refreshTokenRepository.Add(refreshToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var authResult = new AuthResult(
-            accessTokenResult.AccessToken, rawRefreshToken, accessTokenResult.ExpiresAt);
+            accessTokenResult.AccessToken.Value, rawRefreshToken.Value, accessTokenResult.ExpiresAt);
 
         logger.LoginCompleted(command.Nameid);
 

@@ -1,6 +1,5 @@
 using Fargo.Core.Entities;
-using Fargo.Core.Shared;
-using System.Diagnostics.CodeAnalysis;
+using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Partitions;
 
@@ -25,9 +24,14 @@ namespace Fargo.Core.Partitions;
 public class Partition : IEntity
 {
     /// <summary>
-    /// Gets the unique identifier of the partition
+    /// Gets the unique identifier of the partition.
     /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets a value indicating whether this is the global partition.
+    /// </summary>
+    public bool IsGlobalPartition => Guid == FargoCoreWellKnowGuids.GlobalPartitionGuid;
 
     /// <summary>
     /// Gets or sets the name of the partition.
@@ -40,16 +44,11 @@ public class Partition : IEntity
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets the value indicating whether the partition is the global partition.
-    /// </summary>
-    public bool IsGlobalPartition => Guid == FargoCoreGuids.GlobalPartitionGuid;
-
-    /// <summary>
     /// Gets the unique identifier of the parent partition, if any.
     /// </summary>
     /// <remarks>
-    /// A <see langword="null"/> value indicates that the current partition
-    /// is a root partition in the hierarchy.
+    /// A <see langword="null"/> value indicates that this is the global partition,
+    /// which is the root of the partition hierarchy.
     /// </remarks>
     public Guid? ParentPartitionGuid { get; private set; }
 
@@ -63,21 +62,21 @@ public class Partition : IEntity
     public Partition? ParentPartition { get; private set; }
 
     /// <summary>
-    /// Gets the value indicating whether the partition has a parent partition.
+    /// Initializes a new instance of the <see cref="Partition"/> class.
+    /// Intended only for factory methods and Entity Framework.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(ParentPartitionGuid))]
-    public bool HasParentPartition => ParentPartitionGuid is not null;
-
     private Partition()
     {
     }
 
     /// <summary>
-    /// Creates a new partition.
+    /// Creates a new child partition.
     /// </summary>
     /// <param name="name">The name of the partition.</param>
-    /// <param name="parentPartition">The parent partition of the partition.</param>
-    /// <returns></returns>
+    /// <param name="parentPartition">
+    /// The parent of the newly created partition.
+    /// </param>
+    /// <returns>A new <see cref="Partition"/> instance.</returns>
     public static Partition CreatePartition(Name name, Partition parentPartition)
     {
         var partition = new Partition
@@ -91,15 +90,15 @@ public class Partition : IEntity
     }
 
     /// <summary>
-    /// Creates a new global partition.
+    /// Creates the global partition.
     /// </summary>
     /// <param name="name">The name of the global partition.</param>
-    /// <returns></returns>
+    /// <returns>The global <see cref="Partition"/>.</returns>
     public static Partition CreateGlobalPartition(Name name)
     {
         var globalPartition = new Partition
         {
-            Guid = FargoCoreGuids.GlobalPartitionGuid,
+            Guid = FargoCoreWellKnowGuids.GlobalPartitionGuid,
             Name = name
         };
 
@@ -107,20 +106,39 @@ public class Partition : IEntity
     }
 
     /// <summary>
-    /// Sets the parent partition.
+    /// Assigns the specified partition as the parent of the current partition.
     /// </summary>
+    /// <param name="parentPartition">
+    /// The partition to assign as the parent.
+    /// </param>
+    /// <remarks>
+    /// This method validates only invariants that can be enforced by this
+    /// <see cref="Partition"/> instance. It does <b>not</b> validate the overall
+    /// partition hierarchy or detect circular parent-child relationships.
+    ///
+    /// Before calling this method, the application should validate the proposed
+    /// assignment using <see cref="PartitionService"/> to ensure that assigning
+    /// <paramref name="parentPartition"/> as the parent will not introduce an
+    /// invalid hierarchy.
+    /// </remarks>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to assign a parent to the global partition or when
+    /// attempting to assign the partition as its own parent.
+    /// </exception>
     public void SetParentPartition(Partition parentPartition)
     {
+        ArgumentNullException.ThrowIfNull(parentPartition);
+
         if (IsGlobalPartition)
         {
             throw new FargoCoreException(
-                "Global partition cannot be a part of another partition.", FargoCoreErrorType.None);
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot have a parent partition.", FargoCoreErrorType.InvalidOperation);
         }
 
         if (parentPartition.Guid == Guid)
         {
             throw new FargoCoreException(
-                "Parent partition cannot be the own partition.", FargoCoreErrorType.None);
+                $"The partition partition '{Guid}' cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
         }
 
         ParentPartition = parentPartition;

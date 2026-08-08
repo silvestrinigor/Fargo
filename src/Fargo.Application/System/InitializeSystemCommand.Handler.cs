@@ -1,6 +1,7 @@
 using Fargo.Core;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Actions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,7 @@ public sealed class InitializeSystemCommandHandler(
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
     ILogger<InitializeSystemCommandHandler> logger
-    ) : ICommandHandler<InitializeSystemCommand>
+) : ICommandHandler<InitializeSystemCommand>
 {
     public async Task HandleAsync(
         InitializeSystemCommand command,
@@ -22,7 +23,7 @@ public sealed class InitializeSystemCommandHandler(
     {
         logger.InitializeSystemStarted();
 
-        var anyUser = await userRepository.Any(cancellationToken);
+        var anyUser = await userRepository.AnyAsync(cancellationToken);
 
         if (anyUser)
         {
@@ -31,7 +32,7 @@ public sealed class InitializeSystemCommandHandler(
             return;
         }
 
-        var globalPartition = await partitionRepository.GetByGuidAsync(FargoCoreGuids.GlobalPartitionGuid, cancellationToken);
+        var globalPartition = await partitionRepository.GetByGuidAsync(FargoCoreWellKnowGuids.GlobalPartitionGuid, cancellationToken);
 
         var globalPartitionCreated = false;
 
@@ -46,7 +47,7 @@ public sealed class InitializeSystemCommandHandler(
             globalPartitionCreated = true;
         }
 
-        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreGuids.AdminUserGroupGuid, cancellationToken);
+        var administratorsGroup = await userGroupRepository.GetByGuidAsync(FargoCoreWellKnowGuids.AdministratorsUserGroupGuid, cancellationToken);
 
         var allActions = Enum.GetValues<ActionType>();
 
@@ -74,7 +75,9 @@ public sealed class InitializeSystemCommandHandler(
 
         var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
-        var admin = User.CreateAdministratorUser(command.UserAdminNameid, passwordHash);
+        var admin = User.CreateAdministratorUser(command.UserAdminNameid);
+
+        admin.Authentication.SetPasswordHash(passwordHash);
 
         admin.Description = command.UserAdminDescription;
 

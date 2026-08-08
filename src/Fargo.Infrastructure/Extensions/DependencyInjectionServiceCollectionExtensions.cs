@@ -9,9 +9,9 @@ using Fargo.Core.Articles;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
+using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Fargo.Infrastructure.Articles;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
@@ -47,22 +47,21 @@ public static class DependencyInjectionServiceCollectionExtensions
             return services;
         }
 
-        private IServiceCollection AddFargoJwtOptions(
-                IConfiguration configuration)
+        private IServiceCollection AddFargoJwtOptions(IConfiguration configuration)
         {
             services
-                .AddOptions<JwtOptions>()
-                .Bind(configuration.GetSection(JwtOptions.SectionName))
-                .ValidateDataAnnotations();
+            .AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations();
 
             return services;
         }
 
-        public IServiceCollection AddFargoUnitOfWork() => services
-            .AddScoped<IUnitOfWork, UnitOfWork>();
+        public IServiceCollection AddFargoUnitOfWork() =>
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        public IServiceCollection AddFargoDbContext() => services
-            .AddDbContext<FargoDbContext>((sp, opt) => UsesFargoNpgsql(sp, opt));
+        public IServiceCollection AddFargoDbContext() =>
+            services.AddDbContext<FargoDbContext>((sp, opt) => UsesFargoNpgsql(sp, opt));
 
         public void AddFargoConnectionStringOptions(IConfiguration configuration) => services
             .AddOptions<ConnectionStringOptions>()
@@ -70,11 +69,15 @@ public static class DependencyInjectionServiceCollectionExtensions
 
         public static void UsesFargoNpgsql(IServiceProvider sp, DbContextOptionsBuilder opt)
         {
-            var options = sp
-                .GetRequiredService<IOptions<ConnectionStringOptions>>()
-                .Value;
+            var options = sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value;
 
-            opt.UseNpgsql(options.Fargo).UseSnakeCaseNamingConvention();
+            opt.UseNpgsql(
+                options.Fargo,
+                npgsqlOptions =>
+                {
+                    npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
+                }
+            ).UseSnakeCaseNamingConvention();
         }
 
         public void AddFargoRepositories() => services

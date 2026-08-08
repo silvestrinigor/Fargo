@@ -26,7 +26,7 @@ public sealed class RefreshCommandHandler(
 
         var oldRefreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
-        var storedOldRefreshToken = await refreshTokenRepository.GetByTokenHash(oldRefreshTokenHash, cancellationToken);
+        var storedOldRefreshToken = await refreshTokenRepository.GetByTokenHashAsync(oldRefreshTokenHash, cancellationToken);
 
         if (storedOldRefreshToken == null || !storedOldRefreshToken.IsUsable)
         {
@@ -55,7 +55,7 @@ public sealed class RefreshCommandHandler(
             throw new UnauthorizedAccessException();
         }
 
-        if (user.IsPasswordChangeRequired)
+        if (user.Authentication.IsPasswordChangeRequired)
         {
             storedOldRefreshToken.Revoke();
             await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -69,13 +69,7 @@ public sealed class RefreshCommandHandler(
 
         var newRefreshTokenHash = tokenHasher.Hash(rawNewRefreshToken);
 
-        var storedNewRefreshToken = new RefreshToken
-        {
-            UserGuid = user.Guid,
-            TokenHash = newRefreshTokenHash
-        };
-
-        storedOldRefreshToken.ReplaceWith(newRefreshTokenHash);
+        var storedNewRefreshToken = RefreshToken.Create(user.Guid, newRefreshTokenHash);
 
         refreshTokenRepository.Add(storedNewRefreshToken);
 
@@ -83,18 +77,15 @@ public sealed class RefreshCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var actorUserId = new ActorId(storedOldRefreshToken.UserGuid, ActorType.User);
+        var actorUser = await actorService.GetActorByGuidAndTypeAsync(user.Guid, ActorType.User, cancellationToken);
 
-        var actorUser = await actorService.GetActorByActorIdAsync(actorUserId, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, actorUserId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, user.Guid, ActorType.User);
 
         logger.RefreshCompleted(user.Guid);
 
         return new AuthResult(
-            newAccessTokenResult.AccessToken,
-            rawNewRefreshToken,
+            newAccessTokenResult.AccessToken.Value,
+            rawNewRefreshToken.Value,
             newAccessTokenResult.ExpiresAt);
     }
 }
-

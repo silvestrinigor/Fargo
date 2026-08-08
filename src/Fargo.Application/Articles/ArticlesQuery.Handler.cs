@@ -16,12 +16,11 @@ public sealed class ArticlesQueryHandler(
         ArticlesQuery query,
         CancellationToken cancellationToken = default)
     {
-        logger.ArticlesQueryStarted(
-            currentActor.ActorId, query.WithPagination.Page, query.WithPagination.Limit);
+        logger.ArticlesQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
             PartitionQueryFilter.ForPartitionedEntities(
@@ -31,12 +30,15 @@ public sealed class ArticlesQueryHandler(
 
         var articles = await articleRepository.GetManyInfoAsync(
             query.WithPagination,
-            childOfAnyOfThesePartitions, notChildOfAnyPartition,
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition,
             cancellationToken);
 
         logger.ArticlesQueryCompleted(
-            actor.ActorId, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            childOfAnyOfThesePartitions?.Count ?? 0, articles.Count);
+            actor.Guid,
+            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            childOfAnyOfThesePartitions?.Count ?? 0,
+            articles.Count);
 
         return articles;
     }

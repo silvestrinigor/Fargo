@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Globalization;
 using UnitsNet;
 
-namespace Fargo.Infrastructure.Converters;
+namespace Fargo.Infrastructure.ValueConverters;
 
 public sealed class MassStringConverter()
     : ValueConverter<Mass, string>(

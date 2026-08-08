@@ -1,36 +1,92 @@
 namespace Fargo.Core.Items;
 
+/// <summary>
+/// Provides domain operations and validation rules for item entities.
+/// </summary>
+/// <remarks>
+/// This service contains business rules that require repository access and
+/// therefore cannot be enforced by the <see cref="Item"/> entity alone.
+/// </remarks>
 public sealed class ItemService(IItemRepository itemRepository)
 {
-    public async Task MoveToContainer(Item parentContainerItem, Item memberItem, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Validates that assigning the specified parent container item to the specified
+    /// item would result in a valid item containment hierarchy.
+    /// </summary>
+    /// <param name="parentContainerItem">
+    /// The item container that will become the parent.
+    /// </param>
+    /// <param name="memberItem">
+    /// The item that will become contained by the parent container.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentContainerItem"/> or
+    /// <paramref name="memberItem"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the assignment would create a circular item containment hierarchy.
+    /// </exception>
+    /// <remarks>
+    /// This method should be called before
+    /// <see cref="Item.SetParentItemContainer(Item)"/> because validating the
+    /// complete containment hierarchy requires access to other items through the
+    /// repository.
+    /// </remarks>
+    public async Task ValidateParentItemContainerHierarchyAssignmentAsync(
+        Item parentContainerItem,
+        Item memberItem,
+        CancellationToken cancellationToken = default)
     {
-        if (parentContainerItem.Guid == memberItem.Guid)
-        {
-            throw new FargoCoreException($"Item '{memberItem.Guid}' cannot be its own container.");
-        }
+        ArgumentNullException.ThrowIfNull(parentContainerItem);
+        ArgumentNullException.ThrowIfNull(memberItem);
 
-        if (!parentContainerItem.Article.IsContainer)
-        {
-            throw new FargoCoreException($"Item '{parentContainerItem.Guid}' is not a container.");
-        }
+        var createsCircularHierarchy = await CreatesCircularHierarchyAsync(
+            parentContainerItem, memberItem.Guid, cancellationToken);
 
-        var descendantItemGuids = await itemRepository.GetContainerDescendantGuids(
-            memberItem.Guid,
-            includeRoot: false,
-            cancellationToken);
-
-        if (descendantItemGuids.Contains(parentContainerItem.Guid))
+        if (createsCircularHierarchy)
         {
             throw new FargoCoreException(
-                $"Item '{memberItem.Guid}' cannot be assigned to container " +
-                $"'{parentContainerItem.Guid}' because this would create a circular hierarchy.");
+                $"Item '{memberItem.Guid}' cannot be assigned to parent container '{parentContainerItem.Guid}' because this would create a circular containment hierarchy.",
+                FargoCoreErrorType.InvalidOperation);
         }
-
-        memberItem.ParentItemContainer = parentContainerItem;
     }
 
-    public static void RemoveFromContainer(Item item)
+    /// <summary>
+    /// Determines whether assigning the specified item container as a parent
+    /// would create a circular containment hierarchy.
+    /// </summary>
+    /// <param name="candidateParentContainer">
+    /// The item container that would become the parent.
+    /// </param>
+    /// <param name="memberItemGuid">
+    /// The identifier of the item receiving the new parent container.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the assignment would create a circular
+    /// containment hierarchy; otherwise, <see langword="false"/>.
+    /// </returns>
+    private async Task<bool> CreatesCircularHierarchyAsync(
+        Item candidateParentContainer,
+        Guid memberItemGuid,
+        CancellationToken cancellationToken)
     {
-        item.ParentItemContainer = null;
+        ArgumentNullException.ThrowIfNull(candidateParentContainer);
+
+        if (candidateParentContainer.Guid == memberItemGuid)
+        {
+            return true;
+        }
+
+        var descendantItemGuids =
+            await itemRepository.GetContainedDescendantGuidsAsync(
+                memberItemGuid, false, cancellationToken);
+
+        return descendantItemGuids.Contains(candidateParentContainer.Guid);
     }
 }

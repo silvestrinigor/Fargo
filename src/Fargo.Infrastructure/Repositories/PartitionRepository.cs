@@ -10,32 +10,31 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepository, IPartitionQueryRepository
 {
-    private readonly DbSet<Partition> partitions = context.Partitions;
+    public void Add(Partition partition) => context.Partitions.Add(partition);
 
-    public void Add(Partition partition) => partitions.Add(partition);
-
-    public void Remove(Partition partition) => partitions.Remove(partition);
+    public void Remove(Partition partition) => context.Partitions.Remove(partition);
 
     public Task<Partition?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
-        => partitions
+    {
+        return context.Partitions
         .SingleOrDefaultAsync(partition => partition.Guid == entityGuid, cancellationToken);
+    }
 
-    public async Task<PartitionDto?> GetInfoByGuid(
+    public Task<PartitionDto?> GetInfoByGuid(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var partition = await ApplyPartitionFilter(
-                partitions
-                    .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
-            .Where(partition => partition.Guid == entityGuid)
-            .Select(PartitionDtoMappings.Projection)
-            .SingleOrDefaultAsync(cancellationToken);
+        var queryFiltered = ApplyPartitionFilter(
+            context.Partitions.AsNoTracking(),
+            childOfAnyOfThesePartitions,
+            notChildOfAnyPartition);
 
-        return partition;
+        return queryFiltered
+        .Where(partition => partition.Guid == entityGuid)
+        .Select(PartitionDtoMappings.Projection)
+        .SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
@@ -44,20 +43,22 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
-                partitions
+        var queryFiltered = ApplyPartitionFilter(
+                context.Partitions
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+                notChildOfAnyPartition);
+
+        var partition = await queryFiltered
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
             .Select(PartitionDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return partition;
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
         Guid partitionGuid,
         bool includeRoot = true,
         CancellationToken cancellationToken = default)
@@ -92,7 +93,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         return guids;
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuids(
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
         IReadOnlyCollection<Guid> partitionGuids,
         bool includeRoots = true,
         CancellationToken cancellationToken = default)
@@ -106,7 +107,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
         foreach (var partitionGuid in partitionGuids.Distinct())
         {
-            var descendants = await GetDescendantGuids(
+            var descendants = await GetDescendantGuidsAsync(
                 partitionGuid,
                 includeRoots,
                 cancellationToken);
@@ -150,9 +151,9 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             partitionGuids.Contains(partition.ParentPartitionGuid.Value));
     }
 
-    public async Task<bool> HasAnyAssociatedEntity(Guid partitionGuid, CancellationToken cancellationToken = default)
+    public async Task<bool> HasAnyAssociatedEntityAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
     {
-        if (await partitions.AnyAsync(p => p.ParentPartitionGuid == partitionGuid, cancellationToken))
+        if (await context.Partitions.AnyAsync(p => p.ParentPartitionGuid == partitionGuid, cancellationToken))
         {
             return true;
         }

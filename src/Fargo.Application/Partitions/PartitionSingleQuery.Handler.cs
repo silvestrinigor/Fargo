@@ -15,18 +15,18 @@ public sealed class PartitionSingleQueryHandler(
     public async Task<PartitionDto?> HandleAsync(
         PartitionSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.PartitionGuid, currentActor.ActorId);
+        logger.SingleQueryStarted(query.PartitionGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var partition = await partitionRepository.GetInfoByGuid(
             query.PartitionGuid,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true, cancellationToken);
 
-        logger.SingleQueryCompleted(query.PartitionGuid, currentActor.ActorId, partition is not null);
+        logger.SingleQueryCompleted(query.PartitionGuid, currentActor.Guid, partition is not null);
 
         return partition;
     }

@@ -1,4 +1,5 @@
-using Fargo.Core.Shared;
+using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Application.Shared.Users;
 
@@ -10,8 +11,7 @@ public sealed record UserDto(
     Description Description,
     bool IsActive,
     bool IsAdmin,
-    TimeSpan? DefaultPasswordExpirationPeriod,
-    DateTimeOffset? RequirePasswordChangeAt,
+    UserAuthenticationDto Authentication,
     IReadOnlyCollection<ActionType> Permissions,
     IReadOnlyCollection<Guid> Partitions,
     IReadOnlyCollection<Guid> PartitionAccesses,

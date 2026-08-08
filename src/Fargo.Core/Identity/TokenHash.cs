@@ -15,16 +15,14 @@ namespace Fargo.Core.Identity;
 public readonly struct TokenHash : IEquatable<TokenHash>
 {
     /// <summary>
-    /// Minimum allowed length for the token hash.
-    /// </summary>
-    public const int MinLength = 50;
-
-    /// <summary>
     /// Maximum allowed length for the token hash.
     /// </summary>
     public const int MaxLength = 512;
 
-    private readonly string value;
+    /// <summary>
+    /// Gets the underlying hash value.
+    /// </summary>
+    public string Value { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TokenHash"/> value object.
@@ -40,19 +38,8 @@ public readonly struct TokenHash : IEquatable<TokenHash>
     {
         Validate(value);
 
-        // Normalize to canonical uppercase representation
-        this.value = value.ToUpperInvariant();
+        Value = value;
     }
-
-    /// <summary>
-    /// Gets the underlying hash value.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the struct was not properly initialized.
-    /// This protects against the default struct state.
-    /// </exception>
-    public string Value
-        => value ?? throw new InvalidOperationException("Token hash value must be set.");
 
     /// <summary>
     /// Creates a <see cref="TokenHash"/> from the specified string.
@@ -68,7 +55,7 @@ public readonly struct TokenHash : IEquatable<TokenHash>
     /// <param name="other">The other token hash to compare.</param>
     /// <returns><see langword="true"/> if both hashes are equal; otherwise <see langword="false"/>.</returns>
     public bool Equals(TokenHash other)
-        => string.Equals(value, other.value, StringComparison.Ordinal);
+        => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether the current token hash is equal to the specified object.
@@ -80,7 +67,7 @@ public readonly struct TokenHash : IEquatable<TokenHash>
     /// Returns a hash code for the current token hash.
     /// </summary>
     public override int GetHashCode()
-        => value is null ? 0 : value.GetHashCode(StringComparison.Ordinal);
+        => Value.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>
     /// Determines whether two <see cref="TokenHash"/> instances are equal.
@@ -97,14 +84,7 @@ public readonly struct TokenHash : IEquatable<TokenHash>
     /// <summary>
     /// Returns the string representation of the token hash.
     /// </summary>
-    public override string ToString()
-        => Value;
-
-    /// <summary>
-    /// Implicitly converts a <see cref="TokenHash"/> to <see cref="string"/>.
-    /// </summary>
-    public static implicit operator string(TokenHash tokenHash)
-        => tokenHash.Value;
+    public override string ToString() => "[REDACTED]";
 
     /// <summary>
     /// Explicitly converts a <see cref="string"/> to <see cref="TokenHash"/>.
@@ -125,12 +105,12 @@ public readonly struct TokenHash : IEquatable<TokenHash>
                 nameof(value));
         }
 
-        if (value.Length < MinLength || value.Length > MaxLength)
+        if (value.Length > MaxLength)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(value),
                 value.Length,
-                $"Token hash length must be between {MinLength} and {MaxLength} characters.");
+                $"Token hash length must be lower or equal {MaxLength} characters.");
         }
 
         foreach (var c in value)

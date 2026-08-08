@@ -5,76 +5,113 @@ namespace Fargo.Core.Identity;
 /// <summary>
 /// Represents a refresh token used to obtain a new access token
 /// without requiring the user to authenticate again.
-///
-/// Refresh tokens are long-lived credentials associated with a user
-/// and can be rotated or invalidated when replaced.
 /// </summary>
+/// <remarks>
+/// Refresh tokens are long-lived credentials associated with a user.
+/// Only the hashed token value is persisted; the original token value
+/// must not be stored.
+///
+/// A refresh token can become unusable when it expires or is revoked.
+/// </remarks>
 public sealed class RefreshToken : IEntity
 {
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Default number of days before a refresh token expires.
     /// </summary>
     private const short defaultExpirationDays = 10;
 
     /// <summary>
-    /// Gets the default expiration duration for refresh tokens.
+    /// Gets the unique identifier of the refresh token.
     /// </summary>
-    public static TimeSpan DefaultExpirationTimeSpan
-    {
-        get;
-    } = TimeSpan.FromDays(defaultExpirationDays);
+    public Guid Guid { get; private init; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets the default expiration duration applied to newly created refresh tokens.
+    /// </summary>
+    public static TimeSpan DefaultExpirationTimeSpan { get; } = TimeSpan.FromDays(defaultExpirationDays);
 
     /// <summary>
     /// Gets the unique identifier of the user associated with this refresh token.
     /// </summary>
-    public required Guid UserGuid { get; init; }
+    public Guid UserGuid { get; private init; }
 
     /// <summary>
     /// Gets the hashed value of the refresh token.
-    ///
-    /// The raw token should never be stored in the database. Only the hash
-    /// is persisted for security purposes.
     /// </summary>
+    /// <remarks>
+    /// The original token value must never be persisted. The stored hash is used
+    /// to validate refresh token requests without exposing the token itself.
+    /// </remarks>
     public required TokenHash TokenHash { get; init; }
 
     /// <summary>
     /// Gets the date and time when the refresh token expires.
-    ///
-    /// By default, this is set to the current UTC time plus
-    /// <see cref="DefaultExpirationTimeSpan"/>.
     /// </summary>
-    public DateTimeOffset ExpiresAt
-    {
-        get;
-        init;
-    } = DateTimeOffset.UtcNow + DefaultExpirationTimeSpan;
+    /// <remarks>
+    /// Newly created refresh tokens expire after
+    /// <see cref="DefaultExpirationTimeSpan"/> from their creation time.
+    /// </remarks>
+    public DateTimeOffset ExpiresAt { get; init; } = DateTimeOffset.UtcNow + DefaultExpirationTimeSpan;
 
+    /// <summary>
+    /// Gets the date and time when the refresh token was revoked.
+    /// </summary>
+    /// <remarks>
+    /// A <see langword="null"/> value indicates that the refresh token has not
+    /// been revoked.
+    /// </remarks>
     public DateTimeOffset? RevokedAt { get; private set; }
 
     /// <summary>
-    /// Gets the hash of the token that replaced this token during rotation.
-    ///
-    /// When refresh token rotation is enabled, a used refresh token
-    /// is replaced by a new one and this property stores the hash
-    /// of the replacement token.
-    /// </summary>
-    public TokenHash? ReplacedByTokenHash { get; private set; } = null;
-
-    /// <summary>
-    /// Gets a value indicating whether the refresh token is expired.
+    /// Gets a value indicating whether the refresh token has expired.
     /// </summary>
     public bool IsExpired => ExpiresAt <= DateTimeOffset.UtcNow;
 
-    public bool IsUsable => !IsExpired && RevokedAt is null && ReplacedByTokenHash is null;
+    /// <summary>
+    /// Gets a value indicating whether the refresh token can currently be used
+    /// to obtain a new access token.
+    /// </summary>
+    /// <remarks>
+    /// A refresh token is usable only while it has not expired and has not been
+    /// revoked.
+    /// </remarks>
+    public bool IsUsable => !IsExpired && RevokedAt is null;
 
-    public void ReplaceWith(TokenHash replacementTokenHash)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RefreshToken"/> class.
+    /// </summary>
+    /// <remarks>
+    /// Intended only for Entity Framework Core materialization.
+    /// </remarks>
+    private RefreshToken()
     {
-        ReplacedByTokenHash = replacementTokenHash;
-        RevokedAt = DateTimeOffset.UtcNow;
     }
 
+    /// <summary>
+    /// Creates a new refresh token for the specified user.
+    /// </summary>
+    /// <param name="userGuid">
+    /// The unique identifier of the user that owns the refresh token.
+    /// </param>
+    /// <param name="tokenHash">
+    /// The hashed value of the refresh token.
+    /// </param>
+    /// <returns>
+    /// A new <see cref="RefreshToken"/> instance.
+    /// </returns>
+    public static RefreshToken Create(Guid userGuid, TokenHash tokenHash)
+        => new()
+        {
+            UserGuid = userGuid,
+            TokenHash = tokenHash
+        };
+
+    /// <summary>
+    /// Revokes the refresh token.
+    /// </summary>
+    /// <remarks>
+    /// If the refresh token has already been revoked, this method has no effect.
+    /// </remarks>
     public void Revoke()
     {
         RevokedAt ??= DateTimeOffset.UtcNow;

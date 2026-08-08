@@ -1,139 +1,52 @@
 using Fargo.Application.Shared.Articles;
-using Fargo.Core.Shared;
 using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Barcodes;
-using System.Drawing;
-using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleCreateCommand : ICommand<Guid>
 {
-    public ArticleType ArticleType { get; private init; }
-
-    public Name Name { get; init; }
-
-    public Description? Description { get; init; } = null;
-
-    public Guid? FromArticle { get; init; } = null;
-
-    public Scalar? PackQuantity { get; init; } = null;
-
-    public IReadOnlyCollection<ArticleKitComponentDto>? KitComponents { get; init; } = null;
-
-    public TimeSpan? ShelfLife { get; init; } = null;
-
-    public Color? Color { get; init; } = null;
-
-    public Mass? Mass { get; init; } = null;
-
-    public Length? LengthX { get; init; } = null;
-
-    public Length? LengthY { get; init; } = null;
-
-    public Length? LengthZ { get; init; } = null;
-
-    public Ean13? Ean13 { get; init; } = null;
-
-    public Ean8? Ean8 { get; init; } = null;
-
-    public UpcA? UpcA { get; init; } = null;
-
-    public UpcE? UpcE { get; init; } = null;
-
-    public Code128? Code128 { get; init; } = null;
-
-    public Code39? Code39 { get; init; } = null;
-
-    public Itf14? Itf14 { get; init; } = null;
-
-    public Gs1128? Gs1128 { get; init; } = null;
-
-    public QrCode? QrCode { get; init; } = null;
-
-    public DataMatrix? DataMatrix { get; init; } = null;
-
-    public IReadOnlyCollection<Guid>? PartitionsToAdd { get; init; } = null;
-
-    public bool? IsActive { get; init; } = null;
+    public ArticleCreateDto Create { get; private init; }
 
     public ArticleCreateCommand(ArticleCreateDto dto)
     {
-        ArticleType = dto.ArticleType ?? ArticleType.Default;
+        Create = dto;
 
-        if (ArticleType is ArticleType.Variation || ArticleType is ArticleType.Pack || ArticleType is ArticleType.Kit)
+        if (dto.ArticleType is ArticleType.Variation)
         {
-            if (dto.FromArticle is null)
+            if (dto.Variation?.FromArticleGuid is null)
             {
-                throw new ArgumentException(
-                    "From article should be informed when article type is pack, variation or kit.", nameof(dto));
+                throw new ArgumentException(nameof(dto));
             }
-
-            FromArticle = dto.FromArticle;
         }
 
-        if (ArticleType is ArticleType.Pack)
+        if (dto.ArticleType is ArticleType.Pack)
         {
-            if (dto.PackQuantity is null)
+            if (dto.Pack?.FromArticleGuid is null)
+            {
+                throw new ArgumentException(nameof(dto));
+            }
+
+            if (dto.Pack?.Quantity is null)
             {
                 throw new ArgumentException(
                     "Pack quantity should be informed when article type is pack.", nameof(dto));
             }
-
-            PackQuantity = dto.PackQuantity;
         }
 
-        if (ArticleType is ArticleType.Kit)
+        if (dto.ArticleType is ArticleType.Kit)
         {
             if (dto.KitComponents is null || dto.KitComponents.Count == 0)
             {
                 throw new ArgumentException(
                     "Kit components should be informed when article type is kit.", nameof(dto));
             }
-
-            KitComponents = dto.KitComponents;
         }
 
-        if (ArticleType is not ArticleType.Default && ArticleType is not ArticleType.Variation
-            && ArticleType is not ArticleType.Pack && ArticleType is not ArticleType.Kit && ArticleType is not ArticleType.Container)
+        if (dto.ArticleType is not null && dto.ArticleType is not ArticleType.Default && dto.ArticleType is not ArticleType.Variation
+            && dto.ArticleType is not ArticleType.Pack && dto.ArticleType is not ArticleType.Kit
+            && dto.ArticleType is not ArticleType.Container)
         {
             throw new ArgumentException("Article type not supported.", nameof(dto));
         }
-
-        Name = dto.Name;
-
-        Description = dto.Description;
-
-        ShelfLife = dto.ShelfLife;
-
-        Color = dto.Color;
-
-        Mass = dto.Mass;
-
-        LengthX = dto.Dimension?.LengthX;
-
-        LengthY = dto.Dimension?.LengthY;
-
-        LengthZ = dto.Dimension?.LengthZ;
-
-        Ean13 = dto.Barcode?.Ean13;
-
-        Ean8 = dto.Barcode?.Ean8;
-
-        UpcA = dto.Barcode?.UpcA;
-
-        UpcE = dto.Barcode?.UpcE;
-
-        Code39 = dto.Barcode?.Code39;
-
-        Itf14 = dto.Barcode?.Itf14;
-
-        Gs1128 = dto.Barcode?.Gs1128;
-
-        QrCode = dto.Barcode?.QrCode;
-
-        DataMatrix = dto.Barcode?.DataMatrix;
-
-        PartitionsToAdd = dto.PartitionsToAdd;
     }
 }

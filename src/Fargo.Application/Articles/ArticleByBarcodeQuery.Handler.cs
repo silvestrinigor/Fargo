@@ -13,18 +13,18 @@ public sealed class ArticleByBarcodeQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {
-        logger.QueryByBarcodeStarted(query.ArticleBarcode, currentActor.ActorId);
+        logger.QueryByBarcodeStarted(query.ArticleBarcode, currentActor.Guid);
 
-        var actor = await actorService.GetActorByActorIdAsync(currentActor.ActorId, cancellationToken);
+        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.ActorId);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
         var article = await articleRepository.GetInfoByBarcodeAsync(
             query.ArticleBarcode,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true, cancellationToken);
 
-        logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.ActorId, article is not null);
+        logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.Guid, article is not null);
 
         return article;
     }
