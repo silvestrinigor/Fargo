@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Core.Identity;
 using Fargo.Core.Security;
+using Fargo.Core.Shared.Informations;
 using Fargo.Core.Shared.Security;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,6 @@ public sealed class PasswordChangeCommandHandler(
     IPasswordHasher passwordHasher,
     IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
-    ICurrentActor currentActor,
     ILogger<PasswordChangeCommandHandler> logger
 ) : ICommandHandler<PasswordChangeCommand>
 {
@@ -20,13 +20,26 @@ public sealed class PasswordChangeCommandHandler(
         PasswordChangeCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.PasswordChangeStarted(currentActor.Guid);
+        logger.PasswordChangeStarted(command.Passwords.Nameid);
 
-        var user = await userRepository.GetByGuidAsync(currentActor.Guid, cancellationToken);
+        Nameid nameid;
+
+        try
+        {
+            nameid = new Nameid(command.Passwords.Nameid);
+        }
+        catch (ArgumentException)
+        {
+            logger.PasswordChangeRejectedInvalidNameId(command.Passwords.Nameid);
+
+            throw new InvalidCredentialsFargoApplicationException();
+        }
+
+        var user = await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
         if (user is null)
         {
-            logger.PasswordChangeUserNotFound(currentActor.Guid);
+            logger.PasswordChangeUserNotFound(nameid);
 
             throw new UnauthorizedAccessException();
         }
