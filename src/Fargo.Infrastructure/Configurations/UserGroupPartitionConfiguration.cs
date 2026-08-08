@@ -1,25 +1,25 @@
-using Fargo.Core.Users;
+using Fargo.Core.UserGroups;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations;
 
-public sealed class UserPartitionAccessConfiguration : IEntityTypeConfiguration<UserPartitionAccess>
+public sealed class UserGroupPartitionConfiguration : IEntityTypeConfiguration<UserGroupPartition>
 {
-    public void Configure(EntityTypeBuilder<UserPartitionAccess> builder)
+    public void Configure(EntityTypeBuilder<UserGroupPartition> builder)
     {
-        builder.ToTable("user_partition_accesses");
+        builder.ToTable("user_group_partitions");
 
         builder.HasKey(x => new
         {
-            x.UserGuid,
+            x.UserGroupGuid,
             x.PartitionGuid
         });
 
         builder
-        .HasOne(x => x.User)
-        .WithMany(x => x.PartitionAccesses)
-        .HasForeignKey(x => x.UserGuid)
+        .HasOne(x => x.UserGroup)
+        .WithMany(x => x.Partitions)
+        .HasForeignKey(x => x.UserGroupGuid)
         .OnDelete(DeleteBehavior.Cascade);
 
         builder

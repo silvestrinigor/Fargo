@@ -1,0 +1,56 @@
+using Fargo.Core.Partitions;
+
+namespace Fargo.Core.UserGroups;
+
+/// <summary>
+/// Represents a user group's direct access assignment to a partition.
+/// </summary>
+/// <remarks>
+/// Each instance associates one user group with one partition to which
+/// members of the group are granted access. Access to descendant partitions
+/// may be inherited through the partition hierarchy.
+/// </remarks>
+public class UserGroupPartitionAccess
+{
+    /// <summary>
+    /// Gets the unique identifier of the associated user group.
+    /// </summary>
+    public Guid UserGroupGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the user group granted access to the partition.
+    /// </summary>
+    public UserGroup UserGroup { get; private init; }
+
+    /// <summary>
+    /// Gets the unique identifier of the partition to which access is granted.
+    /// </summary>
+    public Guid PartitionGuid { get; private init; }
+
+    /// <summary>
+    /// Gets the partition to which the user group has direct access.
+    /// </summary>
+    public Partition Partition { get; private init; }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    private UserGroupPartitionAccess() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+    /// <summary>
+    /// Initializes a new user-group partition access assignment.
+    /// </summary>
+    /// <param name="userGroup">
+    /// The user group receiving access.
+    /// </param>
+    /// <param name="partition">
+    /// The partition to which access is granted.
+    /// </param>
+    internal UserGroupPartitionAccess(UserGroup userGroup, Partition partition)
+    {
+        UserGroup = userGroup;
+        UserGroupGuid = userGroup.Guid;
+
+        Partition = partition;
+        PartitionGuid = partition.Guid;
+    }
+}
