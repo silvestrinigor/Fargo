@@ -110,6 +110,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ItemPartitionConfiguration());
+
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserAuthenticationConfiguration());
