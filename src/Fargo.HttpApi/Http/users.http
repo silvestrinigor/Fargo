@@ -1,4 +1,4 @@
-@userGuid = 00000000-0000-0000-0000-000000000004
+@userGuid = 89066e82-fe7a-4fba-8cc1-e656a24a0029
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get
@@ -40,7 +40,7 @@ Content-Type: application/json
 
 {
   "description": "Updated user",
-  "partitionAccessesToRemove": 1,
+  "userGroupsToAdd": ["597b9765-79c9-4f51-941e-8e1d17244c9e"]
 }
 
 ###
