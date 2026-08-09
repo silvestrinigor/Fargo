@@ -108,7 +108,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             user.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 
-    public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUser(
+    public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUserAsync(
         Guid userGuid,
         CancellationToken cancellationToken = default)
     {
@@ -159,7 +159,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         return guids;
     }
 
-    public async Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUser(
+    public async Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUserAsync(
         Guid userGuid,
         CancellationToken cancellationToken = default)
     {

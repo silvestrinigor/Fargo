@@ -26,6 +26,6 @@ public class ArticlePartitionConfiguration : IEntityTypeConfiguration<ArticlePar
         .HasOne(x => x.Partition)
         .WithMany()
         .HasForeignKey(x => x.PartitionGuid)
-        .OnDelete(DeleteBehavior.Cascade);
+        .OnDelete(DeleteBehavior.Restrict);
     }
 }

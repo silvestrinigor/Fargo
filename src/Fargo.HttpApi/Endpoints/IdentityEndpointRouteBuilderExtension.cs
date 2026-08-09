@@ -118,7 +118,6 @@ public static class IdentityEndpointRouteBuilderExtension
     private static IEndpointRouteBuilder MapIdentityChangePassword(this IEndpointRouteBuilder builder)
     {
         builder.MapPut("/password", ChangePassword)
-            .RequireAuthorization()
             .WithName("ChangePassword")
             .WithSummary("Changes the password of the authenticated user")
             .WithDescription("Validates the current password and updates it with the new password.")

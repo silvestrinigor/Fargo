@@ -59,9 +59,9 @@ public sealed class ActorService(IUserRepository userRepository)
             return null;
         }
 
-        var partitionAccessGuids = await userRepository.GetAllActivePartitionAccessGuidsFromUser(user.Guid, cancellationToken);
+        var partitionAccessGuids = await userRepository.GetAllActivePartitionAccessGuidsFromUserAsync(user.Guid, cancellationToken);
 
-        var permissions = await userRepository.GetAllActivePermissionsFromUser(user.Guid, cancellationToken);
+        var permissions = await userRepository.GetAllActivePermissionsFromUserAsync(user.Guid, cancellationToken);
 
         var actor = new Actor(user.Guid, ActorType.User, permissions.ToHashSet(), partitionAccessGuids.ToHashSet());
 

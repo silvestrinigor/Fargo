@@ -1758,11 +1758,15 @@
       },
       "PasswordUpdateDto": {
         "required": [
+          "nameid",
           "newPassword",
           "currentPassword"
         ],
         "type": "object",
         "properties": {
+          "nameid": {
+            "type": "string"
+          },
           "newPassword": {
             "type": "string"
           },

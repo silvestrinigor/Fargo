@@ -1026,18 +1026,7 @@
             return null;
         });
 
-    private async Task ChangePasswordAsync() => await RunAsync(
-        OperationIds.ChangePassword,
-        "Password changed",
-        async client =>
-        {
-            await client.Identity.ChangePasswordAsync(new PasswordUpdateDto(
-                RequiredText(accountPassword.NewPassword, "New password"),
-                RequiredText(accountPassword.CurrentPassword, "Current password")));
-            accountPassword.CurrentPassword = string.Empty;
-            accountPassword.NewPassword = string.Empty;
-            return null;
-        });
+    private async Task ChangePasswordAsync() { }
 
     private async Task ClearSavedAuthAsync()
     {
