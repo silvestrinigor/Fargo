@@ -298,7 +298,7 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"The user group '{Guid}' cannot be its own parent.",
-                FargoCoreErrorType.InvalidArgument);
+                FargoCoreErrorType.InvalidOperation);
         }
 
         ParentUserGroup = parentUserGroup;

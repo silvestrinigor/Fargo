@@ -139,7 +139,7 @@ public class Partition : IEntity
         if (parentPartition.Guid == Guid)
         {
             throw new FargoCoreException(
-                $"The partition partition '{Guid}' cannot be its own parent.", FargoCoreErrorType.InvalidArgument);
+                $"The partition partition '{Guid}' cannot be its own parent.", FargoCoreErrorType.InvalidOperation);
         }
 
         ParentPartition = parentPartition;

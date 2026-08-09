@@ -66,7 +66,7 @@ public sealed class ArticleKitComponent
         {
             throw new FargoCoreException(
                 "A kit cannot contain itself.",
-                FargoCoreErrorType.InvalidArgument);
+                FargoCoreErrorType.InvalidOperation);
         }
 
         KitArticle = kitArticle;

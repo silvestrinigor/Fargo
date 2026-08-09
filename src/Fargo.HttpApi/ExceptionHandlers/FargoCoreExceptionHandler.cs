@@ -23,10 +23,15 @@ public sealed class FargoCoreExceptionHandler(
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Core exception.",
+            Title = "Core error.",
             Detail = coreException.Message,
             Instance = httpContext.Request.Path,
         };
+
+        if (coreException.ErrorType == FargoCoreErrorType.InvalidOperation)
+        {
+            problem.Title = "Core invalid operation.";
+        }
 
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
         problem.Extensions["coreErrorType"] = coreException.ErrorType;

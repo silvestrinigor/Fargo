@@ -66,7 +66,7 @@ public sealed class ArticlePack
         {
             throw new FargoCoreException(
                 "A pack cannot reference itself.",
-                FargoCoreErrorType.InvalidArgument);
+                FargoCoreErrorType.InvalidOperation);
         }
 
         PackArticle = packArticle;

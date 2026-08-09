@@ -70,7 +70,7 @@ public sealed class ArticleContainer
         {
             throw new FargoCoreException(
                 "The maximum mass of a container must be greater than zero.",
-                FargoCoreErrorType.InvalidArgument);
+                FargoCoreErrorType.InvalidOperation);
         }
 
         MaxMass = maxMass;

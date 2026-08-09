@@ -14,9 +14,4 @@ public enum FargoCoreErrorType
     /// The operation is invalid.
     /// </summary>
     InvalidOperation = 1,
-
-    /// <summary>
-    /// The argument is invalid.
-    /// </summary>
-    InvalidArgument = 2,
 }
