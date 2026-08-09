@@ -69,7 +69,7 @@ public interface IUserRepository
     /// through inactive user groups are excluded.
     /// </returns>
     Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUserAsync(
-    Guid userGuid, CancellationToken cancellationToken = default);
+        Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a user with the specified <see cref="Nameid"/> already exists.
