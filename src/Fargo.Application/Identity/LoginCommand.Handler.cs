@@ -54,7 +54,18 @@ public sealed class LoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        var password = new Password(command.Password);
+        Password password;
+
+        try
+        {
+            password = new Password(command.Password);
+        }
+        catch (ArgumentException)
+        {
+            logger.LoginRejectedInvalidPasswordFormat(user.Guid);
+
+            throw new InvalidCredentialsFargoApplicationException();
+        }
 
         var isValid = user.Authentication.PasswordHash != null
             && passwordHasher.Verify(

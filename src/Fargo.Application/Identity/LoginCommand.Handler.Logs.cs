@@ -30,6 +30,12 @@ internal static partial class LoginCommandHandlerLogs
 
     [LoggerMessage(
         Level = LogLevel.Warning,
+        Message = "Login flow rejected for user {userGuid} because the password format is invalid.")]
+    public static partial void LoginRejectedInvalidPasswordFormat(
+        this ILogger logger, Guid userGuid);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
         Message = "Login flow rejected because the password was invalid for user {UserGuid}.")]
     public static partial void LoginRejectedInvalidPassword(
         this ILogger logger, Guid userGuid);

@@ -29,7 +29,7 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "Coca Cola 2L",
+  "name": "",
   "description": "PET Bottle",
   "articleType": 1,
   "barcode": {
