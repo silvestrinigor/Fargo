@@ -49,7 +49,7 @@ public interface IUserRepository
     /// the user has access to. Returns an empty collection if the user is
     /// inactive. Accesses granted through inactive user groups are excluded.
     /// </returns>
-    Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUser(
+    Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUserAsync(
         Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -68,7 +68,7 @@ public interface IUserRepository
     /// Returns an empty collection if the user is inactive. Permissions granted
     /// through inactive user groups are excluded.
     /// </returns>
-    Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUser(
+    Task<IReadOnlyCollection<ActionType>> GetAllActivePermissionsFromUserAsync(
     Guid userGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
