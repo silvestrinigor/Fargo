@@ -16,7 +16,7 @@ public class UserGroupServiceTests
     }
 
     [Fact]
-    public async Task InsertIntoUserGroupAsync_WhenUserGroupIsValid_ShouldSetParentUserGroup()
+    public async Task ValidateParentUserGroupAssignmentHierarchyAsync_WhenUserGroupIsValid_ShouldNotThrowException()
     {
         var userGroup1 = UserGroup.CreateUserGroup(default);
         var userGroup2 = UserGroup.CreateUserGroup(default);
@@ -28,7 +28,7 @@ public class UserGroupServiceTests
     }
 
     [Fact]
-    public async Task InsertIntoUserGroupAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
+    public async Task ValidateParentUserGroupAssignmentHierarchyAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
     {
         var userGroup1 = UserGroup.CreateUserGroup(default);
         var userGroup2 = UserGroup.CreateUserGroup(default);

@@ -16,7 +16,7 @@ public class PartitionServiceTests
     }
 
     [Fact]
-    public async Task InsertIntoPartitionAsync_WhenPartitionIsValid_ShouldSetParentPartition()
+    public async Task ValidateParentPartitionHierarchyAssignmentAsync_WhenPartitionIsValid_ShouldNotThrowException()
     {
         var globalPartition = Partition.CreateGlobalPartition(default);
         var partition1 = Partition.CreatePartition(default, globalPartition);
@@ -29,7 +29,7 @@ public class PartitionServiceTests
     }
 
     [Fact]
-    public async Task InsertIntoPartitionAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
+    public async Task ValidateParentPartitionHierarchyAssignmentAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
     {
         var globalPartition = Partition.CreateGlobalPartition(default);
         var partition1 = Partition.CreatePartition(default, globalPartition);
