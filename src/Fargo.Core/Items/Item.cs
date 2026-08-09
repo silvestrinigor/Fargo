@@ -126,13 +126,13 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
 
         if (itemContainer.Guid == Guid)
         {
-            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoCoreErrorType.InvalidArgument);
+            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoCoreErrorType.InvalidOperation);
         }
 
         if (itemContainer.Article.ArticleType != ArticleType.Container)
         {
             throw new FargoCoreException(
-                $"Item '{itemContainer.Guid}' is not a container item.", FargoCoreErrorType.InvalidArgument);
+                $"Item '{itemContainer.Guid}' is not a container item.", FargoCoreErrorType.InvalidOperation);
         }
 
         ParentItemContainer = itemContainer;
