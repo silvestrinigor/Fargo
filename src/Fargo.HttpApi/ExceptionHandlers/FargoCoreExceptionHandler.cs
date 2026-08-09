@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,13 +29,13 @@ public sealed class FargoCoreExceptionHandler(
             Instance = httpContext.Request.Path,
         };
 
-        if (coreException.ErrorType == FargoCoreErrorType.InvalidOperation)
+        if (coreException.ErrorType == FargoErrorType.InvalidOperation)
         {
             problem.Title = "Core invalid operation.";
         }
 
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        problem.Extensions["coreErrorType"] = coreException.ErrorType;
+        problem.Extensions["errorType"] = coreException.ErrorType;
 
         await problemDetailsService.WriteAsync(new ProblemDetailsContext
         {

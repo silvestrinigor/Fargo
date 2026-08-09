@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.UserGroups;
 using NSubstitute;
 
@@ -42,6 +43,6 @@ public class UserGroupServiceTests
         async Task function() => await userGroupService.ValidateParentUserGroupAssignmentHierarchyAsync(userGroup3, userGroup1);
 
         var ex = await Assert.ThrowsAsync<FargoCoreException>(function);
-        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+        Assert.Equal(FargoErrorType.InvalidOperation, ex.ErrorType);
     }
 }

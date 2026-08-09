@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 
 namespace Fargo.Core.Partitions;
 
@@ -51,7 +52,7 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         {
             throw new FargoCoreException(
                 $"Partition '{childPartition.Guid}' cannot be assigned to parent partition '{parentPartition.Guid}' because this would create a circular hierarchy.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 
@@ -105,7 +106,7 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         {
             throw new FargoCoreException(
                 $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot be deleted.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         var hasAssociatedEntities = await partitionRepository.HasAnyAssociatedEntityAsync(partition.Guid, cancellationToken);
@@ -114,7 +115,7 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         {
             throw new FargoCoreException(
                 $"Partition '{partition.Guid}' cannot be deleted because it has associated entities.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 }

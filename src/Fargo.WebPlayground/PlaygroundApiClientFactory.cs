@@ -1,4 +1,4 @@
-using Fargo.HttpClient;
+using Fargo.HttpApiClient;
 using System.Net.Http.Headers;
 
 namespace Fargo.WebPlayground;

@@ -3,6 +3,7 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Common;
 
 namespace Fargo.Core.Items;
 
@@ -126,13 +127,13 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
 
         if (itemContainer.Guid == Guid)
         {
-            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoCoreErrorType.InvalidOperation);
+            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoErrorType.InvalidOperation);
         }
 
         if (itemContainer.Article.ArticleType != ArticleType.Container)
         {
             throw new FargoCoreException(
-                $"Item '{itemContainer.Guid}' is not a container item.", FargoCoreErrorType.InvalidOperation);
+                $"Item '{itemContainer.Guid}' is not a container item.", FargoErrorType.InvalidOperation);
         }
 
         ParentItemContainer = itemContainer;

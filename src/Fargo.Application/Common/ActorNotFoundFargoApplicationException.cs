@@ -1,5 +1,6 @@
 using Fargo.Core.Actors;
 using Fargo.Core.Shared.Actors;
+using Fargo.Core.Shared.Common;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Application.Common;
@@ -11,7 +12,7 @@ public class ActorNotFoundFargoApplicationException : FargoApplicationException
     public ActorType ActorType { get; }
 
     public ActorNotFoundFargoApplicationException(Guid actorGuid, ActorType actorType)
-        : base($"Actor '{actorGuid}' was not found.", FargoApplicationErrorType.ActorNotFound)
+        : base($"Actor '{actorGuid}' was not found.", FargoErrorType.EntityNotFound)
     {
         ActorGuid = actorGuid;
 

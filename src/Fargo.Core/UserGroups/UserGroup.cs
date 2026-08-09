@@ -2,6 +2,7 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.UserGroups;
@@ -146,7 +147,7 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot revoke the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' access to the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         partitionAccesses.RemoveAll(p => p.PartitionGuid == partitionGuid);
@@ -166,7 +167,7 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot associate the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' with the non-global partition '{partition.Guid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         if (partitions.Any(p => p.PartitionGuid == partition.Guid))
@@ -193,7 +194,7 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot remove the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' from the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
@@ -228,7 +229,7 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot revoke the permission '{action}' from the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         permissions.RemoveAll(a => a == action);
@@ -254,7 +255,7 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot deactivate the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         IsActive = false;
@@ -291,14 +292,14 @@ public class UserGroup : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}' cannot be added inside another user group '{parentUserGroup.Guid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         if (parentUserGroup.Guid == Guid)
         {
             throw new FargoCoreException(
                 $"The user group '{Guid}' cannot be its own parent.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         ParentUserGroup = parentUserGroup;

@@ -1,9 +1,9 @@
-namespace Fargo.Core.Common;
+namespace Fargo.Core.Shared.Common;
 
 /// <summary>
 /// Defines the categories of errors that can be associated with a <see cref="FargoCoreException"/>.
 /// </summary>
-public enum FargoCoreErrorType
+public enum FargoErrorType
 {
     /// <summary>
     /// No specific error category.
@@ -14,4 +14,6 @@ public enum FargoCoreErrorType
     /// The operation is invalid.
     /// </summary>
     InvalidOperation = 1,
+
+    EntityNotFound = 2
 }

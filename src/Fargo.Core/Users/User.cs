@@ -2,6 +2,7 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Actions;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 
@@ -146,7 +147,7 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot associate the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' with the non-global partition '{partition.Guid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         if (partitions.Any(p => p.PartitionGuid == partition.Guid))
@@ -172,7 +173,7 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot remove the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' from the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
@@ -211,7 +212,7 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot remove the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' from the administrators user group '{FargoCoreWellKnowGuids.AdministratorsUserGroupGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         userGroupMemberships.RemoveAll(g => g.UserGroupGuid == userGroupGuid);
@@ -249,7 +250,7 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot revoke the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' access to the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         partitionAccesses.RemoveAll(p => p.PartitionGuid == partitionGuid);
@@ -282,7 +283,7 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot revoke permission '{action}' from the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         permissions.RemoveAll(x => x == action);
@@ -308,7 +309,7 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         {
             throw new FargoCoreException(
                 $"Cannot deactivate the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}'.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         IsActive = false;

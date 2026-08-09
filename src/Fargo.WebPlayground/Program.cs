@@ -1,4 +1,4 @@
-using Fargo.HttpClient;
+using Fargo.HttpApiClient;
 using Fargo.WebPlayground;
 using Fargo.WebPlayground.Components;
 using Microsoft.FluentUI.AspNetCore.Components;

@@ -1,4 +1,5 @@
 using Fargo.Core.Entities;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Entities;
 using System.Diagnostics.CodeAnalysis;
 
@@ -11,7 +12,7 @@ public class EntityNotFoundFargoApplicationException : FargoApplicationException
     public EntityType EntityType { get; init; }
 
     public EntityNotFoundFargoApplicationException(Guid entityGuid, EntityType entityType)
-        : base($"Entity '{entityGuid}' of type '{entityType}' was not found.", FargoApplicationErrorType.EntityNotFound)
+        : base($"Entity '{entityGuid}' of type '{entityType}' was not found.", FargoErrorType.EntityNotFound)
     {
         EntityGuid = entityGuid;
 

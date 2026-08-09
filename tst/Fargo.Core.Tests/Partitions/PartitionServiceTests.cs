@@ -1,5 +1,6 @@
 using Fargo.Core.Common;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared.Common;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Partitions;
@@ -42,6 +43,6 @@ public class PartitionServiceTests
         async Task function() => await partitionService.ValidateParentPartitionHierarchyAssignmentAsync(partition3, partition1);
 
         var ex = await Assert.ThrowsAsync<FargoCoreException>(function);
-        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+        Assert.Equal(FargoErrorType.InvalidOperation, ex.ErrorType);
     }
 }

@@ -1,3 +1,5 @@
+using Fargo.Core.Shared.Common;
+
 namespace Fargo.Core.Common;
 
 /// <summary>
@@ -10,7 +12,7 @@ public class FargoCoreException : Exception
     /// <summary>
     /// Gets the error category associated with the exception.
     /// </summary>
-    public FargoCoreErrorType ErrorType { get; init; } = FargoCoreErrorType.None;
+    public FargoErrorType ErrorType { get; init; } = FargoErrorType.None;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoCoreException"/> class.
@@ -31,7 +33,7 @@ public class FargoCoreException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoCoreException"/> class with a specified error message and error type.
     /// </summary>
-    public FargoCoreException(string? message, FargoCoreErrorType errorType)
+    public FargoCoreException(string? message, FargoErrorType errorType)
         : base(message)
     {
         ErrorType = errorType;
@@ -40,7 +42,7 @@ public class FargoCoreException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoCoreException"/> class with a specified error message, error type, and inner exception.
     /// </summary>
-    public FargoCoreException(string? message, FargoCoreErrorType errorType, Exception innerException)
+    public FargoCoreException(string? message, FargoErrorType errorType, Exception innerException)
         : base(message, innerException)
     {
         ErrorType = errorType;
@@ -49,7 +51,7 @@ public class FargoCoreException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoCoreException"/> class with a specified error type and inner exception.
     /// </summary>
-    public FargoCoreException(FargoCoreErrorType errorType, Exception innerException)
+    public FargoCoreException(FargoErrorType errorType, Exception innerException)
         : base(defaultExceptionMessage, innerException)
     {
         ErrorType = errorType;

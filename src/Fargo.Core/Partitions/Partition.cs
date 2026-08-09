@@ -1,5 +1,6 @@
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Partitions;
@@ -133,13 +134,13 @@ public class Partition : IEntity
         if (IsGlobalPartition)
         {
             throw new FargoCoreException(
-                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot have a parent partition.", FargoCoreErrorType.InvalidOperation);
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot have a parent partition.", FargoErrorType.InvalidOperation);
         }
 
         if (parentPartition.Guid == Guid)
         {
             throw new FargoCoreException(
-                $"The partition partition '{Guid}' cannot be its own parent.", FargoCoreErrorType.InvalidOperation);
+                $"The partition partition '{Guid}' cannot be its own parent.", FargoErrorType.InvalidOperation);
         }
 
         ParentPartition = parentPartition;

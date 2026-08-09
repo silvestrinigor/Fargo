@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
@@ -66,7 +67,7 @@ public sealed class ArticlePack
         {
             throw new FargoCoreException(
                 "A pack cannot reference itself.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
         PackArticle = packArticle;

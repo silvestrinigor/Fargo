@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 
 namespace Fargo.Core.Items;
 
@@ -52,7 +53,7 @@ public sealed class ItemService(IItemRepository itemRepository)
         {
             throw new FargoCoreException(
                 $"Item '{memberItem.Guid}' cannot be assigned to parent container '{parentContainerItem.Guid}' because this would create a circular containment hierarchy.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 

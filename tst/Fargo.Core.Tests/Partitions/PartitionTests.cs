@@ -1,5 +1,6 @@
 using Fargo.Core.Common;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Tests.Partitions;
@@ -80,7 +81,7 @@ public class PartitionTests
         void function() => globalPartition.SetParentPartition(partition);
 
         var ex = Assert.Throws<FargoCoreException>(function);
-        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+        Assert.Equal(FargoErrorType.InvalidOperation, ex.ErrorType);
     }
 
     [Fact]
@@ -92,6 +93,6 @@ public class PartitionTests
         void function() => partition.SetParentPartition(partition);
 
         var ex = Assert.Throws<FargoCoreException>(function);
-        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+        Assert.Equal(FargoErrorType.InvalidOperation, ex.ErrorType);
     }
 }

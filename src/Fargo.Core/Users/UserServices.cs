@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Users;
@@ -28,7 +29,7 @@ public sealed class UserService(IUserRepository userRepository)
 
         if (nameidInUse)
         {
-            throw new FargoCoreException($"A user with Nameid '{nameid}' already exists.", FargoCoreErrorType.InvalidOperation);
+            throw new FargoCoreException($"A user with Nameid '{nameid}' already exists.", FargoErrorType.InvalidOperation);
         }
     }
 
@@ -43,7 +44,7 @@ public sealed class UserService(IUserRepository userRepository)
     {
         if (user.IsAdmin)
         {
-            throw new FargoCoreException($"The admin user '{user.Guid}' cannot be deleted.", FargoCoreErrorType.InvalidOperation);
+            throw new FargoCoreException($"The admin user '{user.Guid}' cannot be deleted.", FargoErrorType.InvalidOperation);
         }
     }
 }
