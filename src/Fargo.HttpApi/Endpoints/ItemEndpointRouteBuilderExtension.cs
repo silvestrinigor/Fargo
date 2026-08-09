@@ -40,7 +40,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/{itemGuid:guid}", GetSingleItem)
             .WithName("GetItem")
             .WithSummary("Gets a single item")
-            .WithDescription("Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.")
+            .WithDescription("Retrieves a single item by its unique identifier.")
             .Produces<ItemDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -69,7 +69,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyItem)
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
-            .WithDescription("Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.")
+            .WithDescription("Retrieves a paginated list of items.")
             .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 

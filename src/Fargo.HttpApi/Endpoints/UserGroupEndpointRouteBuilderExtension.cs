@@ -40,7 +40,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         builder.MapGet("/{userGroupGuid:guid}", GetSingleUserGroup)
             .WithName("GetUserGroup")
             .WithSummary("Gets a single user group")
-            .WithDescription("Retrieves a single user group by its unique identifier. Optionally allows querying historical data using temporal tables.")
+            .WithDescription("Retrieves a single user group by its unique identifier.")
             .Produces<UserGroupDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
@@ -70,7 +70,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyUserGroup)
             .WithName("GetUserGroups")
             .WithSummary("Gets multiple user groups")
-            .WithDescription("Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.")
+            .WithDescription("Retrieves a paginated list of user groups.")
             .Produces<IReadOnlyCollection<UserGroupDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
