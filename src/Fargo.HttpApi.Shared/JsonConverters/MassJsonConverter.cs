@@ -3,24 +3,24 @@ using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Fargo.Infrastructure.JsonConverters;
+namespace Fargo.HttpApi.Shared.JsonConverters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="Length"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet length unit abbreviation (e.g. "mm", "cm", "m", "km", "in", "ft").
+/// Serializes and deserializes <see cref="Mass"/> as <c>{ "value": number, "unit": string }</c>.
+/// Reads any UnitsNet mass unit abbreviation (e.g. "g", "kg", "mg", "lb", "oz").
 /// Writes the value and unit exactly as stored — no unit conversion on output.
 /// </summary>
-public sealed class LengthJsonConverter : JsonConverter<Length>
+public sealed class MassJsonConverter : JsonConverter<Mass>
 {
-    public override Length Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Mass Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
         {
-            throw new JsonException("Length must be an object with 'value' (number) and 'unit' (string) fields.");
+            throw new JsonException("Mass must be an object with 'value' (number) and 'unit' (string) fields.");
         }
 
         double value = 0;
-        LengthUnit unit = LengthUnit.Meter;
+        MassUnit unit = MassUnit.Gram;
 
         while (reader.Read())
         {
@@ -31,7 +31,7 @@ public sealed class LengthJsonConverter : JsonConverter<Length>
 
             if (reader.TokenType != JsonTokenType.PropertyName)
             {
-                throw new JsonException("Expected property name inside length object.");
+                throw new JsonException("Expected property name inside mass object.");
             }
 
             string propName = reader.GetString()!;
@@ -44,27 +44,27 @@ public sealed class LengthJsonConverter : JsonConverter<Length>
                     break;
                 case "unit":
                     string unitStr = reader.GetString()
-                        ?? throw new JsonException("Length 'unit' must be a string.");
+                        ?? throw new JsonException("Mass 'unit' must be a string.");
                     try
                     {
-                        unit = UnitParser.Default.Parse<LengthUnit>(unitStr);
+                        unit = UnitParser.Default.Parse<MassUnit>(unitStr);
                     }
                     catch (Exception ex)
                     {
-                        throw new JsonException($"Unknown length unit '{unitStr}'.", ex);
+                        throw new JsonException($"Unknown mass unit '{unitStr}'.", ex);
                     }
                     break;
             }
         }
 
-        return Length.From(value, unit);
+        return Mass.From(value, unit);
     }
 
-    public override void Write(Utf8JsonWriter writer, Length value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Mass value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);
-        writer.WriteString("unit", Length.GetAbbreviation(value.Unit));
+        writer.WriteString("unit", Mass.GetAbbreviation(value.Unit));
         writer.WriteEndObject();
     }
 }

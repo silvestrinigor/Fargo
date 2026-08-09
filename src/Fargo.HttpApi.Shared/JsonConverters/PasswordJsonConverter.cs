@@ -2,7 +2,7 @@ using Fargo.Core.Shared.Security;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Infrastructure.JsonConverters;
+namespace Fargo.HttpApi.Shared.JsonConverters;
 
 public sealed class PasswordJsonConverter : JsonConverter<Password>
 {

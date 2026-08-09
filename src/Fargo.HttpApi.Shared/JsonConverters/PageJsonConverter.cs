@@ -2,11 +2,11 @@ using Fargo.Application;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Infrastructure.JsonConverters;
+namespace Fargo.HttpApi.Shared.JsonConverters;
 
-public sealed class LimitJsonConverter : JsonConverter<Limit>
+public sealed class PageJsonConverter : JsonConverter<Page>
 {
-    public override Limit Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Page Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.Number)
         {
@@ -17,15 +17,15 @@ public sealed class LimitJsonConverter : JsonConverter<Limit>
 
         try
         {
-            return new Limit(value);
+            return new Page(value);
         }
         catch (ArgumentException ex)
         {
-            throw new JsonException("Invalid Limit format.", ex);
+            throw new JsonException("Invalid Page format.", ex);
         }
     }
 
-    public override void Write(Utf8JsonWriter writer, Limit value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Page value, JsonSerializerOptions options)
     {
         writer.WriteNumberValue(value);
     }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Fargo.HttpApi.Client.Common;
 
 public class ProblemDetails
@@ -12,5 +14,6 @@ public class ProblemDetails
 
     public string? Instance { get; set; }
 
+    [JsonExtensionData]
     public IDictionary<string, object?> Extensions { get; set; } = new Dictionary<string, object?>(StringComparer.Ordinal);
 }

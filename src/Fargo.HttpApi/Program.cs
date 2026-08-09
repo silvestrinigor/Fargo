@@ -1,6 +1,7 @@
 using Fargo.Application.Extensions;
 using Fargo.HttpApi.Endpoints;
 using Fargo.HttpApi.Extensions;
+using Fargo.HttpApi.Shared.Extensions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,7 +18,7 @@ builder.Services.AddFargoOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.ConfigureFargoJson();
+builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.AddFargoJsonConverters());
 
 builder.Services.AddFargoApplication();
 

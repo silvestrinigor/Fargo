@@ -45,6 +45,57 @@ public sealed class FargoHttpClient(HttpClient httpClient, JsonSerializerOptions
             cancellationToken);
     }
 
+    public async Task<FargoHttpResponse> PostAsync<TRequest>(
+        string uri,
+        TRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response =
+            await httpClient.PostAsJsonAsync(
+                uri,
+                request,
+                jsonSerializerOptions,
+                cancellationToken);
+
+        return await CreateResponseAsync(
+            response,
+            cancellationToken);
+    }
+
+    public async Task<FargoHttpResponse<TResponse>> PutAsync<TRequest, TResponse>(
+        string uri,
+        TRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response =
+            await httpClient.PutAsJsonAsync(
+                uri,
+                request,
+                jsonSerializerOptions,
+                cancellationToken);
+
+        return await CreateResponseAsync<TResponse>(
+            response,
+            cancellationToken);
+    }
+
+    public async Task<FargoHttpResponse> PutAsync<TRequest>(
+        string uri,
+        TRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response =
+            await httpClient.PutAsJsonAsync(
+                uri,
+                request,
+                jsonSerializerOptions,
+                cancellationToken);
+
+        return await CreateResponseAsync(
+            response,
+            cancellationToken);
+    }
+
     public async Task<FargoHttpResponse<TResponse>> PatchAsync<TRequest, TResponse>(
         string uri,
         TRequest request,

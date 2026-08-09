@@ -3,25 +3,24 @@ using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Fargo.Infrastructure.JsonConverters;
+namespace Fargo.HttpApi.Shared.JsonConverters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="Density"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet density unit abbreviation (e.g. "kg/m³", "g/cm³", "lb/ft³").
+/// Serializes and deserializes <see cref="Length"/> as <c>{ "value": number, "unit": string }</c>.
+/// Reads any UnitsNet length unit abbreviation (e.g. "mm", "cm", "m", "km", "in", "ft").
 /// Writes the value and unit exactly as stored — no unit conversion on output.
 /// </summary>
-public sealed class DensityJsonConverter : JsonConverter<Density>
+public sealed class LengthJsonConverter : JsonConverter<Length>
 {
-    /// <inheritdoc />
-    public override Density Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Length Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
         {
-            throw new JsonException("Density must be an object with 'value' (number) and 'unit' (string) fields.");
+            throw new JsonException("Length must be an object with 'value' (number) and 'unit' (string) fields.");
         }
 
         double value = 0;
-        DensityUnit unit = DensityUnit.KilogramPerCubicMeter;
+        LengthUnit unit = LengthUnit.Meter;
 
         while (reader.Read())
         {
@@ -32,7 +31,7 @@ public sealed class DensityJsonConverter : JsonConverter<Density>
 
             if (reader.TokenType != JsonTokenType.PropertyName)
             {
-                throw new JsonException("Expected property name inside density object.");
+                throw new JsonException("Expected property name inside length object.");
             }
 
             string propName = reader.GetString()!;
@@ -45,28 +44,27 @@ public sealed class DensityJsonConverter : JsonConverter<Density>
                     break;
                 case "unit":
                     string unitStr = reader.GetString()
-                        ?? throw new JsonException("Density 'unit' must be a string.");
+                        ?? throw new JsonException("Length 'unit' must be a string.");
                     try
                     {
-                        unit = UnitParser.Default.Parse<DensityUnit>(unitStr);
+                        unit = UnitParser.Default.Parse<LengthUnit>(unitStr);
                     }
                     catch (Exception ex)
                     {
-                        throw new JsonException($"Unknown density unit '{unitStr}'.", ex);
+                        throw new JsonException($"Unknown length unit '{unitStr}'.", ex);
                     }
                     break;
             }
         }
 
-        return Density.From(value, unit);
+        return Length.From(value, unit);
     }
 
-    /// <inheritdoc />
-    public override void Write(Utf8JsonWriter writer, Density value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Length value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
         writer.WriteNumber("value", value.Value);
-        writer.WriteString("unit", Density.GetAbbreviation(value.Unit));
+        writer.WriteString("unit", Length.GetAbbreviation(value.Unit));
         writer.WriteEndObject();
     }
 }
