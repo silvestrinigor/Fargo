@@ -1,13 +1,12 @@
 using Fargo.Application.Common;
-using Fargo.Application.Shared.Identity;
 using Fargo.Core.Shared.Identity;
 
 namespace Fargo.Application.Identity;
 
 /// <summary>
-/// Command used to refresh authentication tokens using a valid refresh token.
+/// Command used to log out a user by invalidating a refresh token.
 /// </summary>
 /// <param name="RefreshToken">
 /// The refresh token provided by the client.
 /// </param>
-public sealed record RefreshCommand(Token RefreshToken) : ICommand<AuthResult>;
+public sealed record IdentityLogoutCommand(Token RefreshToken) : ICommand;

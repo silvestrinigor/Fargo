@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
-public sealed class RefreshCommandHandler(
+public sealed class IdentityRefreshCommandHandler(
     ActorService actorService,
     IUserRepository userRepository,
     ITokenGenerator tokenGenerator,
@@ -16,11 +16,11 @@ public sealed class RefreshCommandHandler(
     ITokenHasher tokenHasher,
     IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
-    ILogger<RefreshCommandHandler> logger
-) : ICommandHandler<RefreshCommand, AuthResult>
+    ILogger<IdentityRefreshCommandHandler> logger
+) : ICommandHandler<IdentityRefreshCommand, AuthResult>
 {
     public async Task<AuthResult> HandleAsync(
-        RefreshCommand command,
+        IdentityRefreshCommand command,
         CancellationToken cancellationToken = default)
     {
         logger.RefreshStarted();

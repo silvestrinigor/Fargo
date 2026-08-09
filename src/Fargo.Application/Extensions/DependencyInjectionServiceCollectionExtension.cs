@@ -48,10 +48,10 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
         public IServiceCollection AddFargoIdentityApplication() => services
-            .AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>()
-            .AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>()
-            .AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>()
-            .AddScoped<ICommandHandler<PasswordChangeCommand>, PasswordChangeCommandHandler>();
+            .AddScoped<ICommandHandler<IdentityLoginCommand, AuthResult>, IdentityLoginCommandHandler>()
+            .AddScoped<ICommandHandler<IdentityLogoutCommand>, IdentityLogoutCommandHandler>()
+            .AddScoped<ICommandHandler<IdentityRefreshCommand, AuthResult>, IdentityRefreshCommandHandler>()
+            .AddScoped<ICommandHandler<IdentityPasswordChangeCommand>, IdentityPasswordChangeCommandHandler>();
 
         public IServiceCollection AddFargoItemApplication() => services
             .AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>()

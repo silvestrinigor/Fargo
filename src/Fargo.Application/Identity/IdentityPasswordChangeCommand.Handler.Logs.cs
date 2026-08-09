@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
-internal static partial class LogoutCommandHandlerLogs
+internal static partial class IdentityPasswordChangeCommandHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Information,

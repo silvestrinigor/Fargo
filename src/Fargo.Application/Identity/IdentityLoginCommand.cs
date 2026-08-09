@@ -12,7 +12,7 @@ namespace Fargo.Application.Identity;
 /// <param name="Password">
 /// The plaintext password provided for authentication.
 /// </param>
-public sealed record LoginCommand(
+public sealed record IdentityLoginCommand(
     string Nameid,
     string Password
 ) : ICommand<AuthResult>;

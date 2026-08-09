@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
-public sealed class LoginCommandHandler(
+public sealed class IdentityLoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     ITokenGenerator tokenGenerator,
@@ -17,11 +17,11 @@ public sealed class LoginCommandHandler(
     ITokenHasher tokenHasher,
     IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
-    ILogger<LoginCommandHandler> logger
-) : ICommandHandler<LoginCommand, AuthResult>
+    ILogger<IdentityLoginCommandHandler> logger
+) : ICommandHandler<IdentityLoginCommand, AuthResult>
 {
     public async Task<AuthResult> HandleAsync(
-        LoginCommand command, CancellationToken cancellationToken = default)
+        IdentityLoginCommand command, CancellationToken cancellationToken = default)
     {
         logger.LoginStarted(command.Nameid);
 

@@ -240,7 +240,7 @@
           "Items"
         ],
         "summary": "Gets a single item",
-        "description": "Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single item by its unique identifier.",
         "operationId": "GetItem",
         "parameters": [
           {
@@ -334,7 +334,7 @@
           "Items"
         ],
         "summary": "Gets multiple items",
-        "description": "Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.",
+        "description": "Retrieves a paginated list of items.",
         "operationId": "GetItems",
         "parameters": [
           {
@@ -437,7 +437,7 @@
           "Users"
         ],
         "summary": "Gets a single user",
-        "description": "Retrieves a single user by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single user by its unique identifier.",
         "operationId": "GetUser",
         "parameters": [
           {
@@ -531,7 +531,7 @@
           "Users"
         ],
         "summary": "Gets multiple users",
-        "description": "Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.",
+        "description": "Retrieves a paginated list of users.",
         "operationId": "GetUsers",
         "parameters": [
           {
@@ -634,7 +634,7 @@
           "UserGroups"
         ],
         "summary": "Gets a single user group",
-        "description": "Retrieves a single user group by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single user group by its unique identifier.",
         "operationId": "GetUserGroup",
         "parameters": [
           {
@@ -728,7 +728,7 @@
           "UserGroups"
         ],
         "summary": "Gets multiple user groups",
-        "description": "Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.",
+        "description": "Retrieves a paginated list of user groups.",
         "operationId": "GetUserGroups",
         "parameters": [
           {

@@ -8,16 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
-public sealed class PasswordChangeCommandHandler(
+public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
-    ILogger<PasswordChangeCommandHandler> logger
-) : ICommandHandler<PasswordChangeCommand>
+    ILogger<IdentityPasswordChangeCommandHandler> logger
+) : ICommandHandler<IdentityPasswordChangeCommand>
 {
     public async Task HandleAsync(
-        PasswordChangeCommand command,
+        IdentityPasswordChangeCommand command,
         CancellationToken cancellationToken = default)
     {
         logger.PasswordChangeStarted(command.Passwords.Nameid);

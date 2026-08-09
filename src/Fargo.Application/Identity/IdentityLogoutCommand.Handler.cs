@@ -4,15 +4,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
-public sealed class LogoutCommandHandler(
+public sealed class IdentityLogoutCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ITokenHasher tokenHasher,
     IUnitOfWork unitOfWork,
-    ILogger<LogoutCommandHandler> logger
-) : ICommandHandler<LogoutCommand>
+    ILogger<IdentityLogoutCommandHandler> logger
+) : ICommandHandler<IdentityLogoutCommand>
 {
     public async Task HandleAsync(
-        LogoutCommand command,
+        IdentityLogoutCommand command,
         CancellationToken cancellationToken = default)
     {
         logger.LogoutStarted();
