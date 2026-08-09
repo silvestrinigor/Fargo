@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserDeleteCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserRepository userRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,

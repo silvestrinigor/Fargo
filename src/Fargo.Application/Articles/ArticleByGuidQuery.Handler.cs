@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleByGuidQueryHandler(
-    ActorService actorService, IArticleQueryRepository articleRepository,
+    ActorResolver actorService, IArticleQueryRepository articleRepository,
     ICurrentActor currentActor, ILogger<ArticleByGuidQueryHandler> logger
 ) : IQueryHandler<ArticleByGuidQuery, ArticleDto?>
 {

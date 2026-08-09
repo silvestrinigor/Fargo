@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.UserGroups;
 
 public sealed class UserGroupsQueryHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserGroupQueryRepository userGroupRepository,
     ICurrentActor currentActor,
     ILogger<UserGroupsQueryHandler> logger

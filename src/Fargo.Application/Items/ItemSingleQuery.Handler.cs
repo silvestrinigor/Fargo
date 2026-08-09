@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Items;
 
 public sealed class ItemSingleQueryHandler(
-    ActorService actorService, IItemQueryRepository itemRepository,
+    ActorResolver actorService, IItemQueryRepository itemRepository,
     ICurrentActor currentActor, ILogger<ItemSingleQueryHandler> logger
 ) : IQueryHandler<ItemSingleQuery, ItemDto?>
 {

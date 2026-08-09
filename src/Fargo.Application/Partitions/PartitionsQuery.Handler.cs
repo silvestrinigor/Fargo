@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Partitions;
 
 public sealed class PartitionsQueryHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IPartitionQueryRepository partitionRepository,
     ICurrentActor currentActor,
     ILogger<PartitionsQueryHandler> logger

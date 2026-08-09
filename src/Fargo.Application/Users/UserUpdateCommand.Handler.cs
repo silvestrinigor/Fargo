@@ -13,7 +13,7 @@ namespace Fargo.Application.Users;
 
 public sealed class UserUpdateCommandHandler(
     UserService userService,
-    ActorService actorService,
+    ActorResolver actorService,
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,

@@ -11,7 +11,7 @@ namespace Fargo.Application.Items;
 
 public sealed class ItemUpdateCommandHandler(
     ItemService itemService,
-    ActorService actorService,
+    ActorResolver actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,

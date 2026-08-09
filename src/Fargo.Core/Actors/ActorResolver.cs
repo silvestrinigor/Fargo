@@ -9,7 +9,7 @@ namespace Fargo.Core.Actors;
 /// <param name="userRepository">
 /// The repository used to retrieve users and their permissions and partition accesses.
 /// </param>
-public sealed class ActorService(IUserRepository userRepository)
+public sealed class ActorResolver(IUserRepository userRepository)
 {
     /// <summary>
     /// Gets an actor by its unique identifier and actor type.

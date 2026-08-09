@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.UserGroups;
 
 public sealed class UserGroupUpdateCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,

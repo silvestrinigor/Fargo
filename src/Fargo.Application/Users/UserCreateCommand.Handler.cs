@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserCreateCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     UserService userService,
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.UserGroups;
 
 public sealed class UserGroupDeleteCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     ICurrentActor currentActor,

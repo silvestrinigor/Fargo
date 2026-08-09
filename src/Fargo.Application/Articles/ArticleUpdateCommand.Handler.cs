@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticlePatchCommandHandler(
-    ActorService actorService, ArticleService articleService,
+    ActorResolver actorService, ArticleService articleService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
     ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticlePatchCommandHandler> logger

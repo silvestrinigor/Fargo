@@ -10,7 +10,7 @@ namespace Fargo.Application.Partitions;
 
 public sealed class PartitionDeleteCommandHandler(
     PartitionService partitionService,
-    ActorService actorService,
+    ActorResolver actorService,
     IPartitionRepository partitionRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,

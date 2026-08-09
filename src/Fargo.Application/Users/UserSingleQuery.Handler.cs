@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserSingleQueryHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserQueryRepository userRepository,
     ICurrentActor currentActor,
     ILogger<UserSingleQueryHandler> logger

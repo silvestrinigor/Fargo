@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Partitions;
 
 public sealed class PartitionCreateCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork, ICurrentActor currentActor,
     ILogger<PartitionCreateCommandHandler> logger

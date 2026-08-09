@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Identity;
 
 public sealed class IdentityRefreshCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserRepository userRepository,
     ITokenGenerator tokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator,

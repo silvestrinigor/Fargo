@@ -13,7 +13,7 @@ using UnitsNet;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleCreateCommandHandler(
-    ArticleService articleService, ActorService actorService,
+    ArticleService articleService, ActorResolver actorService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
     ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticleCreateCommandHandler> logger

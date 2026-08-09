@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleDeleteCommandHandler(
-    ArticleService articleService, ActorService actorService,
+    ArticleService articleService, ActorResolver actorService,
     IArticleRepository articleRepository, ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticleDeleteCommandHandler> logger) : ICommandHandler<ArticleDeleteCommand>
 {

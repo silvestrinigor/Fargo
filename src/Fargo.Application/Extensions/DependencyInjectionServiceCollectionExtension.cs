@@ -37,7 +37,7 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddFargoSystemApplication();
 
         public IServiceCollection AddFargoDomain() => services
-            .AddScoped<ActorService>()
+            .AddScoped<ActorResolver>()
             .AddScoped<ArticleService>()
             .AddScoped<UserService>()
             .AddScoped<UserGroupService>()
