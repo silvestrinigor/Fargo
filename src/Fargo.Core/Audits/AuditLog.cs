@@ -20,7 +20,7 @@ public class AuditLog : IEntity
 
     public EntityType EntityType { get; private init; }
 
-    public DateTimeOffset OccurredAt { get; private init; }
+    public DateTimeOffset OccurredAt { get; private init; } = DateTimeOffset.UtcNow;
 
     public IReadOnlyDictionary<string, object?> Metadata => metadata;
 
