@@ -1,5 +1,4 @@
-using Fargo.HttpApiClient;
-using Fargo.WebPlayground;
+using Fargo.HttpApi.Client.Extensions;
 using Fargo.WebPlayground.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -11,27 +10,9 @@ builder.Services
 
 builder.Services.AddFluentUIComponents();
 
-builder.Services.AddScoped<PlaygroundAuthSession>();
+var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"] ?? "http://localhost:5534";
 
-builder.Services.AddScoped<PlaygroundApiClientFactory>();
-
-builder.Services.AddScoped<IdentitySession>();
-
-builder.Services.AddFargoHttpClient(options =>
-{
-    var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
-        ?? "http://localhost:5534";
-
-    options.BaseAddress = new Uri(baseAddress);
-});
-
-builder.Services.AddHttpClient(PlaygroundApiClientFactory.HttpClientName, httpClient =>
-{
-    var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
-        ?? "http://localhost:5534";
-
-    httpClient.BaseAddress = new Uri(baseAddress);
-});
+builder.Services.AddFargoHttpApiClient(new Uri(baseAddress));
 
 var app = builder.Build();
 
