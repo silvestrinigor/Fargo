@@ -67,6 +67,8 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
+    public bool IsFixed { get; private set; } = false;
+
     /// <summary>
     /// Gets the partitions directly associated with the item.
     /// </summary>
@@ -136,9 +138,26 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
                 $"Item '{itemContainer.Guid}' is not a container item.", FargoErrorType.InvalidOperation);
         }
 
+        if (IsFixed)
+        {
+            throw new FargoCoreException(
+                $"The fixed item {Guid} cannot be moved to container {itemContainer.Guid}.",
+                FargoErrorType.InvalidOperation);
+        }
+
         ParentItemContainer = itemContainer;
 
         ParentItemContainerGuid = itemContainer.Guid;
+    }
+
+    public void Fix()
+    {
+        IsFixed = true;
+    }
+
+    public void Unfix()
+    {
+        IsFixed = false;
     }
 
     /// <summary>
@@ -150,6 +169,13 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// </remarks>
     public void RemoveParentItemContainer()
     {
+        if (IsFixed)
+        {
+            throw new FargoCoreException(
+                $"The fixed item {Guid} cannot be removed from container.",
+                FargoErrorType.InvalidOperation);
+        }
+
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
