@@ -16,7 +16,10 @@ builder.Services.AddFargoHttpApiClient(new Uri(baseAddress));
 
 var app = builder.Build();
 
-app.UseDeveloperExceptionPage();
+if (app.Environment.EnvironmentName == Environments.Development)
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
