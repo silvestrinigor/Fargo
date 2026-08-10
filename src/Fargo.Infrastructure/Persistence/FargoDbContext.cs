@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Audits;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -28,6 +29,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public DbSet<Partition> Partitions { get; set; }
+
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -133,5 +136,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
 
         modelBuilder.ApplyConfiguration(new PartitionConfiguration());
+
+        modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
     }
 }

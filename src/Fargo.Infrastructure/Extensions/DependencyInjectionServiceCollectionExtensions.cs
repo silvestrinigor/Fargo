@@ -6,6 +6,7 @@ using Fargo.Application.Partitions;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core.Articles;
+using Fargo.Core.Audits;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -91,7 +92,8 @@ public static class DependencyInjectionServiceCollectionExtensions
             .AddScoped<IUserGroupQueryRepository, UserGroupRepository>()
             .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
             .AddScoped<IPartitionRepository, PartitionRepository>()
-            .AddScoped<IPartitionQueryRepository, PartitionRepository>();
+            .AddScoped<IPartitionQueryRepository, PartitionRepository>()
+            .AddScoped<IAuditLogRepository, AuditLogRepository>();
 
         public void AddFargoSecurity() => services
             .AddScoped<IPasswordHasher, IdentityPasswordHasher>()

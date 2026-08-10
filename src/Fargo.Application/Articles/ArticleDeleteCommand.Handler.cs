@@ -2,6 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
+using Fargo.Core.Audits;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Entities;
 using Microsoft.Extensions.Logging;
@@ -9,8 +10,11 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Articles;
 
 public sealed class ArticleDeleteCommandHandler(
-    ArticleService articleService, ActorResolver actorService,
-    IArticleRepository articleRepository, ICurrentActor currentActor, IUnitOfWork unitOfWork,
+    ArticleService articleService,
+    ActorResolver actorService,
+    IArticleRepository articleRepository,
+    IAuditLogRepository auditLogRepository,
+    ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticleDeleteCommandHandler> logger) : ICommandHandler<ArticleDeleteCommand>
 {
     public async Task HandleAsync(
@@ -33,6 +37,10 @@ public sealed class ArticleDeleteCommandHandler(
         await articleService.ValidateArticleCanBeDeletedAsync(article, cancellationToken);
 
         articleRepository.Remove(article);
+
+        var audit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.DeleteArticle);
+
+        auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
