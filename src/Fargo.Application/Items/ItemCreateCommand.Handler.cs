@@ -13,7 +13,6 @@ namespace Fargo.Application.Items;
 public sealed class ItemCreateCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
-    IItemMovimentRepository itemMovimentRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     ICurrentActor currentActor,
@@ -48,16 +47,6 @@ public sealed class ItemCreateCommandHandler(
             actor.ThrowIfAccessDenied(parentItemContainer);
 
             item.PlaceInsideContainer(parentItemContainer);
-
-            var itemMoviment = ItemMoviment.CreateItemContainerMoviment(item, parentItemContainer);
-
-            itemMovimentRepository.Add(itemMoviment);
-        }
-        else
-        {
-            var itemMoviment = ItemMoviment.CreateItemContainerMoviment(item, itemContainerPosition: null);
-
-            itemMovimentRepository.Add(itemMoviment);
         }
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitionGuids)

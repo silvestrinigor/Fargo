@@ -67,6 +67,12 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
+    public DateTimeOffset? LastParentItemContainerChangedAt { get; private set; } = null;
+
+    public IReadOnlyCollection<ItemParentContainerHistory> ParentItemContainerHistory => parentItemContainerHistory;
+
+    private readonly List<ItemParentContainerHistory> parentItemContainerHistory = [];
+
     public bool IsFixed { get; private set; } = false;
 
     /// <summary>
@@ -145,19 +151,22 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
                 FargoErrorType.InvalidOperation);
         }
 
+        if (LastParentItemContainerChangedAt is not null)
+        {
+            var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt.Value, DateTimeOffset.UtcNow);
+
+            var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
+
+            parentItemContainerHistory.Add(parentContainerHistory);
+        }
+        else
+        {
+            LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
+        }
+
         ParentItemContainer = itemContainer;
 
         ParentItemContainerGuid = itemContainer.Guid;
-    }
-
-    public void Fix()
-    {
-        IsFixed = true;
-    }
-
-    public void Unfix()
-    {
-        IsFixed = false;
     }
 
     /// <summary>
@@ -176,9 +185,32 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
                 FargoErrorType.InvalidOperation);
         }
 
+        if (LastParentItemContainerChangedAt is not null)
+        {
+            var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt.Value, DateTimeOffset.UtcNow);
+
+            var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
+
+            parentItemContainerHistory.Add(parentContainerHistory);
+        }
+        else
+        {
+            LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
+        }
+
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
+    }
+
+    public void Fix()
+    {
+        IsFixed = true;
+    }
+
+    public void Unfix()
+    {
+        IsFixed = false;
     }
 
     /// <summary>

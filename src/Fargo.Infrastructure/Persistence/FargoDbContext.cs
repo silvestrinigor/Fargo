@@ -11,6 +11,7 @@ using Fargo.Core.Users;
 using Fargo.Infrastructure.Configurations;
 using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 using System.Drawing;
 using UnitsNet;
 
@@ -93,6 +94,11 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .Properties<Ean13>()
         .HaveMaxLength(Ean13.CodeLength)
         .HaveConversion<Ean13StringConverter>();
+
+        configurationBuilder
+        .Properties<DateTimeOffsetConverter>()
+        .HaveConversion<DateTimeOffsetRangeNpgsqlRangeConverter>()
+        .HaveColumnType("tstzrange");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -114,6 +120,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new ArticlePartitionConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemConfiguration());
+
+        modelBuilder.ApplyConfiguration(new ItemParentContainerHistoryConfiguration());
 
         modelBuilder.ApplyConfiguration(new ItemPartitionConfiguration());
 
