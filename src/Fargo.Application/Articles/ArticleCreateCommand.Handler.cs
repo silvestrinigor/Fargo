@@ -2,6 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
+using Fargo.Core.Audits;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Articles;
@@ -14,7 +15,9 @@ namespace Fargo.Application.Articles;
 
 public sealed class ArticleCreateCommandHandler(
     ArticleService articleService, ActorResolver actorService,
-    IArticleRepository articleRepository, IPartitionRepository partitionRepository,
+    IArticleRepository articleRepository,
+    IPartitionRepository partitionRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor, IUnitOfWork unitOfWork,
     ILogger<ArticleCreateCommandHandler> logger
     ) : ICommandHandler<ArticleCreateCommand, Guid>
@@ -22,6 +25,8 @@ public sealed class ArticleCreateCommandHandler(
     public async Task<Guid> HandleAsync(
         ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
+        var auditMetadata = new Dictionary<string, object?>();
+
         logger.CreateStarted(currentActor.Guid);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
@@ -128,6 +133,14 @@ public sealed class ArticleCreateCommandHandler(
         }
 
         articleRepository.Add(article);
+
+        auditMetadata.Add("name", article.Name);
+
+        auditMetadata.Add("article_type", article.ArticleType);
+
+        var audit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle, auditMetadata);
+
+        auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

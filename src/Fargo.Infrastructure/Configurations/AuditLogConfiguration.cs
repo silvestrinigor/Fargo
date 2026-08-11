@@ -13,5 +13,7 @@ public sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.HasKey(a => a.Guid);
 
         builder.HasIndex(a => a.OccurredAt);
+
+        builder.Property(x => x.Metadata).HasColumnType("jsonb");
     }
 }
