@@ -9,7 +9,7 @@ public sealed class ItemParentContainerHistoryConfiguration : IEntityTypeConfigu
 {
     public void Configure(EntityTypeBuilder<ItemParentContainerHistory> builder)
     {
-        builder.ToTable("item_moviments");
+        builder.ToTable("item_parent_containers_history");
 
         builder.HasKey(i => i.Guid);
 

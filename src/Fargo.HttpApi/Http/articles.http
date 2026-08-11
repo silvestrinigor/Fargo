@@ -29,12 +29,9 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "",
+  "name": "container",
   "description": "PET Bottle",
-  "articleType": 1,
-  "barcode": {
-    "ean13": "1234567891234"
-  }
+  "articleType": 5
 }
 
 ###

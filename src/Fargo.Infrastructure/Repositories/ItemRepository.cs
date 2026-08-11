@@ -25,30 +25,30 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
-    WITH ItemTree AS
+    WITH item_tree AS
     (
         SELECT
             item.[Guid],
-            item.[ParentContainerGuid],
-            item.[ArticleGuid]
-        FROM [Items] AS item
-        INNER JOIN [Articles] AS article
-            ON article.[Guid] = item.[ArticleGuid]
-        WHERE item.[Guid] = {itemContainerGuid}
-          AND article.[ArticleType] = {(int)ArticleType.Container}
+            item.[parent_item_container_guid],
+            item.[article_guid]
+        FROM [items] AS item
+        INNER JOIN [articles] AS article
+            ON article.[guid] = item.[article_guid]
+        WHERE item.[guid] = {itemContainerGuid}
+          AND article.[article_type] = {(int)ArticleType.Container}
 
         UNION ALL
 
         SELECT
-            child.[Guid],
-            child.[ParentContainerGuid],
-            child.[ArticleGuid]
-        FROM [Items] AS child
-        INNER JOIN ItemTree AS parent
-            ON child.[ParentContainerGuid] = parent.[Guid]
+            child.[guid],
+            child.[parent_container_guid],
+            child.[article_guid]
+        FROM [items] AS child
+        INNER JOIN item_tree AS parent
+            ON child.[parent_item_container_guid] = parent.[Guid]
     )
     SELECT [Guid]
-    FROM ItemTree
+    FROM item_tree
     """;
 
         var guids = await context.Database
