@@ -1,6 +1,6 @@
 namespace Fargo.Core.Common;
 
-public readonly struct DateTimeOffsetRange
+public readonly struct DateTimeOffsetRange : IComparable<DateTimeOffsetRange>
 {
     public DateTimeOffset Start { get; }
 
@@ -15,5 +15,12 @@ public readonly struct DateTimeOffsetRange
 
         Start = start;
         End = end;
+    }
+
+    public int CompareTo(DateTimeOffsetRange other)
+    {
+        var startComparison = Start.CompareTo(other.Start);
+
+        return startComparison != 0 ? startComparison : End.CompareTo(other.End);
     }
 }

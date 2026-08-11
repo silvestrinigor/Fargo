@@ -1,4 +1,5 @@
 using Fargo.Core.Items;
+using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,6 +14,12 @@ public sealed class ItemParentContainerHistoryConfiguration : IEntityTypeConfigu
         builder.HasKey(i => i.Guid);
 
         builder.HasAlternateKey(i => new { i.ItemGuid, i.ValidAt });
+
+        // For some reason, I need configure the conversion here even with the configuration in the db context conversions.
+        builder
+        .Property(i => i.ValidAt)
+        .HasConversion<DateTimeOffsetRangeNpgsqlRangeConverter>()
+        .HasColumnType("tstzrange");
 
         builder
         .HasOne(m => m.Item)
