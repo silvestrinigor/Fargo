@@ -25,8 +25,6 @@ public sealed class ArticleCreateCommandHandler(
     public async Task<Guid> HandleAsync(
         ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
-        var auditMetadata = new Dictionary<string, object?>();
-
         logger.CreateStarted(currentActor.Guid);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
@@ -134,11 +132,11 @@ public sealed class ArticleCreateCommandHandler(
 
         articleRepository.Add(article);
 
-        auditMetadata.Add("name", article.Name);
+        var audit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
 
-        auditMetadata.Add("article_type", article.ArticleType);
+        audit.Metadata.Add("name", new AuditValue.String(article.Name));
 
-        var audit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle, auditMetadata);
+        audit.Metadata.Add("article_type", new AuditValue.Number((int)article.ArticleType));
 
         auditLogRepository.Add(audit);
 

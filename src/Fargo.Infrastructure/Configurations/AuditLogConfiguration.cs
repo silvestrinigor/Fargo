@@ -1,4 +1,5 @@
 using Fargo.Core.Audits;
+using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,6 +15,9 @@ public sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.HasIndex(a => a.OccurredAt);
 
-        builder.Property(x => x.Metadata).HasColumnType("jsonb");
+        builder
+        .Property(x => x.Metadata)
+        .HasConversion(new AuditMetadataValueConverter())
+        .HasColumnType("jsonb");
     }
 }

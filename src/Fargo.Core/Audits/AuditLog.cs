@@ -22,24 +22,14 @@ public class AuditLog : IEntity
 
     public DateTimeOffset OccurredAt { get; private init; } = DateTimeOffset.UtcNow;
 
-    public IReadOnlyDictionary<string, object?> Metadata => metadata;
-
-    private readonly Dictionary<string, object?> metadata = new(StringComparer.Ordinal);
+    public AuditMetadata Metadata { get; private init; } = new();
 
     private AuditLog() { }
 
-    private AuditLog(Dictionary<string, object?>? metadata)
-    {
-        if (metadata is not null)
-        {
-            this.metadata = metadata;
-        }
-    }
-
     public static AuditLog CreateAuditLog(
-        Actor actor, Guid entityGuid, EntityType entityType, ActionType actionType, Dictionary<string, object?>? metadata = null)
+        Actor actor, Guid entityGuid, EntityType entityType, ActionType actionType)
     {
-        return new AuditLog(metadata)
+        return new AuditLog()
         {
             ActorGuid = actor.Guid,
             ActorType = actor.ActorType,

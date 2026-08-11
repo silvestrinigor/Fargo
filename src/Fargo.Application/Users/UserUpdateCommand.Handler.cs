@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.Shared.Actions;
@@ -18,6 +19,7 @@ public sealed class UserUpdateCommandHandler(
     IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<UserUpdateCommandHandler> logger
@@ -41,26 +43,51 @@ public sealed class UserUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(user);
 
+        var userAudit = AuditLog.CreateAuditLog(actor, user.Guid, EntityType.User, ActionType.EditUser);
+
         if (command.Update.Nameid is not null)
         {
             await userService.ValidateUserNameidIsAvailableAsync(command.Update.Nameid.Value, cancellationToken);
 
             user.Nameid = command.Update.Nameid.Value;
+
+            userAudit.Metadata.Add(nameof(user.Nameid), new AuditValue.String(user.Nameid));
         }
 
-        user.FirstName = command.Update.FirstName ?? user.FirstName;
-
-        user.LastName = command.Update.LastName ?? user.LastName;
-
-        user.Description = command.Update.Description ?? user.Description;
-
-        if (command.Update.IsActive is true)
+        if (command.Update.FirstName is { } firstName)
         {
-            user.Activate();
+            user.FirstName = firstName;
+
+            userAudit.Metadata.Add(nameof(user.FirstName), new AuditValue.String(user.FirstName));
         }
-        else if (command.Update.IsActive is false)
+
+        if (command.Update.LastName is { } lastName)
         {
-            user.Deactivate();
+            user.LastName = lastName;
+
+            userAudit.Metadata.Add(nameof(user.LastName), new AuditValue.String(user.LastName));
+        }
+
+        if (command.Update.Description is { } description)
+        {
+            user.Description = description;
+
+            userAudit.Metadata.Add(nameof(user.Description), new AuditValue.String(user.Description));
+        }
+
+        if (command.Update.IsActive is { } isActive)
+        {
+            if (isActive is true)
+            {
+                user.Activate();
+            }
+
+            else if (isActive is false)
+            {
+                user.Deactivate();
+            }
+
+            userAudit.Metadata.Add(nameof(user.IsActive), new AuditValue.Boolean(user.IsActive));
         }
 
         if (command.Update.Authentication is { } auth)
@@ -88,12 +115,18 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {
+            var auditPermissions = new List<AuditValue>();
+
             foreach (var permission in permissionsToAdd.Distinct())
             {
                 actor.ThrowIfPermissionDenied(permission);
 
                 user.AddPermission(permission);
+
+                auditPermissions.Add(new AuditValue.Number((int)permission));
             }
+
+            userAudit.Metadata.Add("PermissionsAdded", new AuditValue.Array(auditPermissions));
         }
 
         if (command.Update.PermissionsToRemove is { Count: > 0 } permissionsToRemove)

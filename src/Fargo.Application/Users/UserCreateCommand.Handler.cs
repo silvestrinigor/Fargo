@@ -1,11 +1,11 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Entities;
-using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
@@ -18,6 +18,7 @@ public sealed class UserCreateCommandHandler(
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork,
@@ -39,11 +40,30 @@ public sealed class UserCreateCommandHandler(
 
         var user = User.CreateUser(command.Create.Nameid);
 
-        user.FirstName = command.Create.FirstName ?? null;
+        var userAudit = AuditLog.CreateAuditLog(actor, user.Guid, EntityType.User, ActionType.CreateUser);
 
-        user.LastName = command.Create.LastName ?? null;
+        userAudit.Metadata.Add(nameof(user.Nameid), new AuditValue.String(user.Nameid));
 
-        user.Description = command.Create.Description ?? Description.Empty;
+        if (command.Create.FirstName is { } firstName)
+        {
+            user.FirstName = firstName;
+
+            userAudit.Metadata.Add(nameof(user.FirstName), new AuditValue.String(user.FirstName));
+        }
+
+        if (command.Create.LastName is { } lastName)
+        {
+            user.LastName = lastName;
+
+            userAudit.Metadata.Add(nameof(user.LastName), new AuditValue.String(user.LastName));
+        }
+
+        if (command.Create.Description is { } description)
+        {
+            user.Description = description;
+
+            userAudit.Metadata.Add(nameof(user.Description), new AuditValue.String(user.Description));
+        }
 
         if (command.Create.IsActive is true)
         {
@@ -53,6 +73,8 @@ public sealed class UserCreateCommandHandler(
         {
             user.Deactivate();
         }
+
+        userAudit.Metadata.Add(nameof(user.IsActive), new AuditValue.Boolean(user.IsActive));
 
         user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
@@ -120,6 +142,8 @@ public sealed class UserCreateCommandHandler(
         }
 
         userRepository.Add(user);
+
+        auditLogRepository.Add(userAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
