@@ -10,19 +10,28 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
 
     public ArticleCreateCommand(ArticleCreateDto dto)
     {
+        ValidateDto(dto);
+
+        Create = dto;
+    }
+
+    private static void ValidateDto(ArticleCreateDto dto)
+    {
         if (dto.ArticleType is ArticleType.Variation)
         {
             if (dto.Variation?.FromArticleGuid is null)
             {
-                throw new ArgumentException(nameof(dto));
+                throw new ArgumentException(
+                    "Variation from article guid must be informed when the article type is variation.", nameof(dto));
             }
         }
 
-        if (dto.ArticleType is ArticleType.Pack)
+        else if (dto.ArticleType is ArticleType.Pack)
         {
             if (dto.Pack?.FromArticleGuid is null)
             {
-                throw new ArgumentException(nameof(dto));
+                throw new ArgumentException(
+                    "Pack from article guid must be informed when the article type is pack.", nameof(dto));
             }
 
             if (dto.Pack?.Quantity is null)
@@ -32,7 +41,7 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
             }
         }
 
-        if (dto.ArticleType is ArticleType.Kit)
+        else if (dto.ArticleType is ArticleType.Kit)
         {
             if (dto.KitComponents is null || dto.KitComponents.Count == 0)
             {
@@ -41,13 +50,12 @@ public sealed class ArticleCreateCommand : ICommand<Guid>
             }
         }
 
-        if (dto.ArticleType is not null && dto.ArticleType is not ArticleType.Default && dto.ArticleType is not ArticleType.Variation
-            && dto.ArticleType is not ArticleType.Pack && dto.ArticleType is not ArticleType.Kit
-            && dto.ArticleType is not ArticleType.Container)
+        else if (
+            dto.ArticleType != ArticleType.Default &&
+            dto.ArticleType != ArticleType.Container &&
+            dto.ArticleType != null)
         {
             throw new ArgumentException("Article type not supported.", nameof(dto));
         }
-
-        Create = dto;
     }
 }

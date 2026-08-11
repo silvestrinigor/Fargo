@@ -35,11 +35,18 @@ public sealed class ArticleCreateCommandHandler(
 
         Article article;
 
+        AuditLog articleAudit;
+
         switch (command.Create.ArticleType ?? ArticleType.Default)
         {
             case ArticleType.Default:
-                article = Article.NewArticle(command.Create.Name);
-                break;
+                {
+                    article = Article.NewArticle(command.Create.Name);
+
+                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+
+                    break;
+                }
 
             case ArticleType.Variation:
                 {
@@ -50,6 +57,15 @@ public sealed class ArticleCreateCommandHandler(
                     actor.ThrowIfAccessDenied(fromArticle);
 
                     article = Article.NewArticleVariation(command.Create.Name, fromArticle);
+
+                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+
+                    var auditVariation = new Dictionary<string, AuditValue>
+                    {
+                        { AuditPropertyNames.ArticleCreated.ArticleVariationFromArticleGuid, new AuditValue.String(fromArticle.Guid.ToString()) }
+                    };
+
+                    articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleVariation, new AuditValue.Object(auditVariation));
 
                     break;
                 }
@@ -63,6 +79,16 @@ public sealed class ArticleCreateCommandHandler(
                     actor.ThrowIfAccessDenied(fromArticle);
 
                     article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
+
+                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+
+                    var auditVariation = new Dictionary<string, AuditValue>
+                    {
+                        { AuditPropertyNames.ArticleCreated.ArticlePackFromArticleGuid, new AuditValue.String(fromArticle.Guid.ToString()) },
+                        { AuditPropertyNames.ArticleCreated.ArticlePackQuantity, new AuditValue.String(article.Pack!.Quantity.ToString()) }
+                    };
+
+                    articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticlePack, new AuditValue.Object(auditVariation));
 
                     break;
                 }
@@ -86,17 +112,41 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticleKit(command.Create.Name, kitComponents);
 
+                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+
                     break;
                 }
 
-            case ArticleType.Container: article = Article.NewArticleContainer(command.Create.Name); break;
+            case ArticleType.Container:
+                {
+                    article = Article.NewArticleContainer(command.Create.Name);
 
-            default: throw new NotSupportedException("Not supported article type.");
+                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+
+                    break;
+                }
+
+            default: throw new NotSupportedException("Article type not supported.");
         }
+
+        articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleName, new AuditValue.String(article.Name));
+
+        articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleType, new AuditValue.Number((byte)article.ArticleType));
 
         article.Description = command.Create.Description ?? Description.Empty;
 
-        article.ShelfLife = command.Create.ShelfLife ?? null;
+        articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleDescription, new AuditValue.String(article.Description));
+
+        if (command.Create.ShelfLife is { } shelfLife)
+        {
+            article.ShelfLife = shelfLife;
+
+            articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleShelfLife, new AuditValue.Number(article.ShelfLife.Value.Ticks));
+        }
+        else
+        {
+            articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleShelfLife, new AuditValue.Null());
+        }
 
         article.Color = command.Create.Color ?? null;
 
@@ -132,13 +182,7 @@ public sealed class ArticleCreateCommandHandler(
 
         articleRepository.Add(article);
 
-        var audit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
-
-        audit.Metadata.Add("name", new AuditValue.String(article.Name));
-
-        audit.Metadata.Add("article_type", new AuditValue.Number((int)article.ArticleType));
-
-        auditLogRepository.Add(audit);
+        auditLogRepository.Add(articleAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

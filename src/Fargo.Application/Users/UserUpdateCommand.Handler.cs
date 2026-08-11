@@ -19,7 +19,6 @@ public sealed class UserUpdateCommandHandler(
     IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<UserUpdateCommandHandler> logger

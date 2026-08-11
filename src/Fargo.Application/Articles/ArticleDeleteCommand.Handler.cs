@@ -15,7 +15,8 @@ public sealed class ArticleDeleteCommandHandler(
     IArticleRepository articleRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ArticleDeleteCommandHandler> logger) : ICommandHandler<ArticleDeleteCommand>
+    ILogger<ArticleDeleteCommandHandler> logger
+    ) : ICommandHandler<ArticleDeleteCommand>
 {
     public async Task HandleAsync(
         ArticleDeleteCommand command, CancellationToken cancellationToken = default)

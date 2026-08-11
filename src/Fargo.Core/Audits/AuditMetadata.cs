@@ -6,7 +6,7 @@ public sealed class AuditMetadata
 
     public IReadOnlyDictionary<string, AuditValue> Values => values;
 
-    internal AuditMetadata() { }
+    public AuditMetadata() { }
 
     public void Add(string name, AuditValue value)
     {
