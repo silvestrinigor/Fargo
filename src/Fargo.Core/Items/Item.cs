@@ -67,7 +67,7 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
-    public DateTimeOffset? LastParentItemContainerChangedAt { get; private set; } = null;
+    public DateTimeOffset? LastParentItemContainerChangedAt { get; private set; } = DateTimeOffset.UtcNow;
 
     public IReadOnlyCollection<ItemParentContainerHistory> ParentItemContainerHistory => parentItemContainerHistory;
 
@@ -159,10 +159,6 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
 
             parentItemContainerHistory.Add(parentContainerHistory);
         }
-        else
-        {
-            LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
-        }
 
         ParentItemContainer = itemContainer;
 
@@ -192,10 +188,6 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
             var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
 
             parentItemContainerHistory.Add(parentContainerHistory);
-        }
-        else
-        {
-            LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
         }
 
         ParentItemContainer = null;

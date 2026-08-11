@@ -1,5 +1,5 @@
-@articleGuid = 4bc9b328-a6aa-4b7d-a5ba-a6c3925526c5
-@itemGuid = d419a289-bb4a-47e0-a4c9-0d6e2a64b81b
+@articleGuid = 2a1d9d15-937d-4b2d-88ee-8f07ea865766
+@itemGuid = 355ccc47-c20a-48b3-9a75-61ca12eac38d
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get
@@ -35,10 +35,7 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "partitions": [
-    "{{partitionGuid}}"
-  ],
-  "ParentItemContainerGuid": "0100ac3a-19cb-442b-9857-b5fb5da8cb6e"
+  "ParentItemContainerGuid": "e39e3218-ae4d-42d2-83ec-fe6dcff846ef"
 }
 
 ###

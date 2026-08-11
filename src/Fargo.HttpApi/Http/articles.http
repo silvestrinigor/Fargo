@@ -29,9 +29,9 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "container",
+  "name": "item",
   "description": "PET Bottle",
-  "articleType": 5
+  "articleType": 1
 }
 
 ###

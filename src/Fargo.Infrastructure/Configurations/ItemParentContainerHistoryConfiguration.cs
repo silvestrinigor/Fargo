@@ -23,7 +23,7 @@ public sealed class ItemParentContainerHistoryConfiguration : IEntityTypeConfigu
 
         builder
         .HasOne(m => m.Item)
-        .WithMany()
+        .WithMany(i => i.ParentItemContainerHistory)
         .HasForeignKey(m => m.ItemGuid)
         .OnDelete(DeleteBehavior.Cascade);
 
