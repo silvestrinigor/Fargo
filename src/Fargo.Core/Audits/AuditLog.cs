@@ -32,6 +32,8 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
+    private AuditLog() { }
+
     private AuditLog(Guid actorGuid, ActorType actorType, Guid entityGuid, EntityType entityType, ActionType actionType, IReadOnlyCollection<Guid> partitions)
     {
         ActorGuid = actorGuid;

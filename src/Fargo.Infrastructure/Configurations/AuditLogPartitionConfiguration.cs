@@ -11,6 +11,12 @@ public sealed class AuditLogPartitionConfiguration : IEntityTypeConfiguration<Au
     {
         builder.ToTable("audit_log_partitions");
 
+        builder.HasKey(x => new
+        {
+            x.AuditLogGuid,
+            x.PartitionGuid
+        });
+
         builder
         .HasOne(a => a.AuditLog)
         .WithMany(a => a.Partitions)
