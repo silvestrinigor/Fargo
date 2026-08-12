@@ -71,7 +71,7 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
-    public DateTimeOffset? LastParentItemContainerChangedAt { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset LastParentItemContainerChangedAt { get; private set; } = DateTimeOffset.UtcNow;
 
     public IReadOnlyCollection<ItemParentContainerHistory> ParentItemContainerHistory => parentItemContainerHistory;
 
@@ -137,7 +137,7 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <summary>
     /// Assigns the specified container item as the parent of the current item.
     /// </summary>
-    /// <param name="itemContainer">
+    /// <param name="parentItemContainer">
     /// The parent container item.
     /// </param>
     /// <remarks>
@@ -145,40 +145,39 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// The application should use <see cref="ItemService"/> to validate that
     /// assigning the parent container does not create a circular hierarchy.
     /// </remarks>
-    public void PlaceInsideContainer(Item itemContainer)
+    public void PlaceInsideContainer(Item parentItemContainer)
     {
-        ArgumentNullException.ThrowIfNull(itemContainer);
+        ArgumentNullException.ThrowIfNull(parentItemContainer);
 
-        if (itemContainer.Guid == Guid)
+        if (parentItemContainer.Guid == Guid)
         {
             throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoErrorType.InvalidOperation);
         }
 
-        if (itemContainer.Article.ArticleType != ArticleType.Container)
+        if (parentItemContainer.Article.ArticleType != ArticleType.Container)
         {
             throw new FargoCoreException(
-                $"Item '{itemContainer.Guid}' is not a container item.", FargoErrorType.InvalidOperation);
+                $"Item '{parentItemContainer.Guid}' is not a container item.", FargoErrorType.InvalidOperation);
         }
 
         if (IsFixed)
         {
             throw new FargoCoreException(
-                $"The fixed item {Guid} cannot be moved to container {itemContainer.Guid}.",
+                $"The fixed item {Guid} cannot be moved to container {parentItemContainer.Guid}.",
                 FargoErrorType.InvalidOperation);
         }
 
-        if (LastParentItemContainerChangedAt is not null)
-        {
-            var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt.Value, DateTimeOffset.UtcNow);
+        var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt, DateTimeOffset.UtcNow);
 
-            var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
+        var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
 
-            parentItemContainerHistory.Add(parentContainerHistory);
-        }
+        parentItemContainerHistory.Add(parentContainerHistory);
 
-        ParentItemContainer = itemContainer;
+        ParentItemContainer = parentItemContainer;
 
-        ParentItemContainerGuid = itemContainer.Guid;
+        ParentItemContainerGuid = parentItemContainer.Guid;
+
+        LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
     }
 
     /// <summary>
@@ -197,18 +196,17 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
                 FargoErrorType.InvalidOperation);
         }
 
-        if (LastParentItemContainerChangedAt is not null)
-        {
-            var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt.Value, DateTimeOffset.UtcNow);
+        var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt, DateTimeOffset.UtcNow);
 
-            var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
+        var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
 
-            parentItemContainerHistory.Add(parentContainerHistory);
-        }
+        parentItemContainerHistory.Add(parentContainerHistory);
 
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
+
+        LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
     }
 
     public void Fix()

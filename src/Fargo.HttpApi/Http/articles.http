@@ -1,4 +1,4 @@
-@articleGuid = 11f0aa88-58dd-44a6-8784-d2400ffc5768
+@articleGuid = 8be09da4-2022-48e7-b70c-50c576414097
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get by Guid
@@ -29,8 +29,7 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "item2",
-  "description": "PET Bottle",
+  "name": "item",
   "articleType": 1
 }
 
