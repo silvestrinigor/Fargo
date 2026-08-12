@@ -4,6 +4,7 @@ using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Articles;
 using Fargo.Core.Shared.Common;
+using Fargo.Core.Shared.Entities;
 
 namespace Fargo.Core.Items;
 
@@ -23,8 +24,11 @@ namespace Fargo.Core.Items;
 /// determined by the article's partitions. Instead, a user may access the item
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
+///
+/// Every item is always associated with the global partition. The global
+/// partition defines the base partition scope of the item and cannot be removed.
 /// </remarks>
-public class Item : IEntity, IPartitionedGuidsReadOnly
+public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the item.
@@ -79,11 +83,17 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// Gets the partitions directly associated with the item.
     /// </summary>
     /// <remarks>
-    /// These associations define the partition scope of the item and are used
-    /// during partition-based access evaluation.
+    /// Every item is always associated with the global partition.
+    /// The global partition defines the base partition scope of the item
+    /// and cannot be removed.
+    ///
+    /// Additional partitions may be associated with the item.
     /// </remarks>
     public IReadOnlyCollection<ItemPartition> Partitions => partitions;
 
+    /// <summary>
+    /// Gets the unique identifiers of the partitions associated with the item.
+    /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
     private readonly List<ItemPartition> partitions = [];
@@ -104,10 +114,16 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// Initializes a new item entity associated with the specified article.
     /// </summary>
     /// <param name="article">The article associated with the item.</param>
+    /// <remarks>
+    /// Every item is automatically associated with the global partition when
+    /// it is created. This association is mandatory and cannot be removed.
+    /// </remarks>
     private Item(Article article)
     {
         Article = article;
         ArticleGuid = article.Guid;
+
+        partitions.Add(new ItemPartition(this, FargoCoreWellKnowGuids.GlobalPartitionGuid));
     }
 
     /// <summary>
@@ -205,12 +221,19 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
         IsFixed = false;
     }
 
+
     /// <summary>
     /// Associates the item with the specified partition.
+    /// If the association already exists, no action is taken.
     /// </summary>
     /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+    /// </exception>
     public void AddPartition(Partition partition)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
         if (partitions.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
@@ -219,14 +242,35 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
         partitions.Add(new ItemPartition(this, partition));
     }
 
+
     /// <summary>
     /// Removes the association between the item and the specified partition.
     /// </summary>
+    /// <remarks>
+    /// The global partition is mandatory for every item and therefore cannot
+    /// be removed.
+    ///
+    /// If the item is not associated with the specified partition,
+    /// no action is taken.
+    /// </remarks>
     /// <param name="partitionGuid">
     /// The identifier of the partition to remove.
     /// </param>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when attempting to remove the global partition.
+    /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
+        if (partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                "The global partition is mandatory and cannot be removed from an item.",
+                FargoErrorType.InvalidOperation);
+        }
+
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
+
+    public EntityType GetEntityType() => EntityType.Item;
 }

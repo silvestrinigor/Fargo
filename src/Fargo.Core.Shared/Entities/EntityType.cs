@@ -28,5 +28,7 @@ public enum EntityType
     /// <summary>
     /// Partition entity.
     /// <summary>
-    Partition = 4
+    Partition = 4,
+
+    AuditLog = 5
 }

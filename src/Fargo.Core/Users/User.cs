@@ -3,15 +3,29 @@ using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Common;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.Shared.Informations;
 using Fargo.Core.UserGroups;
 
 namespace Fargo.Core.Users;
 
+
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : IEntity, IPartitionedGuidsReadOnly
+/// <remarks>
+/// Every user is always associated with the global partition. The global
+/// partition defines the base partition scope of the user and cannot be
+/// removed.
+///
+/// The built-in administrator user is restricted to the global partition
+/// and cannot be associated with, or removed from, any other partition.
+///
+/// The built-in administrator also has explicit partition access to the
+/// global partition and is a member of the built-in administrators user group.
+/// These associations cannot be revoked.
+/// </remarks>
+public class User : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the user.
@@ -77,6 +91,9 @@ public class User : IEntity, IPartitionedGuidsReadOnly
     /// <remarks>
     /// Access to descendant partitions may be inherited through the partition
     /// hierarchy and is not represented by this collection.
+    ///
+    /// The built-in administrator user is always granted explicit access to
+    /// the global partition, and this access cannot be revoked.
     /// </remarks>
     public IReadOnlyCollection<UserPartitionAccess> PartitionAccesses => partitionAccesses;
 
@@ -85,19 +102,38 @@ public class User : IEntity, IPartitionedGuidsReadOnly
     /// <summary>
     /// Gets the partitions associated with the user entity.
     /// </summary>
+    /// <remarks>
+    /// Every user is always associated with the global partition.
+    /// The global partition defines the base partition scope of the user
+    /// and cannot be removed.
+    ///
+    /// Additional partitions may be associated with the user.
+    /// The administrator user is an exception and may only be associated
+    /// with the global partition.
+    /// </remarks>
     public IReadOnlyCollection<UserPartition> Partitions => partitions;
 
+    /// <summary>
+    /// Gets the unique identifiers of the partitions associated with the user.
+    /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
     private readonly List<UserPartition> partitions = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="User"/> class.
-    /// Intended only for entity creation through factory methods and Entity Framework.
     /// </summary>
+    /// <remarks>
+    /// Every user is automatically associated with the global partition.
+    /// This association is mandatory and cannot be removed.
+    ///
+    /// Required by Entity Framework.
+    /// </remarks>
     private User()
     {
         Authentication = new UserAuthentication(this);
+
+        partitions.Add(new UserPartition(this, FargoCoreWellKnowGuids.GlobalPartitionGuid));
     }
 
     /// <summary>
@@ -118,7 +154,18 @@ public class User : IEntity, IPartitionedGuidsReadOnly
     /// <summary>
     /// Creates the built-in administrator user.
     /// </summary>
-    /// <param name="nameid">The administrator's unique name identifier.</param>
+    /// <remarks>
+    /// The administrator is automatically associated with the global partition
+    /// by the constructor.
+    ///
+    /// The administrator is also granted explicit access to the global
+    /// partition and added to the built-in administrators user group.
+    ///
+    /// Both associations are mandatory and cannot be revoked.
+    /// </remarks>
+    /// <param name="nameid">
+    /// The administrator's unique name identifier.
+    /// </param>
     /// <returns>The built-in administrator user.</returns>
     public static User CreateAdministratorUser(Nameid nameid)
     {
@@ -128,6 +175,10 @@ public class User : IEntity, IPartitionedGuidsReadOnly
             Nameid = nameid
         };
 
+        user.AddPartitionAccess(FargoCoreWellKnowGuids.GlobalPartitionGuid);
+
+        user.AddUserGroup(FargoCoreWellKnowGuids.AdministratorsUserGroupGuid);
+
         return user;
     }
 
@@ -136,8 +187,12 @@ public class User : IEntity, IPartitionedGuidsReadOnly
     /// If the partition is already associated, no action is taken.
     /// </summary>
     /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when attempting to associate an administrator with a non-global partition.
+    /// Thrown when attempting to associate an administrator with a
+    /// non-global partition.
     /// </exception>
     public void AddPartition(Partition partition)
     {
@@ -161,18 +216,25 @@ public class User : IEntity, IPartitionedGuidsReadOnly
     /// <summary>
     /// Removes the association between the user and the specified partition.
     /// </summary>
+    /// <remarks>
+    /// The global partition is mandatory for every user and therefore cannot
+    /// be removed.
+    ///
+    /// If the user is not associated with the specified partition,
+    /// no action is taken.
+    /// </remarks>
     /// <param name="partitionGuid">
     /// The identifier of the partition to remove.
     /// </param>
     /// <exception cref="FargoCoreException">
-    /// Thrown when attempting to remove an administrator from the global partition.
+    /// Thrown when attempting to remove the global partition.
     /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
-        if (IsAdmin && partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        if (partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
         {
             throw new FargoCoreException(
-                $"Cannot remove the admin user '{FargoCoreWellKnowGuids.AdminUserGuid}' from the global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}'.",
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' is mandatory and cannot be removed from the user '{Guid}'.",
                 FargoErrorType.InvalidOperation);
         }
 
@@ -194,6 +256,38 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         }
 
         userGroupMemberships.Add(new UserUserGroup(this, userGroup));
+    }
+
+    /// <summary>
+    /// Adds the user to the specified user group using its identifier.
+    /// </summary>
+    /// <remarks>
+    /// This overload is intended for internal use when the user group entity
+    /// does not need to be loaded and only its identifier is known, such as
+    /// when assigning membership to a well-known user group.
+    /// </remarks>
+    /// <param name="userGroupGuid">
+    /// The identifier of the user group to add.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="userGroupGuid"/> is
+    /// <see cref="Guid.Empty"/>.
+    /// </exception>
+    internal void AddUserGroup(Guid userGroupGuid)
+    {
+        if (userGroupGuid == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "User group GUID cannot be empty.",
+                nameof(userGroupGuid));
+        }
+
+        if (userGroupMemberships.Any(x => x.UserGroupGuid == userGroupGuid))
+        {
+            return;
+        }
+
+        userGroupMemberships.Add(new UserUserGroup(this, userGroupGuid));
     }
 
     /// <summary>
@@ -232,6 +326,38 @@ public class User : IEntity, IPartitionedGuidsReadOnly
         }
 
         partitionAccesses.Add(new UserPartitionAccess(this, partition));
+    }
+
+    /// <summary>
+    /// Grants access to the specified partition using its identifier.
+    /// </summary>
+    /// <remarks>
+    /// This overload is intended for internal use when the partition entity
+    /// does not need to be loaded and its identifier is already known, such as
+    /// when assigning access to a well-known partition.
+    /// </remarks>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to which access is granted.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="partitionGuid"/> is
+    /// <see cref="Guid.Empty"/>.
+    /// </exception>
+    internal void AddPartitionAccess(Guid partitionGuid)
+    {
+        if (partitionGuid == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "Partition GUID cannot be empty.",
+                nameof(partitionGuid));
+        }
+
+        if (partitionAccesses.Any(x => x.PartitionGuid == partitionGuid))
+        {
+            return;
+        }
+
+        partitionAccesses.Add(new UserPartitionAccess(this, partitionGuid));
     }
 
     /// <summary>
@@ -314,4 +440,6 @@ public class User : IEntity, IPartitionedGuidsReadOnly
 
         IsActive = false;
     }
+
+    public EntityType GetEntityType() => EntityType.User;
 }

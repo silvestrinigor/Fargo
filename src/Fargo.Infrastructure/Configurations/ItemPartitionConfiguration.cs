@@ -26,6 +26,6 @@ public class ItemPartitionConfiguration : IEntityTypeConfiguration<ItemPartition
         .HasOne(x => x.Partition)
         .WithMany()
         .HasForeignKey(x => x.PartitionGuid)
-        .OnDelete(DeleteBehavior.Restrict);
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

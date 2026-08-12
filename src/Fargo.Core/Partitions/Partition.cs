@@ -1,6 +1,7 @@
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Shared.Common;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.Partitions;
@@ -23,7 +24,7 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : IEntity
+public class Partition : IEntity, IEntityTyped
 {
     /// <summary>
     /// Gets the unique identifier of the partition.
@@ -147,4 +148,6 @@ public class Partition : IEntity
 
         ParentPartitionGuid = parentPartition.Guid;
     }
+
+    public EntityType GetEntityType() => EntityType.Partition;
 }

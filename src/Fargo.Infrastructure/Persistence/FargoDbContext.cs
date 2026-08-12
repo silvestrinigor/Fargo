@@ -146,5 +146,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new PartitionConfiguration());
 
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+
+        modelBuilder.ApplyConfiguration(new AuditLogPartitionConfiguration());
     }
 }
