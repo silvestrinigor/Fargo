@@ -9,7 +9,6 @@ using Fargo.Core.UserGroups;
 
 namespace Fargo.Core.Users;
 
-
 /// <summary>
 /// Represents a user in the system.
 /// </summary>

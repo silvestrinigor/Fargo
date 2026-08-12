@@ -60,10 +60,6 @@ public sealed class InitializeSystemCommandHandler(
 
             administratorsGroup.Description = command.UserGroupAdministratorsDescription;
 
-            administratorsGroup.AddPartitionAccess(globalPartition);
-
-            administratorsGroup.AddPartition(globalPartition);
-
             foreach (var a in allActions)
             {
                 administratorsGroup.AddPermission(a);
@@ -74,19 +70,13 @@ public sealed class InitializeSystemCommandHandler(
             administratorsGroupCreated = true;
         }
 
-        var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
-
         var admin = User.CreateAdministratorUser(command.UserAdminNameid);
+
+        var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
         admin.Authentication.SetPasswordHash(passwordHash);
 
         admin.Description = command.UserAdminDescription;
-
-        admin.AddPartitionAccess(globalPartition);
-
-        admin.AddUserGroup(administratorsGroup);
-
-        admin.AddPartition(globalPartition);
 
         foreach (var action in allActions)
         {
