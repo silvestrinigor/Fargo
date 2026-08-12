@@ -52,7 +52,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         partitionRepository.Remove(partitionToDelete);
 
-        var audit = AuditLog.CreateAuditLog(actor, partitionToDelete.Guid, EntityType.Partition, ActionType.DeletePartition);
+        var audit = AuditLog.CreateAuditLog(actor, partitionToDelete, ActionType.DeletePartition);
 
         auditLogRepository.Add(audit);
 

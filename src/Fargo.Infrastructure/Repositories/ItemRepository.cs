@@ -75,8 +75,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     {
         var queryFiltered = ApplyPartitionFilter(
             context.Items.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var itemTask = queryFiltered
             .Where(item => item.Guid == entityGuid)
@@ -89,13 +88,11 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
             context.Items.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var item = await queryFiltered
             .OrderBy(item => item.Guid)
@@ -108,29 +105,11 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     private static IQueryable<Item> ApplyPartitionFilter(
         IQueryable<Item> query,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notChildOfAnyPartition)
+        IReadOnlyCollection<Guid>? partitionGuids)
     {
         if (partitionGuids is null)
         {
-            if (notChildOfAnyPartition is true)
-            {
-                return query.Where(item => !item.Partitions.Any());
-            }
-
-            if (notChildOfAnyPartition is false)
-            {
-                return query.Where(item => item.Partitions.Any());
-            }
-
             return query;
-        }
-
-        if (notChildOfAnyPartition is true)
-        {
-            return query.Where(item =>
-                !item.Partitions.Any() ||
-                item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(item =>

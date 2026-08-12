@@ -28,8 +28,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     {
         var queryFiltered = ApplyPartitionFilter(
             context.Partitions.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         return queryFiltered
         .Where(partition => partition.Guid == entityGuid)
@@ -40,14 +39,12 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
     public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
                 context.Partitions
                     .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition);
+                childOfAnyOfThesePartitions);
 
         var partition = await queryFiltered
             .OrderBy(partition => partition.Guid)
@@ -120,30 +117,12 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
 
     private static IQueryable<Partition> ApplyPartitionFilter(
         IQueryable<Partition> query,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notChildOfAnyPartition
+        IReadOnlyCollection<Guid>? partitionGuids
     )
     {
         if (partitionGuids is null)
         {
-            if (notChildOfAnyPartition is true)
-            {
-                return query.Where(partition => partition.ParentPartitionGuid == null);
-            }
-
-            if (notChildOfAnyPartition is false)
-            {
-                return query.Where(article => article.ParentPartitionGuid != null);
-            }
-
             return query;
-        }
-
-        if (notChildOfAnyPartition is true)
-        {
-            return query.Where(partition =>
-                partition.ParentPartitionGuid == null ||
-                partitionGuids.Contains(partition.ParentPartitionGuid.Value));
         }
 
         return query.Where(partition =>

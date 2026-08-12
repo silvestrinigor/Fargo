@@ -9,17 +9,10 @@ namespace Fargo.Application.Articles;
 /// <param name="WithPagination">
 /// Pagination configuration.
 /// </param>
-/// <param name="TemporalAsOfDateTime">
-/// Temporal query date.
-/// </param>
 /// <param name="ChildOfAnyOfThesePartitions">
 /// Filters articles inside the provided partitions.
 /// </param>
-/// <param name="NotChildOfAnyPartition">
-/// Indicates whether articles without partitions should be included.
-/// </param>
 public sealed record ArticlesQuery(
     Pagination WithPagination,
-    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null,
-    bool? NotChildOfAnyPartition = null
+    IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null
 ) : IQuery<IReadOnlyCollection<ArticleDto>>;

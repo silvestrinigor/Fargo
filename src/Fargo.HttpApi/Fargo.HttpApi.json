@@ -174,13 +174,6 @@
                 "format": "uuid"
               }
             }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
@@ -370,13 +363,6 @@
                 "type": "string",
                 "format": "uuid"
               }
-            }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -568,13 +554,6 @@
                 "format": "uuid"
               }
             }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
@@ -765,13 +744,6 @@
                 "format": "uuid"
               }
             }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
@@ -956,13 +928,6 @@
                 "type": "string",
                 "format": "uuid"
               }
-            }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],

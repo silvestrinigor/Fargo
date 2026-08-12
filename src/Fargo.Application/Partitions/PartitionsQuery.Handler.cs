@@ -22,20 +22,19 @@ public sealed class PartitionsQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+        var partitionGuids =
             PartitionQueryFilter.ForPartitionedEntities(
                 actor.PartitionAccessGuids,
-                query.ChildOfAnyOfThesePartitions,
-                query.NotChildOfAnyPartition);
+                query.ChildOfAnyOfThesePartitions);
 
         var partitions = await partitionRepository.GetManyInfo(
-            query.WithPagination, childOfAnyOfThesePartitions,
-            notChildOfAnyPartition, cancellationToken);
+            query.WithPagination, partitionGuids,
+            cancellationToken);
 
         logger.ManyQueryCompleted(
             currentActor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            childOfAnyOfThesePartitions?.Count ?? 0, partitions.Count);
+            partitionGuids?.Count ?? 0, partitions.Count);
 
         return partitions;
     }

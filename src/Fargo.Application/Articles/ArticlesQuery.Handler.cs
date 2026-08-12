@@ -23,22 +23,20 @@ public sealed class ArticlesQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+        var partitionGuids =
             PartitionQueryFilter.ForPartitionedEntities(
                 actor.PartitionAccessGuids,
-                query.ChildOfAnyOfThesePartitions,
-                query.NotChildOfAnyPartition);
+                query.ChildOfAnyOfThesePartitions);
 
         var articles = await articleRepository.GetManyInfoAsync(
             query.WithPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
+            partitionGuids,
             cancellationToken);
 
         logger.ArticlesQueryCompleted(
             actor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            childOfAnyOfThesePartitions?.Count ?? 0,
+            partitionGuids?.Count ?? 0,
             articles.Count);
 
         return articles;

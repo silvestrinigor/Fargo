@@ -80,7 +80,6 @@ public static class ItemEndpointRouteBuilderExtension
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        bool? notChildOfAnyPartition,
         IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>> handler,
         CancellationToken cancellationToken
     )
@@ -91,8 +90,7 @@ public static class ItemEndpointRouteBuilderExtension
 
         var query = new ItemsQuery(
             withPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

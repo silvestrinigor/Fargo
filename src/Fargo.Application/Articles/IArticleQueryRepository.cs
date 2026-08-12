@@ -65,9 +65,6 @@ public interface IArticleQueryRepository
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
     /// </param>
-    /// <param name="notChildOfAnyPartition">
-    /// Indicates whether articles without partitions should be included.
-    /// </param>
     /// <param name="cancellationToken">
     /// Cancellation token.
     /// </param>
@@ -77,6 +74,5 @@ public interface IArticleQueryRepository
     Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
 }

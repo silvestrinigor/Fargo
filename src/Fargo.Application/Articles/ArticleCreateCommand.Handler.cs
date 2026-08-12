@@ -43,7 +43,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     article = Article.NewArticle(command.Create.Name);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
                     break;
                 }
@@ -58,7 +58,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticleVariation(command.Create.Name, fromArticle);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
                     var auditVariation = new Dictionary<string, AuditValue>
                     {
@@ -80,7 +80,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
                     var auditVariation = new Dictionary<string, AuditValue>
                     {
@@ -112,7 +112,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticleKit(command.Create.Name, kitComponents);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
                     break;
                 }
@@ -121,7 +121,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     article = Article.NewArticleContainer(command.Create.Name);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article.Guid, EntityType.Article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
                     break;
                 }
@@ -135,17 +135,9 @@ public sealed class ArticleCreateCommandHandler(
 
         article.Description = command.Create.Description ?? Description.Empty;
 
-        articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleDescription, new AuditValue.String(article.Description));
-
         if (command.Create.ShelfLife is { } shelfLife)
         {
             article.ShelfLife = shelfLife;
-
-            articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleShelfLife, new AuditValue.Number(article.ShelfLife.Value.Ticks));
-        }
-        else
-        {
-            articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleShelfLife, new AuditValue.Null());
         }
 
         article.Color = command.Create.Color ?? null;

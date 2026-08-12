@@ -82,7 +82,6 @@ public static class UserEndpointRouteBuilderExtension
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        bool? notChildOfAnyPartition,
         IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>> handler,
         CancellationToken cancellationToken
     )
@@ -93,8 +92,7 @@ public static class UserEndpointRouteBuilderExtension
 
         var query = new UsersQuery(
             withPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

@@ -109,7 +109,6 @@ public static class ArticleEndpointRouteBuilderExtension
     private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticleAsync(
         Page? page, Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        bool? notChildOfAnyPartition,
         IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
         CancellationToken cancellationToken)
     {
@@ -118,8 +117,7 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var query = new ArticlesQuery(
             withPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

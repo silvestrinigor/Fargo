@@ -25,7 +25,6 @@ public sealed class UserSingleQueryHandler(
         var user = await userRepository.GetInfoByGuidAsync(
             query.UserGuid,
             actor.PartitionAccessGuids,
-            notChildOfAnyPartition: true,
             cancellationToken);
 
         logger.SingleQueryCompleted(query.UserGuid, currentActor.Guid, user is not null);

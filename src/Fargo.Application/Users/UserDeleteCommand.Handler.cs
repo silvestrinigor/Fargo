@@ -45,7 +45,7 @@ public sealed class UserDeleteCommandHandler(
 
         userRepository.Remove(user);
 
-        var audit = AuditLog.CreateAuditLog(actor, user.Guid, EntityType.User, ActionType.DeleteUser);
+        var audit = AuditLog.CreateAuditLog(actor, user, ActionType.DeleteUser);
 
         auditLogRepository.Add(audit);
 

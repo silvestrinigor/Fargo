@@ -13,6 +13,5 @@ public interface IItemQueryRepository
     Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
 }

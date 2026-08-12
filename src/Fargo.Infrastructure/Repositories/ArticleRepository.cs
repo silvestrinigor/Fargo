@@ -64,8 +64,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     {
         var articleQueryFiltered = ApplyPartitionFilter(
             context.Articles.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var article = await articleQueryFiltered
         .Where(article => article.Guid == articleGuid)
@@ -83,8 +82,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     {
         var articleQueryFiltered = ApplyPartitionFilter(
             context.Articles.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var articleTask = ApplyBarcodeFilter(articleQueryFiltered, barcode)
             .Select(ArticleDtoMapping.Projection)
@@ -96,13 +94,11 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var articleQueryFiltered = ApplyPartitionFilter(
             context.Articles.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var article = await articleQueryFiltered
             .OrderBy(article => article.Guid)
@@ -115,29 +111,11 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
     private static IQueryable<Article> ApplyPartitionFilter(
         IQueryable<Article> query,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notChildOfAnyPartition)
+        IReadOnlyCollection<Guid>? partitionGuids)
     {
         if (partitionGuids is null)
         {
-            if (notChildOfAnyPartition is true)
-            {
-                return query.Where(article => !article.Partitions.Any());
-            }
-
-            if (notChildOfAnyPartition is false)
-            {
-                return query.Where(article => article.Partitions.Any());
-            }
-
             return query;
-        }
-
-        if (notChildOfAnyPartition is true)
-        {
-            return query.Where(article =>
-                !article.Partitions.Any() ||
-                article.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(article =>

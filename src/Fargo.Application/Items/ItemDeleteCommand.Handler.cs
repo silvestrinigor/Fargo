@@ -35,7 +35,7 @@ public sealed class ItemDeleteCommandHandler(
 
         actor.ThrowIfAccessDenied(item);
 
-        var audit = AuditLog.CreateAuditLog(actor, item.Guid, EntityType.Item, ActionType.DeleteItem);
+        var audit = AuditLog.CreateAuditLog(actor, item, ActionType.DeleteItem);
 
         auditLogRepository.Add(audit);
 

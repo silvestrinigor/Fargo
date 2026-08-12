@@ -22,22 +22,20 @@ public sealed class UsersQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+        var partitionGuids =
             PartitionQueryFilter.ForPartitionedEntities(
                 actor.PartitionAccessGuids,
-                query.ChildOfAnyOfThesePartitions,
-                query.NotChildOfAnyPartition);
+                query.ChildOfAnyOfThesePartitions);
 
         var users = await userRepository.GetManyInfoAsync(
             query.WithPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
+            partitionGuids,
             cancellationToken);
 
         logger.ManyQueryCompleted(
             currentActor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            childOfAnyOfThesePartitions?.Count ?? 0,
+            partitionGuids?.Count ?? 0,
             users.Count);
 
         return users;
