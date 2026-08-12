@@ -92,6 +92,10 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 
     private readonly List<ItemPartition> partitions = [];
 
+    public IReadOnlyCollection<ItemMoviment> Moviments => Moviments;
+
+    private readonly List<ItemMoviment> moviments = [];
+
     /// <summary>
     /// Initializes a new item entity.
     /// </summary>
@@ -164,6 +168,8 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         ParentItemContainer = parentItemContainer;
 
         ParentItemContainerGuid = parentItemContainer.Guid;
+
+        moviments.Add(new ItemMoviment(Guid, parentItemContainer.Guid, DateTimeOffset.UtcNow));
     }
 
     /// <summary>
@@ -185,6 +191,8 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
+
+        moviments.Add(new ItemMoviment(Guid, null, DateTimeOffset.UtcNow));
     }
 
     public void Fix()

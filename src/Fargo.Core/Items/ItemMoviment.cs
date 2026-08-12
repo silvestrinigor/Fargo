@@ -16,7 +16,7 @@ public class ItemMoviment : IEntity
 
     private ItemMoviment() { }
 
-    private ItemMoviment(Guid itemGuid, Guid? parentItemContainerGuid, DateTimeOffset occurredAt)
+    internal ItemMoviment(Guid itemGuid, Guid? parentItemContainerGuid, DateTimeOffset occurredAt)
     {
         ItemGuid = itemGuid;
         MovedToContainerGuid = parentItemContainerGuid;

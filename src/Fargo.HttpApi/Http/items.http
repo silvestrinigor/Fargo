@@ -35,8 +35,8 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "ParentItemContainerGuid": "840ec76c-58e1-4031-95fa-005e9e7c78bb"
-  //"RemoveFromParentItemContainer": true
+  //"ParentItemContainerGuid": "840ec76c-58e1-4031-95fa-005e9e7c78bb"
+  "RemoveFromParentItemContainer": true
 }
 
 ###

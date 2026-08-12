@@ -14,7 +14,7 @@ public sealed class ItemMovimentConfiguration : IEntityTypeConfiguration<ItemMov
 
         builder
         .HasOne<Item>()
-        .WithMany()
+        .WithMany(i => i.Moviments)
         .HasForeignKey(m => m.ItemGuid)
         .OnDelete(DeleteBehavior.Cascade);
 

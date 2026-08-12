@@ -22,8 +22,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<Item> Items { get; set; }
 
-    public DbSet<ItemMoviment> ItemMoviments { get; set; }
-
     public DbSet<User> Users { get; set; }
 
     public DbSet<UserGroup> UserGroups { get; set; }
