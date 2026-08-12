@@ -1,9 +1,11 @@
 using Fargo.Application.Articles;
+using Fargo.Application.Audits;
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Articles;
+using Fargo.Application.Shared.Audits;
 using Fargo.Application.Shared.Identity;
 using Fargo.Application.Shared.Items;
 using Fargo.Application.Shared.Partitions;
@@ -34,7 +36,8 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddFargoUserApplication()
             .AddFargoItemApplication()
             .AddFargoIdentityApplication()
-            .AddFargoSystemApplication();
+            .AddFargoSystemApplication()
+            .AddFargoAuditLogApplication();
 
         public IServiceCollection AddFargoDomain() => services
             .AddScoped<ActorResolver>()
@@ -88,5 +91,8 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>()
             .AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>()
             .AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
+
+        public IServiceCollection AddFargoAuditLogApplication() => services
+            .AddScoped<IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>>, AuditLogsQueryHandler>();
     }
 }

@@ -62,6 +62,8 @@ app.MapFargoPartition();
 
 app.MapFargoIdentity();
 
+app.MapFargoAuditLog();
+
 app.MapFargoDefaultEndpoints();
 
 app.Run();

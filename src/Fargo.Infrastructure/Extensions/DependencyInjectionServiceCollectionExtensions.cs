@@ -1,4 +1,5 @@
 using Fargo.Application.Articles;
+using Fargo.Application.Audits;
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
@@ -93,7 +94,8 @@ public static class DependencyInjectionServiceCollectionExtensions
             .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
             .AddScoped<IPartitionRepository, PartitionRepository>()
             .AddScoped<IPartitionQueryRepository, PartitionRepository>()
-            .AddScoped<IAuditLogRepository, AuditLogRepository>();
+            .AddScoped<IAuditLogRepository, AuditLogRepository>()
+            .AddScoped<IAuditLogQueryRepository, AuditLogRepository>();
 
         public void AddFargoSecurity() => services
             .AddScoped<IPasswordHasher, IdentityPasswordHasher>()

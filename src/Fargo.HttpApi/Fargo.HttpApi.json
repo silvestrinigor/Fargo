@@ -1110,6 +1110,55 @@
           }
         }
       }
+    },
+    "/audit-logs": {
+      "get": {
+        "tags": [
+          "AuditLogs"
+        ],
+        "summary": "Gets multiple audit logs",
+        "description": "Retrieves a paginated list of audit logs.",
+        "operationId": "GetAuditLogs",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1497,6 +1546,18 @@
         "type": "object",
         "properties": {
           "fromArticleGuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "AuditLogDto": {
+        "required": [
+          "guid"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
             "type": "string",
             "format": "uuid"
           }
@@ -2313,6 +2374,9 @@
     },
     {
       "name": "Identity"
+    },
+    {
+      "name": "AuditLogs"
     }
   ]
 }
