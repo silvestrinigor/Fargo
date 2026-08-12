@@ -3,17 +3,21 @@ using System;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using NpgsqlTypes;
 
 #nullable disable
 
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    partial class FargoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812171416_ItemMigrationTest2")]
+    partial class ItemMigrationTest2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -326,6 +330,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_fixed");
 
+                    b.Property<DateTimeOffset>("LastParentItemContainerChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_parent_item_container_changed_at");
+
                     b.Property<Guid?>("ParentItemContainerGuid")
                         .HasColumnType("uuid")
                         .HasColumnName("parent_item_container_guid");
@@ -342,35 +350,27 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("items", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.ItemMoviment", b =>
+            modelBuilder.Entity("Fargo.Core.Items.ItemParentContainerHistory", b =>
                 {
-                    b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("guid");
-
                     b.Property<Guid>("ItemGuid")
                         .HasColumnType("uuid")
                         .HasColumnName("item_guid");
 
-                    b.Property<Guid?>("MovedToContainerGuid")
+                    b.Property<Guid>("ParentItemContianerGuid")
                         .HasColumnType("uuid")
-                        .HasColumnName("moved_to_container_guid");
+                        .HasColumnName("parent_item_contianer_guid");
 
-                    b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("occurred_at");
+                    b.Property<NpgsqlRange<DateTimeOffset>>("ValidAt")
+                        .HasColumnType("tstzrange")
+                        .HasColumnName("valid_at");
 
-                    b.HasKey("Guid")
-                        .HasName("pk_item_moviments");
+                    b.HasKey("ItemGuid", "ParentItemContianerGuid")
+                        .HasName("pk_item_parent_containers_history");
 
-                    b.HasIndex("ItemGuid")
-                        .HasDatabaseName("ix_item_moviments_item_guid");
+                    b.HasIndex("ParentItemContianerGuid")
+                        .HasDatabaseName("ix_item_parent_containers_history_parent_item_contianer_guid");
 
-                    b.HasIndex("MovedToContainerGuid")
-                        .HasDatabaseName("ix_item_moviments_moved_to_container_guid");
-
-                    b.ToTable("item_moviments", (string)null);
+                    b.ToTable("item_parent_containers_history", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Items.ItemPartition", b =>
@@ -810,20 +810,21 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentItemContainer");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.ItemMoviment", b =>
+            modelBuilder.Entity("Fargo.Core.Items.ItemParentContainerHistory", b =>
                 {
                     b.HasOne("Fargo.Core.Items.Item", null)
-                        .WithMany()
+                        .WithMany("ParentItemContainerHistory")
                         .HasForeignKey("ItemGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_item_moviments_items_item_guid");
+                        .HasConstraintName("fk_item_parent_containers_history_items_item_guid");
 
                     b.HasOne("Fargo.Core.Items.Item", null)
-                        .WithMany()
-                        .HasForeignKey("MovedToContainerGuid")
+                        .WithMany("parentItemContainerHistory2")
+                        .HasForeignKey("ParentItemContianerGuid")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_item_moviments_items_moved_to_container_guid");
+                        .IsRequired()
+                        .HasConstraintName("fk_item_parent_containers_history_items_parent_item_contianer_");
                 });
 
             modelBuilder.Entity("Fargo.Core.Items.ItemPartition", b =>
@@ -1012,7 +1013,11 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Items.Item", b =>
                 {
+                    b.Navigation("ParentItemContainerHistory");
+
                     b.Navigation("Partitions");
+
+                    b.Navigation("parentItemContainerHistory2");
                 });
 
             modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>

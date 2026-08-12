@@ -14,6 +14,7 @@ public sealed class ItemUpdateCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
+    IItemMovimentRepository itemParentContainerHistoryRepository,
     IUnitOfWork unitOfWork,
     ICurrentActor currentActor,
     ILogger<ItemUpdateCommandHandler> logger
@@ -48,10 +49,18 @@ public sealed class ItemUpdateCommandHandler(
             await itemService.ValidateParentItemContainerHierarchyAssignmentAsync(parentItemContainer, item, cancellationToken);
 
             item.PlaceInsideContainer(parentItemContainer);
+
+            var itemParentContainerHistory = ItemMoviment.CreateItemMoviment(item.Guid, item.ParentItemContainerGuid, DateTimeOffset.UtcNow);
+
+            itemParentContainerHistoryRepository.Add(itemParentContainerHistory);
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {
             item.RemoveParentItemContainer();
+
+            var itemParentContainerHistory = ItemMoviment.CreateItemMoviment(item.Guid, item.ParentItemContainerGuid, DateTimeOffset.UtcNow);
+
+            itemParentContainerHistoryRepository.Add(itemParentContainerHistory);
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionGuidsToAdd)

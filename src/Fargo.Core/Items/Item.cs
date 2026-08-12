@@ -71,12 +71,6 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
-    public DateTimeOffset LastParentItemContainerChangedAt { get; private set; } = DateTimeOffset.UtcNow;
-
-    public IReadOnlyCollection<ItemParentContainerHistory> ParentItemContainerHistory => parentItemContainerHistory;
-
-    private readonly List<ItemParentContainerHistory> parentItemContainerHistory = [];
-
     public bool IsFixed { get; private set; } = false;
 
     /// <summary>
@@ -167,17 +161,9 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
                 FargoErrorType.InvalidOperation);
         }
 
-        var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt, DateTimeOffset.UtcNow);
-
-        var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
-
-        parentItemContainerHistory.Add(parentContainerHistory);
-
         ParentItemContainer = parentItemContainer;
 
         ParentItemContainerGuid = parentItemContainer.Guid;
-
-        LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
     }
 
     /// <summary>
@@ -196,17 +182,9 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
                 FargoErrorType.InvalidOperation);
         }
 
-        var range = new DateTimeOffsetRange(LastParentItemContainerChangedAt, DateTimeOffset.UtcNow);
-
-        var parentContainerHistory = ItemParentContainerHistory.CreateItemParentContainerHistory(this, ParentItemContainer, range);
-
-        parentItemContainerHistory.Add(parentContainerHistory);
-
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
-
-        LastParentItemContainerChangedAt = DateTimeOffset.UtcNow;
     }
 
     public void Fix()

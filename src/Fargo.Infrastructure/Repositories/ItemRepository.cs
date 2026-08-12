@@ -16,6 +16,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return context.Items
         .Include(item => item.Article)
         .Include(item => item.Partitions)
+        .Include(item => item.ParentItemContainer)
         .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
     }
 
