@@ -23,9 +23,18 @@ var serviceSeeds = builder
 .WithReference(serviceMigrations)
 .WaitForCompletion(serviceMigrations);
 
-var serviceHttAppi = builder
+_ = builder
 .AddProject<Projects.Fargo_HttpApi>("fargo-api")
 .WithHttpHealthCheck("/health")
+.WithFargoEnvironment(environmentName)
+.WithReference(databaseFargo)
+.WithReference(serviceMigrations)
+.WithReference(serviceSeeds)
+.WaitForCompletion(serviceMigrations)
+.WaitForCompletion(serviceSeeds);
+
+_ = builder
+.AddProject<Projects.Fargo_Grpc>("fargo-grpc")
 .WithFargoEnvironment(environmentName)
 .WithReference(databaseFargo)
 .WithReference(serviceMigrations)
