@@ -1,4 +1,3 @@
-using Fargo.Application.Shared.Items;
 using Fargo.Core.Items;
 using System.Linq.Expressions;
 

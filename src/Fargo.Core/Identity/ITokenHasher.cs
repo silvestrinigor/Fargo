@@ -1,5 +1,3 @@
-using Fargo.Core.Shared.Identity;
-
 namespace Fargo.Core.Identity;
 
 /// <summary>

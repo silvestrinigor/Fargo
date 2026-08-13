@@ -1,5 +1,5 @@
-using Fargo.Core.Shared.Actors;
-using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Actors;
+using Fargo.Core.Barcodes;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;

@@ -1,26 +1,18 @@
 <Solution>
     <Project Path="src/Fargo.Core/Fargo.Core.csproj" />
-    <Project Path="src/Fargo.Core.Shared/Fargo.Core.Shared.csproj" />
     <Project Path="tst/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
 
     <Project Path="src/Fargo.Application/Fargo.Application.csproj" />
-    <Project Path="src/Fargo.Application.Shared/Fargo.Application.Shared.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
+    <Project Path="src/Fargo.Http/Fargo.Http.csproj" />
 
     <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
     <Project Path="tst/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
-
-    <Project Path="src/Fargo.HttpApi/Fargo.HttpApi.csproj" />
-    <Project Path="src/Fargo.HttpApi.Shared/Fargo.HttpApi.Shared.csproj" />
-    <Project Path="src/Fargo.HttpApi.Client/Fargo.HttpApi.Client.csproj" />
-    <Project Path="tst/Fargo.HttpApi.Tests/Fargo.HttpApi.Tests.csproj" />
 
     <Project Path="src/Fargo.Grpc/Fargo.Grpc.csproj" />
     <Project Path="src/Fargo.Grpc.Client/Fargo.Grpc.Client.csproj" />
 
     <Project Path="src/Fargo.Cli/Fargo.Cli.csproj" />
-
-    <Project Path="src/Fargo.WebPlayground/Fargo.WebPlayground.csproj" />
 
     <Project Path="src/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
     <Project Path="src/Fargo.ServiceSeed/Fargo.ServiceSeed.csproj" />

@@ -1,4 +1,3 @@
-using Fargo.Application.Shared.UserGroups;
 using Fargo.Core.UserGroups;
 using System.Linq.Expressions;
 

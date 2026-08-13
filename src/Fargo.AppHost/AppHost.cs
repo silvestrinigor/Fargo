@@ -23,8 +23,8 @@ var serviceSeeds = builder
 .WithReference(serviceMigrations)
 .WaitForCompletion(serviceMigrations);
 
-var serviceHttAppi = builder
-.AddProject<Projects.Fargo_HttpApi>("fargo-api")
+_ = builder
+.AddProject<Projects.Fargo_Http>("fargo-api")
 .WithHttpHealthCheck("/health")
 .WithFargoEnvironment(environmentName)
 .WithReference(databaseFargo)
@@ -33,13 +33,13 @@ var serviceHttAppi = builder
 .WaitForCompletion(serviceMigrations)
 .WaitForCompletion(serviceSeeds);
 
-if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
-{
-    builder
-    .AddProject<Projects.Fargo_WebPlayground>("fargo-playground")
-    .WithExternalHttpEndpoints()
-    .WithReference(serviceHttAppi)
-    .WaitFor(serviceHttAppi);
-}
+_ = builder
+.AddProject<Projects.Fargo_Grpc>("fargo-grpc")
+.WithFargoEnvironment(environmentName)
+.WithReference(databaseFargo)
+.WithReference(serviceMigrations)
+.WithReference(serviceSeeds)
+.WaitForCompletion(serviceMigrations)
+.WaitForCompletion(serviceSeeds);
 
 builder.Build().Run();

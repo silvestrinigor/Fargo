@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Core.Shared.Common;
+using Fargo.Core.Common;
 
 namespace Fargo.Application.Identity;
 

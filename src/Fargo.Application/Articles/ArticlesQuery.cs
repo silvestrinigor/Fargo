@@ -1,5 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Application.Shared.Articles;
 
 namespace Fargo.Application.Articles;
 

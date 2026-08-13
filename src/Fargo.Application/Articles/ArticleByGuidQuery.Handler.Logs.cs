@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Actors;
+using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;

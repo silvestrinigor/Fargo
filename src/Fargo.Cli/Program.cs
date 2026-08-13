@@ -1,3 +1,3 @@
-﻿using Fargo.Cli;
+using Fargo.Cli;
 
 return await Application.RunAsync();

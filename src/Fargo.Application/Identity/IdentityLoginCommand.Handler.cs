@@ -1,9 +1,7 @@
 using Fargo.Application.Common;
-using Fargo.Application.Shared.Identity;
 using Fargo.Core.Identity;
+using Fargo.Core.Informations;
 using Fargo.Core.Security;
-using Fargo.Core.Shared.Informations;
-using Fargo.Core.Shared.Security;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 

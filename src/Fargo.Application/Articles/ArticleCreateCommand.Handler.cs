@@ -3,11 +3,9 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;
+using Fargo.Core.Entities;
+using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Entities;
-using Fargo.Core.Shared.Informations;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 

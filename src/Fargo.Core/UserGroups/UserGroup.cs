@@ -1,10 +1,8 @@
+using Fargo.Core.Actors;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
+using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Common;
-using Fargo.Core.Shared.Entities;
-using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.UserGroups;
 

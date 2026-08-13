@@ -1,5 +1,3 @@
-using Fargo.Core.Shared.Security;
-
 namespace Fargo.Core.Security;
 
 /// <summary>

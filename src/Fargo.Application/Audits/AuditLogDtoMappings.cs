@@ -1,4 +1,3 @@
-using Fargo.Application.Shared.Audits;
 using Fargo.Core.Audits;
 using System.Linq.Expressions;
 

@@ -3,8 +3,7 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Entities;
+using Fargo.Core.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;

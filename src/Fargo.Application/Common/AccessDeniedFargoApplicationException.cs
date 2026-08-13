@@ -1,5 +1,5 @@
-using Fargo.Core.Shared.Actors;
-using Fargo.Core.Shared.Entities;
+using Fargo.Core.Actors;
+using Fargo.Core.Entities;
 
 namespace Fargo.Application.Common;
 

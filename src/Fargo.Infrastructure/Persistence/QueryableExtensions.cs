@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 
 namespace Fargo.Infrastructure.Extensions;
 

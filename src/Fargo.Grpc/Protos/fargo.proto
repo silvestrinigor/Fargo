@@ -1,0 +1,926 @@
+syntax = "proto3";
+
+package fargo.v1;
+
+import "google/protobuf/empty.proto";
+
+import "google/protobuf/timestamp.proto";
+
+import "google/protobuf/duration.proto";
+
+option csharp_namespace = "Fargo.Grpc.V1";
+
+// ============================================================
+// Common
+// ============================================================
+
+message GuidValue {
+
+  string guid = 1;
+
+}
+
+message PaginationRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+}
+
+message PaginationResponse {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+  int32 total_count = 3;
+
+}
+// ============================================================
+// Value Objects
+// ============================================================
+
+message Name {
+
+  string value = 1;
+
+}
+
+message Description {
+
+  string value = 1;
+
+}
+
+message FirstName {
+
+  string value = 1;
+
+}
+
+message LastName {
+
+  string value = 1;
+
+}
+
+message NameId {
+
+  string value = 1;
+
+}
+
+message Token {
+
+  string value = 1;
+
+}
+
+message Mass {
+
+  double value = 1;
+
+}
+
+message Length {
+
+  double value = 1;
+
+}
+
+message Color {
+
+  string value = 1;
+
+}
+
+message Scalar {
+
+  double value = 1;
+
+}
+// ============================================================
+// Enums
+// ============================================================
+
+enum ActionType {
+
+  ACTION_TYPE_UNSPECIFIED = 0;
+
+  ACTION_TYPE_UNKNOWN = 1;
+
+}
+
+enum ArticleType {
+
+  ARTICLE_TYPE_UNSPECIFIED = 0;
+
+  ARTICLE_TYPE_UNKNOWN = 1;
+
+}
+
+enum BarcodeType {
+
+  BARCODE_TYPE_UNSPECIFIED = 0;
+
+  BARCODE_TYPE_EAN13 = 1;
+}
+
+// ============================================================
+// Articles
+// ============================================================
+
+message Article {
+
+  string guid = 1;
+
+  Name name = 2;
+
+  Description description = 3;
+
+  ArticleType article_type = 4;
+
+  google.protobuf.Duration shelf_life = 5;
+
+  optional Color color = 6;
+
+  optional Mass mass = 7;
+
+  optional ArticleDimension dimension = 8;
+
+  optional ArticleVariation variation = 9;
+
+  optional ArticlePack pack = 10;
+
+  repeated ArticleKitComponent kit_components = 11;
+
+  optional ArticleContainer container = 12;
+
+  repeated ArticleBarcode barcodes = 13;
+
+  repeated string partitions = 14;
+
+}
+
+message ArticleDimension {
+
+  optional Length length_x = 1;
+
+  optional Length length_y = 2;
+
+  optional Length length_z = 3;
+
+}
+
+message ArticleDimensionUpdate {
+
+  optional Length length_x = 1;
+
+  optional bool remove_length_x = 2;
+
+  optional Length length_y = 3;
+
+  optional bool remove_length_y = 4;
+
+  optional Length length_z = 5;
+
+  optional bool remove_length_z = 6;
+
+}
+
+message ArticleBarcode {
+
+  optional string ean13 = 1;
+
+}
+
+message ArticleBarcodeUpdate {
+
+  optional string ean13 = 1;
+
+  optional bool remove_ean13 = 2;
+
+}
+
+message ArticleVariation {
+
+  string from_article_guid = 1;
+
+}
+
+message ArticlePack {
+
+  string from_article_guid = 1;
+
+  Scalar quantity = 2;
+
+}
+
+message ArticleKitComponent {
+
+  string article_guid = 1;
+
+  Scalar quantity = 2;
+
+}
+
+message ArticleContainer {
+
+  optional Mass max_mass = 1;
+
+}
+// -------------------- Create --------------------
+
+message CreateArticleRequest {
+
+  Name name = 1;
+
+  Description description = 2;
+
+  optional ArticleType article_type = 3;
+
+  optional ArticleVariation variation = 4;
+
+  optional ArticlePack pack = 5;
+
+  repeated ArticleKitComponent kit_components = 6;
+
+  optional ArticleContainer container = 7;
+
+  optional google.protobuf.Duration shelf_life = 8;
+
+  optional Color color = 9;
+
+  optional Mass mass = 10;
+
+  optional ArticleDimension dimension = 11;
+
+  optional ArticleBarcode barcode = 12;
+
+  repeated string partitions_to_add = 13;
+
+}
+
+message CreateArticleResponse {
+
+  string guid = 1;
+
+}
+// -------------------- Get --------------------
+
+message GetArticleRequest {
+
+  string article_guid = 1;
+
+}
+
+message GetArticleByBarcodeRequest {
+
+  string barcode = 1;
+
+  BarcodeType barcode_type = 2;
+
+}
+
+message GetArticlesRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+  repeated string child_of_any_of_these_partitions = 3;
+
+}
+
+message GetArticlesResponse {
+
+  repeated Article articles = 1;
+
+}
+// -------------------- Update --------------------
+
+message UpdateArticleRequest {
+
+  string article_guid = 1;
+
+  optional Name name = 2;
+
+  optional Description description = 3;
+
+  optional google.protobuf.Duration shelf_life = 4;
+
+  optional bool remove_shelf_life = 5;
+
+  optional Mass mass = 6;
+
+  optional bool remove_mass = 7;
+
+  optional ArticleDimensionUpdate dimension = 8;
+
+  optional ArticleBarcodeUpdate barcode = 9;
+
+  repeated string partitions_to_add = 10;
+
+  repeated string partitions_to_remove = 11;
+
+}
+// ============================================================
+// Items
+// ============================================================
+
+message Item {
+
+  string guid = 1;
+
+  string article_guid = 2;
+
+  optional string parent_container_guid = 3;
+
+  bool is_fixed = 4;
+
+  repeated string partitions = 5;
+
+}
+
+message CreateItemRequest {
+
+  string article_guid = 1;
+
+  optional string parent_item_container_guid = 2;
+
+  repeated string partitions_to_add = 3;
+
+}
+
+message CreateItemResponse {
+
+  string guid = 1;
+
+}
+
+message GetItemRequest {
+
+  string item_guid = 1;
+
+}
+
+message GetItemsRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+  repeated string child_of_any_of_these_partitions = 3;
+
+}
+
+message GetItemsResponse {
+
+  repeated Item items = 1;
+
+}
+
+message UpdateItemRequest {
+
+  string item_guid = 1;
+
+  optional string parent_item_container_guid = 2;
+
+  optional bool remove_from_parent_item_container = 3;
+
+  repeated string partitions_to_add = 4;
+
+  repeated string partitions_to_remove = 5;
+
+}
+// ============================================================
+// Users
+// ============================================================
+
+message User {
+
+  string guid = 1;
+
+  NameId nameid = 2;
+
+  optional FirstName first_name = 3;
+
+  optional LastName last_name = 4;
+
+  Description description = 5;
+
+  bool is_active = 6;
+
+  bool is_admin = 7;
+
+  UserAuthentication authentication = 8;
+
+  repeated ActionType permissions = 9;
+
+  repeated string partitions = 10;
+
+  repeated string partition_accesses = 11;
+
+  repeated string user_groups = 12;
+
+}
+
+message UserAuthentication {
+
+  optional google.protobuf.Duration default_password_expiration_period = 1;
+
+  optional google.protobuf.Timestamp require_password_change_at = 2;
+
+}
+
+message UserAuthenticationCreate {
+
+  optional string password = 1;
+
+  optional google.protobuf.Duration default_password_expiration_period = 2;
+
+}
+
+message UserAuthenticationUpdate {
+
+  optional string password = 1;
+
+  optional google.protobuf.Duration default_password_expiration_period = 2;
+
+  optional bool remove_default_password_expiration_period = 3;
+
+}
+
+message CreateUserRequest {
+
+  NameId nameid = 1;
+
+  optional FirstName first_name = 2;
+
+  optional LastName last_name = 3;
+
+  optional Description description = 4;
+
+  optional bool is_active = 5;
+
+  optional UserAuthenticationCreate authentication = 6;
+
+  repeated ActionType permissions_to_add = 7;
+
+  repeated string partitions_to_add = 8;
+
+  repeated string user_groups_to_add = 9;
+
+  repeated string partition_accesses_to_add = 10;
+
+}
+
+message CreateUserResponse {
+
+  string guid = 1;
+
+}
+
+message GetUserRequest {
+
+  string user_guid = 1;
+
+}
+
+message GetUsersRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+  repeated string child_of_any_of_these_partitions = 3;
+
+}
+
+message GetUsersResponse {
+
+  repeated User users = 1;
+
+}
+
+message UpdateUserRequest {
+
+  string user_guid = 1;
+
+  optional NameId nameid = 2;
+
+  optional FirstName first_name = 3;
+
+  optional LastName last_name = 4;
+
+  optional Description description = 5;
+
+  optional bool is_active = 6;
+
+  optional UserAuthenticationUpdate authentication = 7;
+
+  repeated ActionType permissions_to_add = 8;
+
+  repeated ActionType permissions_to_remove = 9;
+
+  repeated string partitions_to_add = 10;
+
+  repeated string partitions_to_remove = 11;
+
+  repeated string user_groups_to_add = 12;
+
+  repeated string user_groups_to_remove = 13;
+
+  repeated string partition_accesses_to_add = 14;
+
+  repeated string partition_accesses_to_remove = 15;
+
+}
+// ============================================================
+// User Groups
+// ============================================================
+
+message UserGroup {
+
+  string guid = 1;
+
+  NameId nameid = 2;
+
+  Description description = 3;
+
+  bool is_active = 4;
+
+  bool is_admin_user_group = 5;
+
+  optional string parent_user_group = 6;
+
+  repeated ActionType permissions = 7;
+
+  repeated string partitions = 8;
+
+  repeated string partition_accesses = 9;
+
+}
+
+message CreateUserGroupRequest {
+
+  NameId nameid = 1;
+
+  Description description = 2;
+
+  optional bool is_active = 3;
+
+  optional string parent_user_group = 4;
+
+  repeated ActionType permissions_to_add = 5;
+
+  repeated string partitions_to_add = 6;
+
+  repeated string partition_accesses_to_add = 7;
+
+}
+
+message CreateUserGroupResponse {
+
+  string guid = 1;
+
+}
+
+message GetUserGroupRequest {
+
+  string user_group_guid = 1;
+
+}
+
+message GetUserGroupsRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+  repeated string child_of_any_of_these_partitions = 3;
+
+}
+
+message GetUserGroupsResponse {
+
+  repeated UserGroup user_groups = 1;
+
+}
+
+message UpdateUserGroupRequest {
+
+  string user_group_guid = 1;
+
+  optional NameId nameid = 2;
+
+  optional Description description = 3;
+
+  optional bool is_active = 4;
+
+  optional string parent_user_group = 5;
+
+  optional bool remove_parent_user_group = 6;
+
+  repeated ActionType permissions_to_add = 7;
+
+  repeated ActionType permissions_to_remove = 8;
+
+  repeated string partitions_to_add = 9;
+
+  repeated string partitions_to_remove = 10;
+
+  repeated string partition_accesses_to_add = 11;
+
+  repeated string partition_accesses_to_remove = 12;
+
+}
+// ============================================================
+// Partitions
+// ============================================================
+
+message Partition {
+
+  string guid = 1;
+
+  Name name = 2;
+
+  Description description = 3;
+
+  optional string parent_partition_guid = 4;
+
+  optional bool is_global_partition = 5;
+
+}
+
+message CreatePartitionRequest {
+
+  Name name = 1;
+
+  string parent_partition_guid = 2;
+
+  Description description = 3;
+
+}
+
+message CreatePartitionResponse {
+
+  string guid = 1;
+
+}
+
+message GetPartitionRequest {
+
+  string partition_guid = 1;
+
+}
+
+message GetPartitionsRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+  repeated string child_of_any_of_these_partitions = 3;
+
+}
+
+message GetPartitionsResponse {
+
+  repeated Partition partitions = 1;
+
+}
+
+message UpdatePartitionRequest {
+
+  string partition_guid = 1;
+
+  optional Name name = 2;
+
+  optional Description description = 3;
+
+  optional string parent_partition_guid = 4;
+
+}
+// ============================================================
+// Identity
+// ============================================================
+
+message LoginRequest {
+
+  string nameid = 1;
+
+  string password = 2;
+
+}
+
+message AuthenticationResult {
+
+  string access_token = 1;
+
+  string refresh_token = 2;
+
+  google.protobuf.Timestamp expires_at = 3;
+
+}
+
+message LogoutRequest {
+
+  Token refresh_token = 1;
+
+}
+
+message RefreshTokenRequest {
+
+  Token refresh_token = 1;
+
+}
+
+message ChangePasswordRequest {
+
+  string nameid = 1;
+
+  string current_password = 2;
+
+  string new_password = 3;
+
+}
+// ============================================================
+// Audit Logs
+// ============================================================
+
+message AuditLog {
+
+  string guid = 1;
+
+}
+
+message GetAuditLogsRequest {
+
+  int32 page = 1;
+
+  int32 limit = 2;
+
+}
+
+message GetAuditLogsResponse {
+
+  repeated AuditLog audit_logs = 1;
+
+}
+// ============================================================
+// Services
+// ============================================================
+
+service ArticleService {
+
+  rpc GetArticle(GetArticleRequest)
+
+      returns (Article);
+
+  rpc GetArticleByBarcode(GetArticleByBarcodeRequest)
+
+      returns (Article);
+
+  rpc GetArticles(GetArticlesRequest)
+
+      returns (GetArticlesResponse);
+
+  rpc CreateArticle(CreateArticleRequest)
+
+      returns (CreateArticleResponse);
+
+  rpc UpdateArticle(UpdateArticleRequest)
+
+      returns (google.protobuf.Empty);
+
+  rpc DeleteArticle(GetArticleRequest)
+
+      returns (google.protobuf.Empty);
+
+}
+
+service ItemService {
+
+  rpc GetItem(GetItemRequest)
+
+      returns (Item);
+
+  rpc GetItems(GetItemsRequest)
+
+      returns (GetItemsResponse);
+
+  rpc CreateItem(CreateItemRequest)
+
+      returns (CreateItemResponse);
+
+  rpc UpdateItem(UpdateItemRequest)
+
+      returns (google.protobuf.Empty);
+
+  rpc DeleteItem(GetItemRequest)
+
+      returns (google.protobuf.Empty);
+
+}
+
+service UserService {
+
+  rpc GetUser(GetUserRequest)
+
+      returns (User);
+
+  rpc GetUsers(GetUsersRequest)
+
+      returns (GetUsersResponse);
+
+  rpc CreateUser(CreateUserRequest)
+
+      returns (CreateUserResponse);
+
+  rpc UpdateUser(UpdateUserRequest)
+
+      returns (google.protobuf.Empty);
+
+  rpc DeleteUser(GetUserRequest)
+
+      returns (google.protobuf.Empty);
+
+}
+
+service UserGroupService {
+
+  rpc GetUserGroup(GetUserGroupRequest)
+
+      returns (UserGroup);
+
+  rpc GetUserGroups(GetUserGroupsRequest)
+
+      returns (GetUserGroupsResponse);
+
+  rpc CreateUserGroup(CreateUserGroupRequest)
+
+      returns (CreateUserGroupResponse);
+
+  rpc UpdateUserGroup(UpdateUserGroupRequest)
+
+      returns (google.protobuf.Empty);
+
+  rpc DeleteUserGroup(GetUserGroupRequest)
+
+      returns (google.protobuf.Empty);
+
+}
+
+service PartitionService {
+
+  rpc GetPartition(GetPartitionRequest)
+
+      returns (Partition);
+
+  rpc GetPartitions(GetPartitionsRequest)
+
+      returns (GetPartitionsResponse);
+
+  rpc CreatePartition(CreatePartitionRequest)
+
+      returns (CreatePartitionResponse);
+
+  rpc UpdatePartition(UpdatePartitionRequest)
+
+      returns (google.protobuf.Empty);
+
+  rpc DeletePartition(GetPartitionRequest)
+
+      returns (google.protobuf.Empty);
+
+}
+
+service IdentityService {
+
+  rpc Login(LoginRequest)
+
+      returns (AuthenticationResult);
+
+  rpc Logout(LogoutRequest)
+
+      returns (google.protobuf.Empty);
+
+  rpc RefreshToken(RefreshTokenRequest)
+
+      returns (AuthenticationResult);
+
+  rpc ChangePassword(ChangePasswordRequest)
+
+      returns (google.protobuf.Empty);
+
+}
+
+service AuditLogService {
+
+  rpc GetAuditLogs(GetAuditLogsRequest)
+
+      returns (GetAuditLogsResponse);
+
+}

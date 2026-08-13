@@ -1,5 +1,4 @@
 using Fargo.Core.Common;
-using Fargo.Core.Shared.Common;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 

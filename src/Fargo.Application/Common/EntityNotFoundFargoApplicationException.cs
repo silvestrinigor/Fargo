@@ -1,6 +1,5 @@
+using Fargo.Core.Common;
 using Fargo.Core.Entities;
-using Fargo.Core.Shared.Common;
-using Fargo.Core.Shared.Entities;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Fargo.Application.Common;

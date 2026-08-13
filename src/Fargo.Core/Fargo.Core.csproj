@@ -11,8 +11,4 @@
         <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.1" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Fargo.Core.Shared\Fargo.Core.Shared.csproj" />
-    </ItemGroup>
-
 </Project>

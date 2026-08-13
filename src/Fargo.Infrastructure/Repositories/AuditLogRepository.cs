@@ -1,6 +1,5 @@
-using Fargo.Application;
 using Fargo.Application.Audits;
-using Fargo.Application.Shared.Audits;
+using Fargo.Application.Common;
 using Fargo.Core.Audits;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;

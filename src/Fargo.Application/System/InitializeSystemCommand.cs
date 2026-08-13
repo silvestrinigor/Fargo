@@ -1,6 +1,6 @@
 using Fargo.Application.Common;
-using Fargo.Core.Shared.Informations;
-using Fargo.Core.Shared.Security;
+using Fargo.Core.Informations;
+using Fargo.Core.Security;
 
 namespace Fargo.Application.System;
 

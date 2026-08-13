@@ -2,9 +2,6 @@ using Fargo.Core.Articles;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Common;
-using Fargo.Core.Shared.Entities;
 
 namespace Fargo.Core.Items;
 

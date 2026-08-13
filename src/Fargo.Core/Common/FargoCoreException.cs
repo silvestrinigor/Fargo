@@ -1,5 +1,3 @@
-using Fargo.Core.Shared.Common;
-
 namespace Fargo.Core.Common;
 
 /// <summary>

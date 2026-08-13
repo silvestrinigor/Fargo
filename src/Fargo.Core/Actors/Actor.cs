@@ -1,6 +1,4 @@
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Actors;
 
 namespace Fargo.Core.Actors;
 

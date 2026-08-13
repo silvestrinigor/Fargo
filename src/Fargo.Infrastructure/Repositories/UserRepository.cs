@@ -1,8 +1,7 @@
-using Fargo.Application;
-using Fargo.Application.Shared.Users;
+using Fargo.Application.Common;
 using Fargo.Application.Users;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Informations;
+using Fargo.Core.Actors;
+using Fargo.Core.Informations;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
