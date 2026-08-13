@@ -10,7 +10,7 @@ public sealed class ItemMovimentConfiguration : IEntityTypeConfiguration<ItemMov
     {
         builder.ToTable("item_moviments");
 
-        builder.HasKey(i => i.Guid);
+        builder.HasKey(i => new { i.ItemGuid, i.OccurredAt });
 
         builder
         .HasOne<Item>()

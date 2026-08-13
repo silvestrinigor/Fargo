@@ -51,7 +51,7 @@ public sealed class ItemUpdateCommandHandler(
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {
-            item.RemoveParentItemContainer();
+            item.RemoveFromContainers();
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionGuidsToAdd)

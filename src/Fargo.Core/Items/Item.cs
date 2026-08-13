@@ -71,6 +71,9 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether the item is fixed in its current container location.
+    /// </summary>
     public bool IsFixed { get; private set; } = false;
 
     /// <summary>
@@ -90,6 +93,15 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
+    /// <summary>
+    /// Gets the movement history of the item.
+    /// </summary>
+    /// <remarks>
+    /// A movement is recorded whenever the item's parent container changes.
+    /// Moving an item into a container records the destination container,
+    /// while removing the item from a container records a movement with no
+    /// destination container.
+    /// </remarks>
     private readonly List<ItemPartition> partitions = [];
 
     public IReadOnlyCollection<ItemMoviment> Moviments => Moviments;
@@ -133,16 +145,30 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         => new(article);
 
     /// <summary>
-    /// Assigns the specified container item as the parent of the current item.
+    /// Places the item inside the specified container item.
     /// </summary>
     /// <param name="parentItemContainer">
-    /// The parent container item.
+    /// The container item that will become the item's parent.
     /// </param>
     /// <remarks>
-    /// This method does not validate the complete item containment hierarchy.
-    /// The application should use <see cref="ItemService"/> to validate that
-    /// assigning the parent container does not create a circular hierarchy.
+    /// This operation updates the item's current parent container and records
+    /// a movement in the item's movement history.
+    ///
+    /// The method validates invariants that can be determined from the current
+    /// item and the specified parent, including that the parent is not the item
+    /// itself, that the parent represents a container article, and that the item
+    /// is not fixed.
+    ///
+    /// Validation requiring traversal of the complete containment hierarchy,
+    /// such as detecting indirect circular references, is performed by
+    /// <see cref="ItemService"/>.
     /// </remarks>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentItemContainer"/> is null.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the specified parent is invalid or the item is fixed.
+    /// </exception>
     public void PlaceInsideContainer(Item parentItemContainer)
     {
         ArgumentNullException.ThrowIfNull(parentItemContainer);
@@ -173,13 +199,23 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     }
 
     /// <summary>
-    /// Removes the parent container association from this item.
+    /// Removes the item from its current parent container, leaving the item
+    /// without a parent container.
     /// </summary>
     /// <remarks>
-    /// After calling this method, the item is no longer placed inside another
-    /// container item.
+    /// After this operation, <see cref="ParentItemContainer"/> and
+    /// <see cref="ParentItemContainerGuid"/> are <see langword="null"/>,
+    /// meaning that the item is not currently contained by any other item.
+    ///
+    /// A movement record is added to the item's movement history to represent
+    /// that the item is no longer inside a container.
+    ///
+    /// A fixed item cannot be removed from its current container.
     /// </remarks>
-    public void RemoveParentItemContainer()
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the item is fixed.
+    /// </exception>
+    public void RemoveFromContainers()
     {
         if (IsFixed)
         {
@@ -195,16 +231,35 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         moviments.Add(new ItemMoviment(Guid, null, DateTimeOffset.UtcNow));
     }
 
+    /// <summary>
+    /// Fixes the item in its current location.
+    /// </summary>
+    /// <remarks>
+    /// A fixed item cannot be moved into another container or removed from its
+    /// current parent container.
+    ///
+    /// Fixing an item does not change its current parent container.
+    /// If the item is already fixed, this operation has no effect.
+    /// </remarks>
     public void Fix()
     {
         IsFixed = true;
     }
 
+    /// <summary>
+    /// Removes the fixed state from the item.
+    /// </summary>
+    /// <remarks>
+    /// After this operation, the item can be moved into another container or
+    /// removed from its current parent container.
+    ///
+    /// Unfixing an item does not change its current parent container.
+    /// If the item is already unfixed, this operation has no effect.
+    /// </remarks>
     public void Unfix()
     {
         IsFixed = false;
     }
-
 
     /// <summary>
     /// Associates the item with the specified partition.
