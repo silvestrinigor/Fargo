@@ -1,5 +1,3 @@
-﻿using Fargo.Cli.Commands;
+﻿using Fargo.Cli;
 
-var rootCommand = RootCommandFactory.Create();
-
-return await rootCommand.Parse(args).InvokeAsync();
+return await Application.RunAsync();

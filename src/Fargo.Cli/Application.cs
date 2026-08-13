@@ -6,15 +6,13 @@ public static class Application
 {
     public static async Task<int> RunAsync()
     {
-        await using var session = new Session();
-
         var root = RootCommandFactory.Create();
 
         Console.WriteLine("Fargo Cli");
         Console.WriteLine("Type 'help' for help.");
         Console.WriteLine();
 
-        while (!session.ShouldExit)
+        while (true)
         {
             Console.Write("fargo> ");
 
