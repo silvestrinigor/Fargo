@@ -1,10 +1,8 @@
 <Solution>
     <Project Path="src/Fargo.Core/Fargo.Core.csproj" />
-    <Project Path="src/Fargo.Core.Shared/Fargo.Core.Shared.csproj" />
     <Project Path="tst/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
 
     <Project Path="src/Fargo.Application/Fargo.Application.csproj" />
-    <Project Path="src/Fargo.Application.Shared/Fargo.Application.Shared.csproj" />
     <Project Path="tst/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="src/Fargo.Http/Fargo.Http.csproj" />
 
