@@ -33,13 +33,4 @@ var serviceHttAppi = builder
 .WaitForCompletion(serviceMigrations)
 .WaitForCompletion(serviceSeeds);
 
-if (string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
-{
-    builder
-    .AddProject<Projects.Fargo_WebPlayground>("fargo-playground")
-    .WithExternalHttpEndpoints()
-    .WithReference(serviceHttAppi)
-    .WaitFor(serviceHttAppi);
-}
-
 builder.Build().Run();

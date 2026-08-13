@@ -20,8 +20,6 @@
 
     <Project Path="src/Fargo.Cli/Fargo.Cli.csproj" />
 
-    <Project Path="src/Fargo.WebPlayground/Fargo.WebPlayground.csproj" />
-
     <Project Path="src/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
     <Project Path="src/Fargo.ServiceSeed/Fargo.ServiceSeed.csproj" />
     <Project Path="src/Fargo.ServiceDefaults/Fargo.ServiceDefaults.csproj" />
