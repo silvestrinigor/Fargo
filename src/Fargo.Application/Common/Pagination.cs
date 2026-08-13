@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Fargo.Application;
+namespace Fargo.Application.Common;
 
 #region Pagination
 

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Shared.Items;
+namespace Fargo.Application.Items;
 
 public sealed record ItemUpdateDto(
     Guid? ParentItemContainerGuid = null,

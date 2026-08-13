@@ -1,8 +1,7 @@
-using Fargo.Application.Articles;
 using Fargo.Core.Informations;
 using UnitsNet;
 
-namespace Fargo.Application.Shared.Articles;
+namespace Fargo.Application.Articles;
 
 public sealed record ArticleUpdateDto(
     Name? Name = null,

@@ -1,6 +1,5 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 using Fargo.Application.Items;
-using Fargo.Application.Shared.Items;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Infrastructure.Extensions;

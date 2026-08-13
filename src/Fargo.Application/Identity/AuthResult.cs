@@ -1,4 +1,4 @@
-namespace Fargo.Application.Shared.Identity;
+namespace Fargo.Application.Identity;
 
 /// <summary>
 /// Represents the result of a successful authentication.

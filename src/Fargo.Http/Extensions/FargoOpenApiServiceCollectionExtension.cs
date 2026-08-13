@@ -1,4 +1,4 @@
-using Fargo.Application;
+using Fargo.Application.Common;
 using Fargo.Core.Barcodes;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;

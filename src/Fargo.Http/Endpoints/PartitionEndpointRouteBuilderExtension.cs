@@ -1,7 +1,5 @@
-using Fargo.Application;
 using Fargo.Application.Common;
 using Fargo.Application.Partitions;
-using Fargo.Application.Shared.Partitions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Http.Endpoints;

@@ -1,6 +1,6 @@
 using Fargo.Core.Informations;
 
-namespace Fargo.Application.Shared.Partitions;
+namespace Fargo.Application.Partitions;
 
 public sealed record PartitionDto(
     Guid Guid,

@@ -1,6 +1,6 @@
 using Fargo.Core.Security;
 
-namespace Fargo.Application.Shared.Users;
+namespace Fargo.Application.Users;
 
 public sealed record UserAuthenticationUpdateDto(
     Password? Password = null,

@@ -1,4 +1,4 @@
-namespace Fargo.Application.Shared.Audits;
+namespace Fargo.Application.Audits;
 
 public sealed record AuditLogDto(
     Guid Guid

@@ -1,4 +1,4 @@
-using Fargo.Application.Shared.Items;
+using Fargo.Application.Common;
 
 namespace Fargo.Application.Items;
 

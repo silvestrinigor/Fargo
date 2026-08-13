@@ -1,7 +1,5 @@
-using Fargo.Application;
 using Fargo.Application.Audits;
 using Fargo.Application.Common;
-using Fargo.Application.Shared.Audits;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Http.Endpoints;

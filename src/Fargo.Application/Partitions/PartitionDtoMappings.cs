@@ -1,4 +1,3 @@
-using Fargo.Application.Shared.Partitions;
 using Fargo.Core.Partitions;
 using System.Linq.Expressions;
 

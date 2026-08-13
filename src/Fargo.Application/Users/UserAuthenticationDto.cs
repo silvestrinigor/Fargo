@@ -1,4 +1,4 @@
-namespace Fargo.Application.Shared.Users;
+namespace Fargo.Application.Users;
 
 public sealed record UserAuthenticationDto(
     TimeSpan? DefaultPasswordExpirationPeriod = null,

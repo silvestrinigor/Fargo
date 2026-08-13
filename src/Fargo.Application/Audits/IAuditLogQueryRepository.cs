@@ -1,4 +1,4 @@
-using Fargo.Application.Shared.Audits;
+using Fargo.Application.Common;
 
 namespace Fargo.Application.Audits;
 

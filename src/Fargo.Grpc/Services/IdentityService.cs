@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
-using Fargo.Application.Shared.Identity;
 using Fargo.Grpc.V1;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;

@@ -1,6 +1,4 @@
-using Fargo.Application;
 using Fargo.Application.Common;
-using Fargo.Application.Shared.UserGroups;
 using Fargo.Application.UserGroups;
 using Microsoft.AspNetCore.Http.HttpResults;
 

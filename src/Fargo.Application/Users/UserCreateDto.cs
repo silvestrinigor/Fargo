@@ -1,7 +1,7 @@
 using Fargo.Core.Actors;
 using Fargo.Core.Informations;
 
-namespace Fargo.Application.Shared.Users;
+namespace Fargo.Application.Users;
 
 public sealed record UserCreateDto(
     Nameid Nameid,

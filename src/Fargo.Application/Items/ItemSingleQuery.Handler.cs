@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
-using Fargo.Application.Shared.Items;
 using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
