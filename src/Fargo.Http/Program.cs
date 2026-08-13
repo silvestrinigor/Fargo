@@ -1,7 +1,6 @@
 using Fargo.Application.Extensions;
 using Fargo.Http.Endpoints;
 using Fargo.Http.Extensions;
-using Fargo.Http.Shared.Extensions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

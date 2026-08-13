@@ -19,10 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
     <ProjectReference Include="..\Fargo.Core\Fargo.Core.csproj" />
   </ItemGroup>

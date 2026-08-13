@@ -1,7 +1,7 @@
 using Fargo.Http.Shared.JsonConverters;
 using System.Text.Json;
 
-namespace Fargo.Http.Shared.Extensions;
+namespace Fargo.Http.Extensions;
 
 public static class FargoJsonSerializerOptionsExtensions
 {
