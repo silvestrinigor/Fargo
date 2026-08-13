@@ -1,3 +1,3 @@
-namespace Fargo.Core.Shared.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 public interface IBarcode;

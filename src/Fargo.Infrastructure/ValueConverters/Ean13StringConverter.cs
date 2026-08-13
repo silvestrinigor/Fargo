@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Barcodes;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fargo.Infrastructure.ValueConverters;

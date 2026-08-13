@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 /// <summary>
 /// Represents the barcode format of a barcode.

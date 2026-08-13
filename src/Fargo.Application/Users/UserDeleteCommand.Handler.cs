@@ -2,9 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Audits;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Actors;
-using Fargo.Core.Shared.Entities;
+using Fargo.Core.Entities;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 

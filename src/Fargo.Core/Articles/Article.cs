@@ -1,10 +1,7 @@
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
+using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Common;
-using Fargo.Core.Shared.Entities;
-using Fargo.Core.Shared.Informations;
 using System.Drawing;
 using UnitsNet;
 

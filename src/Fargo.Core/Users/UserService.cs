@@ -1,6 +1,5 @@
 using Fargo.Core.Common;
-using Fargo.Core.Shared.Common;
-using Fargo.Core.Shared.Informations;
+using Fargo.Core.Informations;
 
 namespace Fargo.Core.Users;
 

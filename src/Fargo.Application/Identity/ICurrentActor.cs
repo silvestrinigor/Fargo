@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Actors;
+using Fargo.Core.Actors;
 
 namespace Fargo.Application.Identity;
 

@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Identity;
+using Fargo.Core.Identity;
 
 namespace Fargo.Application.Shared.Identity;
 

@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Security;
+using Fargo.Core.Security;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

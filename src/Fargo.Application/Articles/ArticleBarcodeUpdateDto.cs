@@ -1,6 +1,6 @@
-using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Barcodes;
 
-namespace Fargo.Application.Shared.Articles;
+namespace Fargo.Application.Articles;
 
 public sealed record ArticleBarcodeUpdateDto(
     Ean13? Ean13 = null,

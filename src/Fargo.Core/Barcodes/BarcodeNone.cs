@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 public sealed class BarcodeNone : IBarcode
 {

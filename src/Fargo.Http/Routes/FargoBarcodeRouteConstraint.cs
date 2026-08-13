@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Barcodes;
 using System.Globalization;
 
 namespace Fargo.Http.Routes;

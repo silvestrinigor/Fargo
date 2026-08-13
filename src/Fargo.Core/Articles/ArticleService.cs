@@ -1,6 +1,5 @@
+using Fargo.Core.Barcodes;
 using Fargo.Core.Common;
-using Fargo.Core.Shared.Barcodes;
-using Fargo.Core.Shared.Common;
 
 namespace Fargo.Core.Articles;
 

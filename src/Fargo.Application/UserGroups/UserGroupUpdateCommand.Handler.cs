@@ -1,9 +1,8 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Fargo.Core.Shared.Actions;
-using Fargo.Core.Shared.Entities;
 using Fargo.Core.UserGroups;
 using Microsoft.Extensions.Logging;
 

@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Actions;
+namespace Fargo.Core.Actors;
 
 /// <summary>
 /// Represents the set of actions in the system.

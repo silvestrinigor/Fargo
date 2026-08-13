@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Fargo.Core.Shared.Identity;
+namespace Fargo.Core.Identity;
 
 /// <summary>
 /// Represents a security token used by the system.

@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 public readonly struct Barcode : IParsable<Barcode>, IEquatable<Barcode>
 {

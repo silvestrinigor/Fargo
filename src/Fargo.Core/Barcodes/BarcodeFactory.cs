@@ -1,4 +1,4 @@
-using Fargo.Core.Shared.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 public static class BarcodeFactory
 {

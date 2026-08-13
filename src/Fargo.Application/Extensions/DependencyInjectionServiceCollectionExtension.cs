@@ -4,7 +4,6 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
-using Fargo.Application.Shared.Articles;
 using Fargo.Application.Shared.Audits;
 using Fargo.Application.Shared.Identity;
 using Fargo.Application.Shared.Items;

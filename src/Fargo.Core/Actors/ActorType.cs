@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Actors;
+namespace Fargo.Core.Actors;
 
 /// <summary>
 /// Represents the type of actor responsible for performing an action

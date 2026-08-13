@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Barcodes;
+namespace Fargo.Core.Barcodes;
 
 /// <summary>
 /// EAN-13 barcode value assigned to an article.

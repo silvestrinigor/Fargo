@@ -1,5 +1,4 @@
 using Fargo.Core.Common;
-using Fargo.Core.Shared.Common;
 using Fargo.Core.UserGroups;
 using NSubstitute;
 

@@ -1,9 +1,10 @@
-using Fargo.Core.Shared.Articles;
-using Fargo.Core.Shared.Informations;
+using Fargo.Application.Shared.Articles;
+using Fargo.Core.Articles;
+using Fargo.Core.Informations;
 using System.Drawing;
 using UnitsNet;
 
-namespace Fargo.Application.Shared.Articles;
+namespace Fargo.Application.Articles;
 
 public sealed record ArticleDto(
     Guid Guid,

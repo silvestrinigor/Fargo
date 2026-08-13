@@ -1,4 +1,4 @@
-namespace Fargo.Core.Shared.Articles;
+namespace Fargo.Core.Articles;
 
 /// <summary>
 /// Represents the classification of an article within the inventory system.

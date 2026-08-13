@@ -1,4 +1,5 @@
-using Fargo.Core.Shared.Informations;
+using Fargo.Application.Articles;
+using Fargo.Core.Informations;
 using UnitsNet;
 
 namespace Fargo.Application.Shared.Articles;

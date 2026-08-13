@@ -1,6 +1,6 @@
 using UnitsNet;
 
-namespace Fargo.Application.Shared.Articles;
+namespace Fargo.Application.Articles;
 
 public sealed record ArticlePackDto(
     Guid FromArticleGuid,

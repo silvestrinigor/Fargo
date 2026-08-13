@@ -1,6 +1,5 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Common;
-using Fargo.Application.Shared.Articles;
 using Fargo.Grpc.V1;
 using Grpc.Core;
 
