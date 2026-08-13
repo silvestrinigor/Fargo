@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Items;
 
 public sealed class ItemCreateCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,

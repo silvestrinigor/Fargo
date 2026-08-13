@@ -105,7 +105,7 @@ public sealed class FargoApplicationExceptionHandler(
         }
 
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        problem.Extensions["appErrorType"] = appException.ErrorType;
+        problem.Extensions["errorType"] = appException.ErrorType;
 
         await problemDetailsService.WriteAsync(new ProblemDetailsContext
         {

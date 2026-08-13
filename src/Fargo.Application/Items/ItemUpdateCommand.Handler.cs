@@ -11,7 +11,7 @@ namespace Fargo.Application.Items;
 
 public sealed class ItemUpdateCommandHandler(
     ItemService itemService,
-    ActorService actorService,
+    ActorResolver actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,
@@ -51,7 +51,7 @@ public sealed class ItemUpdateCommandHandler(
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {
-            item.RemoveParentItemContainer();
+            item.RemoveFromContainers();
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionGuidsToAdd)

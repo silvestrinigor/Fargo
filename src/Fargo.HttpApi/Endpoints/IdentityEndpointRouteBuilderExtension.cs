@@ -45,10 +45,10 @@ public static class IdentityEndpointRouteBuilderExtension
 
     private static async Task<Ok<AuthResult>> Login(
         LoginDto request,
-        ICommandHandler<LoginCommand, AuthResult> handler,
+        ICommandHandler<IdentityLoginCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var command = new LoginCommand(request.Nameid, request.Password);
+        var command = new IdentityLoginCommand(request.Nameid, request.Password);
 
         var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -73,10 +73,10 @@ public static class IdentityEndpointRouteBuilderExtension
 
     private static async Task<Ok> Logout(
         LogOutDto request,
-        ICommandHandler<LogoutCommand> handler,
+        ICommandHandler<IdentityLogoutCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new LogoutCommand(request.RefreshToken);
+        var command = new IdentityLogoutCommand(request.RefreshToken);
 
         await handler.HandleAsync(command, cancellationToken);
 
@@ -101,10 +101,10 @@ public static class IdentityEndpointRouteBuilderExtension
 
     private static async Task<Ok<AuthResult>> Refresh(
         RefreshDto request,
-        ICommandHandler<RefreshCommand, AuthResult> handler,
+        ICommandHandler<IdentityRefreshCommand, AuthResult> handler,
         CancellationToken cancellationToken)
     {
-        var command = new RefreshCommand(request.RefreshToken);
+        var command = new IdentityRefreshCommand(request.RefreshToken);
 
         var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -130,10 +130,10 @@ public static class IdentityEndpointRouteBuilderExtension
 
     private static async Task<NoContent> ChangePassword(
         PasswordUpdateDto request,
-        ICommandHandler<PasswordChangeCommand> handler,
+        ICommandHandler<IdentityPasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new PasswordChangeCommand(request);
+        var command = new IdentityPasswordChangeCommand(request);
 
         await handler.HandleAsync(command, cancellationToken);
 

@@ -1,3 +1,5 @@
+using Fargo.Core.Shared.Common;
+
 namespace Fargo.Application.Common;
 
 /// <summary>
@@ -10,7 +12,7 @@ public class FargoApplicationException : Exception
     /// <summary>
     /// Gets the error category associated with the exception.
     /// </summary>
-    public FargoApplicationErrorType ErrorType { get; init; } = FargoApplicationErrorType.None;
+    public FargoErrorType ErrorType { get; init; } = FargoErrorType.None;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoApplicationException"/> class.
@@ -31,7 +33,7 @@ public class FargoApplicationException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoApplicationException"/> class with a specified error message and error type.
     /// </summary>
-    public FargoApplicationException(string? message, FargoApplicationErrorType errorType)
+    public FargoApplicationException(string? message, FargoErrorType errorType)
         : base(message)
     {
         ErrorType = errorType;
@@ -40,7 +42,7 @@ public class FargoApplicationException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoApplicationException"/> class with a specified error message, error type, and inner exception.
     /// </summary>
-    public FargoApplicationException(string? message, FargoApplicationErrorType errorType, Exception innerException)
+    public FargoApplicationException(string? message, FargoErrorType errorType, Exception innerException)
         : base(message, innerException)
     {
         ErrorType = errorType;
@@ -49,7 +51,7 @@ public class FargoApplicationException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="FargoApplicationException"/> class with a specified error type and inner exception.
     /// </summary>
-    public FargoApplicationException(FargoApplicationErrorType errorType, Exception innerException)
+    public FargoApplicationException(FargoErrorType errorType, Exception innerException)
         : base(defaultExceptionMessage, innerException)
     {
         ErrorType = errorType;

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Partitions;
 
 public sealed class PartitionUpdateCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
     IUnitOfWork unitOfWork,

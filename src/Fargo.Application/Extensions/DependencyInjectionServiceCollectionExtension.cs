@@ -1,9 +1,11 @@
 using Fargo.Application.Articles;
+using Fargo.Application.Audits;
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
 using Fargo.Application.Shared.Articles;
+using Fargo.Application.Shared.Audits;
 using Fargo.Application.Shared.Identity;
 using Fargo.Application.Shared.Items;
 using Fargo.Application.Shared.Partitions;
@@ -34,10 +36,11 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddFargoUserApplication()
             .AddFargoItemApplication()
             .AddFargoIdentityApplication()
-            .AddFargoSystemApplication();
+            .AddFargoSystemApplication()
+            .AddFargoAuditLogApplication();
 
         public IServiceCollection AddFargoDomain() => services
-            .AddScoped<ActorService>()
+            .AddScoped<ActorResolver>()
             .AddScoped<ArticleService>()
             .AddScoped<UserService>()
             .AddScoped<UserGroupService>()
@@ -48,10 +51,10 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
 
         public IServiceCollection AddFargoIdentityApplication() => services
-            .AddScoped<ICommandHandler<LoginCommand, AuthResult>, LoginCommandHandler>()
-            .AddScoped<ICommandHandler<LogoutCommand>, LogoutCommandHandler>()
-            .AddScoped<ICommandHandler<RefreshCommand, AuthResult>, RefreshCommandHandler>()
-            .AddScoped<ICommandHandler<PasswordChangeCommand>, PasswordChangeCommandHandler>();
+            .AddScoped<ICommandHandler<IdentityLoginCommand, AuthResult>, IdentityLoginCommandHandler>()
+            .AddScoped<ICommandHandler<IdentityLogoutCommand>, IdentityLogoutCommandHandler>()
+            .AddScoped<ICommandHandler<IdentityRefreshCommand, AuthResult>, IdentityRefreshCommandHandler>()
+            .AddScoped<ICommandHandler<IdentityPasswordChangeCommand>, IdentityPasswordChangeCommandHandler>();
 
         public IServiceCollection AddFargoItemApplication() => services
             .AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>()
@@ -88,5 +91,8 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>()
             .AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>()
             .AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
+
+        public IServiceCollection AddFargoAuditLogApplication() => services
+            .AddScoped<IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>>, AuditLogsQueryHandler>();
     }
 }

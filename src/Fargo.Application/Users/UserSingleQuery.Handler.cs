@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserSingleQueryHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserQueryRepository userRepository,
     ICurrentActor currentActor,
     ILogger<UserSingleQueryHandler> logger
@@ -25,7 +25,6 @@ public sealed class UserSingleQueryHandler(
         var user = await userRepository.GetInfoByGuidAsync(
             query.UserGuid,
             actor.PartitionAccessGuids,
-            notChildOfAnyPartition: true,
             cancellationToken);
 
         logger.SingleQueryCompleted(query.UserGuid, currentActor.Guid, user is not null);

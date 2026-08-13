@@ -26,6 +26,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
         .HasOne(i => i.ParentItemContainer)
         .WithMany()
         .HasForeignKey(i => i.ParentItemContainerGuid)
-        .OnDelete(DeleteBehavior.SetNull);
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

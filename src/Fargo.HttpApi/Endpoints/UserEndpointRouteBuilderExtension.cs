@@ -40,7 +40,7 @@ public static class UserEndpointRouteBuilderExtension
         builder.MapGet("/{userGuid:guid}", GetSingleUser)
             .WithName("GetUser")
             .WithSummary("Gets a single user")
-            .WithDescription("Retrieves a single user by its unique identifier. Optionally allows querying historical data using temporal tables.")
+            .WithDescription("Retrieves a single user by its unique identifier.")
             .Produces<UserDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound
         );
@@ -70,7 +70,7 @@ public static class UserEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyUser)
             .WithName("GetUsers")
             .WithSummary("Gets multiple users")
-            .WithDescription("Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.")
+            .WithDescription("Retrieves a paginated list of users.")
             .Produces<IReadOnlyCollection<UserDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent
         );
@@ -82,7 +82,6 @@ public static class UserEndpointRouteBuilderExtension
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        bool? notChildOfAnyPartition,
         IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>> handler,
         CancellationToken cancellationToken
     )
@@ -93,8 +92,7 @@ public static class UserEndpointRouteBuilderExtension
 
         var query = new UsersQuery(
             withPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

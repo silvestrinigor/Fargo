@@ -26,6 +26,6 @@ public sealed class UserPartitionConfiguration : IEntityTypeConfiguration<UserPa
         .HasOne(x => x.Partition)
         .WithMany()
         .HasForeignKey(x => x.PartitionGuid)
-        .OnDelete(DeleteBehavior.Restrict);
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

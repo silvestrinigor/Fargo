@@ -174,13 +174,6 @@
                 "format": "uuid"
               }
             }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
@@ -240,7 +233,7 @@
           "Items"
         ],
         "summary": "Gets a single item",
-        "description": "Retrieves a single item by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single item by its unique identifier.",
         "operationId": "GetItem",
         "parameters": [
           {
@@ -334,7 +327,7 @@
           "Items"
         ],
         "summary": "Gets multiple items",
-        "description": "Retrieves a paginated list of items. Supports optional temporal queries and partition filters, including public items without partitions.",
+        "description": "Retrieves a paginated list of items.",
         "operationId": "GetItems",
         "parameters": [
           {
@@ -370,13 +363,6 @@
                 "type": "string",
                 "format": "uuid"
               }
-            }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -437,7 +423,7 @@
           "Users"
         ],
         "summary": "Gets a single user",
-        "description": "Retrieves a single user by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single user by its unique identifier.",
         "operationId": "GetUser",
         "parameters": [
           {
@@ -531,7 +517,7 @@
           "Users"
         ],
         "summary": "Gets multiple users",
-        "description": "Retrieves a paginated list of users. Supports optional temporal queries and partition filters, including public users without partitions.",
+        "description": "Retrieves a paginated list of users.",
         "operationId": "GetUsers",
         "parameters": [
           {
@@ -567,13 +553,6 @@
                 "type": "string",
                 "format": "uuid"
               }
-            }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -634,7 +613,7 @@
           "UserGroups"
         ],
         "summary": "Gets a single user group",
-        "description": "Retrieves a single user group by its unique identifier. Optionally allows querying historical data using temporal tables.",
+        "description": "Retrieves a single user group by its unique identifier.",
         "operationId": "GetUserGroup",
         "parameters": [
           {
@@ -728,7 +707,7 @@
           "UserGroups"
         ],
         "summary": "Gets multiple user groups",
-        "description": "Retrieves a paginated list of user groups. Supports optional temporal queries and partition filters, including public user groups without partitions.",
+        "description": "Retrieves a paginated list of user groups.",
         "operationId": "GetUserGroups",
         "parameters": [
           {
@@ -764,13 +743,6 @@
                 "type": "string",
                 "format": "uuid"
               }
-            }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -957,13 +929,6 @@
                 "format": "uuid"
               }
             }
-          },
-          {
-            "name": "notChildOfAnyPartition",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
@@ -1142,6 +1107,55 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/audit-logs": {
+      "get": {
+        "tags": [
+          "AuditLogs"
+        ],
+        "summary": "Gets multiple audit logs",
+        "description": "Retrieves a paginated list of audit logs.",
+        "operationId": "GetAuditLogs",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditLogDto"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -1537,6 +1551,18 @@
           }
         }
       },
+      "AuditLogDto": {
+        "required": [
+          "guid"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "AuthResult": {
         "required": [
           "accessToken",
@@ -1594,6 +1620,7 @@
           "guid",
           "articleGuid",
           "parentContainerGuid",
+          "isFixed",
           "partitions"
         ],
         "type": "object",
@@ -1612,6 +1639,9 @@
               "string"
             ],
             "format": "uuid"
+          },
+          "isFixed": {
+            "type": "boolean"
           },
           "partitions": {
             "type": "array",
@@ -2344,6 +2374,9 @@
     },
     {
       "name": "Identity"
+    },
+    {
+      "name": "AuditLogs"
     }
   ]
 }

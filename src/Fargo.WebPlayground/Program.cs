@@ -1,50 +1,35 @@
-using Fargo.HttpClient;
-using Fargo.WebPlayground;
+using Fargo.HttpApi.Client.Extensions;
 using Fargo.WebPlayground.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services
+.AddRazorComponents()
+.AddInteractiveServerComponents();
 
 builder.Services.AddFluentUIComponents();
 
-builder.Services.AddScoped<PlaygroundAuthSession>();
+var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"] ?? "http://localhost:5534";
 
-builder.Services.AddScoped<PlaygroundApiClientFactory>();
-
-builder.Services.AddScoped<IdentitySession>();
-
-builder.Services.AddFargoHttpClient(options =>
-{
-    var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
-        ?? "http://localhost:5534";
-
-    options.BaseAddress = new Uri(baseAddress);
-});
-
-builder.Services.AddHttpClient(PlaygroundApiClientFactory.HttpClientName, httpClient =>
-{
-    var baseAddress = builder.Configuration["FargoHttpApi:BaseAddress"]
-        ?? "http://localhost:5534";
-
-    httpClient.BaseAddress = new Uri(baseAddress);
-});
+builder.Services.AddFargoHttpApiClient(new Uri(baseAddress));
 
 var app = builder.Build();
 
-app.UseDeveloperExceptionPage();
+if (app.Environment.EnvironmentName == Environments.Development)
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
 app.UseHttpsRedirection();
 
+// A call to UseAntiforgery must be placed after calls, if present, to UseAuthentication and UseAuthorization.
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();

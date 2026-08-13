@@ -69,19 +69,20 @@ public interface IPartitionRepository
         IReadOnlyCollection<Guid> partitionGuids, bool includeRoots = true, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Determines whether the specified partition has any associated entities.
+    /// Determines whether the specified partition has at least one direct child
+    /// partition.
     /// </summary>
     /// <param name="partitionGuid">
-    /// The identifier of the partition to check.
+    /// The identifier of the partition whose children should be checked.
     /// </param>
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
     /// <returns>
-    /// <see langword="true"/> if the partition has one or more associated
-    /// entities; otherwise, <see langword="false"/>.
+    /// <see langword="true"/> if the partition has at least one direct child
+    /// partition; otherwise, <see langword="false"/>.
     /// </returns>
-    Task<bool> HasAnyAssociatedEntityAsync(Guid partitionGuid, CancellationToken cancellationToken = default);
+    Task<bool> HasChildrenAsync(Guid partitionGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new partition to the persistence context.

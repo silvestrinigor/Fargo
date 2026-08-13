@@ -1,0 +1,95 @@
+using Fargo.Application.Common;
+using Fargo.Core.Identity;
+using Fargo.Core.Security;
+using Fargo.Core.Shared.Informations;
+using Fargo.Core.Shared.Security;
+using Fargo.Core.Users;
+using Microsoft.Extensions.Logging;
+
+namespace Fargo.Application.Identity;
+
+public sealed class IdentityPasswordChangeCommandHandler(
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    IRefreshTokenRepository refreshTokenRepository,
+    IUnitOfWork unitOfWork,
+    ILogger<IdentityPasswordChangeCommandHandler> logger
+) : ICommandHandler<IdentityPasswordChangeCommand>
+{
+    public async Task HandleAsync(
+        IdentityPasswordChangeCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        logger.PasswordChangeStarted(command.Passwords.Nameid);
+
+        Nameid nameid;
+
+        try
+        {
+            nameid = new Nameid(command.Passwords.Nameid);
+        }
+        catch (ArgumentException)
+        {
+            logger.PasswordChangeRejectedInvalidNameId(command.Passwords.Nameid);
+
+            throw new InvalidCredentialsFargoApplicationException();
+        }
+
+        var user = await userRepository.GetByNameidAsync(nameid, cancellationToken);
+
+        if (user is null)
+        {
+            logger.PasswordChangeUserNotFound(nameid);
+
+            throw new UnauthorizedAccessException();
+        }
+
+        if (!user.IsActive)
+        {
+            logger.PasswordChangeUserInactive(user.Guid);
+
+            throw new UnauthorizedAccessException();
+        }
+
+        var currentPassword = command.Passwords.CurrentPassword;
+
+        var isValid = user.Authentication.PasswordHash is not null
+            && passwordHasher.Verify(user.Authentication.PasswordHash.Value, new(currentPassword));
+
+        if (!isValid)
+        {
+            logger.PasswordChangeInvalidPassword(user.Guid);
+
+            throw new UnauthorizedAccessException();
+        }
+
+        try
+        {
+            _ = new Password(command.Passwords.NewPassword);
+        }
+        catch (ArgumentException)
+        {
+            // TODO: not aways the reason is weak password.
+            throw new UnauthorizedAccessException();
+        }
+
+        var password = new Password(command.Passwords.NewPassword);
+
+        user.Authentication.SetPasswordHash(passwordHasher.Hash(password));
+
+        user.Authentication.ResetPasswordExpiration();
+
+        user.Authentication.RotateAuthVersion();
+
+        var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.Guid, cancellationToken);
+
+        foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
+        {
+            refreshToken.Revoke();
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        logger.PasswordChangeCompleted(user.Guid);
+    }
+}

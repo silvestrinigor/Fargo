@@ -34,14 +34,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public async Task<UserGroupDto?> GetInfoByGuidAsync(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var userGroup = await ApplyPartitionFilter(
                 userGroups
                     .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+                childOfAnyOfThesePartitions)
             .Where(userGroup => userGroup.Guid == entityGuid)
             .Select(UserGroupDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
@@ -52,14 +50,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public async Task<IReadOnlyCollection<UserGroupDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var result = await ApplyPartitionFilter(
                 userGroups
                     .AsNoTracking(),
-                childOfAnyOfThesePartitions,
-                notChildOfAnyPartition)
+                childOfAnyOfThesePartitions)
             .OrderBy(userGroup => userGroup.Guid)
             .WithPagination(pagination)
             .Select(UserGroupDtoMappings.Projection)
@@ -70,29 +66,11 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
 
     private static IQueryable<UserGroup> ApplyPartitionFilter(
         IQueryable<UserGroup> query,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notChildOfAnyPartition)
+        IReadOnlyCollection<Guid>? partitionGuids)
     {
         if (partitionGuids is null)
         {
-            if (notChildOfAnyPartition is true)
-            {
-                return query.Where(userGroup => !userGroup.Partitions.Any());
-            }
-
-            if (notChildOfAnyPartition is false)
-            {
-                return query.Where(userGroup => userGroup.Partitions.Any());
-            }
-
             return query;
-        }
-
-        if (notChildOfAnyPartition is true)
-        {
-            return query.Where(userGroup =>
-                !userGroup.Partitions.Any() ||
-                userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(userGroup =>

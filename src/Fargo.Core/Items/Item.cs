@@ -3,6 +3,8 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Common;
+using Fargo.Core.Shared.Entities;
 
 namespace Fargo.Core.Items;
 
@@ -22,8 +24,11 @@ namespace Fargo.Core.Items;
 /// determined by the article's partitions. Instead, a user may access the item
 /// if the item has no partition (public), or if they have access to at least
 /// one partition associated directly with the item.
+///
+/// Every item is always associated with the global partition. The global
+/// partition defines the base partition scope of the item and cannot be removed.
 /// </remarks>
-public class Item : IEntity, IPartitionedGuidsReadOnly
+public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the item.
@@ -67,17 +72,41 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     public Item? ParentItemContainer { get; private set; }
 
     /// <summary>
+    /// Gets a value indicating whether the item is fixed in its current container location.
+    /// </summary>
+    public bool IsFixed { get; private set; } = false;
+
+    /// <summary>
     /// Gets the partitions directly associated with the item.
     /// </summary>
     /// <remarks>
-    /// These associations define the partition scope of the item and are used
-    /// during partition-based access evaluation.
+    /// Every item is always associated with the global partition.
+    /// The global partition defines the base partition scope of the item
+    /// and cannot be removed.
+    ///
+    /// Additional partitions may be associated with the item.
     /// </remarks>
     public IReadOnlyCollection<ItemPartition> Partitions => partitions;
 
+    /// <summary>
+    /// Gets the unique identifiers of the partitions associated with the item.
+    /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
+    /// <summary>
+    /// Gets the movement history of the item.
+    /// </summary>
+    /// <remarks>
+    /// A movement is recorded whenever the item's parent container changes.
+    /// Moving an item into a container records the destination container,
+    /// while removing the item from a container records a movement with no
+    /// destination container.
+    /// </remarks>
     private readonly List<ItemPartition> partitions = [];
+
+    public IReadOnlyCollection<ItemMoviment> Moviments => Moviments;
+
+    private readonly List<ItemMoviment> moviments = [];
 
     /// <summary>
     /// Initializes a new item entity.
@@ -95,10 +124,16 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
     /// Initializes a new item entity associated with the specified article.
     /// </summary>
     /// <param name="article">The article associated with the item.</param>
+    /// <remarks>
+    /// Every item is automatically associated with the global partition when
+    /// it is created. This association is mandatory and cannot be removed.
+    /// </remarks>
     private Item(Article article)
     {
         Article = article;
         ArticleGuid = article.Guid;
+
+        partitions.Add(new ItemPartition(this, FargoCoreWellKnowGuids.GlobalPartitionGuid));
     }
 
     /// <summary>
@@ -110,56 +145,134 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
         => new(article);
 
     /// <summary>
-    /// Assigns the specified container item as the parent of the current item.
+    /// Places the item inside the specified container item.
     /// </summary>
-    /// <param name="itemContainer">
-    /// The parent container item.
+    /// <param name="parentItemContainer">
+    /// The container item that will become the item's parent.
     /// </param>
     /// <remarks>
-    /// This method does not validate the complete item containment hierarchy.
-    /// The application should use <see cref="ItemService"/> to validate that
-    /// assigning the parent container does not create a circular hierarchy.
+    /// This operation updates the item's current parent container and records
+    /// a movement in the item's movement history.
+    ///
+    /// The method validates invariants that can be determined from the current
+    /// item and the specified parent, including that the parent is not the item
+    /// itself, that the parent represents a container article, and that the item
+    /// is not fixed.
+    ///
+    /// Validation requiring traversal of the complete containment hierarchy,
+    /// such as detecting indirect circular references, is performed by
+    /// <see cref="ItemService"/>.
     /// </remarks>
-    public void PlaceInsideContainer(Item itemContainer)
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="parentItemContainer"/> is null.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the specified parent is invalid or the item is fixed.
+    /// </exception>
+    public void PlaceInsideContainer(Item parentItemContainer)
     {
-        ArgumentNullException.ThrowIfNull(itemContainer);
+        ArgumentNullException.ThrowIfNull(parentItemContainer);
 
-        if (itemContainer.Guid == Guid)
+        if (parentItemContainer.Guid == Guid)
         {
-            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoCoreErrorType.InvalidArgument);
+            throw new FargoCoreException($"Item '{Guid}' cannot be its own parent container.", FargoErrorType.InvalidOperation);
         }
 
-        if (itemContainer.Article.ArticleType != ArticleType.Container)
+        if (parentItemContainer.Article.ArticleType != ArticleType.Container)
         {
             throw new FargoCoreException(
-                $"Item '{itemContainer.Guid}' is not a container item.", FargoCoreErrorType.InvalidArgument);
+                $"Item '{parentItemContainer.Guid}' is not a container item.", FargoErrorType.InvalidOperation);
         }
 
-        ParentItemContainer = itemContainer;
+        if (IsFixed)
+        {
+            throw new FargoCoreException(
+                $"The fixed item {Guid} cannot be moved to container {parentItemContainer.Guid}.",
+                FargoErrorType.InvalidOperation);
+        }
 
-        ParentItemContainerGuid = itemContainer.Guid;
+        ParentItemContainer = parentItemContainer;
+
+        ParentItemContainerGuid = parentItemContainer.Guid;
+
+        moviments.Add(new ItemMoviment(Guid, parentItemContainer.Guid, DateTimeOffset.UtcNow));
     }
 
     /// <summary>
-    /// Removes the parent container association from this item.
+    /// Removes the item from its current parent container, leaving the item
+    /// without a parent container.
     /// </summary>
     /// <remarks>
-    /// After calling this method, the item is no longer placed inside another
-    /// container item.
+    /// After this operation, <see cref="ParentItemContainer"/> and
+    /// <see cref="ParentItemContainerGuid"/> are <see langword="null"/>,
+    /// meaning that the item is not currently contained by any other item.
+    ///
+    /// A movement record is added to the item's movement history to represent
+    /// that the item is no longer inside a container.
+    ///
+    /// A fixed item cannot be removed from its current container.
     /// </remarks>
-    public void RemoveParentItemContainer()
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the item is fixed.
+    /// </exception>
+    public void RemoveFromContainers()
     {
+        if (IsFixed)
+        {
+            throw new FargoCoreException(
+                $"The fixed item {Guid} cannot be removed from container.",
+                FargoErrorType.InvalidOperation);
+        }
+
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
+
+        moviments.Add(new ItemMoviment(Guid, null, DateTimeOffset.UtcNow));
+    }
+
+    /// <summary>
+    /// Fixes the item in its current location.
+    /// </summary>
+    /// <remarks>
+    /// A fixed item cannot be moved into another container or removed from its
+    /// current parent container.
+    ///
+    /// Fixing an item does not change its current parent container.
+    /// If the item is already fixed, this operation has no effect.
+    /// </remarks>
+    public void Fix()
+    {
+        IsFixed = true;
+    }
+
+    /// <summary>
+    /// Removes the fixed state from the item.
+    /// </summary>
+    /// <remarks>
+    /// After this operation, the item can be moved into another container or
+    /// removed from its current parent container.
+    ///
+    /// Unfixing an item does not change its current parent container.
+    /// If the item is already unfixed, this operation has no effect.
+    /// </remarks>
+    public void Unfix()
+    {
+        IsFixed = false;
     }
 
     /// <summary>
     /// Associates the item with the specified partition.
+    /// If the association already exists, no action is taken.
     /// </summary>
     /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+    /// </exception>
     public void AddPartition(Partition partition)
     {
+        ArgumentNullException.ThrowIfNull(partition);
+
         if (partitions.Any(p => p.PartitionGuid == partition.Guid))
         {
             return;
@@ -168,14 +281,35 @@ public class Item : IEntity, IPartitionedGuidsReadOnly
         partitions.Add(new ItemPartition(this, partition));
     }
 
+
     /// <summary>
     /// Removes the association between the item and the specified partition.
     /// </summary>
+    /// <remarks>
+    /// The global partition is mandatory for every item and therefore cannot
+    /// be removed.
+    ///
+    /// If the item is not associated with the specified partition,
+    /// no action is taken.
+    /// </remarks>
     /// <param name="partitionGuid">
     /// The identifier of the partition to remove.
     /// </param>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when attempting to remove the global partition.
+    /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
+        if (partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                "The global partition is mandatory and cannot be removed from an item.",
+                FargoErrorType.InvalidOperation);
+        }
+
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
+
+    public EntityType GetEntityType() => EntityType.Item;
 }

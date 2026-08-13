@@ -209,6 +209,70 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("article_variations", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("guid");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("integer")
+                        .HasColumnName("action_type");
+
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<byte>("ActorType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("actor_type");
+
+                    b.Property<Guid>("EntityGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entity_guid");
+
+                    b.Property<int>("EntityType")
+                        .HasColumnType("integer")
+                        .HasColumnName("entity_type");
+
+                    b.Property<string>("Metadata")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.HasKey("Guid")
+                        .HasName("pk_audit_logs");
+
+                    b.HasIndex("OccurredAt")
+                        .HasDatabaseName("ix_audit_logs_occurred_at");
+
+                    b.ToTable("audit_logs", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
+                {
+                    b.Property<Guid>("AuditLogGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("audit_log_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("AuditLogGuid", "PartitionGuid")
+                        .HasName("pk_audit_log_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_audit_log_partitions_partition_guid");
+
+                    b.ToTable("audit_log_partitions", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -258,6 +322,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("article_guid");
 
+                    b.Property<bool>("IsFixed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_fixed");
+
                     b.Property<Guid?>("ParentItemContainerGuid")
                         .HasColumnType("uuid")
                         .HasColumnName("parent_item_container_guid");
@@ -272,6 +340,33 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_items_parent_item_container_guid");
 
                     b.ToTable("items", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Items.ItemMoviment", b =>
+                {
+                    b.Property<Guid>("ItemGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_guid");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<Guid?>("MovedToContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("moved_to_container_guid");
+
+                    b.Property<bool>("RemovedFromContainers")
+                        .HasColumnType("boolean")
+                        .HasColumnName("removed_from_containers");
+
+                    b.HasKey("ItemGuid", "OccurredAt")
+                        .HasName("pk_item_moviments");
+
+                    b.HasIndex("MovedToContainerGuid")
+                        .HasDatabaseName("ix_item_moviments_moved_to_container_guid");
+
+                    b.ToTable("item_moviments", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Items.ItemPartition", b =>
@@ -662,6 +757,25 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("VariationArticle");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Audits.AuditLog", "AuditLog")
+                        .WithMany("Partitions")
+                        .HasForeignKey("AuditLogGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_audit_log_partitions_audit_logs_audit_log_guid");
+
+                    b.HasOne("Fargo.Core.Partitions.Partition", null)
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_audit_log_partitions_partitions_partition_guid");
+
+                    b.Navigation("AuditLog");
+                });
+
             modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
                 {
                     b.HasOne("Fargo.Core.Users.User", null)
@@ -684,12 +798,28 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasOne("Fargo.Core.Items.Item", "ParentItemContainer")
                         .WithMany()
                         .HasForeignKey("ParentItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_items_items_parent_item_container_guid");
 
                     b.Navigation("Article");
 
                     b.Navigation("ParentItemContainer");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Items.ItemMoviment", b =>
+                {
+                    b.HasOne("Fargo.Core.Items.Item", null)
+                        .WithMany("Moviments")
+                        .HasForeignKey("ItemGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_moviments_items_item_guid");
+
+                    b.HasOne("Fargo.Core.Items.Item", null)
+                        .WithMany()
+                        .HasForeignKey("MovedToContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_moviments_items_moved_to_container_guid");
                 });
 
             modelBuilder.Entity("Fargo.Core.Items.ItemPartition", b =>
@@ -871,8 +1001,15 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Variation");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
+                {
+                    b.Navigation("Partitions");
+                });
+
             modelBuilder.Entity("Fargo.Core.Items.Item", b =>
                 {
+                    b.Navigation("Moviments");
+
                     b.Navigation("Partitions");
                 });
 

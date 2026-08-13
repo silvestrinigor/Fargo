@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.UserGroups;
 
 public sealed class UserGroupSingleQueryHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserGroupQueryRepository userGroupRepository,
     ICurrentActor currentActor,
     ILogger<UserGroupSingleQueryHandler> logger
@@ -15,8 +15,7 @@ public sealed class UserGroupSingleQueryHandler(
 {
     public async Task<UserGroupDto?> HandleAsync(
         UserGroupSingleQuery query,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         logger.SingleQueryStarted(query.UserGroupGuid, currentActor.Guid);
 
@@ -27,7 +26,6 @@ public sealed class UserGroupSingleQueryHandler(
         var userGroup = await userGroupRepository.GetInfoByGuidAsync(
             query.UserGroupGuid,
             actor.PartitionAccessGuids,
-            notChildOfAnyPartition: true,
             cancellationToken);
 
         logger.SingleQueryCompleted(query.UserGroupGuid, currentActor.Guid, userGroup is not null);

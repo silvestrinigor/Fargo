@@ -64,4 +64,50 @@ public class UserPartitionAccess
         Partition = partition;
         PartitionGuid = partition.Guid;
     }
+
+    /// <summary>
+    /// Initializes a new user-partition access association using the
+    /// specified partition identifier.
+    /// </summary>
+    /// <remarks>
+    /// This constructor should be used when the partition entity does not
+    /// need to be loaded and the partition identifier is already known.
+    ///
+    /// This is particularly useful for well-known or global partitions
+    /// whose identifiers are stable and known by the domain.
+    ///
+    /// Prefer this constructor over the constructor that accepts a
+    /// <see cref="Partition"/> when only the partition identifier is required.
+    /// </remarks>
+    /// <param name="user">
+    /// The user being granted access.
+    /// </param>
+    /// <param name="partitionGuid">
+    /// The unique identifier of the partition to which access is granted.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="user"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="partitionGuid"/> is
+    /// <see cref="Guid.Empty"/>.
+    /// </exception>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    internal UserPartitionAccess(User user, Guid partitionGuid)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    {
+        ArgumentNullException.ThrowIfNull(user);
+
+        if (partitionGuid == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "Partition GUID cannot be empty.",
+                nameof(partitionGuid));
+        }
+
+        User = user;
+        UserGuid = user.Guid;
+
+        PartitionGuid = partitionGuid;
+    }
 }

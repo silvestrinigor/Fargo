@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 
 namespace Fargo.Core.Partitions;
 
@@ -51,7 +52,7 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         {
             throw new FargoCoreException(
                 $"Partition '{childPartition.Guid}' cannot be assigned to parent partition '{parentPartition.Guid}' because this would create a circular hierarchy.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 
@@ -90,13 +91,25 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
     }
 
     /// <summary>
-    /// Ensures that the specified partition can be safely deleted.
+    /// Validates that the specified partition can be safely deleted.
     /// </summary>
-    /// <param name="partition">The partition to validate.</param>
-    /// <param name="cancellationToken">A token used to cancel the operation.</param>
-    /// <exception cref="FargoCoreException">
-    /// Thrown if the partition is the global partition or if it has associated entities.
+    /// <param name="partition">
+    /// The partition to validate.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
     /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the partition is the global partition or has one or more
+    /// direct child partitions.
+    /// </exception>
+    /// <remarks>
+    /// A partition cannot be deleted while it has child partitions because
+    /// deleting it would leave those partitions without their required parent.
+    /// </remarks>
     public async Task ValidatePartitionCanBeDeletedAsync(Partition partition, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partition);
@@ -105,16 +118,16 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         {
             throw new FargoCoreException(
                 $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot be deleted.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
 
-        var hasAssociatedEntities = await partitionRepository.HasAnyAssociatedEntityAsync(partition.Guid, cancellationToken);
+        var hasChildrenPartitions = await partitionRepository.HasChildrenAsync(partition.Guid, cancellationToken);
 
-        if (hasAssociatedEntities)
+        if (hasChildrenPartitions)
         {
             throw new FargoCoreException(
-                $"Partition '{partition.Guid}' cannot be deleted because it has associated entities.",
-                FargoCoreErrorType.InvalidOperation);
+                $"Partition '{partition.Guid}' cannot be deleted because it has children partitions.",
+                FargoErrorType.InvalidOperation);
         }
     }
 }

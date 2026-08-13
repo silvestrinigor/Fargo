@@ -1,6 +1,9 @@
+using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.Shared.Articles;
+using Fargo.Core.Shared.Common;
+using Fargo.Core.Shared.Entities;
 using Fargo.Core.Shared.Informations;
 using System.Drawing;
 using UnitsNet;
@@ -14,8 +17,11 @@ namespace Fargo.Core.Articles;
 /// An article defines the descriptive information of a product or item type,
 /// such as its name and description. It does not represent a physical unit,
 /// but rather the conceptual definition shared by one or more items.
+///
+/// Every article is always associated with the global partition. Additional
+/// partitions may be associated with the article to define its partition scope.
 /// </remarks>
-public class Article : IEntity, IPartitionedGuidsReadOnly
+public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the article.
@@ -107,11 +113,17 @@ public class Article : IEntity, IPartitionedGuidsReadOnly
     /// Gets the partitions associated with the article.
     /// </summary>
     /// <remarks>
-    /// These partitions define the partition scope of the article and are
-    /// used in partition-based access evaluation.
+    /// Every article is always associated with the global partition.
+    /// The global partition defines the base partition scope of the article
+    /// and cannot be removed.
+    ///
+    /// Additional partitions may be associated with the article.
     /// </remarks>
     public IReadOnlyCollection<ArticlePartition> Partitions => partitions;
 
+    /// <summary>
+    /// Gets the unique identifiers of the partitions associated with the article.
+    /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
     private readonly List<ArticlePartition> partitions = [];
@@ -120,6 +132,9 @@ public class Article : IEntity, IPartitionedGuidsReadOnly
     {
         Barcode = new ArticleBarcode(this);
         Dimension = new ArticleDimension(this);
+
+        // Every article must belong to the global partition.
+        partitions.Add(new ArticlePartition(this, FargoCoreWellKnowGuids.GlobalPartitionGuid));
     }
 
     private Article(Article variationFromArticle)
@@ -277,6 +292,9 @@ public class Article : IEntity, IPartitionedGuidsReadOnly
     /// If the association already exists, no action is taken.
     /// </summary>
     /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+    /// </exception>
     public void AddPartition(Partition partition)
     {
         ArgumentNullException.ThrowIfNull(partition);
@@ -292,11 +310,30 @@ public class Article : IEntity, IPartitionedGuidsReadOnly
     /// <summary>
     /// Removes the association between the article and the specified partition.
     /// </summary>
+    /// <remarks>
+    /// The global partition is mandatory for every article and therefore
+    /// cannot be removed.
+    ///
+    /// If the article is not associated with the specified partition,
+    /// no action is taken.
+    /// </remarks>
     /// <param name="partitionGuid">
     /// The identifier of the partition to remove.
     /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when attempting to remove the global partition.
+    /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {
+        if (partitionGuid == FargoCoreWellKnowGuids.GlobalPartitionGuid)
+        {
+            throw new FargoCoreException(
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' is mandatory and cannot be removed from an article.",
+                FargoErrorType.InvalidOperation);
+        }
+
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
+
+    public EntityType GetEntityType() => EntityType.Article;
 }

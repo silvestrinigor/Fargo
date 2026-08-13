@@ -1,5 +1,6 @@
 using Fargo.Core.Common;
 using Fargo.Core.Partitions;
+using Fargo.Core.Shared.Common;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Partitions;
@@ -16,7 +17,7 @@ public class PartitionServiceTests
     }
 
     [Fact]
-    public async Task InsertIntoPartitionAsync_WhenPartitionIsValid_ShouldSetParentPartition()
+    public async Task ValidateParentPartitionHierarchyAssignmentAsync_WhenPartitionIsValid_ShouldNotThrowException()
     {
         var globalPartition = Partition.CreateGlobalPartition(default);
         var partition1 = Partition.CreatePartition(default, globalPartition);
@@ -29,7 +30,7 @@ public class PartitionServiceTests
     }
 
     [Fact]
-    public async Task InsertIntoPartitionAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
+    public async Task ValidateParentPartitionHierarchyAssignmentAsync_WhenCreatesCircularHierarchy_ShouldThrowException()
     {
         var globalPartition = Partition.CreateGlobalPartition(default);
         var partition1 = Partition.CreatePartition(default, globalPartition);
@@ -42,6 +43,6 @@ public class PartitionServiceTests
         async Task function() => await partitionService.ValidateParentPartitionHierarchyAssignmentAsync(partition3, partition1);
 
         var ex = await Assert.ThrowsAsync<FargoCoreException>(function);
-        Assert.Equal(FargoCoreErrorType.InvalidOperation, ex.ErrorType);
+        Assert.Equal(FargoErrorType.InvalidOperation, ex.ErrorType);
     }
 }

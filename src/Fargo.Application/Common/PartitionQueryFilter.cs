@@ -2,24 +2,17 @@ namespace Fargo.Application.Common;
 
 public static class PartitionQueryFilter
 {
-    public static (IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions, bool? NotChildOfAnyPartition)
+    public static IReadOnlyCollection<Guid>?
         ForPartitionedEntities(
             IReadOnlyCollection<Guid> actorPartitionGuids,
-            IReadOnlyCollection<Guid>? requestedPartitionGuids,
-            bool? notChildOfAnyPartition)
+            IReadOnlyCollection<Guid>? requestedPartitionGuids)
     {
         if (requestedPartitionGuids is { Count: > 0 })
         {
             return (
-                [.. actorPartitionGuids.Intersect(requestedPartitionGuids)],
-                notChildOfAnyPartition);
+                [.. actorPartitionGuids.Intersect(requestedPartitionGuids)]);
         }
 
-        if (notChildOfAnyPartition is true)
-        {
-            return (null, true);
-        }
-
-        return (actorPartitionGuids, notChildOfAnyPartition ?? true);
+        return actorPartitionGuids;
     }
 }

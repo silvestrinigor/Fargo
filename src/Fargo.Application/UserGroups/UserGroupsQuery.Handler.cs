@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.UserGroups;
 
 public sealed class UserGroupsQueryHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserGroupQueryRepository userGroupRepository,
     ICurrentActor currentActor,
     ILogger<UserGroupsQueryHandler> logger
@@ -23,22 +23,20 @@ public sealed class UserGroupsQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var (childOfAnyOfThesePartitions, notChildOfAnyPartition) =
+        var partitionGuids =
             PartitionQueryFilter.ForPartitionedEntities(
                 actor.PartitionAccessGuids,
-                query.ChildOfAnyOfThesePartitions,
-                query.NotChildOfAnyPartition);
+                query.ChildOfAnyOfThesePartitions);
 
         var userGroups = await userGroupRepository.GetManyInfoAsync(
             query.WithPagination,
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition,
+            partitionGuids,
             cancellationToken);
 
         logger.ManyQueryCompleted(
             currentActor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            childOfAnyOfThesePartitions?.Count ?? 0,
+            partitionGuids?.Count ?? 0,
             userGroups.Count);
 
         return userGroups;

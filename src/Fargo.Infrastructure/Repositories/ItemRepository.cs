@@ -16,6 +16,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return context.Items
         .Include(item => item.Article)
         .Include(item => item.Partitions)
+        .Include(item => item.ParentItemContainer)
         .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
     }
 
@@ -25,31 +26,31 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         CancellationToken cancellationToken = default)
     {
         FormattableString query = $"""
-    WITH ItemTree AS
-    (
-        SELECT
-            item.[Guid],
-            item.[ParentContainerGuid],
-            item.[ArticleGuid]
-        FROM [Items] AS item
-        INNER JOIN [Articles] AS article
-            ON article.[Guid] = item.[ArticleGuid]
-        WHERE item.[Guid] = {itemContainerGuid}
-          AND article.[ArticleType] = {(int)ArticleType.Container}
+        WITH RECURSIVE item_tree AS
+        (
+            SELECT
+                item.guid,
+                item.parent_item_container_guid,
+                item.article_guid
+            FROM items AS item
+            INNER JOIN articles AS article
+                ON article.guid = item.article_guid
+            WHERE item.guid = {itemContainerGuid}
+            AND article.article_type = {(int)ArticleType.Container}
 
-        UNION ALL
+            UNION ALL
 
-        SELECT
-            child.[Guid],
-            child.[ParentContainerGuid],
-            child.[ArticleGuid]
-        FROM [Items] AS child
-        INNER JOIN ItemTree AS parent
-            ON child.[ParentContainerGuid] = parent.[Guid]
-    )
-    SELECT [Guid]
-    FROM ItemTree
-    """;
+            SELECT
+                child.guid,
+                child.parent_item_container_guid,
+                child.article_guid
+            FROM items AS child
+            INNER JOIN item_tree AS parent
+                ON child.parent_item_container_guid = parent.guid
+        )
+        SELECT guid
+        FROM item_tree;
+        """;
 
         var guids = await context.Database
             .SqlQuery<Guid>(query)
@@ -75,8 +76,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     {
         var queryFiltered = ApplyPartitionFilter(
             context.Items.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var itemTask = queryFiltered
             .Where(item => item.Guid == entityGuid)
@@ -89,13 +89,11 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
             context.Items.AsNoTracking(),
-            childOfAnyOfThesePartitions,
-            notChildOfAnyPartition);
+            childOfAnyOfThesePartitions);
 
         var item = await queryFiltered
             .OrderBy(item => item.Guid)
@@ -108,29 +106,11 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     private static IQueryable<Item> ApplyPartitionFilter(
         IQueryable<Item> query,
-        IReadOnlyCollection<Guid>? partitionGuids,
-        bool? notChildOfAnyPartition)
+        IReadOnlyCollection<Guid>? partitionGuids)
     {
         if (partitionGuids is null)
         {
-            if (notChildOfAnyPartition is true)
-            {
-                return query.Where(item => !item.Partitions.Any());
-            }
-
-            if (notChildOfAnyPartition is false)
-            {
-                return query.Where(item => item.Partitions.Any());
-            }
-
             return query;
-        }
-
-        if (notChildOfAnyPartition is true)
-        {
-            return query.Where(item =>
-                !item.Partitions.Any() ||
-                item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
         }
 
         return query.Where(item =>

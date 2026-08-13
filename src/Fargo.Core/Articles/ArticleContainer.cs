@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using UnitsNet;
 
 namespace Fargo.Core.Articles;
@@ -70,7 +71,7 @@ public sealed class ArticleContainer
         {
             throw new FargoCoreException(
                 "The maximum mass of a container must be greater than zero.",
-                FargoCoreErrorType.InvalidArgument);
+                FargoErrorType.InvalidOperation);
         }
 
         MaxMass = maxMass;

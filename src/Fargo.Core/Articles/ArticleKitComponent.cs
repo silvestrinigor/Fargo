@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
@@ -66,7 +67,7 @@ public sealed class ArticleKitComponent
         {
             throw new FargoCoreException(
                 "A kit cannot contain itself.",
-                FargoCoreErrorType.InvalidArgument);
+                FargoErrorType.InvalidOperation);
         }
 
         KitArticle = kitArticle;

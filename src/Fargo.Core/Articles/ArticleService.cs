@@ -1,5 +1,6 @@
 using Fargo.Core.Common;
 using Fargo.Core.Shared.Barcodes;
+using Fargo.Core.Shared.Common;
 
 namespace Fargo.Core.Articles;
 
@@ -65,7 +66,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         {
             throw new FargoCoreException(
                 $"The ean13 '{ean13}' is already assigned to another article.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 }

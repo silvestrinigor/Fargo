@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Shared.Actions;
 using Fargo.Core.Shared.Actors;
 using Fargo.Core.Shared.Entities;
@@ -10,8 +11,9 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Users;
 
 public sealed class UserDeleteCommandHandler(
-    ActorService actorService,
+    ActorResolver actorService,
     IUserRepository userRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<UserDeleteCommandHandler> logger
@@ -42,6 +44,10 @@ public sealed class UserDeleteCommandHandler(
         UserService.ValidateUserCanBeDeleted(user);
 
         userRepository.Remove(user);
+
+        var audit = AuditLog.CreateAuditLog(actor, user, ActionType.DeleteUser);
+
+        auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

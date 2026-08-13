@@ -1,4 +1,5 @@
 using Fargo.Core.Common;
+using Fargo.Core.Shared.Common;
 using Fargo.Core.Shared.Informations;
 
 namespace Fargo.Core.UserGroups;
@@ -26,7 +27,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 
         if (alreadyExistsWithName)
         {
-            throw new FargoCoreException($"A user group with Nameid '{nameid}' already exists.", FargoCoreErrorType.InvalidOperation);
+            throw new FargoCoreException($"A user group with Nameid '{nameid}' already exists.", FargoErrorType.InvalidOperation);
         }
     }
 
@@ -48,7 +49,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
         if (userGroup.IsAdministrators)
         {
             throw new FargoCoreException(
-                $"The administrators user group '{userGroup.Guid}' cannot be deleted.", FargoCoreErrorType.InvalidOperation);
+                $"The administrators user group '{userGroup.Guid}' cannot be deleted.", FargoErrorType.InvalidOperation);
         }
 
         var anyChildUserGroup = await userGroupRepository.HasChildrenUserGroupAsync(userGroup.Guid, cancellationToken);
@@ -57,7 +58,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
         {
             throw new FargoCoreException(
                 $"User group '{userGroup.Guid}' cannot be deleted because it has child user groups.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 
@@ -97,7 +98,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
         {
             throw new FargoCoreException(
                 $"User group '{childUserGroup.Guid}' cannot be assigned to parent '{parentUserGroup.Guid}' because this would create a circular hierarchy.",
-                FargoCoreErrorType.InvalidOperation);
+                FargoErrorType.InvalidOperation);
         }
     }
 

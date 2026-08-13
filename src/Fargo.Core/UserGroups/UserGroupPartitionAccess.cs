@@ -47,10 +47,42 @@ public class UserGroupPartitionAccess
     /// </param>
     internal UserGroupPartitionAccess(UserGroup userGroup, Partition partition)
     {
+        ArgumentNullException.ThrowIfNull(userGroup);
+        ArgumentNullException.ThrowIfNull(partition);
+
         UserGroup = userGroup;
         UserGroupGuid = userGroup.Guid;
 
         Partition = partition;
         PartitionGuid = partition.Guid;
+    }
+
+    /// <summary>
+    /// Initializes a new user-group partition access assignment using
+    /// the identifier of the partition.
+    /// </summary>
+    /// <param name="userGroup">
+    /// The user group receiving access.
+    /// </param>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to which access is granted.
+    /// </param>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    internal UserGroupPartitionAccess(UserGroup userGroup, Guid partitionGuid)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    {
+        ArgumentNullException.ThrowIfNull(userGroup);
+
+        if (partitionGuid == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "Partition GUID cannot be empty.",
+                nameof(partitionGuid));
+        }
+
+        UserGroup = userGroup;
+        UserGroupGuid = userGroup.Guid;
+
+        PartitionGuid = partitionGuid;
     }
 }
