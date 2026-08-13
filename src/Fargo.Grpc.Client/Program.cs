@@ -1,8 +1,8 @@
-﻿using Grpc.Net.Client;
 using Fargo.Grpc.Client;
-using Grpc.Core.Interceptors;
 using Fargo.Grpc.Client.Interceptors;
 using Fargo.Grpc.Client.Services;
+using Grpc.Core.Interceptors;
+using Grpc.Net.Client;
 
 // The port number must match the port of the gRPC server.
 using var channel = GrpcChannel.ForAddress("https://localhost:5255");
