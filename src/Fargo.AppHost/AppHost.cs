@@ -24,7 +24,7 @@ var serviceSeeds = builder
 .WaitForCompletion(serviceMigrations);
 
 _ = builder
-.AddProject<Projects.Fargo_HttpApi>("fargo-api")
+.AddProject<Projects.Fargo_Http>("fargo-api")
 .WithHttpHealthCheck("/health")
 .WithFargoEnvironment(environmentName)
 .WithReference(databaseFargo)

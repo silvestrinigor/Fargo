@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.HttpApi\Fargo.HttpApi.csproj" />
+    <ProjectReference Include="..\Fargo.Http\Fargo.Http.csproj" />
     <ProjectReference Include="..\Fargo.Grpc\Fargo.Grpc.csproj" />
     <ProjectReference Include="..\Fargo.ServiceMigration\Fargo.ServiceMigration.csproj" />
     <ProjectReference Include="..\Fargo.ServiceSeed\Fargo.ServiceSeed.csproj" />
