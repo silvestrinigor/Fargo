@@ -1,4 +1,4 @@
-namespace Fargo.Application.Shared.Articles;
+namespace Fargo.Application.Articles;
 
 /// <summary>
 /// Represents the variation information of an article.
