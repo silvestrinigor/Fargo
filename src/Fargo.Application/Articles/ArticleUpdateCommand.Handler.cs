@@ -8,6 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
+/// <summary>
+/// Handles commands that update existing articles.
+/// </summary>
+/// <param name="actorService">Resolves the current actor and its permissions.</param>
+/// <param name="articleService">Provides article-specific operations and validation.</param>
+/// <param name="articleRepository">Provides access to article entities.</param>
+/// <param name="partitionRepository">Provides access to partitions associated with articles.</param>
+/// <param name="currentActor">Provides information about the currently authenticated actor.</param>
+/// <param name="unitOfWork">Coordinates persistence of the changes.</param>
+/// <param name="logger">Logs the execution of the command.</param>
 public sealed class ArticlePatchCommandHandler(
     ActorResolver actorService, ArticleService articleService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
@@ -15,6 +25,22 @@ public sealed class ArticlePatchCommandHandler(
     ILogger<ArticlePatchCommandHandler> logger
 ) : ICommandHandler<ArticleUpdateCommand>
 {
+    /// <summary>
+    /// Applies the requested changes to an article after validating the current
+    /// actor's permissions and access to the article and any referenced partitions.
+    /// </summary>
+    /// <param name="command">
+    /// The command containing the identifier of the article to update and the changes to apply.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token that can be used to cancel the operation.
+    /// </param>
+    /// <exception cref="ActorNotFoundFargoApplicationException">
+    /// Thrown when the current actor cannot be found.
+    /// </exception>
+    /// <exception cref="EntityNotFoundFargoApplicationException">
+    /// Thrown when the specified article or a referenced partition cannot be found.
+    /// </exception>
     public async Task HandleAsync(
         ArticleUpdateCommand command,
         CancellationToken cancellationToken = default)

@@ -33,7 +33,7 @@ public sealed class ItemService(IItemRepository itemRepository)
     /// </exception>
     /// <remarks>
     /// This method should be called before
-    /// <see cref="Item.SetParentItemContainer(Item)"/> because validating the
+    /// <see cref="Item.PlaceInsideContainer(Item)"/> because validating the
     /// complete containment hierarchy requires access to other items through the
     /// repository.
     /// </remarks>

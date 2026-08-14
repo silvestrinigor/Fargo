@@ -11,6 +11,33 @@ using UnitsNet;
 
 namespace Fargo.Application.Articles;
 
+/// <summary>
+/// Handles commands that create articles.
+/// </summary>
+/// <param name="articleService">
+/// Provides article-specific operations and validation.
+/// </param>
+/// <param name="actorService">
+/// Resolves the current actor and its permissions and partition access.
+/// </param>
+/// <param name="articleRepository">
+/// Provides access to article entities.
+/// </param>
+/// <param name="partitionRepository">
+/// Provides access to partitions associated with the article.
+/// </param>
+/// <param name="auditLogRepository">
+/// Persists the audit log generated for the article creation.
+/// </param>
+/// <param name="currentActor">
+/// Provides information about the currently authenticated actor.
+/// </param>
+/// <param name="unitOfWork">
+/// Coordinates persistence of the article and its audit log.
+/// </param>
+/// <param name="logger">
+/// Logs the execution of the command.
+/// </param>
 public sealed class ArticleCreateCommandHandler(
     ArticleService articleService, ActorResolver actorService,
     IArticleRepository articleRepository,
@@ -20,10 +47,37 @@ public sealed class ArticleCreateCommandHandler(
     ILogger<ArticleCreateCommandHandler> logger
     ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
+    /// <summary>
+    /// Creates an article according to the requested article type, validates the
+    /// current actor's permissions and access to referenced entities, associates
+    /// the article with the requested partitions, and records the operation in
+    /// the audit log.
+    /// </summary>
+    /// <param name="command">
+    /// The command containing the article creation data.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token that can be used to cancel the operation.
+    /// </param>
+    /// <returns>
+    /// The unique identifier of the newly created article.
+    /// </returns>
+    /// <exception cref="ActorNotFoundFargoApplicationException">
+    /// Thrown when the current actor cannot be found.
+    /// </exception>
+    /// <exception cref="FargoApplicationException">
+    /// Thrown when required data for the requested article type is missing.
+    /// </exception>
+    /// <exception cref="EntityNotFoundFargoApplicationException">
+    /// Thrown when a referenced article or partition cannot be found.
+    /// </exception>
+    /// <exception cref="NotSupportedException">
+    /// Thrown when the requested article type is not supported.
+    /// </exception>
     public async Task<Guid> HandleAsync(
         ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.Guid);
+        logger.CreateStarted(currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -35,7 +89,7 @@ public sealed class ArticleCreateCommandHandler(
 
         AuditLog articleAudit;
 
-        switch (command.Create.ArticleType ?? ArticleType.Default)
+        switch (command.Create.ArticleType)
         {
             case ArticleType.Default:
                 {
@@ -48,7 +102,13 @@ public sealed class ArticleCreateCommandHandler(
 
             case ArticleType.Variation:
                 {
-                    var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Variation!.FromArticleGuid, cancellationToken);
+                    if (command.Create.Variation?.FromArticleGuid is null)
+                    {
+                        throw new FargoApplicationException(
+                            "Variation from article guid must be informed when the article type is variation.");
+                    }
+
+                    var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Variation.FromArticleGuid, cancellationToken);
 
                     EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Variation.FromArticleGuid, EntityType.Article);
 
@@ -70,6 +130,18 @@ public sealed class ArticleCreateCommandHandler(
 
             case ArticleType.Pack:
                 {
+                    if (command.Create.Pack?.FromArticleGuid is null)
+                    {
+                        throw new FargoApplicationException(
+                            "Pack from article guid must be informed when the article type is pack.");
+                    }
+
+                    if (command.Create.Pack?.Quantity is null)
+                    {
+                        throw new FargoApplicationException(
+                            "Pack quantity should be informed when article type is pack.");
+                    }
+
                     var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Pack!.FromArticleGuid, cancellationToken);
 
                     EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Pack.FromArticleGuid, EntityType.Article);
@@ -80,19 +152,25 @@ public sealed class ArticleCreateCommandHandler(
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
-                    var auditVariation = new Dictionary<string, AuditValue>
+                    var auditPack = new Dictionary<string, AuditValue>
                     {
                         { AuditPropertyNames.ArticleCreated.ArticlePackFromArticleGuid, new AuditValue.String(fromArticle.Guid.ToString()) },
                         { AuditPropertyNames.ArticleCreated.ArticlePackQuantity, new AuditValue.String(article.Pack!.Quantity.ToString()) }
                     };
 
-                    articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticlePack, new AuditValue.Object(auditVariation));
+                    articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticlePack, new AuditValue.Object(auditPack));
 
                     break;
                 }
 
             case ArticleType.Kit:
                 {
+                    if (command.Create.KitComponents is null || command.Create.KitComponents.Count == 0)
+                    {
+                        throw new FargoApplicationException(
+                            "Kit components should be informed when article type is kit.");
+                    }
+
                     var kitComponents = new List<(Article, Scalar)>();
 
                     foreach (var kdo in command.Create.KitComponents!)
@@ -176,7 +254,7 @@ public sealed class ArticleCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(article.Guid, actor.Guid);
+        logger.CreateCompleted(article.Guid, actor.Guid, actor.ActorType);
 
         return article.Guid;
     }

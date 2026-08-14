@@ -24,7 +24,7 @@ Content-Type: application/json
 {
   "name": "Warehouse C",
   "description": "This is a description.",
-  "parentPartitionGuid": "{{parentPartitionGuid}}"
+  "parentPartitionGuid": "00000000-0000-0000-0000-000000000002"
 }
 
 ###

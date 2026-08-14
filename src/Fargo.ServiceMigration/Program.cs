@@ -10,9 +10,7 @@ builder.Services.AddHostedService<FargoMigrationService>();
 
 builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(FargoMigrationService.ActivitySourceName));
 
-builder.Services.AddFargoConnectionStringOptions(builder.Configuration);
-
-builder.Services.AddFargoDbContext();
+builder.Services.AddFargoDbContext(builder.Configuration);
 
 var host = builder.Build();
 

@@ -292,7 +292,6 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <param name="partitionGuid">
     /// The identifier of the partition to remove.
     /// </param>
-    /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when attempting to remove the global partition.
     /// </exception>

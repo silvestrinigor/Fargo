@@ -15,16 +15,15 @@ builder.Services.AddFargoRouteConstraints();
 
 builder.Services.AddFargoOpenApi();
 
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.AddFargoJsonConverters());
 
 builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer();
+builder.Services
+.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer();
 
 builder.Services.AddAuthorization();
 

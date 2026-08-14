@@ -86,6 +86,17 @@ public sealed class Actor
         return HasPartitionAccess(partition.Guid);
     }
 
+    /// <summary>
+    /// Determines whether access is granted to the specified partitioned resource.
+    /// </summary>
+    /// <param name="partitioned">
+    /// The resource containing the partition identifiers that are required to access it.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the resource is not associated with any partitions,
+    /// or if at least one of its partitions is included in the partitions accessible
+    /// to the current user; otherwise, <see langword="false"/>.
+    /// </returns>
     public bool HasAccess(IPartitionedGuidsReadOnly partitioned)
     {
         if (partitioned.PartitionGuids.Count == 0)

@@ -1,4 +1,4 @@
-@articleGuid = 8be09da4-2022-48e7-b70c-50c576414097
+@articleGuid = fdbd3eeb-f83e-4936-9960-c127bb8e82f7
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get by Guid
@@ -30,7 +30,13 @@ Content-Type: application/json
 
 {
   "name": "item",
-  "articleType": 1
+  "articleType": 2,
+  "variation": {
+    "fromArticleGuid": "cc4ad0a8-fa25-417a-9fff-52a9126cd0d3"
+  },
+  "barcode": {
+    //"ean13": "1234567891234"
+  }
 }
 
 ###
@@ -42,7 +48,11 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "description": "Updated description"
+  "description": "Updated description",
+  "barcode":{
+    //"ean13": "9876543211231"
+    "removeEan13": true
+  }
 }
 
 ###

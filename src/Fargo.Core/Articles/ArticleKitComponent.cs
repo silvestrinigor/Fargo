@@ -13,7 +13,7 @@ namespace Fargo.Core.Articles;
 /// </remarks>
 public sealed class ArticleKitComponent
 {
-    // <summary>
+    /// <summary>
     /// Gets the unique identifier of the kit article.
     /// </summary>
     public Guid KitArticleGuid { get; private init; }

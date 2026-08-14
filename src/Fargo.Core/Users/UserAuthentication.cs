@@ -49,7 +49,7 @@ public class UserAuthentication
     private UserAuthentication() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    public UserAuthentication(User user)
+    internal UserAuthentication(User user)
     {
         User = user;
         UserGuid = user.Guid;
@@ -94,6 +94,10 @@ public class UserAuthentication
         AuthVersion = Guid.NewGuid();
     }
 
+    /// <summary>
+    /// Sets the password hash for the entity.
+    /// </summary>
+    /// <param name="passwordHash">The new password hash.</param>
     public void SetPasswordHash(PasswordHash passwordHash)
     {
         PasswordHash = passwordHash;

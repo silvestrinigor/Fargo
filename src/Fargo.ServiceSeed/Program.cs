@@ -10,9 +10,7 @@ builder.AddFargoServiceDefaults();
 
 builder.Services.AddFargoSeedOptions(builder.Configuration);
 
-builder.Services.AddFargoConnectionStringOptions(builder.Configuration);
-
-builder.Services.AddFargoDbContext();
+builder.Services.AddFargoDbContext(builder.Configuration);
 
 builder.Services.AddFargoUnitOfWork();
 
