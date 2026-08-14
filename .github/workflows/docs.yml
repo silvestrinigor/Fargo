@@ -1,0 +1,44 @@
+name: Build Docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install DocFX
+        run: dotnet tool update -g docfx
+
+      - name: Build documentation
+        run: docfx docfx.json
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
