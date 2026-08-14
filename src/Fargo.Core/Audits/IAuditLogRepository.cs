@@ -5,6 +5,7 @@ namespace Fargo.Core.Audits;
 /// /// </summary>
 public interface IAuditLogRepository
 {
+    /// <summary>
     /// Adds an audit log to the repository.
     /// </summary>
     /// <param name="auditLog">

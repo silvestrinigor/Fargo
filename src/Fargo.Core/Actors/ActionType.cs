@@ -90,5 +90,8 @@ public enum ActionType
     /// </summary>
     EditPartition = 17,
 
+    /// <summary>
+    /// Read audit logs.
+    /// </summary>
     ReadAuditLogs = 18
 }

@@ -28,7 +28,7 @@ public static class ArticleDtoMapping
                     article.Pack.FromArticleGuid,
                     article.Pack.Quantity)
                 : null,
-            article.KitComponents != null
+            article.ArticleType == ArticleType.Kit
                 ? article.KitComponents
                     .Select(k => new ArticleKitComponentDto(k.FromArticleGuid, k.Quantity)).ToArray()
                 : null,

@@ -1,0 +1,30 @@
+[igor@silvestrin ~]$ fargo -h localhost -p 8080 -U admin
+Password for user admin:
+Fargo cli
+Type "help" for help.
+
+fargo=# article a02c082c-956d-494b-b239-36c1167ea2a6
+Article COCA COLA PET 2L
+-------------+------------------------------------------------------------
+description  | Have sugar.
+article_type | Default
+barcodes     | 1234567891234;
+shelf_life   | 1 year
+color        | Red
+mass         | 2 Kg
+dimensions   | 350 × 120 × 120 mm
+partitions   | 00000000-0000-0000-0000-000000000002;
+
+// the user can click in the guid to add the partition query in the input 
+// and get more information about the entity.
+
+fargo=# partition 00000000-0000-0000-0000-000000000002
+Partition Global
+----------------------+---------------------------------------------------
+guid                  | 00000000-0000-0000-0000-000000000002
+name                  | Global
+description           | Global partition of the system. Cannot be deleted.
+parent partition      | 
+
+fargo=# item 1123082c-956d-494b-b239-36c1167ea2a6 location
+Ware house -> Storage 1 -> Pallet abc

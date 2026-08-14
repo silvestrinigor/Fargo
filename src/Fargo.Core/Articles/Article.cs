@@ -332,5 +332,6 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
+    /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.Article;
 }

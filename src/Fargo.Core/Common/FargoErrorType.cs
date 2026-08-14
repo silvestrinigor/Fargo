@@ -15,5 +15,8 @@ public enum FargoErrorType
     /// </summary>
     InvalidOperation = 1,
 
+    /// <summary>
+    /// The entity was not found.
+    /// </summary>
     EntityNotFound = 2
 }
