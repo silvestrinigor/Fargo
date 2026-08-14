@@ -5,6 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
+/// <summary>
+/// Handles queries that retrieve a paginated collection of articles accessible
+/// to the current actor.
+/// </summary>
+/// <param name="actorService">Resolves the current actor and its partition access.</param>
+/// <param name="articleRepository">Provides access to article query data.</param>
+/// <param name="currentActor">Provides information about the currently authenticated actor.</param>
+/// <param name="logger">Logs the execution of the query.</param>
 public sealed class ArticlesQueryHandler(
     ActorResolver actorService,
     IArticleQueryRepository articleRepository,

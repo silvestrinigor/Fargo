@@ -43,7 +43,7 @@ public sealed class ArticleDeleteCommandHandler(
     public async Task HandleAsync(
         ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.ArticleGuid, currentActor.Guid);
+        logger.DeleteStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -67,6 +67,6 @@ public sealed class ArticleDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(article.Guid, currentActor.Guid);
+        logger.DeleteCompleted(article.Guid, currentActor.Guid, currentActor.ActorType);
     }
 }

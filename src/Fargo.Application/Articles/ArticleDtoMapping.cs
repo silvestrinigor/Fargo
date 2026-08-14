@@ -4,8 +4,18 @@ using System.Linq.Expressions;
 
 namespace Fargo.Application.Articles;
 
+/// <summary>
+/// Provides mappings from article domain entities to application-layer DTOs.
+/// </summary>
 public static class ArticleDtoMapping
 {
+    /// <summary>
+    /// Gets an expression that projects an <see cref="Article"/> into an <see cref="ArticleDto"/>.
+    /// </summary>
+    /// <remarks>
+    /// The projection is represented as an expression tree so it can be translated
+    /// and executed by the underlying query provider.
+    /// </remarks>
     public static readonly Expression<Func<Article, ArticleDto>> Projection = article
         => new ArticleDto(
             article.Guid,

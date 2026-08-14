@@ -1179,18 +1179,25 @@
       "ArticleBarcodeUpdateDto": {
         "type": "object",
         "properties": {
-          "ean13": { },
+          "ean13": {
+            "description": "The new EAN-13 barcode to assign to the article. A `null` value\nleaves the existing EAN-13 barcode unchanged."
+          },
           "removeEan13": {
             "type": "boolean",
+            "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\nvalue to `null`.",
             "default": false
           }
-        }
+        },
+        "description": "Represents the barcode changes to apply to an article."
       },
       "ArticleContainerDto": {
         "type": "object",
         "properties": {
-          "maxMass": { }
-        }
+          "maxMass": {
+            "description": "The optional maximum mass that the container can hold."
+          }
+        },
+        "description": "Represents the container information associated with an article."
       },
       "ArticleCreateDto": {
         "required": [
@@ -1199,18 +1206,15 @@
         "type": "object",
         "properties": {
           "name": {
+            "description": "The name of the article.",
             "$ref": "#/components/schemas/Name"
           },
-          "description": { },
+          "description": {
+            "description": "The optional description of the article."
+          },
           "articleType": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ArticleType"
-              }
-            ]
+            "description": "The type of article to create.",
+            "$ref": "#/components/schemas/ArticleType"
           },
           "variation": {
             "oneOf": [
@@ -1218,6 +1222,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional variation configuration. Required when ArticleType\nis ArticleType.Variation.",
                 "$ref": "#/components/schemas/ArticleVariationDto"
               }
             ]
@@ -1228,6 +1233,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional pack configuration. Required when ArticleType\nis ArticleType.Pack.",
                 "$ref": "#/components/schemas/ArticlePackDto"
               }
             ]
@@ -1239,7 +1245,8 @@
             ],
             "items": {
               "$ref": "#/components/schemas/ArticleKitComponentDto"
-            }
+            },
+            "description": "The optional components of the article. Required when ArticleType\nis ArticleType.Kit."
           },
           "container": {
             "oneOf": [
@@ -1247,6 +1254,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional container configuration when creating a container article.",
                 "$ref": "#/components/schemas/ArticleContainerDto"
               }
             ]
@@ -1256,16 +1264,22 @@
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The optional shelf life of the article."
           },
-          "color": { },
-          "mass": { },
+          "color": {
+            "description": "The optional color of the article."
+          },
+          "mass": {
+            "description": "The optional mass of the article."
+          },
           "dimension": {
             "oneOf": [
               {
                 "type": "null"
               },
               {
+                "description": "The optional physical dimensions of the article.",
                 "$ref": "#/components/schemas/ArticleDimensionDto"
               }
             ]
@@ -1276,6 +1290,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional barcode information of the article.",
                 "$ref": "#/components/schemas/ArticleBarcodeDto"
               }
             ]
@@ -1288,9 +1303,11 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The optional identifiers of partitions to associate with the article."
           }
-        }
+        },
+        "description": "Represents the data required to create an article."
       },
       "ArticleDimensionDto": {
         "type": "object",
@@ -1305,24 +1322,18 @@
         "properties": {
           "lengthX": { },
           "removeLengthX": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           },
           "lengthY": { },
           "removeLengthY": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           },
           "lengthZ": { },
           "removeLengthZ": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -1503,17 +1514,13 @@
             ]
           },
           "removeShelfLife": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           },
           "mass": { },
           "removeMass": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           },
           "dimension": {
             "oneOf": [

@@ -30,9 +30,12 @@ Content-Type: application/json
 
 {
   "name": "item",
-  "articleType": 1,
+  "articleType": 2,
+  "variation": {
+    "fromArticleGuid": "cc4ad0a8-fa25-417a-9fff-52a9126cd0d3"
+  },
   "barcode": {
-    "ean13": "1234567891234"
+    //"ean13": "1234567891234"
   }
 }
 
