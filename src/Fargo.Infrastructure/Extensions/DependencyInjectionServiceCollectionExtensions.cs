@@ -43,7 +43,7 @@ public static class DependencyInjectionServiceCollectionExtensions
 
             services.AddFargoSecurity();
 
-            services.AddScoped<ICurrentActor, CurrentUserActorHttp>();
+            services.AddScoped<ICurrentActor, CurrentUserActor>();
 
             return services;
         }

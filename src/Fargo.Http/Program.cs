@@ -21,8 +21,9 @@ builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer();
+builder.Services
+.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer();
 
 builder.Services.AddAuthorization();
 
