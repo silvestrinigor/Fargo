@@ -20,7 +20,6 @@ using Fargo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Fargo.Infrastructure.Extensions;
 
@@ -30,15 +29,15 @@ public static class DependencyInjectionServiceCollectionExtensions
     {
         public IServiceCollection AddFargoInfrastructure(IConfiguration configuration)
         {
-            services.AddFargoConnectionStringOptions(configuration);
-
-            services.AddFargoDbContext();
+            services.AddFargoDbContext(configuration);
 
             services.AddFargoUnitOfWork();
 
-            services.ConfigureOptions<JwtBearerOptionsSetup>();
+            services.AddHttpContextAccessor();
 
             services.AddFargoRepositories();
+
+            services.ConfigureOptions<JwtBearerOptionsSetup>();
 
             services.AddFargoJwtOptions(configuration);
 
@@ -62,25 +61,17 @@ public static class DependencyInjectionServiceCollectionExtensions
         public IServiceCollection AddFargoUnitOfWork() =>
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        public IServiceCollection AddFargoDbContext() =>
-            services.AddDbContext<FargoDbContext>((sp, opt) => UsesFargoNpgsql(sp, opt));
-
-        public void AddFargoConnectionStringOptions(IConfiguration configuration) => services
-            .AddOptions<ConnectionStringOptions>()
-            .Bind(configuration.GetSection(ConnectionStringOptions.SectionName));
-
-        public static void UsesFargoNpgsql(IServiceProvider sp, DbContextOptionsBuilder opt)
-        {
-            var options = sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value;
-
-            opt.UseNpgsql(
-                options.Fargo,
-                npgsqlOptions =>
-                {
-                    npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
-                }
-            ).UseSnakeCaseNamingConvention();
-        }
+        public IServiceCollection AddFargoDbContext(IConfiguration configuration) =>
+            services.AddDbContext<FargoDbContext>((sp, opt) =>
+            {
+                opt.UseNpgsql(
+                    configuration.GetConnectionString("fargo"),
+                    npgsqlOptions =>
+                    {
+                        npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
+                    }
+                ).UseSnakeCaseNamingConvention();
+            });
 
         public void AddFargoRepositories() => services
             .AddScoped<IArticleRepository, ArticleRepository>()

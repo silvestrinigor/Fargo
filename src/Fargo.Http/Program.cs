@@ -15,8 +15,6 @@ builder.Services.AddFargoRouteConstraints();
 
 builder.Services.AddFargoOpenApi();
 
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.AddFargoJsonConverters());
 
 builder.Services.AddFargoApplication();
