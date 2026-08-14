@@ -1170,18 +1170,19 @@
       "ArticleBarcodeDto": {
         "type": "object",
         "properties": {
-          "ean13": { }
-        }
+          "ean13": {
+            "description": "The optional EAN-13 barcode of the article."
+          }
+        },
+        "description": "Represents the barcode information associated with an article."
       },
       "ArticleBarcodeUpdateDto": {
         "type": "object",
         "properties": {
           "ean13": { },
           "removeEan13": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -1401,7 +1402,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional variation information of the article.",
+                "description": "The variation information when the article is a variation; otherwise, `null`.",
                 "$ref": "#/components/schemas/ArticleVariationDto"
               }
             ]
@@ -1412,7 +1413,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional packaging information of the article.",
+                "description": "The packaging information when the article is a pack; otherwise, `null`.",
                 "$ref": "#/components/schemas/ArticlePackDto"
               }
             ]
@@ -1425,7 +1426,7 @@
             "items": {
               "$ref": "#/components/schemas/ArticleKitComponentDto"
             },
-            "description": "The optional collection of components that compose the article when it is a kit."
+            "description": "The components that compose the article when it is a kit; otherwise, `null`."
           },
           "container": {
             "oneOf": [
@@ -1433,7 +1434,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional container information associated with the article.",
+                "description": "The container information when the article is a container; otherwise, `null`.",
                 "$ref": "#/components/schemas/ArticleContainerDto"
               }
             ]

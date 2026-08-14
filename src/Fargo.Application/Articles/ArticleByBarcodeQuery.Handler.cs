@@ -5,11 +5,31 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
+/// <summary>
+/// Handles queries that retrieve an article by its barcode.
+/// </summary>
+/// <param name="actorService">Resolves the current actor and its partition access.</param>
+/// <param name="articleRepository">Provides access to article query data.</param>
+/// <param name="currentActor">Provides information about the currently authenticated actor.</param>
+/// <param name="logger">Logs the execution of the query.</param>
 public sealed class ArticleByBarcodeQueryHandler(
     ActorResolver actorService, IArticleQueryRepository articleRepository,
     ICurrentActor currentActor, ILogger<ArticleByBarcodeQueryHandler> logger
 ) : IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
+    /// <summary>
+    /// Retrieves an article matching the requested barcode within the current actor's
+    /// accessible partitions.
+    /// </summary>
+    /// <param name="query">The query containing the barcode to search for.</param>
+    /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+    /// <returns>
+    /// The matching article, or <see langword="null"/> if no accessible article
+    /// matches the specified barcode.
+    /// </returns>
+    /// <exception cref="ActorNotFoundFargoApplicationException">
+    /// Thrown when the current actor cannot be found.
+    /// </exception>
     public async Task<ArticleDto?> HandleAsync(ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {
         logger.QueryByBarcodeStarted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType);

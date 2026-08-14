@@ -17,10 +17,10 @@ namespace Fargo.Application.Articles;
 /// <param name="Color">The optional color of the article.</param>
 /// <param name="Mass">The optional mass of the article.</param>
 /// <param name="Dimension">The physical dimensions of the article.</param>
-/// <param name="Variation">The optional variation information of the article.</param>
-/// <param name="Pack">The optional packaging information of the article.</param>
-/// <param name="KitComponents">The optional collection of components that compose the article when it is a kit.</param>
-/// <param name="Container">The optional container information associated with the article.</param>
+/// <param name="Variation">The variation information when the article is a variation; otherwise, <see langword="null"/>.</param>
+/// <param name="Pack">The packaging information when the article is a pack; otherwise, <see langword="null"/>.</param>
+/// <param name="KitComponents">The components that compose the article when it is a kit; otherwise, <see langword="null"/>.</param>
+/// <param name="Container">The container information when the article is a container; otherwise, <see langword="null"/>.</param>
 /// <param name="Barcodes">The barcodes associated with the article.</param>
 /// <param name="Partitions">The identifiers of the partitions associated with the article.</param>
 public sealed record ArticleDto(
