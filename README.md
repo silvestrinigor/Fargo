@@ -7,6 +7,10 @@
 Fargo is currently under active development and is not yet considered production-ready.
 Features, APIs, database structures, and internal architecture may change without notice.
 
+## Documentation
+
+See the [Fargo Documentation](https://silvestrinigor.github.io/Fargo/) for the API reference and project documentation.
+
 ## Running the Application
 
 ```bash
