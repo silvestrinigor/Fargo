@@ -1,6 +1,6 @@
 # Fargo
 
-<img src="doc/under_construction.png" width="400" alt="Under construction" />
+<img src="img/under_construction.png" width="400" alt="Under construction" />
 
 ## Status
 
