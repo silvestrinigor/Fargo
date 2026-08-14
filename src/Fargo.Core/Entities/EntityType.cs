@@ -7,27 +7,27 @@ public enum EntityType
 {
     /// <summary>
     /// Article entity.
-    /// <summary>
+    /// </summary>
     Article = 0,
 
     /// <summary>
     /// Item entity.
-    /// <summary>
+    /// </summary>
     Item = 1,
 
     /// <summary>
     /// User entity.
-    /// <summary>
+    /// </summary>
     User = 2,
 
     /// <summary>
     /// User group entity.
-    /// <summary>
+    /// </summary>
     UserGroup = 3,
 
     /// <summary>
     /// Partition entity.
-    /// <summary>
+    /// </summary>
     Partition = 4,
 
     AuditLog = 5

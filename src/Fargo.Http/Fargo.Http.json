@@ -1164,7 +1164,8 @@
   "components": {
     "schemas": {
       "ActionType": {
-        "type": "integer"
+        "type": "integer",
+        "description": "Represents the set of actions in the system."
       },
       "ArticleBarcodeDto": {
         "type": "object",
@@ -1345,15 +1346,19 @@
         "properties": {
           "guid": {
             "type": "string",
+            "description": "The unique identifier of the article.",
             "format": "uuid"
           },
           "name": {
+            "description": "The name of the article.",
             "$ref": "#/components/schemas/Name"
           },
           "description": {
+            "description": "The description of the article.",
             "$ref": "#/components/schemas/Description"
           },
           "articleType": {
+            "description": "The type of the article.",
             "$ref": "#/components/schemas/ArticleType"
           },
           "shelfLife": {
@@ -1361,7 +1366,8 @@
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The optional shelf life of the article."
           },
           "color": {
             "oneOf": [
@@ -1369,6 +1375,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional color of the article.",
                 "$ref": "#/components/schemas/Color"
               }
             ]
@@ -1379,11 +1386,13 @@
                 "type": "null"
               },
               {
+                "description": "The optional mass of the article.",
                 "$ref": "#/components/schemas/Mass"
               }
             ]
           },
           "dimension": {
+            "description": "The physical dimensions of the article.",
             "$ref": "#/components/schemas/ArticleDimensionDto"
           },
           "variation": {
@@ -1392,6 +1401,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional variation information of the article.",
                 "$ref": "#/components/schemas/ArticleVariationDto"
               }
             ]
@@ -1402,6 +1412,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional packaging information of the article.",
                 "$ref": "#/components/schemas/ArticlePackDto"
               }
             ]
@@ -1413,7 +1424,8 @@
             ],
             "items": {
               "$ref": "#/components/schemas/ArticleKitComponentDto"
-            }
+            },
+            "description": "The optional collection of components that compose the article when it is a kit."
           },
           "container": {
             "oneOf": [
@@ -1421,11 +1433,13 @@
                 "type": "null"
               },
               {
+                "description": "The optional container information associated with the article.",
                 "$ref": "#/components/schemas/ArticleContainerDto"
               }
             ]
           },
           "barcodes": {
+            "description": "The barcodes associated with the article.",
             "$ref": "#/components/schemas/ArticleBarcodeDto"
           },
           "partitions": {
@@ -1433,9 +1447,11 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The identifiers of the partitions associated with the article."
           }
-        }
+        },
+        "description": "Represents the application-layer data transfer object for an article."
       },
       "ArticleKitComponentDto": {
         "required": [
@@ -1470,7 +1486,8 @@
         }
       },
       "ArticleType": {
-        "type": "integer"
+        "type": "integer",
+        "description": "Represents the classification of an article within the inventory system."
       },
       "ArticleUpdateDto": {
         "type": "object",
@@ -1572,19 +1589,25 @@
         "type": "object",
         "properties": {
           "accessToken": {
-            "type": "string"
+            "type": "string",
+            "description": "The generated access token used to authenticate API requests."
           },
           "refreshToken": {
-            "type": "string"
+            "type": "string",
+            "description": "The refresh token used to obtain a new access token when the current one expires."
           },
           "expiresAt": {
             "type": "string",
+            "description": "The date and time when the access token expires.",
             "format": "date-time"
           }
-        }
+        },
+        "description": "Represents the result of a successful authentication."
       },
       "Color": { },
-      "Description": { },
+      "Description": {
+        "description": "Represents a validated textual description."
+      },
       "FirstName": { },
       "ItemCreateDto": {
         "required": [
@@ -1718,8 +1741,12 @@
         }
       },
       "Mass": { },
-      "Name": { },
-      "Nameid": { },
+      "Name": {
+        "description": "Represents a validated name."
+      },
+      "Nameid": {
+        "description": "Represents a nameid."
+      },
       "PartitionCreateDto": {
         "required": [
           "name",
@@ -1817,7 +1844,9 @@
         }
       },
       "Scalar": { },
-      "Token": { },
+      "Token": {
+        "description": "Represents a security token used by the system."
+      },
       "UserAuthenticationCreateDto": {
         "type": "object",
         "properties": {
