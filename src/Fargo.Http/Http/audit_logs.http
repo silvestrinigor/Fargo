@@ -1,0 +1,9 @@
+@articleGuid = fdbd3eeb-f83e-4936-9960-c127bb8e82f7
+@partitionGuid = 55555555-5555-5555-5555-555555555555
+
+### List
+
+GET {{host}}/audit-logs?page=1&limit=20
+Authorization: Bearer {{jwt}}
+
+###

@@ -1,3 +1,4 @@
+using Fargo.Core.Audits;
 using Fargo.Http.Shared.JsonConverters;
 using System.Text.Json;
 
@@ -22,6 +23,7 @@ public static class FargoJsonSerializerOptionsExtensions
         options.Converters.Add(new ColorJsonConverter());
         options.Converters.Add(new Ean13JsonConverter());
         options.Converters.Add(new ScalarJsonConverter());
+        options.Converters.Add(new AuditValueJsonConverter());
 
         return options;
     }

@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -13,6 +14,7 @@ public sealed class ItemUpdateCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
+    IAuditLogRepository auditLogRepository,
     IUnitOfWork unitOfWork,
     ICurrentActor currentActor,
     ILogger<ItemUpdateCommandHandler> logger
@@ -33,6 +35,8 @@ public sealed class ItemUpdateCommandHandler(
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
+
+        var itemAudit = AuditLog.CreateAuditLog(actor, item, ActionType.EditItem);
 
         actor.ThrowIfAccessDenied(item);
 
@@ -80,6 +84,8 @@ public sealed class ItemUpdateCommandHandler(
                 item.RemovePartition(partition.Guid);
             }
         }
+
+        auditLogRepository.Add(itemAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

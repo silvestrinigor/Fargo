@@ -72,7 +72,7 @@ public static class DependencyInjectionServiceCollectionExtension
 
         public IServiceCollection AddFargoArticleApplication() => services
             .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
-            .AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticlePatchCommandHandler>()
+            .AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>()
             .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()
             .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>()

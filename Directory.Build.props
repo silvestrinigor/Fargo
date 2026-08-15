@@ -4,6 +4,7 @@
     <Authors>Igor Silvestrin</Authors>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
 
 </Project>

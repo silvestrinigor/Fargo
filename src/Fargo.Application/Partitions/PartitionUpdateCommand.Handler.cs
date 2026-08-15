@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ public sealed class PartitionUpdateCommandHandler(
     ActorResolver actorService,
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
+    IAuditLogRepository auditLogRepository,
     IUnitOfWork unitOfWork,
     ICurrentActor currentActor,
     ILogger<PartitionUpdateCommandHandler> logger
@@ -32,6 +34,8 @@ public sealed class PartitionUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(partitionToEdit);
 
+        var partitionAudit = AuditLog.CreateAuditLog(actor, partitionToEdit, ActionType.EditPartition);
+
         partitionToEdit.Name = command.Update.Name ?? partitionToEdit.Name;
 
         partitionToEdit.Description = command.Update.Description ?? partitionToEdit.Description;
@@ -48,6 +52,8 @@ public sealed class PartitionUpdateCommandHandler(
 
             partitionToEdit.SetParentPartition(parentPartitionToSet);
         }
+
+        auditLogRepository.Add(partitionAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

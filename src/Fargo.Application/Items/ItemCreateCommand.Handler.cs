@@ -2,6 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
+using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
@@ -14,6 +15,7 @@ public sealed class ItemCreateCommandHandler(
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<ItemCreateCommandHandler> logger
@@ -36,6 +38,8 @@ public sealed class ItemCreateCommandHandler(
         actor.ThrowIfAccessDenied(article);
 
         var item = Item.CreateItem(article);
+
+        var itemAudit = AuditLog.CreateAuditLog(actor, item, ActionType.CreateItem);
 
         if (command.Create.ParentItemContainerGuid is { } parentItemContainerGuid)
         {
@@ -63,6 +67,8 @@ public sealed class ItemCreateCommandHandler(
         }
 
         itemRepository.Add(item);
+
+        auditLogRepository.Add(itemAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
