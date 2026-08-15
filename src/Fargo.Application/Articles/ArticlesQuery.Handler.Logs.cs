@@ -1,4 +1,5 @@
 using Fargo.Application.Common;
+using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
@@ -7,10 +8,11 @@ internal static partial class ArticlesQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Articles query started for actor {actorGuid}. Page: {Page}. Limit: {Limit}.")]
+        Message = "Articles query started for actor {actorGuid} of type {actorType}. Page: {Page}. Limit: {Limit}.")]
     public static partial void ArticlesQueryStarted(
         this ILogger logger,
         Guid actorGuid,
+        ActorType actorType,
         Page page,
         Limit limit);
 
