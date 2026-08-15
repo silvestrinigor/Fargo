@@ -13,6 +13,10 @@ public sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.HasKey(a => a.Guid);
 
+        builder.HasIndex(a => new { a.EntityGuid, a.OccurredAt });
+
+        builder.HasIndex(a => new { a.ActorGuid, a.OccurredAt });
+
         builder.HasIndex(a => a.OccurredAt);
 
         builder

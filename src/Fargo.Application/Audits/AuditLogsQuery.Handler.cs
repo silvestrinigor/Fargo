@@ -23,6 +23,12 @@ public sealed class AuditLogsQueryHandler(
         var items = await auditLogQueryRepository.GetManyInfoAsync(
             query.WithPagination,
             actor.PartitionAccessGuids,
+            query.ActorGuid,
+            query.ActorType,
+            query.EntityGuid,
+            query.EntityType,
+            query.PeriodStart,
+            query.PeriodEnd,
             cancellationToken);
 
         logger.ManyQueryCompleted(currentActor.Guid, actor.PartitionAccessGuids.Count, items.Count);
