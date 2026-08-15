@@ -1,6 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
-using Fargo.Grpc.V1;
 using Fargo.Grpc.Client.Interceptors;
+using Fargo.Grpc.V1;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Grpc.Client.Extensions;
 

@@ -727,13 +727,13 @@ message AuthenticationResult {
 
 message LogoutRequest {
 
-  Token refresh_token = 1;
+  string refresh_token = 1;
 
 }
 
 message RefreshTokenRequest {
 
-  Token refresh_token = 1;
+  string refresh_token = 1;
 
 }
 

@@ -1,4 +1,4 @@
-namespace Fargo.Grpc.Client.Services;
+namespace Fargo.Grpc.Client.Authentication;
 
 public class TokenStore : ITokenStore
 {
@@ -6,17 +6,23 @@ public class TokenStore : ITokenStore
 
     public string? RefreshToken { get; private set; }
 
+    public DateTimeOffset? ExpiresAt { get; private set; }
+
     public void Clear()
     {
         AccessToken = null;
 
         RefreshToken = null;
+
+        ExpiresAt = null;
     }
 
-    public void SetTokens(string accessToken, string refreshToken)
+    public void SetTokens(string accessToken, string refreshToken, DateTimeOffset expiresAt)
     {
         AccessToken = accessToken;
 
         RefreshToken = refreshToken;
+
+        ExpiresAt = expiresAt;
     }
 }
