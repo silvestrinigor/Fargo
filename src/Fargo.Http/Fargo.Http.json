@@ -1167,6 +1167,10 @@
         "type": "integer",
         "description": "Represents the set of actions in the system."
       },
+      "ActorType": {
+        "type": "integer",
+        "description": "Represents the type of actor responsible for performing an action\nwithin the system."
+      },
       "ArticleBarcodeDto": {
         "type": "object",
         "properties": {
@@ -1617,15 +1621,61 @@
       },
       "AuditLogDto": {
         "required": [
-          "guid"
+          "guid",
+          "actorGuid",
+          "actorType",
+          "actionType",
+          "entityGuid",
+          "entityType",
+          "occurredAt",
+          "metadata",
+          "partitions"
         ],
         "type": "object",
         "properties": {
           "guid": {
             "type": "string",
             "format": "uuid"
+          },
+          "actorGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorType": {
+            "$ref": "#/components/schemas/ActorType"
+          },
+          "actionType": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "entityGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AuditValue"
+            }
+          },
+          "partitions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
+      },
+      "AuditValue": {
+        "type": "object",
+        "description": "Represents a value stored in an audit record."
       },
       "AuthResult": {
         "required": [
@@ -1654,6 +1704,10 @@
       "Color": { },
       "Description": {
         "description": "Represents a validated textual description."
+      },
+      "EntityType": {
+        "type": "integer",
+        "description": "Represents a entity type."
       },
       "FirstName": { },
       "ItemCreateDto": {
