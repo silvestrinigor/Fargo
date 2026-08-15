@@ -1,5 +1,7 @@
 using Fargo.Application.Audits;
 using Fargo.Application.Common;
+using Fargo.Core.Actors;
+using Fargo.Core.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.Http.Endpoints;
@@ -39,12 +41,18 @@ public static class AuditLogEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<AuditLogDto>>, NoContent>> GetManyAuditLogAsync(
         Page? page, Limit? limit,
+        Guid? actorGuid,
+        ActorType? actorType,
+        Guid? entityGuid,
+        EntityType? entityType,
+        DateTimeOffset? periodStart,
+        DateTimeOffset? periodEnd,
         IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>> handler,
         CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
 
-        var query = new AuditLogsQuery(withPagination);
+        var query = new AuditLogsQuery(withPagination, actorGuid, actorType, entityGuid, entityType, periodStart, periodEnd);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
