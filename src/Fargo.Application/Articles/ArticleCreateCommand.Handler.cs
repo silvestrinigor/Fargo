@@ -118,13 +118,6 @@ public sealed class ArticleCreateCommandHandler(
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
-                    var auditVariation = new Dictionary<string, AuditValue>
-                    {
-                        { AuditPropertyNames.ArticleCreated.ArticleVariationFromArticleGuid, new AuditValue.String(fromArticle.Guid.ToString()) }
-                    };
-
-                    articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleVariation, new AuditValue.Object(auditVariation));
-
                     break;
                 }
 
@@ -151,14 +144,6 @@ public sealed class ArticleCreateCommandHandler(
                     article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
-
-                    var auditPack = new Dictionary<string, AuditValue>
-                    {
-                        { AuditPropertyNames.ArticleCreated.ArticlePackFromArticleGuid, new AuditValue.String(fromArticle.Guid.ToString()) },
-                        { AuditPropertyNames.ArticleCreated.ArticlePackQuantity, new AuditValue.String(article.Pack!.Quantity.ToString()) }
-                    };
-
-                    articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticlePack, new AuditValue.Object(auditPack));
 
                     break;
                 }
@@ -205,11 +190,13 @@ public sealed class ArticleCreateCommandHandler(
             default: throw new NotSupportedException("Article type not supported.");
         }
 
-        articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleName, new AuditValue.String(article.Name));
+        articleAudit.Metadata.AddName(article.Name);
 
-        articleAudit.Metadata.Add(AuditPropertyNames.ArticleCreated.ArticleType, new AuditValue.Number((byte)article.ArticleType));
+        articleAudit.Metadata.AddArticleType(article.ArticleType);
 
         article.Description = command.Create.Description ?? Description.Empty;
+
+        articleAudit.Metadata.AddDescription(article.Description);
 
         if (command.Create.ShelfLife is { } shelfLife)
         {
@@ -225,7 +212,8 @@ public sealed class ArticleCreateCommandHandler(
 
             command.Create.Dimension?.LengthY ?? null,
 
-            command.Create.Dimension?.LengthZ ?? null);
+            command.Create.Dimension?.LengthZ ?? null
+        );
 
         if (command.Create.Barcode?.Ean13 is { } ean13)
         {

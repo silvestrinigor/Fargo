@@ -1,3 +1,6 @@
+using Fargo.Core.Articles;
+using Fargo.Core.Informations;
+
 namespace Fargo.Core.Audits;
 
 /// <summary>
@@ -31,5 +34,20 @@ public sealed class AuditMetadata
         {
             throw new InvalidOperationException($"Property '{name}' already existis.");
         }
+    }
+
+    public void AddName(Name value)
+    {
+        Add("name", new AuditValue.String(value));
+    }
+
+    public void AddDescription(Description value)
+    {
+        Add("description", new AuditValue.String(value));
+    }
+
+    public void AddArticleType(ArticleType value)
+    {
+        Add("articleType", new AuditValue.Number((byte)value));
     }
 }

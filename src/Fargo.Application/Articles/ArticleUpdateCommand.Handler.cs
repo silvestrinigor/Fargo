@@ -2,6 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
+using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Microsoft.Extensions.Logging;
@@ -14,15 +15,17 @@ namespace Fargo.Application.Articles;
 /// <param name="actorService">Resolves the current actor and its permissions.</param>
 /// <param name="articleService">Provides article-specific operations and validation.</param>
 /// <param name="articleRepository">Provides access to article entities.</param>
-/// <param name="partitionRepository">Provides access to partitions associated with articles.</param>
+/// <param name="partitionRepository">Persists the audit log generated for the article update.</param>
+/// <param name="auditLogRepository"></param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
 /// <param name="unitOfWork">Coordinates persistence of the changes.</param>
 /// <param name="logger">Logs the execution of the command.</param>
-public sealed class ArticlePatchCommandHandler(
+public sealed class ArticleUpdateCommandHandler(
     ActorResolver actorService, ArticleService articleService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ArticlePatchCommandHandler> logger
+    ILogger<ArticleUpdateCommandHandler> logger
 ) : ICommandHandler<ArticleUpdateCommand>
 {
     /// <summary>
@@ -61,9 +64,21 @@ public sealed class ArticlePatchCommandHandler(
 
         var articleUpdateDto = command.Article;
 
-        article.Name = articleUpdateDto.Name ?? article.Name;
+        var articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.EditArticle);
 
-        article.Description = articleUpdateDto.Description ?? article.Description;
+        if (articleUpdateDto.Name is { } name)
+        {
+            article.Name = name;
+
+            articleAudit.Metadata.AddName(name);
+        }
+
+        if (articleUpdateDto.Description is { } description)
+        {
+            article.Description = description;
+
+            articleAudit.Metadata.AddDescription(description);
+        }
 
         article.ShelfLife = articleUpdateDto.RemoveShelfLife is true
             ? null : articleUpdateDto.ShelfLife ?? article.ShelfLife;
@@ -120,6 +135,8 @@ public sealed class ArticlePatchCommandHandler(
                 article.RemovePartition(partition.Guid);
             }
         }
+
+        auditLogRepository.Add(articleAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
