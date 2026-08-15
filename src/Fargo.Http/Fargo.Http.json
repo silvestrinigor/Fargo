@@ -1312,30 +1312,47 @@
       "ArticleDimensionDto": {
         "type": "object",
         "properties": {
-          "lengthX": { },
-          "lengthY": { },
-          "lengthZ": { }
-        }
+          "lengthX": {
+            "description": "The optional length along the X axis."
+          },
+          "lengthY": {
+            "description": "The optional length along the Y axis."
+          },
+          "lengthZ": {
+            "description": "The optional length along the Z axis."
+          }
+        },
+        "description": "Represents the physical dimensions of an article."
       },
       "ArticleDimensionUpdateDto": {
         "type": "object",
         "properties": {
-          "lengthX": { },
+          "lengthX": {
+            "description": "The new length along the X axis. A `null` value leaves the\nexisting value unchanged."
+          },
           "removeLengthX": {
             "type": "boolean",
+            "description": "Indicates whether the existing X-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthX.",
             "default": false
           },
-          "lengthY": { },
+          "lengthY": {
+            "description": "The new length along the Y axis. A `null` value leaves the\nexisting value unchanged."
+          },
           "removeLengthY": {
             "type": "boolean",
+            "description": "Indicates whether the existing Y-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthY.",
             "default": false
           },
-          "lengthZ": { },
+          "lengthZ": {
+            "description": "The new length along the Z axis. A `null` value leaves the\nexisting value unchanged."
+          },
           "removeLengthZ": {
             "type": "boolean",
+            "description": "Indicates whether the existing Z-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthZ.",
             "default": false
           }
-        }
+        },
+        "description": "Represents the dimensional changes to apply to an article."
       },
       "ArticleDto": {
         "required": [
@@ -1474,12 +1491,15 @@
         "properties": {
           "articleGuid": {
             "type": "string",
+            "description": "The unique identifier of the article used as a component.",
             "format": "uuid"
           },
           "quantity": {
+            "description": "The quantity of the article included in the kit.",
             "$ref": "#/components/schemas/Scalar"
           }
-        }
+        },
+        "description": "Represents a component of a kit article."
       },
       "ArticlePackDto": {
         "required": [
@@ -1490,12 +1510,15 @@
         "properties": {
           "fromArticleGuid": {
             "type": "string",
+            "description": "The unique identifier of the article from which the pack is composed.",
             "format": "uuid"
           },
           "quantity": {
+            "description": "The quantity of the source article contained in the pack.",
             "$ref": "#/components/schemas/Scalar"
           }
-        }
+        },
+        "description": "Represents the packaging information for an article pack."
       },
       "ArticleType": {
         "type": "integer",
@@ -1504,22 +1527,31 @@
       "ArticleUpdateDto": {
         "type": "object",
         "properties": {
-          "name": { },
-          "description": { },
+          "name": {
+            "description": "The new name of the article. A `null` value leaves the existing name unchanged."
+          },
+          "description": {
+            "description": "The new description of the article. A `null` value leaves the existing description unchanged."
+          },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The new shelf life of the article. A `null` value leaves the existing value unchanged."
           },
           "removeShelfLife": {
             "type": "boolean",
+            "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\nWhen `true`, this takes precedence over ShelfLife.",
             "default": false
           },
-          "mass": { },
+          "mass": {
+            "description": "The new mass of the article. A `null` value leaves the existing value unchanged."
+          },
           "removeMass": {
             "type": "boolean",
+            "description": "Indicates whether the existing mass should be removed by setting it to `null`.\nWhen `true`, this takes precedence over Mass.",
             "default": false
           },
           "dimension": {
@@ -1528,6 +1560,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional dimensional changes to apply to the article.",
                 "$ref": "#/components/schemas/ArticleDimensionUpdateDto"
               }
             ]
@@ -1538,6 +1571,7 @@
                 "type": "null"
               },
               {
+                "description": "The optional barcode changes to apply to the article.",
                 "$ref": "#/components/schemas/ArticleBarcodeUpdateDto"
               }
             ]
@@ -1550,7 +1584,8 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The identifiers of partitions to associate with the article."
           },
           "partitionsToRemove": {
             "type": [
@@ -1560,9 +1595,11 @@
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The identifiers of partitions to disassociate from the article."
           }
-        }
+        },
+        "description": "Represents the changes to apply to an existing article."
       },
       "ArticleVariationDto": {
         "required": [
@@ -1572,9 +1609,11 @@
         "properties": {
           "fromArticleGuid": {
             "type": "string",
+            "description": "The unique identifier of the article from which the variation was created.",
             "format": "uuid"
           }
-        }
+        },
+        "description": "Represents the variation information of an article."
       },
       "AuditLogDto": {
         "required": [

@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
@@ -11,6 +12,7 @@ namespace Fargo.Application.Partitions;
 public sealed class PartitionCreateCommandHandler(
     ActorResolver actorService,
     IPartitionRepository partitionRepository,
+    IAuditLogRepository auditLogRepository,
     IUnitOfWork unitOfWork, ICurrentActor currentActor,
     ILogger<PartitionCreateCommandHandler> logger
 ) : ICommandHandler<PartitionCreateCommand, Guid>
@@ -35,7 +37,15 @@ public sealed class PartitionCreateCommandHandler(
 
         var newPartition = Partition.CreatePartition(command.Create.Name, parentPartition);
 
+        var partitionAudit = AuditLog.CreateAuditLog(actor, newPartition, ActionType.CreatePartition);
+
+        partitionAudit.Metadata.AddName(newPartition.Name);
+
         newPartition.Description = command.Create.Description ?? Description.Empty;
+
+        partitionAudit.Metadata.AddDescription(newPartition.Description);
+
+        auditLogRepository.Add(partitionAudit);
 
         partitionRepository.Add(newPartition);
 
