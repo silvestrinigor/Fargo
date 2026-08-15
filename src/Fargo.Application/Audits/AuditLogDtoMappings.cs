@@ -17,4 +17,19 @@ public static class AuditLogDtoMappings
             auditLog.Metadata.Values,
             auditLog.Partitions.Select(p => p.PartitionGuid).ToArray()
         );
+
+    public static AuditLogDto ToDto(this AuditLog auditLog)
+    {
+        return new AuditLogDto(
+            auditLog.Guid,
+            auditLog.ActorGuid,
+            auditLog.ActorType,
+            auditLog.ActionType,
+            auditLog.EntityGuid,
+            auditLog.EntityType,
+            auditLog.OccurredAt,
+            auditLog.Metadata.Values,
+            [.. auditLog.Partitions.Select(p => p.PartitionGuid)]
+        );
+    }
 }

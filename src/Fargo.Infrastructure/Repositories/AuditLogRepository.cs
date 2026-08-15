@@ -20,11 +20,13 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
             context.AuditLogs.AsNoTracking(),
             childOfAnyOfThesePartitions);
 
-        return await queryFiltered
+        var auditLog = await queryFiltered
             .OrderBy(auditlog => auditlog.Guid)
+            .Include(a => a.Partitions)
             .WithPagination(pagination)
-            .Select(AuditLogDtoMappings.Projection)
             .ToListAsync(cancellationToken);
+
+        return [.. auditLog.Select(a => a.ToDto())];
     }
 
     private static IQueryable<AuditLog> ApplyPartitionFilter(
