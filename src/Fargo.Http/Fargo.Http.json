@@ -321,6 +321,42 @@
         }
       }
     },
+    "/items/{itemGuid}/location": {
+      "get": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Gets the item location",
+        "description": "Retrieves a list of items that represents the location of the contained item.",
+        "operationId": "GetItemLocation",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/items": {
       "get": {
         "tags": [
@@ -1826,10 +1862,8 @@
             "format": "uuid"
           },
           "removeFromParentItemContainer": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": "boolean",
+            "default": false
           },
           "partitionsToAdd": {
             "type": [

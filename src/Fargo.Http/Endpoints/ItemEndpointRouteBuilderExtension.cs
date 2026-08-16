@@ -12,6 +12,8 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapGetItemByGuid();
 
+        group.MapGetItemLocationByGuid();
+
         group.MapGetItems();
 
         group.MapCreateItem();
@@ -58,7 +60,35 @@ public static class ItemEndpointRouteBuilderExtension
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
-    #endregion Get Single
+    #endregion
+
+    #region Get location
+
+    private static IEndpointRouteBuilder MapGetItemLocationByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}/location", GetItemLocationByGuid)
+            .WithName("GetItemLocation")
+            .WithSummary("Gets the item location")
+            .WithDescription("Retrieves a list of items that represents the location of the contained item.")
+            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NotFound>> GetItemLocationByGuid(
+        Guid itemGuid,
+        IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ItemLocationQuery(itemGuid);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response.Count == 0 ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
 
     #region Get Many
 

@@ -4,10 +4,14 @@ namespace Fargo.Application.Items;
 
 public interface IItemQueryRepository
 {
-    Task<ItemDto?> GetInfoByGuid(
-        Guid entityGuid,
+    Task<ItemDto?> GetInfoByGuidAsync(
+        Guid itemGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAsync(
+        Guid itemGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<ItemDto>> GetManyInfo(

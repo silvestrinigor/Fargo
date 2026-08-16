@@ -29,8 +29,8 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "item",
-  "articleType": 1,
+  "name": "c",
+  "articleType": 5,
   "barcode": {
     //"ean13": "1234567891234"
   }
