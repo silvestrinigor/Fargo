@@ -27,7 +27,7 @@ public sealed class IdentityService(
 
     public override async Task<AuthenticationResult> RefreshToken(RefreshTokenRequest request, ServerCallContext context)
     {
-        var command = new IdentityRefreshCommand(new Core.Identity.Token(request.RefreshToken.Value));
+        var command = new IdentityRefreshCommand(new Core.Identity.Token(request.RefreshToken));
 
         var result = await refreshCommandHandler.HandleAsync(command, context.CancellationToken);
 

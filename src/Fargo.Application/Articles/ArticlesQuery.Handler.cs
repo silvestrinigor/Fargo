@@ -24,7 +24,7 @@ public sealed class ArticlesQueryHandler(
         ArticlesQuery query,
         CancellationToken cancellationToken = default)
     {
-        logger.ArticlesQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
+        logger.ArticlesQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 

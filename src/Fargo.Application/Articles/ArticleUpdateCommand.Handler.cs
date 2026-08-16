@@ -48,7 +48,7 @@ public sealed class ArticleUpdateCommandHandler(
         ArticleUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ArticleGuid, currentActor.Guid);
+        logger.UpdateStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -140,6 +140,6 @@ public sealed class ArticleUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(article.Guid, actor.Guid);
+        logger.UpdateCompleted(article.Guid, actor.Guid, actor.ActorType);
     }
 }

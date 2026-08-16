@@ -1138,6 +1138,52 @@
               "type": "integer",
               "default": 1000
             }
+          },
+          {
+            "name": "actorGuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "actorType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ActorType"
+            }
+          },
+          {
+            "name": "entityGuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/EntityType"
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
           }
         ],
         "responses": {
@@ -1944,15 +1990,19 @@
       "UserAuthenticationCreateDto": {
         "type": "object",
         "properties": {
-          "password": { },
+          "password": {
+            "description": "The initial password for the user's authentication credentials."
+          },
           "defaultPasswordExpirationPeriod": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The period after which the user's password expires."
           }
-        }
+        },
+        "description": "Represents the data required to create authentication information for a user."
       },
       "UserAuthenticationDto": {
         "type": "object",
@@ -1962,16 +2012,19 @@
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The default period after which the user's password expires."
           },
           "requirePasswordChangeAt": {
             "type": [
               "null",
               "string"
             ],
+            "description": "The date and time at which the user is required to change their password.",
             "format": "date-time"
           }
-        }
+        },
+        "description": "Represents user authentication information."
       },
       "UserAuthenticationUpdateDto": {
         "type": "object",
