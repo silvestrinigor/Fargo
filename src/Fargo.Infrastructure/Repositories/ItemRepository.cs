@@ -67,10 +67,9 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public void Remove(Item item) => context.Items.Remove(item);
 
-    public Task<ItemDto?> GetInfoByGuid(
+    public Task<ItemDto?> GetInfoByGuidAsync(
         Guid entityGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(

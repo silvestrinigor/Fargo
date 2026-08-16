@@ -19,9 +19,9 @@ public sealed class ItemSingleQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var item = await itemRepository.GetInfoByGuid(
+        var item = await itemRepository.GetInfoByGuidAsync(
             query.ItemGuid,
-            actor.PartitionAccessGuids, notChildOfAnyPartition: true,
+            actor.PartitionAccessGuids,
             cancellationToken);
 
         logger.SingleQueryCompleted(query.ItemGuid, actor.Guid, item is not null);
