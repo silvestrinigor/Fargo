@@ -115,4 +115,43 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return query.Where(item =>
             item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
+
+    public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAsync(
+        Guid itemGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+        WITH RECURSIVE item_location AS
+        (
+            SELECT
+                item.guid,
+                item.parent_item_container_guid
+            FROM items AS item
+            WHERE item.guid = {itemGuid}
+
+            UNION ALL
+
+            SELECT
+                parent.guid,
+                parent.parent_item_container_guid
+            FROM items AS parent
+            INNER JOIN item_location AS child
+                ON parent.guid = child.parent_item_container_guid
+        )
+        SELECT guid
+        FROM item_location;
+        """;
+
+        var guids = await context.Database
+            .SqlQuery<Guid>(query)
+            .ToListAsync(cancellationToken);
+
+        var items = await context.Items
+            .Where(i => guids.Contains(i.Guid))
+            .Select(ItemDtoMappings.Projection)
+            .ToListAsync(cancellationToken);
+
+        return items;
+    }
 }

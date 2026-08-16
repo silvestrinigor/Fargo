@@ -10,6 +10,11 @@ public interface IItemQueryRepository
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAsync(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
