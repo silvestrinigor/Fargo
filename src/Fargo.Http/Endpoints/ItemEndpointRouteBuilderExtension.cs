@@ -66,8 +66,8 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapGetItemLocationByGuid(this IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/{itemGuid:guid}", GetItemLocationByGuid)
-            .WithName("GetItem")
+        builder.MapGet("/{itemGuid:guid}/location", GetItemLocationByGuid)
+            .WithName("GetItemLocation")
             .WithSummary("Gets the item location")
             .WithDescription("Retrieves a list of items that represents the location of the contained item.")
             .Produces<ItemDto>(StatusCodes.Status200OK)
