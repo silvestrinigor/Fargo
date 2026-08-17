@@ -14,6 +14,11 @@ public interface IItemQueryRepository
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderByOccurredAtAsync(
+        Guid itemGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<ItemDto>> GetManyInfoOrderByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

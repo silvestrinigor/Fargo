@@ -62,10 +62,10 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
         }
 
         var auditLogs = await queryFiltered
-            .OrderBy(a => a.OccurredAt)
-            .Include(a => a.Partitions)
-            .WithPagination(pagination)
-            .ToListAsync(cancellationToken);
+        .OrderBy(a => a.OccurredAt)
+        .Include(a => a.Partitions)
+        .WithPagination(pagination)
+        .ToListAsync(cancellationToken);
 
         return [.. auditLogs.Select(a => a.ToDto())];
     }

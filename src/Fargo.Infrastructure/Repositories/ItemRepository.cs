@@ -146,14 +146,31 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         """;
 
         var guids = await context.Database
-            .SqlQuery<Guid>(query)
-            .ToListAsync(cancellationToken);
+        .SqlQuery<Guid>(query)
+        .ToListAsync(cancellationToken);
 
         var items = await context.Items
-            .Where(i => guids.Contains(i.Guid))
-            .Select(ItemDtoMappings.Projection)
-            .ToListAsync(cancellationToken);
+        .Where(i => guids.Contains(i.Guid))
+        .Select(ItemDtoMappings.Projection)
+        .ToListAsync(cancellationToken);
 
         return items;
+    }
+
+    public async Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderByOccurredAtAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
+    {
+        var itemMoviments = await context.Items
+        .AsNoTracking()
+        .Include(i => i.Moviments)
+        .Where(i => i.Guid == itemGuid)
+        .Select(i => i.Moviments)
+        .FirstOrDefaultAsync(cancellationToken);
+
+        if (itemMoviments is null)
+        {
+            return null;
+        }
+
+        return [.. itemMoviments.OrderBy(m => m.OccurredAt).Select(a => a.ToDto())];
     }
 }
