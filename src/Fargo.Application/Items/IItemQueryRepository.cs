@@ -9,7 +9,7 @@ public interface IItemQueryRepository
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAsync(
+    Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidOrderByDepthAsync(
         Guid itemGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default);

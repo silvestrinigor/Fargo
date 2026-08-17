@@ -115,7 +115,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 
-    public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAsync(
+    public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidOrderByDepthAsync(
         Guid itemGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
@@ -125,7 +125,8 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         (
             SELECT
                 item.guid,
-                item.parent_item_container_guid
+                item.parent_item_container_guid,
+                0 AS depth
             FROM items AS item
             WHERE item.guid = {itemGuid}
 
@@ -133,13 +134,15 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
             SELECT
                 parent.guid,
-                parent.parent_item_container_guid
+                parent.parent_item_container_guid,
+                child.depth + 1
             FROM items AS parent
             INNER JOIN item_location AS child
                 ON parent.guid = child.parent_item_container_guid
         )
         SELECT guid
-        FROM item_location;
+        FROM item_location
+        ORDER BY depth;
         """;
 
         var guids = await context.Database

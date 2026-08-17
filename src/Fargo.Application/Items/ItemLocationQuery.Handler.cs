@@ -21,7 +21,7 @@ public sealed class ItemLocationQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var item = await itemRepository.GetLocationInfoByGuidAsync(
+        var item = await itemRepository.GetLocationInfoByGuidOrderByDepthAsync(
             query.ItemGuid,
             actor.PartitionAccessGuids,
             cancellationToken);
