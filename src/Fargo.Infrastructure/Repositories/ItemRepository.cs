@@ -84,7 +84,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return itemTask;
     }
 
-    public async Task<IReadOnlyCollection<ItemDto>> GetManyInfo(
+    public async Task<IReadOnlyCollection<ItemDto>> GetManyInfoOrderByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
