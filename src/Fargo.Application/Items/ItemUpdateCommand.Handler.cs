@@ -24,7 +24,7 @@ public sealed class ItemUpdateCommandHandler(
         ItemUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ItemGuid, currentActor.Guid);
+        logger.UpdateStarted(command.ItemGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -89,6 +89,6 @@ public sealed class ItemUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(item.Guid, currentActor.Guid);
+        logger.UpdateCompleted(item.Guid, currentActor.Guid, currentActor.ActorType);
     }
 }
