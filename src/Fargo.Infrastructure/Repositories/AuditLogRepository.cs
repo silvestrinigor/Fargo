@@ -16,7 +16,7 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
         context.AuditLogs.Add(auditLog);
     }
 
-    public async Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoAsync(
+    public async Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoOrderedByOccurredAtAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         Guid? actorGuid = null,
@@ -62,10 +62,10 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
         }
 
         var auditLogs = await queryFiltered
-            .OrderBy(a => a.OccurredAt)
-            .Include(a => a.Partitions)
-            .WithPagination(pagination)
-            .ToListAsync(cancellationToken);
+        .OrderBy(a => a.OccurredAt)
+        .Include(a => a.Partitions)
+        .WithPagination(pagination)
+        .ToListAsync(cancellationToken);
 
         return [.. auditLogs.Select(a => a.ToDto())];
     }

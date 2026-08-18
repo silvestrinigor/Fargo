@@ -6,7 +6,7 @@ namespace Fargo.Application.Audits;
 
 public interface IAuditLogQueryRepository
 {
-    Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoAsync(
+    Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoOrderedByOccurredAtAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         Guid? actorGuid = null,

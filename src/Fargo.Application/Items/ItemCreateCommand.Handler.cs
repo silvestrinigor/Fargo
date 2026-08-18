@@ -23,7 +23,7 @@ public sealed class ItemCreateCommandHandler(
 {
     public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(command.Create.ArticleGuid, currentActor.Guid);
+        logger.CreateStarted(command.Create.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -72,7 +72,7 @@ public sealed class ItemCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(item.Guid, actor.Guid, article.Guid);
+        logger.CreateCompleted(item.Guid, actor.Guid, actor.ActorType, article.Guid);
 
         return item.Guid;
     }

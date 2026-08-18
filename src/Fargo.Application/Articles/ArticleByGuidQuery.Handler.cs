@@ -42,7 +42,7 @@ public sealed class ArticleByGuidQueryHandler(
         var article = await articleRepository.GetInfoByGuidAsync(
             query.ArticleGuid,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
-            notChildOfAnyPartition: true, cancellationToken);
+            cancellationToken);
 
         logger.QueryByGuidCompleted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType, found: article is not null);
 

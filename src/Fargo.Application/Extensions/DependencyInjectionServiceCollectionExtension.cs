@@ -22,7 +22,7 @@ public static class DependencyInjectionServiceCollectionExtension
     extension(IServiceCollection services)
     {
         public IServiceCollection AddFargoApplication() => services
-            .AddFargoDomain()
+            .AddFargoCore()
             .AddFargoArticleApplication()
             .AddFargoPartitionApplication()
             .AddFargoUserGroupApplication()
@@ -32,7 +32,7 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddFargoSystemApplication()
             .AddFargoAuditLogApplication();
 
-        public IServiceCollection AddFargoDomain() => services
+        public IServiceCollection AddFargoCore() => services
             .AddScoped<ActorResolver>()
             .AddScoped<ArticleService>()
             .AddScoped<UserService>()
@@ -55,7 +55,8 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>()
             .AddScoped<IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>, ItemsQueryHandler>()
-            .AddScoped<IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>>, ItemLocationQueryHandler>();
+            .AddScoped<IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>>, ItemLocationQueryHandler>()
+            .AddScoped<IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?>, ItemMovimentsQueryHandler>();
 
         public IServiceCollection AddFargoUserApplication() => services
             .AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>()

@@ -20,7 +20,7 @@ public sealed class ItemDeleteCommandHandler(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.ItemGuid, currentActor.Guid);
+        logger.DeleteStarted(command.ItemGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -42,6 +42,6 @@ public sealed class ItemDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(item.Guid, currentActor.Guid);
+        logger.DeleteCompleted(item.Guid, currentActor.Guid, currentActor.ActorType);
     }
 }

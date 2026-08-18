@@ -14,6 +14,8 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapGetItemLocationByGuid();
 
+        group.MapGetItemMovimentsByGuid();
+
         group.MapGetItems();
 
         group.MapCreateItem();
@@ -86,6 +88,34 @@ public static class ItemEndpointRouteBuilderExtension
         var response = await handler.HandleAsync(query, cancellationToken);
 
         return response.Count == 0 ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get moviments history
+
+    private static IEndpointRouteBuilder MapGetItemMovimentsByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}/moviments", GetItemMovimentsByGuid)
+            .WithName("GetItemMoviments")
+            .WithSummary("Gets the item moviments")
+            .WithDescription("Retrieves a list of moviments that represents the moviment history of item.")
+            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemMovimentDto>>, NotFound>> GetItemMovimentsByGuid(
+        Guid itemGuid,
+        IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ItemMovimentsQuery(itemGuid);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     }
 
     #endregion

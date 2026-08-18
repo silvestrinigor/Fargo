@@ -15,18 +15,18 @@ public sealed class ItemLocationQueryHandler(
     public async Task<IReadOnlyCollection<ItemDto>> HandleAsync(
         ItemLocationQuery query, CancellationToken cancellationToken = default)
     {
-        logger.LocationQueryStarted(query.ItemGuid, currentActor.Guid);
+        logger.LocationQueryStarted(query.ItemGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var item = await itemRepository.GetLocationInfoByGuidAsync(
+        var item = await itemRepository.GetLocationInfoByGuidOrderedByDepthAsync(
             query.ItemGuid,
             actor.PartitionAccessGuids,
             cancellationToken);
 
-        logger.LocationQueryCompleted(query.ItemGuid, currentActor.Guid, item.Count != 0);
+        logger.LocationQueryCompleted(query.ItemGuid, currentActor.Guid, currentActor.ActorType, item.Count != 0);
 
         return item;
     }

@@ -13,7 +13,7 @@ public sealed class ItemSingleQueryHandler(
     public async Task<ItemDto?> HandleAsync(
         ItemSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.ItemGuid, currentActor.Guid);
+        logger.SingleQueryStarted(query.ItemGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -22,9 +22,10 @@ public sealed class ItemSingleQueryHandler(
         var item = await itemRepository.GetInfoByGuidAsync(
             query.ItemGuid,
             actor.PartitionAccessGuids,
-            cancellationToken);
+            cancellationToken
+        );
 
-        logger.SingleQueryCompleted(query.ItemGuid, actor.Guid, item is not null);
+        logger.SingleQueryCompleted(query.ItemGuid, actor.Guid, actor.ActorType, item is not null);
 
         return item;
     }

@@ -14,12 +14,11 @@ public sealed class ItemsQueryHandler(
 {
     public async Task<IReadOnlyCollection<ItemDto>> HandleAsync(
         ItemsQuery query,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var pagination = query.WithPagination;
 
-        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
+        logger.ManyQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -28,16 +27,20 @@ public sealed class ItemsQueryHandler(
         var partitionGuids =
             PartitionQueryFilter.ForPartitionedEntities(
                 actor.PartitionAccessGuids,
-                query.ChildOfAnyOfThesePartitions);
+                query.ChildOfAnyOfThesePartitions
+            );
 
-        var items = await itemRepository.GetManyInfo(
+        var items = await itemRepository.GetManyInfoOrderedByGuidAsync(
             pagination,
             partitionGuids,
-            cancellationToken);
+            cancellationToken
+        );
 
         logger.ManyQueryCompleted(
-            currentActor.Guid, query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0, items.Count);
+            currentActor.Guid, currentActor.ActorType,
+            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            partitionGuids?.Count ?? 0, items.Count
+        );
 
         return items;
     }

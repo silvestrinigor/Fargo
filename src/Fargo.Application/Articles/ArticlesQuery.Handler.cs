@@ -35,13 +35,14 @@ public sealed class ArticlesQueryHandler(
                 actor.PartitionAccessGuids,
                 query.ChildOfAnyOfThesePartitions);
 
-        var articles = await articleRepository.GetManyInfoAsync(
+        var articles = await articleRepository.GetManyInfoOrderedByGuidAsync(
             query.WithPagination,
             partitionGuids,
             cancellationToken);
 
         logger.ArticlesQueryCompleted(
             actor.Guid,
+            actor.ActorType,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
             partitionGuids?.Count ?? 0,
             articles.Count);
