@@ -22,7 +22,7 @@ public static class DependencyInjectionServiceCollectionExtension
     extension(IServiceCollection services)
     {
         public IServiceCollection AddFargoApplication() => services
-            .AddFargoDomain()
+            .AddFargoCore()
             .AddFargoArticleApplication()
             .AddFargoPartitionApplication()
             .AddFargoUserGroupApplication()
@@ -32,7 +32,7 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddFargoSystemApplication()
             .AddFargoAuditLogApplication();
 
-        public IServiceCollection AddFargoDomain() => services
+        public IServiceCollection AddFargoCore() => services
             .AddScoped<ActorResolver>()
             .AddScoped<ArticleService>()
             .AddScoped<UserService>()

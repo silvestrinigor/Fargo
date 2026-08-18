@@ -14,7 +14,7 @@ public class AccessDeniedFargoApplicationException : FargoApplicationException
     public EntityType EntityType { get; }
 
     public AccessDeniedFargoApplicationException(Guid actorGuid, ActorType actorType, Guid entityGuid)
-        : base($"Access to entity '{entityGuid}' denied for actor '{actorGuid}'")
+        : base($"Access to entity '{entityGuid}' denied for actor '{actorGuid}' of type '{actorType}'")
     {
         ActorGuid = actorGuid;
 
