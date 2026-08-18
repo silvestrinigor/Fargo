@@ -21,7 +21,7 @@ public sealed class ItemMovimentsQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var itemMoviments = await itemQueryRepository.GetItemMovimentsInfoByGuidOrderByOccurredAtAsync(
+        var itemMoviments = await itemQueryRepository.GetItemMovimentsInfoByGuidOrderedByOccurredAtAsync(
             query.ItemGuid,
             actor.PartitionAccessGuids,
             cancellationToken);

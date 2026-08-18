@@ -16,7 +16,7 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
         context.AuditLogs.Add(auditLog);
     }
 
-    public async Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoAsync(
+    public async Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoOrderedByOccurredAtAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         Guid? actorGuid = null,

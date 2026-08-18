@@ -14,13 +14,13 @@ public sealed class AuditLogsQueryHandler(
 {
     public async Task<IReadOnlyCollection<AuditLogDto>> HandleAsync(AuditLogsQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
+        logger.ManyQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
         var actor = await actorResolver.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var items = await auditLogQueryRepository.GetManyInfoAsync(
+        var items = await auditLogQueryRepository.GetManyInfoOrderedByOccurredAtAsync(
             query.WithPagination,
             actor.PartitionAccessGuids,
             query.ActorGuid,
@@ -31,7 +31,7 @@ public sealed class AuditLogsQueryHandler(
             query.PeriodEnd,
             cancellationToken);
 
-        logger.ManyQueryCompleted(currentActor.Guid, actor.PartitionAccessGuids.Count, items.Count);
+        logger.ManyQueryCompleted(currentActor.Guid, currentActor.ActorType, actor.PartitionAccessGuids.Count, items.Count);
 
         return items;
     }

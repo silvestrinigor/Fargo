@@ -84,7 +84,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return itemTask;
     }
 
-    public async Task<IReadOnlyCollection<ItemDto>> GetManyInfoOrderByGuidAsync(
+    public async Task<IReadOnlyCollection<ItemDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
@@ -115,7 +115,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 
-    public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidOrderByDepthAsync(
+    public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidOrderedByDepthAsync(
         Guid itemGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
@@ -157,7 +157,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return items;
     }
 
-    public async Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderByOccurredAtAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderedByOccurredAtAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
     {
         var itemMoviments = await context.Items
         .AsNoTracking()

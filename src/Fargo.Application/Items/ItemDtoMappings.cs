@@ -10,5 +10,6 @@ public static class ItemDtoMappings
         item.ArticleGuid,
         item.ParentItemContainerGuid,
         item.IsFixed,
-        item.Partitions.Select(partition => partition.PartitionGuid).ToArray());
+        item.Partitions.Select(partition => partition.PartitionGuid).ToArray()
+    );
 }

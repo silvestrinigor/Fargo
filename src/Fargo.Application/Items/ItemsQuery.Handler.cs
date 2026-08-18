@@ -30,7 +30,7 @@ public sealed class ItemsQueryHandler(
                 actor.PartitionAccessGuids,
                 query.ChildOfAnyOfThesePartitions);
 
-        var items = await itemRepository.GetManyInfoOrderByGuidAsync(
+        var items = await itemRepository.GetManyInfoOrderedByGuidAsync(
             pagination,
             partitionGuids,
             cancellationToken);

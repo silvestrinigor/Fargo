@@ -5,4 +5,5 @@ public sealed record ItemDto(
     Guid ArticleGuid,
     Guid? ParentContainerGuid,
     bool IsFixed,
-    IReadOnlyCollection<Guid> Partitions);
+    IReadOnlyCollection<Guid> Partitions
+);
