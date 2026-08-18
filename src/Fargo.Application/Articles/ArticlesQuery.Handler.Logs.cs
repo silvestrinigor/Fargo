@@ -8,7 +8,7 @@ internal static partial class ArticlesQueryHandlerLogs
 {
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Articles query started for actor {actorGuid} of type {actorType}. Page: {Page}. Limit: {Limit}.")]
+        Message = "Articles query started for actor '{actorGuid}' of type '{actorType}'. Page: {Page}. Limit: {Limit}.")]
     public static partial void ArticlesQueryStarted(
         this ILogger logger,
         Guid actorGuid,
@@ -18,10 +18,11 @@ internal static partial class ArticlesQueryHandlerLogs
 
     [LoggerMessage(
         Level = LogLevel.Debug,
-        Message = "Articles query completed for actor {actorGuid}. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
+        Message = "Articles query completed for actor '{actorGuid}' of type '{actorType}'. RequestedPartitionCount: {requestedPartitionCount}. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
     public static partial void ArticlesQueryCompleted(
         this ILogger logger,
         Guid actorGuid,
+        ActorType actorType,
         int requestedPartitionCount,
         int effectivePartitionCount,
         int resultCount);

@@ -17,9 +17,6 @@ public interface IArticleQueryRepository
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
     /// </param>
-    /// <param name="notChildOfAnyPartition">
-    /// Indicates whether articles without partitions should be included.
-    /// </param>
     /// <param name="cancellationToken">
     /// Cancellation token.
     /// </param>
@@ -29,8 +26,8 @@ public interface IArticleQueryRepository
     Task<ArticleDto?> GetInfoByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Retrieves article information by barcode.
@@ -41,9 +38,6 @@ public interface IArticleQueryRepository
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
     /// </param>
-    /// <param name="notChildOfAnyPartition">
-    /// Indicates whether articles without partitions should be included.
-    /// </param>
     /// <param name="cancellationToken">
     /// Cancellation token.
     /// </param>
@@ -53,8 +47,8 @@ public interface IArticleQueryRepository
     Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode articleBarcode,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Retrieves multiple article information records.
@@ -69,10 +63,11 @@ public interface IArticleQueryRepository
     /// Cancellation token.
     /// </param>
     /// <returns>
-    /// Collection of article information.
+    /// Collection of article information ordered by guid.
     /// </returns>
-    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
+    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

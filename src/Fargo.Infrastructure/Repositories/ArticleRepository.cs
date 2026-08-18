@@ -58,7 +58,6 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public async Task<ArticleDto?> GetInfoByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var articleQueryFiltered = ApplyPartitionFilter(
@@ -76,7 +75,6 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     public Task<ArticleDto?> GetInfoByBarcodeAsync(
         Barcode barcode,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
-        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default)
     {
         var articleQueryFiltered = ApplyPartitionFilter(
@@ -90,7 +88,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return articleTask;
     }
 
-    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoAsync(
+    public async Task<IReadOnlyCollection<ArticleDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)

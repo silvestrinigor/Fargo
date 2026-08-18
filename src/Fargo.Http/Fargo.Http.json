@@ -357,6 +357,42 @@
         }
       }
     },
+    "/items/{itemGuid}/moviments": {
+      "get": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Gets the item moviments",
+        "description": "Retrieves a list of moviments that represents the moviment history of item.",
+        "operationId": "GetItemMoviments",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/items": {
       "get": {
         "tags": [

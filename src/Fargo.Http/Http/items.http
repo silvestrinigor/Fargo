@@ -1,5 +1,5 @@
 @articleGuid = 68300812-fc24-4a0a-a9d5-f13ca7754016
-@itemGuid = 461c76df-a36e-4cb1-873a-5bbf67b87a0f
+@itemGuid = 4a5109f6-a603-4c31-a751-7a0a504b772d
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get
@@ -12,6 +12,13 @@ Authorization: Bearer {{jwt}}
 ### Get location
 
 GET {{host}}/items/{{itemGuid}}/location
+Authorization: Bearer {{jwt}}
+
+###
+
+### Get moviments
+
+GET {{host}}/items/{{itemGuid}}/moviments
 Authorization: Bearer {{jwt}}
 
 ###
