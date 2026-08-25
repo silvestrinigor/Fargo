@@ -133,4 +133,37 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                 "Unsupported barcode format.")
         };
     }
+
+    public async Task<ArticleInventoryDto?> GetInventoryInfoByGuidAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default)
+    {
+        var articleExistQuery = ApplyPartitionFilter(
+            context.Articles.AsNoTracking(),
+            childOfAnyOfThesePartitions
+        );
+
+        var articleExist = await articleExistQuery.AnyAsync(a => a.Guid == articleGuid, cancellationToken);
+
+        if (articleExist is false)
+        {
+            return null;
+        }
+
+        var query = context.Items.Where(i => i.ArticleGuid == articleGuid);
+
+        if (insideItemContainerGuids is { Count: > 0 })
+        {
+            query = query.Where(
+                i => i.ParentItemContainerGuid != null &&
+                insideItemContainerGuids.Contains(i.ParentItemContainerGuid.Value)
+            );
+        }
+
+        var itemCount = await query.CountAsync(cancellationToken);
+
+        return new ArticleInventoryDto(TotalCount: itemCount);
+    }
 }

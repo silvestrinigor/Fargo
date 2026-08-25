@@ -136,6 +136,60 @@
         }
       }
     },
+    "/articles/{articleGuid}/inventory": {
+      "get": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Gets a article inventory by guid",
+        "description": "Retrieves a article inventory by its unique identifier.",
+        "operationId": "GetArticleInventory",
+        "parameters": [
+          {
+            "name": "articleGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "insideItemContainerGuids",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "includeDescendents",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleInventoryDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/articles": {
       "get": {
         "tags": [
@@ -1287,7 +1341,7 @@
       },
       "ActorType": {
         "type": "integer",
-        "description": "Represents the type of actor responsible for performing an action\nwithin the system."
+        "description": "Represents the type of actor responsible for performing an action\r\nwithin the system."
       },
       "ArticleBarcodeDto": {
         "type": "object",
@@ -1302,11 +1356,11 @@
         "type": "object",
         "properties": {
           "ean13": {
-            "description": "The new EAN-13 barcode to assign to the article. A `null` value\nleaves the existing EAN-13 barcode unchanged."
+            "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged."
           },
           "removeEan13": {
             "type": "boolean",
-            "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\nvalue to `null`.",
+            "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\r\nvalue to `null`.",
             "default": false
           }
         },
@@ -1344,7 +1398,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional variation configuration. Required when ArticleType\nis ArticleType.Variation.",
+                "description": "The optional variation configuration. Required when ArticleType\r\nis ArticleType.Variation.",
                 "$ref": "#/components/schemas/ArticleVariationDto"
               }
             ]
@@ -1355,7 +1409,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional pack configuration. Required when ArticleType\nis ArticleType.Pack.",
+                "description": "The optional pack configuration. Required when ArticleType\r\nis ArticleType.Pack.",
                 "$ref": "#/components/schemas/ArticlePackDto"
               }
             ]
@@ -1368,7 +1422,7 @@
             "items": {
               "$ref": "#/components/schemas/ArticleKitComponentDto"
             },
-            "description": "The optional components of the article. Required when ArticleType\nis ArticleType.Kit."
+            "description": "The optional components of the article. Required when ArticleType\r\nis ArticleType.Kit."
           },
           "container": {
             "oneOf": [
@@ -1450,27 +1504,27 @@
         "type": "object",
         "properties": {
           "lengthX": {
-            "description": "The new length along the X axis. A `null` value leaves the\nexisting value unchanged."
+            "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthX": {
             "type": "boolean",
-            "description": "Indicates whether the existing X-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthX.",
+            "description": "Indicates whether the existing X-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthX.",
             "default": false
           },
           "lengthY": {
-            "description": "The new length along the Y axis. A `null` value leaves the\nexisting value unchanged."
+            "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthY": {
             "type": "boolean",
-            "description": "Indicates whether the existing Y-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthY.",
+            "description": "Indicates whether the existing Y-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthY.",
             "default": false
           },
           "lengthZ": {
-            "description": "The new length along the Z axis. A `null` value leaves the\nexisting value unchanged."
+            "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthZ": {
             "type": "boolean",
-            "description": "Indicates whether the existing Z-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthZ.",
+            "description": "Indicates whether the existing Z-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthZ.",
             "default": false
           }
         },
@@ -1604,6 +1658,20 @@
         },
         "description": "Represents the application-layer data transfer object for an article."
       },
+      "ArticleInventoryDto": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32",
+            "default": 0
+          }
+        }
+      },
       "ArticleKitComponentDto": {
         "required": [
           "articleGuid",
@@ -1665,7 +1733,7 @@
           },
           "removeShelfLife": {
             "type": "boolean",
-            "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\nWhen `true`, this takes precedence over ShelfLife.",
+            "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over ShelfLife.",
             "default": false
           },
           "mass": {
@@ -1673,7 +1741,7 @@
           },
           "removeMass": {
             "type": "boolean",
-            "description": "Indicates whether the existing mass should be removed by setting it to `null`.\nWhen `true`, this takes precedence over Mass.",
+            "description": "Indicates whether the existing mass should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over Mass.",
             "default": false
           },
           "dimension": {

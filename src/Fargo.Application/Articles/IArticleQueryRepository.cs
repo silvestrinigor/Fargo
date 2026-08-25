@@ -50,6 +50,13 @@ public interface IArticleQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    Task<ArticleInventoryDto?> GetInventoryInfoByGuidAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default
+    );
+
     /// <summary>
     /// Retrieves multiple article information records.
     /// </summary>

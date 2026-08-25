@@ -15,6 +15,8 @@ public static class ArticleEndpointRouteBuilderExtension
 
         group.MapGetArticleByBarcode();
 
+        group.MapGetArticleInventoryByGuid();
+
         group.MapGetArticles();
 
         group.MapCreateArticle();
@@ -82,6 +84,36 @@ public static class ArticleEndpointRouteBuilderExtension
         CancellationToken cancellationToken)
     {
         var query = new ArticleByBarcodeQuery(articleBarcode);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get Inventory By Guid
+
+    private static IEndpointRouteBuilder MapGetArticleInventoryByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{articleGuid:guid}/inventory", GetArticleInventoryByGuidAsync)
+            .WithName("GetArticleInventory")
+            .WithSummary("Gets a article inventory by guid")
+            .WithDescription("Retrieves a article inventory by its unique identifier.")
+            .Produces<ArticleInventoryDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<ArticleInventoryDto>, NotFound>> GetArticleInventoryByGuidAsync(
+        Guid articleGuid,
+        Guid[]? insideItemContainerGuids,
+        bool? includeDescendents,
+        IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ArticleInventoryByGuidQuery(articleGuid, insideItemContainerGuids, includeDescendents ?? true);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

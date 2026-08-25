@@ -78,7 +78,8 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
             .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()
             .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>()
-            .AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>();
+            .AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>()
+            .AddScoped<IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>, ArticleInventoryByGuidQueryHandler>();
 
         public IServiceCollection AddFargoPartitionApplication() => services
             .AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>()
