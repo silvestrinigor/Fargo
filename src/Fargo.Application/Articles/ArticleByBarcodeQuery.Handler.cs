@@ -41,7 +41,8 @@ public sealed class ArticleByBarcodeQueryHandler(
         var article = await articleRepository.GetInfoByBarcodeAsync(
             query.ArticleBarcode,
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
-            cancellationToken);
+            cancellationToken
+        );
 
         logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType, article is not null);
 

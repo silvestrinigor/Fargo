@@ -1,5 +1,6 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Informations;
+using UnitsNet;
 
 namespace Fargo.Core.Audits;
 
@@ -49,5 +50,10 @@ public sealed class AuditMetadata
     public void AddArticleType(ArticleType value)
     {
         Add("articleType", new AuditValue.Number((byte)value));
+    }
+
+    public void AddArticleFromArticleGuid(Guid fromArticleGuid)
+    {
+        Add("fromArticle", new AuditValue.String(fromArticleGuid.ToString()));
     }
 }
