@@ -11,9 +11,6 @@
     <Project Path="src/Fargo.Http/Fargo.Http.csproj" />
     <Project Path="src/Fargo.Http.Client/Fargo.Http.Client.csproj" />
 
-    <Project Path="src/Fargo.Grpc/Fargo.Grpc.csproj" />
-    <Project Path="src/Fargo.Grpc.Client/Fargo.Grpc.Client.csproj" />
-
     <Project Path="src/Fargo.Cli/Fargo.Cli.csproj" />
 
     <Project Path="src/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
