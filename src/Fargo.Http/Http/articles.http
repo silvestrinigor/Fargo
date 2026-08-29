@@ -1,9 +1,16 @@
-@articleGuid = fdbd3eeb-f83e-4936-9960-c127bb8e82f7
+@articleGuid = 8d9e5ba7-9a2b-49fe-a6ed-5b134e9e3d74
 @partitionGuid = 55555555-5555-5555-5555-555555555555
 
 ### Get by Guid
 
 GET {{host}}/articles/{{articleGuid}}
+Authorization: Bearer {{jwt}}
+
+###
+
+### Get inventory by Guid
+
+GET {{host}}/articles/{{articleGuid}}/inventory
 Authorization: Bearer {{jwt}}
 
 ###
@@ -30,7 +37,7 @@ Content-Type: application/json
 
 {
   "name": "c",
-  "articleType": 5,
+  "articleType": 1,
   "barcode": {
     //"ean13": "1234567891234"
   }

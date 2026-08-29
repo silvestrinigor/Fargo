@@ -136,6 +136,60 @@
         }
       }
     },
+    "/articles/{articleGuid}/inventory": {
+      "get": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Gets a article inventory by guid",
+        "description": "Retrieves a article inventory by its unique identifier.",
+        "operationId": "GetArticleInventory",
+        "parameters": [
+          {
+            "name": "articleGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "insideItemContainerGuids",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "includeDescendents",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleInventoryDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/articles": {
       "get": {
         "tags": [
@@ -346,7 +400,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ItemDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemDto"
+                  }
                 }
               }
             }
@@ -382,7 +439,49 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ItemDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemMovimentDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/items/{itemGuid}/inventory": {
+      "get": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Gets the item container inventory",
+        "description": "Retrieves a list of article inventory in the item container.",
+        "operationId": "GetItemContainerInventory",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemContainerInventoryDto"
+                  }
                 }
               }
             }
@@ -1604,6 +1703,22 @@
         },
         "description": "Represents the application-layer data transfer object for an article."
       },
+      "ArticleInventoryDto": {
+        "required": [
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ArticleKitComponentDto": {
         "required": [
           "articleGuid",
@@ -1821,6 +1936,27 @@
         "description": "Represents a entity type."
       },
       "FirstName": { },
+      "ItemContainerInventoryDto": {
+        "required": [
+          "articleGuid",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ItemCreateDto": {
         "required": [
           "articleGuid"
@@ -1884,6 +2020,26 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      },
+      "ItemMovimentDto": {
+        "required": [
+          "movedToItemContainerGuid",
+          "occurredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "movedToItemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

@@ -10,13 +10,13 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository
 {
-    public Task<Item?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
+    public Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default)
     {
         return context.Items
         .Include(item => item.Article)
         .Include(item => item.Partitions)
         .Include(item => item.ParentItemContainer)
-        .SingleOrDefaultAsync(item => item.Guid == entityGuid, cancellationToken);
+        .SingleOrDefaultAsync(item => item.Guid == itemGuid, cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetContainedDescendantGuidsAsync(
@@ -172,5 +172,43 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         }
 
         return [.. itemMoviments.OrderBy(m => m.OccurredAt).Select(a => a.ToDto())];
+    }
+
+    public async Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetInventoryInfoByGuidAsync(
+        IReadOnlyCollection<Guid>? itemContainerGuids = null,
+        IReadOnlyCollection<Guid>? articleGuids = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = context.Items.AsQueryable();
+
+        if (itemContainerGuids is { Count: > 0 })
+        {
+            query = query.Where(x =>
+                x.ParentItemContainerGuid != null &&
+                itemContainerGuids.Contains(x.ParentItemContainerGuid.Value)
+            );
+        }
+
+        if (articleGuids is { Count: > 0 })
+        {
+            query = query.Where(i => articleGuids.Contains(i.ArticleGuid));
+        }
+
+        var countQuery = query.CountBy(x => x.ArticleGuid);
+
+        return await countQuery.Select(x => new ItemContainerInventoryDto(x.Key, x.Value)).ToListAsync();
+    }
+
+    public Task<bool> ExistByGuidAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
+    {
+        var queryFiltered = ApplyPartitionFilter(
+            context.Items.AsNoTracking(),
+            childOfAnyOfThesePartitions);
+
+        var itemTask = queryFiltered
+            .Where(item => item.Guid == itemGuid)
+            .AnyAsync(cancellationToken);
+
+        return itemTask;
     }
 }

@@ -118,6 +118,8 @@ public sealed class ArticleCreateCommandHandler(
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
+                    articleAudit.Metadata.AddArticleFromArticleGuid(fromArticle.Guid);
+
                     break;
                 }
 
@@ -144,6 +146,8 @@ public sealed class ArticleCreateCommandHandler(
                     article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
+
+                    articleAudit.Metadata.AddArticleFromArticleGuid(fromArticle.Guid);
 
                     break;
                 }

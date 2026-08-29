@@ -50,4 +50,9 @@ public sealed class AuditMetadata
     {
         Add("articleType", new AuditValue.Number((byte)value));
     }
+
+    public void AddArticleFromArticleGuid(Guid fromArticleGuid)
+    {
+        Add("fromArticle", new AuditValue.String(fromArticleGuid.ToString()));
+    }
 }

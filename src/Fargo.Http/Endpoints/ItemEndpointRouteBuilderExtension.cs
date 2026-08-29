@@ -16,6 +16,8 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapGetItemMovimentsByGuid();
 
+        group.MapGetItemContainerInventoryByGuid();
+
         group.MapGetItems();
 
         group.MapCreateItem();
@@ -72,7 +74,7 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItemLocation")
             .WithSummary("Gets the item location")
             .WithDescription("Retrieves a list of items that represents the location of the contained item.")
-            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         return builder;
@@ -100,7 +102,7 @@ public static class ItemEndpointRouteBuilderExtension
             .WithName("GetItemMoviments")
             .WithSummary("Gets the item moviments")
             .WithDescription("Retrieves a list of moviments that represents the moviment history of item.")
-            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces<IReadOnlyCollection<ItemMovimentDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
         return builder;
@@ -112,6 +114,34 @@ public static class ItemEndpointRouteBuilderExtension
         CancellationToken cancellationToken)
     {
         var query = new ItemMovimentsQuery(itemGuid);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get inventory
+
+    private static IEndpointRouteBuilder MapGetItemContainerInventoryByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}/inventory", GetItemContainerInventoryByGuid)
+            .WithName("GetItemContainerInventory")
+            .WithSummary("Gets the item container inventory")
+            .WithDescription("Retrieves a list of article inventory in the item container.")
+            .Produces<IReadOnlyCollection<ItemContainerInventoryDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemContainerInventoryDto>>, NotFound>> GetItemContainerInventoryByGuid(
+        Guid itemGuid,
+        IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ItemContainerInventoryByGuidQuery(itemGuid);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
