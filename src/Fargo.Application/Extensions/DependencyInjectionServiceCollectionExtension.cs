@@ -56,7 +56,8 @@ public static class DependencyInjectionServiceCollectionExtension
             .AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>()
             .AddScoped<IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>, ItemsQueryHandler>()
             .AddScoped<IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>>, ItemLocationQueryHandler>()
-            .AddScoped<IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?>, ItemMovimentsQueryHandler>();
+            .AddScoped<IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?>, ItemMovimentsQueryHandler>()
+            .AddScoped<IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?>, ItemContainerInventoryByGuidQueryHandler>();
 
         public IServiceCollection AddFargoUserApplication() => services
             .AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>()
