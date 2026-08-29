@@ -1704,6 +1704,9 @@
         "description": "Represents the application-layer data transfer object for an article."
       },
       "ArticleInventoryDto": {
+        "required": [
+          "totalCount"
+        ],
         "type": "object",
         "properties": {
           "totalCount": {
@@ -1712,8 +1715,7 @@
               "integer",
               "string"
             ],
-            "format": "int32",
-            "default": 0
+            "format": "int32"
           }
         }
       },

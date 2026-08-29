@@ -1,6 +1,5 @@
 using Fargo.Core.Articles;
 using Fargo.Core.Informations;
-using UnitsNet;
 
 namespace Fargo.Core.Audits;
 
