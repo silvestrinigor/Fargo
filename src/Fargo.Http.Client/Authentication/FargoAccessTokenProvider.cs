@@ -2,17 +2,25 @@ using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace Fargo.Http.Client.Authentication;
 
-public sealed class FargoAccessTokenProvider(
-    Func<CancellationToken, Task<string>> accessTokenProvider)
-    : IAccessTokenProvider
+public sealed class FargoAccessTokenProvider : IAccessTokenProvider
 {
-    public AllowedHostsValidator AllowedHostsValidator { get; } = new();
+    private readonly ITokenStore _tokenStore;
+
+    public FargoAccessTokenProvider(ITokenStore tokenStore)
+    {
+        _tokenStore = tokenStore;
+    }
 
     public async Task<string> GetAuthorizationTokenAsync(
         Uri uri,
         Dictionary<string, object>? additionalAuthenticationContext = null,
         CancellationToken cancellationToken = default)
     {
-        return await accessTokenProvider(cancellationToken);
+        var tokens = await _tokenStore.GetAsync(cancellationToken)
+            ?? throw new InvalidOperationException("Fargo is not authenticated.");
+
+        return tokens.AccessToken;
     }
+
+    public AllowedHostsValidator AllowedHostsValidator { get; } = new();
 }

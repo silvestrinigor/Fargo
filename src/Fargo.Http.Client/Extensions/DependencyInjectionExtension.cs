@@ -18,8 +18,7 @@ public static class DependencyInjectionExtension
                 sp.GetRequiredService<IAuthenticationProvider>();
 
             var requestAdapter =
-                new HttpClientRequestAdapter(
-                    authenticationProvider)
+                new HttpClientRequestAdapter(authenticationProvider)
                 {
                     BaseUrl = baseAddress.ToString()
                 };
