@@ -1,3 +1,5 @@
 using Fargo.Cli;
 
-return await Application.RunAsync();
+var root = Application.Create();
+
+await root.Parse(args).InvokeAsync();

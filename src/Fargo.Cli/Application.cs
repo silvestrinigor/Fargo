@@ -1,38 +1,21 @@
 using Fargo.Cli.Commands;
+using Fargo.Http.Client.Extensions;
+using Microsoft.Extensions.Hosting;
+using System.CommandLine;
 
 namespace Fargo.Cli;
 
 public static class Application
 {
-    public static async Task<int> RunAsync()
+    public static RootCommand Create()
     {
-        var root = RootCommandFactory.Create();
+        var builder = Host.CreateApplicationBuilder();
 
-        Console.WriteLine("Fargo Cli");
-        Console.WriteLine("Type 'help' for help.");
-        Console.WriteLine();
+        builder.Services.AddFargoHttpClient(
+            new Uri("http://localhost:5000"));
 
-        while (true)
-        {
-            Console.Write("fargo> ");
+        var host = builder.Build();
 
-            var input = Console.ReadLine();
-
-            if (input is null)
-            {
-                break;
-            }
-
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                continue;
-            }
-
-            var result = root.Parse(input);
-
-            await result.InvokeAsync();
-        }
-
-        return 0;
+        return CommandFactory.Create(host.Services);
     }
 }
