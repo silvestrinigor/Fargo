@@ -1715,9 +1715,11 @@
               "integer",
               "string"
             ],
+            "description": "The total number of items available in inventory for this article.",
             "format": "int32"
           }
-        }
+        },
+        "description": "Represents a summary of inventory information for a specific article."
       },
       "ArticleKitComponentDto": {
         "required": [
