@@ -50,10 +50,9 @@ public interface IArticleQueryRepository
         CancellationToken cancellationToken = default
     );
 
-    Task<ArticleInventoryDto?> GetInventoryInfoByGuidAsync(
+    Task<ArticleInventoryDto> GetInventoryInfoByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default
     );
 
@@ -74,6 +73,12 @@ public interface IArticleQueryRepository
     /// </returns>
     Task<IReadOnlyCollection<ArticleDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<bool> ExistByGuidAsync(
+        Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default
     );

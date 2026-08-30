@@ -134,24 +134,11 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         };
     }
 
-    public async Task<ArticleInventoryDto?> GetInventoryInfoByGuidAsync(
+    public async Task<ArticleInventoryDto> GetInventoryInfoByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
     {
-        var articleExistQuery = ApplyPartitionFilter(
-            context.Articles.AsNoTracking(),
-            childOfAnyOfThesePartitions
-        );
-
-        var articleExist = await articleExistQuery.AnyAsync(a => a.Guid == articleGuid, cancellationToken);
-
-        if (articleExist is false)
-        {
-            return null;
-        }
-
         var query = context.Items.Where(i => i.ArticleGuid == articleGuid);
 
         if (insideItemContainerGuids is { Count: > 0 })
@@ -165,5 +152,18 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         var itemCount = await query.CountAsync(cancellationToken);
 
         return new ArticleInventoryDto(TotalCount: itemCount);
+    }
+
+    public Task<bool> ExistByGuidAsync(Guid articleGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
+    {
+        var queryFiltered = ApplyPartitionFilter(
+            context.Articles.AsNoTracking(),
+            childOfAnyOfThesePartitions);
+
+        var articleTask = queryFiltered
+            .Where(x => x.Guid == articleGuid)
+            .AnyAsync(cancellationToken);
+
+        return articleTask;
     }
 }
