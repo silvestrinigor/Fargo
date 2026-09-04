@@ -7,31 +7,38 @@ namespace Fargo.Cli.Authentication;
 
 public class FargoCliTokenStore(CredentialCache credentials, IFargoCliConfigurationStore configurationStore) : ITokenStore
 {
+    private readonly PersonaGUID personaGuid = PersonaGUID.Create(configurationStore.Load().CredentialId);
+
     public Task ClearAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        credentials.Remove(personaGuid);
+
+        return Task.CompletedTask;
     }
 
     public async Task<AuthTokens?> GetAsync(CancellationToken cancellationToken = default)
     {
-        var config = configurationStore.Load();
-
-        var personaGuid = config.CredentialId;
-
-        if (personaGuid is null)
+        if (credentials.TryGet(personaGuid, out var stored) && stored is FargoCredential fargoCredential)
         {
-            return null;
+            return new AuthTokens(
+                fargoCredential.AccessToken,
+                fargoCredential.AccessToken,
+                fargoCredential.AccessTokenExpiresAt
+            );
         }
 
-        if (credentials.TryGet(PersonaGUID.Create(personaGuid), out Credential? stored) && stored is CredentialWithUsernamePassword creds)
-        {
-        }
-
-        throw new NotImplementedException();
+        return null;
     }
 
     public Task SetAsync(AuthTokens tokens, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        credentials.AddOrReplace(personaGuid, new FargoCredential
+        {
+            AccessToken = tokens.AccessToken,
+            RefreshToken = tokens.RefreshToken,
+            AccessTokenExpiresAt = tokens.ExpiresAt,
+        });
+
+        return Task.CompletedTask;
     }
 }
