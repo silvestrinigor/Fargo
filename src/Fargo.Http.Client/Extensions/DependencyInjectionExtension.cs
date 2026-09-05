@@ -1,42 +1,33 @@
 using Fargo.Http.Client.Authentication;
+using Fargo.Http.Client.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace Fargo.Http.Client.Extensions;
 
 public static class DependencyInjectionExtension
 {
-    public static IServiceCollection AddFargoHttpClient(
-        this IServiceCollection services,
-        Uri baseAddress)
+    public static IServiceCollection AddFargoHttpClient(this IServiceCollection services, Uri baseAddress)
     {
-        services.AddHttpClient();
+        services.AddKiotaHandlers();
 
         services.AddSingleton<IAccessTokenProvider, FargoAccessTokenProvider>();
 
+        services.AddSingleton<ITokenStore, TokenStore>();
+
         services.AddSingleton<IAuthenticationProvider>(sp =>
         {
-            var accessTokenProvider =
-                sp.GetRequiredService<IAccessTokenProvider>();
+            var accessTokenProvider = sp.GetRequiredService<IAccessTokenProvider>();
 
-            return new BaseBearerTokenAuthenticationProvider(
-                accessTokenProvider);
+            return new BaseBearerTokenAuthenticationProvider(accessTokenProvider);
         });
 
-        services.AddSingleton(sp =>
+        services.AddHttpClient<FargoClientFactory>((sp, client) =>
         {
-            var authenticationProvider =
-                sp.GetRequiredService<IAuthenticationProvider>();
+            client.BaseAddress = baseAddress;
+        }).AttachKiotaHandlers();
 
-            var requestAdapter =
-                new HttpClientRequestAdapter(authenticationProvider)
-                {
-                    BaseUrl = baseAddress.ToString()
-                };
-
-            return new FargoApiClient(requestAdapter);
-        });
+        services.AddTransient(sp => sp.GetRequiredService<FargoClientFactory>().GetClient());
 
         return services;
     }

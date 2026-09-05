@@ -2,18 +2,24 @@ namespace Fargo.Http.Client.Authentication;
 
 public sealed class TokenStore : ITokenStore
 {
+    private AuthTokens? authTokens = null;
+
     public Task ClearAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        authTokens = null;
+
+        return Task.CompletedTask;
     }
 
     public Task<AuthTokens?> GetAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(authTokens);
     }
 
     public Task SetAsync(AuthTokens tokens, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        authTokens = tokens;
+
+        return Task.CompletedTask;
     }
 }

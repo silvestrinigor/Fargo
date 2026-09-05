@@ -5,9 +5,27 @@ using ktsu.CredentialCache;
 
 namespace Fargo.Cli.Authentication;
 
-public class FargoCliTokenStore(CredentialCache credentials, IFargoCliConfigurationStore configurationStore) : ITokenStore
+public class FargoCliTokenStore : ITokenStore
 {
-    private readonly PersonaGUID personaGuid = PersonaGUID.Create(configurationStore.Load().CredentialId);
+    private readonly PersonaGUID personaGuid;
+
+    private readonly CredentialCache credentials;
+
+    public FargoCliTokenStore(CredentialCache credentials, IFargoCliConfigurationStore configurationStore)
+    {
+        var config = configurationStore.Load();
+
+        if (config.CredentialId == null)
+        {
+            config.CredentialId = CredentialCache.CreatePersonaGUID();
+
+            configurationStore.Save(config);
+        }
+
+        personaGuid = PersonaGUID.Create(config.CredentialId);
+
+        this.credentials = credentials;
+    }
 
     public Task ClearAsync(CancellationToken cancellationToken = default)
     {

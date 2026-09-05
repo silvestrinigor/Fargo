@@ -16,8 +16,14 @@ public sealed class FargoAccessTokenProvider : IAccessTokenProvider
         Dictionary<string, object>? additionalAuthenticationContext = null,
         CancellationToken cancellationToken = default)
     {
-        var tokens = await _tokenStore.GetAsync(cancellationToken)
-            ?? throw new InvalidOperationException("Fargo is not authenticated.");
+        var tokens = await _tokenStore.GetAsync(cancellationToken);
+
+        if (tokens is null)
+        {
+#pragma warning disable CS8603 // Possible null reference return.
+            return null;
+#pragma warning restore CS8603 // Possible null reference return.
+        }
 
         return tokens.AccessToken;
     }
