@@ -15,4 +15,5 @@ namespace Fargo.Application.Identity;
 public record AuthResult(
     string AccessToken,
     string RefreshToken,
-    DateTimeOffset ExpiresAt);
+    DateTimeOffset ExpiresAt
+);
