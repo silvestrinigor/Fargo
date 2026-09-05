@@ -1,3 +1,4 @@
+using Fargo.Http.Client.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
@@ -10,7 +11,18 @@ public static class DependencyInjectionExtension
         this IServiceCollection services,
         Uri baseAddress)
     {
-        services.AddHttpClient<FargoApiClient>();
+        services.AddHttpClient();
+
+        services.AddSingleton<IAccessTokenProvider, FargoAccessTokenProvider>();
+
+        services.AddSingleton<IAuthenticationProvider>(sp =>
+        {
+            var accessTokenProvider =
+                sp.GetRequiredService<IAccessTokenProvider>();
+
+            return new BaseBearerTokenAuthenticationProvider(
+                accessTokenProvider);
+        });
 
         services.AddSingleton(sp =>
         {

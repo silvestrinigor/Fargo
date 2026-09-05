@@ -22,7 +22,7 @@ public class FargoCliTokenStore(CredentialCache credentials, IFargoCliConfigurat
         {
             return new AuthTokens(
                 fargoCredential.AccessToken,
-                fargoCredential.AccessToken,
+                fargoCredential.RefreshToken,
                 fargoCredential.AccessTokenExpiresAt
             );
         }
