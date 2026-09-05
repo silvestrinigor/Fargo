@@ -6,7 +6,8 @@ public interface ITokenStore
 
     Task SetAsync(
         AuthTokens tokens,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     Task ClearAsync(CancellationToken cancellationToken = default);
 }

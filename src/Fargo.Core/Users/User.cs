@@ -438,5 +438,6 @@ public class User : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         IsActive = false;
     }
 
+    /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.User;
 }
