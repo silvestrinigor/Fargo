@@ -1,5 +1,4 @@
 using System.CommandLine;
-using Fargo.Cli.Authentication;
 using Fargo.Http.Client;
 using Fargo.Http.Client.Authentication;
 using Fargo.Http.Client.Models;
@@ -8,9 +7,7 @@ namespace Fargo.Cli.Commands.Identity;
 
 public sealed class LoginCommand : Command
 {
-    public LoginCommand(
-        FargoApiClient client,
-        ITokenStore tokenStore)
+    public LoginCommand(FargoApiClient client, ITokenStore tokenStore)
         : base("login", "Authenticate with the Fargo server")
     {
         var usernameOption = new Option<string>("--username")
@@ -46,7 +43,7 @@ public sealed class LoginCommand : Command
                 return 1;
             }
 
-            var configuration = tokenStore.SetAsync(new AuthTokens(result.AccessToken!, result.RefreshToken!, result.ExpiresAt!.Value));
+            await tokenStore.SetAsync(new AuthTokens(result.AccessToken!, result.RefreshToken!, result.ExpiresAt!.Value));
 
             Console.WriteLine("Login successful.");
 

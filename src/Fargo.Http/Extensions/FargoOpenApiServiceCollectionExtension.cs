@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Informations;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
 
@@ -38,6 +39,12 @@ internal static class FargoOpenApiSchemaTransformers
         OpenApiSchema schema,
         Type? parameterType)
     {
+        if (parameterType == typeof(Name))
+        {
+            schema.Type = JsonSchemaType.String;
+            schema.Example = "Name";
+        }
+
         if (parameterType == typeof(Barcode))
         {
             schema.Type = JsonSchemaType.String;

@@ -2,6 +2,7 @@
 using Fargo.Cli.Configurations;
 using Fargo.Http.Client.Authentication;
 using ktsu.CredentialCache;
+using System.Text.Json;
 
 namespace Fargo.Cli.Authentication;
 
@@ -9,9 +10,9 @@ public class FargoCliTokenStore : ITokenStore
 {
     private readonly PersonaGUID personaGuid;
 
-    private readonly CredentialCache credentials;
+    private readonly CredentialCache credentials = CredentialCache.Instance;
 
-    public FargoCliTokenStore(CredentialCache credentials, IFargoCliConfigurationStore configurationStore)
+    public FargoCliTokenStore(IFargoCliConfigurationStore configurationStore)
     {
         var config = configurationStore.Load();
 
@@ -20,11 +21,13 @@ public class FargoCliTokenStore : ITokenStore
             config.CredentialId = CredentialCache.CreatePersonaGUID();
 
             configurationStore.Save(config);
+
+            Console.WriteLine(config.CredentialId);
         }
+        Console.WriteLine(config.CredentialId);
+        Console.WriteLine("test");
 
         personaGuid = PersonaGUID.Create(config.CredentialId);
-
-        this.credentials = credentials;
     }
 
     public Task ClearAsync(CancellationToken cancellationToken = default)
@@ -34,27 +37,38 @@ public class FargoCliTokenStore : ITokenStore
         return Task.CompletedTask;
     }
 
-    public async Task<AuthTokens?> GetAsync(CancellationToken cancellationToken = default)
+    public Task<AuthTokens?> GetAsync(CancellationToken cancellationToken = default)
     {
-        if (credentials.TryGet(personaGuid, out var stored) && stored is FargoCredential fargoCredential)
+        if (!credentials.TryGet(personaGuid, out Credential? credential))
         {
-            return new AuthTokens(
-                fargoCredential.AccessToken,
-                fargoCredential.RefreshToken,
-                fargoCredential.AccessTokenExpiresAt
-            );
+            return Task.FromResult<AuthTokens?>(null);
         }
 
-        return null;
+        if (credential is not CredentialWithToken tokenCredential)
+        {
+            return Task.FromResult<AuthTokens?>(null);
+        }
+
+        var data = JsonSerializer.Deserialize<AuthTokens>(
+            tokenCredential.Token);
+
+        if (data is null)
+        {
+            return Task.FromResult<AuthTokens?>(null);
+        }
+
+        return Task.FromResult<AuthTokens?>(data);
     }
 
     public Task SetAsync(AuthTokens tokens, CancellationToken cancellationToken = default)
     {
-        credentials.AddOrReplace(personaGuid, new FargoCredential
+        Console.WriteLine("test");
+
+        var json = JsonSerializer.Serialize(tokens);
+
+        credentials.AddOrReplace(personaGuid, new CredentialWithToken
         {
-            AccessToken = tokens.AccessToken,
-            RefreshToken = tokens.RefreshToken,
-            AccessTokenExpiresAt = tokens.ExpiresAt,
+            Token = CredentialToken.Create(json)
         });
 
         return Task.CompletedTask;

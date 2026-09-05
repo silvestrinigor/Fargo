@@ -11,14 +11,14 @@ var builder = Host.CreateApplicationBuilder();
 
 builder.Services.AddSingleton<CredentialCache>();
 
+builder.Services.AddFargoHttpClient(new Uri("https://localhost:7563"));
+
 builder.Services.AddSingleton<ITokenStore, FargoCliTokenStore>();
 
 builder.Services.AddSingleton<IFargoCliConfigurationStore, FargoCliConfigurationStore>();
 
-builder.Services.AddFargoHttpClient(new Uri("https://localhost:7563"));
-
 var host = builder.Build();
 
-var root = CommandFactory.Create(host.Services);
+var root = await CommandFactory.Create(host.Services);
 
 await root.Parse(args).InvokeAsync();
