@@ -65,7 +65,7 @@ public static class DependencyInjectionServiceCollectionExtensions
             services.AddDbContext<FargoDbContext>((sp, opt) =>
             {
                 opt.UseNpgsql(
-                    configuration.GetConnectionString("fargo"),
+                    configuration.GetConnectionString("fargo-database"),
                     npgsqlOptions =>
                     {
                         npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
