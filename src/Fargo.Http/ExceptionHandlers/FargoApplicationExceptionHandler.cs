@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Http.ExceptionHandlers;
 
-public sealed class FargoApplicationExceptionHandler(
-    IProblemDetailsService problemDetailsService)
-    : IExceptionHandler
+public sealed class FargoApplicationExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
@@ -117,4 +115,3 @@ public sealed class FargoApplicationExceptionHandler(
         return true;
     }
 }
-

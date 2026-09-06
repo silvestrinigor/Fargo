@@ -49,8 +49,8 @@ internal static class FargoOpenApiSchemaTransformers
         if (parameterType == typeof(Barcode))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Pattern = @".+:(Ean13)$";
-            schema.Example = JsonValue.Create("7891234567895:Ean13");
+            schema.Pattern = @".+:(ean13)$";
+            schema.Example = JsonValue.Create("7891234567895:ean13");
         }
 
         if (parameterType == typeof(Page?))
