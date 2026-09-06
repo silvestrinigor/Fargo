@@ -5,7 +5,7 @@ namespace Fargo.Application.Partitions;
 public interface IPartitionQueryRepository
 {
     Task<PartitionDto?> GetInfoByGuid(
-        Guid entityGuid,
+        Guid partitionGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);

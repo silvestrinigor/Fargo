@@ -20,9 +20,9 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 
     public void Remove(User user) => users.Remove(user);
 
-    public Task<User?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
+    public Task<User?> GetByGuidAsync(Guid userGuid, CancellationToken cancellationToken = default)
         => IncludeAggregate(users)
-            .SingleOrDefaultAsync(user => user.Guid == entityGuid, cancellationToken);
+            .SingleOrDefaultAsync(user => user.Guid == userGuid, cancellationToken);
 
     public Task<User?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => IncludeAggregate(users)

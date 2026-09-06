@@ -10,7 +10,7 @@ public interface IUserQueryRepository
     /// <summary>
     /// Gets user information by its unique identifier.
     /// </summary>
-    /// <param name="entityGuid">
+    /// <param name="userGuid">
     /// The unique identifier of the user.
     /// </param>
     /// <param name="childOfAnyOfThesePartitions">
@@ -26,7 +26,7 @@ public interface IUserQueryRepository
     /// <see langword="null"/>.
     /// </returns>
     Task<UserDto?> GetInfoByGuidAsync(
-        Guid entityGuid,
+        Guid userGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default
     );
