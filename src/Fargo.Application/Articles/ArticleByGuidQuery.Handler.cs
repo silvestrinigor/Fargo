@@ -33,7 +33,7 @@ public sealed class ArticleByGuidQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        logger.QueryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        logger.ArticleQueryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -45,7 +45,7 @@ public sealed class ArticleByGuidQueryHandler(
             cancellationToken
         );
 
-        logger.QueryByGuidCompleted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType, found: article is not null);
+        logger.ArticleQueryByGuidCompleted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType, found: article is not null);
 
         return article;
     }

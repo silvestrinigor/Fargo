@@ -8,14 +8,14 @@ internal static partial class ArticleCreateCommandHandlerLogs
     [LoggerMessage(
         Level = LogLevel.Information,
         Message = "Article create flow started for actor '{actorGuid}' of type '{actorType}'.")]
-    public static partial void CreateStarted(
+    public static partial void ArticleCreateStarted(
         this ILogger logger,
         Guid actorGuid, ActorType actorType);
 
     [LoggerMessage(
         Level = LogLevel.Information,
         Message = "Article create mutation completed for article '{articleGuid}' by actor '{actorGuid}' of type '{actorType}'.")]
-    public static partial void CreateCompleted(
+    public static partial void ArticleCreateCompleted(
         this ILogger logger,
         Guid articleGuid, Guid actorGuid, ActorType actorType);
 }

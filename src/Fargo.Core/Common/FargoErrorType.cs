@@ -18,5 +18,15 @@ public enum FargoErrorType
     /// <summary>
     /// The entity was not found.
     /// </summary>
-    EntityNotFound = 2
+    EntityNotFound = 2,
+
+    /// <summary>
+    /// Permission was denied.
+    /// </summary>
+    PermissionDenied = 3,
+
+    /// <summary>
+    /// Access was denied.
+    /// </summary>
+    AccessDenied = 4,
 }

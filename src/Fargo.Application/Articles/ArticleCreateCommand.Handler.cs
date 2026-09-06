@@ -3,6 +3,7 @@ using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;
+using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
@@ -74,10 +75,9 @@ public sealed class ArticleCreateCommandHandler(
     /// <exception cref="NotSupportedException">
     /// Thrown when the requested article type is not supported.
     /// </exception>
-    public async Task<Guid> HandleAsync(
-        ArticleCreateCommand command, CancellationToken cancellationToken = default)
+    public async Task<Guid> HandleAsync(ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.Guid, currentActor.ActorType);
+        logger.ArticleCreateStarted(currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -105,7 +105,7 @@ public sealed class ArticleCreateCommandHandler(
                     if (command.Create.Variation?.FromArticleGuid is null)
                     {
                         throw new FargoApplicationException(
-                            "Variation from article guid must be informed when the article type is variation.");
+                            "Variation from article guid must be informed when the article type is variation.", FargoErrorType.InvalidOperation);
                     }
 
                     var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Variation.FromArticleGuid, cancellationToken);
@@ -118,7 +118,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
-                    articleAudit.Metadata.AddArticleFromArticleGuid(fromArticle.Guid);
+                    articleAudit.Metadata.AddFromArticleGuid(fromArticle.Guid);
 
                     break;
                 }
@@ -128,13 +128,13 @@ public sealed class ArticleCreateCommandHandler(
                     if (command.Create.Pack?.FromArticleGuid is null)
                     {
                         throw new FargoApplicationException(
-                            "Pack from article guid must be informed when the article type is pack.");
+                            "Pack from article guid must be informed when the article type is pack.", FargoErrorType.InvalidOperation);
                     }
 
                     if (command.Create.Pack?.Quantity is null)
                     {
                         throw new FargoApplicationException(
-                            "Pack quantity should be informed when article type is pack.");
+                            "Pack quantity should be informed when article type is pack.", FargoErrorType.InvalidOperation);
                     }
 
                     var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Pack!.FromArticleGuid, cancellationToken);
@@ -147,7 +147,9 @@ public sealed class ArticleCreateCommandHandler(
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
-                    articleAudit.Metadata.AddArticleFromArticleGuid(fromArticle.Guid);
+                    articleAudit.Metadata.AddFromArticleGuid(fromArticle.Guid);
+
+                    articleAudit.Metadata.AddPackQuantity(command.Create.Pack.Quantity);
 
                     break;
                 }
@@ -157,7 +159,7 @@ public sealed class ArticleCreateCommandHandler(
                     if (command.Create.KitComponents is null || command.Create.KitComponents.Count == 0)
                     {
                         throw new FargoApplicationException(
-                            "Kit components should be informed when article type is kit.");
+                            "Kit components should be informed when article type is kit.", FargoErrorType.InvalidOperation);
                     }
 
                     var kitComponents = new List<(Article, Scalar)>();
@@ -179,6 +181,11 @@ public sealed class ArticleCreateCommandHandler(
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
 
+                    articleAudit.Metadata.AddKitComponents(
+                        [.. command.Create.KitComponents.Select(
+                            x => new ArticleKitComponentInformation(x.ArticleGuid, x.Quantity))]
+                        );
+
                     break;
                 }
 
@@ -191,7 +198,8 @@ public sealed class ArticleCreateCommandHandler(
                     break;
                 }
 
-            default: throw new NotSupportedException("Article type not supported.");
+            default:
+                throw new FargoApplicationException("Article type not supported.", FargoErrorType.InvalidOperation);
         }
 
         articleAudit.Metadata.AddName(article.Name);
@@ -202,12 +210,13 @@ public sealed class ArticleCreateCommandHandler(
 
         articleAudit.Metadata.AddDescription(article.Description);
 
-        if (command.Create.ShelfLife is { } shelfLife)
-        {
-            article.ShelfLife = shelfLife;
-        }
+        article.ShelfLife = command.Create.ShelfLife;
+
+        articleAudit.Metadata.AddShelfLife(article.ShelfLife);
 
         article.Color = command.Create.Color ?? null;
+
+        articleAudit.Metadata.AddColor(article.Color);
 
         article.SetMetrics(
             command.Create.Mass ?? null,
@@ -219,12 +228,18 @@ public sealed class ArticleCreateCommandHandler(
             command.Create.Dimension?.LengthZ ?? null
         );
 
+        articleAudit.Metadata.AddMass(article.Mass);
+
+        articleAudit.Metadata.AddDimension(article.Dimension.X, article.Dimension.Y, article.Dimension.Z);
+
         if (command.Create.Barcode?.Ean13 is { } ean13)
         {
             await articleService.ValidateEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
         }
+
+        articleAudit.Metadata.AddEan13(article.Barcode.Ean13);
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
         {
@@ -240,13 +255,15 @@ public sealed class ArticleCreateCommandHandler(
             }
         }
 
+        articleAudit.Metadata.AddPartitions([.. article.Partitions.Select(x => x.PartitionGuid)]);
+
         articleRepository.Add(article);
 
         auditLogRepository.Add(articleAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(article.Guid, actor.Guid, actor.ActorType);
+        logger.ArticleCreateCompleted(article.Guid, actor.Guid, actor.ActorType);
 
         return article.Guid;
     }

@@ -32,7 +32,7 @@ public sealed class ArticleByBarcodeQueryHandler(
     /// </exception>
     public async Task<ArticleDto?> HandleAsync(ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {
-        logger.QueryByBarcodeStarted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType);
+        logger.ArticleQueryByBarcodeStarted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -44,7 +44,7 @@ public sealed class ArticleByBarcodeQueryHandler(
             cancellationToken
         );
 
-        logger.QueryByBarcodeCompleted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType, article is not null);
+        logger.ArticleQueryByBarcodeCompleted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType, article is not null);
 
         return article;
     }

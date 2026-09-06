@@ -4,8 +4,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.Http.ExceptionHandlers;
 
+/// <summary>
+/// Represents an exception handler for Fargo application exceptions that converts them into appropriate HTTP problem details responses.
+/// This handler specifically processes Fargo application exceptions and maps them to standard HTTP status codes with detailed error information.
+/// </summary>
+/// <param name="problemDetailsService">The service used to write problem details responses</param>
 public sealed class FargoApplicationExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
+    /// <summary>
+    /// Attempts to handle the specified exception by converting it into an appropriate HTTP response with problem details.
+    /// This method processes Fargo application exceptions and returns true if the exception was handled, false otherwise.
+    /// </summary>
+    /// <param name="httpContext">The HTTP context for the current request</param>
+    /// <param name="exception">The exception to handle</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A value task that represents the asynchronous operation, with true if the exception was handled, false otherwise</returns>
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
@@ -20,7 +33,7 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
         switch (appException)
         {
-            case AccessDeniedFargoApplicationException ex:
+            case ActorAccessDeniedFargoApplicationException ex:
 
                 httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
 
@@ -29,7 +42,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                     Status = StatusCodes.Status403Forbidden,
                     Title = "Access denied.",
                     Detail = ex.Message,
-                    Instance = httpContext.Request.Path,
                 };
 
                 problem.Extensions["actorGuid"] = ex.ActorGuid;
@@ -38,7 +50,7 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                 problem.Extensions["entityType"] = ex.EntityType;
                 break;
 
-            case PermissionDeniedFargoApplicationException ex:
+            case ActorPermissionDeniedFargoApplicationException ex:
 
                 httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
 
@@ -47,10 +59,10 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                     Status = StatusCodes.Status403Forbidden,
                     Title = "Permission denied.",
                     Detail = ex.Message,
-                    Instance = httpContext.Request.Path,
                 };
 
                 problem.Extensions["actorId"] = ex.ActorGuid;
+                problem.Extensions["actorType"] = ex.ActorType;
                 problem.Extensions["actionType"] = ex.ActionType;
                 break;
 
@@ -63,7 +75,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                     Status = StatusCodes.Status404NotFound,
                     Title = "Entity not found.",
                     Detail = ex.Message,
-                    Instance = httpContext.Request.Path,
                 };
 
                 problem.Extensions["entityGuid"] = ex.EntityGuid;
@@ -79,7 +90,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                     Status = StatusCodes.Status403Forbidden,
                     Title = "Actor not found.",
                     Detail = ex.Message,
-                    Instance = httpContext.Request.Path,
                 };
 
                 problem.Extensions["actorGuid"] = ex.ActorGuid;
@@ -96,12 +106,11 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                     Status = StatusCodes.Status400BadRequest,
                     Title = "Application error.",
                     Detail = appException.Message,
-                    Instance = httpContext.Request.Path,
                 };
-
                 break;
         }
 
+        problem.Instance = httpContext.Request.Path;
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
         problem.Extensions["errorType"] = appException.ErrorType;
 

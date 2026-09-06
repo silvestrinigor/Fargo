@@ -36,10 +36,10 @@ Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
 {
-  "name": "c",
+  "name": "article Test fasdf",
   "articleType": 1,
   "barcode": {
-    //"ean13": "1234567891234"
+    "ean13": "1234567891234"
   }
 }
 

@@ -9,12 +9,12 @@ internal static partial class ArticleByBarcodeQueryHandlerLogs
     [LoggerMessage(
         Level = LogLevel.Debug,
         Message = "Article query by barcode flow started for article '{articleBarcode}' by actor '{actorGuid}' of type '{actorType}'.")]
-    public static partial void QueryByBarcodeStarted(
+    public static partial void ArticleQueryByBarcodeStarted(
         this ILogger logger, Barcode articleBarcode, Guid actorGuid, ActorType actorType);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
         Message = "Article query by barcode flow completed for article '{articleBarcode}' by actor '{actorGuid}' of type '{actorType}'. Found: {found}.")]
-    public static partial void QueryByBarcodeCompleted(
+    public static partial void ArticleQueryByBarcodeCompleted(
         this ILogger logger, Barcode articleBarcode, Guid actorGuid, ActorType actorType, bool found);
 }

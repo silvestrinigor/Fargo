@@ -113,9 +113,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": ".+:(Ean13)$",
+              "pattern": ".+:(ean13)$",
               "type": "string",
-              "example": "7891234567895:Ean13"
+              "example": "7891234567895:ean13"
             }
           }
         ],

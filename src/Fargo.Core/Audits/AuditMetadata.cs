@@ -1,5 +1,8 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Barcodes;
 using Fargo.Core.Informations;
+using System.Drawing;
+using UnitsNet;
 
 namespace Fargo.Core.Audits;
 
@@ -46,13 +49,105 @@ public sealed class AuditMetadata
         Add("description", new AuditValue.String(value));
     }
 
+    public void AddShelfLife(TimeSpan? value)
+    {
+        Add("shelfLife", value != null
+            ? new AuditValue.Number(value.Value.Ticks)
+            : new AuditValue.Null());
+    }
+
+    public void AddColor(Color? value)
+    {
+        Add("color", value != null
+            ? new AuditValue.Number(value.Value.ToArgb())
+            : new AuditValue.Null());
+    }
+
+    public void AddMass(Mass? value)
+    {
+        Add("mass", value is not null
+            ? new AuditValue.String(value.Value.ToString())
+            : new AuditValue.Null());
+    }
+
+    public void AddEan13(Ean13? value)
+    {
+        Add("ean13", value is not null
+            ? new AuditValue.String(value.Value.ToString())
+            : new AuditValue.Null());
+    }
+
     public void AddArticleType(ArticleType value)
     {
         Add("articleType", new AuditValue.Number((byte)value));
     }
 
-    public void AddArticleFromArticleGuid(Guid fromArticleGuid)
+    public void AddFromArticleGuid(Guid fromArticleGuid)
     {
         Add("fromArticle", new AuditValue.String(fromArticleGuid.ToString()));
+    }
+
+    public void AddPackQuantity(Scalar quantity)
+    {
+        Add("packQuantity", new AuditValue.Number((int)quantity.Amount));
+    }
+
+    public void AddKitComponents(IReadOnlyCollection<ArticleKitComponentInformation> kitComponents)
+    {
+        var values = new List<AuditValue.Object>();
+
+        foreach (var k in kitComponents)
+        {
+            var obj = new Dictionary<string, AuditValue>
+            {
+                { "fromArticle", new AuditValue.String(k.FromArticleGuid.ToString()) },
+                { "quantity", new AuditValue.Number((int)k.Quantity.Amount) }
+            };
+
+            var auditObj = new AuditValue.Object(obj);
+
+            values.Add(auditObj);
+        }
+
+        var array = new AuditValue.Array(values);
+
+        Add("kitComponents", array);
+    }
+
+    public void AddPartitions(IReadOnlyCollection<Guid> partitionGuids)
+    {
+        var values = new List<AuditValue.String>();
+
+        foreach (var p in partitionGuids)
+        {
+            values.Add(new AuditValue.String(p.ToString()));
+        }
+
+        var array = new AuditValue.Array(values);
+
+        Add("partitions", array);
+    }
+
+    public void AddDimension(Length? x, Length? y, Length? z)
+    {
+        var obj = new Dictionary<string, AuditValue>
+            {
+                {
+                    "x",
+                    x is not null ? new AuditValue.String(x.Value.ToString()) : new AuditValue.Null()
+                },
+                {
+                    "y",
+                    y is not null ? new AuditValue.String(y.Value.ToString()) : new AuditValue.Null()
+                },
+                {
+                    "z",
+                    z is not null ? new AuditValue.String(z.Value.ToString()) : new AuditValue.Null()
+                },
+            };
+
+        var auditObj = new AuditValue.Object(obj);
+
+        Add("dimension", auditObj);
     }
 }
