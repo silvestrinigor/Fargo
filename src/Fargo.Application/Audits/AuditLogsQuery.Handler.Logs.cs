@@ -9,17 +9,16 @@ internal static partial class AuditLogsQueryHandlerLogs
     [LoggerMessage(
         Level = LogLevel.Debug,
         Message = "Audit logs query started for actor '{actorGuid}' of type '{actorType}'. Page: {page}. Limit: {limit}.")]
-    public static partial void ManyQueryStarted(
-        this ILogger logger,
-        Guid actorGuid, ActorType actorType, Page page, Limit limit);
+    public static partial void AuditLogManyQueryStarted(this ILogger logger, Guid actorGuid, ActorType actorType, Page page, Limit limit);
 
     [LoggerMessage(
         Level = LogLevel.Debug,
         Message = "Audit logs query completed for actor '{actorGuid}' of type '{actorType}'. EffectivePartitionCount: {effectivePartitionCount}. ResultCount: {resultCount}.")]
-    public static partial void ManyQueryCompleted(
+    public static partial void AuditLogManyQueryCompleted(
         this ILogger logger,
         Guid actorGuid,
         ActorType actorType,
         int effectivePartitionCount,
-        int resultCount);
+        int resultCount
+    );
 }

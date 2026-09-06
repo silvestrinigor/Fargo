@@ -30,7 +30,7 @@ public sealed class ArticleInventoryByGuidQueryHandler(
     public async Task<ArticleInventoryDto?> HandleAsync(
         ArticleInventoryByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        logger.QueryInventoryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        logger.ArticleInventoryQueryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -65,12 +65,13 @@ public sealed class ArticleInventoryByGuidQueryHandler(
                 cancellationToken);
         }
 
-        logger.QueryInventoryByGuidCompleted(
+        logger.ArticleInventoryQueryByGuidCompleted(
             query.ArticleGuid,
             currentActor.Guid,
             currentActor.ActorType,
             inventory is not null,
-            inventory?.TotalCount ?? 0);
+            inventory?.TotalCount ?? 0
+        );
 
         return inventory;
     }

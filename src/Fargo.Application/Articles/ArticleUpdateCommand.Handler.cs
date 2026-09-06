@@ -44,11 +44,9 @@ public sealed class ArticleUpdateCommandHandler(
     /// <exception cref="EntityNotFoundFargoApplicationException">
     /// Thrown when the specified article or a referenced partition cannot be found.
     /// </exception>
-    public async Task HandleAsync(
-        ArticleUpdateCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task HandleAsync(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        logger.ArticleUpdateStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -80,32 +78,60 @@ public sealed class ArticleUpdateCommandHandler(
             articleAudit.Metadata.AddDescription(description);
         }
 
-        article.ShelfLife = articleUpdateDto.RemoveShelfLife is true
-            ? null : articleUpdateDto.ShelfLife ?? article.ShelfLife;
+        if (articleUpdateDto.RemoveShelfLife is true)
+        {
+            article.ShelfLife = null;
 
-        article.SetMetrics(
-            articleUpdateDto.RemoveMass is true
-                ? null : articleUpdateDto.Mass ?? article.Mass,
+            articleAudit.Metadata.AddShelfLife(null);
+        }
+        else if (articleUpdateDto.ShelfLife is { } shelfLife)
+        {
+            article.ShelfLife = shelfLife;
 
-            articleUpdateDto.Dimension?.RemoveLengthX is true
-                ? null : articleUpdateDto.Dimension?.LengthX ?? article.Dimension.X,
+            articleAudit.Metadata.AddShelfLife(shelfLife);
+        }
 
-            articleUpdateDto.Dimension?.RemoveLengthY is true
-                ? null : articleUpdateDto.Dimension?.LengthY ?? article.Dimension.Y,
+        if (
+            articleUpdateDto.RemoveMass is true ||
+            articleUpdateDto.Mass is not null ||
+            articleUpdateDto.Dimension?.RemoveLengthX is true ||
+            articleUpdateDto.Dimension?.LengthX is not null ||
+            articleUpdateDto.Dimension?.RemoveLengthY is true ||
+            articleUpdateDto.Dimension?.LengthY is not null ||
+            articleUpdateDto.Dimension?.RemoveLengthZ is true ||
+            articleUpdateDto.Dimension?.LengthZ is not null)
+        {
+            article.SetMetrics(
+                articleUpdateDto.RemoveMass is true
+                    ? null : articleUpdateDto.Mass ?? article.Mass,
 
-            articleUpdateDto.Dimension?.RemoveLengthZ is true
-                ? null : articleUpdateDto.Dimension?.LengthZ ?? article.Dimension.Z);
+                articleUpdateDto.Dimension?.RemoveLengthX is true
+                    ? null : articleUpdateDto.Dimension?.LengthX ?? article.Dimension.X,
+
+                articleUpdateDto.Dimension?.RemoveLengthY is true
+                    ? null : articleUpdateDto.Dimension?.LengthY ?? article.Dimension.Y,
+
+                articleUpdateDto.Dimension?.RemoveLengthZ is true
+                    ? null : articleUpdateDto.Dimension?.LengthZ ?? article.Dimension.Z);
+
+            articleAudit.Metadata.AddMass(article.Mass);
+
+            articleAudit.Metadata.AddDimension(article.Dimension.X, article.Dimension.Y, article.Dimension.Z);
+        }
 
         if (articleUpdateDto.Barcode?.RemoveEan13 is true)
         {
             article.Barcode.Ean13 = null;
-        }
 
+            articleAudit.Metadata.AddEan13(null);
+        }
         else if (articleUpdateDto.Barcode?.Ean13 is { } ean13)
         {
             await articleService.ValidateEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
+
+            articleAudit.Metadata.AddEan13(article.Barcode.Ean13);
         }
 
         if (articleUpdateDto.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
@@ -120,6 +146,8 @@ public sealed class ArticleUpdateCommandHandler(
 
                 article.AddPartition(partition);
             }
+
+            articleAudit.Metadata.AddPartitionsAdded(partitionsToAdd);
         }
 
         if (articleUpdateDto.PartitionsToRemove is { Count: > 0 } partitionsToRemove)
@@ -134,12 +162,14 @@ public sealed class ArticleUpdateCommandHandler(
 
                 article.RemovePartition(partition.Guid);
             }
+
+            articleAudit.Metadata.AddPartitionsRemoved(partitionsToRemove);
         }
 
         auditLogRepository.Add(articleAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(article.Guid, actor.Guid, actor.ActorType);
+        logger.ArticleUpdateCompleted(article.Guid, actor.Guid, actor.ActorType);
     }
 }

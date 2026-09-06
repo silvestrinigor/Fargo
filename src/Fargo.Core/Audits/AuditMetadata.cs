@@ -128,6 +128,34 @@ public sealed class AuditMetadata
         Add("partitions", array);
     }
 
+    public void AddPartitionsAdded(IReadOnlyCollection<Guid> partitionGuids)
+    {
+        var values = new List<AuditValue.String>();
+
+        foreach (var p in partitionGuids)
+        {
+            values.Add(new AuditValue.String(p.ToString()));
+        }
+
+        var array = new AuditValue.Array(values);
+
+        Add("partitionsAdded", array);
+    }
+
+    public void AddPartitionsRemoved(IReadOnlyCollection<Guid> partitionGuids)
+    {
+        var values = new List<AuditValue.String>();
+
+        foreach (var p in partitionGuids)
+        {
+            values.Add(new AuditValue.String(p.ToString()));
+        }
+
+        var array = new AuditValue.Array(values);
+
+        Add("partitionsRemoved", array);
+    }
+
     public void AddDimension(Length? x, Length? y, Length? z)
     {
         var obj = new Dictionary<string, AuditValue>

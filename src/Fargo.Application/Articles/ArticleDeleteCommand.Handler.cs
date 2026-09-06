@@ -40,10 +40,9 @@ public sealed class ArticleDeleteCommandHandler(
     /// <exception cref="EntityNotFoundFargoApplicationException">
     /// Thrown when the specified article cannot be found.
     /// </exception>
-    public async Task HandleAsync(
-        ArticleDeleteCommand command, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        logger.ArticleDeleteStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -67,6 +66,6 @@ public sealed class ArticleDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(article.Guid, currentActor.Guid, currentActor.ActorType);
+        logger.ArticleDeleteCompleted(article.Guid, currentActor.Guid, currentActor.ActorType);
     }
 }

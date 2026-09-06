@@ -24,7 +24,7 @@ public static class ArticleDtoMapping
             article.ShelfLife,
             article.Color,
             article.Mass,
-            new ArticleDimensionDto(
+            Dimension: new ArticleDimensionDto(
                 article.Dimension.X,
                 article.Dimension.Y,
                 article.Dimension.Z),
@@ -44,7 +44,8 @@ public static class ArticleDtoMapping
             article.Container != null
                 ? new ArticleContainerDto(article.Container.MaxMass)
                 : null,
-            new ArticleBarcodeDto(
+            Barcodes: new ArticleBarcodeDto(
                 article.Barcode.Ean13),
-            article.Partitions.Select(partition => partition.PartitionGuid).ToArray());
+            Partitions: article.Partitions.Select(partition => partition.PartitionGuid).ToArray()
+        );
 }

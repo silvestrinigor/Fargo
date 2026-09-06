@@ -14,7 +14,8 @@ internal static partial class ArticlesQueryHandlerLogs
         Guid actorGuid,
         ActorType actorType,
         Page page,
-        Limit limit);
+        Limit limit
+    );
 
     [LoggerMessage(
         Level = LogLevel.Debug,
@@ -25,5 +26,6 @@ internal static partial class ArticlesQueryHandlerLogs
         ActorType actorType,
         int requestedPartitionCount,
         int effectivePartitionCount,
-        int resultCount);
+        int resultCount
+    );
 }

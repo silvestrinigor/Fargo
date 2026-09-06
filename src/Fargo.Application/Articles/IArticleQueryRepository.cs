@@ -77,6 +77,22 @@ public interface IArticleQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    /// <summary>
+    /// Checks if an article exists by its unique identifier within the specified partitions.
+    /// </summary>
+    /// <param name="articleGuid">
+    /// Article unique identifier to check for existence.
+    /// </param>
+    /// <param name="childOfAnyOfThesePartitions">
+    /// Filters articles inside the provided partitions. If null or empty, no partition filtering is applied.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Cancellation token to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains true if the article exists;
+    /// otherwise false.
+    /// </returns>
     Task<bool> ExistByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

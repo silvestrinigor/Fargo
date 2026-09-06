@@ -20,9 +20,15 @@ public sealed class ArticlesQueryHandler(
     ILogger<ArticlesQueryHandler> logger
 ) : IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>
 {
-    public async Task<IReadOnlyCollection<ArticleDto>> HandleAsync(
-        ArticlesQuery query,
-        CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Handles the ArticlesQuery by retrieving a paginated collection of articles that are accessible to the current actor.
+    /// </summary>
+    /// <param name="query">The ArticlesQuery containing pagination and partition filtering parameters</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation, containing a read-only collection of ArticleDto objects
+    /// </returns>
+    public async Task<IReadOnlyCollection<ArticleDto>> HandleAsync(ArticlesQuery query, CancellationToken cancellationToken = default)
     {
         logger.ArticlesQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
@@ -33,19 +39,22 @@ public sealed class ArticlesQueryHandler(
         var partitionGuids =
             PartitionQueryFilter.ForPartitionedEntities(
                 actor.PartitionAccessGuids,
-                query.ChildOfAnyOfThesePartitions);
+                query.ChildOfAnyOfThesePartitions
+            );
 
         var articles = await articleRepository.GetManyInfoOrderedByGuidAsync(
             query.WithPagination,
             partitionGuids,
-            cancellationToken);
+            cancellationToken
+        );
 
         logger.ArticlesQueryCompleted(
             actor.Guid,
             actor.ActorType,
-            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0,
-            articles.Count);
+            requestedPartitionCount: query.ChildOfAnyOfThesePartitions?.Count ?? 0,
+            effectivePartitionCount: partitionGuids?.Count ?? 0,
+            resultCount: articles.Count
+        );
 
         return articles;
     }
