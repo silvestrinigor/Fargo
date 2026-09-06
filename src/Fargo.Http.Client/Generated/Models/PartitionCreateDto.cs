@@ -25,10 +25,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>Represents a validated name.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Name { get; set; }
+        public string? Name { get; set; }
 #nullable restore
 #else
-        public UntypedNode Name { get; set; }
+        public string Name { get; set; }
 #endif
         /// <summary>The parentPartitionGuid property</summary>
         public Guid? ParentPartitionGuid { get; set; }
@@ -58,7 +58,7 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "name", n => { Name = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "name", n => { Name = n.GetStringValue(); } },
                 { "parentPartitionGuid", n => { ParentPartitionGuid = n.GetGuidValue(); } },
             };
         }
@@ -70,7 +70,7 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteObjectValue<UntypedNode>("description", Description);
-            writer.WriteObjectValue<UntypedNode>("name", Name);
+            writer.WriteStringValue("name", Name);
             writer.WriteGuidValue("parentPartitionGuid", ParentPartitionGuid);
             writer.WriteAdditionalData(AdditionalData);
         }

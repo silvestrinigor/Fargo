@@ -113,7 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": ".+:(Ean13|Ean8|UpcA|UpcE|Code128|Code39|Itf14|Gs1128|QrCode|DataMatrix)$",
+              "pattern": ".+:(Ean13)$",
               "type": "string",
               "example": "7891234567895:Ean13"
             }
@@ -2110,7 +2110,9 @@
       },
       "Mass": { },
       "Name": {
-        "description": "Represents a validated name."
+        "type": "string",
+        "description": "Represents a validated name.",
+        "format": "string"
       },
       "Nameid": {
         "description": "Represents a nameid."

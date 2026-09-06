@@ -1,4 +1,3 @@
-
 using Fargo.Cli.Configurations;
 using Fargo.Http.Client.Authentication;
 using ktsu.CredentialCache;
@@ -24,8 +23,6 @@ public class FargoCliTokenStore : ITokenStore
 
             Console.WriteLine(config.CredentialId);
         }
-        Console.WriteLine(config.CredentialId);
-        Console.WriteLine("test");
 
         personaGuid = PersonaGUID.Create(config.CredentialId);
     }
@@ -62,8 +59,6 @@ public class FargoCliTokenStore : ITokenStore
 
     public Task SetAsync(AuthTokens tokens, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("test");
-
         var json = JsonSerializer.Serialize(tokens);
 
         credentials.AddOrReplace(personaGuid, new CredentialWithToken

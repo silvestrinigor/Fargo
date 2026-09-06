@@ -76,10 +76,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The name of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Name { get; set; }
+        public string? Name { get; set; }
 #nullable restore
 #else
-        public UntypedNode Name { get; set; }
+        public string Name { get; set; }
 #endif
         /// <summary>The pack property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -146,7 +146,7 @@ namespace Fargo.Http.Client.Models
                 { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension.CreateFromDiscriminatorValue); } },
                 { "kitComponents", n => { KitComponents = n.GetCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>(global::Fargo.Http.Client.Models.ArticleKitComponentDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "name", n => { Name = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "name", n => { Name = n.GetStringValue(); } },
                 { "pack", n => { Pack = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack.CreateFromDiscriminatorValue); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "shelfLife", n => { ShelfLife = n.GetStringValue(); } },
@@ -168,7 +168,7 @@ namespace Fargo.Http.Client.Models
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension>("dimension", Dimension);
             writer.WriteCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>("kitComponents", KitComponents);
             writer.WriteObjectValue<UntypedNode>("mass", Mass);
-            writer.WriteObjectValue<UntypedNode>("name", Name);
+            writer.WriteStringValue("name", Name);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack>("pack", Pack);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteStringValue("shelfLife", ShelfLife);

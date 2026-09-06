@@ -18,8 +18,15 @@ public static class FargoOpenApiServiceCollectionExtension
         {
             services.AddOpenApi(options =>
             {
+
                 options.AddSchemaTransformer((schema, context, _) =>
                 {
+                    if (context.JsonTypeInfo.Type == typeof(Name))
+                    {
+                        schema.Type = JsonSchemaType.String;
+                        schema.Format = "string";
+                    }
+
                     FargoOpenApiSchemaTransformers.Apply(
                         schema,
                         context.ParameterDescription?.Type);
@@ -39,16 +46,10 @@ internal static class FargoOpenApiSchemaTransformers
         OpenApiSchema schema,
         Type? parameterType)
     {
-        if (parameterType == typeof(Name))
-        {
-            schema.Type = JsonSchemaType.String;
-            schema.Example = "Name";
-        }
-
         if (parameterType == typeof(Barcode))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Pattern = @".+:(Ean13|Ean8|UpcA|UpcE|Code128|Code39|Itf14|Gs1128|QrCode|DataMatrix)$";
+            schema.Pattern = @".+:(Ean13)$";
             schema.Example = JsonValue.Create("7891234567895:Ean13");
         }
 
