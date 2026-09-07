@@ -32,12 +32,14 @@ public static class IdentityEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapIdentityLogin(this IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/login", Login)
-            .WithName("Login")
-            .WithSummary("Authenticates a user")
-            .WithDescription("Validates user credentials and returns an access token and refresh token.")
-            .Produces<IdentityAuthResultDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
+        builder
+        .MapPost("/login", Login)
+        .WithName("Login")
+        .WithSummary("Authenticates a user")
+        .WithDescription("Validates user credentials and returns an access token and refresh token.")
+        .Produces<IdentityAuthResultDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .RequireRateLimiting("identity-login");
 
         return builder;
     }
@@ -45,6 +47,7 @@ public static class IdentityEndpointRouteBuilderExtension
     private static async Task<Ok<IdentityAuthResultDto>> Login(
         IdentityLoginDto request,
         ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto> handler,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         var command = new IdentityLoginCommand(request.Nameid, request.Password);
@@ -65,7 +68,8 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithSummary("Logs out the current user")
             .WithDescription("Invalidates the current refresh token or session.")
             .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireRateLimiting("identity-default");
 
         return builder;
     }
@@ -93,7 +97,8 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithSummary("Refreshes the access token")
             .WithDescription("Uses a valid refresh token to generate a new access token.")
             .Produces<IdentityAuthResultDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireRateLimiting("identity-refresh");
 
         return builder;
     }
@@ -122,7 +127,8 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithDescription("Validates the current password and updates it with the new password.")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireRateLimiting("identity-default");
 
         return builder;
     }

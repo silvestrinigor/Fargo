@@ -8,16 +8,23 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Identity;
 
 /// <summary>
-/// Handles the authentication login command by validating user credentials and generating authentication tokens.
+/// Handles the authentication login command by validating the client address,
+/// checking authentication attempt limits, validating user credentials, and
+/// generating authentication tokens for successfully authenticated users.
 /// </summary>
 /// <param name="userRepository">Provides access to user data.</param>
 /// <param name="passwordHasher">Verifies password hashes against provided passwords.</param>
 /// <param name="tokenGenerator">Generates access tokens for authenticated users.</param>
 /// <param name="refreshTokenGenerator">Generates refresh tokens for token rotation.</param>
-/// <param name="tokenHasher">Hashes refresh tokens for secure storage.</param>
+/// <param name="tokenHasher">Hashes refresh tokens before they are persisted.</param>
 /// <param name="refreshTokenRepository">Manages refresh token persistence.</param>
+/// <param name="attemptService">
+/// Tracks authentication attempts and determines whether another authentication
+/// attempt is currently allowed.
+/// </param>
+/// <param name="clientContext">Provides information about the current client request.</param>
 /// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
-/// <param name="logger">Logs the execution of the authentication process.</param>
+/// <param name="logger">Logs the execution and outcome of the authentication process.</param>
 public sealed class IdentityLoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -25,19 +32,46 @@ public sealed class IdentityLoginCommandHandler(
     IRefreshTokenGenerator refreshTokenGenerator,
     ITokenHasher tokenHasher,
     IRefreshTokenRepository refreshTokenRepository,
+    IAuthenticationAttemptService attemptService,
+    IClientContext clientContext,
     IUnitOfWork unitOfWork,
     ILogger<IdentityLoginCommandHandler> logger
 ) : ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto>
 {
     /// <summary>
-    /// Processes the login command by validating credentials and generating authentication tokens.
+    /// Authenticates a user using the supplied credentials and generates an access
+    /// token and refresh token when authentication succeeds.
     /// </summary>
-    /// <param name="command">The login command containing user credentials</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the authentication result with tokens</returns>
+    /// <param name="command">The command containing the user's authentication credentials.</param>
+    /// <param name="cancellationToken">
+    /// A cancellation token that can be used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous authentication operation. The task result
+    /// contains the generated authentication tokens.
+    /// </returns>
+    /// <exception cref="AuthenticationRateLimitFargoApplicationException">
+    /// Thrown when authentication attempts for the client are currently rate limited.
+    /// </exception>
+    /// <exception cref="InvalidCredentialsFargoApplicationException">
+    /// Thrown when the supplied credentials are invalid or the user cannot authenticate.
+    /// </exception>
+    /// <exception cref="UserPasswordChangeRequiredFargoApplicationException">
+    /// Thrown when the supplied credentials are valid but the user must change
+    /// their password before authentication can be completed.
+    /// </exception>
     public async Task<IdentityAuthResultDto> HandleAsync(IdentityLoginCommand command, CancellationToken cancellationToken = default)
     {
         logger.IdentityLoginStarted(command.Nameid);
+
+        var shouldLogin = await attemptService.IsAllowedAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
+
+        if (!shouldLogin.Allow)
+        {
+            logger.IdentityLoginRejectedRateLimit(command.Nameid);
+
+            throw new AuthenticationRateLimitFargoApplicationException(shouldLogin.RetryAfter);
+        }
 
         Nameid nameid;
 
@@ -49,6 +83,10 @@ public sealed class IdentityLoginCommandHandler(
         {
             logger.IdentityLoginRejectedInvalidNameId(command.Nameid);
 
+            await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
             throw new InvalidCredentialsFargoApplicationException();
         }
 
@@ -58,12 +96,20 @@ public sealed class IdentityLoginCommandHandler(
         {
             logger.IdentityLoginRejectedUserNotFound(command.Nameid);
 
+            await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (!user.IsActive)
         {
             logger.IdentityLoginRejectedUserNotActive(command.Nameid);
+
+            await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
@@ -78,6 +124,10 @@ public sealed class IdentityLoginCommandHandler(
         {
             logger.IdentityLoginRejectedInvalidPasswordFormat(user.Guid);
 
+            await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
             throw new InvalidCredentialsFargoApplicationException();
         }
 
@@ -88,12 +138,23 @@ public sealed class IdentityLoginCommandHandler(
         {
             logger.IdentityLoginRejectedInvalidPassword(user.Guid);
 
+            await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (user.Authentication.IsPasswordChangeRequired)
         {
             logger.IdentityLoginRejectedPasswordChangeRequired(user.Guid);
+
+            await attemptService.RegisterSuccessAsync(
+                command.Nameid,
+                clientContext.IpAddress,
+                cancellationToken);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new UserPasswordChangeRequiredFargoApplicationException(user.Guid);
         }
@@ -107,6 +168,8 @@ public sealed class IdentityLoginCommandHandler(
         var refreshToken = RefreshToken.Create(user.Guid, refreshTokenHash);
 
         refreshTokenRepository.Add(refreshToken);
+
+        await attemptService.RegisterSuccessAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -91,6 +91,8 @@ public sealed class IdentityRefreshCommandHandler(
 
         refreshTokenRepository.Add(storedNewRefreshToken);
 
+        storedOldRefreshToken.Revoke();
+
         var newAccessTokenResult = tokenGenerator.Generate(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

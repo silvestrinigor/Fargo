@@ -32,6 +32,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<AuditLog> AuditLogs { get; set; }
 
+    public DbSet<AuthenticationAttempt> AuthenticationAttempts { get; set; }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder
@@ -142,5 +144,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
 
         modelBuilder.ApplyConfiguration(new AuditLogPartitionConfiguration());
+
+        modelBuilder.ApplyConfiguration(new AuthenticationAttemptConfiguration());
     }
 }

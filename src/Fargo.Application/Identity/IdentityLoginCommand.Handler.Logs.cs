@@ -12,6 +12,12 @@ internal static partial class IdentityLoginCommandHandlerLogs
 
     [LoggerMessage(
         Level = LogLevel.Warning,
+        Message = "Login flow rejected because too many authentication attempts for user '{nameid}'.")]
+    public static partial void IdentityLoginRejectedRateLimit(
+        this ILogger logger, string nameId);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
         Message = "Login flow rejected because the provided nameid '{nameid}' format is invalid.")]
     public static partial void IdentityLoginRejectedInvalidNameId(
         this ILogger logger, string nameId);

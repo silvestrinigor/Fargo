@@ -14,6 +14,7 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
+using Fargo.Infrastructure.Client;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Security;
@@ -45,6 +46,8 @@ public static class DependencyInjectionServiceCollectionExtensions
 
             services.AddScoped<ICurrentActor, CurrentUserActor>();
 
+            services.AddScoped<IClientContext, HttpClientContext>();
+
             return services;
         }
 
@@ -74,24 +77,25 @@ public static class DependencyInjectionServiceCollectionExtensions
             });
 
         public void AddFargoRepositories() => services
-            .AddScoped<IArticleRepository, ArticleRepository>()
-            .AddScoped<IArticleQueryRepository, ArticleRepository>()
-            .AddScoped<IItemRepository, ItemRepository>()
-            .AddScoped<IItemQueryRepository, ItemRepository>()
-            .AddScoped<IUserRepository, UserRepository>()
-            .AddScoped<IUserQueryRepository, UserRepository>()
-            .AddScoped<IUserGroupRepository, UserGroupRepository>()
-            .AddScoped<IUserGroupQueryRepository, UserGroupRepository>()
-            .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
-            .AddScoped<IPartitionRepository, PartitionRepository>()
-            .AddScoped<IPartitionQueryRepository, PartitionRepository>()
-            .AddScoped<IAuditLogRepository, AuditLogRepository>()
-            .AddScoped<IAuditLogQueryRepository, AuditLogRepository>();
+        .AddScoped<IArticleRepository, ArticleRepository>()
+        .AddScoped<IArticleQueryRepository, ArticleRepository>()
+        .AddScoped<IItemRepository, ItemRepository>()
+        .AddScoped<IItemQueryRepository, ItemRepository>()
+        .AddScoped<IUserRepository, UserRepository>()
+        .AddScoped<IUserQueryRepository, UserRepository>()
+        .AddScoped<IUserGroupRepository, UserGroupRepository>()
+        .AddScoped<IUserGroupQueryRepository, UserGroupRepository>()
+        .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
+        .AddScoped<IPartitionRepository, PartitionRepository>()
+        .AddScoped<IPartitionQueryRepository, PartitionRepository>()
+        .AddScoped<IAuditLogRepository, AuditLogRepository>()
+        .AddScoped<IAuditLogQueryRepository, AuditLogRepository>()
+        .AddScoped<IAuthenticationAttemptRepository, AuthenticationAttemptRepository>();
 
         public void AddFargoSecurity() => services
-            .AddScoped<IPasswordHasher, IdentityPasswordHasher>()
-            .AddScoped<ITokenGenerator, JwtTokenGenerator>()
-            .AddScoped<ITokenHasher, Sha256TokenHasher>()
-            .AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>();
+        .AddScoped<IPasswordHasher, IdentityPasswordHasher>()
+        .AddScoped<ITokenGenerator, JwtTokenGenerator>()
+        .AddScoped<ITokenHasher, Sha256TokenHasher>()
+        .AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>();
     }
 }

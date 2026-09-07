@@ -21,6 +21,7 @@ builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
+
 builder.Services
 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer();
@@ -30,6 +31,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddFargoExceptionHandler();
 
 builder.Services.AddProblemDetails();
+
+builder.Services.AddFargoRateLimiter();
 
 var app = builder.Build();
 
@@ -47,6 +50,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseRateLimiter();
 
 app.MapFargoArticle();
 

@@ -9,6 +9,7 @@ using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
+using Fargo.Core.Identity;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
@@ -38,7 +39,8 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<UserService>()
         .AddScoped<UserGroupService>()
         .AddScoped<PartitionService>()
-        .AddScoped<ItemService>();
+        .AddScoped<ItemService>()
+        .AddScoped<IAuthenticationAttemptService, AuthenticationAttemptService>();
 
         public IServiceCollection AddFargoSystemApplication() => services
         .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();

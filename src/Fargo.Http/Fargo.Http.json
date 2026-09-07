@@ -1165,7 +1165,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDto"
+                "$ref": "#/components/schemas/IdentityLoginDto"
               }
             }
           },
@@ -1177,7 +1177,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResult"
+                  "$ref": "#/components/schemas/IdentityAuthResultDto"
                 }
               }
             }
@@ -1200,7 +1200,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LogOutDto"
+                "$ref": "#/components/schemas/IdentityLogOutDto"
               }
             }
           },
@@ -1228,7 +1228,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshDto"
+                "$ref": "#/components/schemas/IdentityRefreshDto"
               }
             }
           },
@@ -1240,7 +1240,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResult"
+                  "$ref": "#/components/schemas/IdentityAuthResultDto"
                 }
               }
             }
@@ -1263,7 +1263,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PasswordUpdateDto"
+                "$ref": "#/components/schemas/IdentityPasswordUpdateDto"
               }
             }
           },
@@ -1870,42 +1870,61 @@
         "properties": {
           "guid": {
             "type": "string",
+            "description": "The unique identifier of the audit log entry",
             "format": "uuid"
           },
           "actorGuid": {
             "type": "string",
+            "description": "The unique identifier of the actor who performed the action",
             "format": "uuid"
           },
           "actorType": {
+            "description": "The type of actor who performed the action (e.g., User, Application)",
             "$ref": "#/components/schemas/ActorType"
           },
           "actionType": {
+            "description": "The type of action that was performed (e.g., Create, Update, Delete)",
             "$ref": "#/components/schemas/ActionType"
           },
           "entityGuid": {
             "type": "string",
+            "description": "The unique identifier of the entity that was affected by the action",
             "format": "uuid"
           },
           "entityType": {
+            "description": "The type of entity that was affected (e.g., Article, User)",
             "$ref": "#/components/schemas/EntityType"
           },
           "occurredAt": {
             "type": "string",
+            "description": "The date and time when the audit event occurred",
             "format": "date-time"
           },
           "metadata": {
-            "type": "object"
+            "type": "object",
+            "description": "A dictionary containing additional metadata about the audit event"
           },
           "partitions": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The collection of partition GUIDs that this audit log entry belongs to"
           }
-        }
+        },
+        "description": "Represents a data transfer object for audit log information.\nThis DTO contains all the essential details about an audit event, including\nthe actor who performed the action, the entity affected, the type of action,\nwhen it occurred, and any additional metadata."
       },
-      "AuthResult": {
+      "Color": { },
+      "Description": {
+        "description": "Represents a validated textual description."
+      },
+      "EntityType": {
+        "type": "integer",
+        "description": "Represents a entity type."
+      },
+      "FirstName": { },
+      "IdentityAuthResultDto": {
         "required": [
           "accessToken",
           "refreshToken",
@@ -1929,15 +1948,70 @@
         },
         "description": "Represents the result of a successful authentication."
       },
-      "Color": { },
-      "Description": {
-        "description": "Represents a validated textual description."
+      "IdentityLoginDto": {
+        "required": [
+          "nameid",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "nameid": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
       },
-      "EntityType": {
-        "type": "integer",
-        "description": "Represents a entity type."
+      "IdentityLogOutDto": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "description": "The refresh token to be revoked during logout",
+            "$ref": "#/components/schemas/Token"
+          }
+        },
+        "description": "Represents the data transfer object for logging out by providing a refresh token.\nThis DTO is used as input when performing a logout operation to revoke the refresh token."
       },
-      "FirstName": { },
+      "IdentityPasswordUpdateDto": {
+        "required": [
+          "nameid",
+          "newPassword",
+          "currentPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "nameid": {
+            "type": "string",
+            "description": "The unique identifier of the user whose password is being changed"
+          },
+          "newPassword": {
+            "description": "The new password value that will be validated against security rules",
+            "$ref": "#/components/schemas/Password"
+          },
+          "currentPassword": {
+            "type": "string",
+            "description": "The user's current password for verification purposes"
+          }
+        },
+        "description": "Represents the data transfer object for updating a user's password.\nThe NewPassword field uses the Password structure to enforce security validation rules\nincluding minimum character requirements, special character constraints, and other password policies."
+      },
+      "IdentityRefreshDto": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "description": "The refresh token used to obtain a new access token",
+            "$ref": "#/components/schemas/Token"
+          }
+        },
+        "description": "Represents the data transfer object for refreshing authentication tokens.\nThis DTO is used as input when requesting a new access token using a refresh token."
+      },
       "ItemContainerInventoryDto": {
         "required": [
           "articleGuid",
@@ -2082,32 +2156,6 @@
         }
       },
       "LastName": { },
-      "LoginDto": {
-        "required": [
-          "nameid",
-          "password"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        }
-      },
-      "LogOutDto": {
-        "required": [
-          "refreshToken"
-        ],
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "$ref": "#/components/schemas/Token"
-          }
-        }
-      },
       "Mass": { },
       "Name": {
         "type": "string",
@@ -2183,35 +2231,8 @@
           }
         }
       },
-      "PasswordUpdateDto": {
-        "required": [
-          "nameid",
-          "newPassword",
-          "currentPassword"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "type": "string"
-          },
-          "newPassword": {
-            "type": "string"
-          },
-          "currentPassword": {
-            "type": "string"
-          }
-        }
-      },
-      "RefreshDto": {
-        "required": [
-          "refreshToken"
-        ],
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "$ref": "#/components/schemas/Token"
-          }
-        }
+      "Password": {
+        "description": "Represents a validated plaintext password."
       },
       "Scalar": { },
       "Token": {

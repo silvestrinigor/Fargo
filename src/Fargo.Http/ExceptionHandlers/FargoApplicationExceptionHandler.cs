@@ -126,6 +126,21 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
                 break;
 
+            case AuthenticationRateLimitFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status429TooManyRequests,
+                    Title = "Too many authentication attempts.",
+                    Detail = ex.Message
+                };
+
+                problem.Extensions["retryAfter"] = ex.RetryAfter;
+
+                break;
+
             default:
 
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -136,6 +151,7 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                     Title = "Application error.",
                     Detail = appException.Message,
                 };
+
                 break;
         }
 
