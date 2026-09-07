@@ -7,6 +7,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
+/// <summary>
+/// Handles the authentication login command by validating user credentials and generating authentication tokens.
+/// </summary>
+/// <param name="userRepository">Provides access to user data.</param>
+/// <param name="passwordHasher">Verifies password hashes against provided passwords.</param>
+/// <param name="tokenGenerator">Generates access tokens for authenticated users.</param>
+/// <param name="refreshTokenGenerator">Generates refresh tokens for token rotation.</param>
+/// <param name="tokenHasher">Hashes refresh tokens for secure storage.</param>
+/// <param name="refreshTokenRepository">Manages refresh token persistence.</param>
+/// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
+/// <param name="logger">Logs the execution of the authentication process.</param>
 public sealed class IdentityLoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -16,12 +27,17 @@ public sealed class IdentityLoginCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IUnitOfWork unitOfWork,
     ILogger<IdentityLoginCommandHandler> logger
-) : ICommandHandler<IdentityLoginCommand, AuthResult>
+) : ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto>
 {
-    public async Task<AuthResult> HandleAsync(
-        IdentityLoginCommand command, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Processes the login command by validating credentials and generating authentication tokens.
+    /// </summary>
+    /// <param name="command">The login command containing user credentials</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the authentication result with tokens</returns>
+    public async Task<IdentityAuthResultDto> HandleAsync(IdentityLoginCommand command, CancellationToken cancellationToken = default)
     {
-        logger.LoginStarted(command.Nameid);
+        logger.IdentityLoginStarted(command.Nameid);
 
         Nameid nameid;
 
@@ -31,7 +47,7 @@ public sealed class IdentityLoginCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.LoginRejectedInvalidNameId(command.Nameid);
+            logger.IdentityLoginRejectedInvalidNameId(command.Nameid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
@@ -40,14 +56,14 @@ public sealed class IdentityLoginCommandHandler(
 
         if (user is null)
         {
-            logger.LoginRejectedUserNotFound(command.Nameid);
+            logger.IdentityLoginRejectedUserNotFound(command.Nameid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (!user.IsActive)
         {
-            logger.LoginRejectedUserNotActive(command.Nameid);
+            logger.IdentityLoginRejectedUserNotActive(command.Nameid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
@@ -60,27 +76,26 @@ public sealed class IdentityLoginCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.LoginRejectedInvalidPasswordFormat(user.Guid);
+            logger.IdentityLoginRejectedInvalidPasswordFormat(user.Guid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         var isValid = user.Authentication.PasswordHash != null
-            && passwordHasher.Verify(
-                user.Authentication.PasswordHash.Value, password);
+            && passwordHasher.Verify(user.Authentication.PasswordHash.Value, password);
 
         if (!isValid)
         {
-            logger.LoginRejectedInvalidPassword(user.Guid);
+            logger.IdentityLoginRejectedInvalidPassword(user.Guid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (user.Authentication.IsPasswordChangeRequired)
         {
-            logger.LoginRejectedPasswordChangeRequired(user.Guid);
+            logger.IdentityLoginRejectedPasswordChangeRequired(user.Guid);
 
-            throw new PasswordChangeRequiredException(user.Guid);
+            throw new UserPasswordChangeRequiredFargoApplicationException(user.Guid);
         }
 
         var accessTokenResult = tokenGenerator.Generate(user);
@@ -95,10 +110,10 @@ public sealed class IdentityLoginCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var authResult = new AuthResult(
+        var authResult = new IdentityAuthResultDto(
             accessTokenResult.AccessToken.Value, rawRefreshToken.Value, accessTokenResult.ExpiresAt);
 
-        logger.LoginCompleted(command.Nameid);
+        logger.IdentityLoginCompleted(command.Nameid);
 
         return authResult;
     }

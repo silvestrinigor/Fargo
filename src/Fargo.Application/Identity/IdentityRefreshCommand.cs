@@ -9,4 +9,4 @@ namespace Fargo.Application.Identity;
 /// <param name="RefreshToken">
 /// The refresh token provided by the client.
 /// </param>
-public sealed record IdentityRefreshCommand(Token RefreshToken) : ICommand<AuthResult>;
+public sealed record IdentityRefreshCommand(Token RefreshToken) : ICommand<IdentityAuthResultDto>;

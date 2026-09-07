@@ -1,4 +1,5 @@
 using Fargo.Application.Common;
+using Fargo.Core.Common;
 
 namespace Fargo.Application.Identity;
 
@@ -6,13 +7,13 @@ namespace Fargo.Application.Identity;
 /// Exception thrown when a user must change their password before accessing the system.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="PasswordChangeRequiredException"/> class.
+/// Initializes a new instance of the <see cref="UserPasswordChangeRequiredFargoApplicationException"/> class.
 /// </remarks>
 /// <param name="userGuid">
 /// The identifier of the user who must change their password.
 /// </param>
-public sealed class PasswordChangeRequiredException(Guid userGuid)
-    : FargoApplicationException($"User '{userGuid}' must change their password before continuing.")
+public sealed class UserPasswordChangeRequiredFargoApplicationException(Guid userGuid)
+    : FargoApplicationException($"User '{userGuid}' must change their password before continuing.", FargoErrorType.NotAuthorized)
 {
     /// <summary>
     /// Gets the identifier of the user who must change their password.

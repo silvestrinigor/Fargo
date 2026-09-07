@@ -7,6 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;
 
+/// <summary>
+/// Handles the password change command by validating current credentials and updating user authentication information.
+/// </summary>
+/// <param name="userRepository">Provides access to user data.</param>
+/// <param name="passwordHasher">Hashes and verifies password values.</param>
+/// <param name="refreshTokenRepository">Manages refresh token persistence for token invalidation.</param>
+/// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
+/// <param name="logger">Logs the execution of the password change process.</param>
 public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -15,11 +23,15 @@ public sealed class IdentityPasswordChangeCommandHandler(
     ILogger<IdentityPasswordChangeCommandHandler> logger
 ) : ICommandHandler<IdentityPasswordChangeCommand>
 {
-    public async Task HandleAsync(
-        IdentityPasswordChangeCommand command,
-        CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Processes the password change command by validating current credentials, updating the password hash,
+    /// resetting password expiration, and rotating authentication version. All existing refresh tokens are revoked.
+    /// </summary>
+    /// <param name="command">The password change command containing user credentials and new password</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
+    public async Task HandleAsync(IdentityPasswordChangeCommand command, CancellationToken cancellationToken = default)
     {
-        logger.PasswordChangeStarted(command.Passwords.Nameid);
+        logger.IdentityPasswordChangeStarted(command.Passwords.Nameid);
 
         Nameid nameid;
 
@@ -29,7 +41,7 @@ public sealed class IdentityPasswordChangeCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.PasswordChangeRejectedInvalidNameId(command.Passwords.Nameid);
+            logger.IdentityPasswordChangeRejectedInvalidNameId(command.Passwords.Nameid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
@@ -38,16 +50,16 @@ public sealed class IdentityPasswordChangeCommandHandler(
 
         if (user is null)
         {
-            logger.PasswordChangeUserNotFound(nameid);
+            logger.IdentityPasswordChangeUserNotFound(nameid);
 
-            throw new UnauthorizedAccessException();
+            throw new InvalidCredentialsFargoApplicationException();
         }
 
         if (!user.IsActive)
         {
-            logger.PasswordChangeUserInactive(user.Guid);
+            logger.IdentityPasswordChangeUserInactive(user.Guid);
 
-            throw new UnauthorizedAccessException();
+            throw new InvalidCredentialsFargoApplicationException();
         }
 
         var currentPassword = command.Passwords.CurrentPassword;
@@ -57,24 +69,12 @@ public sealed class IdentityPasswordChangeCommandHandler(
 
         if (!isValid)
         {
-            logger.PasswordChangeInvalidPassword(user.Guid);
+            logger.IdentityPasswordChangeInvalidPassword(user.Guid);
 
-            throw new UnauthorizedAccessException();
+            throw new InvalidCredentialsFargoApplicationException();
         }
 
-        try
-        {
-            _ = new Password(command.Passwords.NewPassword);
-        }
-        catch (ArgumentException)
-        {
-            // TODO: not aways the reason is weak password.
-            throw new UnauthorizedAccessException();
-        }
-
-        var password = new Password(command.Passwords.NewPassword);
-
-        user.Authentication.SetPasswordHash(passwordHasher.Hash(password));
+        user.Authentication.SetPasswordHash(passwordHasher.Hash(command.Passwords.NewPassword));
 
         user.Authentication.ResetPasswordExpiration();
 
@@ -89,6 +89,6 @@ public sealed class IdentityPasswordChangeCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.PasswordChangeCompleted(user.Guid);
+        logger.IdentityPasswordChangeCompleted(user.Guid);
     }
 }

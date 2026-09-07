@@ -1,4 +1,5 @@
 using Fargo.Application.Common;
+using Fargo.Application.Identity;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -94,6 +95,34 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
                 problem.Extensions["actorGuid"] = ex.ActorGuid;
                 problem.Extensions["actorType"] = ex.ActorType;
+
+                break;
+
+            case InvalidCredentialsFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status401Unauthorized,
+                    Title = "Invalid credentials.",
+                    Detail = ex.Message,
+                };
+
+                break;
+
+            case UserPasswordChangeRequiredFargoApplicationException ex:
+
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status401Unauthorized,
+                    Title = "Password change required.",
+                    Detail = ex.Message,
+                };
+
+                problem.Extensions["userGuid"] = ex.UserGuid;
 
                 break;
 

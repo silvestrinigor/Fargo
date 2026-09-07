@@ -12,7 +12,7 @@ namespace Fargo.Application.Identity;
 /// <param name="ExpiresAt">
 /// The date and time when the access token expires.
 /// </param>
-public record AuthResult(
+public record IdentityAuthResultDto(
     string AccessToken,
     string RefreshToken,
     DateTimeOffset ExpiresAt

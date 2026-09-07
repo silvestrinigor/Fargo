@@ -29,4 +29,14 @@ public enum FargoErrorType
     /// Access was denied.
     /// </summary>
     AccessDenied = 4,
+
+    /// <summary>
+    /// The provided credentials are invalid.
+    /// </summary>
+    InvalidCredentials = 5,
+
+    /// <summary>
+    /// The operation is not authorized.
+    /// </summary>
+    NotAuthorized = 6,
 }

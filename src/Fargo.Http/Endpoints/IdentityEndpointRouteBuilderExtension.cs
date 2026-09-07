@@ -36,15 +36,15 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithName("Login")
             .WithSummary("Authenticates a user")
             .WithDescription("Validates user credentials and returns an access token and refresh token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces<IdentityAuthResultDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
         return builder;
     }
 
-    private static async Task<Ok<AuthResult>> Login(
-        LoginDto request,
-        ICommandHandler<IdentityLoginCommand, AuthResult> handler,
+    private static async Task<Ok<IdentityAuthResultDto>> Login(
+        IdentityLoginDto request,
+        ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto> handler,
         CancellationToken cancellationToken)
     {
         var command = new IdentityLoginCommand(request.Nameid, request.Password);
@@ -71,7 +71,7 @@ public static class IdentityEndpointRouteBuilderExtension
     }
 
     private static async Task<Ok> Logout(
-        LogOutDto request,
+        IdentityLogOutDto request,
         ICommandHandler<IdentityLogoutCommand> handler,
         CancellationToken cancellationToken)
     {
@@ -92,15 +92,15 @@ public static class IdentityEndpointRouteBuilderExtension
             .WithName("RefreshToken")
             .WithSummary("Refreshes the access token")
             .WithDescription("Uses a valid refresh token to generate a new access token.")
-            .Produces<AuthResult>(StatusCodes.Status200OK)
+            .Produces<IdentityAuthResultDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
         return builder;
     }
 
-    private static async Task<Ok<AuthResult>> Refresh(
-        RefreshDto request,
-        ICommandHandler<IdentityRefreshCommand, AuthResult> handler,
+    private static async Task<Ok<IdentityAuthResultDto>> Refresh(
+        IdentityRefreshDto request,
+        ICommandHandler<IdentityRefreshCommand, IdentityAuthResultDto> handler,
         CancellationToken cancellationToken)
     {
         var command = new IdentityRefreshCommand(request.RefreshToken);
@@ -128,7 +128,7 @@ public static class IdentityEndpointRouteBuilderExtension
     }
 
     private static async Task<NoContent> ChangePassword(
-        PasswordUpdateDto request,
+        IdentityPasswordUpdateDto request,
         ICommandHandler<IdentityPasswordChangeCommand> handler,
         CancellationToken cancellationToken)
     {
