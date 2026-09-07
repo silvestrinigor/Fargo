@@ -18,9 +18,10 @@ public static class AuditLogEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapAuditLogGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/audit-logs")
-            .RequireAuthorization()
-            .WithTags("AuditLogs");
+        .MapGroup("/audit-logs")
+        .RequireAuthorization()
+        .WithTags("AuditLogs")
+        .RequireRateLimiting("general-authenticated");
 
         return group;
     }
@@ -29,12 +30,13 @@ public static class AuditLogEndpointRouteBuilderExtension
 
     private static IEndpointRouteBuilder MapGetAuditLogs(this IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/", GetManyAuditLogAsync)
-            .WithName("GetAuditLogs")
-            .WithSummary("Gets multiple audit logs")
-            .WithDescription("Retrieves a paginated list of audit logs.")
-            .Produces<IReadOnlyCollection<AuditLogDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+        builder
+        .MapGet("/", GetManyAuditLogAsync)
+        .WithName("GetAuditLogs")
+        .WithSummary("Gets multiple audit logs")
+        .WithDescription("Retrieves a paginated list of audit logs.")
+        .Produces<IReadOnlyCollection<AuditLogDto>>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status204NoContent);
 
         return builder;
     }

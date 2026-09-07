@@ -24,9 +24,10 @@ public static class UserEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapUserGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/users")
-            .RequireAuthorization()
-            .WithTags("Users");
+        .MapGroup("/users")
+        .RequireAuthorization()
+        .WithTags("Users")
+        .RequireRateLimiting("general-authenticated");
 
         return group;
     }

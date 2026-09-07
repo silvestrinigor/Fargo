@@ -8,6 +8,31 @@ public static class FargoRateLimitingExtensions
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
+                context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        GetClientIp(context),
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0
+                        }));
+
+            options.AddPolicy("general-authenticated", context =>
+            {
+                var identity = context.User.Identity?.Name;
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    identity ?? "anonymous",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 100,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    });
+            });
+
             options.AddPolicy("identity-login", context =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     GetClientIp(context),

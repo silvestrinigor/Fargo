@@ -29,9 +29,10 @@ public static class ArticleEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapArticleGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/articles")
-            .RequireAuthorization()
-            .WithTags("Articles");
+        .MapGroup("/articles")
+        .RequireAuthorization()
+        .WithTags("Articles")
+        .RequireRateLimiting("general-authenticated");
 
         return group;
     }

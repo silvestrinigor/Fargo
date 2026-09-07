@@ -30,9 +30,10 @@ public static class ItemEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapItemGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/items")
-            .RequireAuthorization()
-            .WithTags("Items");
+        .MapGroup("/items")
+        .RequireAuthorization()
+        .WithTags("Items")
+        .RequireRateLimiting("general-authenticated");
 
         return group;
     }

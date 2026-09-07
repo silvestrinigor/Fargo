@@ -24,9 +24,10 @@ public static class PartitionEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapPartitionGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/partitions")
-            .RequireAuthorization()
-            .WithTags("Partitions");
+        .MapGroup("/partitions")
+        .RequireAuthorization()
+        .WithTags("Partitions")
+        .RequireRateLimiting("general-authenticated");
 
         return group;
     }
