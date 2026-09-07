@@ -36,16 +36,16 @@ namespace Fargo.Http.Client.Identity.Password
         /// <summary>
         /// Validates the current password and updates it with the new password.
         /// </summary>
-        /// <param name="body">The request body</param>
+        /// <param name="body">Represents the data transfer object for updating a user&apos;s password.The NewPassword field uses the Password structure to enforce security validation rulesincluding minimum character requirements, special character constraints, and other password policies.</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task PutAsync(global::Fargo.Http.Client.Models.PasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task PutAsync(global::Fargo.Http.Client.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task PutAsync(global::Fargo.Http.Client.Models.PasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task PutAsync(global::Fargo.Http.Client.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -56,15 +56,15 @@ namespace Fargo.Http.Client.Identity.Password
         /// Validates the current password and updates it with the new password.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
-        /// <param name="body">The request body</param>
+        /// <param name="body">Represents the data transfer object for updating a user&apos;s password.The NewPassword field uses the Password structure to enforce security validation rulesincluding minimum character requirements, special character constraints, and other password policies.</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPutRequestInformation(global::Fargo.Http.Client.Models.PasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPutRequestInformation(global::Fargo.Http.Client.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPutRequestInformation(global::Fargo.Http.Client.Models.PasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPutRequestInformation(global::Fargo.Http.Client.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

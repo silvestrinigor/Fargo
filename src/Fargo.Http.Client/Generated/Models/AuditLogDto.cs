@@ -7,26 +7,27 @@ using System.IO;
 using System;
 namespace Fargo.Http.Client.Models
 {
+    /// <summary>
+    /// Represents a data transfer object for audit log information.This DTO contains all the essential details about an audit event, includingthe actor who performed the action, the entity affected, the type of action,when it occurred, and any additional metadata.
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    #pragma warning disable CS1591
     public partial class AuditLogDto : IAdditionalDataHolder, IParsable
-    #pragma warning restore CS1591
     {
-        /// <summary>Represents the set of actions in the system.</summary>
+        /// <summary>The type of action that was performed (e.g., Create, Update, Delete)</summary>
         public int? ActionType { get; set; }
-        /// <summary>The actorGuid property</summary>
+        /// <summary>The unique identifier of the actor who performed the action</summary>
         public Guid? ActorGuid { get; set; }
-        /// <summary>Represents the type of actor responsible for performing an actionwithin the system.</summary>
+        /// <summary>The type of actor who performed the action (e.g., User, Application)</summary>
         public int? ActorType { get; set; }
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The entityGuid property</summary>
+        /// <summary>The unique identifier of the entity that was affected by the action</summary>
         public Guid? EntityGuid { get; set; }
-        /// <summary>Represents a entity type.</summary>
+        /// <summary>The type of entity that was affected (e.g., Article, User)</summary>
         public int? EntityType { get; set; }
-        /// <summary>The guid property</summary>
+        /// <summary>The unique identifier of the audit log entry</summary>
         public Guid? Guid { get; set; }
-        /// <summary>The metadata property</summary>
+        /// <summary>A dictionary containing additional metadata about the audit event</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public global::Fargo.Http.Client.Models.AuditLogDto_metadata? Metadata { get; set; }
@@ -34,9 +35,9 @@ namespace Fargo.Http.Client.Models
 #else
         public global::Fargo.Http.Client.Models.AuditLogDto_metadata Metadata { get; set; }
 #endif
-        /// <summary>The occurredAt property</summary>
+        /// <summary>The date and time when the audit event occurred</summary>
         public DateTimeOffset? OccurredAt { get; set; }
-        /// <summary>The partitions property</summary>
+        /// <summary>The collection of partition GUIDs that this audit log entry belongs to</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public List<Guid?>? Partitions { get; set; }

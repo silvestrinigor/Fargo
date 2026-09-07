@@ -31,7 +31,7 @@ public sealed class LoginCommand : Command
             var password = parseResult.GetValue(passwordOption)!;
 
             var result = await client.Identity.Login.PostAsync(
-                new LoginDto
+                new IdentityLoginDto
                 {
                     Nameid = username,
                     Password = password
