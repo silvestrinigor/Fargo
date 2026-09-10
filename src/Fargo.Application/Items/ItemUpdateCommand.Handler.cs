@@ -20,9 +20,7 @@ public sealed class ItemUpdateCommandHandler(
     ILogger<ItemUpdateCommandHandler> logger
 ) : ICommandHandler<ItemUpdateCommand>
 {
-    public async Task HandleAsync(
-        ItemUpdateCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task HandleAsync(ItemUpdateCommand command, CancellationToken cancellationToken = default)
     {
         logger.UpdateStarted(command.ItemGuid, currentActor.Guid, currentActor.ActorType);
 

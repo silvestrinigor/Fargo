@@ -105,13 +105,13 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 
     private readonly List<ItemMoviment> moviments = [];
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     /// <summary>
     /// Initializes a new item entity.
     /// </summary>
     /// <remarks>
     /// Required by Entity Framework.
     /// </remarks>
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private Item()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {

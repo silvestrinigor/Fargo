@@ -121,6 +121,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         modelBuilder.ApplyConfiguration(new ItemPartitionConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ItemParentContainerHistoryPostgresTemporalConfiguration());
+
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
         modelBuilder.ApplyConfiguration(new UserAuthenticationConfiguration());

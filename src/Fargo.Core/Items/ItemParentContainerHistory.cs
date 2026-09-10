@@ -6,16 +6,27 @@ public class ItemParentContainerHistory
 
     public Guid ItemGuid { get; private init; }
 
-    public DateTime ValidAt { get; private set; }
+    public bool RemovedFromContainers { get; private init; } = false;
 
-    private ItemParentContainerHistory()
+    public virtual DateTimeOffset PeriodStart { get; }
+
+    public virtual DateTimeOffset PeriodEnd { get; }
+
+    public ItemParentContainerHistory(Guid itemGuid, Guid? parentItemContainerGuid)
     {
-    }
+        if (itemGuid == Guid.Empty)
+        {
+            throw new ArgumentException(
+                "The item identifier cannot be empty.",
+                nameof(itemGuid));
+        }
 
-    public ItemParentContainerHistory(Item item)
-    {
-        ItemGuid = item.Guid;
+        ItemGuid = itemGuid;
+        ParentItemContainerGuid = parentItemContainerGuid;
 
-        ParentItemContainerGuid = item.ParentItemContainerGuid;
+        if (ParentItemContainerGuid is null)
+        {
+            RemovedFromContainers = true;
+        }
     }
 }

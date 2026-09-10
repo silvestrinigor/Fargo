@@ -196,7 +196,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
         var countQuery = query.CountBy(x => x.ArticleGuid);
 
-        return await countQuery.Select(x => new ItemContainerInventoryDto(x.Key, x.Value)).ToListAsync();
+        return await countQuery.Select(x => new ItemContainerInventoryDto(x.Key, x.Value)).ToListAsync(cancellationToken);
     }
 
     public Task<bool> ExistByGuidAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
