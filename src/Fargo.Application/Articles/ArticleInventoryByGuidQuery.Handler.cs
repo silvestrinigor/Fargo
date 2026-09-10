@@ -27,8 +27,7 @@ public sealed class ArticleInventoryByGuidQueryHandler(
     /// If <see cref="ArticleInventoryByGuidQuery.IncludeDescendents"/> is true and container IDs are provided, 
     /// the handler will recursively resolve all descendant container IDs before fetching inventory data.
     /// </remarks>
-    public async Task<ArticleInventoryDto?> HandleAsync(
-        ArticleInventoryByGuidQuery query, CancellationToken cancellationToken = default)
+    public async Task<ArticleInventoryDto?> HandleAsync(ArticleInventoryByGuidQuery query, CancellationToken cancellationToken = default)
     {
         logger.ArticleInventoryQueryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
@@ -54,7 +53,8 @@ public sealed class ArticleInventoryByGuidQueryHandler(
             inventory = await articleRepository.GetInventoryInfoByGuidAsync(
                 query.ArticleGuid,
                 [.. itemContainerGuids.Distinct()],
-                cancellationToken);
+                cancellationToken
+            );
         }
         else if (articleExist)
         {

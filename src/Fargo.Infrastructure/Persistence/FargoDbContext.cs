@@ -9,6 +9,7 @@ using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Configurations;
+using Fargo.Infrastructure.Entities;
 using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
@@ -21,6 +22,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<Article> Articles { get; set; }
 
     public DbSet<Item> Items { get; set; }
+
+    public DbSet<ItemParentContainerHistoryPostgresTemporal> ItemParentContainerHistories { get; set; }
 
     public DbSet<User> Users { get; set; }
 

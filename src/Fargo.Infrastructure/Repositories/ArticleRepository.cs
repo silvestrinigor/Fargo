@@ -154,6 +154,28 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return new ArticleInventoryDto(TotalCount: itemCount);
     }
 
+    public async Task<ArticleInventoryDto> GetInventoryInfoByGuidTemporalAsOfAsync(
+        Guid articleGuid,
+        DateTimeOffset temporalAsOf,
+        IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = context.ItemParentContainerHistories.Where(i => i.Item.ArticleGuid == articleGuid);
+
+        if (insideItemContainerGuids is { Count: > 0 })
+        {
+            query = query.Where(
+                i => i.ParentItemContainerGuid != null &&
+                i.ValidPeriod.Contains(temporalAsOf) &&
+                insideItemContainerGuids.Contains(i.ParentItemContainerGuid.Value)
+            );
+        }
+
+        var itemCount = await query.Select(x => x.Item).CountAsync(cancellationToken);
+
+        return new ArticleInventoryDto(TotalCount: itemCount);
+    }
+
     public Task<bool> ExistByGuidAsync(Guid articleGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
