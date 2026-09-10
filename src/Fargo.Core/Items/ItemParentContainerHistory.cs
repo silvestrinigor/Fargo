@@ -2,9 +2,13 @@ namespace Fargo.Core.Items;
 
 public class ItemParentContainerHistory
 {
-    public Guid? ParentItemContainerGuid { get; private init; }
+    public Item Item { get; private init; } = null!;
 
     public Guid ItemGuid { get; private init; }
+
+    public Item? ParentItemContainer { get; private init; }
+
+    public Guid? ParentItemContainerGuid { get; private init; }
 
     public bool RemovedFromContainers { get; private init; } = false;
 
@@ -22,6 +26,7 @@ public class ItemParentContainerHistory
         }
 
         ItemGuid = itemGuid;
+
         ParentItemContainerGuid = parentItemContainerGuid;
 
         if (ParentItemContainerGuid is null)
