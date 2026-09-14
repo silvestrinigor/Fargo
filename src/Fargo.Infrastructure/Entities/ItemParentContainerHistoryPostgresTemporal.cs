@@ -5,6 +5,8 @@ namespace Fargo.Infrastructure.Entities;
 
 public class ItemParentContainerHistoryPostgresTemporal : ItemParentContainerHistory
 {
+    public int Id { get; set; }
+
     public NpgsqlRange<DateTimeOffset> ValidPeriod { get; set; }
 
     public override DateTimeOffset PeriodStart => ValidPeriod.LowerBound;

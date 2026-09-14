@@ -10,7 +10,7 @@ public sealed class ItemParentContainerHistoryPostgresTemporalConfiguration : IE
     {
         builder.ToTable("item_parent_container_history");
 
-        builder.HasKey(i => new { i.ItemGuid, i.ValidPeriod });
+        builder.HasKey(i => i.Id);
         // TODO: Configure postgres temporal table when efcore 11 available (without overlaps).
 
         builder
