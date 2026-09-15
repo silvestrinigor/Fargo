@@ -102,54 +102,31 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new ArticleConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticleBarcodeConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticleDimensionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticleVariationConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticlePackConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticleKitComponentConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticleContainerConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ArticlePartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemMovimentConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemPartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new ItemParentContainerHistoryPostgresTemporalConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserAuthenticationConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserUserGroupConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserPartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserPartitionAccessConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserGroupConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserGroupPartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new UserGroupPartitionAccessConfiguration());
-
-        modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
-
-        modelBuilder.ApplyConfiguration(new PartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
-
-        modelBuilder.ApplyConfiguration(new AuditLogPartitionConfiguration());
-
-        modelBuilder.ApplyConfiguration(new AuthenticationAttemptConfiguration());
+        modelBuilder
+        .ApplyConfiguration(new ArticleConfiguration())
+        .ApplyConfiguration(new ArticleBarcodeConfiguration())
+        .ApplyConfiguration(new ArticleDimensionConfiguration())
+        .ApplyConfiguration(new ArticleVariationConfiguration())
+        .ApplyConfiguration(new ArticlePackConfiguration())
+        .ApplyConfiguration(new ArticleKitComponentConfiguration())
+        .ApplyConfiguration(new ArticleContainerConfiguration())
+        .ApplyConfiguration(new ArticlePartitionConfiguration())
+        .ApplyConfiguration(new ItemConfiguration())
+        .ApplyConfiguration(new ItemMovimentConfiguration())
+        .ApplyConfiguration(new ItemPartitionConfiguration())
+        .ApplyConfiguration(new ItemParentContainerHistoryPostgresTemporalConfiguration())
+        .ApplyConfiguration(new UserConfiguration())
+        .ApplyConfiguration(new UserAuthenticationConfiguration())
+        .ApplyConfiguration(new UserUserGroupConfiguration())
+        .ApplyConfiguration(new UserPartitionConfiguration())
+        .ApplyConfiguration(new UserPartitionAccessConfiguration())
+        .ApplyConfiguration(new UserGroupConfiguration())
+        .ApplyConfiguration(new UserGroupPartitionConfiguration())
+        .ApplyConfiguration(new UserGroupPartitionAccessConfiguration())
+        .ApplyConfiguration(new RefreshTokenConfiguration())
+        .ApplyConfiguration(new PartitionConfiguration())
+        .ApplyConfiguration(new AuditLogConfiguration())
+        .ApplyConfiguration(new AuditLogPartitionConfiguration())
+        .ApplyConfiguration(new AuthenticationAttemptConfiguration());
     }
 }
