@@ -77,6 +77,13 @@ public sealed class AuditMetadata
             : new AuditValue.Null());
     }
 
+    public void AddParentContainer(Guid? parentContainer)
+    {
+        Add("parentContainerGuid", parentContainer is not null
+            ? new AuditValue.String(parentContainer.Value.ToString())
+            : new AuditValue.Null());
+    }
+
     public void AddArticleType(ArticleType value)
     {
         Add("articleType", new AuditValue.Number((byte)value));

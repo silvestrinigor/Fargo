@@ -52,6 +52,8 @@ public sealed class ItemCreateCommandHandler(
             item.PlaceInsideContainer(parentItemContainer);
         }
 
+        itemAudit.Metadata.AddParentContainer(item.ParentItemContainerGuid);
+
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitionGuids)
         {
             foreach (var partitionGuid in partitionGuids)
@@ -65,6 +67,8 @@ public sealed class ItemCreateCommandHandler(
                 item.AddPartition(partition);
             }
         }
+
+        itemAudit.Metadata.AddPartitions(item.PartitionGuids);
 
         itemRepository.Add(item);
 

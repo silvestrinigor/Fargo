@@ -49,10 +49,14 @@ public sealed class ItemUpdateCommandHandler(
             await itemService.ValidateParentItemContainerHierarchyAssignmentAsync(parentItemContainer, item, cancellationToken);
 
             item.PlaceInsideContainer(parentItemContainer);
+
+            itemAudit.Metadata.AddParentContainer(item.ParentItemContainerGuid);
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {
             item.RemoveFromContainers();
+
+            itemAudit.Metadata.AddParentContainer(null);
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionGuidsToAdd)
@@ -67,6 +71,8 @@ public sealed class ItemUpdateCommandHandler(
 
                 item.AddPartition(partition);
             }
+
+            itemAudit.Metadata.AddPartitionsAdded(partitionGuidsToAdd);
         }
 
         if (command.Update.PartitionsToRemove is { Count: > 0 } partitionGuidsToRemove)
@@ -81,6 +87,8 @@ public sealed class ItemUpdateCommandHandler(
 
                 item.RemovePartition(partition.Guid);
             }
+
+            itemAudit.Metadata.AddPartitionsRemoved(partitionGuidsToRemove);
         }
 
         auditLogRepository.Add(itemAudit);
