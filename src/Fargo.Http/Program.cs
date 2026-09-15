@@ -45,6 +45,12 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
