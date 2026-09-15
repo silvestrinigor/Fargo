@@ -34,30 +34,26 @@ public static class ServiceCollectionExtensions
         /// The use of <c>ValidateOnStart()</c> ensures that the application fails
         /// fast if the configuration is missing or invalid.
         /// </remarks>
-        public IServiceCollection AddFargoSeedOptions(
-                IConfiguration configuration)
+        public IServiceCollection AddFargoSeedOptions(IConfiguration configuration)
         {
             services
-                .AddOptions<DefaultAdminOptions>()
-                .Bind(configuration.GetSection(DefaultAdminOptions.SectionName))
-                .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid),
-                        "DefaultAdmin:Nameid must be provided.")
-                .Validate(o => !string.IsNullOrWhiteSpace(o.Password),
-                        "DefaultAdmin:Password must be provided.")
-                .ValidateOnStart();
+            .AddOptions<DefaultAdminOptions>()
+            .Bind(configuration.GetSection(DefaultAdminOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid), "DefaultAdmin:Nameid must be provided.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Password), "DefaultAdmin:Password must be provided.")
+            .ValidateOnStart();
 
             services
-                .AddOptions<AdministratorsUserGroupOptions>()
-                .Bind(configuration.GetSection(AdministratorsUserGroupOptions.SectionName))
-                .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid),
-                        "DefaultAdmin:Nameid must be provided.")
-                .ValidateOnStart();
+            .AddOptions<AdministratorsUserGroupOptions>()
+            .Bind(configuration.GetSection(AdministratorsUserGroupOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid), "DefaultAdmin:Nameid must be provided.")
+            .ValidateOnStart();
 
-            services.AddOptions<GlobalPartitionOptions>()
-                .Bind(configuration.GetSection(GlobalPartitionOptions.SectionName))
-                .Validate(o => !string.IsNullOrWhiteSpace(o.Name),
-                    "GlobalPartition:Name must be provided.")
-                .ValidateOnStart();
+            services
+            .AddOptions<GlobalPartitionOptions>()
+            .Bind(configuration.GetSection(GlobalPartitionOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Name), "GlobalPartition:Name must be provided.")
+            .ValidateOnStart();
 
             return services;
         }

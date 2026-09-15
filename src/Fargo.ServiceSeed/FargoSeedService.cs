@@ -11,7 +11,8 @@ namespace Fargo.ServiceSeed;
 public sealed class FargoSeedService(
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime,
-    ILogger<FargoSeedService> logger) : BackgroundService
+    ILogger<FargoSeedService> logger
+    ) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing seed operations.
@@ -46,10 +47,9 @@ public sealed class FargoSeedService(
     /// </remarks>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var activity = activitySource.StartActivity(
-            "Seeding database", ActivityKind.Client);
+        using var activity = activitySource.StartActivity("Seeding database", ActivityKind.Client);
 
-        logger.LogInformation("Starting system initialization.");
+        logger.LogInformation("Starting seed database.");
 
         try
         {
@@ -71,19 +71,19 @@ public sealed class FargoSeedService(
 
             await handler.HandleAsync(command, stoppingToken);
 
-            logger.LogInformation("System initialization completed successfully.");
+            logger.LogInformation("Seed database completed successfully.");
         }
         catch (Exception ex)
         {
             activity?.AddException(ex);
 
-            logger.LogError(ex, "System initialization failed.");
+            logger.LogError(ex, "Seed database failed.");
 
             throw;
         }
         finally
         {
-            logger.LogInformation("Stopping seed application.");
+            logger.LogInformation("Stopping seed database.");
 
             hostApplicationLifetime.StopApplication();
         }

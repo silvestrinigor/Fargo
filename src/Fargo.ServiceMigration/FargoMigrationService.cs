@@ -52,8 +52,7 @@ public sealed class FargoMigrationService(
     /// </exception>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var activity = activitySource.StartActivity(
-            "Migrating database", ActivityKind.Client);
+        using var activity = activitySource.StartActivity("Migrating database", ActivityKind.Client);
 
         logger.LogInformation("Starting database migration.");
 
@@ -77,7 +76,7 @@ public sealed class FargoMigrationService(
         }
         finally
         {
-            logger.LogInformation("Stopping seed application.");
+            logger.LogInformation("Stopping database migration.");
 
             hostApplicationLifetime.StopApplication();
         }
