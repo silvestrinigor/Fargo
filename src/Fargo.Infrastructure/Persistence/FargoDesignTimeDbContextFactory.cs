@@ -16,8 +16,7 @@ namespace Fargo.Infrastructure.Persistence;
 /// Database schema upgrades are performed by a dedicated worker service
 /// responsible for applying migrations during deployment or startup.
 /// </remarks>
-public sealed class FargoWriteDesignTimeDbContextFactory
-    : IDesignTimeDbContextFactory<FargoDbContext>
+public sealed class FargoDesignTimeDbContextFactory : IDesignTimeDbContextFactory<FargoDbContext>
 {
     /// <summary>
     /// Creates a configured instance of <see cref="FargoDbContext"/>
@@ -41,12 +40,13 @@ public sealed class FargoWriteDesignTimeDbContextFactory
     {
         var optionsBuilder = new DbContextOptionsBuilder<FargoDbContext>();
 
-        optionsBuilder.UseNpgsql(
+        optionsBuilder
+        .UseNpgsql(
             npgsqlOptions =>
             {
                 npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
-            }
-        ).UseSnakeCaseNamingConvention();
+            })
+        .UseSnakeCaseNamingConvention();
 
         return new FargoDbContext(optionsBuilder.Options);
     }
