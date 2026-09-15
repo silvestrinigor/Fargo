@@ -1,9 +1,8 @@
 using Fargo.Application.Common;
-using Fargo.Http.OpenApi;
 
-namespace Fargo.Http.Extensions;
+namespace Fargo.Http.OpenApi;
 
-public static class FargoOpenApiServiceCollectionExtension
+public static class FargoOpenApiServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {

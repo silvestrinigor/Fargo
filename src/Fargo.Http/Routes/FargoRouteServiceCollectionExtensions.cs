@@ -1,8 +1,6 @@
-using Fargo.Http.Routes;
+namespace Fargo.Http.Routes;
 
-namespace Fargo.Http.Extensions;
-
-public static class FargoRouteServiceCollectionExtension
+public static class FargoRouteServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {

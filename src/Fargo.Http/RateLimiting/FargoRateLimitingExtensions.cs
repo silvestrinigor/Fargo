@@ -1,5 +1,7 @@
 using System.Threading.RateLimiting;
 
+namespace Fargo.Http.RateLimiting;
+
 public static class FargoRateLimitingExtensions
 {
     public static IServiceCollection AddFargoRateLimiter(this IServiceCollection services)

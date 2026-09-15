@@ -1,8 +1,6 @@
-using Fargo.Http.ExceptionHandlers;
+namespace Fargo.Http.ExceptionHandlers;
 
-namespace Fargo.Http.Extensions;
-
-public static class FargoExceptionHandlerServiceCollectionExtension
+public static class FargoExceptionHandlerServiceCollectionExtensions
 {
     public static IServiceCollection AddFargoExceptionHandler(this IServiceCollection services)
     {
