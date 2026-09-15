@@ -2,6 +2,7 @@ using Fargo.Application.Extensions;
 using Fargo.Http.Endpoints;
 using Fargo.Http.Extensions;
 using Fargo.Infrastructure.Extensions;
+using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -32,6 +33,8 @@ builder.Services.AddFargoExceptionHandler();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddFargoRateLimiter();
+
+builder.Services.AddHealthChecks().AddDbContextCheck<FargoDbContext>();
 
 var app = builder.Build();
 
