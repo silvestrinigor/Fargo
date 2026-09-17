@@ -1,4 +1,4 @@
-using Fargo.Application.Identity;
+using Fargo.Application.Common;
 using Fargo.Core.Actors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;

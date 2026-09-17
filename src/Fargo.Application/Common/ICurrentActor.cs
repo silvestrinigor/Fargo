@@ -1,6 +1,6 @@
 using Fargo.Core.Actors;
 
-namespace Fargo.Application.Identity;
+namespace Fargo.Application.Common;
 
 public interface ICurrentActor
 {

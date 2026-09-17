@@ -2,7 +2,7 @@ using Fargo.Core.Informations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Http.Shared.JsonConverters;
+namespace Fargo.Http.JsonConverters;
 
 public sealed class DescriptionJsonConverter : JsonConverter<Description>
 {

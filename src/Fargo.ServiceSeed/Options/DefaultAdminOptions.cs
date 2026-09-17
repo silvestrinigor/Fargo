@@ -1,4 +1,4 @@
-namespace Fargo.Application.System;
+namespace Fargo.ServiceSeed.Options;
 
 /// <summary>
 /// Configuration options used to create the default administrator

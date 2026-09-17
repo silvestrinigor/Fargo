@@ -1,7 +1,8 @@
+using Fargo.Core.Audits;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Fargo.Core.Audits;
+namespace Fargo.Http.JsonConverters;
 
 /// <summary>
 /// Converts <see cref="AuditValue"/> instances to and from JSON values.

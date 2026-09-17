@@ -1,4 +1,4 @@
-namespace Fargo.Application.System;
+namespace Fargo.ServiceSeed.Options;
 
 public sealed class GlobalPartitionOptions
 {

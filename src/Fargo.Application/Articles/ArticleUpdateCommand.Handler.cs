@@ -1,5 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Application.Identity;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;

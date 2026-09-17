@@ -1,4 +1,4 @@
-using Fargo.Application.System;
+using Fargo.ServiceSeed.Options;
 
 namespace Fargo.ServiceSeed.Extensions;
 

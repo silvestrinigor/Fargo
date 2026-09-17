@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
+using Fargo.Infrastructure.Extensions;
 
-namespace Fargo.Infrastructure.Extensions;
+namespace Fargo.Infrastructure.Persistence;
 
 /// <summary>
 /// Provides extension methods for applying pagination to LINQ queries.

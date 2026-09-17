@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Fargo.Http.Shared.JsonConverters;
+namespace Fargo.Http.JsonConverters;
 
 /// <summary>
 /// Serializes and deserializes <see cref="Density"/> as <c>{ "value": number, "unit": string }</c>.

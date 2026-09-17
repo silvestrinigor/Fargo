@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Fargo.Http.Shared.JsonConverters;
+namespace Fargo.Http.JsonConverters;
 
 public sealed class ScalarJsonConverter : JsonConverter<Scalar>
 {
