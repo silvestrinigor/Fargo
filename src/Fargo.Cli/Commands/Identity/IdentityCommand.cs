@@ -10,5 +10,8 @@ public sealed class IdentityCommand : Command
         : base("identity", "Manage Fargo identity and authentication")
     {
         Add(new LoginCommand(client, tokenStore));
+        Add(new LogoutCommand(client, tokenStore));
+        Add(new RefreshCommand(client, tokenStore));
+        Add(new ChangePasswordCommand(client));
     }
 }

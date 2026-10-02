@@ -1,12 +1,12 @@
 using Fargo.Http.Client;
 using System.CommandLine;
 
-namespace Fargo.Cli.Commands.Articles;
+namespace Fargo.Cli.Commands.Items;
 
-public sealed class ListArticlesCommand : Command
+public sealed class ListItemsCommand : Command
 {
-    public ListArticlesCommand(FargoApiClient client)
-        : base("list", "List articles")
+    public ListItemsCommand(FargoApiClient client)
+        : base("list", "List items")
     {
         var pageOption = new Option<int?>("--page")
         {
@@ -15,7 +15,7 @@ public sealed class ListArticlesCommand : Command
 
         var limitOption = new Option<int?>("--limit")
         {
-            Description = "Number of articles per page."
+            Description = "Number of items per page."
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
@@ -34,17 +34,17 @@ public sealed class ListArticlesCommand : Command
             var limit = parseResult.GetValue(limitOption);
             var partitions = parseResult.GetValue(partitionsOption);
 
-            var result = await client.Articles.GetAsync(request =>
+            var result = await client.Items.GetAsync(request =>
             {
-                if (page.HasValue) request.QueryParameters.Page = page.Value;
-                if (limit.HasValue) request.QueryParameters.Limit = limit.Value;
+                if (page.HasValue) request.QueryParameters.Page = page.Value.ToString();
+                if (limit.HasValue) request.QueryParameters.Limit = limit.Value.ToString();
                 if (partitions is { Length: > 0 })
                     request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
             });
 
-            foreach (var article in result ?? [])
+            foreach (var item in result ?? [])
             {
-                Console.WriteLine($"{article.Guid}  {article.Name}  type={article.ArticleType}");
+                Console.WriteLine($"{item.Guid}  article={item.ArticleGuid}");
             }
         });
     }

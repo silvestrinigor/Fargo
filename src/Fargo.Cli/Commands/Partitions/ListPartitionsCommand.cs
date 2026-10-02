@@ -1,12 +1,12 @@
 using Fargo.Http.Client;
 using System.CommandLine;
 
-namespace Fargo.Cli.Commands.Articles;
+namespace Fargo.Cli.Commands.Partitions;
 
-public sealed class ListArticlesCommand : Command
+public sealed class ListPartitionsCommand : Command
 {
-    public ListArticlesCommand(FargoApiClient client)
-        : base("list", "List articles")
+    public ListPartitionsCommand(FargoApiClient client)
+        : base("list", "List partitions")
     {
         var pageOption = new Option<int?>("--page")
         {
@@ -15,26 +15,26 @@ public sealed class ListArticlesCommand : Command
 
         var limitOption = new Option<int?>("--limit")
         {
-            Description = "Number of articles per page."
+            Description = "Number of partitions per page."
         };
 
-        var partitionsOption = new Option<Guid[]?>("--partitions")
+        var parentOption = new Option<Guid[]?>("--partitions")
         {
-            Description = "Filter by partition GUIDs (space-separated).",
+            Description = "Filter by parent partition GUIDs (space-separated).",
             AllowMultipleArgumentsPerToken = true
         };
 
         Add(pageOption);
         Add(limitOption);
-        Add(partitionsOption);
+        Add(parentOption);
 
         SetAction(async parseResult =>
         {
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
-            var partitions = parseResult.GetValue(partitionsOption);
+            var partitions = parseResult.GetValue(parentOption);
 
-            var result = await client.Articles.GetAsync(request =>
+            var result = await client.Partitions.GetAsync(request =>
             {
                 if (page.HasValue) request.QueryParameters.Page = page.Value;
                 if (limit.HasValue) request.QueryParameters.Limit = limit.Value;
@@ -42,9 +42,9 @@ public sealed class ListArticlesCommand : Command
                     request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
             });
 
-            foreach (var article in result ?? [])
+            foreach (var partition in result ?? [])
             {
-                Console.WriteLine($"{article.Guid}  {article.Name}  type={article.ArticleType}");
+                Console.WriteLine($"{partition.Guid}  {partition.Name}");
             }
         });
     }
