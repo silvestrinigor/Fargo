@@ -4,10 +4,9 @@ using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;
 
-public sealed class CreateArticleCommand : Command
+public sealed class ArticleCreateCommand : Command
 {
-    public CreateArticleCommand(FargoApiClient client)
-        : base("create", "Create a new article")
+    public ArticleCreateCommand(FargoApiClient client) : base("create", "Create a new article")
     {
         var nameOption = new Option<string>("--name")
         {
