@@ -8,7 +8,7 @@
     <Project Path="src/server/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
     <Project Path="src/server/Fargo.ServiceSeed/Fargo.ServiceSeed.csproj" />
     <Project Path="src/client/Fargo.Cli/Fargo.Cli.csproj" />
-    <Project Path="src/client/Fargo.Http.Client/Fargo.Http.Client.csproj" />
+    <Project Path="src/client/Fargo.ClientHttp/Fargo.ClientHttp.csproj" />
     <Project Path="src/client/Fargo.Mcp/Fargo.Mcp.csproj" />
     <Project Path="tests/server/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tests/server/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />

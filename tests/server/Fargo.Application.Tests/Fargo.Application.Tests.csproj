@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\server\Fargo.Application\Fargo.Application.csproj" />
-    <ProjectReference Include="..\..\src\server\Fargo.Core\Fargo.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\server\Fargo.Application\Fargo.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\server\Fargo.Core\Fargo.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

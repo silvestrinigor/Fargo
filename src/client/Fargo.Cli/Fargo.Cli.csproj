@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.Http.Client\Fargo.Http.Client.csproj" />
+    <ProjectReference Include="..\Fargo.ClientHttp\Fargo.ClientHttp.csproj" />
   </ItemGroup>
 
 </Project>
