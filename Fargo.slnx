@@ -10,7 +10,7 @@
     <Project Path="src/client/Fargo.Cli/Fargo.Cli.csproj" />
     <Project Path="src/client/Fargo.Http.Client/Fargo.Http.Client.csproj" />
     <Project Path="src/client/Fargo.Mcp/Fargo.Mcp.csproj" />
-    <Project Path="tests/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
-    <Project Path="tests/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
-    <Project Path="tests/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
+    <Project Path="tests/server/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
+    <Project Path="tests/server/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
+    <Project Path="tests/server/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
 </Solution>
