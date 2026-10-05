@@ -52,17 +52,17 @@ public sealed class UpdateUserCommand : Command
 
             if (username is not null)
             {
-                dto.Nameid = new UntypedString(username);
+                dto.Nameid = username;
             }
 
             if (firstName is not null)
             {
-                dto.FirstName = new UntypedString(firstName);
+                dto.FirstName = firstName;
             }
 
             if (lastName is not null)
             {
-                dto.LastName = new UntypedString(lastName);
+                dto.LastName = lastName;
             }
 
             if (isActive.HasValue)

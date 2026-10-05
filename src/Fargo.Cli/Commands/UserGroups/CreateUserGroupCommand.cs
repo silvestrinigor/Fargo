@@ -17,9 +17,9 @@ public sealed class CreateUserGroupCommand : Command
 
         var isActiveOption = new Option<bool>("--active")
         {
-            Description = "Whether the group is active. Defaults to true."
+            Description = "Whether the group is active. Defaults to true.",
+            DefaultValueFactory = x => true
         };
-        isActiveOption.SetDefaultValue(true);
 
         var parentOption = new Option<Guid?>("--parent")
         {
@@ -38,7 +38,7 @@ public sealed class CreateUserGroupCommand : Command
 
             var dto = new UserGroupCreateDto
             {
-                Nameid = new UntypedString(nameid),
+                Nameid = nameid,
                 IsActive = isActive,
                 ParentUserGroup = parent
             };

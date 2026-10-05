@@ -22,7 +22,7 @@ public sealed class RefreshCommand : Command
 
             var result = await client.Identity.Refresh.PostAsync(new IdentityRefreshDto
             {
-                RefreshToken = new UntypedString(tokens.RefreshToken)
+                RefreshToken = tokens.RefreshToken
             });
 
             if (result is null)

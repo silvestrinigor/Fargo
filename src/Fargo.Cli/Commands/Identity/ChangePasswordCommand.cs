@@ -41,7 +41,7 @@ public sealed class ChangePasswordCommand : Command
             {
                 Nameid = nameid,
                 CurrentPassword = currentPassword,
-                NewPassword = new UntypedString(newPassword)
+                NewPassword = newPassword
             });
 
             Console.WriteLine("Password changed successfully.");

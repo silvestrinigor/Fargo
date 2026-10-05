@@ -38,12 +38,12 @@ public sealed class ListUsersCommand : Command
             {
                 if (page.HasValue)
                 {
-                    request.QueryParameters.Page = page.Value.ToString();
+                    request.QueryParameters.Page = page.Value;
                 }
 
                 if (limit.HasValue)
                 {
-                    request.QueryParameters.Limit = limit.Value.ToString();
+                    request.QueryParameters.Limit = limit.Value;
                 }
 
                 if (partitions is { Length: > 0 })

@@ -45,7 +45,7 @@ public sealed class UpdateArticleCommand : Command
 
             var dto = new ArticleUpdateDto
             {
-                Name = name is not null ? new UntypedString(name) : null,
+                Name = name is not null ? name : null,
                 PartitionsToAdd = addPartitions?.Select(g => (Guid?)g).ToList(),
                 PartitionsToRemove = removePartitions?.Select(g => (Guid?)g).ToList()
             };

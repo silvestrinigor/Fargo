@@ -33,9 +33,9 @@ public sealed class CreateUserCommand : Command
 
         var isActiveOption = new Option<bool>("--active")
         {
-            Description = "Whether the user is active. Defaults to true."
+            Description = "Whether the user is active. Defaults to true.",
+            DefaultValueFactory = x => true
         };
-        isActiveOption.SetDefaultValue(true);
 
         Add(usernameOption);
         Add(passwordOption);
@@ -53,25 +53,22 @@ public sealed class CreateUserCommand : Command
 
             var dto = new UserCreateDto
             {
-                Nameid = new UntypedString(username),
+                Nameid = username,
                 IsActive = isActive,
-                Authentication = new UserCreateDto.UserCreateDto_authentication
+                Authentication = new UserAuthenticationCreateDto
                 {
-                    UserAuthenticationCreateDto = new UserAuthenticationCreateDto
-                    {
-                        Password = new UntypedString(password)
-                    }
+                    Password = password
                 }
             };
 
             if (firstName is not null)
             {
-                dto.FirstName = new UntypedString(firstName);
+                dto.FirstName = firstName;
             }
 
             if (lastName is not null)
             {
-                dto.LastName = new UntypedString(lastName);
+                dto.LastName = lastName;
             }
 
             var guid = await client.Users.PostAsync(dto);

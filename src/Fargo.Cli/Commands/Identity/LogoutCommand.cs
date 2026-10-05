@@ -24,7 +24,7 @@ public sealed class LogoutCommand : Command
             {
                 await client.Identity.Logout.PostAsync(new IdentityLogOutDto
                 {
-                    RefreshToken = new UntypedString(tokens.RefreshToken)
+                    RefreshToken = tokens.RefreshToken
                 });
             }
             catch (Exception ex)

@@ -107,7 +107,7 @@ public static class FargoOpenApiSchemaTransformers
             schema.Properties = new Dictionary<string, IOpenApiSchema>
             {
                 ["value"] = new OpenApiSchema { Type = JsonSchemaType.Number },
-                ["unit"]  = new OpenApiSchema { Type = JsonSchemaType.String, Example = JsonValue.Create("g") }
+                ["unit"] = new OpenApiSchema { Type = JsonSchemaType.String, Example = JsonValue.Create("g") }
             };
             schema.Required = new HashSet<string> { "value", "unit" };
         }
@@ -118,7 +118,7 @@ public static class FargoOpenApiSchemaTransformers
             schema.Properties = new Dictionary<string, IOpenApiSchema>
             {
                 ["value"] = new OpenApiSchema { Type = JsonSchemaType.Number },
-                ["unit"]  = new OpenApiSchema { Type = JsonSchemaType.String, Example = JsonValue.Create("m") }
+                ["unit"] = new OpenApiSchema { Type = JsonSchemaType.String, Example = JsonValue.Create("m") }
             };
             schema.Required = new HashSet<string> { "value", "unit" };
         }
