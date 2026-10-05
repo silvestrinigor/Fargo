@@ -15,53 +15,59 @@ public static class FargoOpenApiSchemaTransformers
 {
     /// <summary>
     /// Applies type-specific schema transformations to OpenAPI schemas.
-    /// This method modifies the schema based on the provided JSON type information.
+    /// Unwraps <see cref="Nullable{T}"/> before comparing so that both
+    /// <c>Name</c> and <c>Name?</c> resolve to the same rules.
     /// </summary>
     /// <param name="schema">The OpenAPI schema to be modified</param>
     /// <param name="jsonTypeInfo">The type information used to determine schema modifications</param>
     public static void ApplyFargoTypes(OpenApiSchema schema, Type? jsonTypeInfo)
     {
-        if (jsonTypeInfo == typeof(Name))
+        // Unwrap Nullable<T> so Name? resolves to the same rules as Name.
+        var type = jsonTypeInfo is null
+            ? null
+            : Nullable.GetUnderlyingType(jsonTypeInfo) ?? jsonTypeInfo;
+
+        if (type == typeof(Name))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Format = "string";
+            schema.Format = null;
             schema.MinLength = Name.MinLength;
             schema.MaxLength = Name.MaxLength;
         }
 
-        if (jsonTypeInfo == typeof(FirstName))
+        if (type == typeof(FirstName))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Format = "string";
+            schema.Format = null;
             schema.MinLength = FirstName.MinLength;
             schema.MaxLength = FirstName.MaxLength;
         }
 
-        if (jsonTypeInfo == typeof(LastName))
+        if (type == typeof(LastName))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Format = "string";
+            schema.Format = null;
             schema.MinLength = LastName.MinLength;
             schema.MaxLength = LastName.MaxLength;
         }
 
-        if (jsonTypeInfo == typeof(Description))
+        if (type == typeof(Description))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Format = "string";
+            schema.Format = null;
             schema.MaxLength = Description.MaxLength;
         }
 
-        if (jsonTypeInfo == typeof(Nameid))
+        if (type == typeof(Nameid))
         {
             schema.Type = JsonSchemaType.String;
-            schema.Format = "string";
+            schema.Format = null;
             schema.MinLength = Nameid.MinLength;
             schema.MaxLength = Nameid.MaxLength;
             schema.Pattern = @"^[a-z0-9][a-z0-9._-]*[a-z0-9]$";
         }
 
-        if (jsonTypeInfo == typeof(Password))
+        if (type == typeof(Password))
         {
             schema.Type = JsonSchemaType.String;
             schema.Format = "password";

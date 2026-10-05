@@ -26,10 +26,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The new description of the article. A `null` value leaves the existing description unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Description { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public UntypedNode Description { get; set; }
+        public string Description { get; set; }
 #endif
         /// <summary>The dimension property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -50,10 +50,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The new name of the article. A `null` value leaves the existing name unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Name { get; set; }
+        public string? Name { get; set; }
 #nullable restore
 #else
-        public UntypedNode Name { get; set; }
+        public string Name { get; set; }
 #endif
         /// <summary>The identifiers of partitions to associate with the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -111,10 +111,10 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>(global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto.CreateFromDiscriminatorValue); } },
-                { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetStringValue(); } },
                 { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>(global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto.CreateFromDiscriminatorValue); } },
                 { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "name", n => { Name = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "name", n => { Name = n.GetStringValue(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "removeMass", n => { RemoveMass = n.GetBoolValue(); } },
@@ -130,10 +130,10 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>("barcode", Barcode);
-            writer.WriteObjectValue<UntypedNode>("description", Description);
+            writer.WriteStringValue("description", Description);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>("dimension", Dimension);
             writer.WriteObjectValue<UntypedNode>("mass", Mass);
-            writer.WriteObjectValue<UntypedNode>("name", Name);
+            writer.WriteStringValue("name", Name);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
             writer.WriteBoolValue("removeMass", RemoveMass);

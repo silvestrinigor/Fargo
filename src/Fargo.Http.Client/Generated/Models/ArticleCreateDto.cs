@@ -44,10 +44,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The optional description of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Description { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public UntypedNode Description { get; set; }
+        public string Description { get; set; }
 #endif
         /// <summary>The dimension property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -142,7 +142,7 @@ namespace Fargo.Http.Client.Models
                 { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>(global::Fargo.Http.Client.Models.ArticleBarcodeDto.CreateFromDiscriminatorValue); } },
                 { "color", n => { Color = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "container", n => { Container = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>(global::Fargo.Http.Client.Models.ArticleContainerDto.CreateFromDiscriminatorValue); } },
-                { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetStringValue(); } },
                 { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>(global::Fargo.Http.Client.Models.ArticleDimensionDto.CreateFromDiscriminatorValue); } },
                 { "kitComponents", n => { KitComponents = n.GetCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>(global::Fargo.Http.Client.Models.ArticleKitComponentDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
@@ -164,7 +164,7 @@ namespace Fargo.Http.Client.Models
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>("barcode", Barcode);
             writer.WriteObjectValue<UntypedNode>("color", Color);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>("container", Container);
-            writer.WriteObjectValue<UntypedNode>("description", Description);
+            writer.WriteStringValue("description", Description);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>("dimension", Dimension);
             writer.WriteCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>("kitComponents", KitComponents);
             writer.WriteObjectValue<UntypedNode>("mass", Mass);

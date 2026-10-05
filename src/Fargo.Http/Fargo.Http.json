@@ -1431,6 +1431,8 @@
             "$ref": "#/components/schemas/Name"
           },
           "description": {
+            "maxLength": 500,
+            "type": "string",
             "description": "The optional description of the article."
           },
           "articleType": {
@@ -1767,9 +1769,14 @@
         "type": "object",
         "properties": {
           "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
             "description": "The new name of the article. A `null` value leaves the existing name unchanged."
           },
           "description": {
+            "maxLength": 500,
+            "type": "string",
             "description": "The new description of the article. A `null` value leaves the existing description unchanged."
           },
           "shelfLife": {
@@ -1919,14 +1926,17 @@
       "Description": {
         "maxLength": 500,
         "type": "string",
-        "description": "Represents a validated textual description.",
-        "format": "string"
+        "description": "Represents a validated textual description."
       },
       "EntityType": {
         "type": "integer",
         "description": "Represents a entity type."
       },
-      "FirstName": { },
+      "FirstName": {
+        "maxLength": 50,
+        "minLength": 1,
+        "type": "string"
+      },
       "IdentityAuthResultDto": {
         "required": [
           "accessToken",
@@ -2158,22 +2168,24 @@
           }
         }
       },
-      "LastName": { },
+      "LastName": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
       "Mass": { },
       "Name": {
         "maxLength": 100,
         "minLength": 1,
         "type": "string",
-        "description": "Represents a validated name.",
-        "format": "string"
+        "description": "Represents a validated name."
       },
       "Nameid": {
         "maxLength": 100,
         "minLength": 3,
         "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
         "type": "string",
-        "description": "Represents a nameid.",
-        "format": "string"
+        "description": "Represents a nameid."
       },
       "PartitionCreateDto": {
         "required": [
@@ -2189,7 +2201,10 @@
             "type": "string",
             "format": "uuid"
           },
-          "description": { }
+          "description": {
+            "maxLength": 500,
+            "type": "string"
+          }
         }
       },
       "PartitionDto": {
@@ -2230,8 +2245,15 @@
       "PartitionUpdateDto": {
         "type": "object",
         "properties": {
-          "name": { },
-          "description": { },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "type": "string"
+          },
           "parentPartitionGuid": {
             "type": [
               "null",
@@ -2256,7 +2278,11 @@
         "type": "object",
         "properties": {
           "password": {
-            "description": "The initial password for the user's authentication credentials."
+            "maxLength": 512,
+            "minLength": 9,
+            "type": "string",
+            "description": "The initial password for the user's authentication credentials.",
+            "format": "password"
           },
           "defaultPasswordExpirationPeriod": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -2294,7 +2320,12 @@
       "UserAuthenticationUpdateDto": {
         "type": "object",
         "properties": {
-          "password": { },
+          "password": {
+            "maxLength": 512,
+            "minLength": 9,
+            "type": "string",
+            "format": "password"
+          },
           "defaultPasswordExpirationPeriod": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
             "type": [
@@ -2319,9 +2350,20 @@
           "nameid": {
             "$ref": "#/components/schemas/Nameid"
           },
-          "firstName": { },
-          "lastName": { },
-          "description": { },
+          "firstName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "lastName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "type": "string"
+          },
           "isActive": {
             "type": [
               "null",
@@ -2473,7 +2515,10 @@
           "nameid": {
             "$ref": "#/components/schemas/Nameid"
           },
-          "description": { },
+          "description": {
+            "maxLength": 500,
+            "type": "string"
+          },
           "isActive": {
             "type": [
               "null",
@@ -2695,10 +2740,26 @@
       "UserUpdateDto": {
         "type": "object",
         "properties": {
-          "nameid": { },
-          "firstName": { },
-          "lastName": { },
-          "description": { },
+          "nameid": {
+            "maxLength": 100,
+            "minLength": 3,
+            "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
+            "type": "string"
+          },
+          "firstName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "lastName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "type": "string"
+          },
           "isActive": {
             "type": [
               "null",

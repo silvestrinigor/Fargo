@@ -25,36 +25,36 @@ namespace Fargo.Http.Client.Models
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Description { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public UntypedNode Description { get; set; }
+        public string Description { get; set; }
 #endif
         /// <summary>The firstName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? FirstName { get; set; }
+        public string? FirstName { get; set; }
 #nullable restore
 #else
-        public UntypedNode FirstName { get; set; }
+        public string FirstName { get; set; }
 #endif
         /// <summary>The isActive property</summary>
         public bool? IsActive { get; set; }
         /// <summary>The lastName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? LastName { get; set; }
+        public string? LastName { get; set; }
 #nullable restore
 #else
-        public UntypedNode LastName { get; set; }
+        public string LastName { get; set; }
 #endif
         /// <summary>The nameid property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Nameid { get; set; }
+        public string? Nameid { get; set; }
 #nullable restore
 #else
-        public UntypedNode Nameid { get; set; }
+        public string Nameid { get; set; }
 #endif
         /// <summary>The partitionAccessesToAdd property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -146,11 +146,11 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "authentication", n => { Authentication = n.GetObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationUpdateDto>(global::Fargo.Http.Client.Models.UserAuthenticationUpdateDto.CreateFromDiscriminatorValue); } },
-                { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "firstName", n => { FirstName = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetStringValue(); } },
+                { "firstName", n => { FirstName = n.GetStringValue(); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
-                { "lastName", n => { LastName = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "lastName", n => { LastName = n.GetStringValue(); } },
+                { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -169,11 +169,11 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationUpdateDto>("authentication", Authentication);
-            writer.WriteObjectValue<UntypedNode>("description", Description);
-            writer.WriteObjectValue<UntypedNode>("firstName", FirstName);
+            writer.WriteStringValue("description", Description);
+            writer.WriteStringValue("firstName", FirstName);
             writer.WriteBoolValue("isActive", IsActive);
-            writer.WriteObjectValue<UntypedNode>("lastName", LastName);
-            writer.WriteObjectValue<UntypedNode>("nameid", Nameid);
+            writer.WriteStringValue("lastName", LastName);
+            writer.WriteStringValue("nameid", Nameid);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);

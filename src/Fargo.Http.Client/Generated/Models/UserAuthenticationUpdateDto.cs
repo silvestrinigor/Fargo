@@ -25,10 +25,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The password property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Password { get; set; }
+        public string? Password { get; set; }
 #nullable restore
 #else
-        public UntypedNode Password { get; set; }
+        public string Password { get; set; }
 #endif
         /// <summary>The removeDefaultPasswordExpirationPeriod property</summary>
         public bool? RemoveDefaultPasswordExpirationPeriod { get; set; }
@@ -58,7 +58,7 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "defaultPasswordExpirationPeriod", n => { DefaultPasswordExpirationPeriod = n.GetStringValue(); } },
-                { "password", n => { Password = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "password", n => { Password = n.GetStringValue(); } },
                 { "removeDefaultPasswordExpirationPeriod", n => { RemoveDefaultPasswordExpirationPeriod = n.GetBoolValue(); } },
             };
         }
@@ -70,7 +70,7 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("defaultPasswordExpirationPeriod", DefaultPasswordExpirationPeriod);
-            writer.WriteObjectValue<UntypedNode>("password", Password);
+            writer.WriteStringValue("password", Password);
             writer.WriteBoolValue("removeDefaultPasswordExpirationPeriod", RemoveDefaultPasswordExpirationPeriod);
             writer.WriteAdditionalData(AdditionalData);
         }
