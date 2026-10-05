@@ -21,9 +21,9 @@ public sealed class ArticleInventoryCommand : Command
 
         var includeDescendantsOption = new Option<bool>("--include-descendants")
         {
-            Description = "Include items in nested containers. Defaults to true."
+            Description = "Include items in nested containers. Defaults to true.",
+            DefaultValueFactory = x => true
         };
-        includeDescendantsOption.SetDefaultValue(true);
 
         Add(guidArgument);
         Add(containersOption);
@@ -39,7 +39,9 @@ public sealed class ArticleInventoryCommand : Command
             {
                 request.QueryParameters.IncludeDescendents = includeDescendants;
                 if (containers is { Length: > 0 })
+                {
                     request.QueryParameters.InsideItemContainerGuids = containers.Select(g => (Guid?)g).ToArray();
+                }
             });
 
             if (result is null)

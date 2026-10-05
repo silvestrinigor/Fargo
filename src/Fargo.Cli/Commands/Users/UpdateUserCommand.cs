@@ -1,6 +1,5 @@
 using Fargo.Http.Client;
 using Fargo.Http.Client.Models;
-using Microsoft.Kiota.Abstractions;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Users;
@@ -51,10 +50,25 @@ public sealed class UpdateUserCommand : Command
 
             var dto = new UserUpdateDto();
 
-            if (username is not null) dto.Nameid = new UntypedString(username);
-            if (firstName is not null) dto.FirstName = new UntypedString(firstName);
-            if (lastName is not null) dto.LastName = new UntypedString(lastName);
-            if (isActive.HasValue) dto.IsActive = isActive;
+            if (username is not null)
+            {
+                dto.Nameid = new UntypedString(username);
+            }
+
+            if (firstName is not null)
+            {
+                dto.FirstName = new UntypedString(firstName);
+            }
+
+            if (lastName is not null)
+            {
+                dto.LastName = new UntypedString(lastName);
+            }
+
+            if (isActive.HasValue)
+            {
+                dto.IsActive = isActive;
+            }
 
             await client.Users[guid].PutAsync(dto);
 

@@ -36,10 +36,20 @@ public sealed class ListItemsCommand : Command
 
             var result = await client.Items.GetAsync(request =>
             {
-                if (page.HasValue) request.QueryParameters.Page = page.Value.ToString();
-                if (limit.HasValue) request.QueryParameters.Limit = limit.Value.ToString();
+                if (page.HasValue)
+                {
+                    request.QueryParameters.Page = page.Value.ToString();
+                }
+
+                if (limit.HasValue)
+                {
+                    request.QueryParameters.Limit = limit.Value.ToString();
+                }
+
                 if (partitions is { Length: > 0 })
+                {
                     request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
+                }
             });
 
             foreach (var item in result ?? [])

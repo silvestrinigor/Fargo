@@ -1,6 +1,5 @@
 using Fargo.Http.Client;
 using Fargo.Http.Client.Models;
-using Microsoft.Kiota.Abstractions;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.UserGroups;

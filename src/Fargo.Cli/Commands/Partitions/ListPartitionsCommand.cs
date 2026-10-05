@@ -36,10 +36,20 @@ public sealed class ListPartitionsCommand : Command
 
             var result = await client.Partitions.GetAsync(request =>
             {
-                if (page.HasValue) request.QueryParameters.Page = page.Value;
-                if (limit.HasValue) request.QueryParameters.Limit = limit.Value;
+                if (page.HasValue)
+                {
+                    request.QueryParameters.Page = page.Value;
+                }
+
+                if (limit.HasValue)
+                {
+                    request.QueryParameters.Limit = limit.Value;
+                }
+
                 if (partitions is { Length: > 0 })
+                {
                     request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
+                }
             });
 
             foreach (var partition in result ?? [])

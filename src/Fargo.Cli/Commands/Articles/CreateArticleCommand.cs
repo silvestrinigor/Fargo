@@ -18,9 +18,9 @@ public sealed class CreateArticleCommand : Command
         // ArticleType: 0=Standard, 1=Kit, 2=Pack, 3=Variation (domain values)
         var typeOption = new Option<int>("--type")
         {
-            Description = "Article type (0=Standard, 1=Kit, 2=Pack, 3=Variation). Defaults to 0."
+            Description = "Article type (0=Standard, 1=Kit, 2=Pack, 3=Variation). Defaults to 0.",
+            DefaultValueFactory = x => 0
         };
-        typeOption.SetDefaultValue(0);
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
         {
