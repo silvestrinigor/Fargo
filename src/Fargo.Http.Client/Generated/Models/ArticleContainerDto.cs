@@ -18,10 +18,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The optional maximum mass that the container can hold.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? MaxMass { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleContainerDto_maxMass? MaxMass { get; set; }
 #nullable restore
 #else
-        public UntypedNode MaxMass { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleContainerDto_maxMass MaxMass { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.ArticleContainerDto"/> and sets the default values.
@@ -48,7 +48,7 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "maxMass", n => { MaxMass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "maxMass", n => { MaxMass = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto_maxMass>(global::Fargo.Http.Client.Models.ArticleContainerDto_maxMass.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -58,7 +58,7 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<UntypedNode>("maxMass", MaxMass);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto_maxMass>("maxMass", MaxMass);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

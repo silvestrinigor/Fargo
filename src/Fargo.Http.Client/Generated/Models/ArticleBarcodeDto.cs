@@ -18,10 +18,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The optional EAN-13 barcode of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Ean13 { get; set; }
+        public string? Ean13 { get; set; }
 #nullable restore
 #else
-        public UntypedNode Ean13 { get; set; }
+        public string Ean13 { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.ArticleBarcodeDto"/> and sets the default values.
@@ -48,7 +48,7 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "ean13", n => { Ean13 = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "ean13", n => { Ean13 = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -58,7 +58,7 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<UntypedNode>("ean13", Ean13);
+            writer.WriteStringValue("ean13", Ean13);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

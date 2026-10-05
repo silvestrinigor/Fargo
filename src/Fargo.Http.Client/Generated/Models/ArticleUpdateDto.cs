@@ -42,10 +42,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The new mass of the article. A `null` value leaves the existing value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Mass { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleUpdateDto_mass? Mass { get; set; }
 #nullable restore
 #else
-        public UntypedNode Mass { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleUpdateDto_mass Mass { get; set; }
 #endif
         /// <summary>The new name of the article. A `null` value leaves the existing name unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -113,7 +113,7 @@ namespace Fargo.Http.Client.Models
                 { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>(global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>(global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto.CreateFromDiscriminatorValue); } },
-                { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "mass", n => { Mass = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto_mass>(global::Fargo.Http.Client.Models.ArticleUpdateDto_mass.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -132,7 +132,7 @@ namespace Fargo.Http.Client.Models
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>("barcode", Barcode);
             writer.WriteStringValue("description", Description);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>("dimension", Dimension);
-            writer.WriteObjectValue<UntypedNode>("mass", Mass);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto_mass>("mass", Mass);
             writer.WriteStringValue("name", Name);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);

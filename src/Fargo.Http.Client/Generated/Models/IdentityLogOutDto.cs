@@ -18,10 +18,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The refresh token to be revoked during logout</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? RefreshToken { get; set; }
+        public string? RefreshToken { get; set; }
 #nullable restore
 #else
-        public UntypedNode RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.IdentityLogOutDto"/> and sets the default values.
@@ -48,7 +48,7 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "refreshToken", n => { RefreshToken = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "refreshToken", n => { RefreshToken = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -58,7 +58,7 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<UntypedNode>("refreshToken", RefreshToken);
+            writer.WriteStringValue("refreshToken", RefreshToken);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

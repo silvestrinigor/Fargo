@@ -1392,6 +1392,10 @@
         "type": "object",
         "properties": {
           "ean13": {
+            "maxLength": 13,
+            "minLength": 13,
+            "pattern": "^\\d{13}$",
+            "type": "string",
             "description": "The optional EAN-13 barcode of the article."
           }
         },
@@ -1401,6 +1405,10 @@
         "type": "object",
         "properties": {
           "ean13": {
+            "maxLength": 13,
+            "minLength": 13,
+            "pattern": "^\\d{13}$",
+            "type": "string",
             "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged."
           },
           "removeEan13": {
@@ -1415,6 +1423,20 @@
         "type": "object",
         "properties": {
           "maxMass": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "g"
+              }
+            },
             "description": "The optional maximum mass that the container can hold."
           }
         },
@@ -1491,9 +1513,26 @@
             "description": "The optional shelf life of the article."
           },
           "color": {
-            "description": "The optional color of the article."
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string",
+            "description": "The optional color of the article.",
+            "example": "#FFFFFF"
           },
           "mass": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "g"
+              }
+            },
             "description": "The optional mass of the article."
           },
           "dimension": {
@@ -1536,12 +1575,54 @@
         "type": "object",
         "properties": {
           "lengthX": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "m"
+              }
+            },
             "description": "The optional length along the X axis."
           },
           "lengthY": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "m"
+              }
+            },
             "description": "The optional length along the Y axis."
           },
           "lengthZ": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "m"
+              }
+            },
             "description": "The optional length along the Z axis."
           }
         },
@@ -1551,6 +1632,20 @@
         "type": "object",
         "properties": {
           "lengthX": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "m"
+              }
+            },
             "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthX": {
@@ -1559,6 +1654,20 @@
             "default": false
           },
           "lengthY": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "m"
+              }
+            },
             "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthY": {
@@ -1567,6 +1676,20 @@
             "default": false
           },
           "lengthZ": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "m"
+              }
+            },
             "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthZ": {
@@ -1793,6 +1916,20 @@
             "default": false
           },
           "mass": {
+            "required": [
+              "value",
+              "unit"
+            ],
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "example": "g"
+              }
+            },
             "description": "The new mass of the article. A `null` value leaves the existing value unchanged."
           },
           "removeMass": {
@@ -1922,7 +2059,11 @@
         },
         "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata."
       },
-      "Color": { },
+      "Color": {
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "type": "string",
+        "example": "#FFFFFF"
+      },
       "Description": {
         "maxLength": 500,
         "type": "string",
@@ -2173,7 +2314,22 @@
         "minLength": 1,
         "type": "string"
       },
-      "Mass": { },
+      "Mass": {
+        "required": [
+          "value",
+          "unit"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "example": "g"
+          }
+        }
+      },
       "Name": {
         "maxLength": 100,
         "minLength": 1,
@@ -2270,8 +2426,20 @@
         "description": "Represents a validated plaintext password.",
         "format": "password"
       },
-      "Scalar": { },
+      "Scalar": {
+        "oneOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
       "Token": {
+        "maxLength": 4096,
+        "minLength": 50,
+        "type": "string",
         "description": "Represents a security token used by the system."
       },
       "UserAuthenticationCreateDto": {

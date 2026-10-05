@@ -18,26 +18,26 @@ namespace Fargo.Http.Client.Models
         /// <summary>The new length along the X axis. A `null` value leaves theexisting value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? LengthX { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthX? LengthX { get; set; }
 #nullable restore
 #else
-        public UntypedNode LengthX { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthX LengthX { get; set; }
 #endif
         /// <summary>The new length along the Y axis. A `null` value leaves theexisting value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? LengthY { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthY? LengthY { get; set; }
 #nullable restore
 #else
-        public UntypedNode LengthY { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthY LengthY { get; set; }
 #endif
         /// <summary>The new length along the Z axis. A `null` value leaves theexisting value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? LengthZ { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthZ? LengthZ { get; set; }
 #nullable restore
 #else
-        public UntypedNode LengthZ { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthZ LengthZ { get; set; }
 #endif
         /// <summary>Indicates whether the existing X-axis length should be removed by setting itto `null`. When `true`, this takes precedenceover LengthX.</summary>
         public bool? RemoveLengthX { get; set; }
@@ -73,9 +73,9 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "lengthX", n => { LengthX = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "lengthY", n => { LengthY = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "lengthZ", n => { LengthZ = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "lengthX", n => { LengthX = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthX>(global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthX.CreateFromDiscriminatorValue); } },
+                { "lengthY", n => { LengthY = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthY>(global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthY.CreateFromDiscriminatorValue); } },
+                { "lengthZ", n => { LengthZ = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthZ>(global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthZ.CreateFromDiscriminatorValue); } },
                 { "removeLengthX", n => { RemoveLengthX = n.GetBoolValue(); } },
                 { "removeLengthY", n => { RemoveLengthY = n.GetBoolValue(); } },
                 { "removeLengthZ", n => { RemoveLengthZ = n.GetBoolValue(); } },
@@ -88,9 +88,9 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<UntypedNode>("lengthX", LengthX);
-            writer.WriteObjectValue<UntypedNode>("lengthY", LengthY);
-            writer.WriteObjectValue<UntypedNode>("lengthZ", LengthZ);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthX>("lengthX", LengthX);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthY>("lengthY", LengthY);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto_lengthZ>("lengthZ", LengthZ);
             writer.WriteBoolValue("removeLengthX", RemoveLengthX);
             writer.WriteBoolValue("removeLengthY", RemoveLengthY);
             writer.WriteBoolValue("removeLengthZ", RemoveLengthZ);

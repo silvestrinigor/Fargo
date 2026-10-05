@@ -28,10 +28,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The optional color of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Color { get; set; }
+        public string? Color { get; set; }
 #nullable restore
 #else
-        public UntypedNode Color { get; set; }
+        public string Color { get; set; }
 #endif
         /// <summary>The container property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -68,10 +68,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The optional mass of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Mass { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleCreateDto_mass? Mass { get; set; }
 #nullable restore
 #else
-        public UntypedNode Mass { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleCreateDto_mass Mass { get; set; }
 #endif
         /// <summary>The name of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -140,12 +140,12 @@ namespace Fargo.Http.Client.Models
             {
                 { "articleType", n => { ArticleType = n.GetIntValue(); } },
                 { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>(global::Fargo.Http.Client.Models.ArticleBarcodeDto.CreateFromDiscriminatorValue); } },
-                { "color", n => { Color = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "color", n => { Color = n.GetStringValue(); } },
                 { "container", n => { Container = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>(global::Fargo.Http.Client.Models.ArticleContainerDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>(global::Fargo.Http.Client.Models.ArticleDimensionDto.CreateFromDiscriminatorValue); } },
                 { "kitComponents", n => { KitComponents = n.GetCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>(global::Fargo.Http.Client.Models.ArticleKitComponentDto.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "mass", n => { Mass = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_mass>(global::Fargo.Http.Client.Models.ArticleCreateDto_mass.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "pack", n => { Pack = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticlePackDto>(global::Fargo.Http.Client.Models.ArticlePackDto.CreateFromDiscriminatorValue); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -162,12 +162,12 @@ namespace Fargo.Http.Client.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteIntValue("articleType", ArticleType);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>("barcode", Barcode);
-            writer.WriteObjectValue<UntypedNode>("color", Color);
+            writer.WriteStringValue("color", Color);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>("container", Container);
             writer.WriteStringValue("description", Description);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>("dimension", Dimension);
             writer.WriteCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>("kitComponents", KitComponents);
-            writer.WriteObjectValue<UntypedNode>("mass", Mass);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_mass>("mass", Mass);
             writer.WriteStringValue("name", Name);
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticlePackDto>("pack", Pack);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);

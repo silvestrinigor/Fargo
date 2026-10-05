@@ -18,10 +18,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The new EAN-13 barcode to assign to the article. A `null` valueleaves the existing EAN-13 barcode unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Ean13 { get; set; }
+        public string? Ean13 { get; set; }
 #nullable restore
 #else
-        public UntypedNode Ean13 { get; set; }
+        public string Ean13 { get; set; }
 #endif
         /// <summary>Indicates whether the existing EAN-13 barcode should be removed by setting itsvalue to `null`.</summary>
         public bool? RemoveEan13 { get; set; }
@@ -51,7 +51,7 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "ean13", n => { Ean13 = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "ean13", n => { Ean13 = n.GetStringValue(); } },
                 { "removeEan13", n => { RemoveEan13 = n.GetBoolValue(); } },
             };
         }
@@ -62,7 +62,7 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<UntypedNode>("ean13", Ean13);
+            writer.WriteStringValue("ean13", Ean13);
             writer.WriteBoolValue("removeEan13", RemoveEan13);
             writer.WriteAdditionalData(AdditionalData);
         }

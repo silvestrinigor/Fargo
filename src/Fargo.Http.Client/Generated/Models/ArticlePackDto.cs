@@ -20,10 +20,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The quantity of the source article contained in the pack.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Quantity { get; set; }
+        public global::Fargo.Http.Client.Models.Scalar? Quantity { get; set; }
 #nullable restore
 #else
-        public UntypedNode Quantity { get; set; }
+        public global::Fargo.Http.Client.Models.Scalar Quantity { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.ArticlePackDto"/> and sets the default values.
@@ -51,7 +51,7 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "fromArticleGuid", n => { FromArticleGuid = n.GetGuidValue(); } },
-                { "quantity", n => { Quantity = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "quantity", n => { Quantity = n.GetObjectValue<global::Fargo.Http.Client.Models.Scalar>(global::Fargo.Http.Client.Models.Scalar.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -62,7 +62,7 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteGuidValue("fromArticleGuid", FromArticleGuid);
-            writer.WriteObjectValue<UntypedNode>("quantity", Quantity);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.Scalar>("quantity", Quantity);
             writer.WriteAdditionalData(AdditionalData);
         }
     }
