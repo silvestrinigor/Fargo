@@ -1,6 +1,6 @@
-using Fargo.Http.Client;
-using Fargo.Http.Client.Authentication;
-using Fargo.Http.Client.Models;
+using Fargo.ClientHttp;
+using Fargo.ClientHttp.Authentication;
+using Fargo.ClientHttp.Models;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Identity;

@@ -1,4 +1,4 @@
-using Fargo.Http.Client;
+using Fargo.ClientHttp;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.UserGroups;
