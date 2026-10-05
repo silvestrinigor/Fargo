@@ -14,7 +14,7 @@ See the [Fargo Documentation](https://silvestrinigor.github.io/Fargo/) for the A
 ## Running the Application
 
 ```bash
-dotnet run --project src/Fargo.AppHost
+dotnet run --project src/server/Fargo.AppHost
 ```
 
 ## Running Tests

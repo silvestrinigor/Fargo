@@ -3,8 +3,8 @@
 set -e
 
 kiota generate \
-    --openapi src/Fargo.Http/Fargo.Http.json \
+    --openapi src/server/Fargo.ServiceHttp/Fargo.ServiceHttp.json \
     --language CSharp \
     --class-name FargoApiClient \
-    --namespace-name Fargo.Http.Client \
-    --output ./src/Fargo.Http.Client/Generated \
+    --namespace-name Fargo.ClientHttp \
+    --output ./src/client/Fargo.ClientHttp/Generated \
