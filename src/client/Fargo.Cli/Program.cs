@@ -4,21 +4,20 @@ using Fargo.Cli.Configurations;
 using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System.Net;
 
-var builder = Host.CreateApplicationBuilder();
+var serviceCollection = new ServiceCollection();
 
-builder.Services.AddSingleton<CredentialCache>();
+serviceCollection.AddSingleton<CredentialCache>();
 
-builder.Services.AddFargoHttpClient(new Uri("https://localhost:7563"));
+serviceCollection.AddFargoHttpClient(new Uri("https://localhost:7563"));
 
-builder.Services.AddSingleton<ITokenStore, FargoCliTokenStore>();
+serviceCollection.AddSingleton<ITokenStore, FargoCliTokenStore>();
 
-builder.Services.AddSingleton<IFargoCliConfigurationStore, FargoCliConfigurationStore>();
+serviceCollection.AddSingleton<IFargoCliConfigurationStore, FargoCliConfigurationStore>();
 
-var host = builder.Build();
+var serviceProvider = serviceCollection.BuildServiceProvider();
 
-var root = await CommandFactory.Create(host.Services);
+var root = await CommandFactory.Create(serviceProvider);
 
 await root.Parse(args).InvokeAsync();

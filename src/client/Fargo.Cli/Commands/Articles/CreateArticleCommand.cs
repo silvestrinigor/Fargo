@@ -15,11 +15,10 @@ public sealed class CreateArticleCommand : Command
             Required = true
         };
 
-        // ArticleType: 0=Standard, 1=Kit, 2=Pack, 3=Variation (domain values)
         var typeOption = new Option<int>("--type")
         {
-            Description = "Article type (0=Standard, 1=Kit, 2=Pack, 3=Variation). Defaults to 0.",
-            DefaultValueFactory = x => 0
+            Description = "Article type . Defaults to 1.",
+            DefaultValueFactory = x => 1
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")

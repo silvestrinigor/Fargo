@@ -9,5 +9,11 @@ public sealed class ArticlesCommand : Command
         : base("articles", "Manage articles")
     {
         Add(new ListArticlesCommand(client));
+        Add(new GetArticleCommand(client));
+        Add(new GetArticleByBarcodeCommand(client));
+        Add(new ArticleInventoryCommand(client));
+        Add(new CreateArticleCommand(client));
+        Add(new DeleteArticleCommand(client));
+        Add(new UpdateArticleCommand(client));
     }
 }

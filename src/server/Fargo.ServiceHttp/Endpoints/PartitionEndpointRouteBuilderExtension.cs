@@ -70,8 +70,7 @@ public static class PartitionEndpointRouteBuilderExtension
             .WithSummary("Gets multiple partitions")
             .WithDescription("Retrieves a paginated list of partitions.")
             .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent
-        );
+            .Produces(StatusCodes.Status204NoContent);
 
         return builder;
     }
