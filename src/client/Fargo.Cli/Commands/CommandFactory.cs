@@ -1,4 +1,5 @@
 using Fargo.Cli.Commands.Articles;
+using Fargo.Cli.Commands.Audits;
 using Fargo.Cli.Commands.Identity;
 using Fargo.Cli.Commands.Items;
 using Fargo.Cli.Commands.Partitions;
@@ -32,6 +33,8 @@ public static class CommandFactory
         root.Add(new UserGroupsCommand(client));
 
         root.Add(new UsersCommand(client));
+
+        root.Add(new AuditLogsCommand(client));
 
         return root;
     }
