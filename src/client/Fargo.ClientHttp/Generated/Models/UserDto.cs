@@ -20,7 +20,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.UserAuthenticationDto? Authentication { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.UserAuthenticationDto Authentication { get; set; }
+        public global::Fargo.ClientHttp.Models.UserAuthenticationDto Authentication { get; set; }
 #endif
         /// <summary>Represents a validated textual description.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -36,7 +36,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.FirstName? FirstName { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.FirstName FirstName { get; set; }
+        public global::Fargo.ClientHttp.Models.FirstName FirstName { get; set; }
 #endif
         /// <summary>The guid property</summary>
         public Guid? Guid { get; set; }
@@ -50,7 +50,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.LastName? LastName { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.LastName LastName { get; set; }
+        public global::Fargo.ClientHttp.Models.LastName LastName { get; set; }
 #endif
         /// <summary>Represents a nameid.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER

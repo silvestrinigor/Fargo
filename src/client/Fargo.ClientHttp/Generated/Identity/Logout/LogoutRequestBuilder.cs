@@ -46,7 +46,7 @@ namespace Fargo.ClientHttp.Identity.Logout
         {
 #nullable restore
 #else
-        public async Task<Stream> PostAsync(global::Fargo.HttpClient.Models.IdentityLogOutDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream> PostAsync(global::Fargo.ClientHttp.Models.IdentityLogOutDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -65,7 +65,7 @@ namespace Fargo.ClientHttp.Identity.Logout
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::Fargo.HttpClient.Models.IdentityLogOutDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::Fargo.ClientHttp.Models.IdentityLogOutDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

@@ -23,10 +23,10 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.Scalar? Quantity { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.Scalar Quantity { get; set; }
+        public global::Fargo.ClientHttp.Models.Scalar Quantity { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.HttpClient.Models.ArticleKitComponentDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ArticleKitComponentDto"/> and sets the default values.
         /// </summary>
         public ArticleKitComponentDto()
         {

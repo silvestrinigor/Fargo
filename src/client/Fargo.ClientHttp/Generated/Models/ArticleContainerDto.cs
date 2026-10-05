@@ -21,10 +21,10 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleContainerDto_maxMass? MaxMass { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleContainerDto_maxMass MaxMass { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleContainerDto_maxMass MaxMass { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.HttpClient.Models.ArticleContainerDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ArticleContainerDto"/> and sets the default values.
         /// </summary>
         public ArticleContainerDto()
         {

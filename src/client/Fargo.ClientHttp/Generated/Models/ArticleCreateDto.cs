@@ -23,7 +23,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleBarcodeDto? Barcode { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleBarcodeDto Barcode { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleBarcodeDto Barcode { get; set; }
 #endif
         /// <summary>The optional color of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -39,7 +39,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleContainerDto? Container { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleContainerDto Container { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleContainerDto Container { get; set; }
 #endif
         /// <summary>The optional description of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -55,7 +55,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionDto? Dimension { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionDto Dimension { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionDto Dimension { get; set; }
 #endif
         /// <summary>The optional components of the article. Required when ArticleTypeis ArticleType.Kit.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -63,7 +63,7 @@ namespace Fargo.ClientHttp.Models
         public List<global::Fargo.ClientHttp.Models.ArticleKitComponentDto>? KitComponents { get; set; }
 #nullable restore
 #else
-        public List<global::Fargo.HttpClient.Models.ArticleKitComponentDto> KitComponents { get; set; }
+        public List<global::Fargo.ClientHttp.Models.ArticleKitComponentDto> KitComponents { get; set; }
 #endif
         /// <summary>The optional mass of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -71,7 +71,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleCreateDto_mass? Mass { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleCreateDto_mass Mass { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleCreateDto_mass Mass { get; set; }
 #endif
         /// <summary>The name of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -87,7 +87,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticlePackDto? Pack { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticlePackDto Pack { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticlePackDto Pack { get; set; }
 #endif
         /// <summary>The optional identifiers of partitions to associate with the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -111,10 +111,10 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleVariationDto? Variation { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleVariationDto Variation { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleVariationDto Variation { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.HttpClient.Models.ArticleCreateDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ArticleCreateDto"/> and sets the default values.
         /// </summary>
         public ArticleCreateDto()
         {

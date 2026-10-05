@@ -36,7 +36,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
         /// <summary>
         /// Retrieves a list of items that represents the location of the contained item.
         /// </summary>
-        /// <returns>A List&lt;global::Fargo.HttpClient.Models.ItemDto&gt;</returns>
+        /// <returns>A List&lt;global::Fargo.ClientHttp.Models.ItemDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -45,7 +45,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.HttpClient.Models.ItemDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::Fargo.ClientHttp.Models.ItemDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);

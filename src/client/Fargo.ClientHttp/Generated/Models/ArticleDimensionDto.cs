@@ -21,7 +21,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionDto_lengthX? LengthX { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionDto_lengthX LengthX { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionDto_lengthX LengthX { get; set; }
 #endif
         /// <summary>The optional length along the Y axis.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -29,7 +29,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionDto_lengthY? LengthY { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionDto_lengthY LengthY { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionDto_lengthY LengthY { get; set; }
 #endif
         /// <summary>The optional length along the Z axis.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -37,10 +37,10 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionDto_lengthZ? LengthZ { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionDto_lengthZ LengthZ { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionDto_lengthZ LengthZ { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.HttpClient.Models.ArticleDimensionDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ArticleDimensionDto"/> and sets the default values.
         /// </summary>
         public ArticleDimensionDto()
         {

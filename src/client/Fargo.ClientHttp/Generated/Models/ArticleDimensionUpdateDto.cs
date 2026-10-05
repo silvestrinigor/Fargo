@@ -21,7 +21,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto_lengthX? LengthX { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionUpdateDto_lengthX LengthX { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto_lengthX LengthX { get; set; }
 #endif
         /// <summary>The new length along the Y axis. A `null` value leaves theexisting value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -29,7 +29,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto_lengthY? LengthY { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionUpdateDto_lengthY LengthY { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto_lengthY LengthY { get; set; }
 #endif
         /// <summary>The new length along the Z axis. A `null` value leaves theexisting value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -37,7 +37,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto_lengthZ? LengthZ { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionUpdateDto_lengthZ LengthZ { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto_lengthZ LengthZ { get; set; }
 #endif
         /// <summary>Indicates whether the existing X-axis length should be removed by setting itto `null`. When `true`, this takes precedenceover LengthX.</summary>
         public bool? RemoveLengthX { get; set; }

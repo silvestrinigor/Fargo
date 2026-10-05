@@ -45,7 +45,7 @@ namespace Fargo.ClientHttp.Articles.Item.Inventory
         {
 #nullable restore
 #else
-        public async Task<global::Fargo.HttpClient.Models.ArticleInventoryDto> GetAsync(Action<RequestConfiguration<global::Fargo.HttpClient.Articles.Item.Inventory.InventoryRequestBuilder.InventoryRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.ArticleInventoryDto> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Articles.Item.Inventory.InventoryRequestBuilder.InventoryRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -62,7 +62,7 @@ namespace Fargo.ClientHttp.Articles.Item.Inventory
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.HttpClient.Articles.Item.Inventory.InventoryRequestBuilder.InventoryRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Articles.Item.Inventory.InventoryRequestBuilder.InventoryRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);

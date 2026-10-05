@@ -5,7 +5,7 @@
   "kiotaVersion": "1.35.0",
   "clientClassName": "FargoApiClient",
   "typeAccessModifier": "Public",
-  "clientNamespaceName": "Fargo.HttpClient",
+  "clientNamespaceName": "Fargo.ClientHttp",
   "language": "CSharp",
   "usesBackingStore": false,
   "excludeBackwardCompatible": false,

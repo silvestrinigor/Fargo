@@ -36,7 +36,7 @@ namespace Fargo.ClientHttp.Items.Item.Moviments
         /// <summary>
         /// Retrieves a list of moviments that represents the moviment history of item.
         /// </summary>
-        /// <returns>A List&lt;global::Fargo.HttpClient.Models.ItemMovimentDto&gt;</returns>
+        /// <returns>A List&lt;global::Fargo.ClientHttp.Models.ItemMovimentDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -45,7 +45,7 @@ namespace Fargo.ClientHttp.Items.Item.Moviments
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.HttpClient.Models.ItemMovimentDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::Fargo.ClientHttp.Models.ItemMovimentDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);

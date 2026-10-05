@@ -21,7 +21,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleBarcodeUpdateDto? Barcode { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleBarcodeUpdateDto Barcode { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleBarcodeUpdateDto Barcode { get; set; }
 #endif
         /// <summary>The new description of the article. A `null` value leaves the existing description unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -37,7 +37,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto? Dimension { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleDimensionUpdateDto Dimension { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto Dimension { get; set; }
 #endif
         /// <summary>The new mass of the article. A `null` value leaves the existing value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -45,7 +45,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass? Mass { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.ArticleUpdateDto_mass Mass { get; set; }
+        public global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass Mass { get; set; }
 #endif
         /// <summary>The new name of the article. A `null` value leaves the existing name unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER

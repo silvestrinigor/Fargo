@@ -45,7 +45,7 @@ namespace Fargo.ClientHttp.Identity.Password
         {
 #nullable restore
 #else
-        public async Task PutAsync(global::Fargo.HttpClient.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task PutAsync(global::Fargo.ClientHttp.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -64,7 +64,7 @@ namespace Fargo.ClientHttp.Identity.Password
         {
 #nullable restore
 #else
-        public RequestInformation ToPutRequestInformation(global::Fargo.HttpClient.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPutRequestInformation(global::Fargo.ClientHttp.Models.IdentityPasswordUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

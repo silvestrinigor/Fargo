@@ -18,7 +18,7 @@ namespace Fargo.ClientHttp.Users
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class UsersRequestBuilder : BaseRequestBuilder
     {
-        /// <summary>Gets an item from the Fargo.HttpClient.users.item collection</summary>
+        /// <summary>Gets an item from the Fargo.ClientHttp.users.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
         /// <returns>A <see cref="global::Fargo.ClientHttp.Users.Item.WithUserGuItemRequestBuilder"/></returns>
         public global::Fargo.ClientHttp.Users.Item.WithUserGuItemRequestBuilder this[Guid position]
@@ -30,7 +30,7 @@ namespace Fargo.ClientHttp.Users
                 return new global::Fargo.ClientHttp.Users.Item.WithUserGuItemRequestBuilder(urlTplParams, RequestAdapter);
             }
         }
-        /// <summary>Gets an item from the Fargo.HttpClient.users.item collection</summary>
+        /// <summary>Gets an item from the Fargo.ClientHttp.users.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
         /// <returns>A <see cref="global::Fargo.ClientHttp.Users.Item.WithUserGuItemRequestBuilder"/></returns>
         [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
@@ -62,7 +62,7 @@ namespace Fargo.ClientHttp.Users
         /// <summary>
         /// Retrieves a paginated list of users.
         /// </summary>
-        /// <returns>A List&lt;global::Fargo.HttpClient.Models.UserDto&gt;</returns>
+        /// <returns>A List&lt;global::Fargo.ClientHttp.Models.UserDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -71,7 +71,7 @@ namespace Fargo.ClientHttp.Users
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.HttpClient.Models.UserDto>> GetAsync(Action<RequestConfiguration<global::Fargo.HttpClient.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::Fargo.ClientHttp.Models.UserDto>> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -91,7 +91,7 @@ namespace Fargo.ClientHttp.Users
         {
 #nullable restore
 #else
-        public async Task<Guid?> PostAsync(global::Fargo.HttpClient.Models.UserCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Guid?> PostAsync(global::Fargo.ClientHttp.Models.UserCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -109,7 +109,7 @@ namespace Fargo.ClientHttp.Users
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.HttpClient.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -129,7 +129,7 @@ namespace Fargo.ClientHttp.Users
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::Fargo.HttpClient.Models.UserCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::Fargo.ClientHttp.Models.UserCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

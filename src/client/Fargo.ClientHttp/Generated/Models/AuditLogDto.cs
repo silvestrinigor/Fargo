@@ -33,7 +33,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.AuditLogDto_metadata? Metadata { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.AuditLogDto_metadata Metadata { get; set; }
+        public global::Fargo.ClientHttp.Models.AuditLogDto_metadata Metadata { get; set; }
 #endif
         /// <summary>The date and time when the audit event occurred</summary>
         public DateTimeOffset? OccurredAt { get; set; }

@@ -80,7 +80,7 @@ namespace Fargo.ClientHttp.Items.Item
         {
 #nullable restore
 #else
-        public async Task<global::Fargo.HttpClient.Models.ItemDto> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.ItemDto> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -98,7 +98,7 @@ namespace Fargo.ClientHttp.Items.Item
         {
 #nullable restore
 #else
-        public async Task PatchAsync(global::Fargo.HttpClient.Models.ItemUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task PatchAsync(global::Fargo.ClientHttp.Models.ItemUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -154,7 +154,7 @@ namespace Fargo.ClientHttp.Items.Item
         {
 #nullable restore
 #else
-        public RequestInformation ToPatchRequestInformation(global::Fargo.HttpClient.Models.ItemUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPatchRequestInformation(global::Fargo.ClientHttp.Models.ItemUpdateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

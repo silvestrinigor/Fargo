@@ -18,7 +18,7 @@ namespace Fargo.ClientHttp.Articles
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ArticlesRequestBuilder : BaseRequestBuilder
     {
-        /// <summary>Gets an item from the Fargo.HttpClient.articles.item collection</summary>
+        /// <summary>Gets an item from the Fargo.ClientHttp.articles.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
         /// <returns>A <see cref="global::Fargo.ClientHttp.Articles.Item.ArticleBarcodeItemRequestBuilder"/></returns>
         public global::Fargo.ClientHttp.Articles.Item.ArticleBarcodeItemRequestBuilder this[string position]
@@ -49,7 +49,7 @@ namespace Fargo.ClientHttp.Articles
         /// <summary>
         /// Retrieves a paginated list of articles.
         /// </summary>
-        /// <returns>A List&lt;global::Fargo.HttpClient.Models.ArticleDto&gt;</returns>
+        /// <returns>A List&lt;global::Fargo.ClientHttp.Models.ArticleDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -58,7 +58,7 @@ namespace Fargo.ClientHttp.Articles
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.HttpClient.Models.ArticleDto>> GetAsync(Action<RequestConfiguration<global::Fargo.HttpClient.Articles.ArticlesRequestBuilder.ArticlesRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::Fargo.ClientHttp.Models.ArticleDto>> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Articles.ArticlesRequestBuilder.ArticlesRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -78,7 +78,7 @@ namespace Fargo.ClientHttp.Articles
         {
 #nullable restore
 #else
-        public async Task<Guid?> PostAsync(global::Fargo.HttpClient.Models.ArticleCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Guid?> PostAsync(global::Fargo.ClientHttp.Models.ArticleCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -96,7 +96,7 @@ namespace Fargo.ClientHttp.Articles
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.HttpClient.Articles.ArticlesRequestBuilder.ArticlesRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Articles.ArticlesRequestBuilder.ArticlesRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -116,7 +116,7 @@ namespace Fargo.ClientHttp.Articles
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::Fargo.HttpClient.Models.ArticleCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::Fargo.ClientHttp.Models.ArticleCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

@@ -20,7 +20,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.Description? Description { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.Description Description { get; set; }
+        public global::Fargo.ClientHttp.Models.Description Description { get; set; }
 #endif
         /// <summary>The isActive property</summary>
         public bool? IsActive { get; set; }
@@ -30,7 +30,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.Nameid? Nameid { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.Nameid Nameid { get; set; }
+        public global::Fargo.ClientHttp.Models.Nameid Nameid { get; set; }
 #endif
         /// <summary>The parentUserGroup property</summary>
         public Guid? ParentUserGroup { get; set; }

@@ -20,7 +20,7 @@ namespace Fargo.ClientHttp.Models
         public global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto? Authentication { get; set; }
 #nullable restore
 #else
-        public global::Fargo.HttpClient.Models.UserAuthenticationUpdateDto Authentication { get; set; }
+        public global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto Authentication { get; set; }
 #endif
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
