@@ -1917,7 +1917,10 @@
       },
       "Color": { },
       "Description": {
-        "description": "Represents a validated textual description."
+        "maxLength": 500,
+        "type": "string",
+        "description": "Represents a validated textual description.",
+        "format": "string"
       },
       "EntityType": {
         "type": "integer",
@@ -2158,12 +2161,19 @@
       "LastName": { },
       "Mass": { },
       "Name": {
+        "maxLength": 100,
+        "minLength": 1,
         "type": "string",
         "description": "Represents a validated name.",
         "format": "string"
       },
       "Nameid": {
-        "description": "Represents a nameid."
+        "maxLength": 100,
+        "minLength": 3,
+        "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
+        "type": "string",
+        "description": "Represents a nameid.",
+        "format": "string"
       },
       "PartitionCreateDto": {
         "required": [
@@ -2232,7 +2242,11 @@
         }
       },
       "Password": {
-        "description": "Represents a validated plaintext password."
+        "maxLength": 512,
+        "minLength": 9,
+        "type": "string",
+        "description": "Represents a validated plaintext password.",
+        "format": "password"
       },
       "Scalar": { },
       "Token": {

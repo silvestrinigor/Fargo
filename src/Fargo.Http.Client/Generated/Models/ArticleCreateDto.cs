@@ -20,10 +20,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The barcode property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode? Barcode { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleBarcodeDto? Barcode { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode Barcode { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleBarcodeDto Barcode { get; set; }
 #endif
         /// <summary>The optional color of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -36,10 +36,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The container property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container? Container { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleContainerDto? Container { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container Container { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleContainerDto Container { get; set; }
 #endif
         /// <summary>The optional description of the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -52,10 +52,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The dimension property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension? Dimension { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionDto? Dimension { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension Dimension { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionDto Dimension { get; set; }
 #endif
         /// <summary>The optional components of the article. Required when ArticleTypeis ArticleType.Kit.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -84,10 +84,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The pack property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack? Pack { get; set; }
+        public global::Fargo.Http.Client.Models.ArticlePackDto? Pack { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack Pack { get; set; }
+        public global::Fargo.Http.Client.Models.ArticlePackDto Pack { get; set; }
 #endif
         /// <summary>The optional identifiers of partitions to associate with the article.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -108,10 +108,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The variation property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation? Variation { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleVariationDto? Variation { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation Variation { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleVariationDto Variation { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto"/> and sets the default values.
@@ -139,18 +139,18 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "articleType", n => { ArticleType = n.GetIntValue(); } },
-                { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode.CreateFromDiscriminatorValue); } },
+                { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>(global::Fargo.Http.Client.Models.ArticleBarcodeDto.CreateFromDiscriminatorValue); } },
                 { "color", n => { Color = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "container", n => { Container = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container.CreateFromDiscriminatorValue); } },
+                { "container", n => { Container = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>(global::Fargo.Http.Client.Models.ArticleContainerDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension.CreateFromDiscriminatorValue); } },
+                { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>(global::Fargo.Http.Client.Models.ArticleDimensionDto.CreateFromDiscriminatorValue); } },
                 { "kitComponents", n => { KitComponents = n.GetCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>(global::Fargo.Http.Client.Models.ArticleKitComponentDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetStringValue(); } },
-                { "pack", n => { Pack = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack.CreateFromDiscriminatorValue); } },
+                { "pack", n => { Pack = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticlePackDto>(global::Fargo.Http.Client.Models.ArticlePackDto.CreateFromDiscriminatorValue); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "shelfLife", n => { ShelfLife = n.GetStringValue(); } },
-                { "variation", n => { Variation = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation>(global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation.CreateFromDiscriminatorValue); } },
+                { "variation", n => { Variation = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleVariationDto>(global::Fargo.Http.Client.Models.ArticleVariationDto.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -161,374 +161,19 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteIntValue("articleType", ArticleType);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode>("barcode", Barcode);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>("barcode", Barcode);
             writer.WriteObjectValue<UntypedNode>("color", Color);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container>("container", Container);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>("container", Container);
             writer.WriteObjectValue<UntypedNode>("description", Description);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension>("dimension", Dimension);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>("dimension", Dimension);
             writer.WriteCollectionOfObjectValues<global::Fargo.Http.Client.Models.ArticleKitComponentDto>("kitComponents", KitComponents);
             writer.WriteObjectValue<UntypedNode>("mass", Mass);
             writer.WriteStringValue("name", Name);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack>("pack", Pack);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticlePackDto>("pack", Pack);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteStringValue("shelfLife", ShelfLife);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation>("variation", Variation);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleVariationDto>("variation", Variation);
             writer.WriteAdditionalData(AdditionalData);
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleBarcodeDto"/>, <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_barcodeMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleCreateDto_barcode : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleBarcodeDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleBarcodeDto? ArticleBarcodeDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleBarcodeDto ArticleBarcodeDto { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_barcodeMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_barcodeMember1? ArticleCreateDtoBarcodeMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_barcodeMember1 ArticleCreateDtoBarcodeMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_barcode();
-                if("ArticleBarcodeDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticleBarcodeDto = new global::Fargo.Http.Client.Models.ArticleBarcodeDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleBarcodeDto != null)
-                {
-                    return ArticleBarcodeDto.GetFieldDeserializers();
-                }
-                else if(ArticleCreateDtoBarcodeMember1 != null)
-                {
-                    return ArticleCreateDtoBarcodeMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleBarcodeDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeDto>(null, ArticleBarcodeDto);
-                }
-                else if(ArticleCreateDtoBarcodeMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_barcodeMember1>(null, ArticleCreateDtoBarcodeMember1);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleContainerDto"/>, <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_containerMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleCreateDto_container : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleContainerDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleContainerDto? ArticleContainerDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleContainerDto ArticleContainerDto { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_containerMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_containerMember1? ArticleCreateDtoContainerMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_containerMember1 ArticleCreateDtoContainerMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_container();
-                if("ArticleContainerDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticleContainerDto = new global::Fargo.Http.Client.Models.ArticleContainerDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleContainerDto != null)
-                {
-                    return ArticleContainerDto.GetFieldDeserializers();
-                }
-                else if(ArticleCreateDtoContainerMember1 != null)
-                {
-                    return ArticleCreateDtoContainerMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleContainerDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleContainerDto>(null, ArticleContainerDto);
-                }
-                else if(ArticleCreateDtoContainerMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_containerMember1>(null, ArticleCreateDtoContainerMember1);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_dimensionMember1"/>, <see cref="global::Fargo.Http.Client.Models.ArticleDimensionDto"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleCreateDto_dimension : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_dimensionMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_dimensionMember1? ArticleCreateDtoDimensionMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_dimensionMember1 ArticleCreateDtoDimensionMember1 { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleDimensionDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleDimensionDto? ArticleDimensionDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleDimensionDto ArticleDimensionDto { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_dimension();
-                if("ArticleDimensionDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticleDimensionDto = new global::Fargo.Http.Client.Models.ArticleDimensionDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleCreateDtoDimensionMember1 != null)
-                {
-                    return ArticleCreateDtoDimensionMember1.GetFieldDeserializers();
-                }
-                else if(ArticleDimensionDto != null)
-                {
-                    return ArticleDimensionDto.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleCreateDtoDimensionMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_dimensionMember1>(null, ArticleCreateDtoDimensionMember1);
-                }
-                else if(ArticleDimensionDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionDto>(null, ArticleDimensionDto);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_packMember1"/>, <see cref="global::Fargo.Http.Client.Models.ArticlePackDto"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleCreateDto_pack : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_packMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_packMember1? ArticleCreateDtoPackMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_packMember1 ArticleCreateDtoPackMember1 { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticlePackDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticlePackDto? ArticlePackDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticlePackDto ArticlePackDto { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_pack();
-                if("ArticlePackDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticlePackDto = new global::Fargo.Http.Client.Models.ArticlePackDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleCreateDtoPackMember1 != null)
-                {
-                    return ArticleCreateDtoPackMember1.GetFieldDeserializers();
-                }
-                else if(ArticlePackDto != null)
-                {
-                    return ArticlePackDto.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleCreateDtoPackMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_packMember1>(null, ArticleCreateDtoPackMember1);
-                }
-                else if(ArticlePackDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticlePackDto>(null, ArticlePackDto);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_variationMember1"/>, <see cref="global::Fargo.Http.Client.Models.ArticleVariationDto"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleCreateDto_variation : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto_variationMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_variationMember1? ArticleCreateDtoVariationMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleCreateDto_variationMember1 ArticleCreateDtoVariationMember1 { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleVariationDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleVariationDto? ArticleVariationDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleVariationDto ArticleVariationDto { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleCreateDto.ArticleCreateDto_variation();
-                if("ArticleVariationDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticleVariationDto = new global::Fargo.Http.Client.Models.ArticleVariationDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleCreateDtoVariationMember1 != null)
-                {
-                    return ArticleCreateDtoVariationMember1.GetFieldDeserializers();
-                }
-                else if(ArticleVariationDto != null)
-                {
-                    return ArticleVariationDto.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleCreateDtoVariationMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleCreateDto_variationMember1>(null, ArticleCreateDtoVariationMember1);
-                }
-                else if(ArticleVariationDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleVariationDto>(null, ArticleVariationDto);
-                }
-            }
         }
     }
 }

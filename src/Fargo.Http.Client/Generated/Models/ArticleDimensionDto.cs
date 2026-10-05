@@ -8,7 +8,7 @@ using System;
 namespace Fargo.Http.Client.Models
 {
     /// <summary>
-    /// The physical dimensions of the article.
+    /// Represents the physical dimensions of an article.
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ArticleDimensionDto : IAdditionalDataHolder, IParsable

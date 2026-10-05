@@ -18,10 +18,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The barcode property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode? Barcode { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto? Barcode { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode Barcode { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto Barcode { get; set; }
 #endif
         /// <summary>The new description of the article. A `null` value leaves the existing description unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -34,10 +34,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The dimension property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension? Dimension { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto? Dimension { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension Dimension { get; set; }
+        public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto Dimension { get; set; }
 #endif
         /// <summary>The new mass of the article. A `null` value leaves the existing value unchanged.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -110,9 +110,9 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode>(global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode.CreateFromDiscriminatorValue); } },
+                { "barcode", n => { Barcode = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>(global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension>(global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension.CreateFromDiscriminatorValue); } },
+                { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>(global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto.CreateFromDiscriminatorValue); } },
                 { "mass", n => { Mass = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -129,9 +129,9 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode>("barcode", Barcode);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>("barcode", Barcode);
             writer.WriteObjectValue<UntypedNode>("description", Description);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension>("dimension", Dimension);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>("dimension", Dimension);
             writer.WriteObjectValue<UntypedNode>("mass", Mass);
             writer.WriteObjectValue<UntypedNode>("name", Name);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
@@ -140,148 +140,6 @@ namespace Fargo.Http.Client.Models
             writer.WriteBoolValue("removeShelfLife", RemoveShelfLife);
             writer.WriteStringValue("shelfLife", ShelfLife);
             writer.WriteAdditionalData(AdditionalData);
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto"/>, <see cref="global::Fargo.Http.Client.Models.ArticleUpdateDto_barcodeMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleUpdateDto_barcode : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto? ArticleBarcodeUpdateDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto ArticleBarcodeUpdateDto { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleUpdateDto_barcodeMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleUpdateDto_barcodeMember1? ArticleUpdateDtoBarcodeMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleUpdateDto_barcodeMember1 ArticleUpdateDtoBarcodeMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_barcode();
-                if("ArticleBarcodeUpdateDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticleBarcodeUpdateDto = new global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleBarcodeUpdateDto != null)
-                {
-                    return ArticleBarcodeUpdateDto.GetFieldDeserializers();
-                }
-                else if(ArticleUpdateDtoBarcodeMember1 != null)
-                {
-                    return ArticleUpdateDtoBarcodeMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleBarcodeUpdateDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleBarcodeUpdateDto>(null, ArticleBarcodeUpdateDto);
-                }
-                else if(ArticleUpdateDtoBarcodeMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto_barcodeMember1>(null, ArticleUpdateDtoBarcodeMember1);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto"/>, <see cref="global::Fargo.Http.Client.Models.ArticleUpdateDto_dimensionMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ArticleUpdateDto_dimension : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto? ArticleDimensionUpdateDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto ArticleDimensionUpdateDto { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.ArticleUpdateDto_dimensionMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.ArticleUpdateDto_dimensionMember1? ArticleUpdateDtoDimensionMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.ArticleUpdateDto_dimensionMember1 ArticleUpdateDtoDimensionMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.ArticleUpdateDto.ArticleUpdateDto_dimension();
-                if("ArticleDimensionUpdateDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ArticleDimensionUpdateDto = new global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(ArticleDimensionUpdateDto != null)
-                {
-                    return ArticleDimensionUpdateDto.GetFieldDeserializers();
-                }
-                else if(ArticleUpdateDtoDimensionMember1 != null)
-                {
-                    return ArticleUpdateDtoDimensionMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(ArticleDimensionUpdateDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleDimensionUpdateDto>(null, ArticleDimensionUpdateDto);
-                }
-                else if(ArticleUpdateDtoDimensionMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.ArticleUpdateDto_dimensionMember1>(null, ArticleUpdateDtoDimensionMember1);
-                }
-            }
         }
     }
 }

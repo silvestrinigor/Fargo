@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Informations;
+using Fargo.Core.Security;
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
 
@@ -24,6 +25,48 @@ public static class FargoOpenApiSchemaTransformers
         {
             schema.Type = JsonSchemaType.String;
             schema.Format = "string";
+            schema.MinLength = Name.MinLength;
+            schema.MaxLength = Name.MaxLength;
+        }
+
+        if (jsonTypeInfo == typeof(FirstName))
+        {
+            schema.Type = JsonSchemaType.String;
+            schema.Format = "string";
+            schema.MinLength = FirstName.MinLength;
+            schema.MaxLength = FirstName.MaxLength;
+        }
+
+        if (jsonTypeInfo == typeof(LastName))
+        {
+            schema.Type = JsonSchemaType.String;
+            schema.Format = "string";
+            schema.MinLength = LastName.MinLength;
+            schema.MaxLength = LastName.MaxLength;
+        }
+
+        if (jsonTypeInfo == typeof(Description))
+        {
+            schema.Type = JsonSchemaType.String;
+            schema.Format = "string";
+            schema.MaxLength = Description.MaxLength;
+        }
+
+        if (jsonTypeInfo == typeof(Nameid))
+        {
+            schema.Type = JsonSchemaType.String;
+            schema.Format = "string";
+            schema.MinLength = Nameid.MinLength;
+            schema.MaxLength = Nameid.MaxLength;
+            schema.Pattern = @"^[a-z0-9][a-z0-9._-]*[a-z0-9]$";
+        }
+
+        if (jsonTypeInfo == typeof(Password))
+        {
+            schema.Type = JsonSchemaType.String;
+            schema.Format = "password";
+            schema.MinLength = Password.MinLength;
+            schema.MaxLength = Password.MaxLength;
         }
     }
 

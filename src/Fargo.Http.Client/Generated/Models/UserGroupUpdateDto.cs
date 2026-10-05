@@ -17,20 +17,20 @@ namespace Fargo.Http.Client.Models
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description? Description { get; set; }
+        public global::Fargo.Http.Client.Models.Description? Description { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description Description { get; set; }
+        public global::Fargo.Http.Client.Models.Description Description { get; set; }
 #endif
         /// <summary>The isActive property</summary>
         public bool? IsActive { get; set; }
         /// <summary>The nameid property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid? Nameid { get; set; }
+        public global::Fargo.Http.Client.Models.Nameid? Nameid { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid Nameid { get; set; }
+        public global::Fargo.Http.Client.Models.Nameid Nameid { get; set; }
 #endif
         /// <summary>The parentUserGroup property</summary>
         public Guid? ParentUserGroup { get; set; }
@@ -109,9 +109,9 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "description", n => { Description = n.GetObjectValue<global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description>(global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetObjectValue<global::Fargo.Http.Client.Models.Description>(global::Fargo.Http.Client.Models.Description.CreateFromDiscriminatorValue); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid>(global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid.CreateFromDiscriminatorValue); } },
+                { "nameid", n => { Nameid = n.GetObjectValue<global::Fargo.Http.Client.Models.Nameid>(global::Fargo.Http.Client.Models.Nameid.CreateFromDiscriminatorValue); } },
                 { "parentUserGroup", n => { ParentUserGroup = n.GetGuidValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -129,9 +129,9 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description>("description", Description);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.Description>("description", Description);
             writer.WriteBoolValue("isActive", IsActive);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid>("nameid", Nameid);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.Nameid>("nameid", Nameid);
             writer.WriteGuidValue("parentUserGroup", ParentUserGroup);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
@@ -141,140 +141,6 @@ namespace Fargo.Http.Client.Models
             writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToRemove", PermissionsToRemove);
             writer.WriteBoolValue("removeParentUserGroup", RemoveParentUserGroup);
             writer.WriteAdditionalData(AdditionalData);
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.Description"/>, <see cref="global::Fargo.Http.Client.Models.UserGroupUpdateDto_descriptionMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class UserGroupUpdateDto_description : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.Description"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.Description? Description { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.Description Description { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.UserGroupUpdateDto_descriptionMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.UserGroupUpdateDto_descriptionMember1? UserGroupUpdateDtoDescriptionMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.UserGroupUpdateDto_descriptionMember1 UserGroupUpdateDtoDescriptionMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_description();
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(Description != null)
-                {
-                    return Description.GetFieldDeserializers();
-                }
-                else if(UserGroupUpdateDtoDescriptionMember1 != null)
-                {
-                    return UserGroupUpdateDtoDescriptionMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(Description != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.Description>(null, Description);
-                }
-                else if(UserGroupUpdateDtoDescriptionMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserGroupUpdateDto_descriptionMember1>(null, UserGroupUpdateDtoDescriptionMember1);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.Nameid"/>, <see cref="global::Fargo.Http.Client.Models.UserGroupUpdateDto_nameidMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class UserGroupUpdateDto_nameid : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.Nameid"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.Nameid? Nameid { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.Nameid Nameid { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.UserGroupUpdateDto_nameidMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.UserGroupUpdateDto_nameidMember1? UserGroupUpdateDtoNameidMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.UserGroupUpdateDto_nameidMember1 UserGroupUpdateDtoNameidMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.UserGroupUpdateDto.UserGroupUpdateDto_nameid();
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(Nameid != null)
-                {
-                    return Nameid.GetFieldDeserializers();
-                }
-                else if(UserGroupUpdateDtoNameidMember1 != null)
-                {
-                    return UserGroupUpdateDtoNameidMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(Nameid != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.Nameid>(null, Nameid);
-                }
-                else if(UserGroupUpdateDtoNameidMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserGroupUpdateDto_nameidMember1>(null, UserGroupUpdateDtoNameidMember1);
-                }
-            }
         }
     }
 }

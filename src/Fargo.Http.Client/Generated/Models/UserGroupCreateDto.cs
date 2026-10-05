@@ -27,10 +27,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>Represents a nameid.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Nameid { get; set; }
+        public string? Nameid { get; set; }
 #nullable restore
 #else
-        public UntypedNode Nameid { get; set; }
+        public string Nameid { get; set; }
 #endif
         /// <summary>The parentUserGroup property</summary>
         public Guid? ParentUserGroup { get; set; }
@@ -85,7 +85,7 @@ namespace Fargo.Http.Client.Models
             {
                 { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "parentUserGroup", n => { ParentUserGroup = n.GetGuidValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -101,7 +101,7 @@ namespace Fargo.Http.Client.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteObjectValue<UntypedNode>("description", Description);
             writer.WriteBoolValue("isActive", IsActive);
-            writer.WriteObjectValue<UntypedNode>("nameid", Nameid);
+            writer.WriteStringValue("nameid", Nameid);
             writer.WriteGuidValue("parentUserGroup", ParentUserGroup);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);

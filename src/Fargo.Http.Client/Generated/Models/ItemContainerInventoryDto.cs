@@ -17,13 +17,7 @@ namespace Fargo.Http.Client.Models
         /// <summary>The articleGuid property</summary>
         public Guid? ArticleGuid { get; set; }
         /// <summary>The totalCount property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public UntypedNode? TotalCount { get; set; }
-#nullable restore
-#else
-        public UntypedNode TotalCount { get; set; }
-#endif
+        public int? TotalCount { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.ItemContainerInventoryDto"/> and sets the default values.
         /// </summary>
@@ -50,7 +44,7 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "articleGuid", n => { ArticleGuid = n.GetGuidValue(); } },
-                { "totalCount", n => { TotalCount = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "totalCount", n => { TotalCount = n.GetIntValue(); } },
             };
         }
         /// <summary>
@@ -61,7 +55,7 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteGuidValue("articleGuid", ArticleGuid);
-            writer.WriteObjectValue<UntypedNode>("totalCount", TotalCount);
+            writer.WriteIntValue("totalCount", TotalCount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -17,10 +17,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The authentication property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication? Authentication { get; set; }
+        public global::Fargo.Http.Client.Models.UserAuthenticationCreateDto? Authentication { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication Authentication { get; set; }
+        public global::Fargo.Http.Client.Models.UserAuthenticationCreateDto Authentication { get; set; }
 #endif
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -51,10 +51,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>Represents a nameid.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Nameid { get; set; }
+        public string? Nameid { get; set; }
 #nullable restore
 #else
-        public UntypedNode Nameid { get; set; }
+        public string Nameid { get; set; }
 #endif
         /// <summary>The partitionAccessesToAdd property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -113,12 +113,12 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "authentication", n => { Authentication = n.GetObjectValue<global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication>(global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication.CreateFromDiscriminatorValue); } },
+                { "authentication", n => { Authentication = n.GetObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationCreateDto>(global::Fargo.Http.Client.Models.UserAuthenticationCreateDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "firstName", n => { FirstName = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "lastName", n => { LastName = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "permissionsToAdd", n => { PermissionsToAdd = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
@@ -132,88 +132,17 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication>("authentication", Authentication);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationCreateDto>("authentication", Authentication);
             writer.WriteObjectValue<UntypedNode>("description", Description);
             writer.WriteObjectValue<UntypedNode>("firstName", FirstName);
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteObjectValue<UntypedNode>("lastName", LastName);
-            writer.WriteObjectValue<UntypedNode>("nameid", Nameid);
+            writer.WriteStringValue("nameid", Nameid);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToAdd", PermissionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("userGroupsToAdd", UserGroupsToAdd);
             writer.WriteAdditionalData(AdditionalData);
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.UserAuthenticationCreateDto"/>, <see cref="global::Fargo.Http.Client.Models.UserCreateDto_authenticationMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class UserCreateDto_authentication : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.UserAuthenticationCreateDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.UserAuthenticationCreateDto? UserAuthenticationCreateDto { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.UserAuthenticationCreateDto UserAuthenticationCreateDto { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.UserCreateDto_authenticationMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.UserCreateDto_authenticationMember1? UserCreateDtoAuthenticationMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.UserCreateDto_authenticationMember1 UserCreateDtoAuthenticationMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.UserCreateDto.UserCreateDto_authentication();
-                if("UserAuthenticationCreateDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.UserAuthenticationCreateDto = new global::Fargo.Http.Client.Models.UserAuthenticationCreateDto();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(UserAuthenticationCreateDto != null)
-                {
-                    return UserAuthenticationCreateDto.GetFieldDeserializers();
-                }
-                else if(UserCreateDtoAuthenticationMember1 != null)
-                {
-                    return UserCreateDtoAuthenticationMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(UserAuthenticationCreateDto != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationCreateDto>(null, UserAuthenticationCreateDto);
-                }
-                else if(UserCreateDtoAuthenticationMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserCreateDto_authenticationMember1>(null, UserCreateDtoAuthenticationMember1);
-                }
-            }
         }
     }
 }

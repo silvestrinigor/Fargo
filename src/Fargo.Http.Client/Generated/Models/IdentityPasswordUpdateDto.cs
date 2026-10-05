@@ -34,10 +34,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>The new password value that will be validated against security rules</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? NewPassword { get; set; }
+        public string? NewPassword { get; set; }
 #nullable restore
 #else
-        public UntypedNode NewPassword { get; set; }
+        public string NewPassword { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Http.Client.Models.IdentityPasswordUpdateDto"/> and sets the default values.
@@ -66,7 +66,7 @@ namespace Fargo.Http.Client.Models
             {
                 { "currentPassword", n => { CurrentPassword = n.GetStringValue(); } },
                 { "nameid", n => { Nameid = n.GetStringValue(); } },
-                { "newPassword", n => { NewPassword = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "newPassword", n => { NewPassword = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -78,7 +78,7 @@ namespace Fargo.Http.Client.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("currentPassword", CurrentPassword);
             writer.WriteStringValue("nameid", Nameid);
-            writer.WriteObjectValue<UntypedNode>("newPassword", NewPassword);
+            writer.WriteStringValue("newPassword", NewPassword);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -25,18 +25,18 @@ namespace Fargo.Http.Client.Models
         /// <summary>Represents a validated textual description.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Description { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public UntypedNode Description { get; set; }
+        public string Description { get; set; }
 #endif
         /// <summary>The firstName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.UserDto.UserDto_firstName? FirstName { get; set; }
+        public global::Fargo.Http.Client.Models.FirstName? FirstName { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.UserDto.UserDto_firstName FirstName { get; set; }
+        public global::Fargo.Http.Client.Models.FirstName FirstName { get; set; }
 #endif
         /// <summary>The guid property</summary>
         public Guid? Guid { get; set; }
@@ -47,18 +47,18 @@ namespace Fargo.Http.Client.Models
         /// <summary>The lastName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.Http.Client.Models.UserDto.UserDto_lastName? LastName { get; set; }
+        public global::Fargo.Http.Client.Models.LastName? LastName { get; set; }
 #nullable restore
 #else
-        public global::Fargo.Http.Client.Models.UserDto.UserDto_lastName LastName { get; set; }
+        public global::Fargo.Http.Client.Models.LastName LastName { get; set; }
 #endif
         /// <summary>Represents a nameid.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Nameid { get; set; }
+        public string? Nameid { get; set; }
 #nullable restore
 #else
-        public UntypedNode Nameid { get; set; }
+        public string Nameid { get; set; }
 #endif
         /// <summary>The partitionAccesses property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -118,13 +118,13 @@ namespace Fargo.Http.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "authentication", n => { Authentication = n.GetObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationDto>(global::Fargo.Http.Client.Models.UserAuthenticationDto.CreateFromDiscriminatorValue); } },
-                { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
-                { "firstName", n => { FirstName = n.GetObjectValue<global::Fargo.Http.Client.Models.UserDto.UserDto_firstName>(global::Fargo.Http.Client.Models.UserDto.UserDto_firstName.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetStringValue(); } },
+                { "firstName", n => { FirstName = n.GetObjectValue<global::Fargo.Http.Client.Models.FirstName>(global::Fargo.Http.Client.Models.FirstName.CreateFromDiscriminatorValue); } },
                 { "guid", n => { Guid = n.GetGuidValue(); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "isAdmin", n => { IsAdmin = n.GetBoolValue(); } },
-                { "lastName", n => { LastName = n.GetObjectValue<global::Fargo.Http.Client.Models.UserDto.UserDto_lastName>(global::Fargo.Http.Client.Models.UserDto.UserDto_lastName.CreateFromDiscriminatorValue); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "lastName", n => { LastName = n.GetObjectValue<global::Fargo.Http.Client.Models.LastName>(global::Fargo.Http.Client.Models.LastName.CreateFromDiscriminatorValue); } },
+                { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "partitionAccesses", n => { PartitionAccesses = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitions", n => { Partitions = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "permissions", n => { Permissions = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
@@ -139,152 +139,18 @@ namespace Fargo.Http.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserAuthenticationDto>("authentication", Authentication);
-            writer.WriteObjectValue<UntypedNode>("description", Description);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserDto.UserDto_firstName>("firstName", FirstName);
+            writer.WriteStringValue("description", Description);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.FirstName>("firstName", FirstName);
             writer.WriteGuidValue("guid", Guid);
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteBoolValue("isAdmin", IsAdmin);
-            writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserDto.UserDto_lastName>("lastName", LastName);
-            writer.WriteObjectValue<UntypedNode>("nameid", Nameid);
+            writer.WriteObjectValue<global::Fargo.Http.Client.Models.LastName>("lastName", LastName);
+            writer.WriteStringValue("nameid", Nameid);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccesses", PartitionAccesses);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitions", Partitions);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissions", Permissions);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("userGroups", UserGroups);
             writer.WriteAdditionalData(AdditionalData);
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.FirstName"/>, <see cref="global::Fargo.Http.Client.Models.UserDto_firstNameMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class UserDto_firstName : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.FirstName"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.FirstName? FirstName { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.FirstName FirstName { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.UserDto_firstNameMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.UserDto_firstNameMember1? UserDtoFirstNameMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.UserDto_firstNameMember1 UserDtoFirstNameMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.UserDto.UserDto_firstName"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.UserDto.UserDto_firstName CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.UserDto.UserDto_firstName();
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(FirstName != null)
-                {
-                    return FirstName.GetFieldDeserializers();
-                }
-                else if(UserDtoFirstNameMember1 != null)
-                {
-                    return UserDtoFirstNameMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(FirstName != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.FirstName>(null, FirstName);
-                }
-                else if(UserDtoFirstNameMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserDto_firstNameMember1>(null, UserDtoFirstNameMember1);
-                }
-            }
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Fargo.Http.Client.Models.LastName"/>, <see cref="global::Fargo.Http.Client.Models.UserDto_lastNameMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class UserDto_lastName : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.LastName"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.LastName? LastName { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.LastName LastName { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Fargo.Http.Client.Models.UserDto_lastNameMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Fargo.Http.Client.Models.UserDto_lastNameMember1? UserDtoLastNameMember1 { get; set; }
-#nullable restore
-#else
-            public global::Fargo.Http.Client.Models.UserDto_lastNameMember1 UserDtoLastNameMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::Fargo.Http.Client.Models.UserDto.UserDto_lastName"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::Fargo.Http.Client.Models.UserDto.UserDto_lastName CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::Fargo.Http.Client.Models.UserDto.UserDto_lastName();
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(LastName != null)
-                {
-                    return LastName.GetFieldDeserializers();
-                }
-                else if(UserDtoLastNameMember1 != null)
-                {
-                    return UserDtoLastNameMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(LastName != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.LastName>(null, LastName);
-                }
-                else if(UserDtoLastNameMember1 != null)
-                {
-                    writer.WriteObjectValue<global::Fargo.Http.Client.Models.UserDto_lastNameMember1>(null, UserDtoLastNameMember1);
-                }
-            }
         }
     }
 }

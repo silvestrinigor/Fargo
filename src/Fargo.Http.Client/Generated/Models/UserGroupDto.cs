@@ -17,10 +17,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>Represents a validated textual description.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Description { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public UntypedNode Description { get; set; }
+        public string Description { get; set; }
 #endif
         /// <summary>The guid property</summary>
         public Guid? Guid { get; set; }
@@ -31,10 +31,10 @@ namespace Fargo.Http.Client.Models
         /// <summary>Represents a nameid.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public UntypedNode? Nameid { get; set; }
+        public string? Nameid { get; set; }
 #nullable restore
 #else
-        public UntypedNode Nameid { get; set; }
+        public string Nameid { get; set; }
 #endif
         /// <summary>The parentPartition property</summary>
         public Guid? ParentPartition { get; set; }
@@ -87,11 +87,11 @@ namespace Fargo.Http.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "description", n => { Description = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetStringValue(); } },
                 { "guid", n => { Guid = n.GetGuidValue(); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "isAdminUserGroup", n => { IsAdminUserGroup = n.GetBoolValue(); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "parentPartition", n => { ParentPartition = n.GetGuidValue(); } },
                 { "partitionAccesses", n => { PartitionAccesses = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitions", n => { Partitions = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -105,11 +105,11 @@ namespace Fargo.Http.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<UntypedNode>("description", Description);
+            writer.WriteStringValue("description", Description);
             writer.WriteGuidValue("guid", Guid);
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteBoolValue("isAdminUserGroup", IsAdminUserGroup);
-            writer.WriteObjectValue<UntypedNode>("nameid", Nameid);
+            writer.WriteStringValue("nameid", Nameid);
             writer.WriteGuidValue("parentPartition", ParentPartition);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccesses", PartitionAccesses);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitions", Partitions);
