@@ -39,16 +39,31 @@ public sealed class AuditMetadata
         }
     }
 
+    /// <summary>
+    /// Adds the name of an article to the metadata.
+    /// </summary>
+    /// <param name="value">The name value to add.</param>
     public void AddName(Name value)
     {
         Add("name", new AuditValue.String(value));
     }
 
+    /// <summary>
+    /// Adds the description of an article to the metadata.
+    /// </summary>
+    /// <param name="value">The description value to add.</param>
     public void AddDescription(Description value)
     {
         Add("description", new AuditValue.String(value));
     }
 
+    /// <summary>
+    /// Adds the shelf life of an article to the metadata.
+    /// </summary>
+    /// <param name="value">
+    /// The shelf life to add, or <see langword="null"/> to record the absence of
+    /// a shelf life constraint.
+    /// </param>
     public void AddShelfLife(TimeSpan? value)
     {
         Add("shelfLife", value != null
@@ -56,6 +71,13 @@ public sealed class AuditMetadata
             : new AuditValue.Null());
     }
 
+    /// <summary>
+    /// Adds the color of an article to the metadata.
+    /// </summary>
+    /// <param name="value">
+    /// The color to add, or <see langword="null"/> to record the absence of a
+    /// color constraint.
+    /// </param>
     public void AddColor(Color? value)
     {
         Add("color", value != null
@@ -63,6 +85,12 @@ public sealed class AuditMetadata
             : new AuditValue.Null());
     }
 
+    /// <summary>
+    /// Adds the mass of an article to the metadata.
+    /// </summary>
+    /// <param name="value">
+    /// The mass to add, or <see langword="null"/> to record the absence of a mass.
+    /// </param>
     public void AddMass(Mass? value)
     {
         Add("mass", value is not null
@@ -70,6 +98,13 @@ public sealed class AuditMetadata
             : new AuditValue.Null());
     }
 
+    /// <summary>
+    /// Adds the EAN-13 barcode of an article to the metadata.
+    /// </summary>
+    /// <param name="value">
+    /// The EAN-13 barcode to add, or <see langword="null"/> to record the absence
+    /// of a barcode.
+    /// </param>
     public void AddEan13(Ean13? value)
     {
         Add("ean13", value is not null
@@ -77,6 +112,13 @@ public sealed class AuditMetadata
             : new AuditValue.Null());
     }
 
+    /// <summary>
+    /// Adds the parent container identifier to the metadata.
+    /// </summary>
+    /// <param name="parentContainer">
+    /// The unique identifier of the parent container, or <see langword="null"/>
+    /// when the item is not placed inside a container.
+    /// </param>
     public void AddParentContainer(Guid? parentContainer)
     {
         Add("parentContainerGuid", parentContainer is not null
@@ -84,21 +126,43 @@ public sealed class AuditMetadata
             : new AuditValue.Null());
     }
 
+    /// <summary>
+    /// Adds the article type to the metadata.
+    /// </summary>
+    /// <param name="value">The article type to add.</param>
     public void AddArticleType(ArticleType value)
     {
         Add("articleType", new AuditValue.Number((byte)value));
     }
 
+    /// <summary>
+    /// Adds the identifier of the source article to the metadata.
+    /// </summary>
+    /// <param name="fromArticleGuid">
+    /// The unique identifier of the article the current article derives from.
+    /// </param>
     public void AddFromArticleGuid(Guid fromArticleGuid)
     {
         Add("fromArticle", new AuditValue.String(fromArticleGuid.ToString()));
     }
 
+    /// <summary>
+    /// Adds the pack quantity to the metadata.
+    /// </summary>
+    /// <param name="quantity">
+    /// The quantity of the source article represented by the pack.
+    /// </param>
     public void AddPackQuantity(Scalar quantity)
     {
         Add("packQuantity", new AuditValue.Number((int)quantity.Amount));
     }
 
+    /// <summary>
+    /// Adds the components of a kit article to the metadata.
+    /// </summary>
+    /// <param name="kitComponents">
+    /// The components that compose the kit article.
+    /// </param>
     public void AddKitComponents(IReadOnlyCollection<ArticleKitComponentInformation> kitComponents)
     {
         var values = new List<AuditValue.Object>();
@@ -121,6 +185,12 @@ public sealed class AuditMetadata
         Add("kitComponents", array);
     }
 
+    /// <summary>
+    /// Adds the partitions associated with an entity to the metadata.
+    /// </summary>
+    /// <param name="partitionGuids">
+    /// The unique identifiers of the partitions associated with the entity.
+    /// </param>
     public void AddPartitions(IReadOnlyCollection<Guid> partitionGuids)
     {
         var values = new List<AuditValue.String>();
@@ -135,6 +205,12 @@ public sealed class AuditMetadata
         Add("partitions", array);
     }
 
+    /// <summary>
+    /// Adds the partitions that were added to an entity to the metadata.
+    /// </summary>
+    /// <param name="partitionGuids">
+    /// The unique identifiers of the partitions that were added.
+    /// </param>
     public void AddPartitionsAdded(IReadOnlyCollection<Guid> partitionGuids)
     {
         var values = new List<AuditValue.String>();
@@ -149,6 +225,12 @@ public sealed class AuditMetadata
         Add("partitionsAdded", array);
     }
 
+    /// <summary>
+    /// Adds the partitions that were removed from an entity to the metadata.
+    /// </summary>
+    /// <param name="partitionGuids">
+    /// The unique identifiers of the partitions that were removed.
+    /// </param>
     public void AddPartitionsRemoved(IReadOnlyCollection<Guid> partitionGuids)
     {
         var values = new List<AuditValue.String>();
@@ -163,6 +245,18 @@ public sealed class AuditMetadata
         Add("partitionsRemoved", array);
     }
 
+    /// <summary>
+    /// Adds the physical dimensions of an article to the metadata.
+    /// </summary>
+    /// <param name="x">
+    /// The length along the X axis, or <see langword="null"/> when undefined.
+    /// </param>
+    /// <param name="y">
+    /// The length along the Y axis, or <see langword="null"/> when undefined.
+    /// </param>
+    /// <param name="z">
+    /// The length along the Z axis, or <see langword="null"/> when undefined.
+    /// </param>
     public void AddDimension(Length? x, Length? y, Length? z)
     {
         var obj = new Dictionary<string, AuditValue>

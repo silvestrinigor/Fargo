@@ -1,7 +1,14 @@
 namespace Fargo.Core.Identity;
 
+/// <summary>
+/// Provides authentication attempt tracking and rate limiting.
+/// </summary>
+/// <param name="attemptRepository">
+/// The repository used to persist and query authentication attempts.
+/// </param>
 public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepository attemptRepository) : IAuthenticationAttemptService
 {
+    /// <inheritdoc/>
     public async Task<AuthenticationAttemptAllowResults> IsAllowedAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
         var lastSuccessAuth = await attemptRepository.GetLastSuccessAuthenticationAttemptAsync(ipAddress, identifier, cancellationToken);
@@ -45,6 +52,7 @@ public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepositor
         static TimeSpan Max(TimeSpan a, TimeSpan b) => a > b ? a : b;
     }
 
+    /// <inheritdoc/>
     public Task RegisterFailureAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
         var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: false);
@@ -54,6 +62,7 @@ public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepositor
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc/>
     public Task RegisterSuccessAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
         var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: true);

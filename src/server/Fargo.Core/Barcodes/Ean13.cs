@@ -16,6 +16,16 @@ public readonly struct Ean13 : IBarcode, IEquatable<Ean13>
     /// </summary>
     public string Value { get; } = "0000000000000";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Ean13"/> struct.
+    /// </summary>
+    /// <param name="value">
+    /// The 13-digit numeric code of the barcode.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="value"/> is null, empty, or does not consist
+    /// of exactly <see cref="CodeLength"/> ASCII digits.
+    /// </exception>
     public Ean13(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
@@ -28,12 +38,37 @@ public readonly struct Ean13 : IBarcode, IEquatable<Ean13>
         Value = value;
     }
 
+    /// <summary>
+    /// Determines whether the specified <see cref="Ean13"/> is equal to the current
+    /// <see cref="Ean13"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="Ean13"/> to compare with the current instance.</param>
+    /// <returns>
+    /// <see langword="true"/> if the specified <see cref="Ean13"/> has the same
+    /// code; otherwise, <see langword="false"/>.
+    /// </returns>
     public bool Equals(Ean13 other) => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
+    /// <summary>
+    /// Determines whether the specified object is equal to the current <see cref="Ean13"/>.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current instance.</param>
+    /// <returns>
+    /// <see langword="true"/> if the specified object is an <see cref="Ean13"/> with
+    /// the same code; otherwise, <see langword="false"/>.
+    /// </returns>
     public override bool Equals(object? obj) => obj is Ean13 other && Equals(other);
 
+    /// <summary>
+    /// Serves as a hash function for the <see cref="Ean13"/>.
+    /// </summary>
+    /// <returns>A hash code for the current <see cref="Ean13"/>.</returns>
     public override int GetHashCode() => Value is null ? 0 : Value.GetHashCode(StringComparison.Ordinal);
 
+    /// <summary>
+    /// Returns the EAN-13 code as its string representation.
+    /// </summary>
+    /// <returns>The 13-digit EAN-13 code.</returns>
     public override string ToString() => Value;
 
     /// <summary>

@@ -147,5 +147,6 @@ public class Partition : IEntity, IEntityTyped
         ParentPartitionGuid = parentPartition.Guid;
     }
 
+    /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.Partition;
 }
