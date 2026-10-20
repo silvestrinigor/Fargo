@@ -12,6 +12,8 @@ public static class AuditLogEndpointRouteBuilderExtension
     {
         var group = builder.MapAuditLogGroup();
 
+        group.MapGetAuditLog();
+
         group.MapGetAuditLogs();
     }
 
@@ -25,6 +27,35 @@ public static class AuditLogEndpointRouteBuilderExtension
 
         return group;
     }
+
+    #region Get Single
+
+    private static IEndpointRouteBuilder MapGetAuditLog(this IEndpointRouteBuilder builder)
+    {
+        builder
+        .MapGet("/{auditLogGuid:guid}", GetSingleAuditLogAsync)
+        .WithName("GetAuditLog")
+        .WithSummary("Gets a single audit log")
+        .WithDescription("Retrieves a single audit log by its unique identifier, including its metadata.")
+        .Produces<AuditLogDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<AuditLogDto>, NotFound>> GetSingleAuditLogAsync(
+        Guid auditLogGuid,
+        IQueryHandler<AuditLogSingleQuery, AuditLogDto?> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new AuditLogSingleQuery(auditLogGuid);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
 
     #region Get Many
 

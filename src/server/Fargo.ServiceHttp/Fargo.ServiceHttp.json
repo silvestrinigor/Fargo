@@ -1282,6 +1282,42 @@
         }
       }
     },
+    "/audit-logs/{auditLogGuid}": {
+      "get": {
+        "tags": [
+          "AuditLogs"
+        ],
+        "summary": "Gets a single audit log",
+        "description": "Retrieves a single audit log by its unique identifier, including its metadata.",
+        "operationId": "GetAuditLog",
+        "parameters": [
+          {
+            "name": "auditLogGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/audit-logs": {
       "get": {
         "tags": [

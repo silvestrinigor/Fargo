@@ -10,6 +10,23 @@ namespace Fargo.Application.Audits;
 public interface IAuditLogQueryRepository
 {
     /// <summary>
+    /// Retrieves a single audit log by its unique identifier.
+    /// </summary>
+    /// <param name="auditLogGuid">The unique identifier of the audit log.</param>
+    /// <param name="childOfAnyOfThesePartitions">
+    /// An optional collection of partition identifiers. When specified, only
+    /// audit logs accessible through one of these partitions are considered.
+    /// </param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains
+    /// the audit log DTO if a matching audit log is found; otherwise, <see langword="null"/>.</returns>
+    Task<AuditLogDto?> GetInfoByGuidAsync(
+        Guid auditLogGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Retrieves multiple audit log entries ordered by occurrence time.
     /// </summary>
     /// <param name="pagination">Pagination configuration for limiting the number of results</param>
