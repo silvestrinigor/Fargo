@@ -98,4 +98,29 @@ public static class PartitionTools
 
         return $"Partition '{partitionGuid}' deleted.";
     }
+
+    [McpServerTool(Name = "fargo_partitions_update")]
+    [Description("Update an existing partition's name, description, or parent. Only the supplied fields are changed; omitted fields are left as-is.")]
+    public static async Task<string> UpdatePartitionAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the partition to update.")] Guid partitionGuid,
+        [Description("The new name of the partition. Leave null to keep the existing name.")] string? name = null,
+        [Description("The new description of the partition. Leave null to keep the existing description.")] string? description = null,
+        [Description("The GUID of the new parent partition. Leave null to keep the current parent.")] Guid? parentPartitionGuid = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new PartitionUpdateDto
+        {
+            Name = name,
+            Description = description,
+            ParentPartitionGuid = parentPartitionGuid
+        };
+
+        await client.Partitions[partitionGuid].PatchAsync(body, cancellationToken: cancellationToken);
+
+        return $"Partition '{partitionGuid}' updated.";
+    }
 }
