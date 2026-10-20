@@ -2,8 +2,8 @@
   href: introduction.md
 - name: Getting Started
   href: getting-started.md
-- name: Architecture
-  href: architecture.md
+- name: Server
+  href: server/
 - name: CLI
   href: cli/
 - name: Web API

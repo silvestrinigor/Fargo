@@ -24,7 +24,7 @@ The Aspire AppHost starts the services in order:
 3. The seed service (creates the default administrator on first run).
 4. The HTTP API.
 
-See [Architecture](architecture.md) for the full startup graph.
+See [Server Architecture](server/architecture.md#startup-and-orchestration) for the full startup graph.
 
 Once the HTTP API is running, its base address is shown in the Aspire
 dashboard (by default `https://localhost:7563`).

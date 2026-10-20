@@ -42,6 +42,7 @@ through a REST API and a command-line client.
 ## Where to go next
 
 - [Getting Started](getting-started.md) — run Fargo locally.
-- [Architecture](architecture.md) — how the services are composed.
+- [Server](server/overview.md) — how the server is built: architecture, domain model, persistence, and security.
+- [CLI](cli/overview.md) — the command-line client.
 - [Web API Overview](web-api/overview.md) — the REST API surface.
 - [API Reference](~/api/index.md) — the generated .NET API documentation.
