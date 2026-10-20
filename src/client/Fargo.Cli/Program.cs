@@ -106,6 +106,23 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
             authResult.RefreshToken,
             authResult.ExpiresAt.Value));
 }
+else if (!IsIdentityCommand(parseResult))
+{
+    // For any non-identity command, refresh the stored token up front if it has
+    // expired, so the request carries a valid access token. The identity
+    // commands manage authentication themselves and are skipped.
+    var client = serviceProvider.GetRequiredService<FargoApiClient>();
+    var tokenStore = serviceProvider.GetRequiredService<ITokenStore>();
+
+    try
+    {
+        await TokenRefresher.EnsureValidAsync(client, tokenStore);
+    }
+    catch (FargoApiException ex)
+    {
+        return ApiErrorReporter.Report(ex);
+    }
+}
 
 // Disable the built-in exception handler so API errors (401/403, etc.) can be
 // rendered as concise messages instead of stack traces.
@@ -121,4 +138,25 @@ try
 catch (FargoApiException ex)
 {
     return ApiErrorReporter.Report(ex);
+}
+
+// Returns true when the invoked command belongs to the "identity" group, whose
+// commands handle authentication themselves and must not be auto-refreshed.
+static bool IsIdentityCommand(System.CommandLine.ParseResult result)
+{
+    var command = result.CommandResult.Command;
+
+    while (command is not null)
+    {
+        if (string.Equals(command.Name, "identity", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        command = (command as System.CommandLine.Command)?.Parents
+            .OfType<System.CommandLine.Command>()
+            .FirstOrDefault();
+    }
+
+    return false;
 }
