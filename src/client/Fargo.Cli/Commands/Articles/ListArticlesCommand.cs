@@ -64,7 +64,7 @@ public sealed class ListArticlesCommand : Command
             new TableWriter<Fargo.ClientHttp.Models.ArticleDto>()
                 .Column("GUID", a => a.Guid?.ToString())
                 .Column("NAME", a => a.Name)
-                .Column("TYPE", a => a.ArticleType?.ToString())
+                .Column("TYPE", a => EnumFormatting.Format<ArticleType>(a.ArticleType))
                 .Column("DESCRIPTION", a => a.Description)
                 .EmptyMessage("No articles found.")
                 .Write(result);

@@ -37,7 +37,7 @@ public sealed class GetArticleCommand : Command
                 .Title("Article")
                 .Field("GUID", article.Guid)
                 .Field("Name", article.Name)
-                .Field("Type", article.ArticleType)
+                .Field("Type", EnumFormatting.Format<ArticleType>(article.ArticleType))
                 .Field("Description", article.Description)
                 .Field("Shelf life", article.ShelfLife)
                 .Write();

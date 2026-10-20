@@ -13,7 +13,7 @@ public sealed class ArticleCreateCommand : Command
 
             Examples:
               fargo articles create --name "Widget"
-              fargo articles create --name "Widget" --type 2 --partitions 00000000-0000-0000-0000-000000000001
+              fargo articles create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var nameOption = new Option<string>("--name")
@@ -22,10 +22,12 @@ public sealed class ArticleCreateCommand : Command
             Required = true
         };
 
-        var typeOption = new Option<int>("--type")
+        var typeOption = new Option<ArticleType>("--type")
         {
-            Description = "Article type as an integer. Defaults to 1.",
-            DefaultValueFactory = _ => 1
+            Description =
+                "Article type by name (default, variation, pack, kit, container). "
+                + "Defaults to default.",
+            DefaultValueFactory = _ => ArticleType.Default
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
@@ -47,7 +49,7 @@ public sealed class ArticleCreateCommand : Command
             var dto = new ArticleCreateDto
             {
                 Name = name,
-                ArticleType = type,
+                ArticleType = (int)type,
                 PartitionsToAdd = partitions?.Select(g => (Guid?)g).ToList()
             };
 
