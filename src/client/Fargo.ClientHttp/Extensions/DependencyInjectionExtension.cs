@@ -11,6 +11,8 @@ public static class DependencyInjectionExtension
     {
         services.AddKiotaHandlers();
 
+        services.AddSingleton<ClientConnectionContext>();
+
         services.AddSingleton<IAccessTokenProvider, FargoAccessTokenProvider>();
 
         services.AddSingleton<ITokenStore, TokenStore>();
@@ -24,7 +26,9 @@ public static class DependencyInjectionExtension
 
         services.AddHttpClient<FargoClientFactory>((sp, client) =>
         {
-            client.BaseAddress = baseAddress;
+            var connectionContext = sp.GetRequiredService<ClientConnectionContext>();
+
+            client.BaseAddress = connectionContext.BaseAddressOverride ?? baseAddress;
         }).AttachKiotaHandlers();
 
         services.AddTransient(sp => sp.GetRequiredService<FargoClientFactory>().GetClient());
