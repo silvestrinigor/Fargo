@@ -64,12 +64,21 @@ var root = await CommandFactory.Create(serviceProvider, globalOptions);
 
 var parseResult = root.Parse(args);
 
+// Help, version, and parse-error invocations do not call a command that needs
+// the API client, so skip any credential/token work (and the network) for them.
+// This also keeps `--help` usable in environments without a credential backend.
+var actionTypeName = parseResult.Action?.GetType().Name;
+var skipAuthentication =
+    parseResult.Action is System.CommandLine.Help.HelpAction
+    || actionTypeName == "VersionAction"
+    || parseResult.Errors.Count > 0;
+
 // Read the ad-hoc credentials from the real parse result. Commands that declare
 // their own --username/--password (login, users create, change-password) shadow
 // the recursive global options, so these come back null for them and the global
 // sign-in is correctly skipped.
-var username = parseResult.GetValue(globalOptions.Username);
-var password = parseResult.GetValue(globalOptions.Password);
+var username = skipAuthentication ? null : parseResult.GetValue(globalOptions.Username);
+var password = skipAuthentication ? null : parseResult.GetValue(globalOptions.Password);
 
 if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
 {
@@ -106,7 +115,7 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
             authResult.RefreshToken,
             authResult.ExpiresAt.Value));
 }
-else if (!IsIdentityCommand(parseResult))
+else if (!skipAuthentication && !IsIdentityCommand(parseResult))
 {
     // For any non-identity command, refresh the stored token up front if it has
     // expired, so the request carries a valid access token. The identity
