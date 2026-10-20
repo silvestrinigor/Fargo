@@ -113,7 +113,3 @@ Once registered, ask the host to list available tools (or use its tool inspector
 and confirm the `fargo_*` tools appear. A simple first call is
 `fargo_partitions_list`, which returns the partitions the authenticated user can
 see.
-
-## Where to go next
-
-- [Tools Reference](tools.md) — the full list of tools and their parameters.

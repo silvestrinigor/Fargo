@@ -98,4 +98,76 @@ public static class ItemTools
 
         return $"Item '{itemGuid}' deleted.";
     }
+
+    [McpServerTool(Name = "fargo_items_update")]
+    [Description("Update an existing item: move it to (or out of) a parent container and adjust its partitions. Only the supplied changes are applied.")]
+    public static async Task<string> UpdateItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to update.")] Guid itemGuid,
+        [Description("The GUID of the parent item container to move this item into. Leave null to keep the current container.")] Guid? parentItemContainerGuid = null,
+        [Description("When true, removes the item from its current parent container. Takes precedence over parentItemContainerGuid.")] bool? removeFromParentItemContainer = null,
+        [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
+        [Description("The GUIDs of the partitions to remove the item from.")] Guid[]? partitionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemUpdateDto
+        {
+            ParentItemContainerGuid = parentItemContainerGuid,
+            RemoveFromParentItemContainer = removeFromParentItemContainer,
+            PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList(),
+            PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
+        };
+
+        await client.Items[itemGuid].PatchAsync(body, cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_items_get_location")]
+    [Description("Get the location of an item: the chain of parent container items from the item up to its root container.")]
+    public static async Task<IReadOnlyList<ItemSummary>> GetItemLocationAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.Items[itemGuid].Location.GetAsync(cancellationToken: cancellationToken);
+
+        return result?.Select(i => i.ToSummary()).ToArray() ?? [];
+    }
+
+    [McpServerTool(Name = "fargo_items_list_moviments")]
+    [Description("List the movement history of an item: each time it was moved between containers and when.")]
+    public static async Task<IReadOnlyList<ItemMovimentSummary>> ListItemMovimentsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.Items[itemGuid].Moviments.GetAsync(cancellationToken: cancellationToken);
+
+        return result?.Select(m => m.ToSummary()).ToArray() ?? [];
+    }
+
+    [McpServerTool(Name = "fargo_items_get_inventory")]
+    [Description("Get the inventory of an item treated as a container: the count of contained items grouped by article.")]
+    public static async Task<IReadOnlyList<ItemContainerInventorySummary>> GetItemInventoryAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item (container).")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.Items[itemGuid].Inventory.GetAsync(cancellationToken: cancellationToken);
+
+        return result?.Select(i => i.ToSummary()).ToArray() ?? [];
+    }
 }

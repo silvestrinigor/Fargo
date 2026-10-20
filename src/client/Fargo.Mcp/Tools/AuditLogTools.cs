@@ -73,4 +73,19 @@ public static class AuditLogTools
 
         return result?.Select(a => a.ToSummary()).ToArray() ?? [];
     }
+
+    [McpServerTool(Name = "fargo_auditlogs_get")]
+    [Description("Get a single audit log entry by its GUID.")]
+    public static async Task<AuditLogSummary?> GetAuditLogAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the audit log entry.")] Guid auditLogGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var entry = await client.AuditLogs[auditLogGuid].GetAsync(cancellationToken: cancellationToken);
+
+        return entry?.ToSummary();
+    }
 }

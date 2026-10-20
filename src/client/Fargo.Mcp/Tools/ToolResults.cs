@@ -53,6 +53,17 @@ public static class ToolResults
         dto.EntityType,
         dto.AuditLogType,
         dto.OccurredAt);
+
+    public static ArticleInventorySummary ToSummary(this ArticleInventoryDto dto) => new(
+        dto.TotalCount);
+
+    public static ItemContainerInventorySummary ToSummary(this ItemContainerInventoryDto dto) => new(
+        dto.ArticleGuid,
+        dto.TotalCount);
+
+    public static ItemMovimentSummary ToSummary(this ItemMovimentDto dto) => new(
+        dto.MovedToItemContainerGuid,
+        dto.OccurredAt);
 }
 
 public sealed record ArticleSummary(
@@ -97,4 +108,15 @@ public sealed record AuditLogSummary(
     Guid? EntityGuid,
     int? EntityType,
     int? AuditLogType,
+    DateTimeOffset? OccurredAt);
+
+public sealed record ArticleInventorySummary(
+    int? TotalCount);
+
+public sealed record ItemContainerInventorySummary(
+    Guid? ArticleGuid,
+    int? TotalCount);
+
+public sealed record ItemMovimentSummary(
+    Guid? MovedToItemContainerGuid,
     DateTimeOffset? OccurredAt);

@@ -98,4 +98,46 @@ public static class ArticleTools
 
         return $"Article with barcode '{barcode}' deleted.";
     }
+
+    [McpServerTool(Name = "fargo_articles_update_by_barcode")]
+    [Description("Update an existing article identified by one of its barcodes. Only the supplied fields are changed; omitted fields are left as-is.")]
+    public static async Task<string> UpdateArticleByBarcodeAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The barcode in {value}:{type} format, e.g. 1234567890128:ean13.")] string barcode,
+        [Description("The new name of the article. Leave null to keep the existing name.")] string? name = null,
+        [Description("The new description of the article. Leave null to keep the existing description.")] string? description = null,
+        [Description("The GUIDs of the partitions to associate with the article.")] Guid[]? partitionsToAdd = null,
+        [Description("The GUIDs of the partitions to disassociate from the article.")] Guid[]? partitionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ArticleUpdateDto
+        {
+            Name = name,
+            Description = description,
+            PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList(),
+            PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
+        };
+
+        await client.Articles[barcode].PatchAsync(body, cancellationToken: cancellationToken);
+
+        return $"Article with barcode '{barcode}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_articles_get_inventory_by_barcode")]
+    [Description("Get inventory information (total item count) for an article identified by one of its barcodes.")]
+    public static async Task<ArticleInventorySummary?> GetArticleInventoryByBarcodeAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The barcode in {value}:{type} format, e.g. 1234567890128:ean13.")] string barcode,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var inventory = await client.Articles[barcode].Inventory.GetAsync(cancellationToken: cancellationToken);
+
+        return inventory?.ToSummary();
+    }
 }
