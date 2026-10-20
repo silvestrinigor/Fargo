@@ -1422,7 +1422,7 @@
       },
       "ActorType": {
         "type": "integer",
-        "description": "Represents the type of actor responsible for performing an action\nwithin the system."
+        "description": "Represents the type of actor responsible for performing an action\r\nwithin the system."
       },
       "ArticleBarcodeDto": {
         "type": "object",
@@ -1445,11 +1445,11 @@
             "minLength": 13,
             "pattern": "^\\d{13}$",
             "type": "string",
-            "description": "The new EAN-13 barcode to assign to the article. A `null` value\nleaves the existing EAN-13 barcode unchanged."
+            "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged."
           },
           "removeEan13": {
             "type": "boolean",
-            "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\nvalue to `null`.",
+            "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\r\nvalue to `null`.",
             "default": false
           }
         },
@@ -1503,7 +1503,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional variation configuration. Required when ArticleType\nis ArticleType.Variation.",
+                "description": "The optional variation configuration. Required when ArticleType\r\nis ArticleType.Variation.",
                 "$ref": "#/components/schemas/ArticleVariationDto"
               }
             ]
@@ -1514,7 +1514,7 @@
                 "type": "null"
               },
               {
-                "description": "The optional pack configuration. Required when ArticleType\nis ArticleType.Pack.",
+                "description": "The optional pack configuration. Required when ArticleType\r\nis ArticleType.Pack.",
                 "$ref": "#/components/schemas/ArticlePackDto"
               }
             ]
@@ -1527,7 +1527,7 @@
             "items": {
               "$ref": "#/components/schemas/ArticleKitComponentDto"
             },
-            "description": "The optional components of the article. Required when ArticleType\nis ArticleType.Kit."
+            "description": "The optional components of the article. Required when ArticleType\r\nis ArticleType.Kit."
           },
           "container": {
             "oneOf": [
@@ -1682,11 +1682,11 @@
                 "example": "m"
               }
             },
-            "description": "The new length along the X axis. A `null` value leaves the\nexisting value unchanged."
+            "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthX": {
             "type": "boolean",
-            "description": "Indicates whether the existing X-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthX.",
+            "description": "Indicates whether the existing X-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthX.",
             "default": false
           },
           "lengthY": {
@@ -1704,11 +1704,11 @@
                 "example": "m"
               }
             },
-            "description": "The new length along the Y axis. A `null` value leaves the\nexisting value unchanged."
+            "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthY": {
             "type": "boolean",
-            "description": "Indicates whether the existing Y-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthY.",
+            "description": "Indicates whether the existing Y-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthY.",
             "default": false
           },
           "lengthZ": {
@@ -1726,11 +1726,11 @@
                 "example": "m"
               }
             },
-            "description": "The new length along the Z axis. A `null` value leaves the\nexisting value unchanged."
+            "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged."
           },
           "removeLengthZ": {
             "type": "boolean",
-            "description": "Indicates whether the existing Z-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthZ.",
+            "description": "Indicates whether the existing Z-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthZ.",
             "default": false
           }
         },
@@ -1948,7 +1948,7 @@
           },
           "removeShelfLife": {
             "type": "boolean",
-            "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\nWhen `true`, this takes precedence over ShelfLife.",
+            "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over ShelfLife.",
             "default": false
           },
           "mass": {
@@ -1970,7 +1970,7 @@
           },
           "removeMass": {
             "type": "boolean",
-            "description": "Indicates whether the existing mass should be removed by setting it to `null`.\nWhen `true`, this takes precedence over Mass.",
+            "description": "Indicates whether the existing mass should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over Mass.",
             "default": false
           },
           "dimension": {
@@ -2093,7 +2093,7 @@
             "description": "The collection of partition GUIDs that this audit log entry belongs to"
           }
         },
-        "description": "Represents a data transfer object for audit log information.\nThis DTO contains all the essential details about an audit event, including\nthe actor who performed the action, the entity affected, the type of action,\nwhen it occurred, and any additional metadata."
+        "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata."
       },
       "AuditLogType": {
         "type": "integer",
@@ -2168,7 +2168,7 @@
             "$ref": "#/components/schemas/Token"
           }
         },
-        "description": "Represents the data transfer object for logging out by providing a refresh token.\nThis DTO is used as input when performing a logout operation to revoke the refresh token."
+        "description": "Represents the data transfer object for logging out by providing a refresh token.\r\nThis DTO is used as input when performing a logout operation to revoke the refresh token."
       },
       "IdentityPasswordUpdateDto": {
         "required": [
@@ -2191,7 +2191,7 @@
             "description": "The user's current password for verification purposes"
           }
         },
-        "description": "Represents the data transfer object for updating a user's password.\nThe NewPassword field uses the Password structure to enforce security validation rules\nincluding minimum character requirements, special character constraints, and other password policies."
+        "description": "Represents the data transfer object for updating a user's password.\r\nThe NewPassword field uses the Password structure to enforce security validation rules\r\nincluding minimum character requirements, special character constraints, and other password policies."
       },
       "IdentityRefreshDto": {
         "required": [
@@ -2204,7 +2204,7 @@
             "$ref": "#/components/schemas/Token"
           }
         },
-        "description": "Represents the data transfer object for refreshing authentication tokens.\nThis DTO is used as input when requesting a new access token using a refresh token."
+        "description": "Represents the data transfer object for refreshing authentication tokens.\r\nThis DTO is used as input when requesting a new access token using a refresh token."
       },
       "ItemContainerInventoryDto": {
         "required": [

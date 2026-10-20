@@ -38,6 +38,8 @@ through a REST API and a command-line client.
   other systems.
 - **Command-line client (`fargo`)** — a terminal client for operators and
   scripts.
+- **[MCP server](mcp/overview.md)** — a Model Context Protocol server that lets
+  AI agents work with Fargo through tools.
 
 ## Where to go next
 
@@ -45,4 +47,5 @@ through a REST API and a command-line client.
 - [Server](server/overview.md) — how the server is built: architecture, domain model, persistence, and security.
 - [CLI](cli/overview.md) — the command-line client.
 - [Web API Overview](web-api/overview.md) — the REST API surface.
+- [MCP Server Overview](mcp/overview.md) — the Model Context Protocol server for AI agents.
 - [API Reference](~/api/index.md) — the generated .NET API documentation.
