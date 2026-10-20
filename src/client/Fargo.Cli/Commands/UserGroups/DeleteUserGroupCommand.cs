@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.UserGroups;
 public sealed class DeleteUserGroupCommand : Command
 {
     public DeleteUserGroupCommand(FargoApiClient client)
-        : base("delete", "Delete a user group by GUID")
+        : base("delete", """
+            Delete a user group by GUID.
+
+            Examples:
+              fargo user-groups delete 00000000-0000-0000-0000-000000000003
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -21,7 +27,7 @@ public sealed class DeleteUserGroupCommand : Command
 
             await client.UserGroups[guid].DeleteAsync();
 
-            Console.WriteLine("User group deleted.");
+            StatusWriter.Success("User group deleted.", ("GUID", guid.ToString()));
 
             return 0;
         });

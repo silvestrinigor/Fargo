@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Articles;
 public sealed class GetArticleCommand : Command
 {
     public GetArticleCommand(FargoApiClient client)
-        : base("get", "Get a single article by GUID")
+        : base("get", """
+            Show the full details of a single article.
+
+            Examples:
+              fargo articles get 11111111-1111-1111-1111-111111111111
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -27,9 +33,14 @@ public sealed class GetArticleCommand : Command
                 return 1;
             }
 
-            Console.WriteLine($"GUID:  {article.Guid}");
-            Console.WriteLine($"Name:  {article.Name}");
-            Console.WriteLine($"Type:  {article.ArticleType}");
+            new DetailWriter()
+                .Title("Article")
+                .Field("GUID", article.Guid)
+                .Field("Name", article.Name)
+                .Field("Type", article.ArticleType)
+                .Field("Description", article.Description)
+                .Field("Shelf life", article.ShelfLife)
+                .Write();
 
             return 0;
         });

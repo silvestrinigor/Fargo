@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Partitions;
 public sealed class GetPartitionCommand : Command
 {
     public GetPartitionCommand(FargoApiClient client)
-        : base("get", "Get a single partition by GUID")
+        : base("get", """
+            Show the full details of a single partition.
+
+            Examples:
+              fargo partitions get 00000000-0000-0000-0000-000000000001
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -27,9 +33,14 @@ public sealed class GetPartitionCommand : Command
                 return 1;
             }
 
-            Console.WriteLine($"GUID:    {partition.Guid}");
-            Console.WriteLine($"Name:    {partition.Name}");
-            Console.WriteLine($"Parent:  {partition.ParentPartitionGuid}");
+            new DetailWriter()
+                .Title("Partition")
+                .Field("GUID", partition.Guid)
+                .Field("Name", partition.Name)
+                .Field("Description", partition.Description)
+                .Field("Parent", partition.ParentPartitionGuid)
+                .Field("Global", partition.IsGlobalPartition)
+                .Write();
 
             return 0;
         });

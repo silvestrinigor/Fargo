@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.UserGroups;
 public sealed class GetUserGroupCommand : Command
 {
     public GetUserGroupCommand(FargoApiClient client)
-        : base("get", "Get a single user group by GUID")
+        : base("get", """
+            Show the full details of a single user group.
+
+            Examples:
+              fargo user-groups get 00000000-0000-0000-0000-000000000003
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -27,9 +33,15 @@ public sealed class GetUserGroupCommand : Command
                 return 1;
             }
 
-            Console.WriteLine($"GUID:    {group.Guid}");
-            Console.WriteLine($"Name:    {group.Nameid}");
-            Console.WriteLine($"Active:  {group.IsActive}");
+            new DetailWriter()
+                .Title("User group")
+                .Field("GUID", group.Guid)
+                .Field("Name", group.Nameid)
+                .Field("Description", group.Description)
+                .Field("Active", group.IsActive)
+                .Field("Admin group", group.IsAdminUserGroup)
+                .Field("Parent partition", group.ParentPartition)
+                .Write();
 
             return 0;
         });

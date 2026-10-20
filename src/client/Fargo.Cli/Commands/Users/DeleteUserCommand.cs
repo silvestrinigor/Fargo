@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Users;
 public sealed class DeleteUserCommand : Command
 {
     public DeleteUserCommand(FargoApiClient client)
-        : base("delete", "Delete a user by GUID")
+        : base("delete", """
+            Delete a user by GUID.
+
+            Examples:
+              fargo users delete 00000000-0000-0000-0000-000000000004
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -21,7 +27,7 @@ public sealed class DeleteUserCommand : Command
 
             await client.Users[guid].DeleteAsync();
 
-            Console.WriteLine("User deleted.");
+            StatusWriter.Success("User deleted.", ("GUID", guid.ToString()));
 
             return 0;
         });

@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,13 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class ItemLocationCommand : Command
 {
     public ItemLocationCommand(FargoApiClient client)
-        : base("location", "Get the location (container chain) for an item")
+        : base("location", """
+            Show the container chain an item is located in, from the outermost
+            container to the innermost.
+
+            Examples:
+              fargo items location 22222222-2222-2222-2222-222222222222
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -27,11 +34,13 @@ public sealed class ItemLocationCommand : Command
                 return 0;
             }
 
-            Console.WriteLine("Location chain (outermost → innermost):");
-            foreach (var container in result)
-            {
-                Console.WriteLine($"  {container.Guid}  article={container.ArticleGuid}");
-            }
+            Console.WriteLine("Location chain (outermost to innermost):");
+            Console.WriteLine();
+
+            new TableWriter<Fargo.ClientHttp.Models.ItemDto>()
+                .Column("CONTAINER GUID", c => c.Guid?.ToString())
+                .Column("ARTICLE", c => c.ArticleGuid?.ToString())
+                .Write(result);
 
             return 0;
         });

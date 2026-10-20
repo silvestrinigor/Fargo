@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using System.CommandLine;
@@ -6,7 +7,14 @@ namespace Fargo.Cli.Commands.Articles;
 
 public sealed class ArticleCreateCommand : Command
 {
-    public ArticleCreateCommand(FargoApiClient client) : base("create", "Create a new article")
+    public ArticleCreateCommand(FargoApiClient client)
+        : base("create", """
+            Create a new article.
+
+            Examples:
+              fargo articles create --name "Widget"
+              fargo articles create --name "Widget" --type 2 --partitions 00000000-0000-0000-0000-000000000001
+            """)
     {
         var nameOption = new Option<string>("--name")
         {
@@ -16,13 +24,13 @@ public sealed class ArticleCreateCommand : Command
 
         var typeOption = new Option<int>("--type")
         {
-            Description = "Article type . Defaults to 1.",
-            DefaultValueFactory = x => 1
+            Description = "Article type as an integer. Defaults to 1.",
+            DefaultValueFactory = _ => 1
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
         {
-            Description = "Partition GUIDs to associate (space-separated).",
+            Description = "Partition GUIDs to associate the article with (space-separated).",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -45,7 +53,10 @@ public sealed class ArticleCreateCommand : Command
 
             var guid = await client.Articles.PostAsync(dto);
 
-            Console.WriteLine($"Article created: {guid}");
+            StatusWriter.Success(
+                "Article created.",
+                ("GUID", guid?.ToString()),
+                ("Name", name));
 
             return 0;
         });

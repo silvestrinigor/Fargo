@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using System.CommandLine;
@@ -7,11 +8,17 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class CreateItemCommand : Command
 {
     public CreateItemCommand(FargoApiClient client)
-        : base("create", "Create a new item")
+        : base("create", """
+            Create a new item (an instance of an article).
+
+            Examples:
+              fargo items create --article 11111111-1111-1111-1111-111111111111
+              fargo items create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+            """)
     {
         var articleOption = new Option<Guid?>("--article")
         {
-            Description = "GUID of the article this item belongs to."
+            Description = "GUID of the article this item is an instance of."
         };
 
         var containerOption = new Option<Guid?>("--container")
@@ -44,7 +51,10 @@ public sealed class CreateItemCommand : Command
 
             var guid = await client.Items.PostAsync(dto);
 
-            Console.WriteLine($"Item created: {guid}");
+            StatusWriter.Success(
+                "Item created.",
+                ("GUID", guid?.ToString()),
+                ("Article", article?.ToString()));
 
             return 0;
         });

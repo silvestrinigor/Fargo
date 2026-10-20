@@ -1,4 +1,5 @@
 using Fargo.Cli.Configurations;
+using Fargo.Cli.Output;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Config;
@@ -6,7 +7,14 @@ namespace Fargo.Cli.Commands.Config;
 public sealed class SetServerCommand : Command
 {
     public SetServerCommand(IFargoCliConfigurationStore configurationStore)
-        : base("set-server", "Set the Fargo server URL the CLI connects to")
+        : base("set-server", """
+            Set and persist the Fargo server URL the CLI connects to by default.
+
+            This is used when a command does not pass --server explicitly.
+
+            Examples:
+              fargo config set-server --url https://localhost:7563
+            """)
     {
         var urlOption = new Option<string>("--url")
         {
@@ -35,7 +43,7 @@ public sealed class SetServerCommand : Command
 
             configurationStore.Save(configuration);
 
-            Console.WriteLine($"Server URL set to {server}.");
+            StatusWriter.Success("Server URL updated.", ("Server", server.ToString()));
 
             return 0;
         });

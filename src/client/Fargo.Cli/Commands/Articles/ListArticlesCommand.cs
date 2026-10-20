@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,21 +7,28 @@ namespace Fargo.Cli.Commands.Articles;
 public sealed class ListArticlesCommand : Command
 {
     public ListArticlesCommand(FargoApiClient client)
-        : base("list", "List articles")
+        : base("list", """
+            List articles as a table, with optional paging and partition filters.
+
+            Examples:
+              fargo articles list
+              fargo articles list --page 1 --limit 20
+              fargo articles list --partitions 00000000-0000-0000-0000-000000000001
+            """)
     {
         var pageOption = new Option<int?>("--page")
         {
-            Description = "Page number."
+            Description = "Page number to retrieve (starts at 1)."
         };
 
         var limitOption = new Option<int?>("--limit")
         {
-            Description = "Number of articles per page."
+            Description = "Maximum number of articles per page."
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
         {
-            Description = "Filter by partition GUIDs (space-separated).",
+            Description = "Only show articles under these partition GUIDs (space-separated).",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -48,14 +56,20 @@ public sealed class ListArticlesCommand : Command
 
                 if (partitions is { Length: > 0 })
                 {
-                    request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
+                    request.QueryParameters.ChildOfAnyOfThesePartitions =
+                        partitions.Select(g => (Guid?)g).ToArray();
                 }
             });
 
-            foreach (var article in result ?? [])
-            {
-                Console.WriteLine($"{article.Guid}  {article.Name}  type={article.ArticleType}");
-            }
+            new TableWriter<Fargo.ClientHttp.Models.ArticleDto>()
+                .Column("GUID", a => a.Guid?.ToString())
+                .Column("NAME", a => a.Name)
+                .Column("TYPE", a => a.ArticleType?.ToString())
+                .Column("DESCRIPTION", a => a.Description)
+                .EmptyMessage("No articles found.")
+                .Write(result);
+
+            return 0;
         });
     }
 }

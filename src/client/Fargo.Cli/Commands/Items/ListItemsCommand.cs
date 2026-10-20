@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,21 +7,28 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class ListItemsCommand : Command
 {
     public ListItemsCommand(FargoApiClient client)
-        : base("list", "List items")
+        : base("list", """
+            List items as a table, with optional paging and partition filters.
+
+            Examples:
+              fargo items list
+              fargo items list --page 1 --limit 20
+              fargo items list --partitions 00000000-0000-0000-0000-000000000001
+            """)
     {
         var pageOption = new Option<int?>("--page")
         {
-            Description = "Page number."
+            Description = "Page number to retrieve (starts at 1)."
         };
 
         var limitOption = new Option<int?>("--limit")
         {
-            Description = "Number of items per page."
+            Description = "Maximum number of items per page."
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
         {
-            Description = "Filter by partition GUIDs (space-separated).",
+            Description = "Only show items under these partition GUIDs (space-separated).",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -48,14 +56,20 @@ public sealed class ListItemsCommand : Command
 
                 if (partitions is { Length: > 0 })
                 {
-                    request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
+                    request.QueryParameters.ChildOfAnyOfThesePartitions =
+                        partitions.Select(g => (Guid?)g).ToArray();
                 }
             });
 
-            foreach (var item in result ?? [])
-            {
-                Console.WriteLine($"{item.Guid}  article={item.ArticleGuid}");
-            }
+            new TableWriter<Fargo.ClientHttp.Models.ItemDto>()
+                .Column("GUID", i => i.Guid?.ToString())
+                .Column("ARTICLE", i => i.ArticleGuid?.ToString())
+                .Column("CONTAINER", i => i.ParentContainerGuid?.ToString())
+                .Column("FIXED", i => i.IsFixed?.ToString())
+                .EmptyMessage("No items found.")
+                .Write(result);
+
+            return 0;
         });
     }
 }

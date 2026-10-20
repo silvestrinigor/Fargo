@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,16 +7,24 @@ namespace Fargo.Cli.Commands.Audits;
 public sealed class ListAuditLogsCommand : Command
 {
     public ListAuditLogsCommand(FargoApiClient client)
-        : base("list", "List audit logs")
+        : base("list", """
+            List audit log entries as a table, most useful with paging.
+
+            Each row shows who (actor) did what (action) to which entity, and when.
+
+            Examples:
+              fargo audit list
+              fargo audit list --page 1 --limit 50
+            """)
     {
         var pageOption = new Option<int?>("--page")
         {
-            Description = "Page number."
+            Description = "Page number to retrieve (starts at 1)."
         };
 
         var limitOption = new Option<int?>("--limit")
         {
-            Description = "Number of audit logs per page."
+            Description = "Maximum number of audit entries per page."
         };
 
         Add(pageOption);
@@ -39,10 +48,18 @@ public sealed class ListAuditLogsCommand : Command
                 }
             });
 
-            foreach (var auditLogs in result ?? [])
-            {
-                Console.WriteLine($"{auditLogs.Guid}  actorGuid={auditLogs.ActorGuid}  actorType={auditLogs.ActorType} actionType={auditLogs.ActionType} entityType={auditLogs.EntityType}");
-            }
+            new TableWriter<Fargo.ClientHttp.Models.AuditLogDto>()
+                .Column("GUID", a => a.Guid?.ToString())
+                .Column("ACTOR", a => a.ActorGuid?.ToString())
+                .Column("ACTOR TYPE", a => a.ActorType?.ToString())
+                .Column("ACTION", a => a.ActionType?.ToString())
+                .Column("ENTITY TYPE", a => a.EntityType?.ToString())
+                .Column("ENTITY", a => a.EntityGuid?.ToString())
+                .Column("OCCURRED AT", a => a.OccurredAt?.ToString("u"))
+                .EmptyMessage("No audit logs found.")
+                .Write(result);
+
+            return 0;
         });
     }
 }

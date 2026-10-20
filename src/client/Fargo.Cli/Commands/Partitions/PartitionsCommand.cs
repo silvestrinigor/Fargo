@@ -6,7 +6,7 @@ namespace Fargo.Cli.Commands.Partitions;
 public sealed class PartitionsCommand : Command
 {
     public PartitionsCommand(FargoApiClient client)
-        : base("partitions", "Manage partitions")
+        : base("partitions", "Manage partitions - the hierarchy used to scope and group data.")
     {
         Add(new ListPartitionsCommand(client));
         Add(new GetPartitionCommand(client));

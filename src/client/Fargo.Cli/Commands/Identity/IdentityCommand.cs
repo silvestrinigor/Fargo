@@ -7,7 +7,7 @@ namespace Fargo.Cli.Commands.Identity;
 public sealed class IdentityCommand : Command
 {
     public IdentityCommand(FargoApiClient client, ITokenStore tokenStore)
-        : base("identity", "Manage Fargo identity and authentication")
+        : base("identity", "Authenticate with the Fargo server (login, logout, refresh, change password).")
     {
         Add(new LoginCommand(client, tokenStore));
         Add(new LogoutCommand(client, tokenStore));

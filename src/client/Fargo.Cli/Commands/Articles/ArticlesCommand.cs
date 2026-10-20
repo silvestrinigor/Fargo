@@ -5,7 +5,8 @@ namespace Fargo.Cli.Commands.Articles;
 
 public sealed class ArticlesCommand : Command
 {
-    public ArticlesCommand(FargoApiClient client) : base("articles", "Manage articles")
+    public ArticlesCommand(FargoApiClient client)
+        : base("articles", "Manage articles - the catalog of product definitions.")
     {
         Add(new ListArticlesCommand(client));
         Add(new GetArticleCommand(client));

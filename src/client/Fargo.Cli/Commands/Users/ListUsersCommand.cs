@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,21 +7,28 @@ namespace Fargo.Cli.Commands.Users;
 public sealed class ListUsersCommand : Command
 {
     public ListUsersCommand(FargoApiClient client)
-        : base("list", "List users")
+        : base("list", """
+            List users as a table, with optional paging and partition filters.
+
+            Examples:
+              fargo users list
+              fargo users list --page 1 --limit 20
+              fargo users list --partitions 00000000-0000-0000-0000-000000000001
+            """)
     {
         var pageOption = new Option<int?>("--page")
         {
-            Description = "Page number."
+            Description = "Page number to retrieve (starts at 1)."
         };
 
         var limitOption = new Option<int?>("--limit")
         {
-            Description = "Number of users per page."
+            Description = "Maximum number of users per page."
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
         {
-            Description = "Filter by partition GUIDs (space-separated).",
+            Description = "Only show users under these partition GUIDs (space-separated).",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -48,14 +56,21 @@ public sealed class ListUsersCommand : Command
 
                 if (partitions is { Length: > 0 })
                 {
-                    request.QueryParameters.ChildOfAnyOfThesePartitions = partitions.Select(g => (Guid?)g).ToArray();
+                    request.QueryParameters.ChildOfAnyOfThesePartitions =
+                        partitions.Select(g => (Guid?)g).ToArray();
                 }
             });
 
-            foreach (var user in result ?? [])
-            {
-                Console.WriteLine($"{user.Guid}  {user.Nameid}  {user.FirstName} {user.LastName}");
-            }
+            new TableWriter<Fargo.ClientHttp.Models.UserDto>()
+                .Column("GUID", u => u.Guid?.ToString())
+                .Column("USERNAME", u => u.Nameid)
+                .Column("NAME", u => $"{u.FirstName} {u.LastName}".Trim())
+                .Column("ACTIVE", u => u.IsActive?.ToString())
+                .Column("ADMIN", u => u.IsAdmin?.ToString())
+                .EmptyMessage("No users found.")
+                .Write(result);
+
+            return 0;
         });
     }
 }

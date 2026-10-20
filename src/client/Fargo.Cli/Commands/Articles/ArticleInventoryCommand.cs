@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,13 @@ namespace Fargo.Cli.Commands.Articles;
 public sealed class ArticleInventoryCommand : Command
 {
     public ArticleInventoryCommand(FargoApiClient client)
-        : base("inventory", "Get inventory count for an article")
+        : base("inventory", """
+            Show the inventory count for an article.
+
+            Examples:
+              fargo articles inventory 11111111-1111-1111-1111-111111111111
+              fargo articles inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -22,7 +29,7 @@ public sealed class ArticleInventoryCommand : Command
         var includeDescendantsOption = new Option<bool>("--include-descendants")
         {
             Description = "Include items in nested containers. Defaults to true.",
-            DefaultValueFactory = x => true
+            DefaultValueFactory = _ => true
         };
 
         Add(guidArgument);
@@ -38,9 +45,11 @@ public sealed class ArticleInventoryCommand : Command
             var result = await client.Articles[guid.ToString()].Inventory.GetAsync(request =>
             {
                 request.QueryParameters.IncludeDescendents = includeDescendants;
+
                 if (containers is { Length: > 0 })
                 {
-                    request.QueryParameters.InsideItemContainerGuids = containers.Select(g => (Guid?)g).ToArray();
+                    request.QueryParameters.InsideItemContainerGuids =
+                        containers.Select(g => (Guid?)g).ToArray();
                 }
             });
 
@@ -50,8 +59,11 @@ public sealed class ArticleInventoryCommand : Command
                 return 1;
             }
 
-            Console.WriteLine($"Article: {guid}");
-            Console.WriteLine($"Total:   {result.TotalCount}");
+            new DetailWriter()
+                .Title("Article inventory")
+                .Field("Article", guid)
+                .Field("Total count", result.TotalCount)
+                .Write();
 
             return 0;
         });

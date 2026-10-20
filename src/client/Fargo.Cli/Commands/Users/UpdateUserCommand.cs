@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using System.CommandLine;
@@ -7,7 +8,13 @@ namespace Fargo.Cli.Commands.Users;
 public sealed class UpdateUserCommand : Command
 {
     public UpdateUserCommand(FargoApiClient client)
-        : base("update", "Update an existing user")
+        : base("update", """
+            Update an existing user. Only the options you pass are changed.
+
+            Examples:
+              fargo users update 00000000-0000-0000-0000-000000000004 --first-name Jane
+              fargo users update 00000000-0000-0000-0000-000000000004 --active false
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -31,7 +38,7 @@ public sealed class UpdateUserCommand : Command
 
         var isActiveOption = new Option<bool?>("--active")
         {
-            Description = "Set user active state."
+            Description = "Set the user active state (true or false)."
         };
 
         Add(guidArgument);
@@ -72,7 +79,7 @@ public sealed class UpdateUserCommand : Command
 
             await client.Users[guid].PutAsync(dto);
 
-            Console.WriteLine("User updated.");
+            StatusWriter.Success("User updated.", ("GUID", guid.ToString()));
 
             return 0;
         });

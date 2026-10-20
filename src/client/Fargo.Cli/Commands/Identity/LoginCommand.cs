@@ -1,4 +1,5 @@
 using Fargo.Cli.Authentication;
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Models;
@@ -9,7 +10,16 @@ namespace Fargo.Cli.Commands.Identity;
 public sealed class LoginCommand : Command
 {
     public LoginCommand(FargoApiClient client, ITokenStore tokenStore)
-        : base("login", "Authenticate with the Fargo server")
+        : base("login", """
+            Authenticate with the Fargo server and store the session token.
+
+            If --password is omitted you will be prompted to type it securely
+            (the input is not echoed).
+
+            Examples:
+              fargo identity login --username admin
+              fargo identity login --username admin --password 'S3cr3t!'
+            """)
     {
         var usernameOption = new Option<string>("--username")
         {
@@ -58,7 +68,10 @@ public sealed class LoginCommand : Command
 
             await tokenStore.SetAsync(new AuthTokens(result.AccessToken!, result.RefreshToken!, result.ExpiresAt!.Value));
 
-            Console.WriteLine("Login successful.");
+            StatusWriter.Success(
+                "Login successful.",
+                ("User", username),
+                ("Expires at", result.ExpiresAt?.ToString("u")));
 
             return 0;
         });

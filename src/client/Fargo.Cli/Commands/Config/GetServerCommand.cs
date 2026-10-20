@@ -6,7 +6,12 @@ namespace Fargo.Cli.Commands.Config;
 public sealed class GetServerCommand : Command
 {
     public GetServerCommand(IFargoCliConfigurationStore configurationStore)
-        : base("get-server", "Show the Fargo server URL the CLI connects to")
+        : base("get-server", """
+            Print the configured default Fargo server URL.
+
+            Examples:
+              fargo config get-server
+            """)
     {
         SetAction(parseResult =>
         {
