@@ -416,5 +416,6 @@ public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         ParentUserGroupGuid = null;
     }
 
+    /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.UserGroup;
 }

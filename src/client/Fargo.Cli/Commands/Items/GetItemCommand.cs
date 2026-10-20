@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class GetItemCommand : Command
 {
     public GetItemCommand(FargoApiClient client)
-        : base("get", "Get a single item by GUID")
+        : base("get", """
+            Show the full details of a single item.
+
+            Examples:
+              fargo items get 22222222-2222-2222-2222-222222222222
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -27,15 +33,18 @@ public sealed class GetItemCommand : Command
                 return 1;
             }
 
-            Console.WriteLine($"GUID:       {item.Guid}");
-            Console.WriteLine($"Article:    {item.ArticleGuid}");
-            Console.WriteLine($"Container:  {item.ParentContainerGuid}");
-            Console.WriteLine($"Fixed:      {item.IsFixed}");
+            var partitions = item.Partitions is { Count: > 0 }
+                ? string.Join(", ", item.Partitions.Where(p => p.HasValue).Select(p => p!.Value))
+                : null;
 
-            if (item.Partitions is { Count: > 0 })
-            {
-                Console.WriteLine($"Partitions: {string.Join(", ", item.Partitions)}");
-            }
+            new DetailWriter()
+                .Title("Item")
+                .Field("GUID", item.Guid)
+                .Field("Article", item.ArticleGuid)
+                .Field("Container", item.ParentContainerGuid)
+                .Field("Fixed", item.IsFixed)
+                .Field("Partitions", partitions)
+                .Write();
 
             return 0;
         });

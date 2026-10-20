@@ -30,7 +30,7 @@ public sealed class FargoCliConfigurationStore : IFargoCliConfigurationStore
         {
             return new FargoCliConfiguration
             {
-                Server = new Uri("http://localhost:5000")
+                Server = new Uri("https://localhost:7563")
             };
         }
 

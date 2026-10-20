@@ -92,6 +92,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
 
         public IServiceCollection AddFargoAuditLogApplication() => services
-        .AddScoped<IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>>, AuditLogsQueryHandler>();
+        .AddScoped<IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>>, AuditLogsQueryHandler>()
+        .AddScoped<IQueryHandler<AuditLogSingleQuery, AuditLogDto?>, AuditLogSingleQueryHandler>();
     }
 }

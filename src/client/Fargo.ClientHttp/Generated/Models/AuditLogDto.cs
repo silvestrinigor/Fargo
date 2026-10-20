@@ -13,8 +13,8 @@ namespace Fargo.ClientHttp.Models
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class AuditLogDto : IAdditionalDataHolder, IParsable
     {
-        /// <summary>The type of action that was performed (e.g., Create, Update, Delete)</summary>
-        public int? ActionType { get; set; }
+        /// <summary>The type of change that was recorded (entity created, updated, or deleted)</summary>
+        public int? AuditLogType { get; set; }
         /// <summary>The unique identifier of the actor who performed the action</summary>
         public Guid? ActorGuid { get; set; }
         /// <summary>The type of actor who performed the action (e.g., User, Application)</summary>
@@ -70,7 +70,7 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "actionType", n => { ActionType = n.GetIntValue(); } },
+                { "auditLogType", n => { AuditLogType = n.GetIntValue(); } },
                 { "actorGuid", n => { ActorGuid = n.GetGuidValue(); } },
                 { "actorType", n => { ActorType = n.GetIntValue(); } },
                 { "entityGuid", n => { EntityGuid = n.GetGuidValue(); } },
@@ -88,7 +88,7 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("actionType", ActionType);
+            writer.WriteIntValue("auditLogType", AuditLogType);
             writer.WriteGuidValue("actorGuid", ActorGuid);
             writer.WriteIntValue("actorType", ActorType);
             writer.WriteGuidValue("entityGuid", EntityGuid);

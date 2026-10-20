@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using System.CommandLine;
@@ -7,7 +8,13 @@ namespace Fargo.Cli.Commands.Users;
 public sealed class CreateUserCommand : Command
 {
     public CreateUserCommand(FargoApiClient client)
-        : base("create", "Create a new user")
+        : base("create", """
+            Create a new user account.
+
+            Examples:
+              fargo users create --username jdoe --password 'S3cr3t!'
+              fargo users create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
+            """)
     {
         var usernameOption = new Option<string>("--username")
         {
@@ -34,7 +41,7 @@ public sealed class CreateUserCommand : Command
         var isActiveOption = new Option<bool>("--active")
         {
             Description = "Whether the user is active. Defaults to true.",
-            DefaultValueFactory = x => true
+            DefaultValueFactory = _ => true
         };
 
         Add(usernameOption);
@@ -73,7 +80,10 @@ public sealed class CreateUserCommand : Command
 
             var guid = await client.Users.PostAsync(dto);
 
-            Console.WriteLine($"User created: {guid}");
+            StatusWriter.Success(
+                "User created.",
+                ("GUID", guid?.ToString()),
+                ("Username", username));
 
             return 0;
         });

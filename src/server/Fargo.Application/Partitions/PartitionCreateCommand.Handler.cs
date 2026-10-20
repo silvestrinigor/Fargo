@@ -36,7 +36,7 @@ public sealed class PartitionCreateCommandHandler(
 
         var newPartition = Partition.CreatePartition(command.Create.Name, parentPartition);
 
-        var partitionAudit = AuditLog.CreateAuditLog(actor, newPartition, ActionType.CreatePartition);
+        var partitionAudit = AuditLog.CreateAuditLog(actor, newPartition, AuditLogType.EntityCreated);
 
         partitionAudit.Metadata.AddName(newPartition.Name);
 

@@ -61,7 +61,7 @@ public sealed class ArticleUpdateCommandHandler(
 
         var articleUpdateDto = command.Article;
 
-        var articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.EditArticle);
+        var articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityUpdated);
 
         if (articleUpdateDto.Name is { } name)
         {

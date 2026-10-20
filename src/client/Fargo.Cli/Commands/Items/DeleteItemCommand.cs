@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class DeleteItemCommand : Command
 {
     public DeleteItemCommand(FargoApiClient client)
-        : base("delete", "Delete an item by GUID")
+        : base("delete", """
+            Delete an item by GUID.
+
+            Examples:
+              fargo items delete 22222222-2222-2222-2222-222222222222
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -21,7 +27,7 @@ public sealed class DeleteItemCommand : Command
 
             await client.Items[guid].DeleteAsync();
 
-            Console.WriteLine("Item deleted.");
+            StatusWriter.Success("Item deleted.", ("GUID", guid.ToString()));
 
             return 0;
         });

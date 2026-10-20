@@ -1282,6 +1282,42 @@
         }
       }
     },
+    "/audit-logs/{auditLogGuid}": {
+      "get": {
+        "tags": [
+          "AuditLogs"
+        ],
+        "summary": "Gets a single audit log",
+        "description": "Retrieves a single audit log by its unique identifier, including its metadata.",
+        "operationId": "GetAuditLog",
+        "parameters": [
+          {
+            "name": "auditLogGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/audit-logs": {
       "get": {
         "tags": [
@@ -2003,7 +2039,7 @@
           "guid",
           "actorGuid",
           "actorType",
-          "actionType",
+          "auditLogType",
           "entityGuid",
           "entityType",
           "occurredAt",
@@ -2026,9 +2062,9 @@
             "description": "The type of actor who performed the action (e.g., User, Application)",
             "$ref": "#/components/schemas/ActorType"
           },
-          "actionType": {
-            "description": "The type of action that was performed (e.g., Create, Update, Delete)",
-            "$ref": "#/components/schemas/ActionType"
+          "auditLogType": {
+            "description": "The type of change that was recorded (entity created, updated, or deleted)",
+            "$ref": "#/components/schemas/AuditLogType"
           },
           "entityGuid": {
             "type": "string",
@@ -2058,6 +2094,10 @@
           }
         },
         "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata."
+      },
+      "AuditLogType": {
+        "type": "integer",
+        "description": "Represents the kind of change an audit log records."
       },
       "Color": {
         "pattern": "^#[0-9a-fA-F]{6}$",

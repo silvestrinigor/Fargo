@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Models;
@@ -8,7 +9,12 @@ namespace Fargo.Cli.Commands.Identity;
 public sealed class RefreshCommand : Command
 {
     public RefreshCommand(FargoApiClient client, ITokenStore tokenStore)
-        : base("refresh", "Refresh the access token using the stored refresh token")
+        : base("refresh", """
+            Refresh the access token using the stored refresh token.
+
+            Examples:
+              fargo identity refresh
+            """)
     {
         SetAction(async parseResult =>
         {
@@ -36,7 +42,9 @@ public sealed class RefreshCommand : Command
                 result.RefreshToken!,
                 result.ExpiresAt!.Value));
 
-            Console.WriteLine($"Token refreshed. Expires at: {result.ExpiresAt:O}");
+            StatusWriter.Success(
+                "Token refreshed.",
+                ("Expires at", result.ExpiresAt?.ToString("u")));
 
             return 0;
         });

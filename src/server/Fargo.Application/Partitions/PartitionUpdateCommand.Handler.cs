@@ -33,7 +33,7 @@ public sealed class PartitionUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(partitionToEdit);
 
-        var partitionAudit = AuditLog.CreateAuditLog(actor, partitionToEdit, ActionType.EditPartition);
+        var partitionAudit = AuditLog.CreateAuditLog(actor, partitionToEdit, AuditLogType.EntityUpdated);
 
         partitionToEdit.Name = command.Update.Name ?? partitionToEdit.Name;
 

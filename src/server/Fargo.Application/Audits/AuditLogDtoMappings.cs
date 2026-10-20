@@ -19,7 +19,7 @@ public static class AuditLogDtoMappings
             auditLog.Guid,
             auditLog.ActorGuid,
             auditLog.ActorType,
-            auditLog.ActionType,
+            auditLog.AuditLogType,
             auditLog.EntityGuid,
             auditLog.EntityType,
             auditLog.OccurredAt,

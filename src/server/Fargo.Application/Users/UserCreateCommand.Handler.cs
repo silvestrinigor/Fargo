@@ -38,7 +38,7 @@ public sealed class UserCreateCommandHandler(
 
         var user = User.CreateUser(command.Create.Nameid);
 
-        var userAudit = AuditLog.CreateAuditLog(actor, user, ActionType.CreateUser);
+        var userAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityCreated);
 
         userAudit.Metadata.Add(nameof(user.Nameid), new AuditValue.String(user.Nameid));
 

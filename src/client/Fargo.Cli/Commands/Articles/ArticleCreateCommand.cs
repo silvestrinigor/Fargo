@@ -1,13 +1,20 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;
 
-public sealed class CreateArticleCommand : Command
+public sealed class ArticleCreateCommand : Command
 {
-    public CreateArticleCommand(FargoApiClient client)
-        : base("create", "Create a new article")
+    public ArticleCreateCommand(FargoApiClient client)
+        : base("create", """
+            Create a new article.
+
+            Examples:
+              fargo articles create --name "Widget"
+              fargo articles create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
+            """)
     {
         var nameOption = new Option<string>("--name")
         {
@@ -15,15 +22,17 @@ public sealed class CreateArticleCommand : Command
             Required = true
         };
 
-        var typeOption = new Option<int>("--type")
+        var typeOption = new Option<ArticleType>("--type")
         {
-            Description = "Article type . Defaults to 1.",
-            DefaultValueFactory = x => 1
+            Description =
+                "Article type by name (default, variation, pack, kit, container). "
+                + "Defaults to default.",
+            DefaultValueFactory = _ => ArticleType.Default
         };
 
         var partitionsOption = new Option<Guid[]?>("--partitions")
         {
-            Description = "Partition GUIDs to associate (space-separated).",
+            Description = "Partition GUIDs to associate the article with (space-separated).",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -40,13 +49,16 @@ public sealed class CreateArticleCommand : Command
             var dto = new ArticleCreateDto
             {
                 Name = name,
-                ArticleType = type,
+                ArticleType = (int)type,
                 PartitionsToAdd = partitions?.Select(g => (Guid?)g).ToList()
             };
 
             var guid = await client.Articles.PostAsync(dto);
 
-            Console.WriteLine($"Article created: {guid}");
+            StatusWriter.Success(
+                "Article created.",
+                ("GUID", guid?.ToString()),
+                ("Name", name));
 
             return 0;
         });

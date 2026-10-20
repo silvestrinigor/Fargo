@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,11 +7,18 @@ namespace Fargo.Cli.Commands.Articles;
 public sealed class GetArticleByBarcodeCommand : Command
 {
     public GetArticleByBarcodeCommand(FargoApiClient client)
-        : base("get-by-barcode", "Get an article by barcode")
+        : base("get-by-barcode", """
+            Look up a single article by one of its barcodes.
+
+            The barcode is given as {value}:{type}.
+
+            Examples:
+              fargo articles get-by-barcode 1234567890128:ean13
+            """)
     {
         var barcodeArgument = new Argument<string>("barcode")
         {
-            Description = "The barcode value in {value}:{type} format (e.g. 1234567890128:ean13)."
+            Description = "The barcode in {value}:{type} format (e.g. 1234567890128:ean13)."
         };
 
         Add(barcodeArgument);
@@ -27,9 +35,13 @@ public sealed class GetArticleByBarcodeCommand : Command
                 return 1;
             }
 
-            Console.WriteLine($"GUID:  {article.Guid}");
-            Console.WriteLine($"Name:  {article.Name}");
-            Console.WriteLine($"Type:  {article.ArticleType}");
+            new DetailWriter()
+                .Title("Article")
+                .Field("GUID", article.Guid)
+                .Field("Name", article.Name)
+                .Field("Type", EnumFormatting.Format<ArticleType>(article.ArticleType))
+                .Field("Description", article.Description)
+                .Write();
 
             return 0;
         });

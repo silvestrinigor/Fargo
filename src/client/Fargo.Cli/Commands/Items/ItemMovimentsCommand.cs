@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class ItemMovimentsCommand : Command
 {
     public ItemMovimentsCommand(FargoApiClient client)
-        : base("moviments", "Get the movement history for an item")
+        : base("moviments", """
+            Show the movement history for an item (when it changed containers).
+
+            Examples:
+              fargo items moviments 22222222-2222-2222-2222-222222222222
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -21,16 +27,11 @@ public sealed class ItemMovimentsCommand : Command
 
             var result = await client.Items[guid].Moviments.GetAsync();
 
-            if (result is null || result.Count == 0)
-            {
-                Console.WriteLine("No movement history found.");
-                return 0;
-            }
-
-            foreach (var moviment in result)
-            {
-                Console.WriteLine($"{moviment.OccurredAt:O}  container={moviment.MovedToItemContainerGuid}");
-            }
+            new TableWriter<Fargo.ClientHttp.Models.ItemMovimentDto>()
+                .Column("OCCURRED AT", m => m.OccurredAt?.ToString("u"))
+                .Column("MOVED TO CONTAINER", m => m.MovedToItemContainerGuid?.ToString())
+                .EmptyMessage("No movement history found.")
+                .Write(result);
 
             return 0;
         });

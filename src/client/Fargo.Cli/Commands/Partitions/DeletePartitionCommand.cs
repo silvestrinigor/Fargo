@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Partitions;
 public sealed class DeletePartitionCommand : Command
 {
     public DeletePartitionCommand(FargoApiClient client)
-        : base("delete", "Delete a partition by GUID")
+        : base("delete", """
+            Delete a partition by GUID.
+
+            Examples:
+              fargo partitions delete 00000000-0000-0000-0000-000000000002
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -21,7 +27,7 @@ public sealed class DeletePartitionCommand : Command
 
             await client.Partitions[guid].DeleteAsync();
 
-            Console.WriteLine("Partition deleted.");
+            StatusWriter.Success("Partition deleted.", ("GUID", guid.ToString()));
 
             return 0;
         });

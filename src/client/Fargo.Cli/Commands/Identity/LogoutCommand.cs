@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Models;
@@ -8,7 +9,12 @@ namespace Fargo.Cli.Commands.Identity;
 public sealed class LogoutCommand : Command
 {
     public LogoutCommand(FargoApiClient client, ITokenStore tokenStore)
-        : base("logout", "Log out from the Fargo server")
+        : base("logout", """
+            Log out from the Fargo server and clear the stored session token.
+
+            Examples:
+              fargo identity logout
+            """)
     {
         SetAction(async parseResult =>
         {
@@ -35,7 +41,7 @@ public sealed class LogoutCommand : Command
 
             await tokenStore.ClearAsync();
 
-            Console.WriteLine("Logged out successfully.");
+            StatusWriter.Success("Logged out successfully.");
 
             return 0;
         });

@@ -90,6 +90,8 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
+    private readonly List<ItemPartition> partitions = [];
+
     /// <summary>
     /// Gets the movement history of the item.
     /// </summary>
@@ -99,8 +101,6 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// while removing the item from a container records a movement with no
     /// destination container.
     /// </remarks>
-    private readonly List<ItemPartition> partitions = [];
-
     public IReadOnlyCollection<ItemMoviment> Moviments => Moviments;
 
     private readonly List<ItemMoviment> moviments = [];
@@ -307,5 +307,6 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
+    /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.Item;
 }

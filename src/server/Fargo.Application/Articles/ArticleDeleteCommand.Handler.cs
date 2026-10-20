@@ -59,7 +59,7 @@ public sealed class ArticleDeleteCommandHandler(
 
         articleRepository.Remove(article);
 
-        var audit = AuditLog.CreateAuditLog(actor, article, ActionType.DeleteArticle);
+        var audit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
 

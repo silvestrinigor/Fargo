@@ -1,3 +1,4 @@
+using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -6,7 +7,12 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class ItemInventoryCommand : Command
 {
     public ItemInventoryCommand(FargoApiClient client)
-        : base("inventory", "Get the article inventory inside a container item")
+        : base("inventory", """
+            Show the article inventory contained inside a container item.
+
+            Examples:
+              fargo items inventory 22222222-2222-2222-2222-222222222222
+            """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
@@ -21,19 +27,11 @@ public sealed class ItemInventoryCommand : Command
 
             var result = await client.Items[guid].Inventory.GetAsync();
 
-            if (result is null || result.Count == 0)
-            {
-                Console.WriteLine("Container is empty.");
-                return 0;
-            }
-
-            Console.WriteLine($"{"Article GUID",-40}  {"Count"}");
-            Console.WriteLine(new string('-', 50));
-
-            foreach (var entry in result)
-            {
-                Console.WriteLine($"{entry.ArticleGuid,-40}  {entry.TotalCount}");
-            }
+            new TableWriter<Fargo.ClientHttp.Models.ItemContainerInventoryDto>()
+                .Column("ARTICLE GUID", e => e.ArticleGuid?.ToString())
+                .Column("COUNT", e => e.TotalCount?.ToString())
+                .EmptyMessage("Container is empty.")
+                .Write(result);
 
             return 0;
         });

@@ -94,7 +94,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     article = Article.NewArticle(command.Create.Name);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
                     break;
                 }
@@ -115,7 +115,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticleVariation(command.Create.Name, fromArticle);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
                     articleAudit.Metadata.AddFromArticleGuid(fromArticle.Guid);
 
@@ -144,7 +144,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
                     articleAudit.Metadata.AddFromArticleGuid(fromArticle.Guid);
 
@@ -178,7 +178,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     article = Article.NewArticleKit(command.Create.Name, kitComponents);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
                     articleAudit.Metadata.AddKitComponents(
                         [.. command.Create.KitComponents.Select(
@@ -192,7 +192,7 @@ public sealed class ArticleCreateCommandHandler(
                 {
                     article = Article.NewArticleContainer(command.Create.Name);
 
-                    articleAudit = AuditLog.CreateAuditLog(actor, article, ActionType.CreateArticle);
+                    articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
                     break;
                 }
