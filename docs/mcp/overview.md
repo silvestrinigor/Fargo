@@ -38,11 +38,11 @@ Tools are grouped by resource and named `fargo_<resource>_<action>`:
 | User groups | `fargo_usergroups_list`, `fargo_usergroups_get` | Read-only |
 | Audit logs | `fargo_auditlogs_list` | Read-only |
 
-See the [Tools Reference](tools.md) for the parameters and return shape of each
-tool.
+Each tool's parameters and description are declared on the tool itself and
+surfaced live by the MCP host, so the host's own tool list is the authoritative
+reference for the current tool surface.
 
 ## Where to go next
 
 - [Getting Started](getting-started.md) — configure and register the server with
   an MCP host.
-- [Tools Reference](tools.md) — the full list of tools and their parameters.

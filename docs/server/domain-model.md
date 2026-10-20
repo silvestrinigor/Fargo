@@ -69,47 +69,6 @@ a parent is assigned.
 An actor's access check is simple: a resource is accessible if it has no
 partitions, or if any of its partitions is one the actor can access.
 
-## Enumerations
-
-Enumerations are stored by their numeric value and surfaced by name in the CLI.
-
-### EntityType
-
-Identifies the kind of entity an audit log or operation refers to:
-`Article (0)`, `Item (1)`, `User (2)`, `UserGroup (3)`, `Partition (4)`,
-`AuditLog (5)`.
-
-### ArticleType
-
-Classifies an article: `Default (1)`, `Variation (2)`, `Pack (3)`, `Kit (4)`,
-`Container (5)`.
-
-### ActorType
-
-The kind of actor performing an action. Currently `User (1)`.
-
-### ActionType
-
-The set of permissions an actor can hold. There is a create / delete / edit
-permission per resource (articles, items, users, user groups, partitions), plus
-a few specific actions:
-
-- Articles: `CreateArticle`, `DeleteArticle`, `EditArticle`
-- Items: `CreateItem`, `DeleteItem`, `EditItem`
-- Users: `CreateUser`, `DeleteUser`, `EditUser`, `ChangeAnotherUserPassword`
-- User groups: `CreateUserGroup`, `DeleteUserGroup`, `EditUserGroup`,
-  `ChangeUserGroupMembers`
-- Partitions: `CreatePartition`, `DeletePartition`, `EditPartition`
-- Audit: `ReadAuditLogs`
-
-See [Security](security.md) for how permissions are granted and enforced.
-
-### AuditLogType
-
-The kind of change an audit log records: `EntityCreated (1)`,
-`EntityUpdated (2)`, `EntityDeleted (3)`. The affected entity's kind is recorded
-separately via `EntityType`, so these stay generic.
-
 ## Value objects
 
 Validated value objects wrap primitive data so invalid values cannot exist in

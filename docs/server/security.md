@@ -47,7 +47,7 @@ domain state.
 
 ## Permissions
 
-Permissions are values of [`ActionType`](domain-model.md#actiontype) — a
+Permissions are values of [`ActionType`](xref:Fargo.Core.Actors.ActionType) — a
 create / delete / edit permission per resource plus a few specific actions such
 as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, and `ReadAuditLogs`.
 
@@ -92,7 +92,7 @@ listings and lookups never return entities outside the actor's scope.
 
 Every create, update, and delete produces an [audit log](domain-model.md#audit-logs)
 recording the actor, the affected entity and its type, the
-[`AuditLogType`](domain-model.md#auditlogtype), the timestamp, and a metadata
+[`AuditLogType`](xref:Fargo.Core.Audits.AuditLogType), the timestamp, and a metadata
 bag. Audit logs inherit the partition scope of the entity they describe, so they
 are visible only to actors who can access that entity.
 
