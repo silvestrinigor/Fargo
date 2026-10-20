@@ -1,8 +1,10 @@
 using Fargo.Cli.Authentication;
 using Fargo.Cli.Commands;
 using Fargo.Cli.Configurations;
+using Fargo.Cli.ErrorHandling;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Authentication;
+using Fargo.ClientHttp.ErrorHandling;
 using Fargo.ClientHttp.Extensions;
 using Fargo.ClientHttp.Factories;
 using Fargo.ClientHttp.Models;
@@ -34,32 +36,52 @@ var serviceProvider = serviceCollection.BuildServiceProvider();
 
 var globalOptions = new GlobalOptions();
 
-// Resolve the global options first so --server can be applied before the HTTP
-// client is created, and credentials can be exchanged for a token up front.
-var globals = GlobalOptionValues.Parse(args, globalOptions);
+// Resolve --server first so the override can be applied before the HTTP client
+// is created when the command tree is built.
+var serverValue = GlobalServerValue.Parse(args, globalOptions);
 
-if (globals.Error is not null)
+if (serverValue.Error is not null)
 {
-    Console.Error.WriteLine(globals.Error);
+    Console.Error.WriteLine(serverValue.Error);
     return 1;
 }
 
-if (globals.Server is not null)
+if (serverValue.Server is not null)
 {
     serviceProvider
         .GetRequiredService<ClientConnectionContext>()
-        .BaseAddressOverride = globals.Server;
+        .BaseAddressOverride = serverValue.Server;
 }
 
-var client = serviceProvider.GetRequiredService<FargoApiClient>();
+var root = await CommandFactory.Create(serviceProvider, globalOptions);
 
-if (globals.Username is not null && globals.Password is not null)
+var parseResult = root.Parse(args);
+
+// Read the ad-hoc credentials from the real parse result. Commands that declare
+// their own --username/--password (login, users create, change-password) shadow
+// the recursive global options, so these come back null for them and the global
+// sign-in is correctly skipped.
+var username = parseResult.GetValue(globalOptions.Username);
+var password = parseResult.GetValue(globalOptions.Password);
+
+if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
 {
-    var authResult = await client.Identity.Login.PostAsync(new IdentityLoginDto
+    var client = serviceProvider.GetRequiredService<FargoApiClient>();
+
+    IdentityAuthResultDto? authResult;
+
+    try
     {
-        Nameid = globals.Username,
-        Password = globals.Password
-    });
+        authResult = await client.Identity.Login.PostAsync(new IdentityLoginDto
+        {
+            Nameid = username,
+            Password = password
+        });
+    }
+    catch (FargoApiException ex)
+    {
+        return ApiErrorReporter.Report(ex);
+    }
 
     if (authResult?.AccessToken is null
         || authResult.RefreshToken is null
@@ -78,6 +100,18 @@ if (globals.Username is not null && globals.Password is not null)
             authResult.ExpiresAt.Value));
 }
 
-var root = await CommandFactory.Create(serviceProvider, globalOptions);
+// Disable the built-in exception handler so API errors (401/403, etc.) can be
+// rendered as concise messages instead of stack traces.
+var invocationConfiguration = new InvocationConfiguration
+{
+    EnableDefaultExceptionHandler = false
+};
 
-return await root.Parse(args).InvokeAsync();
+try
+{
+    return await parseResult.InvokeAsync(invocationConfiguration);
+}
+catch (FargoApiException ex)
+{
+    return ApiErrorReporter.Report(ex);
+}

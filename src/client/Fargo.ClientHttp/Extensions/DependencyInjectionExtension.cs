@@ -1,4 +1,5 @@
 using Fargo.ClientHttp.Authentication;
+using Fargo.ClientHttp.ErrorHandling;
 using Fargo.ClientHttp.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
@@ -12,6 +13,8 @@ public static class DependencyInjectionExtension
         services.AddKiotaHandlers();
 
         services.AddSingleton<ClientConnectionContext>();
+
+        services.AddTransient<ProblemDetailsHandler>();
 
         services.AddSingleton<IAccessTokenProvider, FargoAccessTokenProvider>();
 
@@ -29,7 +32,12 @@ public static class DependencyInjectionExtension
             var connectionContext = sp.GetRequiredService<ClientConnectionContext>();
 
             client.BaseAddress = connectionContext.BaseAddressOverride ?? baseAddress;
-        }).AttachKiotaHandlers();
+        })
+        // Registered before the Kiota handlers so it is the outermost handler and
+        // sees the final response, letting it translate 401/403 into typed
+        // exceptions before Kiota raises its generic ApiException.
+        .AddHttpMessageHandler<ProblemDetailsHandler>()
+        .AttachKiotaHandlers();
 
         services.AddTransient(sp => sp.GetRequiredService<FargoClientFactory>().GetClient());
 
