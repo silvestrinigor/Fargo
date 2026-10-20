@@ -3,7 +3,10 @@ bruno/
 
 # Docfx
 _site/
-api/
+# Generated .NET API metadata (keep the hand-authored landing page).
+api/**/*.yml
+api/**/*.manifest
+!api/index.md
 
 # Dotnet Migrations Bug
 # https://github.com/dotnet/efcore/issues/36142

@@ -25,6 +25,9 @@ jobs:
       - name: Install DocFX
         run: dotnet tool update -g docfx
 
+      - name: Generate REST API reference (Swagger 2.0)
+        run: bash scripts/generate-rest-api-docs.sh
+
       - name: Build documentation
         run: docfx docfx.json
 
