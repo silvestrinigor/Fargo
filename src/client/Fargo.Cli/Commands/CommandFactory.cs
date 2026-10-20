@@ -28,14 +28,15 @@ public static class CommandFactory
               2. Authenticate:               fargo identity login --username admin
               3. Work with resources:        fargo articles list, fargo items get <guid>, ...
 
-            Global options (available on every command):
-              --server              Override the configured server for one invocation.
-              --username/--password Authenticate for a single invocation.
+            Global options:
+              --server              Override the configured server (available on every command).
+              --username/--password Authenticate for a single invocation (resource commands only,
+                                    not the identity commands).
 
             Run any command with --help to see its options and examples.
             """);
 
-        globalOptions.AddToRoot(root);
+        globalOptions.AddServerToRoot(root);
 
         var client = services.GetRequiredService<FargoApiClient>();
 
@@ -44,21 +45,27 @@ public static class CommandFactory
         var configurationStore =
             services.GetRequiredService<IFargoCliConfigurationStore>();
 
-        root.Add(new ConfigCommand(configurationStore));
-
+        // The identity group is intentionally excluded from the ad-hoc
+        // credential options: its commands take their own credentials or use the
+        // stored session, so --username/--password are not applicable there.
         root.Add(new IdentityCommand(client, tokenStore));
 
-        root.Add(new ArticlesCommand(client));
+        var credentialGroups = new Command[]
+        {
+            new ConfigCommand(configurationStore),
+            new ArticlesCommand(client),
+            new ItemsCommand(client),
+            new PartitionsCommand(client),
+            new UserGroupsCommand(client),
+            new UsersCommand(client),
+            new AuditLogsCommand(client),
+        };
 
-        root.Add(new ItemsCommand(client));
-
-        root.Add(new PartitionsCommand(client));
-
-        root.Add(new UserGroupsCommand(client));
-
-        root.Add(new UsersCommand(client));
-
-        root.Add(new AuditLogsCommand(client));
+        foreach (var group in credentialGroups)
+        {
+            globalOptions.AddCredentialsTo(group);
+            root.Add(group);
+        }
 
         return root;
     }
