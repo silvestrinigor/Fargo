@@ -24,6 +24,10 @@ var configuration = configurationStore.Load();
 
 serviceCollection.AddFargoHttpClient(configuration.Server);
 
+// Tracks the server this invocation actually targets so tokens stay bound to it.
+var activeServerContext = new ActiveServerContext { Server = configuration.Server };
+serviceCollection.AddSingleton(activeServerContext);
+
 // The persistent store writes to the OS credential cache; the session store
 // wraps it so that ad-hoc `--username`/`--password` credentials only live for
 // the current invocation.
@@ -51,6 +55,9 @@ if (serverValue.Server is not null)
     serviceProvider
         .GetRequiredService<ClientConnectionContext>()
         .BaseAddressOverride = serverValue.Server;
+
+    // Bind tokens to the overridden server for this invocation.
+    activeServerContext.Server = serverValue.Server;
 }
 
 var root = await CommandFactory.Create(serviceProvider, globalOptions);
