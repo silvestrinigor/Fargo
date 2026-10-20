@@ -23,6 +23,16 @@ public enum ActorType
 }
 
 /// <summary>
+/// Kind of change an audit log records. Mirrors the server's AuditLogType enum.
+/// </summary>
+public enum AuditLogType
+{
+    EntityCreated = 1,
+    EntityUpdated = 2,
+    EntityDeleted = 3,
+}
+
+/// <summary>
 /// Type of entity affected by an action. Mirrors the server's EntityType enum.
 /// </summary>
 public enum EntityType

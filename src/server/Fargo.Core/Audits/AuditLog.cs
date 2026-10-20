@@ -39,9 +39,9 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     public ActorType ActorType { get; private init; }
 
     /// <summary>
-    /// Gets the type of action recorded by this audit log.
+    /// Gets the type of change recorded by this audit log.
     /// </summary>
-    public ActionType ActionType { get; private init; }
+    public AuditLogType AuditLogType { get; private init; }
 
     /// <summary>
     /// Gets the identifier of the entity affected by the action.
@@ -82,13 +82,13 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 
     private AuditLog() { }
 
-    private AuditLog(Guid actorGuid, ActorType actorType, Guid entityGuid, EntityType entityType, ActionType actionType, IReadOnlyCollection<Guid> partitions)
+    private AuditLog(Guid actorGuid, ActorType actorType, Guid entityGuid, EntityType entityType, AuditLogType auditLogType, IReadOnlyCollection<Guid> partitions)
     {
         ActorGuid = actorGuid;
         ActorType = actorType;
         EntityGuid = entityGuid;
         EntityType = entityType;
-        ActionType = actionType;
+        AuditLogType = auditLogType;
 
         foreach (var p in partitions)
         {
@@ -102,17 +102,17 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <typeparam name="TEntity">The type of the audited entity.</typeparam>
     /// <param name="actor">The actor that performed the action.</param>
     /// <param name="entity">The entity affected by the action.</param>
-    /// <param name="actionType">The action that was performed.</param>
+    /// <param name="auditLogType">The type of change that occurred.</param>
     /// <returns>A new audit log associated with the partitions of the entity.</returns>
     /// <remarks>
     /// The audit log inherits its partition access from the audited entity.
     /// Every partition associated with the entity at the time of the action
     /// is copied to the audit log.
     /// </remarks>
-    public static AuditLog CreateAuditLog<TEntity>(Actor actor, TEntity entity, ActionType actionType)
+    public static AuditLog CreateAuditLog<TEntity>(Actor actor, TEntity entity, AuditLogType auditLogType)
         where TEntity : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     {
-        return new AuditLog(actor.Guid, actor.ActorType, entity.Guid, entity.GetEntityType(), actionType, entity.PartitionGuids);
+        return new AuditLog(actor.Guid, actor.ActorType, entity.Guid, entity.GetEntityType(), auditLogType, entity.PartitionGuids);
     }
 
     /// <summary>
@@ -120,17 +120,17 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </summary>
     /// <param name="actor">The actor that performed the action.</param>
     /// <param name="partition">The partition affected by the action.</param>
-    /// <param name="actionType">The action that was performed.</param>
+    /// <param name="auditLogType">The type of change that occurred.</param>
     /// <returns>A new audit log associated with the appropriate parent partition.</returns>
     /// <remarks>
     /// A partition action is associated with its parent partition. If the
     /// affected partition has no parent, the audit log is associated with the
     /// global partition.
     /// </remarks>
-    public static AuditLog CreateAuditLog(Actor actor, Partition partition, ActionType actionType)
+    public static AuditLog CreateAuditLog(Actor actor, Partition partition, AuditLogType auditLogType)
     {
         return new AuditLog(
-            actor.Guid, actor.ActorType, partition.Guid, partition.GetEntityType(), actionType,
+            actor.Guid, actor.ActorType, partition.Guid, partition.GetEntityType(), auditLogType,
             [partition.ParentPartitionGuid ?? FargoCoreWellKnowGuids.GlobalPartitionGuid]);
     }
 

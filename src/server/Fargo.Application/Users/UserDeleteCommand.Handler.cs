@@ -42,7 +42,7 @@ public sealed class UserDeleteCommandHandler(
 
         userRepository.Remove(user);
 
-        var audit = AuditLog.CreateAuditLog(actor, user, ActionType.DeleteUser);
+        var audit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
 

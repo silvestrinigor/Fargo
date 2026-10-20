@@ -33,7 +33,7 @@ public sealed class ItemUpdateCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
 
-        var itemAudit = AuditLog.CreateAuditLog(actor, item, ActionType.EditItem);
+        var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityUpdated);
 
         actor.ThrowIfAccessDenied(item);
 

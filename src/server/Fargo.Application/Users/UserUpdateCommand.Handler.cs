@@ -40,7 +40,7 @@ public sealed class UserUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(user);
 
-        var userAudit = AuditLog.CreateAuditLog(actor, user, ActionType.EditUser);
+        var userAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityUpdated);
 
         if (command.Update.Nameid is not null)
         {

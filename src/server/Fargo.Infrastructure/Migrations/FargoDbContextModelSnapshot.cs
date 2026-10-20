@@ -217,10 +217,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("guid");
 
-                    b.Property<int>("ActionType")
-                        .HasColumnType("integer")
-                        .HasColumnName("action_type");
-
                     b.Property<Guid>("ActorGuid")
                         .HasColumnType("uuid")
                         .HasColumnName("actor_guid");
@@ -228,6 +224,10 @@ namespace Fargo.Infrastructure.Migrations
                     b.Property<byte>("ActorType")
                         .HasColumnType("smallint")
                         .HasColumnName("actor_type");
+
+                    b.Property<int>("AuditLogType")
+                        .HasColumnType("integer")
+                        .HasColumnName("audit_log_type");
 
                     b.Property<Guid>("EntityGuid")
                         .HasColumnType("uuid")

@@ -52,7 +52,7 @@ public sealed class ListAuditLogsCommand : Command
                 .Column("GUID", a => a.Guid?.ToString())
                 .Column("ACTOR", a => a.ActorGuid?.ToString())
                 .Column("ACTOR TYPE", a => EnumFormatting.Format<ActorType>(a.ActorType))
-                .Column("ACTION", a => EnumFormatting.Format<ActionType>(a.ActionType))
+                .Column("TYPE", a => EnumFormatting.Format<AuditLogType>(a.AuditLogType))
                 .Column("ENTITY TYPE", a => EnumFormatting.Format<EntityType>(a.EntityType))
                 .Column("ENTITY", a => a.EntityGuid?.ToString())
                 .Column("OCCURRED AT", a => a.OccurredAt?.ToString("u"))

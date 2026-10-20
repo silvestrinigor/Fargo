@@ -38,7 +38,7 @@ public sealed class ItemCreateCommandHandler(
 
         var item = Item.CreateItem(article);
 
-        var itemAudit = AuditLog.CreateAuditLog(actor, item, ActionType.CreateItem);
+        var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityCreated);
 
         if (command.Create.ParentItemContainerGuid is { } parentItemContainerGuid)
         {

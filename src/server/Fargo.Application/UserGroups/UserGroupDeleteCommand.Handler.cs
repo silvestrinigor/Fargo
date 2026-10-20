@@ -39,7 +39,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
         userGroupRepository.Remove(userGroup);
 
-        var audit = AuditLog.CreateAuditLog(actor, userGroup, ActionType.DeleteUserGroup);
+        var audit = AuditLog.CreateAuditLog(actor, userGroup, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
 

@@ -13,7 +13,7 @@ namespace Fargo.Application.Audits;
 /// <param name="Guid">The unique identifier of the audit log entry</param>
 /// <param name="ActorGuid">The unique identifier of the actor who performed the action</param>
 /// <param name="ActorType">The type of actor who performed the action (e.g., User, Application)</param>
-/// <param name="ActionType">The type of action that was performed (e.g., Create, Update, Delete)</param>
+/// <param name="AuditLogType">The type of change that was recorded (entity created, updated, or deleted)</param>
 /// <param name="EntityGuid">The unique identifier of the entity that was affected by the action</param>
 /// <param name="EntityType">The type of entity that was affected (e.g., Article, User)</param>
 /// <param name="OccurredAt">The date and time when the audit event occurred</param>
@@ -23,7 +23,7 @@ public sealed record AuditLogDto(
     Guid Guid,
     Guid ActorGuid,
     ActorType ActorType,
-    ActionType ActionType,
+    AuditLogType AuditLogType,
     Guid EntityGuid,
     EntityType EntityType,
     DateTimeOffset OccurredAt,
