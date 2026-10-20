@@ -28,6 +28,9 @@ jobs:
       - name: Generate REST API reference (Swagger 2.0)
         run: bash scripts/generate-rest-api-docs.sh
 
+      - name: Generate CLI reference
+        run: bash scripts/generate-cli-docs.sh
+
       - name: Build documentation
         run: docfx docfx.json
 
