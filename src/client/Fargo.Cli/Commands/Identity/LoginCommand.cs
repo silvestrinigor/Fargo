@@ -1,3 +1,4 @@
+using Fargo.Cli.Authentication;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Models;
@@ -16,10 +17,11 @@ public sealed class LoginCommand : Command
             Required = true
         };
 
-        var passwordOption = new Option<string>("--password")
+        var passwordOption = new Option<string?>("--password")
         {
-            Description = "Password.",
-            Required = true
+            Description =
+                "Password. If omitted, you will be prompted to enter it securely.",
+            Required = false
         };
 
         Add(usernameOption);
@@ -28,7 +30,18 @@ public sealed class LoginCommand : Command
         SetAction(async parseResult =>
         {
             var username = parseResult.GetValue(usernameOption)!;
-            var password = parseResult.GetValue(passwordOption)!;
+            var password = parseResult.GetValue(passwordOption);
+
+            if (string.IsNullOrEmpty(password))
+            {
+                password = PasswordPrompt.Read();
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                Console.Error.WriteLine("Password is required.");
+                return 1;
+            }
 
             var result = await client.Identity.Login.PostAsync(
                 new IdentityLoginDto

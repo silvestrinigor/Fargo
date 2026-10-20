@@ -23,7 +23,7 @@ public sealed class GlobalOptions
         {
             Description =
                 "Username to authenticate with for this invocation. "
-                + "Must be used together with --password.",
+                + "Provide together with --password to sign in just for this command.",
             Recursive = true
         };
 
@@ -31,7 +31,7 @@ public sealed class GlobalOptions
         {
             Description =
                 "Password to authenticate with for this invocation. "
-                + "Must be used together with --username.",
+                + "Provide together with --username to sign in just for this command.",
             Recursive = true
         };
     }

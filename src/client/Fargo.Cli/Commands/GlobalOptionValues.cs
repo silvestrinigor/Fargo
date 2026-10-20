@@ -66,19 +66,15 @@ public sealed class GlobalOptionValues
         var hasUsername = !string.IsNullOrWhiteSpace(username);
         var hasPassword = !string.IsNullOrWhiteSpace(password);
 
-        if (hasUsername != hasPassword)
-        {
-            return new GlobalOptionValues
-            {
-                Error = "--username and --password must be supplied together."
-            };
-        }
-
+        // Ad-hoc authentication only kicks in when BOTH credentials are present.
+        // A lone --username or --password is left for the selected command to
+        // handle (e.g. `identity login --username x` prompts for the password,
+        // and `users create --username x` treats it as the new user's name).
         return new GlobalOptionValues
         {
             Server = serverUri,
-            Username = hasUsername ? username : null,
-            Password = hasPassword ? password : null
+            Username = hasUsername && hasPassword ? username : null,
+            Password = hasUsername && hasPassword ? password : null
         };
     }
 }
