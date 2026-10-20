@@ -8,3 +8,5 @@
   href: cli/
 - name: Web API
   href: web-api/
+- name: MCP Server
+  href: mcp/
