@@ -94,9 +94,9 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
             Password = password
         });
     }
-    catch (FargoApiException ex)
+    catch (Exception ex) when (ApiErrorReporter.TryReport(ex, out var exitCode))
     {
-        return ApiErrorReporter.Report(ex);
+        return exitCode;
     }
 
     if (authResult?.AccessToken is null
@@ -127,9 +127,9 @@ else if (!skipAuthentication && !IsIdentityCommand(parseResult))
     {
         await TokenRefresher.EnsureValidAsync(client, tokenStore);
     }
-    catch (FargoApiException ex)
+    catch (Exception ex) when (ApiErrorReporter.TryReport(ex, out var exitCode))
     {
-        return ApiErrorReporter.Report(ex);
+        return exitCode;
     }
 }
 
@@ -144,9 +144,9 @@ try
 {
     return await parseResult.InvokeAsync(invocationConfiguration);
 }
-catch (FargoApiException ex)
+catch (Exception ex) when (ApiErrorReporter.TryReport(ex, out var exitCode))
 {
-    return ApiErrorReporter.Report(ex);
+    return exitCode;
 }
 
 // Returns true when the invoked command belongs to the "identity" group, whose
