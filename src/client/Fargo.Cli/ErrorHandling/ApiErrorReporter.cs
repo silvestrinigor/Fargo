@@ -12,6 +12,13 @@ namespace Fargo.Cli.ErrorHandling;
 public static class ApiErrorReporter
 {
     /// <summary>
+    /// When enabled (via the <c>--verbose</c> global flag), error output also
+    /// includes technical diagnostics: the exception type, inner exceptions,
+    /// and stack trace. Off by default so normal output stays concise.
+    /// </summary>
+    public static bool Verbose { get; set; }
+
+    /// <summary>
     /// Writes a message for <paramref name="exception"/> to standard error and
     /// returns the exit code the process should use.
     /// </summary>
@@ -21,20 +28,24 @@ public static class ApiErrorReporter
         {
             case UnauthorizedApiException unauthorized:
                 WriteProblem(unauthorized);
+                WriteVerboseDetails(unauthorized);
                 return 1;
 
             case ForbiddenApiException forbidden:
                 WriteProblem(forbidden);
+                WriteVerboseDetails(forbidden);
                 return 1;
 
             case FargoApiException api:
                 Console.Error.WriteLine(api.Message);
+                WriteVerboseDetails(api);
                 return 1;
 
             default:
                 if (IsConnectivityError(exception))
                 {
                     WriteConnectivityError(exception);
+                    WriteVerboseDetails(exception);
                     return 1;
                 }
 
@@ -44,6 +55,15 @@ public static class ApiErrorReporter
     }
 
     /// <summary>
+    /// Pure predicate (no output) that reports whether <paramref name="exception"/>
+    /// is a user-facing error this reporter knows how to render. Safe to use in
+    /// an exception filter (<c>catch ... when</c>); the actual rendering should
+    /// happen in the catch body via <see cref="Report"/>.
+    /// </summary>
+    public static bool CanReport(Exception exception) =>
+        exception is FargoApiException || IsConnectivityError(exception);
+
+    /// <summary>
     /// Attempts to report <paramref name="exception"/> as a known, user-facing
     /// error (a Fargo API error or a connectivity failure). Returns
     /// <c>true</c> and sets <paramref name="exitCode"/> when handled; returns
@@ -51,7 +71,7 @@ public static class ApiErrorReporter
     /// </summary>
     public static bool TryReport(Exception exception, out int exitCode)
     {
-        if (exception is not FargoApiException && !IsConnectivityError(exception))
+        if (!CanReport(exception))
         {
             exitCode = 0;
             return false;
@@ -96,6 +116,37 @@ public static class ApiErrorReporter
             "Could not connect to the Fargo server. Make sure the server is "
             + "running and the configured URL is correct (check "
             + "'fargo config show' or pass --server <url>).");
+    }
+
+    /// <summary>
+    /// When <see cref="Verbose"/> is enabled, writes technical diagnostics for
+    /// <paramref name="exception"/> (type, status code, inner exceptions and
+    /// stack trace) to standard error, below the user-facing message.
+    /// </summary>
+    private static void WriteVerboseDetails(Exception exception)
+    {
+        if (!Verbose)
+        {
+            return;
+        }
+
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("--- Verbose diagnostics ---");
+
+        if (exception is FargoApiException api)
+        {
+            Console.Error.WriteLine($"HTTP status: {api.StatusCode}");
+        }
+
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            Console.Error.WriteLine($"{current.GetType().FullName}: {current.Message}");
+        }
+
+        if (exception.StackTrace is not null)
+        {
+            Console.Error.WriteLine(exception.StackTrace);
+        }
     }
 
     private static void WriteProblem(FargoApiException exception)

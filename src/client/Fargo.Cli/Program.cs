@@ -40,7 +40,11 @@ var serviceProvider = serviceCollection.BuildServiceProvider();
 
 var globalOptions = new GlobalOptions();
 
-// Resolve --server first so the override can be applied before the HTTP client
+// Resolve --verbose first so error diagnostics can be enabled even for failures
+// that happen before the command is invoked (early token refresh, ad-hoc login).
+ApiErrorReporter.Verbose = GlobalVerboseValue.Parse(args, globalOptions);
+
+// Resolve --server next so the override can be applied before the HTTP client
 // is created when the command tree is built.
 var serverValue = GlobalServerValue.Parse(args, globalOptions);
 
@@ -94,9 +98,9 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
             Password = password
         });
     }
-    catch (Exception ex) when (ApiErrorReporter.TryReport(ex, out var exitCode))
+    catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
     {
-        return exitCode;
+        return ApiErrorReporter.Report(ex);
     }
 
     if (authResult?.AccessToken is null
@@ -127,9 +131,9 @@ else if (!skipAuthentication && !IsIdentityCommand(parseResult))
     {
         await TokenRefresher.EnsureValidAsync(client, tokenStore);
     }
-    catch (Exception ex) when (ApiErrorReporter.TryReport(ex, out var exitCode))
+    catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
     {
-        return exitCode;
+        return ApiErrorReporter.Report(ex);
     }
 }
 
@@ -144,9 +148,9 @@ try
 {
     return await parseResult.InvokeAsync(invocationConfiguration);
 }
-catch (Exception ex) when (ApiErrorReporter.TryReport(ex, out var exitCode))
+catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
 {
-    return exitCode;
+    return ApiErrorReporter.Report(ex);
 }
 
 // Returns true when the invoked command belongs to the "identity" group, whose

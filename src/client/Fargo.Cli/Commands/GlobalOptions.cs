@@ -17,6 +17,11 @@ namespace Fargo.Cli.Commands;
 /// credential options (login, change-password) or operate on the stored session
 /// (logout, refresh), so the global credentials would be meaningless there.
 /// </para>
+///
+/// <para>
+/// <c>--verbose</c>/<c>-v</c> is recursive on the root and enables detailed
+/// error diagnostics (exception types, inner exceptions, stack traces).
+/// </para>
 /// </summary>
 public sealed class GlobalOptions
 {
@@ -45,6 +50,14 @@ public sealed class GlobalOptions
                 + "Provide together with --username to sign in just for this command.",
             Recursive = true
         };
+
+        Verbose = new Option<bool>("--verbose", "-v")
+        {
+            Description =
+                "Show detailed diagnostics for errors, including exception "
+                + "types, inner exceptions, and stack traces.",
+            Recursive = true
+        };
     }
 
     public Option<string?> Server { get; }
@@ -53,10 +66,18 @@ public sealed class GlobalOptions
 
     public Option<string?> Password { get; }
 
+    public Option<bool> Verbose { get; }
+
     /// <summary>Adds the always-available <c>--server</c> option to the root.</summary>
     public void AddServerToRoot(RootCommand root)
     {
         root.Options.Add(Server);
+    }
+
+    /// <summary>Adds the always-available <c>--verbose</c> option to the root.</summary>
+    public void AddVerboseToRoot(RootCommand root)
+    {
+        root.Options.Add(Verbose);
     }
 
     /// <summary>
