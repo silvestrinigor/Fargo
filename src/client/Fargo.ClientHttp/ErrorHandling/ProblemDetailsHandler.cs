@@ -4,11 +4,13 @@ using System.Text.Json;
 namespace Fargo.ClientHttp.ErrorHandling;
 
 /// <summary>
-/// Inspects HTTP responses and converts 401 (Unauthorized) and 403 (Forbidden)
-/// into typed <see cref="FargoApiException"/> instances. When the server
-/// returns an RFC 7807 problem details body, its title/detail are used for the
-/// message; otherwise a sensible default is provided (for example, a bare 401
-/// from the authentication middleware has no body).
+/// Inspects HTTP responses and converts non-success status codes into typed
+/// <see cref="FargoApiException"/> instances so commands can surface a clear
+/// message instead of a raw Kiota error. 400 (Bad Request), 401 (Unauthorized)
+/// and 403 (Forbidden) get dedicated exception types; any other error status
+/// (404, 429, 5xx, ...) becomes a generic <see cref="FargoApiException"/>. When
+/// the server returns an RFC 7807 problem details body, its title/detail are
+/// used for the message; otherwise a sensible default is provided.
 /// </summary>
 public sealed class ProblemDetailsHandler : DelegatingHandler
 {
@@ -24,34 +26,57 @@ public sealed class ProblemDetailsHandler : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        if (response.StatusCode is not (HttpStatusCode.Unauthorized
-            or HttpStatusCode.Forbidden))
+        // Success responses pass straight through to Kiota for deserialization.
+        if (response.IsSuccessStatusCode)
         {
             return response;
         }
 
+        var status = (int)response.StatusCode;
+
         var problem = await TryReadProblemDetailsAsync(response, cancellationToken)
             .ConfigureAwait(false);
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        switch (response.StatusCode)
         {
-            throw new UnauthorizedApiException(
-                problem,
-                BuildMessage(
+            case HttpStatusCode.BadRequest:
+                throw new BadRequestApiException(
                     problem,
-                    defaultMessage:
-                    "Unauthorized (401): authentication is required or your "
-                    + "session has expired. Run 'fargo identity login' or "
-                    + "provide --username and --password."));
-        }
+                    BuildMessage(
+                        problem,
+                        defaultMessage:
+                        "Bad request (400): the server rejected the request. "
+                        + "Check the command arguments and try again."));
 
-        throw new ForbiddenApiException(
-            problem,
-            BuildMessage(
-                problem,
-                defaultMessage:
-                "Forbidden (403): you do not have permission to perform this "
-                + "action."));
+            case HttpStatusCode.Unauthorized:
+                throw new UnauthorizedApiException(
+                    problem,
+                    BuildMessage(
+                        problem,
+                        defaultMessage:
+                        "Unauthorized (401): authentication is required or your "
+                        + "session has expired. Run 'fargo identity login' or "
+                        + "provide --username and --password."));
+
+            case HttpStatusCode.Forbidden:
+                throw new ForbiddenApiException(
+                    problem,
+                    BuildMessage(
+                        problem,
+                        defaultMessage:
+                        "Forbidden (403): you do not have permission to perform "
+                        + "this action."));
+
+            default:
+                throw new FargoApiException(
+                    status,
+                    problem,
+                    BuildMessage(
+                        problem,
+                        defaultMessage:
+                        $"The server returned an error ({status} "
+                        + $"{response.ReasonPhrase})."));
+        }
     }
 
     private static async Task<FargoProblemDetails?> TryReadProblemDetailsAsync(
