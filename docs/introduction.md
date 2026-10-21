@@ -36,7 +36,7 @@ through a REST API and a command-line client.
 
 - **[Web API](web-api/overview.md)** — a REST API for integrating Fargo with
   other systems.
-- **Command-line client (`fargo`)** — a terminal client for operators and
+- **[CLI](cli/overview.md)** — a terminal client for operators and
   scripts.
 - **[MCP server](mcp/overview.md)** — a Model Context Protocol server that lets
   AI agents work with Fargo through tools.

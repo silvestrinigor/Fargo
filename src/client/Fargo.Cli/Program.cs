@@ -70,7 +70,7 @@ var parseResult = root.Parse(args);
 var actionTypeName = parseResult.Action?.GetType().Name;
 var skipAuthentication =
     parseResult.Action is System.CommandLine.Help.HelpAction
-    || actionTypeName == "VersionAction"
+    || actionTypeName is "VersionAction" or "VersionOptionAction"
     || parseResult.Errors.Count > 0;
 
 // Read the ad-hoc credentials from the real parse result. Commands that declare

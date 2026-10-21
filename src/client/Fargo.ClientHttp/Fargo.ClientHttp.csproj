@@ -4,6 +4,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+
+    <!--
+      Version of the Fargo.ClientHttp library. Versioned independently of the
+      `fargo` CLI: as a library its version communicates API-contract changes
+      (SemVer), which follows a different cadence than the CLI tool. Pre-1.0
+      with a prerelease suffix while the public surface is still unstable.
+    -->
+    <Version>0.1.0-alpha.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

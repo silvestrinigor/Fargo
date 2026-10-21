@@ -12,7 +12,7 @@ set -e
 
 CLI_PROJECT="src/client/Fargo.Cli/Fargo.Cli.csproj"
 BUILD_DIR="$(pwd)/artifacts/cli-docs"
-CLI_DLL="$BUILD_DIR/Fargo.Cli.dll"
+CLI_DLL="$BUILD_DIR/fargo.dll"
 REFERENCE_DIR="docs/cli/reference"
 
 # Command groups and their subcommands. Keep in sync with CommandFactory.
