@@ -11,7 +11,7 @@ public sealed class GetItemCommand : Command
             Show the full details of a single item.
 
             Examples:
-              fargo items get 22222222-2222-2222-2222-222222222222
+              fargo item get 22222222-2222-2222-2222-222222222222
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

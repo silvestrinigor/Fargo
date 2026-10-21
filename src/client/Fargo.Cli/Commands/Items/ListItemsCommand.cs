@@ -11,9 +11,9 @@ public sealed class ListItemsCommand : Command
             List items as a table, with optional paging and partition filters.
 
             Examples:
-              fargo items list
-              fargo items list --page 1 --limit 20
-              fargo items list --partitions 00000000-0000-0000-0000-000000000001
+              fargo item list
+              fargo item list --page 1 --limit 20
+              fargo item list --partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var pageOption = new Option<int?>("--page")

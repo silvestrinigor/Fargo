@@ -12,8 +12,8 @@ public sealed class UpdateUserCommand : Command
             Update an existing user. Only the options you pass are changed.
 
             Examples:
-              fargo users update 00000000-0000-0000-0000-000000000004 --first-name Jane
-              fargo users update 00000000-0000-0000-0000-000000000004 --active false
+              fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
+              fargo user update 00000000-0000-0000-0000-000000000004 --active false
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

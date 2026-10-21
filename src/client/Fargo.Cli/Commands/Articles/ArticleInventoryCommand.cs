@@ -11,8 +11,8 @@ public sealed class ArticleInventoryCommand : Command
             Show the inventory count for an article.
 
             Examples:
-              fargo articles inventory 11111111-1111-1111-1111-111111111111
-              fargo articles inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
+              fargo article inventory 11111111-1111-1111-1111-111111111111
+              fargo article inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

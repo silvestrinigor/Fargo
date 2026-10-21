@@ -1,61 +1,62 @@
-# User Groups
+# User Group
 
-Command reference for `fargo user-groups`, generated from the CLI's help output.
+Command reference for `fargo user-group`, generated from the CLI's help output.
 
-## `fargo user-groups`
+## `fargo user-group`
 
 ```text
 Description:
   Manage user groups - collections of users that share permissions.
 
 Usage:
-  Fargo.Cli user-groups [command] [options]
+  fargo user-group [command] [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
   list           List user groups as a table, with optional paging and partition filters.
   
                  Examples:
-                   fargo user-groups list
-                   fargo user-groups list --page 1 --limit 20
+                   fargo user-group list
+                   fargo user-group list --page 1 --limit 20
   get <guid>     Show the full details of a single user group.
   
                  Examples:
-                   fargo user-groups get 00000000-0000-0000-0000-000000000003
+                   fargo user-group get 00000000-0000-0000-0000-000000000003
   create         Create a new user group, optionally nested under a parent group.
   
                  Examples:
-                   fargo user-groups create --name warehouse-ops
-                   fargo user-groups create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
+                   fargo user-group create --name warehouse-ops
+                   fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
   update <guid>  Update an existing user group. Only the options you pass are changed.
   
                  Examples:
-                   fargo user-groups update 00000000-0000-0000-0000-000000000003 --active false
-                   fargo user-groups update 00000000-0000-0000-0000-000000000003 --remove-parent
+                   fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
+                   fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
   delete <guid>  Delete a user group by GUID.
   
                  Examples:
-                   fargo user-groups delete 00000000-0000-0000-0000-000000000003
+                   fargo user-group delete 00000000-0000-0000-0000-000000000003
 
 ```
 
-## `fargo user-groups list`
+## `fargo user-group list`
 
 ```text
 Description:
   List user groups as a table, with optional paging and partition filters.
   
   Examples:
-    fargo user-groups list
-    fargo user-groups list --page 1 --limit 20
+    fargo user-group list
+    fargo user-group list --page 1 --limit 20
 
 Usage:
-  Fargo.Cli user-groups list [options]
+  fargo user-group list [options]
 
 Options:
   --page <page>              Page number to retrieve (starts at 1).
@@ -65,20 +66,21 @@ Options:
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo user-groups get`
+## `fargo user-group get`
 
 ```text
 Description:
   Show the full details of a single user group.
   
   Examples:
-    fargo user-groups get 00000000-0000-0000-0000-000000000003
+    fargo user-group get 00000000-0000-0000-0000-000000000003
 
 Usage:
-  Fargo.Cli user-groups get <guid> [options]
+  fargo user-group get <guid> [options]
 
 Arguments:
   <guid>  The user group GUID.
@@ -88,21 +90,22 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo user-groups create`
+## `fargo user-group create`
 
 ```text
 Description:
   Create a new user group, optionally nested under a parent group.
   
   Examples:
-    fargo user-groups create --name warehouse-ops
-    fargo user-groups create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
+    fargo user-group create --name warehouse-ops
+    fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
 
 Usage:
-  Fargo.Cli user-groups create [options]
+  fargo user-group create [options]
 
 Options:
   --name <name> (REQUIRED)  Name identifier (nameid) for the user group.
@@ -112,21 +115,22 @@ Options:
   --password <password>     Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help            Show help and usage information
   --server <server>         The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose             Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo user-groups update`
+## `fargo user-group update`
 
 ```text
 Description:
   Update an existing user group. Only the options you pass are changed.
   
   Examples:
-    fargo user-groups update 00000000-0000-0000-0000-000000000003 --active false
-    fargo user-groups update 00000000-0000-0000-0000-000000000003 --remove-parent
+    fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
+    fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
 
 Usage:
-  Fargo.Cli user-groups update <guid> [options]
+  fargo user-group update <guid> [options]
 
 Arguments:
   <guid>  The user group GUID.
@@ -139,20 +143,21 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo user-groups delete`
+## `fargo user-group delete`
 
 ```text
 Description:
   Delete a user group by GUID.
   
   Examples:
-    fargo user-groups delete 00000000-0000-0000-0000-000000000003
+    fargo user-group delete 00000000-0000-0000-0000-000000000003
 
 Usage:
-  Fargo.Cli user-groups delete <guid> [options]
+  fargo user-group delete <guid> [options]
 
 Arguments:
   <guid>  The user group GUID.
@@ -162,6 +167,7 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

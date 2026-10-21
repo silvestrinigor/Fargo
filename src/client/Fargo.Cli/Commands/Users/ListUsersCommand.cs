@@ -11,9 +11,9 @@ public sealed class ListUsersCommand : Command
             List users as a table, with optional paging and partition filters.
 
             Examples:
-              fargo users list
-              fargo users list --page 1 --limit 20
-              fargo users list --partitions 00000000-0000-0000-0000-000000000001
+              fargo user list
+              fargo user list --page 1 --limit 20
+              fargo user list --partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var pageOption = new Option<int?>("--page")

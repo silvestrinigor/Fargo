@@ -1,74 +1,75 @@
-# Articles
+# Article
 
-Command reference for `fargo articles`, generated from the CLI's help output.
+Command reference for `fargo article`, generated from the CLI's help output.
 
-## `fargo articles`
+## `fargo article`
 
 ```text
 Description:
   Manage articles - the catalog of product definitions.
 
 Usage:
-  Fargo.Cli articles [command] [options]
+  fargo article [command] [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
   list                      List articles as a table, with optional paging and partition filters.
   
                             Examples:
-                              fargo articles list
-                              fargo articles list --page 1 --limit 20
-                              fargo articles list --partitions 00000000-0000-0000-0000-000000000001
+                              fargo article list
+                              fargo article list --page 1 --limit 20
+                              fargo article list --partitions 00000000-0000-0000-0000-000000000001
   get <guid>                Show the full details of a single article.
   
                             Examples:
-                              fargo articles get 11111111-1111-1111-1111-111111111111
+                              fargo article get 11111111-1111-1111-1111-111111111111
   get-by-barcode <barcode>  Look up a single article by one of its barcodes.
   
                             The barcode is given as {value}:{type}.
   
                             Examples:
-                              fargo articles get-by-barcode 1234567890128:ean13
+                              fargo article get-by-barcode 1234567890128:ean13
   inventory <guid>          Show the inventory count for an article.
   
                             Examples:
-                              fargo articles inventory 11111111-1111-1111-1111-111111111111
-                              fargo articles inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
+                              fargo article inventory 11111111-1111-1111-1111-111111111111
+                              fargo article inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
   create                    Create a new article.
   
                             Examples:
-                              fargo articles create --name "Widget"
-                              fargo articles create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
+                              fargo article create --name "Widget"
+                              fargo article create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
   delete <guid>             Delete an article by GUID.
   
                             Examples:
-                              fargo articles delete 11111111-1111-1111-1111-111111111111
+                              fargo article delete 11111111-1111-1111-1111-111111111111
   update <guid>             Update an existing article. Only the options you pass are changed.
   
                             Examples:
-                              fargo articles update 11111111-1111-1111-1111-111111111111 --name "New name"
-                              fargo articles update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+                              fargo article update 11111111-1111-1111-1111-111111111111 --name "New name"
+                              fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
 
 ```
 
-## `fargo articles list`
+## `fargo article list`
 
 ```text
 Description:
   List articles as a table, with optional paging and partition filters.
   
   Examples:
-    fargo articles list
-    fargo articles list --page 1 --limit 20
-    fargo articles list --partitions 00000000-0000-0000-0000-000000000001
+    fargo article list
+    fargo article list --page 1 --limit 20
+    fargo article list --partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli articles list [options]
+  fargo article list [options]
 
 Options:
   --page <page>              Page number to retrieve (starts at 1).
@@ -78,20 +79,21 @@ Options:
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo articles get`
+## `fargo article get`
 
 ```text
 Description:
   Show the full details of a single article.
   
   Examples:
-    fargo articles get 11111111-1111-1111-1111-111111111111
+    fargo article get 11111111-1111-1111-1111-111111111111
 
 Usage:
-  Fargo.Cli articles get <guid> [options]
+  fargo article get <guid> [options]
 
 Arguments:
   <guid>  The article GUID.
@@ -101,10 +103,11 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo articles get-by-barcode`
+## `fargo article get-by-barcode`
 
 ```text
 Description:
@@ -113,10 +116,10 @@ Description:
   The barcode is given as {value}:{type}.
   
   Examples:
-    fargo articles get-by-barcode 1234567890128:ean13
+    fargo article get-by-barcode 1234567890128:ean13
 
 Usage:
-  Fargo.Cli articles get-by-barcode <barcode> [options]
+  fargo article get-by-barcode <barcode> [options]
 
 Arguments:
   <barcode>  The barcode in {value}:{type} format (e.g. 1234567890128:ean13).
@@ -126,21 +129,22 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo articles inventory`
+## `fargo article inventory`
 
 ```text
 Description:
   Show the inventory count for an article.
   
   Examples:
-    fargo articles inventory 11111111-1111-1111-1111-111111111111
-    fargo articles inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
+    fargo article inventory 11111111-1111-1111-1111-111111111111
+    fargo article inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
 
 Usage:
-  Fargo.Cli articles inventory <guid> [options]
+  fargo article inventory <guid> [options]
 
 Arguments:
   <guid>  The article GUID.
@@ -152,21 +156,22 @@ Options:
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo articles create`
+## `fargo article create`
 
 ```text
 Description:
   Create a new article.
   
   Examples:
-    fargo articles create --name "Widget"
-    fargo articles create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
+    fargo article create --name "Widget"
+    fargo article create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli articles create [options]
+  fargo article create [options]
 
 Options:
   --name <name> (REQUIRED)                       Name of the article.
@@ -176,21 +181,22 @@ Options:
   --password <password>                          Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help                                 Show help and usage information
   --server <server>                              The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                                  Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo articles update`
+## `fargo article update`
 
 ```text
 Description:
   Update an existing article. Only the options you pass are changed.
   
   Examples:
-    fargo articles update 11111111-1111-1111-1111-111111111111 --name "New name"
-    fargo articles update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+    fargo article update 11111111-1111-1111-1111-111111111111 --name "New name"
+    fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli articles update <guid> [options]
+  fargo article update <guid> [options]
 
 Arguments:
   <guid>  The article GUID.
@@ -203,20 +209,21 @@ Options:
   --password <password>                    Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help                           Show help and usage information
   --server <server>                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo articles delete`
+## `fargo article delete`
 
 ```text
 Description:
   Delete an article by GUID.
   
   Examples:
-    fargo articles delete 11111111-1111-1111-1111-111111111111
+    fargo article delete 11111111-1111-1111-1111-111111111111
 
 Usage:
-  Fargo.Cli articles delete <guid> [options]
+  fargo article delete <guid> [options]
 
 Arguments:
   <guid>  The article GUID.
@@ -226,6 +233,7 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

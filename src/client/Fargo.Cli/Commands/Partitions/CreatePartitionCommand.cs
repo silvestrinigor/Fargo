@@ -12,8 +12,8 @@ public sealed class CreatePartitionCommand : Command
             Create a new partition, optionally nested under a parent.
 
             Examples:
-              fargo partitions create --name "Warehouse A"
-              fargo partitions create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
+              fargo partition create --name "Warehouse A"
+              fargo partition create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
             """)
     {
         var nameOption = new Option<string>("--name")

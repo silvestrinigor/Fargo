@@ -12,8 +12,8 @@ public sealed class ArticleCreateCommand : Command
             Create a new article.
 
             Examples:
-              fargo articles create --name "Widget"
-              fargo articles create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
+              fargo article create --name "Widget"
+              fargo article create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var nameOption = new Option<string>("--name")

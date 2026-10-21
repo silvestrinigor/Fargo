@@ -91,17 +91,17 @@ in your `PATH`.
 fargo --version
 fargo config set-server --url https://localhost:7563
 fargo identity login --username admin
-fargo articles list
+fargo article list
 ```
 
-Run any command with `--help` to see its options, e.g. `fargo articles --help`.
+Run any command with `--help` to see its options, e.g. `fargo article --help`.
 
 Add `--verbose` (or `-v`) to any command to print detailed diagnostics when an
 error occurs (exception types, inner exceptions, and stack traces), which is
 useful when reporting issues:
 
 ```bash
-fargo articles list --verbose
+fargo article list --verbose
 ```
 
 ## Running the Application

@@ -12,8 +12,8 @@ public sealed class UpdateArticleCommand : Command
             Update an existing article. Only the options you pass are changed.
 
             Examples:
-              fargo articles update 11111111-1111-1111-1111-111111111111 --name "New name"
-              fargo articles update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+              fargo article update 11111111-1111-1111-1111-111111111111 --name "New name"
+              fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

@@ -11,8 +11,8 @@ public sealed class ListUserGroupsCommand : Command
             List user groups as a table, with optional paging and partition filters.
 
             Examples:
-              fargo user-groups list
-              fargo user-groups list --page 1 --limit 20
+              fargo user-group list
+              fargo user-group list --page 1 --limit 20
             """)
     {
         var pageOption = new Option<int?>("--page")

@@ -6,7 +6,7 @@ namespace Fargo.Cli.Commands.UserGroups;
 public sealed class UserGroupsCommand : Command
 {
     public UserGroupsCommand(FargoApiClient client)
-        : base("user-groups", "Manage user groups - collections of users that share permissions.")
+        : base("user-group", "Manage user groups - collections of users that share permissions.")
     {
         Add(new ListUserGroupsCommand(client));
         Add(new GetUserGroupCommand(client));

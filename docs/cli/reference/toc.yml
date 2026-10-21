@@ -4,15 +4,15 @@
   href: config.md
 - name: Identity
   href: identity.md
-- name: Articles
-  href: articles.md
-- name: Items
-  href: items.md
-- name: Partitions
-  href: partitions.md
-- name: User Groups
-  href: user-groups.md
-- name: Users
-  href: users.md
+- name: Article
+  href: article.md
+- name: Item
+  href: item.md
+- name: Partition
+  href: partition.md
+- name: User Group
+  href: user-group.md
+- name: User
+  href: user.md
 - name: Audit
   href: audit.md

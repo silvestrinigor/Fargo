@@ -12,8 +12,8 @@ public sealed class CreateUserGroupCommand : Command
             Create a new user group, optionally nested under a parent group.
 
             Examples:
-              fargo user-groups create --name warehouse-ops
-              fargo user-groups create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
+              fargo user-group create --name warehouse-ops
+              fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
             """)
     {
         var nameidOption = new Option<string>("--name")

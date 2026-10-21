@@ -12,7 +12,7 @@ public sealed class ItemLocationCommand : Command
             container to the innermost.
 
             Examples:
-              fargo items location 22222222-2222-2222-2222-222222222222
+              fargo item location 22222222-2222-2222-2222-222222222222
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

@@ -13,7 +13,7 @@ public sealed class GetArticleByBarcodeCommand : Command
             The barcode is given as {value}:{type}.
 
             Examples:
-              fargo articles get-by-barcode 1234567890128:ean13
+              fargo article get-by-barcode 1234567890128:ean13
             """)
     {
         var barcodeArgument = new Argument<string>("barcode")

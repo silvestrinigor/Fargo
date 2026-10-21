@@ -11,9 +11,9 @@ public sealed class ListArticlesCommand : Command
             List articles as a table, with optional paging and partition filters.
 
             Examples:
-              fargo articles list
-              fargo articles list --page 1 --limit 20
-              fargo articles list --partitions 00000000-0000-0000-0000-000000000001
+              fargo article list
+              fargo article list --page 1 --limit 20
+              fargo article list --partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var pageOption = new Option<int?>("--page")

@@ -11,7 +11,7 @@ public sealed class GetUserGroupCommand : Command
             Show the full details of a single user group.
 
             Examples:
-              fargo user-groups get 00000000-0000-0000-0000-000000000003
+              fargo user-group get 00000000-0000-0000-0000-000000000003
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

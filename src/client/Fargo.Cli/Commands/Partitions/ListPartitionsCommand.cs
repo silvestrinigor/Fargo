@@ -11,9 +11,9 @@ public sealed class ListPartitionsCommand : Command
             List partitions as a table, with optional paging and parent filters.
 
             Examples:
-              fargo partitions list
-              fargo partitions list --page 1 --limit 20
-              fargo partitions list --partitions 00000000-0000-0000-0000-000000000001
+              fargo partition list
+              fargo partition list --page 1 --limit 20
+              fargo partition list --partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var pageOption = new Option<int?>("--page")

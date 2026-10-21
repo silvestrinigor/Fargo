@@ -11,7 +11,7 @@ public sealed class GetUserCommand : Command
             Show the full details of a single user.
 
             Examples:
-              fargo users get 00000000-0000-0000-0000-000000000004
+              fargo user get 00000000-0000-0000-0000-000000000004
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

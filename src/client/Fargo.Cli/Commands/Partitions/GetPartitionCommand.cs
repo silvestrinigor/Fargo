@@ -11,7 +11,7 @@ public sealed class GetPartitionCommand : Command
             Show the full details of a single partition.
 
             Examples:
-              fargo partitions get 00000000-0000-0000-0000-000000000001
+              fargo partition get 00000000-0000-0000-0000-000000000001
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

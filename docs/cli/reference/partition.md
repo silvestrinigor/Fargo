@@ -1,62 +1,63 @@
-# Partitions
+# Partition
 
-Command reference for `fargo partitions`, generated from the CLI's help output.
+Command reference for `fargo partition`, generated from the CLI's help output.
 
-## `fargo partitions`
+## `fargo partition`
 
 ```text
 Description:
   Manage partitions - the hierarchy used to scope and group data.
 
 Usage:
-  Fargo.Cli partitions [command] [options]
+  fargo partition [command] [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
   list           List partitions as a table, with optional paging and parent filters.
   
                  Examples:
-                   fargo partitions list
-                   fargo partitions list --page 1 --limit 20
-                   fargo partitions list --partitions 00000000-0000-0000-0000-000000000001
+                   fargo partition list
+                   fargo partition list --page 1 --limit 20
+                   fargo partition list --partitions 00000000-0000-0000-0000-000000000001
   get <guid>     Show the full details of a single partition.
   
                  Examples:
-                   fargo partitions get 00000000-0000-0000-0000-000000000001
+                   fargo partition get 00000000-0000-0000-0000-000000000001
   create         Create a new partition, optionally nested under a parent.
   
                  Examples:
-                   fargo partitions create --name "Warehouse A"
-                   fargo partitions create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
+                   fargo partition create --name "Warehouse A"
+                   fargo partition create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
   update <guid>  Update an existing partition. Only the options you pass are changed.
   
                  Examples:
-                   fargo partitions update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
+                   fargo partition update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
   delete <guid>  Delete a partition by GUID.
   
                  Examples:
-                   fargo partitions delete 00000000-0000-0000-0000-000000000002
+                   fargo partition delete 00000000-0000-0000-0000-000000000002
 
 ```
 
-## `fargo partitions list`
+## `fargo partition list`
 
 ```text
 Description:
   List partitions as a table, with optional paging and parent filters.
   
   Examples:
-    fargo partitions list
-    fargo partitions list --page 1 --limit 20
-    fargo partitions list --partitions 00000000-0000-0000-0000-000000000001
+    fargo partition list
+    fargo partition list --page 1 --limit 20
+    fargo partition list --partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli partitions list [options]
+  fargo partition list [options]
 
 Options:
   --page <page>              Page number to retrieve (starts at 1).
@@ -66,20 +67,21 @@ Options:
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo partitions get`
+## `fargo partition get`
 
 ```text
 Description:
   Show the full details of a single partition.
   
   Examples:
-    fargo partitions get 00000000-0000-0000-0000-000000000001
+    fargo partition get 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli partitions get <guid> [options]
+  fargo partition get <guid> [options]
 
 Arguments:
   <guid>  The partition GUID.
@@ -89,21 +91,22 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo partitions create`
+## `fargo partition create`
 
 ```text
 Description:
   Create a new partition, optionally nested under a parent.
   
   Examples:
-    fargo partitions create --name "Warehouse A"
-    fargo partitions create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
+    fargo partition create --name "Warehouse A"
+    fargo partition create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli partitions create [options]
+  fargo partition create [options]
 
 Options:
   --name <name> (REQUIRED)  Name of the partition.
@@ -112,20 +115,21 @@ Options:
   --password <password>     Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help            Show help and usage information
   --server <server>         The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose             Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo partitions update`
+## `fargo partition update`
 
 ```text
 Description:
   Update an existing partition. Only the options you pass are changed.
   
   Examples:
-    fargo partitions update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
+    fargo partition update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli partitions update <guid> [options]
+  fargo partition update <guid> [options]
 
 Arguments:
   <guid>  The partition GUID.
@@ -136,20 +140,21 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo partitions delete`
+## `fargo partition delete`
 
 ```text
 Description:
   Delete a partition by GUID.
   
   Examples:
-    fargo partitions delete 00000000-0000-0000-0000-000000000002
+    fargo partition delete 00000000-0000-0000-0000-000000000002
 
 Usage:
-  Fargo.Cli partitions delete <guid> [options]
+  fargo partition delete <guid> [options]
 
 Arguments:
   <guid>  The partition GUID.
@@ -159,6 +164,7 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

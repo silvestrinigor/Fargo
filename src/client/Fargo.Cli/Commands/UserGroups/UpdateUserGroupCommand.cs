@@ -12,8 +12,8 @@ public sealed class UpdateUserGroupCommand : Command
             Update an existing user group. Only the options you pass are changed.
 
             Examples:
-              fargo user-groups update 00000000-0000-0000-0000-000000000003 --active false
-              fargo user-groups update 00000000-0000-0000-0000-000000000003 --remove-parent
+              fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
+              fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

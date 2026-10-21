@@ -11,7 +11,7 @@ public sealed class DeletePartitionCommand : Command
             Delete a partition by GUID.
 
             Examples:
-              fargo partitions delete 00000000-0000-0000-0000-000000000002
+              fargo partition delete 00000000-0000-0000-0000-000000000002
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace Fargo.Mcp.Tools;
 
 /// <summary>
-/// MCP tools for working with Fargo items. Mirrors the <c>fargo items</c> CLI
+/// MCP tools for working with Fargo items. Mirrors the <c>fargo item</c> CLI
 /// surface.
 /// </summary>
 [McpServerToolType]

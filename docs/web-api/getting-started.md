@@ -76,7 +76,7 @@ and targets a configurable server:
 ```bash
 fargo config set-server --url https://localhost:7563
 fargo identity login --username admin
-fargo articles list
+fargo article list
 fargo audit get <audit-log-guid>
 ```
 

@@ -12,8 +12,8 @@ public sealed class CreateUserCommand : Command
             Create a new user account.
 
             Examples:
-              fargo users create --username jdoe --password 'S3cr3t!'
-              fargo users create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
+              fargo user create --username jdoe --password 'S3cr3t!'
+              fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
             """)
     {
         var usernameOption = new Option<string>("--username")

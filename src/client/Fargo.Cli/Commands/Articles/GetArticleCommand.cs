@@ -11,7 +11,7 @@ public sealed class GetArticleCommand : Command
             Show the full details of a single article.
 
             Examples:
-              fargo articles get 11111111-1111-1111-1111-111111111111
+              fargo article get 11111111-1111-1111-1111-111111111111
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

@@ -1,63 +1,64 @@
-# Users
+# User
 
-Command reference for `fargo users`, generated from the CLI's help output.
+Command reference for `fargo user`, generated from the CLI's help output.
 
-## `fargo users`
+## `fargo user`
 
 ```text
 Description:
   Manage user accounts (list, inspect, create, update, delete).
 
 Usage:
-  Fargo.Cli users [command] [options]
+  fargo user [command] [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
   list           List users as a table, with optional paging and partition filters.
   
                  Examples:
-                   fargo users list
-                   fargo users list --page 1 --limit 20
-                   fargo users list --partitions 00000000-0000-0000-0000-000000000001
+                   fargo user list
+                   fargo user list --page 1 --limit 20
+                   fargo user list --partitions 00000000-0000-0000-0000-000000000001
   get <guid>     Show the full details of a single user.
   
                  Examples:
-                   fargo users get 00000000-0000-0000-0000-000000000004
+                   fargo user get 00000000-0000-0000-0000-000000000004
   create         Create a new user account.
   
                  Examples:
-                   fargo users create --username jdoe --password 'S3cr3t!'
-                   fargo users create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
+                   fargo user create --username jdoe --password 'S3cr3t!'
+                   fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
   update <guid>  Update an existing user. Only the options you pass are changed.
   
                  Examples:
-                   fargo users update 00000000-0000-0000-0000-000000000004 --first-name Jane
-                   fargo users update 00000000-0000-0000-0000-000000000004 --active false
+                   fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
+                   fargo user update 00000000-0000-0000-0000-000000000004 --active false
   delete <guid>  Delete a user by GUID.
   
                  Examples:
-                   fargo users delete 00000000-0000-0000-0000-000000000004
+                   fargo user delete 00000000-0000-0000-0000-000000000004
 
 ```
 
-## `fargo users list`
+## `fargo user list`
 
 ```text
 Description:
   List users as a table, with optional paging and partition filters.
   
   Examples:
-    fargo users list
-    fargo users list --page 1 --limit 20
-    fargo users list --partitions 00000000-0000-0000-0000-000000000001
+    fargo user list
+    fargo user list --page 1 --limit 20
+    fargo user list --partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
-  Fargo.Cli users list [options]
+  fargo user list [options]
 
 Options:
   --page <page>              Page number to retrieve (starts at 1).
@@ -67,20 +68,21 @@ Options:
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo users get`
+## `fargo user get`
 
 ```text
 Description:
   Show the full details of a single user.
   
   Examples:
-    fargo users get 00000000-0000-0000-0000-000000000004
+    fargo user get 00000000-0000-0000-0000-000000000004
 
 Usage:
-  Fargo.Cli users get <guid> [options]
+  fargo user get <guid> [options]
 
 Arguments:
   <guid>  The user GUID.
@@ -90,21 +92,22 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo users create`
+## `fargo user create`
 
 ```text
 Description:
   Create a new user account.
   
   Examples:
-    fargo users create --username jdoe --password 'S3cr3t!'
-    fargo users create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
+    fargo user create --username jdoe --password 'S3cr3t!'
+    fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
 
 Usage:
-  Fargo.Cli users create [options]
+  fargo user create [options]
 
 Options:
   --username <username> (REQUIRED)  Username (nameid) for the new user.
@@ -116,21 +119,22 @@ Options:
   --password <password>             Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help                    Show help and usage information
   --server <server>                 The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                     Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo users update`
+## `fargo user update`
 
 ```text
 Description:
   Update an existing user. Only the options you pass are changed.
   
   Examples:
-    fargo users update 00000000-0000-0000-0000-000000000004 --first-name Jane
-    fargo users update 00000000-0000-0000-0000-000000000004 --active false
+    fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
+    fargo user update 00000000-0000-0000-0000-000000000004 --active false
 
 Usage:
-  Fargo.Cli users update <guid> [options]
+  fargo user update <guid> [options]
 
 Arguments:
   <guid>  The user GUID.
@@ -144,20 +148,21 @@ Options:
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo users delete`
+## `fargo user delete`
 
 ```text
 Description:
   Delete a user by GUID.
   
   Examples:
-    fargo users delete 00000000-0000-0000-0000-000000000004
+    fargo user delete 00000000-0000-0000-0000-000000000004
 
 Usage:
-  Fargo.Cli users delete <guid> [options]
+  fargo user delete <guid> [options]
 
 Arguments:
   <guid>  The user GUID.
@@ -167,6 +172,7 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
