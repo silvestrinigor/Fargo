@@ -4,7 +4,13 @@
     <Authors>Igor Silvestrin</Authors>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <!--
+      Version numbers are intentionally NOT set here. Fargo ships several
+      independently-releasable artifacts (the Fargo.Cli tool, the
+      Fargo.ClientHttp library, the Fargo.Mcp server) whose versions follow
+      different cadences, so each one declares its own <Version> in its own
+      .csproj. Release builds may override it (e.g. -p:Version=0.1.0-alpha.2).
+    -->
   </PropertyGroup>
 
 </Project>

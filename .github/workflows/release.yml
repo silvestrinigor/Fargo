@@ -1,0 +1,60 @@
+name: Release CLI
+
+# Publishes the Fargo CLI as self-contained native executables (win-x64 and
+# linux-x64) to a GitHub Release whenever a version tag is pushed.
+#
+# Tag the commit you want to ship, e.g.:
+#   git tag v0.1.0-alpha.1
+#   git push origin v0.1.0-alpha.1
+#
+# The version baked into the binaries and used in the archive names comes from
+# the tag (the leading "v" is stripped). Pre-1.0 and any tag containing a
+# prerelease suffix (e.g. -alpha, -beta, -rc) is published as a GitHub
+# "pre-release" so it is clearly flagged as not production-ready.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Resolve version from tag
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Mark as pre-release for 0.x versions or any prerelease suffix.
+          if [[ "$version" == 0.* || "$version" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and package CLI
+        run: bash scripts/publish-cli.sh "${{ steps.version.outputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Fargo CLI ${{ steps.version.outputs.version }}
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          generate_release_notes: true
+          files: |
+            artifacts/dist/*.zip
+            artifacts/dist/*.tar.gz
+            artifacts/dist/*.sha256

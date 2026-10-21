@@ -38,6 +38,10 @@ public static class CommandFactory
 
         globalOptions.AddServerToRoot(root);
 
+        // Expose `fargo --version`, reporting the assembly's informational
+        // version (set from the build's VersionPrefix/VersionSuffix).
+        root.Options.Add(new VersionOption());
+
         var client = services.GetRequiredService<FargoApiClient>();
 
         var tokenStore = services.GetRequiredService<ITokenStore>();
