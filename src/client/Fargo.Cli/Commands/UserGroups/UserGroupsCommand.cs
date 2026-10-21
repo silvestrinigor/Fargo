@@ -9,6 +9,7 @@ public sealed class UserGroupsCommand : Command
         : base("user-group", "Manage user groups - collections of users that share permissions.")
     {
         Add(new ListUserGroupsCommand(client));
+        Add(new TreeUserGroupsCommand(client));
         Add(new GetUserGroupCommand(client));
         Add(new CreateUserGroupCommand(client));
         Add(new UpdateUserGroupCommand(client));
