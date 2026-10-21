@@ -32,8 +32,6 @@ public class FargoCliTokenStore : ITokenStore
             config.CredentialId = CredentialCache.CreatePersonaGUID();
 
             configurationStore.Save(config);
-
-            Console.WriteLine(config.CredentialId);
         }
 
         personaGuid = PersonaGUID.Create(config.CredentialId);

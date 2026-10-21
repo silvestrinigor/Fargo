@@ -23,34 +23,62 @@ and **Linux (x64)** are attached to each
 
 ### Windows (x64)
 
-1. Download `fargo-<version>-win-x64.zip` from the latest release.
-2. (Optional) Verify the download against its checksum:
-   ```powershell
-   $expected = (Get-Content fargo-<version>-win-x64.zip.sha256).Split(' ')[0]
-   (Get-FileHash fargo-<version>-win-x64.zip -Algorithm SHA256).Hash -ieq $expected
-   ```
-3. Extract the archive and move `fargo.exe` to a folder on your `PATH`
-   (for example `%LOCALAPPDATA%\Programs\fargo`). To add that folder to your
-   user `PATH`:
-   ```powershell
-   $dir = "$env:LOCALAPPDATA\Programs\fargo"
-   setx PATH "$env:PATH;$dir"
-   ```
-   Open a new terminal afterwards so the updated `PATH` takes effect.
+Install (or upgrade) the latest release for the current user. This downloads
+`fargo.exe`, installs it to `%LOCALAPPDATA%\Programs\fargo`, and adds it to your
+user `PATH` — no admin rights required:
+
+```powershell
+irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 | iex
+```
+
+Open a **new** terminal afterwards so the updated `PATH` takes effect, then run
+`fargo --version`.
+
+To install a specific version, or to uninstall, download the script and run it
+with arguments:
+
+```powershell
+# Install a specific version
+$s = "$env:TEMP\fargo-install.ps1"
+irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 -OutFile $s
+& $s -Version 0.1.0-alpha.1
+
+# Uninstall (removes the binary and the PATH entry)
+& $s -Uninstall
+```
 
 ### Linux (x64)
 
-1. Download `fargo-<version>-linux-x64.tar.gz` from the latest release.
-2. (Optional) Verify the download against its checksum:
-   ```bash
-   sha256sum -c fargo-<version>-linux-x64.tar.gz.sha256
-   ```
-3. Extract and install it onto your `PATH`:
-   ```bash
-   tar -xzf fargo-<version>-linux-x64.tar.gz
-   install -m 0755 fargo ~/.local/bin/fargo   # or: sudo install -m 0755 fargo /usr/local/bin/fargo
-   ```
-   Make sure `~/.local/bin` is on your `PATH`.
+Install (or upgrade) the latest release for the current user. This downloads the
+`fargo` binary, verifies its checksum, and installs it to `~/.local/bin`:
+
+```bash
+curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh
+```
+
+Make sure `~/.local/bin` is on your `PATH` (the script warns you if it is not),
+then run `fargo --version`.
+
+Install a specific version, pick a different install directory, or uninstall:
+
+```bash
+# Install a specific version
+curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh -s -- --version 0.1.0-alpha.1
+
+# Install system-wide (needs sudo)
+curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sudo sh -s -- --prefix /usr/local/bin
+
+# Uninstall
+curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh -s -- --uninstall
+```
+
+### Manual install
+
+Prefer to do it by hand? Download `fargo-<version>-win-x64.zip` (Windows) or
+`fargo-<version>-linux-x64.tar.gz` (Linux) from the
+[releases page](https://github.com/silvestrinigor/Fargo/releases), verify it
+against its `.sha256` file, extract it, and place `fargo`/`fargo.exe` on a folder
+in your `PATH`.
 
 ### First run
 
@@ -62,6 +90,14 @@ fargo articles list
 ```
 
 Run any command with `--help` to see its options, e.g. `fargo articles --help`.
+
+Add `--verbose` (or `-v`) to any command to print detailed diagnostics when an
+error occurs (exception types, inner exceptions, and stack traces), which is
+useful when reporting issues:
+
+```bash
+fargo articles list --verbose
+```
 
 ## Running the Application
 

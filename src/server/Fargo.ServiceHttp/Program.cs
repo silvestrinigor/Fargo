@@ -1,13 +1,13 @@
 using Fargo.Application.Extensions;
+using Fargo.Infrastructure.Extensions;
+using Fargo.Infrastructure.Persistence;
+using Fargo.ServiceDefaults;
 using Fargo.ServiceHttp.Endpoints;
 using Fargo.ServiceHttp.ExceptionHandlers;
 using Fargo.ServiceHttp.JsonConverters;
 using Fargo.ServiceHttp.OpenApi;
 using Fargo.ServiceHttp.RateLimiting;
 using Fargo.ServiceHttp.Routes;
-using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
-using Fargo.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,5 +1,4 @@
 using Fargo.ClientHttp.AuditLogs.Item;
-using Microsoft.Kiota.Abstractions;
 
 namespace Fargo.ClientHttp.AuditLogs;
 

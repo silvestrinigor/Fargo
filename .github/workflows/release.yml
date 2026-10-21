@@ -48,6 +48,9 @@ jobs:
       - name: Build and package CLI
         run: bash scripts/publish-cli.sh "${{ steps.version.outputs.version }}"
 
+      - name: Stage installer scripts as release assets
+        run: cp scripts/install.ps1 scripts/install.sh artifacts/dist/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -58,3 +61,5 @@ jobs:
             artifacts/dist/*.zip
             artifacts/dist/*.tar.gz
             artifacts/dist/*.sha256
+            artifacts/dist/install.ps1
+            artifacts/dist/install.sh
