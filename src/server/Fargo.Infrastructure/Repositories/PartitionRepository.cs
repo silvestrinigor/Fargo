@@ -124,9 +124,15 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             return query;
         }
 
+        // A partition is visible when the actor has access to it directly (its
+        // own GUID is in the access set) or when it is a child of an accessible
+        // partition. The direct-access case is essential for root partitions
+        // such as the global partition, whose ParentPartitionGuid is null and
+        // which would otherwise never match the parent-based condition.
         return query.Where(partition =>
-            partition.ParentPartitionGuid != null &&
-            partitionGuids.Contains(partition.ParentPartitionGuid.Value));
+            partitionGuids.Contains(partition.Guid) ||
+            (partition.ParentPartitionGuid != null &&
+             partitionGuids.Contains(partition.ParentPartitionGuid.Value)));
     }
 
     public async Task<bool> HasChildrenAsync(Guid partitionGuid, CancellationToken cancellationToken = default)
