@@ -28,8 +28,13 @@ Install (or upgrade) the latest release for the current user. This downloads
 user `PATH` — no admin rights required:
 
 ```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 | iex
 ```
+
+> The first line enables TLS 1.2, which Windows PowerShell 5.1 does not use by
+> default — without it the download fails with "the connection was closed
+> unexpectedly". It is harmless on PowerShell 7+.
 
 Open a **new** terminal afterwards so the updated `PATH` takes effect, then run
 `fargo --version`.

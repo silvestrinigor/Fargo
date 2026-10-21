@@ -34,6 +34,16 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Windows PowerShell 5.1 defaults to TLS 1.0/1.1, which GitHub rejects (the
+# connection is closed during the handshake). Ensure TLS 1.2 is enabled before
+# any web request. Harmless on PowerShell 7+, which already uses modern TLS.
+try {
+    [Net.ServicePointManager]::SecurityProtocol =
+        [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+} catch {
+    # Older runtimes may not expose Tls12 by name; ignore and proceed.
+}
+
 $Repo       = 'silvestrinigor/Fargo'
 $Rid        = 'win-x64'
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\fargo'
