@@ -31,12 +31,20 @@ and **Linux (x64)** are attached to each
    ```
 3. Extract the archive and move `fargo.exe` to a folder on your `PATH`
    (for example `%LOCALAPPDATA%\Programs\fargo`). To add that folder to your
-   user `PATH`:
+   user `PATH` (appends only this folder, without the truncation and
+   duplication problems of `setx`):
    ```powershell
    $dir = "$env:LOCALAPPDATA\Programs\fargo"
-   setx PATH "$env:PATH;$dir"
+   $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
+   if (($userPath -split ';') -notcontains $dir) {
+       [Environment]::SetEnvironmentVariable('PATH', "$userPath;$dir", 'User')
+   }
    ```
-   Open a new terminal afterwards so the updated `PATH` takes effect.
+   Open a **new** terminal afterwards so the updated `PATH` takes effect. To use
+   `fargo` in the current terminal without reopening it, also run:
+   ```powershell
+   $env:PATH += ";$env:LOCALAPPDATA\Programs\fargo"
+   ```
 
 ### Linux (x64)
 
