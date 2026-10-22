@@ -36,8 +36,8 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Nameid { get; set; }
 #endif
-        /// <summary>The parentPartition property</summary>
-        public Guid? ParentPartition { get; set; }
+        /// <summary>The parentUserGroup property</summary>
+        public Guid? ParentUserGroup { get; set; }
         /// <summary>The partitionAccesses property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -92,7 +92,7 @@ namespace Fargo.ClientHttp.Models
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "isAdminUserGroup", n => { IsAdminUserGroup = n.GetBoolValue(); } },
                 { "nameid", n => { Nameid = n.GetStringValue(); } },
-                { "parentPartition", n => { ParentPartition = n.GetGuidValue(); } },
+                { "parentUserGroup", n => { ParentUserGroup = n.GetGuidValue(); } },
                 { "partitionAccesses", n => { PartitionAccesses = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitions", n => { Partitions = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "permissions", n => { Permissions = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
@@ -110,7 +110,7 @@ namespace Fargo.ClientHttp.Models
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteBoolValue("isAdminUserGroup", IsAdminUserGroup);
             writer.WriteStringValue("nameid", Nameid);
-            writer.WriteGuidValue("parentPartition", ParentPartition);
+            writer.WriteGuidValue("parentUserGroup", ParentUserGroup);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccesses", PartitionAccesses);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitions", Partitions);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissions", Permissions);

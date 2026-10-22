@@ -2778,7 +2778,7 @@
           "description",
           "isActive",
           "isAdminUserGroup",
-          "parentPartition",
+          "parentUserGroup",
           "permissions",
           "partitions",
           "partitionAccesses"
@@ -2801,7 +2801,7 @@
           "isAdminUserGroup": {
             "type": "boolean"
           },
-          "parentPartition": {
+          "parentUserGroup": {
             "type": [
               "null",
               "string"

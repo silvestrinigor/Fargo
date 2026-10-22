@@ -13,14 +13,14 @@ namespace Fargo.ClientHttp.Models
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class AuditLogDto : IAdditionalDataHolder, IParsable
     {
-        /// <summary>The type of change that was recorded (entity created, updated, or deleted)</summary>
-        public int? AuditLogType { get; set; }
         /// <summary>The unique identifier of the actor who performed the action</summary>
         public Guid? ActorGuid { get; set; }
         /// <summary>The type of actor who performed the action (e.g., User, Application)</summary>
         public int? ActorType { get; set; }
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The type of change that was recorded (entity created, updated, or deleted)</summary>
+        public int? AuditLogType { get; set; }
         /// <summary>The unique identifier of the entity that was affected by the action</summary>
         public Guid? EntityGuid { get; set; }
         /// <summary>The type of entity that was affected (e.g., Article, User)</summary>
@@ -70,9 +70,9 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "auditLogType", n => { AuditLogType = n.GetIntValue(); } },
                 { "actorGuid", n => { ActorGuid = n.GetGuidValue(); } },
                 { "actorType", n => { ActorType = n.GetIntValue(); } },
+                { "auditLogType", n => { AuditLogType = n.GetIntValue(); } },
                 { "entityGuid", n => { EntityGuid = n.GetGuidValue(); } },
                 { "entityType", n => { EntityType = n.GetIntValue(); } },
                 { "guid", n => { Guid = n.GetGuidValue(); } },
@@ -88,9 +88,9 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("auditLogType", AuditLogType);
             writer.WriteGuidValue("actorGuid", ActorGuid);
             writer.WriteIntValue("actorType", ActorType);
+            writer.WriteIntValue("auditLogType", AuditLogType);
             writer.WriteGuidValue("entityGuid", EntityGuid);
             writer.WriteIntValue("entityType", EntityType);
             writer.WriteGuidValue("guid", Guid);

@@ -11,10 +11,8 @@ namespace Fargo.Cli.Commands.UserGroups;
 /// (GET /user-groups and GET /users); no new backend endpoint is required.
 /// </summary>
 /// <remarks>
-/// Group nesting uses <see cref="UserGroupDto.ParentPartition"/>. Despite its
-/// name, the server maps the parent <em>user group</em> GUID into that field
-/// (see the server UserGroupDtoMappings projection), so it is the parent-group
-/// link, not a partition. User membership comes from
+/// Group nesting uses <see cref="UserGroupDto.ParentUserGroup"/>, the parent
+/// user-group GUID. User membership comes from
 /// <see cref="UserDto.UserGroups"/>. Each node is tagged with its type
 /// (<c>[group]</c> or <c>[user]</c>). Users that belong to no group appear at
 /// the root level, as siblings of the top-level groups.
@@ -68,7 +66,7 @@ public sealed class TreeUserGroupsCommand : Command
             }
 
             // Index groups and their parent/child relationships. The parent link
-            // lives in ParentPartition (which carries the parent user-group GUID).
+            // lives in ParentUserGroup (the parent user-group GUID).
             var groupsByGuid = new Dictionary<Guid, UserGroupDto>();
             var childrenByParent = new Dictionary<Guid, List<UserGroupDto>>();
             var rootGroups = new List<UserGroupDto>();
@@ -83,7 +81,7 @@ public sealed class TreeUserGroupsCommand : Command
 
             foreach (var group in groups)
             {
-                var parentGuid = group.ParentPartition;
+                var parentGuid = group.ParentUserGroup;
 
                 // A group is a root when it has no parent, or its parent is not
                 // among the groups we can see (orphaned parent -> treat as root).
