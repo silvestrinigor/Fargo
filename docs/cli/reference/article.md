@@ -25,6 +25,16 @@ Commands:
                                  fargo article list
                                  fargo article list --page 1 --limit 20
                                  fargo article list --partitions 00000000-0000-0000-0000-000000000001
+  tree                         Show articles as a tree: each variation and pack nested under the
+                               article it derives from.
+  
+                               Each line is tagged with its type ([article], with a variation / pack
+                               / kit / container hint). Kits are not nested and always appear at the
+                               root level. Variations and packs whose source article is not visible
+                               also appear at the root level.
+  
+                               Examples:
+                                 fargo article tree
   get <guid>                   Show the full details of a single article.
   
                                Examples:
@@ -125,6 +135,33 @@ Options:
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo article tree`
+
+```text
+Description:
+  Show articles as a tree: each variation and pack nested under the
+  article it derives from.
+  
+  Each line is tagged with its type ([article], with a variation / pack
+  / kit / container hint). Kits are not nested and always appear at the
+  root level. Variations and packs whose source article is not visible
+  also appear at the root level.
+  
+  Examples:
+    fargo article tree
+
+Usage:
+  fargo article tree [options]
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

@@ -23,6 +23,7 @@ fargo
 │  └─ change-password
 ├─ articles       Manage articles
 │  ├─ list
+│  ├─ tree
 │  ├─ get
 │  ├─ get-by-barcode
 │  ├─ inventory

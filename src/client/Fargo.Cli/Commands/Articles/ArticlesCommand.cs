@@ -9,6 +9,7 @@ public sealed class ArticlesCommand : Command
         : base("article", "Manage articles - the catalog of product definitions.")
     {
         Add(new ListArticlesCommand(client));
+        Add(new TreeArticlesCommand(client));
         Add(new GetArticleCommand(client));
         Add(new GetArticleByBarcodeCommand(client));
         Add(new ArticleInventoryCommand(client));
