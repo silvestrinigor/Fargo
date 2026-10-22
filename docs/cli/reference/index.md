@@ -28,7 +28,9 @@ fargo
 │  ├─ inventory
 │  ├─ create
 │  ├─ update
-│  └─ delete
+│  ├─ update-by-barcode
+│  ├─ delete
+│  └─ delete-by-barcode
 ├─ items          Manage items
 │  ├─ list
 │  ├─ get
@@ -46,6 +48,7 @@ fargo
 │  └─ delete
 ├─ user-groups    Manage user groups
 │  ├─ list
+│  ├─ tree
 │  ├─ get
 │  ├─ create
 │  ├─ update

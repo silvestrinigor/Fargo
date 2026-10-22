@@ -24,6 +24,15 @@ Commands:
                  Examples:
                    fargo user-group list
                    fargo user-group list --page 1 --limit 20
+  tree           Show user groups as a tree: child groups nested under their parent,
+                 and member users nested under each group.
+  
+                 Each line is tagged with its type ([group] or [user]). Users that
+                 are not in any group appear at the root level, alongside the
+                 top-level groups.
+  
+                 Examples:
+                   fargo user-group tree
   get <guid>     Show the full details of a single user group.
   
                  Examples:
@@ -67,6 +76,32 @@ Options:
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group tree`
+
+```text
+Description:
+  Show user groups as a tree: child groups nested under their parent,
+  and member users nested under each group.
+  
+  Each line is tagged with its type ([group] or [user]). Users that
+  are not in any group appear at the root level, alongside the
+  top-level groups.
+  
+  Examples:
+    fargo user-group tree
+
+Usage:
+  fargo user-group tree [options]
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

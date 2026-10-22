@@ -14,6 +14,8 @@ public sealed class ArticlesCommand : Command
         Add(new ArticleInventoryCommand(client));
         Add(new ArticleCreateCommand(client));
         Add(new DeleteArticleCommand(client));
+        Add(new DeleteArticleByBarcodeCommand(client));
         Add(new UpdateArticleCommand(client));
+        Add(new UpdateArticleByBarcodeCommand(client));
     }
 }
