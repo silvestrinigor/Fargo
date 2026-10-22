@@ -70,8 +70,7 @@ public sealed class LoginCommand : Command
 
             StatusWriter.Success(
                 "Login successful.",
-                ("User", username),
-                ("Expires at", result.ExpiresAt?.ToString("u")));
+                ("User", username));
 
             return 0;
         });
