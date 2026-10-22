@@ -2385,8 +2385,7 @@
       },
       "PartitionCreateDto": {
         "required": [
-          "name",
-          "parentPartitionGuid"
+          "name"
         ],
         "type": "object",
         "properties": {
@@ -2394,7 +2393,10 @@
             "$ref": "#/components/schemas/Name"
           },
           "parentPartitionGuid": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "description": {

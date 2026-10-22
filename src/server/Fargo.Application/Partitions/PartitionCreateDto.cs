@@ -4,5 +4,5 @@ namespace Fargo.Application.Partitions;
 
 public sealed record PartitionCreateDto(
     Name Name,
-    Guid ParentPartitionGuid,
+    Guid? ParentPartitionGuid = null,
     Description? Description = null);

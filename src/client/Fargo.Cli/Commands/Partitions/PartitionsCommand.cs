@@ -9,6 +9,7 @@ public sealed class PartitionsCommand : Command
         : base("partition", "Manage partitions - the hierarchy used to scope and group data.")
     {
         Add(new ListPartitionsCommand(client));
+        Add(new TreePartitionsCommand(client));
         Add(new GetPartitionCommand(client));
         Add(new CreatePartitionCommand(client));
         Add(new UpdatePartitionCommand(client));

@@ -22,7 +22,7 @@ CLI_GROUPS=(
     "identity|Identity|login logout refresh change-password"
     "article|Article|list get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
     "item|Item|list get create update delete location moviments inventory"
-    "partition|Partition|list get create update delete"
+    "partition|Partition|list tree get create update delete"
     "user-group|User Group|list tree get create update delete"
     "user|User|list get create update delete"
     "audit|Audit|list get"

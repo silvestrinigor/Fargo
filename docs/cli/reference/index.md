@@ -42,6 +42,7 @@ fargo
 │  └─ inventory
 ├─ partitions     Manage partitions
 │  ├─ list
+│  ├─ tree
 │  ├─ get
 │  ├─ create
 │  ├─ update

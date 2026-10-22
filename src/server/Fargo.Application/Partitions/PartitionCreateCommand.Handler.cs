@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
 using Fargo.Core.Audits;
+using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
@@ -28,9 +29,23 @@ public sealed class PartitionCreateCommandHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
 
-        var parentPartition = await partitionRepository.GetByGuidAsync(command.Create.ParentPartitionGuid, cancellationToken);
+        // When the caller does not specify a parent, default to the global
+        // partition. The actor must have access to the global partition to use
+        // this default; otherwise they must name a parent they can access.
+        var parentPartitionGuid =
+            command.Create.ParentPartitionGuid ?? FargoCoreWellKnowGuids.GlobalPartitionGuid;
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, command.Create.ParentPartitionGuid, EntityType.Partition);
+        var parentPartition = await partitionRepository.GetByGuidAsync(parentPartitionGuid, cancellationToken);
+
+        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
+
+        if (command.Create.ParentPartitionGuid is null && !actor.HasAccess(parentPartition))
+        {
+            throw new FargoApplicationException(
+                "No parent partition was provided and the default global partition is not "
+                + "accessible to you. Specify a parent partition you have access to.",
+                FargoErrorType.AccessDenied);
+        }
 
         actor.ThrowIfAccessDenied(parentPartition);
 

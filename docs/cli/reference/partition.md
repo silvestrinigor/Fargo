@@ -25,6 +25,13 @@ Commands:
                    fargo partition list
                    fargo partition list --page 1 --limit 20
                    fargo partition list --partitions 00000000-0000-0000-0000-000000000001
+  tree           Show partitions as a tree: child partitions nested under their parent.
+  
+                 Each line is tagged with its type ([partition]). Partitions with no
+                 parent (or whose parent is not visible) appear at the root level.
+  
+                 Examples:
+                   fargo partition tree
   get <guid>     Show the full details of a single partition.
   
                  Examples:
@@ -68,6 +75,30 @@ Options:
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo partition tree`
+
+```text
+Description:
+  Show partitions as a tree: child partitions nested under their parent.
+  
+  Each line is tagged with its type ([partition]). Partitions with no
+  parent (or whose parent is not visible) appear at the root level.
+  
+  Examples:
+    fargo partition tree
+
+Usage:
+  fargo partition tree [options]
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
