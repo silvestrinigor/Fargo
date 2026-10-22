@@ -14,6 +14,8 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="13.4.6" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
+    <!-- Pin patched version to resolve transitive vulnerability GHSA-qhrr-8q5h-9q3h (CVE-2026-92707). -->
+    <PackageReference Include="MessagePack" Version="2.5.303" />
   </ItemGroup>
 
   <ItemGroup>
