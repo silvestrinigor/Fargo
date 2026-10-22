@@ -38,9 +38,10 @@ public interface IAuditLogQueryRepository
     /// <param name="periodStart">Optional filter for audit logs starting from a specific date and time</param>
     /// <param name="periodEnd">Optional filter for audit logs ending at a specific date and time</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains 
-    /// the collection of audit log DTOs ordered by occurrence time</returns>
-    Task<IReadOnlyCollection<AuditLogDto>> GetManyInfoOrderedByOccurredAtAsync(
+    /// <returns>A task that represents the asynchronous operation. The task result contains
+    /// a page of audit log DTOs ordered by occurrence time, together with the total
+    /// number of matching entries.</returns>
+    Task<PagedResult<AuditLogDto>> GetManyInfoOrderedByOccurredAtAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         Guid? actorGuid = null,

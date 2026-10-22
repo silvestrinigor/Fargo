@@ -1324,7 +1324,7 @@
           "AuditLogs"
         ],
         "summary": "Gets multiple audit logs",
-        "description": "Retrieves a paginated list of audit logs.",
+        "description": "Retrieves a paginated list of audit logs, including the total number of matching entries.",
         "operationId": "GetAuditLogs",
         "parameters": [
           {
@@ -1399,16 +1399,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AuditLogDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfAuditLogDto"
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       }
@@ -2382,6 +2376,69 @@
         "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
         "type": "string",
         "description": "Represents a nameid."
+      },
+      "PagedResultOfAuditLogDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
       },
       "PartitionCreateDto": {
         "required": [

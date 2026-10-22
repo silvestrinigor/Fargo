@@ -17,15 +17,15 @@ public sealed class AuditLogsQueryHandler(
     IAuditLogQueryRepository auditLogQueryRepository,
     ICurrentActor currentActor,
     ILogger<AuditLogsQueryHandler> logger
-) : IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>>
+) : IQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>>
 {
     /// <summary>
     /// Handles the AuditLogsQuery by retrieving a paginated collection of audit logs that are accessible to the current actor.
     /// </summary>
     /// <param name="query">The audit logs query containing pagination and filter criteria</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the collection of audit log DTOs</returns>
-    public async Task<IReadOnlyCollection<AuditLogDto>> HandleAsync(AuditLogsQuery query, CancellationToken cancellationToken = default)
+    /// <returns>A task that represents the asynchronous operation. The task result contains a page of audit log DTOs together with the total count</returns>
+    public async Task<PagedResult<AuditLogDto>> HandleAsync(AuditLogsQuery query, CancellationToken cancellationToken = default)
     {
         logger.AuditLogManyQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
@@ -33,7 +33,7 @@ public sealed class AuditLogsQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var items = await auditLogQueryRepository.GetManyInfoOrderedByOccurredAtAsync(
+        var result = await auditLogQueryRepository.GetManyInfoOrderedByOccurredAtAsync(
             query.WithPagination,
             actor.PartitionAccessGuids,
             query.ActorGuid,
@@ -45,8 +45,8 @@ public sealed class AuditLogsQueryHandler(
             cancellationToken
         );
 
-        logger.AuditLogManyQueryCompleted(currentActor.Guid, currentActor.ActorType, actor.PartitionAccessGuids.Count, items.Count);
+        logger.AuditLogManyQueryCompleted(currentActor.Guid, currentActor.ActorType, actor.PartitionAccessGuids.Count, result.Items.Count);
 
-        return items;
+        return result;
     }
 }

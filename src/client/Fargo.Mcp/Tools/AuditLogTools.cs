@@ -71,7 +71,7 @@ public static class AuditLogTools
             }
         }, cancellationToken);
 
-        return result?.Select(a => a.ToSummary()).ToArray() ?? [];
+        return result?.Items?.Select(a => a.ToSummary()).ToArray() ?? [];
     }
 
     [McpServerTool(Name = "fargo_auditlogs_get")]

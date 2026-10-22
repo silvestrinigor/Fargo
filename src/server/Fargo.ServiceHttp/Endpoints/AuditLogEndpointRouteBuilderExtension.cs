@@ -65,14 +65,13 @@ public static class AuditLogEndpointRouteBuilderExtension
         .MapGet("/", GetManyAuditLogAsync)
         .WithName("GetAuditLogs")
         .WithSummary("Gets multiple audit logs")
-        .WithDescription("Retrieves a paginated list of audit logs.")
-        .Produces<IReadOnlyCollection<AuditLogDto>>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status204NoContent);
+        .WithDescription("Retrieves a paginated list of audit logs, including the total number of matching entries.")
+        .Produces<PagedResult<AuditLogDto>>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<AuditLogDto>>, NoContent>> GetManyAuditLogAsync(
+    private static async Task<Ok<PagedResult<AuditLogDto>>> GetManyAuditLogAsync(
         Page? page, Limit? limit,
         Guid? actorGuid,
         ActorType? actorType,
@@ -80,7 +79,7 @@ public static class AuditLogEndpointRouteBuilderExtension
         EntityType? entityType,
         DateTimeOffset? periodStart,
         DateTimeOffset? periodEnd,
-        IQueryHandler<AuditLogsQuery, IReadOnlyCollection<AuditLogDto>> handler,
+        IQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>> handler,
         CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(page ?? Page.FirstPage, limit ?? Limit.MaxLimit);
@@ -88,11 +87,6 @@ public static class AuditLogEndpointRouteBuilderExtension
         var query = new AuditLogsQuery(withPagination, actorGuid, actorType, entityGuid, entityType, periodStart, periodEnd);
 
         var response = await handler.HandleAsync(query, cancellationToken);
-
-        if (response.Count == 0)
-        {
-            return TypedResults.NoContent();
-        }
 
         return TypedResults.Ok(response);
     }
