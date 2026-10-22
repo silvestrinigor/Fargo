@@ -158,18 +158,17 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyItem)
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
-            .WithDescription("Retrieves a paginated list of items.")
-            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            .WithDescription("Retrieves a paginated list of items, including the total number of matching entries.")
+            .Produces<PagedResult<ItemDto>>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItem(
+    private static async Task<Ok<PagedResult<ItemDto>>> GetManyItem(
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>> handler,
+        IQueryHandler<ItemsQuery, PagedResult<ItemDto>> handler,
         CancellationToken cancellationToken
     )
     {
@@ -182,11 +181,6 @@ public static class ItemEndpointRouteBuilderExtension
             childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
-
-        if (response.Count == 0)
-        {
-            return TypedResults.NoContent();
-        }
 
         return TypedResults.Ok(response);
     }

@@ -22,7 +22,7 @@ public interface IItemQueryRepository
         CancellationToken cancellationToken = default
     );
 
-    Task<IReadOnlyCollection<ItemDto>> GetManyInfoOrderedByGuidAsync(
+    Task<PagedResult<ItemDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default

@@ -44,7 +44,7 @@ public sealed class TreeArticlesCommand : Command
     {
         SetAction(async _ =>
         {
-            var articles = await client.Articles.GetAsync() ?? [];
+            var articles = (await client.Articles.GetAsync())?.Items ?? [];
 
             // Index articles by GUID so source-article links can be resolved.
             var articlesByGuid = new Dictionary<Guid, ArticleDto>();

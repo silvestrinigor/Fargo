@@ -9,9 +9,9 @@ public sealed class UsersQueryHandler(
     IUserQueryRepository userRepository,
     ICurrentActor currentActor,
     ILogger<UsersQueryHandler> logger
-) : IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>
+) : IQueryHandler<UsersQuery, PagedResult<UserDto>>
 {
-    public async Task<IReadOnlyCollection<UserDto>> HandleAsync(
+    public async Task<PagedResult<UserDto>> HandleAsync(
         UsersQuery query, CancellationToken cancellationToken = default)
     {
         logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
@@ -34,7 +34,7 @@ public sealed class UsersQueryHandler(
             currentActor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
             partitionGuids?.Count ?? 0,
-            users.Count);
+            users.Items.Count);
 
         return users;
     }

@@ -56,7 +56,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>()
         .AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>()
         .AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>()
-        .AddScoped<IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>, ItemsQueryHandler>()
+        .AddScoped<IQueryHandler<ItemsQuery, PagedResult<ItemDto>>, ItemsQueryHandler>()
         .AddScoped<IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>>, ItemLocationQueryHandler>()
         .AddScoped<IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?>, ItemMovimentsQueryHandler>()
         .AddScoped<IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?>, ItemContainerInventoryByGuidQueryHandler>();
@@ -66,14 +66,14 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>()
         .AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>()
         .AddScoped<IQueryHandler<UserSingleQuery, UserDto?>, UserSingleQueryHandler>()
-        .AddScoped<IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>>, UsersQueryHandler>();
+        .AddScoped<IQueryHandler<UsersQuery, PagedResult<UserDto>>, UsersQueryHandler>();
 
         public IServiceCollection AddFargoUserGroupApplication() => services
         .AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>()
         .AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>()
         .AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>()
         .AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupDto?>, UserGroupSingleQueryHandler>()
-        .AddScoped<IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>, UserGroupsQueryHandler>();
+        .AddScoped<IQueryHandler<UserGroupsQuery, PagedResult<UserGroupDto>>, UserGroupsQueryHandler>();
 
         public IServiceCollection AddFargoArticleApplication() => services
         .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
@@ -81,7 +81,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
         .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()
         .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>()
-        .AddScoped<IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>, ArticlesQueryHandler>()
+        .AddScoped<IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>>, ArticlesQueryHandler>()
         .AddScoped<IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>, ArticleInventoryByGuidQueryHandler>();
 
         public IServiceCollection AddFargoPartitionApplication() => services
@@ -89,7 +89,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>()
         .AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>()
         .AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>()
-        .AddScoped<IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>, PartitionsQueryHandler>();
+        .AddScoped<IQueryHandler<PartitionsQuery, PagedResult<PartitionDto>>, PartitionsQueryHandler>();
 
         public IServiceCollection AddFargoAuditLogApplication() => services
         .AddScoped<IQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>>, AuditLogsQueryHandler>()

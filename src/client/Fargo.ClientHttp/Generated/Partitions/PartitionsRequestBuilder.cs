@@ -60,23 +60,22 @@ namespace Fargo.ClientHttp.Partitions
         {
         }
         /// <summary>
-        /// Retrieves a paginated list of partitions.
+        /// Retrieves a paginated list of partitions, including the total number of matching entries.
         /// </summary>
-        /// <returns>A List&lt;global::Fargo.ClientHttp.Models.PartitionDto&gt;</returns>
+        /// <returns>A <see cref="global::Fargo.ClientHttp.Models.PagedResultOfPartitionDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<List<global::Fargo.ClientHttp.Models.PartitionDto>?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Partitions.PartitionsRequestBuilder.PartitionsRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfPartitionDto?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Partitions.PartitionsRequestBuilder.PartitionsRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.ClientHttp.Models.PartitionDto>> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Partitions.PartitionsRequestBuilder.PartitionsRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfPartitionDto> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Partitions.PartitionsRequestBuilder.PartitionsRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
-            var collectionResult = await RequestAdapter.SendCollectionAsync<global::Fargo.ClientHttp.Models.PartitionDto>(requestInfo, global::Fargo.ClientHttp.Models.PartitionDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
-            return collectionResult?.AsList();
+            return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.PagedResultOfPartitionDto>(requestInfo, global::Fargo.ClientHttp.Models.PagedResultOfPartitionDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
         /// Creates a new partition under an parent. Returns the generated identifier.
@@ -99,7 +98,7 @@ namespace Fargo.ClientHttp.Partitions
             return await RequestAdapter.SendPrimitiveAsync<Guid?>(requestInfo, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Retrieves a paginated list of partitions.
+        /// Retrieves a paginated list of partitions, including the total number of matching entries.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -149,7 +148,7 @@ namespace Fargo.ClientHttp.Partitions
             return new global::Fargo.ClientHttp.Partitions.PartitionsRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Retrieves a paginated list of partitions.
+        /// Retrieves a paginated list of partitions, including the total number of matching entries.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class PartitionsRequestBuilderGetQueryParameters 

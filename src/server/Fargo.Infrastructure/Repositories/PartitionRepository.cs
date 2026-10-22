@@ -35,7 +35,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
+    public async Task<PagedResult<PartitionDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
@@ -45,13 +45,19 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions);
 
-        var partition = await queryFiltered
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var partitions = await queryFiltered
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
             .Select(PartitionDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return partition;
+        return new PagedResult<PartitionDto>(
+            partitions,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(

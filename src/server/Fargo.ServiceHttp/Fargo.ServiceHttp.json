@@ -196,7 +196,7 @@
           "Articles"
         ],
         "summary": "Gets multiple articles",
-        "description": "Retrieves a paginated list of articles.",
+        "description": "Retrieves a paginated list of articles, including the total number of matching entries.",
         "operationId": "GetArticles",
         "parameters": [
           {
@@ -236,16 +236,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ArticleDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfArticleDto"
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -498,7 +492,7 @@
           "Items"
         ],
         "summary": "Gets multiple items",
-        "description": "Retrieves a paginated list of items.",
+        "description": "Retrieves a paginated list of items, including the total number of matching entries.",
         "operationId": "GetItems",
         "parameters": [
           {
@@ -543,16 +537,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfItemDto"
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -688,7 +676,7 @@
           "Users"
         ],
         "summary": "Gets multiple users",
-        "description": "Retrieves a paginated list of users.",
+        "description": "Retrieves a paginated list of users, including the total number of matching entries.",
         "operationId": "GetUsers",
         "parameters": [
           {
@@ -733,16 +721,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfUserDto"
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -878,7 +860,7 @@
           "UserGroups"
         ],
         "summary": "Gets multiple user groups",
-        "description": "Retrieves a paginated list of user groups.",
+        "description": "Retrieves a paginated list of user groups, including the total number of matching entries.",
         "operationId": "GetUserGroups",
         "parameters": [
           {
@@ -923,16 +905,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserGroupDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfUserGroupDto"
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -1068,7 +1044,7 @@
           "Partitions"
         ],
         "summary": "Gets multiple partitions",
-        "description": "Retrieves a paginated list of partitions.",
+        "description": "Retrieves a paginated list of partitions, including the total number of matching entries.",
         "operationId": "GetPartitions",
         "parameters": [
           {
@@ -1108,16 +1084,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PartitionDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfPartitionDto"
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -2377,6 +2347,69 @@
         "type": "string",
         "description": "Represents a nameid."
       },
+      "PagedResultOfArticleDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
       "PagedResultOfAuditLogDto": {
         "required": [
           "items",
@@ -2390,6 +2423,258 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AuditLogDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
+      "PagedResultOfItemDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
+      "PagedResultOfPartitionDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartitionDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
+      "PagedResultOfUserDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
+      "PagedResultOfUserGroupDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserGroupDto"
             },
             "description": "The items on the current page."
           },

@@ -47,21 +47,29 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         return user;
     }
 
-    public async Task<IReadOnlyCollection<UserDto>> GetManyInfoAsync(
+    public async Task<PagedResult<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
+        var queryFiltered = ApplyPartitionFilter(
                 users
                     .AsNoTracking(),
-                childOfAnyOfThesePartitions)
+                childOfAnyOfThesePartitions);
+
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var result = await queryFiltered
             .OrderBy(user => user.Guid)
             .WithPagination(pagination)
             .Select(UserDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return new PagedResult<UserDto>(
+            result,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
     }
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)

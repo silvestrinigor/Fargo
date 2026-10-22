@@ -14,4 +14,4 @@ namespace Fargo.Application.Articles;
 public sealed record ArticlesQuery(
     Pagination WithPagination,
     IReadOnlyCollection<Guid>? ChildOfAnyOfThesePartitions = null
-) : IQuery<IReadOnlyCollection<ArticleDto>>;
+) : IQuery<PagedResult<ArticleDto>>;

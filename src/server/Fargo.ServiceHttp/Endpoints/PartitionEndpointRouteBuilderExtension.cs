@@ -68,18 +68,17 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyPartition)
             .WithName("GetPartitions")
             .WithSummary("Gets multiple partitions")
-            .WithDescription("Retrieves a paginated list of partitions.")
-            .Produces<IReadOnlyCollection<PartitionDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            .WithDescription("Retrieves a paginated list of partitions, including the total number of matching entries.")
+            .Produces<PagedResult<PartitionDto>>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<PartitionDto>>, NoContent>> GetManyPartition(
+    private static async Task<Ok<PagedResult<PartitionDto>>> GetManyPartition(
         Page? page,
         Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>> handler,
+        IQueryHandler<PartitionsQuery, PagedResult<PartitionDto>> handler,
         CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(
@@ -91,11 +90,6 @@ public static class PartitionEndpointRouteBuilderExtension
             childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
-
-        if (response.Count == 0)
-        {
-            return TypedResults.NoContent();
-        }
 
         return TypedResults.Ok(response);
     }

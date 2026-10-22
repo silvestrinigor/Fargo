@@ -19,11 +19,18 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list           List partitions as a table, with optional paging and parent filters.
+  list           List partitions as a table.
+  
+                 By default the list is paged interactively: a page of partitions is
+                 shown and you can press 'n' for the next page, 'p' for the previous
+                 page, or 'q' to quit (press Enter after the key). Passing --page or
+                 --limit switches to a single, non-interactive fetch of exactly that
+                 page.
   
                  Examples:
                    fargo partition list
-                   fargo partition list --page 1 --limit 20
+                   fargo partition list --page 2
+                   fargo partition list --page 1 --limit 50
                    fargo partition list --partitions 00000000-0000-0000-0000-000000000001
   tree           Show partitions as a tree: child partitions nested under their parent.
   
@@ -60,19 +67,26 @@ Commands:
 
 ```text
 Description:
-  List partitions as a table, with optional paging and parent filters.
+  List partitions as a table.
+  
+  By default the list is paged interactively: a page of partitions is
+  shown and you can press 'n' for the next page, 'p' for the previous
+  page, or 'q' to quit (press Enter after the key). Passing --page or
+  --limit switches to a single, non-interactive fetch of exactly that
+  page.
   
   Examples:
     fargo partition list
-    fargo partition list --page 1 --limit 20
+    fargo partition list --page 2
+    fargo partition list --page 1 --limit 50
     fargo partition list --partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
   fargo partition list [options]
 
 Options:
-  --page <page>              Page number to retrieve (starts at 1).
-  --limit <limit>            Maximum number of partitions per page.
+  --page <page>              Page number to retrieve (starts at 1). Disables interactive paging.
+  --limit <limit>            Maximum number of partitions per page. Disables interactive paging.
   --partitions <partitions>  Only show partitions under these parent GUIDs (space-separated).
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.

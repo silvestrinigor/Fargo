@@ -130,17 +130,16 @@ public static class ArticleEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyArticleAsync)
             .WithName("GetArticles")
             .WithSummary("Gets multiple articles")
-            .WithDescription("Retrieves a paginated list of articles.")
-            .Produces<IReadOnlyCollection<ArticleDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            .WithDescription("Retrieves a paginated list of articles, including the total number of matching entries.")
+            .Produces<PagedResult<ArticleDto>>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ArticleDto>>, NoContent>> GetManyArticleAsync(
+    private static async Task<Ok<PagedResult<ArticleDto>>> GetManyArticleAsync(
         Page? page, Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>> handler,
+        IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>> handler,
         CancellationToken cancellationToken)
     {
         var withPagination = new Pagination(
@@ -151,11 +150,6 @@ public static class ArticleEndpointRouteBuilderExtension
             childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
-
-        if (response.Count == 0)
-        {
-            return TypedResults.NoContent();
-        }
 
         return TypedResults.Ok(response);
     }

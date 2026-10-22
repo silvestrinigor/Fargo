@@ -84,7 +84,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return itemTask;
     }
 
-    public async Task<IReadOnlyCollection<ItemDto>> GetManyInfoOrderedByGuidAsync(
+    public async Task<PagedResult<ItemDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
@@ -93,13 +93,19 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             context.Items.AsNoTracking(),
             childOfAnyOfThesePartitions);
 
-        var item = await queryFiltered
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var items = await queryFiltered
             .OrderBy(item => item.Guid)
             .WithPagination(pagination)
             .Select(ItemDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return item;
+        return new PagedResult<ItemDto>(
+            items,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
     }
 
     private static IQueryable<Item> ApplyPartitionFilter(

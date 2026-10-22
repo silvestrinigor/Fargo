@@ -19,11 +19,19 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list           List user groups as a table, with optional paging and partition filters.
+  list           List user groups as a table.
+  
+                 By default the list is paged interactively: a page of user groups is
+                 shown and you can press 'n' for the next page, 'p' for the previous
+                 page, or 'q' to quit (press Enter after the key). Passing --page or
+                 --limit switches to a single, non-interactive fetch of exactly that
+                 page.
   
                  Examples:
                    fargo user-group list
-                   fargo user-group list --page 1 --limit 20
+                   fargo user-group list --page 2
+                   fargo user-group list --page 1 --limit 50
+                   fargo user-group list --partitions 00000000-0000-0000-0000-000000000001
   tree           Show user groups as a tree: child groups nested under their parent,
                  and member users nested under each group.
   
@@ -58,18 +66,26 @@ Commands:
 
 ```text
 Description:
-  List user groups as a table, with optional paging and partition filters.
+  List user groups as a table.
+  
+  By default the list is paged interactively: a page of user groups is
+  shown and you can press 'n' for the next page, 'p' for the previous
+  page, or 'q' to quit (press Enter after the key). Passing --page or
+  --limit switches to a single, non-interactive fetch of exactly that
+  page.
   
   Examples:
     fargo user-group list
-    fargo user-group list --page 1 --limit 20
+    fargo user-group list --page 2
+    fargo user-group list --page 1 --limit 50
+    fargo user-group list --partitions 00000000-0000-0000-0000-000000000001
 
 Usage:
   fargo user-group list [options]
 
 Options:
-  --page <page>              Page number to retrieve (starts at 1).
-  --limit <limit>            Maximum number of user groups per page.
+  --page <page>              Page number to retrieve (starts at 1). Disables interactive paging.
+  --limit <limit>            Maximum number of user groups per page. Disables interactive paging.
   --partitions <partitions>  Only show user groups under these partition GUIDs (space-separated).
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.

@@ -9,9 +9,9 @@ public sealed class PartitionsQueryHandler(
     IPartitionQueryRepository partitionRepository,
     ICurrentActor currentActor,
     ILogger<PartitionsQueryHandler> logger
-) : IQueryHandler<PartitionsQuery, IReadOnlyCollection<PartitionDto>>
+) : IQueryHandler<PartitionsQuery, PagedResult<PartitionDto>>
 {
-    public async Task<IReadOnlyCollection<PartitionDto>> HandleAsync(
+    public async Task<PagedResult<PartitionDto>> HandleAsync(
         PartitionsQuery query, CancellationToken cancellationToken = default)
     {
         logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
@@ -32,7 +32,7 @@ public sealed class PartitionsQueryHandler(
         logger.ManyQueryCompleted(
             currentActor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0, partitions.Count);
+            partitionGuids?.Count ?? 0, partitions.Items.Count);
 
         return partitions;
     }

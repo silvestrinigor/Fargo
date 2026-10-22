@@ -49,7 +49,7 @@ public interface IUserQueryRepository
     /// <returns>
     /// A read-only collection containing the requested page of user information.
     /// </returns>
-    Task<IReadOnlyCollection<UserDto>> GetManyInfoAsync(
+    Task<PagedResult<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default

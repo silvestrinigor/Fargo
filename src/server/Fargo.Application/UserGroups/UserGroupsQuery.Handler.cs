@@ -9,9 +9,9 @@ public sealed class UserGroupsQueryHandler(
     IUserGroupQueryRepository userGroupRepository,
     ICurrentActor currentActor,
     ILogger<UserGroupsQueryHandler> logger
-) : IQueryHandler<UserGroupsQuery, IReadOnlyCollection<UserGroupDto>>
+) : IQueryHandler<UserGroupsQuery, PagedResult<UserGroupDto>>
 {
-    public async Task<IReadOnlyCollection<UserGroupDto>> HandleAsync(
+    public async Task<PagedResult<UserGroupDto>> HandleAsync(
         UserGroupsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -35,7 +35,7 @@ public sealed class UserGroupsQueryHandler(
             currentActor.Guid,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
             partitionGuids?.Count ?? 0,
-            userGroups.Count);
+            userGroups.Items.Count);
 
         return userGroups;
     }

@@ -44,7 +44,7 @@ public static class ItemTools
             }
         }, cancellationToken);
 
-        return result?.Select(i => i.ToSummary()).ToArray() ?? [];
+        return result?.Items?.Select(i => i.ToSummary()).ToArray() ?? [];
     }
 
     [McpServerTool(Name = "fargo_items_get")]

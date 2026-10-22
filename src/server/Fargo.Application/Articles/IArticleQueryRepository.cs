@@ -71,7 +71,7 @@ public interface IArticleQueryRepository
     /// <returns>
     /// Collection of article information ordered by guid.
     /// </returns>
-    Task<IReadOnlyCollection<ArticleDto>> GetManyInfoOrderedByGuidAsync(
+    Task<PagedResult<ArticleDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default

@@ -44,7 +44,7 @@ public static class ArticleTools
             }
         }, cancellationToken);
 
-        return result?.Select(a => a.ToSummary()).ToArray() ?? [];
+        return result?.Items?.Select(a => a.ToSummary()).ToArray() ?? [];
     }
 
     [McpServerTool(Name = "fargo_articles_get_by_barcode")]

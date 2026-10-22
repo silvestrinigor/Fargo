@@ -9,9 +9,9 @@ public sealed class ItemsQueryHandler(
     IItemQueryRepository itemRepository,
     ICurrentActor currentActor,
     ILogger<ItemsQueryHandler> logger
-) : IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>>
+) : IQueryHandler<ItemsQuery, PagedResult<ItemDto>>
 {
-    public async Task<IReadOnlyCollection<ItemDto>> HandleAsync(
+    public async Task<PagedResult<ItemDto>> HandleAsync(
         ItemsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -38,7 +38,7 @@ public sealed class ItemsQueryHandler(
         logger.ManyQueryCompleted(
             currentActor.Guid, currentActor.ActorType,
             query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0, items.Count
+            partitionGuids?.Count ?? 0, items.Items.Count
         );
 
         return items;
