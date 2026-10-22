@@ -7,9 +7,26 @@ namespace Fargo.Cli.Commands.Articles;
 
 public sealed class ArticleCreateCommand : Command
 {
+    // Mirrors the server's ArticleType enum numeric values.
+    private const int ArticleTypeDefault = 1;
+    private const int ArticleTypeVariation = 2;
+    private const int ArticleTypePack = 3;
+    private const int ArticleTypeKit = 4;
+    private const int ArticleTypeContainer = 5;
+
     public ArticleCreateCommand(FargoApiClient client)
         : base("create", """
             Create a new article.
+
+            The article type is inferred from the options you pass; you do not set
+            it explicitly:
+              - variation : --variation-from <guid>
+              - pack      : --pack-from <guid> and/or --pack-quantity <n>
+              - kit       : one or more --kit-component
+              - container : --is-container
+              - default   : none of the above
+            These are mutually exclusive: combining options that imply different
+            types (for example --variation-from with --pack-from) is an error.
 
             Measures are written as a number followed by a unit, e.g. '2.5kg' or
             '10cm'. Units are standard abbreviations (mass: g, kg, mg, lb, oz;
@@ -18,14 +35,15 @@ public sealed class ArticleCreateCommand : Command
 
             Examples:
               fargo article create --name "Widget"
-              fargo article create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
               fargo article create --name "Widget" --mass 2.5kg --length-x 10cm --length-y 5cm --length-z 2cm
-              fargo article create --name "Bundle" --type kit \
+              fargo article create --name "Bundle" \
                 --kit-component 11111111-1111-1111-1111-111111111111:2 \
                 --kit-component 22222222-2222-2222-2222-222222222222
-              fargo article create --name "Case" --type container --container-max-mass 25kg
-              fargo article create --name "6-pack" --type pack \
+              fargo article create --name "Case" --is-container --container-max-mass 25kg
+              fargo article create --name "6-pack" \
                 --pack-from 11111111-1111-1111-1111-111111111111 --pack-quantity 6
+              fargo article create --name "Blue Widget" \
+                --variation-from 11111111-1111-1111-1111-111111111111
               fargo article create --name "Widget" --barcode-ean13 1234567890128
             """)
     {
@@ -33,14 +51,6 @@ public sealed class ArticleCreateCommand : Command
         {
             Description = "Name of the article.",
             Required = true
-        };
-
-        var typeOption = new Option<ArticleType>("--type")
-        {
-            Description =
-                "Article type by name (default, variation, pack, kit, container). "
-                + "Defaults to default.",
-            DefaultValueFactory = _ => ArticleType.Default
         };
 
         var descriptionOption = new Option<string?>("--description")
@@ -80,22 +90,35 @@ public sealed class ArticleCreateCommand : Command
 
         var variationFromOption = new Option<Guid?>("--variation-from")
         {
-            Description = "GUID of the source article this variation is created from."
+            Description =
+                "GUID of the source article this variation is created from. "
+                + "Implies the article is a variation."
         };
 
         var packFromOption = new Option<Guid?>("--pack-from")
         {
-            Description = "GUID of the source article this pack is composed of."
+            Description =
+                "GUID of the source article this pack is composed of. "
+                + "Implies the article is a pack."
         };
 
         var packQuantityOption = new Option<double?>("--pack-quantity")
         {
-            Description = "Quantity of the source article contained in the pack."
+            Description =
+                "Quantity of the source article contained in the pack. "
+                + "Implies the article is a pack."
+        };
+
+        var isContainerOption = new Option<bool>("--is-container")
+        {
+            Description = "Create the article as a container."
         };
 
         var containerMaxMassOption = new Option<string?>("--container-max-mass")
         {
-            Description = "Maximum mass the container can hold, as value+unit, e.g. '25kg'."
+            Description =
+                "Maximum mass the container can hold, as value+unit, e.g. '25kg'. "
+                + "Implies the article is a container."
         };
 
         var barcodeEan13Option = new Option<string?>("--barcode-ean13")
@@ -107,7 +130,7 @@ public sealed class ArticleCreateCommand : Command
         {
             Description =
                 "Kit component as '<article-guid>' or '<article-guid>:<quantity>'. "
-                + "Repeat the option for multiple components.",
+                + "Repeat the option for multiple components. Implies the article is a kit.",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -118,7 +141,6 @@ public sealed class ArticleCreateCommand : Command
         };
 
         Add(nameOption);
-        Add(typeOption);
         Add(descriptionOption);
         Add(shelfLifeOption);
         Add(colorOption);
@@ -129,6 +151,7 @@ public sealed class ArticleCreateCommand : Command
         Add(variationFromOption);
         Add(packFromOption);
         Add(packQuantityOption);
+        Add(isContainerOption);
         Add(containerMaxMassOption);
         Add(barcodeEan13Option);
         Add(kitComponentOption);
@@ -137,7 +160,6 @@ public sealed class ArticleCreateCommand : Command
         SetAction(async parseResult =>
         {
             var name = parseResult.GetValue(nameOption)!;
-            var type = parseResult.GetValue(typeOption);
             var description = parseResult.GetValue(descriptionOption);
             var shelfLife = parseResult.GetValue(shelfLifeOption);
             var color = parseResult.GetValue(colorOption);
@@ -148,15 +170,33 @@ public sealed class ArticleCreateCommand : Command
             var variationFrom = parseResult.GetValue(variationFromOption);
             var packFrom = parseResult.GetValue(packFromOption);
             var packQuantity = parseResult.GetValue(packQuantityOption);
+            var isContainer = parseResult.GetValue(isContainerOption);
             var containerMaxMass = parseResult.GetValue(containerMaxMassOption);
             var barcodeEan13 = parseResult.GetValue(barcodeEan13Option);
             var kitComponents = parseResult.GetValue(kitComponentOption);
             var partitions = parseResult.GetValue(partitionsOption);
 
+            // Infer the article type from the options the user supplied, and
+            // reject combinations that imply more than one type.
+            int articleType;
+            try
+            {
+                articleType = InferArticleType(
+                    variationPresent: variationFrom is not null,
+                    packPresent: packFrom is not null || packQuantity is not null,
+                    kitPresent: kitComponents is { Length: > 0 },
+                    containerPresent: isContainer || containerMaxMass is not null);
+            }
+            catch (FormatException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
+
             var dto = new ArticleCreateDto
             {
                 Name = name,
-                ArticleType = (int)type,
+                ArticleType = articleType,
                 Description = description,
                 ShelfLife = shelfLife,
                 Color = color,
@@ -235,6 +275,41 @@ public sealed class ArticleCreateCommand : Command
 
             return 0;
         });
+    }
+
+    /// <summary>
+    /// Determines the article type from which groups of options were supplied.
+    /// Exactly one type-signalling group may be present; when none are present
+    /// the article is a plain default article. Throws a
+    /// <see cref="FormatException"/> when the supplied options imply more than
+    /// one article type.
+    /// </summary>
+    private static int InferArticleType(
+        bool variationPresent,
+        bool packPresent,
+        bool kitPresent,
+        bool containerPresent)
+    {
+        var signals = new List<(bool Present, int Type, string OptionHint)>
+        {
+            (variationPresent, ArticleTypeVariation, "--variation-from"),
+            (packPresent, ArticleTypePack, "--pack-from / --pack-quantity"),
+            (kitPresent, ArticleTypeKit, "--kit-component"),
+            (containerPresent, ArticleTypeContainer, "--is-container / --container-max-mass"),
+        };
+
+        var present = signals.Where(s => s.Present).ToList();
+
+        if (present.Count > 1)
+        {
+            var hints = string.Join(", ", present.Select(s => s.OptionHint));
+            throw new FormatException(
+                $"Conflicting article type options: {hints}. "
+                + "An article can only be one of variation, pack, kit, or container. "
+                + "Supply the options for a single type.");
+        }
+
+        return present.Count == 1 ? present[0].Type : ArticleTypeDefault;
     }
 
     private static ArticleDimensionDto? BuildDimension(string? lengthX, string? lengthY, string? lengthZ)

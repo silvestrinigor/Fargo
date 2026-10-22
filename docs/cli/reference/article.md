@@ -42,6 +42,16 @@ Commands:
                                  fargo article inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
   create                       Create a new article.
   
+                               The article type is inferred from the options you pass; you do not set
+                               it explicitly:
+                                 - variation : --variation-from <guid>
+                                 - pack      : --pack-from <guid> and/or --pack-quantity <n>
+                                 - kit       : one or more --kit-component
+                                 - container : --is-container
+                                 - default   : none of the above
+                               These are mutually exclusive: combining options that imply different
+                               types (for example --variation-from with --pack-from) is an error.
+  
                                Measures are written as a number followed by a unit, e.g. '2.5kg' or
                                '10cm'. Units are standard abbreviations (mass: g, kg, mg, lb, oz;
                                length: mm, cm, m, in, ft). Kit components are written as
@@ -49,14 +59,15 @@ Commands:
   
                                Examples:
                                  fargo article create --name "Widget"
-                                 fargo article create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
                                  fargo article create --name "Widget" --mass 2.5kg --length-x 10cm --length-y 5cm --length-z 2cm
-                                 fargo article create --name "Bundle" --type kit \
+                                 fargo article create --name "Bundle" \
                                    --kit-component 11111111-1111-1111-1111-111111111111:2 \
                                    --kit-component 22222222-2222-2222-2222-222222222222
-                                 fargo article create --name "Case" --type container --container-max-mass 25kg
-                                 fargo article create --name "6-pack" --type pack \
+                                 fargo article create --name "Case" --is-container --container-max-mass 25kg
+                                 fargo article create --name "6-pack" \
                                    --pack-from 11111111-1111-1111-1111-111111111111 --pack-quantity 6
+                                 fargo article create --name "Blue Widget" \
+                                   --variation-from 11111111-1111-1111-1111-111111111111
                                  fargo article create --name "Widget" --barcode-ean13 1234567890128
   delete <guid>                Delete an article by GUID.
   
@@ -200,6 +211,16 @@ Options:
 Description:
   Create a new article.
   
+  The article type is inferred from the options you pass; you do not set
+  it explicitly:
+    - variation : --variation-from <guid>
+    - pack      : --pack-from <guid> and/or --pack-quantity <n>
+    - kit       : one or more --kit-component
+    - container : --is-container
+    - default   : none of the above
+  These are mutually exclusive: combining options that imply different
+  types (for example --variation-from with --pack-from) is an error.
+  
   Measures are written as a number followed by a unit, e.g. '2.5kg' or
   '10cm'. Units are standard abbreviations (mass: g, kg, mg, lb, oz;
   length: mm, cm, m, in, ft). Kit components are written as
@@ -207,41 +228,42 @@ Description:
   
   Examples:
     fargo article create --name "Widget"
-    fargo article create --name "Widget" --type pack --partitions 00000000-0000-0000-0000-000000000001
     fargo article create --name "Widget" --mass 2.5kg --length-x 10cm --length-y 5cm --length-z 2cm
-    fargo article create --name "Bundle" --type kit \
+    fargo article create --name "Bundle" \
       --kit-component 11111111-1111-1111-1111-111111111111:2 \
       --kit-component 22222222-2222-2222-2222-222222222222
-    fargo article create --name "Case" --type container --container-max-mass 25kg
-    fargo article create --name "6-pack" --type pack \
+    fargo article create --name "Case" --is-container --container-max-mass 25kg
+    fargo article create --name "6-pack" \
       --pack-from 11111111-1111-1111-1111-111111111111 --pack-quantity 6
+    fargo article create --name "Blue Widget" \
+      --variation-from 11111111-1111-1111-1111-111111111111
     fargo article create --name "Widget" --barcode-ean13 1234567890128
 
 Usage:
   fargo article create [options]
 
 Options:
-  --name <name> (REQUIRED)                       Name of the article.
-  --type <Container|Default|Kit|Pack|Variation>  Article type by name (default, variation, pack, kit, container). Defaults to default. [default: Default]
-  --description <description>                    Optional description of the article.
-  --shelf-life <shelf-life>                      Optional shelf life (e.g. an ISO-8601 duration like 'P30D').
-  --color <color>                                Optional color of the article (e.g. a hex code like '#FF0000').
-  --mass <mass>                                  Optional mass as value+unit, e.g. '2.5kg'.
-  --length-x <length-x>                          Optional dimension along X as value+unit, e.g. '10cm'.
-  --length-y <length-y>                          Optional dimension along Y as value+unit, e.g. '5cm'.
-  --length-z <length-z>                          Optional dimension along Z as value+unit, e.g. '2cm'.
-  --variation-from <variation-from>              GUID of the source article this variation is created from.
-  --pack-from <pack-from>                        GUID of the source article this pack is composed of.
-  --pack-quantity <pack-quantity>                Quantity of the source article contained in the pack.
-  --container-max-mass <container-max-mass>      Maximum mass the container can hold, as value+unit, e.g. '25kg'.
-  --barcode-ean13 <barcode-ean13>                Optional EAN-13 barcode to assign to the article.
-  --kit-component <kit-component>                Kit component as '<article-guid>' or '<article-guid>:<quantity>'. Repeat the option for multiple components.
-  --partitions <partitions>                      Partition GUIDs to associate the article with (space-separated).
-  --username <username>                          Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>                          Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                                 Show help and usage information
-  --server <server>                              The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                                  Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --name <name> (REQUIRED)                   Name of the article.
+  --description <description>                Optional description of the article.
+  --shelf-life <shelf-life>                  Optional shelf life (e.g. an ISO-8601 duration like 'P30D').
+  --color <color>                            Optional color of the article (e.g. a hex code like '#FF0000').
+  --mass <mass>                              Optional mass as value+unit, e.g. '2.5kg'.
+  --length-x <length-x>                      Optional dimension along X as value+unit, e.g. '10cm'.
+  --length-y <length-y>                      Optional dimension along Y as value+unit, e.g. '5cm'.
+  --length-z <length-z>                      Optional dimension along Z as value+unit, e.g. '2cm'.
+  --variation-from <variation-from>          GUID of the source article this variation is created from. Implies the article is a variation.
+  --pack-from <pack-from>                    GUID of the source article this pack is composed of. Implies the article is a pack.
+  --pack-quantity <pack-quantity>            Quantity of the source article contained in the pack. Implies the article is a pack.
+  --is-container                             Create the article as a container.
+  --container-max-mass <container-max-mass>  Maximum mass the container can hold, as value+unit, e.g. '25kg'. Implies the article is a container.
+  --barcode-ean13 <barcode-ean13>            Optional EAN-13 barcode to assign to the article.
+  --kit-component <kit-component>            Kit component as '<article-guid>' or '<article-guid>:<quantity>'. Repeat the option for multiple components. Implies the article is a kit.
+  --partitions <partitions>                  Partition GUIDs to associate the article with (space-separated).
+  --username <username>                      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                             Show help and usage information
+  --server <server>                          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

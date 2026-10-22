@@ -38,6 +38,10 @@ Commands:
                    fargo partition get 00000000-0000-0000-0000-000000000001
   create         Create a new partition, optionally nested under a parent.
   
+                 When --parent is omitted, the partition is created under the global
+                 partition (if you have access to it); otherwise you must supply a
+                 parent partition you can access.
+  
                  Examples:
                    fargo partition create --name "Warehouse A"
                    fargo partition create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
@@ -131,6 +135,10 @@ Options:
 ```text
 Description:
   Create a new partition, optionally nested under a parent.
+  
+  When --parent is omitted, the partition is created under the global
+  partition (if you have access to it); otherwise you must supply a
+  parent partition you can access.
   
   Examples:
     fargo partition create --name "Warehouse A"
