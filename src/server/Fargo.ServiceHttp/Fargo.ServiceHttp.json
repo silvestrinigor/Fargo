@@ -375,7 +375,7 @@
           "Items"
         ],
         "summary": "Gets the item location",
-        "description": "Retrieves a list of items that represents the location of the contained item.",
+        "description": "Retrieves a list of items that represents the location of the contained item. When 'asOf' is supplied, the location is reconstructed from the containment history as it was at that instant.",
         "operationId": "GetItemLocation",
         "parameters": [
           {
@@ -385,6 +385,14 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],

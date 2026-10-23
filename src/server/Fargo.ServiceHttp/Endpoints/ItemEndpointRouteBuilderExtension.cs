@@ -74,7 +74,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/{itemGuid:guid}/location", GetItemLocationByGuid)
             .WithName("GetItemLocation")
             .WithSummary("Gets the item location")
-            .WithDescription("Retrieves a list of items that represents the location of the contained item.")
+            .WithDescription("Retrieves a list of items that represents the location of the contained item. When 'asOf' is supplied, the location is reconstructed from the containment history as it was at that instant.")
             .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -83,10 +83,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NotFound>> GetItemLocationByGuid(
         Guid itemGuid,
+        DateTimeOffset? asOf,
         IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ItemLocationQuery(itemGuid);
+        var query = new ItemLocationQuery(itemGuid, asOf);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

@@ -22,7 +22,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public LocationRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location", pathParameters)
+        public LocationRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location{?asOf*}", pathParameters)
         {
         }
         /// <summary>
@@ -30,22 +30,22 @@ namespace Fargo.ClientHttp.Items.Item.Location
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public LocationRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location", rawUrl)
+        public LocationRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location{?asOf*}", rawUrl)
         {
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item.
+        /// Retrieves a list of items that represents the location of the contained item. When &apos;asOf&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
         /// </summary>
         /// <returns>A List&lt;global::Fargo.ClientHttp.Models.ItemDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<List<global::Fargo.ClientHttp.Models.ItemDto>?> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::Fargo.ClientHttp.Models.ItemDto>?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder.LocationRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.ClientHttp.Models.ItemDto>> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<List<global::Fargo.ClientHttp.Models.ItemDto>> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder.LocationRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -53,17 +53,17 @@ namespace Fargo.ClientHttp.Items.Item.Location
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item.
+        /// Retrieves a list of items that represents the location of the contained item. When &apos;asOf&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder.LocationRequestBuilderGetQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder.LocationRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -81,11 +81,22 @@ namespace Fargo.ClientHttp.Items.Item.Location
             return new global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
+        /// Retrieves a list of items that represents the location of the contained item. When &apos;asOf&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
+        public partial class LocationRequestBuilderGetQueryParameters 
+        {
+            #pragma warning disable CS1591
+            [QueryParameter("asOf")]
+            public DateTimeOffset? AsOf { get; set; }
+            #pragma warning restore CS1591
+        }
+        /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class LocationRequestBuilderGetRequestConfiguration : RequestConfiguration<DefaultQueryParameters>
+        public partial class LocationRequestBuilderGetRequestConfiguration : RequestConfiguration<global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder.LocationRequestBuilderGetQueryParameters>
         {
         }
     }

@@ -163,6 +163,65 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return items;
     }
 
+    public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAtInstantOrderedByDepthAsync(
+        Guid itemGuid,
+        DateTimeOffset asOf,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Walk the containment chain as it existed at the given instant.
+        //
+        // For each item in the chain, the parent is taken from the row of
+        // item_parent_container_history whose validity period contains the
+        // instant (valid_period @> asOf). Starting from the queried item, the
+        // recursion follows that historical parent outward until an item has no
+        // historical parent (it was a root at that instant) or no history row
+        // covering the instant (the chain ends).
+        FormattableString query = $"""
+        WITH RECURSIVE item_location AS
+        (
+            SELECT
+                history.item_guid AS guid,
+                history.parent_item_container_guid,
+                0 AS depth
+            FROM item_parent_container_history AS history
+            WHERE history.item_guid = {itemGuid}
+            AND history.valid_period @> {asOf}::timestamptz
+
+            UNION ALL
+
+            SELECT
+                parent_history.item_guid AS guid,
+                parent_history.parent_item_container_guid,
+                child.depth + 1
+            FROM item_parent_container_history AS parent_history
+            INNER JOIN item_location AS child
+                ON parent_history.item_guid = child.parent_item_container_guid
+            WHERE parent_history.valid_period @> {asOf}::timestamptz
+        )
+        SELECT guid
+        FROM item_location
+        ORDER BY depth;
+        """;
+
+        var guids = await context.Database
+        .SqlQuery<Guid>(query)
+        .ToListAsync(cancellationToken);
+
+        var items = await context.Items
+        .Where(i => guids.Contains(i.Guid))
+        .Select(ItemDtoMappings.Projection)
+        .ToListAsync(cancellationToken);
+
+        // Preserve the depth ordering produced by the recursive query, since the
+        // subsequent projection does not guarantee it.
+        var orderByGuid = guids
+            .Select((guid, index) => (guid, index))
+            .ToDictionary(x => x.guid, x => x.index);
+
+        return [.. items.OrderBy(item => orderByGuid[item.Guid])];
+    }
+
     public async Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderedByOccurredAtAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
     {
         var itemMoviments = await context.Items

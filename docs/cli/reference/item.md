@@ -52,8 +52,13 @@ Commands:
   location <guid>   Show the container chain an item is located in, from the outermost
                     container to the innermost.
   
+                    Pass --as-of to reconstruct the location as it was at a specific
+                    instant, using the item's containment history, instead of the
+                    current location.
+  
                     Examples:
                       fargo item location 22222222-2222-2222-2222-222222222222
+                      fargo item location 22222222-2222-2222-2222-222222222222 --as-of 2026-03-01T12:00:00Z
   moviments <guid>  Show the movement history for an item (when it changed containers).
   
                     Examples:
@@ -206,8 +211,13 @@ Description:
   Show the container chain an item is located in, from the outermost
   container to the innermost.
   
+  Pass --as-of to reconstruct the location as it was at a specific
+  instant, using the item's containment history, instead of the
+  current location.
+  
   Examples:
     fargo item location 22222222-2222-2222-2222-222222222222
+    fargo item location 22222222-2222-2222-2222-222222222222 --as-of 2026-03-01T12:00:00Z
 
 Usage:
   fargo item location <guid> [options]
@@ -216,6 +226,7 @@ Arguments:
   <guid>  The item GUID.
 
 Options:
+  --as-of <as-of>        Instant (ISO 8601, e.g. 2026-03-01T12:00:00Z) at which to evaluate the location. Defaults to now.
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information

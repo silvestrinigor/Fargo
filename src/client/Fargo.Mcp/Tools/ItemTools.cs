@@ -127,16 +127,23 @@ public static class ItemTools
     }
 
     [McpServerTool(Name = "fargo_items_get_location")]
-    [Description("Get the location of an item: the chain of parent container items from the item up to its root container.")]
+    [Description("Get the location of an item: the chain of parent container items from the item up to its root container. When 'asOf' is supplied, the location is reconstructed from the item's containment history as it was at that instant.")]
     public static async Task<IReadOnlyList<ItemSummary>> GetItemLocationAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("The GUID of the item.")] Guid itemGuid,
+        [Description("Optional instant (ISO 8601 UTC, e.g. 2026-03-01T12:00:00Z) at which to evaluate the location. When omitted, the current location is returned.")] DateTimeOffset? asOf = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Items[itemGuid].Location.GetAsync(cancellationToken: cancellationToken);
+        var result = await client.Items[itemGuid].Location.GetAsync(request =>
+        {
+            if (asOf.HasValue)
+            {
+                request.QueryParameters.AsOf = asOf.Value;
+            }
+        }, cancellationToken);
 
         return result?.Select(i => i.ToSummary()).ToArray() ?? [];
     }
