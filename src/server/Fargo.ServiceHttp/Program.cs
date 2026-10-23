@@ -36,7 +36,7 @@ builder.Services.AddFargoExceptionHandler();
 
 builder.Services.AddProblemDetails();
 
-builder.Services.AddFargoRateLimiter();
+builder.Services.AddFargoRateLimiter(builder.Configuration);
 
 builder.Services.AddHealthChecks().AddDbContextCheck<FargoDbContext>();
 
