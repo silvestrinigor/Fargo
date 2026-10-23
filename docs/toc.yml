@@ -3,10 +3,63 @@
 - name: Getting Started
   href: getting-started.md
 - name: Server
-  href: server/
+  href: server/overview.md
+  items:
+    - name: Overview
+      href: server/overview.md
+    - name: Architecture
+      href: server/architecture.md
+    - name: Domain Model
+      href: server/domain-model.md
+    - name: Persistence
+      href: server/persistence.md
+    - name: Security
+      href: server/security.md
+    - name: Cross-Cutting Concerns
+      href: server/cross-cutting.md
+    - name: Operations
+      href: server/operations.md
 - name: CLI
-  href: cli/
+  href: cli/overview.md
+  items:
+    - name: Overview
+      href: cli/overview.md
+    - name: Getting Started
+      href: cli/getting-started.md
+    - name: Command Reference
+      href: cli/reference/index.md
+      items:
+        - name: Overview
+          href: cli/reference/index.md
+        - name: Config
+          href: cli/reference/config.md
+        - name: Identity
+          href: cli/reference/identity.md
+        - name: Article
+          href: cli/reference/article.md
+        - name: Item
+          href: cli/reference/item.md
+        - name: Partition
+          href: cli/reference/partition.md
+        - name: User Group
+          href: cli/reference/user-group.md
+        - name: User
+          href: cli/reference/user.md
+        - name: Audit
+          href: cli/reference/audit.md
 - name: Web API
-  href: web-api/
+  href: web-api/overview.md
+  items:
+    - name: Overview
+      href: web-api/overview.md
+    - name: Getting Started
+      href: web-api/getting-started.md
+    - name: API Reference
+      href: web-api/reference/fargo.swagger.json
 - name: MCP Server
-  href: mcp/
+  href: mcp/overview.md
+  items:
+    - name: Overview
+      href: mcp/overview.md
+    - name: Getting Started
+      href: mcp/getting-started.md
