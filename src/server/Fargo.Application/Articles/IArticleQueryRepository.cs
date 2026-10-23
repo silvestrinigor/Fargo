@@ -57,6 +57,24 @@ public interface IArticleQueryRepository
     );
 
     /// <summary>
+    /// Retrieves the inventory count of an article contained within the given
+    /// containers or any of their descendant containers, resolved in a single
+    /// recursive query over the live container tree.
+    /// </summary>
+    /// <param name="articleGuid">The article to count.</param>
+    /// <param name="insideItemContainerGuids">
+    /// The root containers whose subtrees are searched. Each container plus every
+    /// descendant container is included.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The inventory count of the article across the container subtrees.</returns>
+    Task<ArticleInventoryDto> GetInventoryInfoByGuidWithDescendantsAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid> insideItemContainerGuids,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Retrieves the inventory count of an article as it existed at a specific
     /// instant, reconstructed from the item containment history.
     /// </summary>
