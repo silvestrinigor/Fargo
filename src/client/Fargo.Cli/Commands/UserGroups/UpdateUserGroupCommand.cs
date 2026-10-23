@@ -41,7 +41,7 @@ public sealed class UpdateUserGroupCommand : Command
         Add(parentOption);
         Add(removeParentOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
             var isActive = parseResult.GetValue(isActiveOption);
@@ -55,7 +55,7 @@ public sealed class UpdateUserGroupCommand : Command
                 RemoveParentUserGroup = removeParent ? true : null
             };
 
-            await client.UserGroups[guid].PutAsync(dto);
+            await client.UserGroups[guid].PutAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("User group updated.", ("GUID", guid.ToString()));
 

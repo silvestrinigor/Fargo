@@ -44,7 +44,7 @@ public sealed class ListUserGroupsCommand : Command
         Add(limitOption);
         Add(partitionsOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
@@ -65,7 +65,7 @@ public sealed class ListUserGroupsCommand : Command
                             request.QueryParameters.ChildOfAnyOfThesePartitions =
                                 partitions.Select(g => (Guid?)g).ToArray();
                         }
-                    });
+                    }, cancellationToken);
 
                     return result is null
                         ? null
@@ -77,7 +77,8 @@ public sealed class ListUserGroupsCommand : Command
                             result.HasNextPage ?? false,
                             result.HasPreviousPage ?? false);
                 },
-                renderer: Render);
+                renderer: Render,
+                cancellationToken);
 
             return 0;
         });

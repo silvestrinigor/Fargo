@@ -28,7 +28,7 @@ public sealed class UpdatePartitionCommand : Command
         Add(guidArgument);
         Add(parentOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
             var parent = parseResult.GetValue(parentOption);
@@ -38,7 +38,7 @@ public sealed class UpdatePartitionCommand : Command
                 ParentPartitionGuid = parent
             };
 
-            await client.Partitions[guid].PatchAsync(dto);
+            await client.Partitions[guid].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Partition updated.", ("GUID", guid.ToString()));
 

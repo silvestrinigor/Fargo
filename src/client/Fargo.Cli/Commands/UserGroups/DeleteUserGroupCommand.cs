@@ -21,11 +21,11 @@ public sealed class DeleteUserGroupCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.UserGroups[guid].DeleteAsync();
+            await client.UserGroups[guid].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("User group deleted.", ("GUID", guid.ToString()));
 

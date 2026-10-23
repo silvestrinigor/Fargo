@@ -30,9 +30,9 @@ public sealed class TreePartitionsCommand : Command
               fargo partition tree
             """)
     {
-        SetAction(async _ =>
+        SetAction(async (_, cancellationToken) =>
         {
-            var partitions = (await client.Partitions.GetAsync())?.Items ?? [];
+            var partitions = (await client.Partitions.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
 
             // Index partitions and their parent/child relationships. The parent
             // link lives in ParentPartitionGuid (the parent partition GUID).

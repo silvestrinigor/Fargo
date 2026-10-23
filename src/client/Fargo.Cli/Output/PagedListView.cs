@@ -44,7 +44,8 @@ public static class PagedListView
         int? page,
         int? limit,
         Func<int, int, Task<PageData<TItem>?>> fetch,
-        Action<IReadOnlyList<TItem>> renderer)
+        Action<IReadOnlyList<TItem>> renderer,
+        CancellationToken cancellationToken = default)
     {
         // A single, non-interactive fetch is used when the user pins a page or
         // limit, or when output is redirected (no interactive terminal to read
@@ -59,17 +60,20 @@ public static class PagedListView
             return;
         }
 
-        await RunInteractiveAsync(fetch, renderer);
+        await RunInteractiveAsync(fetch, renderer, cancellationToken);
     }
 
     private static async Task RunInteractiveAsync<TItem>(
         Func<int, int, Task<PageData<TItem>?>> fetch,
-        Action<IReadOnlyList<TItem>> renderer)
+        Action<IReadOnlyList<TItem>> renderer,
+        CancellationToken cancellationToken)
     {
         var currentPage = 1;
 
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var result = await fetch(currentPage, DefaultPageSize);
 
             renderer(result?.Items ?? []);

@@ -45,7 +45,7 @@ public class PartitionRepositoryTests
             new Pagination(new Page(1), new Limit(50)),
             accessGuids);
 
-        var guids = result.Select(p => p.Guid).ToList();
+        var guids = result.Items.Select(p => p.Guid).ToList();
 
         Assert.Contains(FargoCoreWellKnowGuids.GlobalPartitionGuid, guids);
         // The child of an accessible partition is still returned.
@@ -78,7 +78,7 @@ public class PartitionRepositoryTests
             new Pagination(new Page(1), new Limit(50)),
             accessGuids);
 
-        var guids = result.Select(p => p.Guid).ToList();
+        var guids = result.Items.Select(p => p.Guid).ToList();
 
         Assert.Contains(branch.Guid, guids);   // direct access
         Assert.Contains(leaf.Guid, guids);     // child of accessible

@@ -32,7 +32,7 @@ public sealed class ItemInventoryCommand : Command
         Add(guidArgument);
         Add(atOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
@@ -44,7 +44,7 @@ public sealed class ItemInventoryCommand : Command
                 {
                     request.QueryParameters.At = at.Value;
                 }
-            });
+            }, cancellationToken);
 
             if (at.HasValue)
             {

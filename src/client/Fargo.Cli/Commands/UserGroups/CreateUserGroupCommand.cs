@@ -37,7 +37,7 @@ public sealed class CreateUserGroupCommand : Command
         Add(isActiveOption);
         Add(parentOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var nameid = parseResult.GetValue(nameidOption)!;
             var isActive = parseResult.GetValue(isActiveOption);
@@ -50,7 +50,7 @@ public sealed class CreateUserGroupCommand : Command
                 ParentUserGroup = parent
             };
 
-            var guid = await client.UserGroups.PostAsync(dto);
+            var guid = await client.UserGroups.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "User group created.",

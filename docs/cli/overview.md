@@ -31,7 +31,7 @@ fargo article create --help
 | Group | Description |
 | --- | --- |
 | `config` | Manage CLI configuration (the server URL the CLI connects to). |
-| `identity` | Authenticate: login, logout, refresh, change password. |
+| `identity` | Authenticate: login, logout, change password. |
 | `articles` | Manage articles — the catalog of product definitions. |
 | `items` | Manage items — physical instances of articles and their locations. |
 | `partitions` | Manage partitions — the hierarchy used to scope and group data. |

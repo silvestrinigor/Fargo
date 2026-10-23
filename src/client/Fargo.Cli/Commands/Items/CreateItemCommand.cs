@@ -36,7 +36,7 @@ public sealed class CreateItemCommand : Command
         Add(containerOption);
         Add(partitionsOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var article = parseResult.GetValue(articleOption);
             var container = parseResult.GetValue(containerOption);
@@ -49,7 +49,7 @@ public sealed class CreateItemCommand : Command
                 PartitionsToAdd = partitions?.Select(g => (Guid?)g).ToList()
             };
 
-            var guid = await client.Items.PostAsync(dto);
+            var guid = await client.Items.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Item created.",

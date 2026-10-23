@@ -29,7 +29,7 @@ public sealed class UpdateArticleByBarcodeCommand : Command
         Add(barcodeArgument);
         options.AddTo(this);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var barcode = parseResult.GetValue(barcodeArgument)!;
 
@@ -44,7 +44,7 @@ public sealed class UpdateArticleByBarcodeCommand : Command
                 return 1;
             }
 
-            await client.Articles[barcode].PatchAsync(dto);
+            await client.Articles[barcode].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article updated.", ("Barcode", barcode));
 

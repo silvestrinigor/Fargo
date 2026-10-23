@@ -46,7 +46,7 @@ public sealed class ArticleInventoryCommand : Command
         Add(includeDescendantsOption);
         Add(atOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
             var containers = parseResult.GetValue(containersOption);
@@ -67,7 +67,7 @@ public sealed class ArticleInventoryCommand : Command
                 {
                     request.QueryParameters.At = at.Value;
                 }
-            });
+            }, cancellationToken);
 
             if (result is null)
             {

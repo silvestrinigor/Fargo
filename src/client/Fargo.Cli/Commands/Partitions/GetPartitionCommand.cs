@@ -21,11 +21,11 @@ public sealed class GetPartitionCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var partition = await client.Partitions[guid].GetAsync();
+            var partition = await client.Partitions[guid].GetAsync(cancellationToken: cancellationToken);
 
             if (partition is null)
             {

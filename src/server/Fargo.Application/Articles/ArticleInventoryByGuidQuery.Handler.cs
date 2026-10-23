@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
-using Fargo.Core.Items;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
@@ -11,7 +10,6 @@ namespace Fargo.Application.Articles;
 public sealed class ArticleInventoryByGuidQueryHandler(
     ActorResolver actorService,
     IArticleQueryRepository articleRepository,
-    IItemRepository itemRepository,
     ICurrentActor currentActor,
     ILogger<ArticleInventoryByGuidQueryHandler> logger
 ) : IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>
@@ -49,22 +47,15 @@ public sealed class ArticleInventoryByGuidQueryHandler(
                 query.IncludeDescendents,
                 cancellationToken);
         }
-        else if (articleExist && query.IncludeDescendents && query.InsideItemContainerGuids is { Count: > 0 })
+        else if (articleExist && query.IncludeDescendents && query.InsideItemContainerGuids is { Count: > 0 } containers)
         {
-            var itemContainerGuids = new List<Guid>();
-
-            foreach (var containerGuid in query.InsideItemContainerGuids)
-            {
-                // Fetch all nested/sub-container IDs.
-                var result = await itemRepository.GetContainedDescendantGuidsAsync(containerGuid, true, cancellationToken);
-                itemContainerGuids.AddRange(result);
-            }
-
-            inventory = await articleRepository.GetInventoryInfoByGuidAsync(
+            // Resolve the containers and all their descendant containers in a
+            // single recursive query rather than walking each container in the
+            // application and round-tripping a large IN list.
+            inventory = await articleRepository.GetInventoryInfoByGuidWithDescendantsAsync(
                 query.ArticleGuid,
-                [.. itemContainerGuids.Distinct()],
-                cancellationToken
-            );
+                containers,
+                cancellationToken);
         }
         else if (articleExist)
         {

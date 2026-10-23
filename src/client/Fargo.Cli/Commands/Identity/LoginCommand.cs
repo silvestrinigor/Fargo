@@ -37,7 +37,7 @@ public sealed class LoginCommand : Command
         Add(usernameOption);
         Add(passwordOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var username = parseResult.GetValue(usernameOption)!;
             var password = parseResult.GetValue(passwordOption);
@@ -58,7 +58,7 @@ public sealed class LoginCommand : Command
                 {
                     Nameid = username,
                     Password = password
-                });
+                }, cancellationToken: cancellationToken);
 
             if (result is null)
             {

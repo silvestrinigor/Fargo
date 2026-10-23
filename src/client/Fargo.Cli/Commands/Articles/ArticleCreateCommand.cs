@@ -157,7 +157,7 @@ public sealed class ArticleCreateCommand : Command
         Add(kitComponentOption);
         Add(partitionsOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var name = parseResult.GetValue(nameOption)!;
             var description = parseResult.GetValue(descriptionOption);
@@ -266,7 +266,7 @@ public sealed class ArticleCreateCommand : Command
                 return 1;
             }
 
-            var guid = await client.Articles.PostAsync(dto);
+            var guid = await client.Articles.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Article created.",

@@ -37,7 +37,7 @@ public sealed class ListAuditLogsCommand : Command
         Add(pageOption);
         Add(limitOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
@@ -51,7 +51,7 @@ public sealed class ListAuditLogsCommand : Command
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;
-                    });
+                    }, cancellationToken);
 
                     return result is null
                         ? null
@@ -63,7 +63,8 @@ public sealed class ListAuditLogsCommand : Command
                             result.HasNextPage ?? false,
                             result.HasPreviousPage ?? false);
                 },
-                renderer: Render);
+                renderer: Render,
+                cancellationToken);
 
             return 0;
         });

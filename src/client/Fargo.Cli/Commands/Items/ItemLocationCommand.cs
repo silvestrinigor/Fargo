@@ -44,7 +44,7 @@ public sealed class ItemLocationCommand : Command
         Add(guidArgument);
         Add(atOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
@@ -56,7 +56,7 @@ public sealed class ItemLocationCommand : Command
                 {
                     request.QueryParameters.At = at.Value;
                 }
-            });
+            }, cancellationToken);
 
             if (result is null || result.Count == 0)
             {

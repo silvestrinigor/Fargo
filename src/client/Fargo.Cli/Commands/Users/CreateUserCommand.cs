@@ -50,7 +50,7 @@ public sealed class CreateUserCommand : Command
         Add(lastNameOption);
         Add(isActiveOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var username = parseResult.GetValue(usernameOption)!;
             var password = parseResult.GetValue(passwordOption)!;
@@ -78,7 +78,7 @@ public sealed class CreateUserCommand : Command
                 dto.LastName = lastName;
             }
 
-            var guid = await client.Users.PostAsync(dto);
+            var guid = await client.Users.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "User created.",

@@ -16,9 +16,9 @@ public sealed class LogoutCommand : Command
               fargo identity logout
             """)
     {
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
-            var tokens = await tokenStore.GetAsync();
+            var tokens = await tokenStore.GetAsync(cancellationToken);
 
             if (tokens is null)
             {
@@ -31,7 +31,7 @@ public sealed class LogoutCommand : Command
                 await client.Identity.Logout.PostAsync(new IdentityLogOutDto
                 {
                     RefreshToken = tokens.RefreshToken
-                });
+                }, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {
@@ -39,7 +39,7 @@ public sealed class LogoutCommand : Command
                 // Still clear local tokens
             }
 
-            await tokenStore.ClearAsync();
+            await tokenStore.ClearAsync(cancellationToken);
 
             StatusWriter.Success("Logged out successfully.");
 

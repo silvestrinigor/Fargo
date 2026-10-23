@@ -21,11 +21,11 @@ public sealed class DeleteArticleCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.Articles[guid.ToString()].DeleteAsync();
+            await client.Articles[guid.ToString()].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article deleted.", ("GUID", guid.ToString()));
 

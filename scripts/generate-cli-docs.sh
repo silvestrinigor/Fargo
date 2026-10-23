@@ -19,7 +19,7 @@ REFERENCE_DIR="docs/cli/reference"
 # Format: "group|Title|sub1 sub2 ..."
 CLI_GROUPS=(
     "config|Config|set-server get-server show"
-    "identity|Identity|login logout refresh change-password"
+    "identity|Identity|login logout change-password"
     "article|Article|list tree get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
     "item|Item|list get create update delete location moviments inventory"
     "partition|Partition|list tree get create update delete"
@@ -44,11 +44,9 @@ cli_help() {
 
 mkdir -p "$REFERENCE_DIR"
 
-TOC_FILE="$REFERENCE_DIR/toc.yml"
-{
-    echo "- name: Overview"
-    echo "  href: index.md"
-} > "$TOC_FILE"
+# The CLI reference pages are listed in the unified docs/toc.yml, so this
+# script only (re)generates the Markdown pages and does not write a per-folder
+# toc.yml.
 
 for entry in "${CLI_GROUPS[@]}"; do
     IFS='|' read -r group title subs <<< "$entry"
@@ -77,9 +75,6 @@ for entry in "${CLI_GROUPS[@]}"; do
             echo
         done
     } > "$page"
-
-    echo "- name: $title" >> "$TOC_FILE"
-    echo "  href: $group.md" >> "$TOC_FILE"
 done
 
 echo "Done. CLI reference written to $REFERENCE_DIR."

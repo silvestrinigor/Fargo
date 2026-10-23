@@ -1,4 +1,3 @@
-using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
@@ -23,11 +22,11 @@ public sealed class GetArticleByBarcodeCommand : Command
 
         Add(barcodeArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var barcode = parseResult.GetValue(barcodeArgument)!;
 
-            var article = await client.Articles[barcode].GetAsync();
+            var article = await client.Articles[barcode].GetAsync(cancellationToken: cancellationToken);
 
             if (article is null)
             {

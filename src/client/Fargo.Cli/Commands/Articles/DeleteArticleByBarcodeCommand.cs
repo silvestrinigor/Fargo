@@ -23,11 +23,11 @@ public sealed class DeleteArticleByBarcodeCommand : Command
 
         Add(barcodeArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var barcode = parseResult.GetValue(barcodeArgument)!;
 
-            await client.Articles[barcode].DeleteAsync();
+            await client.Articles[barcode].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article deleted.", ("Barcode", barcode));
 

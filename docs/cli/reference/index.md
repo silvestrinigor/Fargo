@@ -19,7 +19,6 @@ fargo
 ├─ identity       Authenticate with the Fargo server
 │  ├─ login
 │  ├─ logout
-│  ├─ refresh
 │  └─ change-password
 ├─ articles       Manage articles
 │  ├─ list

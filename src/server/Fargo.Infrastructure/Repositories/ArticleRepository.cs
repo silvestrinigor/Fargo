@@ -160,6 +160,57 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return new ArticleInventoryDto(TotalCount: itemCount);
     }
 
+    public async Task<ArticleInventoryDto> GetInventoryInfoByGuidWithDescendantsAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid> insideItemContainerGuids,
+        CancellationToken cancellationToken = default)
+    {
+        // Count the article's items across the given containers and all of their
+        // descendant containers, in one recursive query over the live container
+        // tree. This replaces the previous approach of resolving every descendant
+        // container GUID in the application and round-tripping them back as a
+        // large IN list.
+        //
+        // Distinct guards against duplicate roots seeding the anchor more than
+        // once. Only container-typed items are recursed into.
+        var containers = insideItemContainerGuids.Distinct().ToArray();
+
+        if (containers.Length == 0)
+        {
+            return new ArticleInventoryDto(TotalCount: 0);
+        }
+
+        FormattableString query = $"""
+        WITH RECURSIVE container_set AS
+        (
+            SELECT guid
+            FROM items
+            WHERE guid = ANY({containers}::uuid[])
+
+            UNION ALL
+
+            SELECT child.guid
+            FROM items AS child
+            INNER JOIN container_set AS parent
+                ON child.parent_item_container_guid = parent.guid
+            INNER JOIN articles AS child_article
+                ON child_article.guid = child.article_guid
+            WHERE child_article.article_type = {(int)ArticleType.Container}
+        )
+        SELECT COUNT(*)::int AS value
+        FROM items AS item
+        INNER JOIN container_set AS cs
+            ON cs.guid = item.parent_item_container_guid
+        WHERE item.article_guid = {articleGuid}
+        """;
+
+        var counts = await context.Database
+            .SqlQuery<int>(query)
+            .ToListAsync(cancellationToken);
+
+        return new ArticleInventoryDto(TotalCount: counts.FirstOrDefault());
+    }
+
     public async Task<ArticleInventoryDto> GetInventoryInfoByGuidAtInstantAsync(
         Guid articleGuid,
         DateTimeOffset at,
@@ -181,7 +232,10 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         if (insideItemContainerGuids is not { Count: > 0 })
         {
             FormattableString allQuery = $"""
-            SELECT COUNT(DISTINCT history.item_guid)::int AS value
+            -- COUNT(*) is safe (not COUNT(DISTINCT item_guid)): the non-overlap
+            -- exclusion constraint guarantees at most one history row per item
+            -- satisfies valid_period @> at, so each item is counted exactly once.
+            SELECT COUNT(*)::int AS value
             FROM item_parent_container_history AS history
             INNER JOIN items AS item
                 ON item.guid = history.item_guid
@@ -198,7 +252,10 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             return new ArticleInventoryDto(TotalCount: allCounts.FirstOrDefault());
         }
 
-        var containers = insideItemContainerGuids.ToArray();
+        // Distinct guards against duplicate container guids in the input, which
+        // would otherwise seed the recursion's anchor more than once and
+        // double-count contents.
+        var containers = insideItemContainerGuids.Distinct().ToArray();
 
         FormattableString query = $"""
         WITH RECURSIVE container_set AS
@@ -221,7 +278,10 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             WHERE {includeDescendents}
               AND child_article.article_type = {(int)ArticleType.Container}
         )
-        SELECT COUNT(DISTINCT history.item_guid)::int AS value
+        -- COUNT(*) is safe here too: the non-overlap constraint means at most one
+        -- history row per item matches valid_period @> at, and container_set
+        -- contains distinct container guids, so no item is double-counted.
+        SELECT COUNT(*)::int AS value
         FROM item_parent_container_history AS history
         INNER JOIN items AS item
             ON item.guid = history.item_guid
