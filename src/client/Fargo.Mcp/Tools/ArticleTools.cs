@@ -127,16 +127,36 @@ public static class ArticleTools
     }
 
     [McpServerTool(Name = "fargo_articles_get_inventory_by_barcode")]
-    [Description("Get inventory information (total item count) for an article identified by one of its barcodes.")]
+    [Description("Get inventory information (total item count) for an article identified by one of its barcodes. When 'at' is supplied, the count is reconstructed from the item containment history as it was at that instant.")]
     public static async Task<ArticleInventorySummary?> GetArticleInventoryByBarcodeAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("The barcode in {value}:{type} format, e.g. 1234567890128:ean13.")] string barcode,
+        [Description("Only count items inside these container item GUIDs. When omitted, all items of the article are counted.")] Guid[]? insideItemContainerGuids = null,
+        [Description("Include items in nested containers of the given containers. Defaults to true. Ignored when no containers are given.")] bool? includeDescendents = null,
+        [Description("Optional instant (ISO 8601 UTC, e.g. 2026-03-01T12:00:00Z) at which to evaluate the inventory. When omitted, the current inventory is returned.")] DateTimeOffset? at = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var inventory = await client.Articles[barcode].Inventory.GetAsync(cancellationToken: cancellationToken);
+        var inventory = await client.Articles[barcode].Inventory.GetAsync(request =>
+        {
+            if (insideItemContainerGuids is { Length: > 0 })
+            {
+                request.QueryParameters.InsideItemContainerGuids =
+                    insideItemContainerGuids.Select(g => (Guid?)g).ToArray();
+            }
+
+            if (includeDescendents.HasValue)
+            {
+                request.QueryParameters.IncludeDescendents = includeDescendents.Value;
+            }
+
+            if (at.HasValue)
+            {
+                request.QueryParameters.At = at.Value;
+            }
+        }, cancellationToken);
 
         return inventory?.ToSummary();
     }
