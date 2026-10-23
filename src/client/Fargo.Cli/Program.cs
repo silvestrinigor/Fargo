@@ -4,7 +4,6 @@ using Fargo.Cli.Configurations;
 using Fargo.Cli.ErrorHandling;
 using Fargo.ClientHttp;
 using Fargo.ClientHttp.Authentication;
-using Fargo.ClientHttp.ErrorHandling;
 using Fargo.ClientHttp.Extensions;
 using Fargo.ClientHttp.Factories;
 using Fargo.ClientHttp.Models;

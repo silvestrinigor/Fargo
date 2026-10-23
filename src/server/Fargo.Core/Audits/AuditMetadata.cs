@@ -1,5 +1,5 @@
-using Fargo.Core.Articles;
 using Fargo.Core.Actors;
+using Fargo.Core.Articles;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Informations;
 using System.Drawing;

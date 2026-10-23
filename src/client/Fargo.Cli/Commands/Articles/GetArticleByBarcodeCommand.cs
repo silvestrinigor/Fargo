@@ -1,4 +1,3 @@
-using Fargo.Cli.Output;
 using Fargo.ClientHttp;
 using System.CommandLine;
 
