@@ -266,9 +266,13 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             query = query.Where(i => articleGuids.Contains(i.ArticleGuid));
         }
 
-        var countQuery = query.CountBy(x => x.ArticleGuid);
-
-        return await countQuery.Select(x => new ItemContainerInventoryDto(x.Key, x.Value)).ToListAsync(cancellationToken);
+        // Group on the server and count per article. EF Core cannot translate the
+        // LINQ CountBy operator to SQL, so use GroupBy + Count(), which maps to a
+        // GROUP BY ... COUNT(*) query.
+        return await query
+            .GroupBy(item => item.ArticleGuid)
+            .Select(group => new ItemContainerInventoryDto(group.Key, group.Count()))
+            .ToListAsync(cancellationToken);
     }
 
     public Task<bool> ExistByGuidAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
