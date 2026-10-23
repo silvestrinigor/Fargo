@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Actors;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Informations;
 using System.Drawing;
@@ -278,5 +279,200 @@ public sealed class AuditMetadata
         var auditObj = new AuditValue.Object(obj);
 
         Add("dimension", auditObj);
+    }
+
+    /// <summary>
+    /// Adds the unique name identifier of an entity to the metadata.
+    /// </summary>
+    /// <param name="value">The nameid value to add.</param>
+    public void AddNameid(Nameid value)
+    {
+        Add("nameid", new AuditValue.String(value.ToString()));
+    }
+
+    /// <summary>
+    /// Adds the first name of a user to the metadata.
+    /// </summary>
+    /// <param name="value">The first name value to add.</param>
+    public void AddFirstName(FirstName value)
+    {
+        Add("firstName", new AuditValue.String(value.ToString()));
+    }
+
+    /// <summary>
+    /// Adds the last name of a user to the metadata.
+    /// </summary>
+    /// <param name="value">The last name value to add.</param>
+    public void AddLastName(LastName value)
+    {
+        Add("lastName", new AuditValue.String(value.ToString()));
+    }
+
+    /// <summary>
+    /// Adds the active state of an entity to the metadata.
+    /// </summary>
+    /// <param name="value">
+    /// <see langword="true"/> when the entity is active; otherwise,
+    /// <see langword="false"/>.
+    /// </param>
+    public void AddIsActive(bool value)
+    {
+        Add("isActive", new AuditValue.Boolean(value));
+    }
+
+    /// <summary>
+    /// Adds the article an item is an instance of to the metadata.
+    /// </summary>
+    /// <param name="articleGuid">
+    /// The unique identifier of the article the item instantiates.
+    /// </param>
+    public void AddArticleGuid(Guid articleGuid)
+    {
+        Add("articleGuid", new AuditValue.String(articleGuid.ToString()));
+    }
+
+    /// <summary>
+    /// Adds the parent partition of a partition to the metadata.
+    /// </summary>
+    /// <param name="parentPartitionGuid">
+    /// The unique identifier of the parent partition, or <see langword="null"/>
+    /// when the partition has no parent.
+    /// </param>
+    public void AddParentPartition(Guid? parentPartitionGuid)
+    {
+        Add("parentPartitionGuid", parentPartitionGuid is not null
+            ? new AuditValue.String(parentPartitionGuid.Value.ToString())
+            : new AuditValue.Null());
+    }
+
+    /// <summary>
+    /// Adds the parent user group of a user group to the metadata.
+    /// </summary>
+    /// <param name="parentUserGroupGuid">
+    /// The unique identifier of the parent user group, or <see langword="null"/>
+    /// when the user group has no parent.
+    /// </param>
+    public void AddParentUserGroup(Guid? parentUserGroupGuid)
+    {
+        Add("parentUserGroupGuid", parentUserGroupGuid is not null
+            ? new AuditValue.String(parentUserGroupGuid.Value.ToString())
+            : new AuditValue.Null());
+    }
+
+    /// <summary>
+    /// Adds the permissions associated with an entity to the metadata.
+    /// </summary>
+    /// <param name="actions">The actions the entity is permitted to perform.</param>
+    public void AddPermissions(IReadOnlyCollection<ActionType> actions)
+    {
+        Add("permissions", BuildPermissionArray(actions));
+    }
+
+    /// <summary>
+    /// Adds the permissions that were granted to an entity to the metadata.
+    /// </summary>
+    /// <param name="actions">The actions that were granted.</param>
+    public void AddPermissionsAdded(IReadOnlyCollection<ActionType> actions)
+    {
+        Add("permissionsAdded", BuildPermissionArray(actions));
+    }
+
+    /// <summary>
+    /// Adds the permissions that were revoked from an entity to the metadata.
+    /// </summary>
+    /// <param name="actions">The actions that were revoked.</param>
+    public void AddPermissionsRemoved(IReadOnlyCollection<ActionType> actions)
+    {
+        Add("permissionsRemoved", BuildPermissionArray(actions));
+    }
+
+    /// <summary>
+    /// Adds the user groups that were added to a user to the metadata.
+    /// </summary>
+    /// <param name="userGroupGuids">
+    /// The unique identifiers of the user groups that were added.
+    /// </param>
+    public void AddUserGroupsAdded(IReadOnlyCollection<Guid> userGroupGuids)
+    {
+        Add("userGroupsAdded", BuildGuidArray(userGroupGuids));
+    }
+
+    /// <summary>
+    /// Adds the user groups that were removed from a user to the metadata.
+    /// </summary>
+    /// <param name="userGroupGuids">
+    /// The unique identifiers of the user groups that were removed.
+    /// </param>
+    public void AddUserGroupsRemoved(IReadOnlyCollection<Guid> userGroupGuids)
+    {
+        Add("userGroupsRemoved", BuildGuidArray(userGroupGuids));
+    }
+
+    /// <summary>
+    /// Adds the partition accesses that were granted to an entity to the metadata.
+    /// </summary>
+    /// <param name="partitionGuids">
+    /// The unique identifiers of the partitions the entity gained access to.
+    /// </param>
+    public void AddPartitionAccessesAdded(IReadOnlyCollection<Guid> partitionGuids)
+    {
+        Add("partitionAccessesAdded", BuildGuidArray(partitionGuids));
+    }
+
+    /// <summary>
+    /// Adds the partition accesses that were revoked from an entity to the metadata.
+    /// </summary>
+    /// <param name="partitionGuids">
+    /// The unique identifiers of the partitions the entity lost access to.
+    /// </param>
+    public void AddPartitionAccessesRemoved(IReadOnlyCollection<Guid> partitionGuids)
+    {
+        Add("partitionAccessesRemoved", BuildGuidArray(partitionGuids));
+    }
+
+    /// <summary>
+    /// Records that the authentication password of a user was changed.
+    /// </summary>
+    /// <remarks>
+    /// The password value is never recorded; only the fact that it changed is
+    /// captured so the action can be understood without exposing the secret.
+    /// </remarks>
+    public void AddPasswordChanged()
+    {
+        Add("passwordChanged", new AuditValue.Boolean(true));
+    }
+
+    /// <summary>
+    /// Adds the number of refresh tokens that were revoked as a consequence of
+    /// the audited action to the metadata.
+    /// </summary>
+    /// <param name="count">The number of refresh tokens that were revoked.</param>
+    public void AddRefreshTokensRevoked(int count)
+    {
+        Add("refreshTokensRevoked", new AuditValue.Number(count));
+    }
+
+    private static AuditValue.Array BuildPermissionArray(IReadOnlyCollection<ActionType> actions)
+    {
+        var values = new List<AuditValue>();
+
+        foreach (var action in actions)
+        {
+            values.Add(new AuditValue.Number((int)action));
+        }
+
+        return new AuditValue.Array(values);
+    }
+
+    private static AuditValue.Array BuildGuidArray(IReadOnlyCollection<Guid> guids)
+    {
+        var values = new List<AuditValue>();
+
+        foreach (var guid in guids)
+        {
+            values.Add(new AuditValue.String(guid.ToString()));
+        }
+
+        return new AuditValue.Array(values);
     }
 }

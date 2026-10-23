@@ -17,6 +17,7 @@ public sealed class UserUpdateCommandHandler(
     IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
+    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IUnitOfWork unitOfWork,
     ILogger<UserUpdateCommandHandler> logger
@@ -48,28 +49,28 @@ public sealed class UserUpdateCommandHandler(
 
             user.Nameid = command.Update.Nameid.Value;
 
-            userAudit.Metadata.Add(nameof(user.Nameid), new AuditValue.String(user.Nameid));
+            userAudit.Metadata.AddNameid(user.Nameid);
         }
 
         if (command.Update.FirstName is { } firstName)
         {
             user.FirstName = firstName;
 
-            userAudit.Metadata.Add(nameof(user.FirstName), new AuditValue.String(user.FirstName));
+            userAudit.Metadata.AddFirstName(firstName);
         }
 
         if (command.Update.LastName is { } lastName)
         {
             user.LastName = lastName;
 
-            userAudit.Metadata.Add(nameof(user.LastName), new AuditValue.String(user.LastName));
+            userAudit.Metadata.AddLastName(lastName);
         }
 
         if (command.Update.Description is { } description)
         {
             user.Description = description;
 
-            userAudit.Metadata.Add(nameof(user.Description), new AuditValue.String(user.Description));
+            userAudit.Metadata.AddDescription(user.Description);
         }
 
         if (command.Update.IsActive is { } isActive)
@@ -84,7 +85,7 @@ public sealed class UserUpdateCommandHandler(
                 user.Deactivate();
             }
 
-            userAudit.Metadata.Add(nameof(user.IsActive), new AuditValue.Boolean(user.IsActive));
+            userAudit.Metadata.AddIsActive(user.IsActive);
         }
 
         if (command.Update.Authentication is { } auth)
@@ -112,18 +113,14 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
         {
-            var auditPermissions = new List<AuditValue>();
-
             foreach (var permission in permissionsToAdd.Distinct())
             {
                 actor.ThrowIfPermissionDenied(permission);
 
                 user.AddPermission(permission);
-
-                auditPermissions.Add(new AuditValue.Number((int)permission));
             }
 
-            userAudit.Metadata.Add("PermissionsAdded", new AuditValue.Array(auditPermissions));
+            userAudit.Metadata.AddPermissionsAdded([.. permissionsToAdd.Distinct()]);
         }
 
         if (command.Update.PermissionsToRemove is { Count: > 0 } permissionsToRemove)
@@ -134,6 +131,8 @@ public sealed class UserUpdateCommandHandler(
 
                 user.RemovePermission(permission);
             }
+
+            userAudit.Metadata.AddPermissionsRemoved([.. permissionsToRemove.Distinct()]);
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
@@ -148,6 +147,8 @@ public sealed class UserUpdateCommandHandler(
 
                 user.AddPartition(partition);
             }
+
+            userAudit.Metadata.AddPartitionsAdded(partitionsToAdd);
         }
 
         if (command.Update.PartitionsToRemove is { Count: > 0 } partitionsToRemove)
@@ -162,6 +163,8 @@ public sealed class UserUpdateCommandHandler(
 
                 user.RemovePartition(partition.Guid);
             }
+
+            userAudit.Metadata.AddPartitionsRemoved(partitionsToRemove);
         }
 
         if (command.Update.UserGroupsToAdd is { Count: > 0 } userGroupsToAdd)
@@ -176,6 +179,8 @@ public sealed class UserUpdateCommandHandler(
 
                 user.AddUserGroup(userGroup);
             }
+
+            userAudit.Metadata.AddUserGroupsAdded([.. userGroupsToAdd.Distinct()]);
         }
 
         if (command.Update.UserGroupsToRemove is { Count: > 0 } userGroupsToRemove)
@@ -190,6 +195,8 @@ public sealed class UserUpdateCommandHandler(
 
                 user.RemoveUserGroup(userGroup.Guid);
             }
+
+            userAudit.Metadata.AddUserGroupsRemoved([.. userGroupsToRemove.Distinct()]);
         }
 
         if (command.Update.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
@@ -204,6 +211,8 @@ public sealed class UserUpdateCommandHandler(
 
                 user.AddPartitionAccess(partition);
             }
+
+            userAudit.Metadata.AddPartitionAccessesAdded([.. partitionAccessesToAdd]);
         }
 
         if (command.Update.PartitionAccessesToRemove is { Count: > 0 } partitionAccessesToRemove)
@@ -218,7 +227,11 @@ public sealed class UserUpdateCommandHandler(
 
                 user.RemovePartitionAccess(partition.Guid);
             }
+
+            userAudit.Metadata.AddPartitionAccessesRemoved([.. partitionAccessesToRemove]);
         }
+
+        auditLogRepository.Add(userAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

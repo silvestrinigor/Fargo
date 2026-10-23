@@ -35,9 +35,19 @@ public sealed class PartitionUpdateCommandHandler(
 
         var partitionAudit = AuditLog.CreateAuditLog(actor, partitionToEdit, AuditLogType.EntityUpdated);
 
-        partitionToEdit.Name = command.Update.Name ?? partitionToEdit.Name;
+        if (command.Update.Name is { } name)
+        {
+            partitionToEdit.Name = name;
 
-        partitionToEdit.Description = command.Update.Description ?? partitionToEdit.Description;
+            partitionAudit.Metadata.AddName(partitionToEdit.Name);
+        }
+
+        if (command.Update.Description is { } description)
+        {
+            partitionToEdit.Description = description;
+
+            partitionAudit.Metadata.AddDescription(partitionToEdit.Description);
+        }
 
         if (command.Update.ParentPartitionGuid is { } parentPartitionGuidToSet)
         {
@@ -50,6 +60,8 @@ public sealed class PartitionUpdateCommandHandler(
             await partitionService.ValidateParentPartitionHierarchyAssignmentAsync(parentPartitionToSet, partitionToEdit, cancellationToken);
 
             partitionToEdit.SetParentPartition(parentPartitionToSet);
+
+            partitionAudit.Metadata.AddParentPartition(partitionToEdit.ParentPartitionGuid);
         }
 
         auditLogRepository.Add(partitionAudit);

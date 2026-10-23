@@ -55,6 +55,8 @@ public sealed class PartitionCreateCommandHandler(
 
         partitionAudit.Metadata.AddName(newPartition.Name);
 
+        partitionAudit.Metadata.AddParentPartition(newPartition.ParentPartitionGuid);
+
         newPartition.Description = command.Create.Description ?? Description.Empty;
 
         partitionAudit.Metadata.AddDescription(newPartition.Description);

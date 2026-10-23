@@ -1,4 +1,6 @@
 using Fargo.Application.Common;
+using Fargo.Core.Actors;
+using Fargo.Core.Audits;
 using Fargo.Core.Identity;
 using Fargo.Core.Informations;
 using Fargo.Core.Security;
@@ -13,12 +15,16 @@ namespace Fargo.Application.Identity;
 /// <param name="userRepository">Provides access to user data.</param>
 /// <param name="passwordHasher">Hashes and verifies password values.</param>
 /// <param name="refreshTokenRepository">Manages refresh token persistence for token invalidation.</param>
+/// <param name="actorResolver">Resolves the actor representing the user changing their password.</param>
+/// <param name="auditLogRepository">Persists the audit log generated for the password change.</param>
 /// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
 /// <param name="logger">Logs the execution of the password change process.</param>
 public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IRefreshTokenRepository refreshTokenRepository,
+    ActorResolver actorResolver,
+    IAuditLogRepository auditLogRepository,
     IUnitOfWork unitOfWork,
     ILogger<IdentityPasswordChangeCommandHandler> logger
 ) : ICommandHandler<IdentityPasswordChangeCommand>
@@ -80,12 +86,31 @@ public sealed class IdentityPasswordChangeCommandHandler(
 
         user.Authentication.RotateAuthVersion();
 
+        // The user changing their own password is both the actor and the audited
+        // entity. Resolve the actor from the validated, active user so the audit
+        // log inherits the user's partition access scope.
+        var actor = await actorResolver.GetActorByGuidAndTypeAsync(user.Guid, ActorType.User, cancellationToken);
+
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, user.Guid, ActorType.User);
+
+        var passwordChangeAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityUpdated);
+
+        passwordChangeAudit.Metadata.AddPasswordChanged();
+
         var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.Guid, cancellationToken);
+
+        var revokedCount = 0;
 
         foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
         {
             refreshToken.Revoke();
+
+            revokedCount++;
         }
+
+        passwordChangeAudit.Metadata.AddRefreshTokensRevoked(revokedCount);
+
+        auditLogRepository.Add(passwordChangeAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
