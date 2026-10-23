@@ -73,10 +73,13 @@ public sealed class ItemLocationCommand : Command
 
     private static void Render(Guid queriedGuid, DateTimeOffset? at, IReadOnlyList<ItemDto> chain)
     {
-        // The API orders the chain from the item (depth 0) outward to the root
-        // container. Reverse it so the root comes first and the item last, which
-        // is the natural reading order for a top-down tree.
-        var outerToInner = chain.Reverse().ToList();
+        // The API orders the chain from the item (first element) outward to the
+        // root container (last element). Build an explicit outer-to-inner list
+        // (root first, item last) so the tree nests the natural way. A new list
+        // is reversed in place to avoid any ambiguity between the in-place
+        // List<T>.Reverse() and the LINQ Enumerable.Reverse().
+        var outerToInner = new List<ItemDto>(chain);
+        outerToInner.Reverse();
 
         Console.WriteLine(at.HasValue
             ? $"Location of item {Short(queriedGuid)} at {at.Value:u}"

@@ -160,7 +160,14 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         .Select(ItemDtoMappings.Projection)
         .ToListAsync(cancellationToken);
 
-        return items;
+        // The IN-based projection does not preserve the depth order produced by
+        // the recursive query, so reorder the results to match: item first,
+        // outward to the root container last.
+        var orderByGuid = guids
+            .Select((guid, index) => (guid, index))
+            .ToDictionary(x => x.guid, x => x.index);
+
+        return [.. items.OrderBy(item => item.Guid is { } g ? orderByGuid[g] : int.MaxValue)];
     }
 
     public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAtInstantOrderedByDepthAsync(
@@ -219,7 +226,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             .Select((guid, index) => (guid, index))
             .ToDictionary(x => x.guid, x => x.index);
 
-        return [.. items.OrderBy(item => orderByGuid[item.Guid])];
+        return [.. items.OrderBy(item => item.Guid is { } g ? orderByGuid[g] : int.MaxValue)];
     }
 
     public async Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderedByOccurredAtAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
