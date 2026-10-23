@@ -34,7 +34,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
         {
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item. When &apos;at&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When &apos;at&apos; is supplied, the chain is reconstructed from the containment history as it was at that instant.
         /// </summary>
         /// <returns>A List&lt;global::Fargo.ClientHttp.Models.ItemDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -53,7 +53,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item. When &apos;at&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When &apos;at&apos; is supplied, the chain is reconstructed from the containment history as it was at that instant.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -81,7 +81,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
             return new global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item. When &apos;at&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When &apos;at&apos; is supplied, the chain is reconstructed from the containment history as it was at that instant.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class LocationRequestBuilderGetQueryParameters 

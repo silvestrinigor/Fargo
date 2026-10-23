@@ -74,7 +74,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/{itemGuid:guid}/location", GetItemLocationByGuid)
             .WithName("GetItemLocation")
             .WithSummary("Gets the item location")
-            .WithDescription("Retrieves a list of items that represents the location of the contained item. When 'at' is supplied, the location is reconstructed from the containment history as it was at that instant.")
+            .WithDescription("Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When 'at' is supplied, the chain is reconstructed from the containment history as it was at that instant.")
             .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 

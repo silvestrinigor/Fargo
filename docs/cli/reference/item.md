@@ -49,8 +49,8 @@ Commands:
   
                     Examples:
                       fargo item delete 22222222-2222-2222-2222-222222222222
-  location <guid>   Show the container chain an item is located in, from the outermost
-                    container to the innermost.
+  location <guid>   Show where an item is located as a nested container tree, from the
+                    outermost container inward to the item itself.
   
                     Pass --at to reconstruct the location as it was at a specific
                     instant, using the item's containment history, instead of the
@@ -208,8 +208,8 @@ Options:
 
 ```text
 Description:
-  Show the container chain an item is located in, from the outermost
-  container to the innermost.
+  Show where an item is located as a nested container tree, from the
+  outermost container inward to the item itself.
   
   Pass --at to reconstruct the location as it was at a specific
   instant, using the item's containment history, instead of the
