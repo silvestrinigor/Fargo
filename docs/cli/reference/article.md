@@ -54,9 +54,13 @@ Commands:
                                  fargo article get-by-barcode 1234567890128:ean13
   inventory <guid>             Show the inventory count for an article.
   
+                               Pass --at to reconstruct the count as it was at a specific instant,
+                               using the item containment history, instead of the current count.
+  
                                Examples:
                                  fargo article inventory 11111111-1111-1111-1111-111111111111
                                  fargo article inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
+                                 fargo article inventory 11111111-1111-1111-1111-111111111111 --at 2026-03-01T12:00:00Z
   create                       Create a new article.
   
                                The article type is inferred from the options you pass; you do not set
@@ -235,9 +239,13 @@ Options:
 Description:
   Show the inventory count for an article.
   
+  Pass --at to reconstruct the count as it was at a specific instant,
+  using the item containment history, instead of the current count.
+  
   Examples:
     fargo article inventory 11111111-1111-1111-1111-111111111111
     fargo article inventory 11111111-1111-1111-1111-111111111111 --include-descendants false
+    fargo article inventory 11111111-1111-1111-1111-111111111111 --at 2026-03-01T12:00:00Z
 
 Usage:
   fargo article inventory <guid> [options]
@@ -248,6 +256,7 @@ Arguments:
 Options:
   --containers <containers>  Limit inventory to these container item GUIDs (space-separated).
   --include-descendants      Include items in nested containers. Defaults to true.
+  --at <at>                  Instant (ISO 8601, e.g. 2026-03-01T12:00:00Z) at which to evaluate the inventory. Defaults to now.
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information

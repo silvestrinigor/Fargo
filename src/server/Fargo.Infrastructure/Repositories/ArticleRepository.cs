@@ -160,26 +160,82 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return new ArticleInventoryDto(TotalCount: itemCount);
     }
 
-    public async Task<ArticleInventoryDto> GetInventoryInfoByGuidTemporalAsOfAsync(
+    public async Task<ArticleInventoryDto> GetInventoryInfoByGuidAtInstantAsync(
         Guid articleGuid,
-        DateTimeOffset temporalAsOf,
+        DateTimeOffset at,
         IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        bool includeDescendents = true,
         CancellationToken cancellationToken = default)
     {
-        var query = context.ItemParentContainerHistories.Where(i => i.Item.ArticleGuid == articleGuid);
-
-        if (insideItemContainerGuids is { Count: > 0 })
+        // Count the items of an article as they were located at a specific
+        // instant, reconstructed from item_parent_container_history.
+        //
+        // When no containers are given, every item of the article that had a
+        // containment record covering the instant is counted (i.e. existed then).
+        //
+        // When containers are given, the "container set" is those containers plus
+        // (when descendants are included) every descendant container nested in
+        // them at the instant. Items of the article whose historical parent at the
+        // instant is in that set are counted. Only container-typed items are
+        // recursed into, mirroring the live descendant walk.
+        if (insideItemContainerGuids is not { Count: > 0 })
         {
-            query = query.Where(
-                i => i.ParentItemContainerGuid != null &&
-                i.ValidPeriod.Contains(temporalAsOf) &&
-                insideItemContainerGuids.Contains(i.ParentItemContainerGuid.Value)
-            );
+            FormattableString allQuery = $"""
+            SELECT COUNT(DISTINCT history.item_guid)::int AS value
+            FROM item_parent_container_history AS history
+            INNER JOIN items AS item
+                ON item.guid = history.item_guid
+            WHERE item.article_guid = {articleGuid}
+              AND history.valid_period @> {at}::timestamptz
+            """;
+
+            // ToListAsync executes the SQL as-is; SingleAsync would compose it as
+            // a subquery, which is invalid for a trailing/CTE query.
+            var allCounts = await context.Database
+                .SqlQuery<int>(allQuery)
+                .ToListAsync(cancellationToken);
+
+            return new ArticleInventoryDto(TotalCount: allCounts.FirstOrDefault());
         }
 
-        var itemCount = await query.Select(x => x.Item).CountAsync(cancellationToken);
+        var containers = insideItemContainerGuids.ToArray();
 
-        return new ArticleInventoryDto(TotalCount: itemCount);
+        FormattableString query = $"""
+        WITH RECURSIVE container_set AS
+        (
+            SELECT guid
+            FROM items
+            WHERE guid = ANY({containers}::uuid[])
+
+            UNION ALL
+
+            SELECT child.item_guid AS guid
+            FROM container_set AS parent
+            INNER JOIN item_parent_container_history AS child
+                ON child.parent_item_container_guid = parent.guid
+               AND child.valid_period @> {at}::timestamptz
+            INNER JOIN items AS child_item
+                ON child_item.guid = child.item_guid
+            INNER JOIN articles AS child_article
+                ON child_article.guid = child_item.article_guid
+            WHERE {includeDescendents}
+              AND child_article.article_type = {(int)ArticleType.Container}
+        )
+        SELECT COUNT(DISTINCT history.item_guid)::int AS value
+        FROM item_parent_container_history AS history
+        INNER JOIN items AS item
+            ON item.guid = history.item_guid
+        INNER JOIN container_set AS cs
+            ON cs.guid = history.parent_item_container_guid
+        WHERE item.article_guid = {articleGuid}
+          AND history.valid_period @> {at}::timestamptz
+        """;
+
+        var itemCounts = await context.Database
+            .SqlQuery<int>(query)
+            .ToListAsync(cancellationToken);
+
+        return new ArticleInventoryDto(TotalCount: itemCounts.FirstOrDefault());
     }
 
     public Task<bool> ExistByGuidAsync(Guid articleGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)

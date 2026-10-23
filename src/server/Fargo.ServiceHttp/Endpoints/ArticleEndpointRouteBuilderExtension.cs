@@ -100,7 +100,7 @@ public static class ArticleEndpointRouteBuilderExtension
         builder.MapGet("/{articleGuid:guid}/inventory", GetArticleInventoryByGuidAsync)
             .WithName("GetArticleInventory")
             .WithSummary("Gets a article inventory by guid")
-            .WithDescription("Retrieves a article inventory by its unique identifier.")
+            .WithDescription("Retrieves the inventory count for an article. When 'at' is supplied, the count is reconstructed from the item containment history as it was at that instant.")
             .Produces<ArticleInventoryDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -111,10 +111,11 @@ public static class ArticleEndpointRouteBuilderExtension
         Guid articleGuid,
         Guid[]? insideItemContainerGuids,
         bool? includeDescendents,
+        DateTimeOffset? at,
         IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ArticleInventoryByGuidQuery(articleGuid, insideItemContainerGuids, includeDescendents ?? true);
+        var query = new ArticleInventoryByGuidQuery(articleGuid, insideItemContainerGuids, includeDescendents ?? true, at);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

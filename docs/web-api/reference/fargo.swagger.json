@@ -132,7 +132,7 @@
           "Articles"
         ],
         "summary": "Gets a article inventory by guid",
-        "description": "Retrieves a article inventory by its unique identifier.",
+        "description": "Retrieves the inventory count for an article. When 'at' is supplied, the count is reconstructed from the item containment history as it was at that instant.",
         "operationId": "GetArticleInventory",
         "produces": [
           "application/json"
@@ -159,6 +159,12 @@
             "in": "query",
             "name": "includeDescendents",
             "type": "boolean"
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {

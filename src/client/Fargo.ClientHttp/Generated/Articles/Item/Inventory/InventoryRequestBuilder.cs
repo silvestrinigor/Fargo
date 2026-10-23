@@ -22,7 +22,7 @@ namespace Fargo.ClientHttp.Articles.Item.Inventory
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public InventoryRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/articles/{articleBarcode%2Did}/inventory{?includeDescendents*,insideItemContainerGuids*}", pathParameters)
+        public InventoryRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/articles/{articleBarcode%2Did}/inventory{?at*,includeDescendents*,insideItemContainerGuids*}", pathParameters)
         {
         }
         /// <summary>
@@ -30,11 +30,11 @@ namespace Fargo.ClientHttp.Articles.Item.Inventory
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public InventoryRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/articles/{articleBarcode%2Did}/inventory{?includeDescendents*,insideItemContainerGuids*}", rawUrl)
+        public InventoryRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/articles/{articleBarcode%2Did}/inventory{?at*,includeDescendents*,insideItemContainerGuids*}", rawUrl)
         {
         }
         /// <summary>
-        /// Retrieves a article inventory by its unique identifier.
+        /// Retrieves the inventory count for an article. When &apos;at&apos; is supplied, the count is reconstructed from the item containment history as it was at that instant.
         /// </summary>
         /// <returns>A <see cref="global::Fargo.ClientHttp.Models.ArticleInventoryDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -52,7 +52,7 @@ namespace Fargo.ClientHttp.Articles.Item.Inventory
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.ArticleInventoryDto>(requestInfo, global::Fargo.ClientHttp.Models.ArticleInventoryDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Retrieves a article inventory by its unique identifier.
+        /// Retrieves the inventory count for an article. When &apos;at&apos; is supplied, the count is reconstructed from the item containment history as it was at that instant.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -80,11 +80,15 @@ namespace Fargo.ClientHttp.Articles.Item.Inventory
             return new global::Fargo.ClientHttp.Articles.Item.Inventory.InventoryRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Retrieves a article inventory by its unique identifier.
+        /// Retrieves the inventory count for an article. When &apos;at&apos; is supplied, the count is reconstructed from the item containment history as it was at that instant.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class InventoryRequestBuilderGetQueryParameters 
         {
+            #pragma warning disable CS1591
+            [QueryParameter("at")]
+            public DateTimeOffset? At { get; set; }
+            #pragma warning restore CS1591
             #pragma warning disable CS1591
             [QueryParameter("includeDescendents")]
             public bool? IncludeDescendents { get; set; }

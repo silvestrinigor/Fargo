@@ -57,6 +57,36 @@ public interface IArticleQueryRepository
     );
 
     /// <summary>
+    /// Retrieves the inventory count of an article as it existed at a specific
+    /// instant, reconstructed from the item containment history.
+    /// </summary>
+    /// <param name="articleGuid">The article to count.</param>
+    /// <param name="at">
+    /// The instant, in UTC, at which the inventory is evaluated. Each item's
+    /// containment is resolved from the history row valid at this instant.
+    /// </param>
+    /// <param name="insideItemContainerGuids">
+    /// When provided, only items that were inside these containers (or, when
+    /// descendants are included, their nested containers) at the instant are
+    /// counted. When null or empty, every item of the article that existed at the
+    /// instant is counted.
+    /// </param>
+    /// <param name="includeDescendents">
+    /// When <see langword="true"/>, items in descendant containers (as nested at
+    /// the instant) are included; otherwise only items directly inside the given
+    /// containers are counted. Ignored when no containers are provided.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The inventory count of the article at that instant.</returns>
+    Task<ArticleInventoryDto> GetInventoryInfoByGuidAtInstantAsync(
+        Guid articleGuid,
+        DateTimeOffset at,
+        IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        bool includeDescendents = true,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Retrieves multiple article information records.
     /// </summary>
     /// <param name="pagination">
