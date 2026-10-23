@@ -9,7 +9,7 @@ namespace Fargo.Application.Items;
 /// <param name="ItemGuid">
 /// The unique identifier of the item for which the location hierarchy is queried.
 /// </param>
-/// <param name="AsOf">
+/// <param name="At">
 /// The instant, in UTC, at which the location hierarchy should be evaluated. When
 /// <see langword="null"/>, the current location hierarchy is returned. When
 /// provided, the hierarchy is reconstructed from the item containment history as
@@ -21,11 +21,11 @@ namespace Fargo.Application.Items;
 /// contained by another item, the collection contains the queried item and its
 /// containing items.
 ///
-/// When <paramref name="AsOf"/> is supplied, each link of the chain is resolved
+/// When <paramref name="At"/> is supplied, each link of the chain is resolved
 /// using the containment that was valid at that instant, so the result reflects
 /// where the item was located at that time rather than where it is now.
 /// </remarks>
 public sealed record ItemLocationQuery(
     Guid ItemGuid,
-    DateTimeOffset? AsOf = null
+    DateTimeOffset? At = null
 ) : IQuery<IReadOnlyCollection<ItemDto>>;

@@ -22,7 +22,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public LocationRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location{?asOf*}", pathParameters)
+        public LocationRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location{?at*}", pathParameters)
         {
         }
         /// <summary>
@@ -30,11 +30,11 @@ namespace Fargo.ClientHttp.Items.Item.Location
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public LocationRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location{?asOf*}", rawUrl)
+        public LocationRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/items/{itemGuid}/location{?at*}", rawUrl)
         {
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item. When &apos;asOf&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// Retrieves a list of items that represents the location of the contained item. When &apos;at&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
         /// </summary>
         /// <returns>A List&lt;global::Fargo.ClientHttp.Models.ItemDto&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -53,7 +53,7 @@ namespace Fargo.ClientHttp.Items.Item.Location
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item. When &apos;asOf&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// Retrieves a list of items that represents the location of the contained item. When &apos;at&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -81,14 +81,14 @@ namespace Fargo.ClientHttp.Items.Item.Location
             return new global::Fargo.ClientHttp.Items.Item.Location.LocationRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Retrieves a list of items that represents the location of the contained item. When &apos;asOf&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
+        /// Retrieves a list of items that represents the location of the contained item. When &apos;at&apos; is supplied, the location is reconstructed from the containment history as it was at that instant.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class LocationRequestBuilderGetQueryParameters 
         {
             #pragma warning disable CS1591
-            [QueryParameter("asOf")]
-            public DateTimeOffset? AsOf { get; set; }
+            [QueryParameter("at")]
+            public DateTimeOffset? At { get; set; }
             #pragma warning restore CS1591
         }
         /// <summary>

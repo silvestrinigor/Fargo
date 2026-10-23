@@ -349,7 +349,7 @@
           "Items"
         ],
         "summary": "Gets the item location",
-        "description": "Retrieves a list of items that represents the location of the contained item. When 'asOf' is supplied, the location is reconstructed from the containment history as it was at that instant.",
+        "description": "Retrieves a list of items that represents the location of the contained item. When 'at' is supplied, the location is reconstructed from the containment history as it was at that instant.",
         "operationId": "GetItemLocation",
         "produces": [
           "application/json"
@@ -364,7 +364,7 @@
           },
           {
             "in": "query",
-            "name": "asOf",
+            "name": "at",
             "type": "string",
             "format": "date-time"
           }

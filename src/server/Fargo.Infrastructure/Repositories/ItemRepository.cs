@@ -165,7 +165,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAtInstantOrderedByDepthAsync(
         Guid itemGuid,
-        DateTimeOffset asOf,
+        DateTimeOffset at,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
     {
@@ -173,7 +173,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         //
         // For each item in the chain, the parent is taken from the row of
         // item_parent_container_history whose validity period contains the
-        // instant (valid_period @> asOf). Starting from the queried item, the
+        // instant (valid_period @> at). Starting from the queried item, the
         // recursion follows that historical parent outward until an item has no
         // historical parent (it was a root at that instant) or no history row
         // covering the instant (the chain ends).
@@ -186,7 +186,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
                 0 AS depth
             FROM item_parent_container_history AS history
             WHERE history.item_guid = {itemGuid}
-            AND history.valid_period @> {asOf}::timestamptz
+            AND history.valid_period @> {at}::timestamptz
 
             UNION ALL
 
@@ -197,7 +197,7 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             FROM item_parent_container_history AS parent_history
             INNER JOIN item_location AS child
                 ON parent_history.item_guid = child.parent_item_container_guid
-            WHERE parent_history.valid_period @> {asOf}::timestamptz
+            WHERE parent_history.valid_period @> {at}::timestamptz
         )
         SELECT guid
         FROM item_location

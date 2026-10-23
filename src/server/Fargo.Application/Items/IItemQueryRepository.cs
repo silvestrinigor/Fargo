@@ -21,7 +21,7 @@ public interface IItemQueryRepository
     /// ordered from the item itself outward to its root container.
     /// </summary>
     /// <param name="itemGuid">The unique identifier of the item.</param>
-    /// <param name="asOf">
+    /// <param name="at">
     /// The instant, in UTC, at which the containment hierarchy is evaluated. Each
     /// link of the chain is resolved from the containment history valid at this
     /// instant.
@@ -32,13 +32,13 @@ public interface IItemQueryRepository
     /// </param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>
-    /// The chain of items that contained the queried item at <paramref name="asOf"/>,
+    /// The chain of items that contained the queried item at <paramref name="at"/>,
     /// ordered by depth. An empty collection when the item had no containment
     /// history covering that instant (for example, it did not yet exist).
     /// </returns>
     Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAtInstantOrderedByDepthAsync(
         Guid itemGuid,
-        DateTimeOffset asOf,
+        DateTimeOffset at,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default
     );
