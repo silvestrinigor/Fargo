@@ -275,6 +275,75 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetInventoryInfoByGuidAtInstantAsync(
+        Guid itemContainerGuid,
+        DateTimeOffset at,
+        IReadOnlyCollection<Guid>? articleGuids = null,
+        bool includeDescendents = true,
+        CancellationToken cancellationToken = default)
+    {
+        // Reconstruct the inventory of a container as it was at a specific instant.
+        //
+        // Containment at the instant is taken from item_parent_container_history
+        // (the history row whose validity period contains the instant). The
+        // "container set" is the set of container items whose direct contents are
+        // counted: when descendants are included it is the root container plus
+        // every descendant container that was nested in it at the instant;
+        // otherwise it is just the root container. Items whose historical parent
+        // is in the container set are then grouped by article and counted.
+        //
+        // Only container-typed items are recursed into, mirroring the live
+        // descendant walk; all contained items are counted regardless of type.
+        var articleFilter = articleGuids is { Count: > 0 }
+            ? articleGuids.ToArray()
+            : null;
+
+        FormattableString query = $"""
+        WITH RECURSIVE container_set AS
+        (
+            SELECT {itemContainerGuid} AS guid
+
+            UNION ALL
+
+            SELECT child.item_guid AS guid
+            FROM container_set AS parent
+            INNER JOIN item_parent_container_history AS child
+                ON child.parent_item_container_guid = parent.guid
+               AND child.valid_period @> {at}::timestamptz
+            INNER JOIN items AS child_item
+                ON child_item.guid = child.item_guid
+            INNER JOIN articles AS child_article
+                ON child_article.guid = child_item.article_guid
+            WHERE {includeDescendents}
+              AND child_article.article_type = {(int)ArticleType.Container}
+        ),
+        contained AS
+        (
+            SELECT contained_item.guid, contained_item.article_guid
+            FROM item_parent_container_history AS history
+            INNER JOIN container_set AS cs
+                ON cs.guid = history.parent_item_container_guid
+            INNER JOIN items AS contained_item
+                ON contained_item.guid = history.item_guid
+            WHERE history.valid_period @> {at}::timestamptz
+              AND ({articleFilter}::uuid[] IS NULL OR contained_item.article_guid = ANY({articleFilter}::uuid[]))
+        )
+        SELECT
+            article_guid AS article_guid,
+            COUNT(*)::int AS total_count
+        FROM contained
+        GROUP BY article_guid;
+        """;
+
+        var rows = await context.Database
+            .SqlQuery<InventoryRow>(query)
+            .ToListAsync(cancellationToken);
+
+        return [.. rows.Select(r => new ItemContainerInventoryDto(r.ArticleGuid, r.TotalCount))];
+    }
+
+    private sealed record InventoryRow(Guid ArticleGuid, int TotalCount);
+
     public Task<bool> ExistByGuidAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(

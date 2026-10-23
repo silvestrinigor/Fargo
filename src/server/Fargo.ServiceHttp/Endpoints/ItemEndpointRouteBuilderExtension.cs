@@ -131,7 +131,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/{itemGuid:guid}/inventory", GetItemContainerInventoryByGuid)
             .WithName("GetItemContainerInventory")
             .WithSummary("Gets the item container inventory")
-            .WithDescription("Retrieves a list of article inventory in the item container.")
+            .WithDescription("Retrieves the per-article inventory contained in the item container. When 'at' is supplied, the inventory is reconstructed from the containment history as it was at that instant.")
             .Produces<IReadOnlyCollection<ItemContainerInventoryDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -140,10 +140,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<ItemContainerInventoryDto>>, NotFound>> GetItemContainerInventoryByGuid(
         Guid itemGuid,
+        DateTimeOffset? at,
         IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ItemContainerInventoryByGuidQuery(itemGuid);
+        var query = new ItemContainerInventoryByGuidQuery(itemGuid, At: at);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

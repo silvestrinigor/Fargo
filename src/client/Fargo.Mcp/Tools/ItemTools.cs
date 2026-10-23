@@ -164,16 +164,23 @@ public static class ItemTools
     }
 
     [McpServerTool(Name = "fargo_items_get_inventory")]
-    [Description("Get the inventory of an item treated as a container: the count of contained items grouped by article.")]
+    [Description("Get the inventory of an item treated as a container: the count of contained items grouped by article. When 'at' is supplied, the inventory is reconstructed from the item containment history as it was at that instant.")]
     public static async Task<IReadOnlyList<ItemContainerInventorySummary>> GetItemInventoryAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("The GUID of the item (container).")] Guid itemGuid,
+        [Description("Optional instant (ISO 8601 UTC, e.g. 2026-03-01T12:00:00Z) at which to evaluate the inventory. When omitted, the current inventory is returned.")] DateTimeOffset? at = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Items[itemGuid].Inventory.GetAsync(cancellationToken: cancellationToken);
+        var result = await client.Items[itemGuid].Inventory.GetAsync(request =>
+        {
+            if (at.HasValue)
+            {
+                request.QueryParameters.At = at.Value;
+            }
+        }, cancellationToken);
 
         return result?.Select(i => i.ToSummary()).ToArray() ?? [];
     }

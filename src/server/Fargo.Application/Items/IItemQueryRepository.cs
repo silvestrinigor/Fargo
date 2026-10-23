@@ -61,6 +61,33 @@ public interface IItemQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    /// <summary>
+    /// Gets the article inventory of a container as it existed at a specific
+    /// instant, reconstructed from the item containment history.
+    /// </summary>
+    /// <param name="itemContainerGuid">The container item to inspect.</param>
+    /// <param name="at">
+    /// The instant, in UTC, at which the inventory is evaluated. Containment is
+    /// resolved from the history row valid at this instant for each item.
+    /// </param>
+    /// <param name="articleGuids">
+    /// When provided, restricts the inventory to these articles.
+    /// </param>
+    /// <param name="includeDescendents">
+    /// When <see langword="true"/>, counts items nested in descendant containers
+    /// (as they were nested at the instant) as well as direct children; otherwise
+    /// only items directly inside the container at the instant are counted.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The per-article counts contained in the container at that instant.</returns>
+    Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetInventoryInfoByGuidAtInstantAsync(
+        Guid itemContainerGuid,
+        DateTimeOffset at,
+        IReadOnlyCollection<Guid>? articleGuids = null,
+        bool includeDescendents = true,
+        CancellationToken cancellationToken = default
+    );
+
     Task<bool> ExistByGuidAsync(
         Guid itemGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

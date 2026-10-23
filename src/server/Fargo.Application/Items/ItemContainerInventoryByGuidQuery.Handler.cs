@@ -30,7 +30,18 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
 
         IReadOnlyCollection<ItemContainerInventoryDto>? inventory;
 
-        if (query.IncludeDescendents)
+        if (query.At is { } at)
+        {
+            // Point-in-time inventory is resolved entirely from the containment
+            // history in a single query, including the descendant walk.
+            inventory = await itemQueryRepository.GetInventoryInfoByGuidAtInstantAsync(
+                query.ItemContainerGuid,
+                at,
+                query.ArticleGuids,
+                query.IncludeDescendents,
+                cancellationToken);
+        }
+        else if (query.IncludeDescendents)
         {
             var itemContainerGuids = await itemRepository.GetContainedDescendantGuidsAsync(query.ItemContainerGuid, true, cancellationToken);
 

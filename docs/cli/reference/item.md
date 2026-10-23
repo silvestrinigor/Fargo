@@ -65,8 +65,13 @@ Commands:
                       fargo item moviments 22222222-2222-2222-2222-222222222222
   inventory <guid>  Show the article inventory contained inside a container item.
   
+                    Pass --at to reconstruct the inventory as it was at a specific
+                    instant, using the item containment history, instead of the current
+                    inventory.
+  
                     Examples:
                       fargo item inventory 22222222-2222-2222-2222-222222222222
+                      fargo item inventory 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
 
 ```
 
@@ -265,8 +270,13 @@ Options:
 Description:
   Show the article inventory contained inside a container item.
   
+  Pass --at to reconstruct the inventory as it was at a specific
+  instant, using the item containment history, instead of the current
+  inventory.
+  
   Examples:
     fargo item inventory 22222222-2222-2222-2222-222222222222
+    fargo item inventory 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
 
 Usage:
   fargo item inventory <guid> [options]
@@ -275,6 +285,7 @@ Arguments:
   <guid>  The container item GUID.
 
 Options:
+  --at <at>              Instant (ISO 8601, e.g. 2026-03-01T12:00:00Z) at which to evaluate the inventory. Defaults to now.
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
