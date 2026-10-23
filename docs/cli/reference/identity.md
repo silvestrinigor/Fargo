@@ -6,7 +6,7 @@ Command reference for `fargo identity`, generated from the CLI's help output.
 
 ```text
 Description:
-  Authenticate with the Fargo server (login, logout, refresh, change password).
+  Authenticate with the Fargo server (login, logout, change password).
 
 Usage:
   fargo identity [command] [options]
@@ -29,10 +29,6 @@ Commands:
   
                    Examples:
                      fargo identity logout
-  refresh          Refresh the access token using the stored refresh token.
-  
-                   Examples:
-                     fargo identity refresh
   change-password  Change the password for an account.
   
                    If --current-password or --new-password are omitted you will be
@@ -80,25 +76,6 @@ Description:
 
 Usage:
   fargo identity logout [options]
-
-Options:
-  -?, -h, --help     Show help and usage information
-  --server <server>  The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose      Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
-
-```
-
-## `fargo identity refresh`
-
-```text
-Description:
-  Refresh the access token using the stored refresh token.
-  
-  Examples:
-    fargo identity refresh
-
-Usage:
-  fargo identity refresh [options]
 
 Options:
   -?, -h, --help     Show help and usage information
