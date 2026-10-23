@@ -1,8 +1,8 @@
 {
-  "descriptionHash": "136BCF2029C4322DD1A89CD8A80C459325845DFA31C1CD2E04E0B150EA48CB6F5EC1B45C94E72442BE12895AF3E79405E13FBACC30CF83AFE46448556800D6A2",
+  "descriptionHash": "1489B8B8B982298A2B631035032287A75D4A40AED366AB7CDE69ECA59FF53B4C159DB1290006FFD7C9C84C9F895221EFCBADD8DC40222144EC6E3BF19579776C",
   "descriptionLocation": "../../../server/Fargo.ServiceHttp/Fargo.ServiceHttp.json",
   "lockFileVersion": "1.0.0",
-  "kiotaVersion": "1.35.0",
+  "kiotaVersion": "1.36.1",
   "clientClassName": "FargoApiClient",
   "typeAccessModifier": "Public",
   "clientNamespaceName": "Fargo.ClientHttp",

@@ -60,23 +60,22 @@ namespace Fargo.ClientHttp.Users
         {
         }
         /// <summary>
-        /// Retrieves a paginated list of users.
+        /// Retrieves a paginated list of users, including the total number of matching entries.
         /// </summary>
-        /// <returns>A List&lt;global::Fargo.ClientHttp.Models.UserDto&gt;</returns>
+        /// <returns>A <see cref="global::Fargo.ClientHttp.Models.PagedResultOfUserDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<List<global::Fargo.ClientHttp.Models.UserDto>?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfUserDto?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<List<global::Fargo.ClientHttp.Models.UserDto>> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfUserDto> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Users.UsersRequestBuilder.UsersRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
-            var collectionResult = await RequestAdapter.SendCollectionAsync<global::Fargo.ClientHttp.Models.UserDto>(requestInfo, global::Fargo.ClientHttp.Models.UserDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
-            return collectionResult?.AsList();
+            return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.PagedResultOfUserDto>(requestInfo, global::Fargo.ClientHttp.Models.PagedResultOfUserDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
         /// Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier.
@@ -99,7 +98,7 @@ namespace Fargo.ClientHttp.Users
             return await RequestAdapter.SendPrimitiveAsync<Guid?>(requestInfo, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Retrieves a paginated list of users.
+        /// Retrieves a paginated list of users, including the total number of matching entries.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -149,7 +148,7 @@ namespace Fargo.ClientHttp.Users
             return new global::Fargo.ClientHttp.Users.UsersRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Retrieves a paginated list of users.
+        /// Retrieves a paginated list of users, including the total number of matching entries.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class UsersRequestBuilderGetQueryParameters 

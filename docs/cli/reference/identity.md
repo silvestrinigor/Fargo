@@ -9,11 +9,12 @@ Description:
   Authenticate with the Fargo server (login, logout, refresh, change password).
 
 Usage:
-  Fargo.Cli identity [command] [options]
+  fargo identity [command] [options]
 
 Options:
   -?, -h, --help     Show help and usage information
   --server <server>  The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose      Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
   login            Authenticate with the Fargo server and store the session token.
@@ -57,13 +58,14 @@ Description:
     fargo identity login --username admin --password 'S3cr3t!'
 
 Usage:
-  Fargo.Cli identity login [options]
+  fargo identity login [options]
 
 Options:
   --username <username> (REQUIRED)  Username.
   --password <password>             Password. If omitted, you will be prompted to enter it securely.
   -?, -h, --help                    Show help and usage information
   --server <server>                 The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                     Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -77,11 +79,12 @@ Description:
     fargo identity logout
 
 Usage:
-  Fargo.Cli identity logout [options]
+  fargo identity logout [options]
 
 Options:
   -?, -h, --help     Show help and usage information
   --server <server>  The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose      Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -95,11 +98,12 @@ Description:
     fargo identity refresh
 
 Usage:
-  Fargo.Cli identity refresh [options]
+  fargo identity refresh [options]
 
 Options:
   -?, -h, --help     Show help and usage information
   --server <server>  The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose      Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -117,7 +121,7 @@ Description:
     fargo identity change-password --username admin --current-password old --new-password new
 
 Usage:
-  Fargo.Cli identity change-password [options]
+  fargo identity change-password [options]
 
 Options:
   --username <username> (REQUIRED)       Username (nameid) of the account.
@@ -125,6 +129,7 @@ Options:
   --new-password <new-password>          New password. If omitted, you will be prompted securely.
   -?, -h, --help                         Show help and usage information
   --server <server>                      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

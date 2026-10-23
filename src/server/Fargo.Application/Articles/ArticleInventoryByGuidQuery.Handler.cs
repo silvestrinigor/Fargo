@@ -38,7 +38,18 @@ public sealed class ArticleInventoryByGuidQueryHandler(
 
         ArticleInventoryDto? inventory = null;
 
-        if (articleExist && query.IncludeDescendents && query.InsideItemContainerGuids is { Count: > 0 })
+        if (articleExist && query.At is { } at)
+        {
+            // Point-in-time inventory is resolved entirely from the containment
+            // history in a single query, including the descendant walk.
+            inventory = await articleRepository.GetInventoryInfoByGuidAtInstantAsync(
+                query.ArticleGuid,
+                at,
+                query.InsideItemContainerGuids,
+                query.IncludeDescendents,
+                cancellationToken);
+        }
+        else if (articleExist && query.IncludeDescendents && query.InsideItemContainerGuids is { Count: > 0 })
         {
             var itemContainerGuids = new List<Guid>();
 

@@ -5,8 +5,9 @@ namespace Fargo.Cli.ErrorHandling;
 
 /// <summary>
 /// Renders Fargo API errors as concise, user-friendly console messages and maps
-/// them to process exit codes. Centralizes the handling of 401/403 responses
-/// and connectivity failures so every command surfaces the same clear output
+/// them to process exit codes. Centralizes the handling of API error responses
+/// (400 with validation errors, 401, 403, and other non-success statuses) and
+/// connectivity failures so every command surfaces the same clear output
 /// instead of raw stack traces.
 /// </summary>
 public static class ApiErrorReporter
@@ -34,6 +35,12 @@ public static class ApiErrorReporter
             case ForbiddenApiException forbidden:
                 WriteProblem(forbidden);
                 WriteVerboseDetails(forbidden);
+                return 1;
+
+            case BadRequestApiException badRequest:
+                WriteProblem(badRequest);
+                WriteValidationErrors(badRequest);
+                WriteVerboseDetails(badRequest);
                 return 1;
 
             case FargoApiException api:
@@ -116,6 +123,39 @@ public static class ApiErrorReporter
             "Could not connect to the Fargo server. Make sure the server is "
             + "running and the configured URL is correct (check "
             + "'fargo config show' or pass --server <url>).");
+    }
+
+    /// <summary>
+    /// Writes field-level validation errors (field: message) for a bad-request
+    /// response, when the problem details carry an <c>errors</c> map. Does
+    /// nothing when there are none.
+    /// </summary>
+    private static void WriteValidationErrors(FargoApiException exception)
+    {
+        var problem = exception.Problem;
+
+        if (problem is null)
+        {
+            return;
+        }
+
+        var errors = problem.GetValidationErrors();
+
+        if (errors.Count == 0)
+        {
+            return;
+        }
+
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Validation errors:");
+
+        foreach (var (field, messages) in errors)
+        {
+            foreach (var message in messages)
+            {
+                Console.Error.WriteLine($"  - {field}: {message}");
+            }
+        }
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ public sealed record UserGroupDto(
     Description Description,
     bool IsActive,
     bool IsAdminUserGroup,
-    Guid? ParentPartition,
+    Guid? ParentUserGroup,
     IReadOnlyCollection<ActionType> Permissions,
     IReadOnlyCollection<Guid> Partitions,
     IReadOnlyCollection<Guid> PartitionAccesses

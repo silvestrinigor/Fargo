@@ -30,24 +30,24 @@ commands. It is bound to the server you logged in against.
 List resources as a table:
 
 ```bash
-fargo articles list
-fargo items list --page 1 --limit 20
+fargo article list
+fargo item list --page 1 --limit 20
 ```
 
 Inspect a single resource:
 
 ```bash
-fargo articles get 11111111-1111-1111-1111-111111111111
-fargo users get 00000000-0000-0000-0000-000000000004
+fargo article get 11111111-1111-1111-1111-111111111111
+fargo user get 00000000-0000-0000-0000-000000000004
 ```
 
 Create, update, and delete:
 
 ```bash
-fargo articles create --name "Widget" --type pack
-fargo partitions create --name "Warehouse A"
-fargo users update 00000000-0000-0000-0000-000000000004 --active false
-fargo items delete 22222222-2222-2222-2222-222222222222
+fargo article create --name "Widget" --type pack
+fargo partition create --name "Warehouse A"
+fargo user update 00000000-0000-0000-0000-000000000004 --active false
+fargo item delete 22222222-2222-2222-2222-222222222222
 ```
 
 ## 4. Inspect the audit trail
@@ -65,14 +65,14 @@ fargo audit get 809434f3-c3b6-4f74-ad15-74e41d26468e
 Override the server for a single command without changing your configuration:
 
 ```bash
-fargo articles list --server https://staging.example.com
+fargo article list --server https://staging.example.com
 ```
 
 Authenticate as a different user for a single command without changing your
 stored session (resource commands only):
 
 ```bash
-fargo users list --username auditor --password '<password>'
+fargo user list --username auditor --password '<password>'
 ```
 
 ## Troubleshooting
@@ -84,7 +84,7 @@ fargo users list --username auditor --password '<password>'
 - Unsure about a command's options? Append `--help`:
 
   ```bash
-  fargo items update --help
+  fargo item update --help
   ```
 
 ## Next steps

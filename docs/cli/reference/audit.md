@@ -9,21 +9,28 @@ Description:
   View audit logs - a record of actions performed in the system.
 
 Usage:
-  Fargo.Cli audit [command] [options]
+  fargo audit [command] [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list        List audit log entries as a table, most useful with paging.
+  list        List audit log entries as a table.
   
               Each row shows who (actor) did what (action) to which entity, and when.
   
+              By default the list is paged interactively: a page of entries is shown
+              and you can press 'n' for the next page, 'p' for the previous page, or
+              'q' to quit (press Enter after the key). Passing --page or --limit
+              switches to a single, non-interactive fetch of exactly that page.
+  
               Examples:
                 fargo audit list
+                fargo audit list --page 2
                 fargo audit list --page 1 --limit 50
   get <guid>  Show a single audit log by GUID, including its metadata.
   
@@ -36,24 +43,31 @@ Commands:
 
 ```text
 Description:
-  List audit log entries as a table, most useful with paging.
+  List audit log entries as a table.
   
   Each row shows who (actor) did what (action) to which entity, and when.
   
+  By default the list is paged interactively: a page of entries is shown
+  and you can press 'n' for the next page, 'p' for the previous page, or
+  'q' to quit (press Enter after the key). Passing --page or --limit
+  switches to a single, non-interactive fetch of exactly that page.
+  
   Examples:
     fargo audit list
+    fargo audit list --page 2
     fargo audit list --page 1 --limit 50
 
 Usage:
-  Fargo.Cli audit list [options]
+  fargo audit list [options]
 
 Options:
-  --page <page>          Page number to retrieve (starts at 1).
-  --limit <limit>        Maximum number of audit entries per page.
+  --page <page>          Page number to retrieve (starts at 1). Disables interactive paging.
+  --limit <limit>        Maximum number of audit entries per page. Disables interactive paging.
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -67,7 +81,7 @@ Description:
     fargo audit get 809434f3-c3b6-4f74-ad15-74e41d26468e
 
 Usage:
-  Fargo.Cli audit get <guid> [options]
+  fargo audit get <guid> [options]
 
 Arguments:
   <guid>  The audit log GUID.
@@ -77,6 +91,7 @@ Options:
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

@@ -20,11 +20,11 @@ REFERENCE_DIR="docs/cli/reference"
 CLI_GROUPS=(
     "config|Config|set-server get-server show"
     "identity|Identity|login logout refresh change-password"
-    "articles|Articles|list get get-by-barcode inventory create update delete"
-    "items|Items|list get create update delete location moviments inventory"
-    "partitions|Partitions|list get create update delete"
-    "user-groups|User Groups|list get create update delete"
-    "users|Users|list get create update delete"
+    "article|Article|list tree get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
+    "item|Item|list get create update delete location moviments inventory"
+    "partition|Partition|list tree get create update delete"
+    "user-group|User Group|list tree get create update delete"
+    "user|User|list get create update delete"
     "audit|Audit|list get"
 )
 

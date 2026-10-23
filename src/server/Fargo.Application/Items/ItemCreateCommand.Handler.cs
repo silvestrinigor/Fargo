@@ -40,6 +40,8 @@ public sealed class ItemCreateCommandHandler(
 
         var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityCreated);
 
+        itemAudit.Metadata.AddArticleGuid(article.Guid);
+
         if (command.Create.ParentItemContainerGuid is { } parentItemContainerGuid)
         {
             var parentItemContainer = await itemRepository.GetByGuidAsync(parentItemContainerGuid, cancellationToken);

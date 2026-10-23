@@ -12,7 +12,7 @@ public sealed class UpdatePartitionCommand : Command
             Update an existing partition. Only the options you pass are changed.
 
             Examples:
-              fargo partitions update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
+              fargo partition update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

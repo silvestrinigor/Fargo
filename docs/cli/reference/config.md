@@ -9,13 +9,14 @@ Description:
   Manage CLI configuration (the server URL this CLI connects to).
 
 Usage:
-  Fargo.Cli config [command] [options]
+  fargo config [command] [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
   set-server  Set and persist the Fargo server URL the CLI connects to by default.
@@ -47,7 +48,7 @@ Description:
     fargo config set-server --url https://localhost:7563
 
 Usage:
-  Fargo.Cli config set-server [options]
+  fargo config set-server [options]
 
 Options:
   --url <url> (REQUIRED)  The Fargo server URL (e.g. https://localhost:7563).
@@ -55,6 +56,7 @@ Options:
   --password <password>   Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help          Show help and usage information
   --server <server>       The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose           Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -68,13 +70,14 @@ Description:
     fargo config get-server
 
 Usage:
-  Fargo.Cli config get-server [options]
+  fargo config get-server [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -88,13 +91,14 @@ Description:
     fargo config show
 
 Usage:
-  Fargo.Cli config show [options]
+  fargo config show [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

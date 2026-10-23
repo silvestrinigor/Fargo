@@ -11,7 +11,7 @@ public sealed class DeleteUserGroupCommand : Command
             Delete a user group by GUID.
 
             Examples:
-              fargo user-groups delete 00000000-0000-0000-0000-000000000003
+              fargo user-group delete 00000000-0000-0000-0000-000000000003
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

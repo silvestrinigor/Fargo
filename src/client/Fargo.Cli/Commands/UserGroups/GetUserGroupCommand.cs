@@ -11,7 +11,7 @@ public sealed class GetUserGroupCommand : Command
             Show the full details of a single user group.
 
             Examples:
-              fargo user-groups get 00000000-0000-0000-0000-000000000003
+              fargo user-group get 00000000-0000-0000-0000-000000000003
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
@@ -40,10 +40,40 @@ public sealed class GetUserGroupCommand : Command
                 .Field("Description", group.Description)
                 .Field("Active", group.IsActive)
                 .Field("Admin group", group.IsAdminUserGroup)
-                .Field("Parent partition", group.ParentPartition)
+                .Field("Parent user group", group.ParentUserGroup)
+                .Field("Permissions", FormatPermissions(group.Permissions))
+                .Field("Partition accesses", FormatGuids(group.PartitionAccesses))
+                .Field("Partitions", FormatGuids(group.Partitions))
                 .Write();
 
             return 0;
         });
+    }
+
+    private static string? FormatGuids(IEnumerable<Guid?>? guids)
+    {
+        if (guids is null)
+        {
+            return null;
+        }
+
+        var values = guids.Where(g => g.HasValue).Select(g => g!.Value.ToString()).ToArray();
+
+        return values.Length == 0 ? null : string.Join(", ", values);
+    }
+
+    private static string? FormatPermissions(IEnumerable<int?>? permissions)
+    {
+        if (permissions is null)
+        {
+            return null;
+        }
+
+        var values = permissions
+            .Where(p => p.HasValue)
+            .Select(p => EnumFormatting.Format<ActionType>(p) ?? $"unknown ({p!.Value})")
+            .ToArray();
+
+        return values.Length == 0 ? null : string.Join(", ", values);
     }
 }

@@ -8,7 +8,7 @@ namespace Fargo.Mcp.Tools;
 
 /// <summary>
 /// MCP tools for working with Fargo partitions. Mirrors the
-/// <c>fargo partitions</c> CLI surface.
+/// <c>fargo partition</c> CLI surface.
 /// </summary>
 [McpServerToolType]
 public static class PartitionTools
@@ -44,7 +44,7 @@ public static class PartitionTools
             }
         }, cancellationToken);
 
-        return result?.Select(p => p.ToSummary()).ToArray() ?? [];
+        return result?.Items?.Select(p => p.ToSummary()).ToArray() ?? [];
     }
 
     [McpServerTool(Name = "fargo_partitions_get")]

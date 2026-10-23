@@ -74,7 +74,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/{itemGuid:guid}/location", GetItemLocationByGuid)
             .WithName("GetItemLocation")
             .WithSummary("Gets the item location")
-            .WithDescription("Retrieves a list of items that represents the location of the contained item.")
+            .WithDescription("Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When 'at' is supplied, the chain is reconstructed from the containment history as it was at that instant.")
             .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -83,10 +83,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NotFound>> GetItemLocationByGuid(
         Guid itemGuid,
+        DateTimeOffset? at,
         IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ItemLocationQuery(itemGuid);
+        var query = new ItemLocationQuery(itemGuid, at);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -130,7 +131,7 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/{itemGuid:guid}/inventory", GetItemContainerInventoryByGuid)
             .WithName("GetItemContainerInventory")
             .WithSummary("Gets the item container inventory")
-            .WithDescription("Retrieves a list of article inventory in the item container.")
+            .WithDescription("Retrieves the per-article inventory contained in the item container. When 'at' is supplied, the inventory is reconstructed from the containment history as it was at that instant.")
             .Produces<IReadOnlyCollection<ItemContainerInventoryDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -139,10 +140,11 @@ public static class ItemEndpointRouteBuilderExtension
 
     private static async Task<Results<Ok<IReadOnlyCollection<ItemContainerInventoryDto>>, NotFound>> GetItemContainerInventoryByGuid(
         Guid itemGuid,
+        DateTimeOffset? at,
         IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?> handler,
         CancellationToken cancellationToken)
     {
-        var query = new ItemContainerInventoryByGuidQuery(itemGuid);
+        var query = new ItemContainerInventoryByGuidQuery(itemGuid, At: at);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 
@@ -158,18 +160,17 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyItem)
             .WithName("GetItems")
             .WithSummary("Gets multiple items")
-            .WithDescription("Retrieves a paginated list of items.")
-            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            .WithDescription("Retrieves a paginated list of items, including the total number of matching entries.")
+            .Produces<PagedResult<ItemDto>>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NoContent>> GetManyItem(
+    private static async Task<Ok<PagedResult<ItemDto>>> GetManyItem(
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        IQueryHandler<ItemsQuery, IReadOnlyCollection<ItemDto>> handler,
+        IQueryHandler<ItemsQuery, PagedResult<ItemDto>> handler,
         CancellationToken cancellationToken
     )
     {
@@ -182,11 +183,6 @@ public static class ItemEndpointRouteBuilderExtension
             childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
-
-        if (response.Count == 0)
-        {
-            return TypedResults.NoContent();
-        }
 
         return TypedResults.Ok(response);
     }

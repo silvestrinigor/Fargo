@@ -11,7 +11,7 @@ public sealed class DeleteArticleCommand : Command
             Delete an article by GUID.
 
             Examples:
-              fargo articles delete 11111111-1111-1111-1111-111111111111
+              fargo article delete 11111111-1111-1111-1111-111111111111
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

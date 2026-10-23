@@ -12,8 +12,8 @@ public sealed class UpdateItemCommand : Command
             Update an existing item. Only the options you pass are changed.
 
             Examples:
-              fargo items update 22222222-2222-2222-2222-222222222222 --container 33333333-3333-3333-3333-333333333333
-              fargo items update 22222222-2222-2222-2222-222222222222 --remove-container
+              fargo item update 22222222-2222-2222-2222-222222222222 --container 33333333-3333-3333-3333-333333333333
+              fargo item update 22222222-2222-2222-2222-222222222222 --remove-container
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

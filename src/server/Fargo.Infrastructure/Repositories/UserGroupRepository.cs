@@ -46,21 +46,29 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         return userGroup;
     }
 
-    public async Task<IReadOnlyCollection<UserGroupDto>> GetManyInfoAsync(
+    public async Task<PagedResult<UserGroupDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
+        var queryFiltered = ApplyPartitionFilter(
                 userGroups
                     .AsNoTracking(),
-                childOfAnyOfThesePartitions)
+                childOfAnyOfThesePartitions);
+
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var result = await queryFiltered
             .OrderBy(userGroup => userGroup.Guid)
             .WithPagination(pagination)
             .Select(UserGroupDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return new PagedResult<UserGroupDto>(
+            result,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
     }
 
     private static IQueryable<UserGroup> ApplyPartitionFilter(

@@ -22,8 +22,8 @@ Run any command with `--help` to see its description, options, and examples:
 
 ```bash
 fargo --help
-fargo articles --help
-fargo articles create --help
+fargo article --help
+fargo article create --help
 ```
 
 ## Command groups

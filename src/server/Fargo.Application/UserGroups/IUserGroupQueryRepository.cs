@@ -9,7 +9,7 @@ public interface IUserGroupQueryRepository
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<UserGroupDto>> GetManyInfoAsync(
+    Task<PagedResult<UserGroupDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default);

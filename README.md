@@ -28,8 +28,13 @@ Install (or upgrade) the latest release for the current user. This downloads
 user `PATH` — no admin rights required:
 
 ```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 | iex
 ```
+
+> The first line enables TLS 1.2, which Windows PowerShell 5.1 does not use by
+> default — without it the download fails with "the connection was closed
+> unexpectedly". It is harmless on PowerShell 7+.
 
 Open a **new** terminal afterwards so the updated `PATH` takes effect, then run
 `fargo --version`.
@@ -86,17 +91,17 @@ in your `PATH`.
 fargo --version
 fargo config set-server --url https://localhost:7563
 fargo identity login --username admin
-fargo articles list
+fargo article list
 ```
 
-Run any command with `--help` to see its options, e.g. `fargo articles --help`.
+Run any command with `--help` to see its options, e.g. `fargo article --help`.
 
 Add `--verbose` (or `-v`) to any command to print detailed diagnostics when an
 error occurs (exception types, inner exceptions, and stack traces), which is
 useful when reporting issues:
 
 ```bash
-fargo articles list --verbose
+fargo article list --verbose
 ```
 
 ## Running the Application

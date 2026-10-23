@@ -47,21 +47,29 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         return user;
     }
 
-    public async Task<IReadOnlyCollection<UserDto>> GetManyInfoAsync(
+    public async Task<PagedResult<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ApplyPartitionFilter(
+        var queryFiltered = ApplyPartitionFilter(
                 users
                     .AsNoTracking(),
-                childOfAnyOfThesePartitions)
+                childOfAnyOfThesePartitions);
+
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var result = await queryFiltered
             .OrderBy(user => user.Guid)
             .WithPagination(pagination)
             .Select(UserDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return result;
+        return new PagedResult<UserDto>(
+            result,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
     }
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
@@ -113,20 +121,43 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             INNER JOIN user_group_hierarchy child
                 ON child.parent_user_group_guid = parent.guid
             WHERE parent.is_active = true
+        ),
+        granted_partitions AS
+        (
+            SELECT upa.partition_guid
+            FROM user_partition_accesses upa
+            INNER JOIN users u
+                ON u.guid = upa.user_guid
+            WHERE upa.user_guid = {userGuid}
+            AND u.is_active = true
+
+            UNION
+
+            SELECT ugpa.partition_guid
+            FROM user_group_partition_accesses ugpa
+            INNER JOIN user_group_hierarchy ugh
+                ON ugh.guid = ugpa.user_group_guid
+        ),
+        partition_tree AS
+        (
+            -- Seed with the partitions granted directly to the user/groups.
+            SELECT p.guid, p.parent_partition_guid
+            FROM partitions p
+            INNER JOIN granted_partitions gp
+                ON gp.partition_guid = p.guid
+
+            UNION
+
+            -- Expand downward: every child of an already-included partition is
+            -- also accessible (access to a partition implies access to all of
+            -- its descendant partitions).
+            SELECT child.guid, child.parent_partition_guid
+            FROM partitions AS child
+            INNER JOIN partition_tree AS parent
+                ON child.parent_partition_guid = parent.guid
         )
-        SELECT upa.partition_guid
-        FROM user_partition_accesses upa
-        INNER JOIN users u
-            ON u.guid = upa.user_guid
-        WHERE upa.user_guid = {userGuid}
-        AND u.is_active = true
-
-        UNION
-
-        SELECT ugpa.partition_guid
-        FROM user_group_partition_accesses ugpa
-        INNER JOIN user_group_hierarchy ugh
-            ON ugh.guid = ugpa.user_group_guid;
+        SELECT DISTINCT guid AS partition_guid
+        FROM partition_tree;
         """;
 
         var guids = await context.Database

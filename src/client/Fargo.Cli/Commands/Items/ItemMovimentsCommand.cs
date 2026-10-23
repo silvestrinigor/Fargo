@@ -11,7 +11,7 @@ public sealed class ItemMovimentsCommand : Command
             Show the movement history for an item (when it changed containers).
 
             Examples:
-              fargo items moviments 22222222-2222-2222-2222-222222222222
+              fargo item moviments 22222222-2222-2222-2222-222222222222
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

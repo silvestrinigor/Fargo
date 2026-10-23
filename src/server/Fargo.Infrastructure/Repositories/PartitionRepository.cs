@@ -35,7 +35,7 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<PartitionDto>> GetManyInfo(
+    public async Task<PagedResult<PartitionDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
@@ -45,13 +45,19 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions);
 
-        var partition = await queryFiltered
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var partitions = await queryFiltered
             .OrderBy(partition => partition.Guid)
             .WithPagination(pagination)
             .Select(PartitionDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
-        return partition;
+        return new PagedResult<PartitionDto>(
+            partitions,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(
@@ -124,9 +130,15 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             return query;
         }
 
+        // A partition is visible when the actor has access to it directly (its
+        // own GUID is in the access set) or when it is a child of an accessible
+        // partition. The direct-access case is essential for root partitions
+        // such as the global partition, whose ParentPartitionGuid is null and
+        // which would otherwise never match the parent-based condition.
         return query.Where(partition =>
-            partition.ParentPartitionGuid != null &&
-            partitionGuids.Contains(partition.ParentPartitionGuid.Value));
+            partitionGuids.Contains(partition.Guid) ||
+            (partition.ParentPartitionGuid != null &&
+             partitionGuids.Contains(partition.ParentPartitionGuid.Value)));
     }
 
     public async Task<bool> HasChildrenAsync(Guid partitionGuid, CancellationToken cancellationToken = default)

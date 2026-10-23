@@ -40,27 +40,27 @@ public sealed class UserCreateCommandHandler(
 
         var userAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityCreated);
 
-        userAudit.Metadata.Add(nameof(user.Nameid), new AuditValue.String(user.Nameid));
+        userAudit.Metadata.AddNameid(user.Nameid);
 
         if (command.Create.FirstName is { } firstName)
         {
             user.FirstName = firstName;
 
-            userAudit.Metadata.Add(nameof(user.FirstName), new AuditValue.String(user.FirstName));
+            userAudit.Metadata.AddFirstName(firstName);
         }
 
         if (command.Create.LastName is { } lastName)
         {
             user.LastName = lastName;
 
-            userAudit.Metadata.Add(nameof(user.LastName), new AuditValue.String(user.LastName));
+            userAudit.Metadata.AddLastName(lastName);
         }
 
         if (command.Create.Description is { } description)
         {
             user.Description = description;
 
-            userAudit.Metadata.Add(nameof(user.Description), new AuditValue.String(user.Description));
+            userAudit.Metadata.AddDescription(user.Description);
         }
 
         if (command.Create.IsActive is true)
@@ -72,7 +72,7 @@ public sealed class UserCreateCommandHandler(
             user.Deactivate();
         }
 
-        userAudit.Metadata.Add(nameof(user.IsActive), new AuditValue.Boolean(user.IsActive));
+        userAudit.Metadata.AddIsActive(user.IsActive);
 
         user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
@@ -97,6 +97,8 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
+        userAudit.Metadata.AddPermissions([.. user.Permissions]);
+
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
@@ -111,6 +113,8 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
+        userAudit.Metadata.AddPartitions(user.PartitionGuids);
+
         if (command.Create.UserGroupsToAdd is { Count: > 0 } userGroups)
         {
             foreach (var userGroupGuid in userGroups.Distinct())
@@ -123,6 +127,9 @@ public sealed class UserCreateCommandHandler(
 
                 user.AddUserGroup(userGroup);
             }
+
+            userAudit.Metadata.AddUserGroupsAdded(
+                [.. user.UserGroupMemberships.Select(m => m.UserGroupGuid)]);
         }
 
         if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
@@ -137,6 +144,9 @@ public sealed class UserCreateCommandHandler(
 
                 user.AddPartitionAccess(partition);
             }
+
+            userAudit.Metadata.AddPartitionAccessesAdded(
+                [.. user.PartitionAccesses.Select(p => p.PartitionGuid)]);
         }
 
         userRepository.Add(user);

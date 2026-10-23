@@ -11,7 +11,7 @@ public sealed class DeleteItemCommand : Command
             Delete an item by GUID.
 
             Examples:
-              fargo items delete 22222222-2222-2222-2222-222222222222
+              fargo item delete 22222222-2222-2222-2222-222222222222
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

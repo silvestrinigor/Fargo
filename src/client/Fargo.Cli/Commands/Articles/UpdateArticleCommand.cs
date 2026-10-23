@@ -1,6 +1,5 @@
 using Fargo.Cli.Output;
 using Fargo.ClientHttp;
-using Fargo.ClientHttp.Models;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;
@@ -9,11 +8,17 @@ public sealed class UpdateArticleCommand : Command
 {
     public UpdateArticleCommand(FargoApiClient client)
         : base("update", """
-            Update an existing article. Only the options you pass are changed.
+            Update an existing article by GUID. Only the options you pass are changed.
+
+            Measures are written as a number followed by a unit, e.g. '2.5kg' or
+            '10cm'. Use the matching --remove-* flag to clear a value.
 
             Examples:
-              fargo articles update 11111111-1111-1111-1111-111111111111 --name "New name"
-              fargo articles update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+              fargo article update 11111111-1111-1111-1111-111111111111 --name "New name"
+              fargo article update 11111111-1111-1111-1111-111111111111 --mass 3kg --length-x 12cm
+              fargo article update 11111111-1111-1111-1111-111111111111 --remove-mass --remove-barcode
+              fargo article update 11111111-1111-1111-1111-111111111111 --barcode-ean13 1234567890128
+              fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
@@ -21,41 +26,25 @@ public sealed class UpdateArticleCommand : Command
             Description = "The article GUID."
         };
 
-        var nameOption = new Option<string?>("--name")
-        {
-            Description = "New name for the article."
-        };
-
-        var addPartitionsOption = new Option<Guid[]?>("--add-partitions")
-        {
-            Description = "Partition GUIDs to add (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var removePartitionsOption = new Option<Guid[]?>("--remove-partitions")
-        {
-            Description = "Partition GUIDs to remove (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
+        var options = new ArticleUpdateOptions();
 
         Add(guidArgument);
-        Add(nameOption);
-        Add(addPartitionsOption);
-        Add(removePartitionsOption);
+        options.AddTo(this);
 
         SetAction(async parseResult =>
         {
             var guid = parseResult.GetValue(guidArgument);
-            var name = parseResult.GetValue(nameOption);
-            var addPartitions = parseResult.GetValue(addPartitionsOption);
-            var removePartitions = parseResult.GetValue(removePartitionsOption);
 
-            var dto = new ArticleUpdateDto
+            ClientHttp.Models.ArticleUpdateDto dto;
+            try
             {
-                Name = name,
-                PartitionsToAdd = addPartitions?.Select(g => (Guid?)g).ToList(),
-                PartitionsToRemove = removePartitions?.Select(g => (Guid?)g).ToList()
-            };
+                dto = options.Build(parseResult);
+            }
+            catch (FormatException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
 
             await client.Articles[guid.ToString()].PatchAsync(dto);
 

@@ -132,7 +132,7 @@
           "Articles"
         ],
         "summary": "Gets a article inventory by guid",
-        "description": "Retrieves a article inventory by its unique identifier.",
+        "description": "Retrieves the inventory count for an article. When 'at' is supplied, the count is reconstructed from the item containment history as it was at that instant.",
         "operationId": "GetArticleInventory",
         "produces": [
           "application/json"
@@ -159,6 +159,12 @@
             "in": "query",
             "name": "includeDescendents",
             "type": "boolean"
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
@@ -180,7 +186,7 @@
           "Articles"
         ],
         "summary": "Gets multiple articles",
-        "description": "Retrieves a paginated list of articles.",
+        "description": "Retrieves a paginated list of articles, including the total number of matching entries.",
         "operationId": "GetArticles",
         "produces": [
           "application/json"
@@ -216,14 +222,8 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ArticleDto"
-              }
+              "$ref": "#/definitions/PagedResultOfArticleDto"
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -355,7 +355,7 @@
           "Items"
         ],
         "summary": "Gets the item location",
-        "description": "Retrieves a list of items that represents the location of the contained item.",
+        "description": "Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When 'at' is supplied, the chain is reconstructed from the containment history as it was at that instant.",
         "operationId": "GetItemLocation",
         "produces": [
           "application/json"
@@ -367,6 +367,12 @@
             "required": true,
             "type": "string",
             "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
@@ -427,7 +433,7 @@
           "Items"
         ],
         "summary": "Gets the item container inventory",
-        "description": "Retrieves a list of article inventory in the item container.",
+        "description": "Retrieves the per-article inventory contained in the item container. When 'at' is supplied, the inventory is reconstructed from the containment history as it was at that instant.",
         "operationId": "GetItemContainerInventory",
         "produces": [
           "application/json"
@@ -439,6 +445,12 @@
             "required": true,
             "type": "string",
             "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
@@ -463,7 +475,7 @@
           "Items"
         ],
         "summary": "Gets multiple items",
-        "description": "Retrieves a paginated list of items.",
+        "description": "Retrieves a paginated list of items, including the total number of matching entries.",
         "operationId": "GetItems",
         "produces": [
           "application/json"
@@ -498,14 +510,8 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ItemDto"
-              }
+              "$ref": "#/definitions/PagedResultOfItemDto"
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -637,7 +643,7 @@
           "Users"
         ],
         "summary": "Gets multiple users",
-        "description": "Retrieves a paginated list of users.",
+        "description": "Retrieves a paginated list of users, including the total number of matching entries.",
         "operationId": "GetUsers",
         "produces": [
           "application/json"
@@ -672,14 +678,8 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserDto"
-              }
+              "$ref": "#/definitions/PagedResultOfUserDto"
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -811,7 +811,7 @@
           "UserGroups"
         ],
         "summary": "Gets multiple user groups",
-        "description": "Retrieves a paginated list of user groups.",
+        "description": "Retrieves a paginated list of user groups, including the total number of matching entries.",
         "operationId": "GetUserGroups",
         "produces": [
           "application/json"
@@ -846,14 +846,8 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserGroupDto"
-              }
+              "$ref": "#/definitions/PagedResultOfUserGroupDto"
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -985,7 +979,7 @@
           "Partitions"
         ],
         "summary": "Gets multiple partitions",
-        "description": "Retrieves a paginated list of partitions.",
+        "description": "Retrieves a paginated list of partitions, including the total number of matching entries.",
         "operationId": "GetPartitions",
         "produces": [
           "application/json"
@@ -1021,14 +1015,8 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/PartitionDto"
-              }
+              "$ref": "#/definitions/PagedResultOfPartitionDto"
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -1244,7 +1232,7 @@
           "AuditLogs"
         ],
         "summary": "Gets multiple audit logs",
-        "description": "Retrieves a paginated list of audit logs.",
+        "description": "Retrieves a paginated list of audit logs, including the total number of matching entries.",
         "operationId": "GetAuditLogs",
         "produces": [
           "application/json"
@@ -1304,14 +1292,8 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/AuditLogDto"
-              }
+              "$ref": "#/definitions/PagedResultOfAuditLogDto"
             }
-          },
-          "204": {
-            "description": "No Content"
           }
         }
       }
@@ -1324,7 +1306,7 @@
     },
     "ActorType": {
       "type": "integer",
-      "description": "Represents the type of actor responsible for performing an action\nwithin the system."
+      "description": "Represents the type of actor responsible for performing an action\r\nwithin the system."
     },
     "ArticleBarcodeDto": {
       "type": "object",
@@ -1345,14 +1327,14 @@
       "properties": {
         "ean13": {
           "type": "string",
-          "description": "The new EAN-13 barcode to assign to the article. A `null` value\nleaves the existing EAN-13 barcode unchanged.",
+          "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged.",
           "maxLength": 13,
           "minLength": 13,
           "pattern": "^\\d{13}$"
         },
         "removeEan13": {
           "type": "boolean",
-          "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\nvalue to `null`.",
+          "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\r\nvalue to `null`.",
           "default": false
         }
       }
@@ -1414,7 +1396,7 @@
         },
         "kitComponents": {
           "type": "array",
-          "description": "The optional components of the article. Required when ArticleType\nis ArticleType.Kit.",
+          "description": "The optional components of the article. Required when ArticleType\r\nis ArticleType.Kit.",
           "items": {
             "$ref": "#/definitions/ArticleKitComponentDto"
           },
@@ -1544,7 +1526,7 @@
       "properties": {
         "lengthX": {
           "type": "object",
-          "description": "The new length along the X axis. A `null` value leaves the\nexisting value unchanged.",
+          "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged.",
           "required": [
             "value",
             "unit"
@@ -1561,12 +1543,12 @@
         },
         "removeLengthX": {
           "type": "boolean",
-          "description": "Indicates whether the existing X-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthX.",
+          "description": "Indicates whether the existing X-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthX.",
           "default": false
         },
         "lengthY": {
           "type": "object",
-          "description": "The new length along the Y axis. A `null` value leaves the\nexisting value unchanged.",
+          "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged.",
           "required": [
             "value",
             "unit"
@@ -1583,12 +1565,12 @@
         },
         "removeLengthY": {
           "type": "boolean",
-          "description": "Indicates whether the existing Y-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthY.",
+          "description": "Indicates whether the existing Y-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthY.",
           "default": false
         },
         "lengthZ": {
           "type": "object",
-          "description": "The new length along the Z axis. A `null` value leaves the\nexisting value unchanged.",
+          "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged.",
           "required": [
             "value",
             "unit"
@@ -1605,7 +1587,7 @@
         },
         "removeLengthZ": {
           "type": "boolean",
-          "description": "Indicates whether the existing Z-axis length should be removed by setting it\nto `null`. When `true`, this takes precedence\nover LengthZ.",
+          "description": "Indicates whether the existing Z-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthZ.",
           "default": false
         }
       }
@@ -1786,7 +1768,7 @@
         },
         "removeShelfLife": {
           "type": "boolean",
-          "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\nWhen `true`, this takes precedence over ShelfLife.",
+          "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over ShelfLife.",
           "default": false
         },
         "mass": {
@@ -1808,7 +1790,7 @@
         },
         "removeMass": {
           "type": "boolean",
-          "description": "Indicates whether the existing mass should be removed by setting it to `null`.\nWhen `true`, this takes precedence over Mass.",
+          "description": "Indicates whether the existing mass should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over Mass.",
           "default": false
         },
         "dimension": {
@@ -1861,7 +1843,7 @@
     },
     "AuditLogDto": {
       "type": "object",
-      "description": "Represents a data transfer object for audit log information.\nThis DTO contains all the essential details about an audit event, including\nthe actor who performed the action, the entity affected, the type of action,\nwhen it occurred, and any additional metadata.",
+      "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata.",
       "required": [
         "guid",
         "actorGuid",
@@ -1981,7 +1963,7 @@
     },
     "IdentityLogOutDto": {
       "type": "object",
-      "description": "Represents the data transfer object for logging out by providing a refresh token.\nThis DTO is used as input when performing a logout operation to revoke the refresh token.",
+      "description": "Represents the data transfer object for logging out by providing a refresh token.\r\nThis DTO is used as input when performing a logout operation to revoke the refresh token.",
       "required": [
         "refreshToken"
       ],
@@ -1993,7 +1975,7 @@
     },
     "IdentityPasswordUpdateDto": {
       "type": "object",
-      "description": "Represents the data transfer object for updating a user's password.\nThe NewPassword field uses the Password structure to enforce security validation rules\nincluding minimum character requirements, special character constraints, and other password policies.",
+      "description": "Represents the data transfer object for updating a user's password.\r\nThe NewPassword field uses the Password structure to enforce security validation rules\r\nincluding minimum character requirements, special character constraints, and other password policies.",
       "required": [
         "nameid",
         "newPassword",
@@ -2015,7 +1997,7 @@
     },
     "IdentityRefreshDto": {
       "type": "object",
-      "description": "Represents the data transfer object for refreshing authentication tokens.\nThis DTO is used as input when requesting a new access token using a refresh token.",
+      "description": "Represents the data transfer object for refreshing authentication tokens.\r\nThis DTO is used as input when requesting a new access token using a refresh token.",
       "required": [
         "refreshToken"
       ],
@@ -2184,11 +2166,292 @@
       "minLength": 3,
       "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$"
     },
+    "PagedResultOfArticleDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ArticleDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfAuditLogDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/AuditLogDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfItemDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ItemDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfPartitionDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/PartitionDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfUserDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/UserDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfUserGroupDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/UserGroupDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
     "PartitionCreateDto": {
       "type": "object",
       "required": [
-        "name",
-        "parentPartitionGuid"
+        "name"
       ],
       "properties": {
         "name": {
@@ -2196,7 +2459,8 @@
         },
         "parentPartitionGuid": {
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-nullable": true
         },
         "description": {
           "type": "string",
@@ -2532,7 +2796,7 @@
         "description",
         "isActive",
         "isAdminUserGroup",
-        "parentPartition",
+        "parentUserGroup",
         "permissions",
         "partitions",
         "partitionAccesses"
@@ -2554,7 +2818,7 @@
         "isAdminUserGroup": {
           "type": "boolean"
         },
-        "parentPartition": {
+        "parentUserGroup": {
           "type": "string",
           "format": "uuid",
           "x-nullable": true

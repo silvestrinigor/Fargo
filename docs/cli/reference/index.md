@@ -23,12 +23,15 @@ fargo
 │  └─ change-password
 ├─ articles       Manage articles
 │  ├─ list
+│  ├─ tree
 │  ├─ get
 │  ├─ get-by-barcode
 │  ├─ inventory
 │  ├─ create
 │  ├─ update
-│  └─ delete
+│  ├─ update-by-barcode
+│  ├─ delete
+│  └─ delete-by-barcode
 ├─ items          Manage items
 │  ├─ list
 │  ├─ get
@@ -40,12 +43,14 @@ fargo
 │  └─ inventory
 ├─ partitions     Manage partitions
 │  ├─ list
+│  ├─ tree
 │  ├─ get
 │  ├─ create
 │  ├─ update
 │  └─ delete
 ├─ user-groups    Manage user groups
 │  ├─ list
+│  ├─ tree
 │  ├─ get
 │  ├─ create
 │  ├─ update

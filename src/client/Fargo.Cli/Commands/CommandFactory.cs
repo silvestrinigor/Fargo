@@ -26,7 +26,7 @@ public static class CommandFactory
             Common workflow:
               1. Point the CLI at a server:  fargo config set-server --url https://localhost:7563
               2. Authenticate:               fargo identity login --username admin
-              3. Work with resources:        fargo articles list, fargo items get <guid>, ...
+              3. Work with resources:        fargo article list, fargo item get <guid>, ...
 
             Global options:
               --server              Override the configured server (available on every command).

@@ -45,3 +45,17 @@ public sealed class ForbiddenApiException : FargoApiException
     {
     }
 }
+
+/// <summary>
+/// Thrown when the API responds with HTTP 400 (Bad Request), for example when a
+/// request fails model validation or an application rule rejects the input. The
+/// <see cref="FargoApiException.Problem"/> may carry field-level validation
+/// errors (see <see cref="FargoProblemDetails.GetValidationErrors"/>).
+/// </summary>
+public sealed class BadRequestApiException : FargoApiException
+{
+    public BadRequestApiException(FargoProblemDetails? problem, string message)
+        : base(400, problem, message)
+    {
+    }
+}

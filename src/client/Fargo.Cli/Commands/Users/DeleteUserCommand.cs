@@ -11,7 +11,7 @@ public sealed class DeleteUserCommand : Command
             Delete a user by GUID.
 
             Examples:
-              fargo users delete 00000000-0000-0000-0000-000000000004
+              fargo user delete 00000000-0000-0000-0000-000000000004
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

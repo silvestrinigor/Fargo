@@ -69,19 +69,17 @@ public static class UserEndpointRouteBuilderExtension
         builder.MapGet("/", GetManyUser)
             .WithName("GetUsers")
             .WithSummary("Gets multiple users")
-            .WithDescription("Retrieves a paginated list of users.")
-            .Produces<IReadOnlyCollection<UserDto>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent
-        );
+            .WithDescription("Retrieves a paginated list of users, including the total number of matching entries.")
+            .Produces<PagedResult<UserDto>>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<Results<Ok<IReadOnlyCollection<UserDto>>, NoContent>> GetManyUser(
+    private static async Task<Ok<PagedResult<UserDto>>> GetManyUser(
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
-        IQueryHandler<UsersQuery, IReadOnlyCollection<UserDto>> handler,
+        IQueryHandler<UsersQuery, PagedResult<UserDto>> handler,
         CancellationToken cancellationToken
     )
     {
@@ -94,11 +92,6 @@ public static class UserEndpointRouteBuilderExtension
             childOfAnyOfThesePartitions);
 
         var response = await handler.HandleAsync(query, cancellationToken);
-
-        if (response.Count == 0)
-        {
-            return TypedResults.NoContent();
-        }
 
         return TypedResults.Ok(response);
     }

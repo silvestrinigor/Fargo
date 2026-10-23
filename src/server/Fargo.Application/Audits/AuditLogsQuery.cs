@@ -22,4 +22,4 @@ public sealed record AuditLogsQuery(
     EntityType? EntityType = null,
     DateTimeOffset? PeriodStart = null,
     DateTimeOffset? PeriodEnd = null
-) : IQuery<IReadOnlyCollection<AuditLogDto>>;
+) : IQuery<PagedResult<AuditLogDto>>;

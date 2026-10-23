@@ -17,7 +17,7 @@ public sealed class ArticlesQueryHandler(
     IArticleQueryRepository articleRepository,
     ICurrentActor currentActor,
     ILogger<ArticlesQueryHandler> logger
-) : IQueryHandler<ArticlesQuery, IReadOnlyCollection<ArticleDto>>
+) : IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>>
 {
     /// <summary>
     /// Handles the ArticlesQuery by retrieving a paginated collection of articles that are accessible to the current actor.
@@ -25,9 +25,9 @@ public sealed class ArticlesQueryHandler(
     /// <param name="query">The ArticlesQuery containing pagination and partition filtering parameters</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
     /// <returns>
-    /// A task that represents the asynchronous operation, containing a read-only collection of ArticleDto objects
+    /// A task that represents the asynchronous operation, containing a page of ArticleDto objects and the total count
     /// </returns>
-    public async Task<IReadOnlyCollection<ArticleDto>> HandleAsync(ArticlesQuery query, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<ArticleDto>> HandleAsync(ArticlesQuery query, CancellationToken cancellationToken = default)
     {
         logger.ArticlesQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
@@ -52,7 +52,7 @@ public sealed class ArticlesQueryHandler(
             actor.ActorType,
             requestedPartitionCount: query.ChildOfAnyOfThesePartitions?.Count ?? 0,
             effectivePartitionCount: partitionGuids?.Count ?? 0,
-            resultCount: articles.Count
+            resultCount: articles.Items.Count
         );
 
         return articles;

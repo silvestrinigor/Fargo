@@ -50,4 +50,61 @@ public sealed class FargoProblemDetails
             _ => element.GetRawText()
         };
     }
+
+    /// <summary>
+    /// Reads the ASP.NET validation <c>errors</c> extension (a map of field name
+    /// to an array of error messages) produced for HTTP 400 responses. Returns
+    /// an empty collection when no validation errors are present.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> GetValidationErrors()
+    {
+        var result = new Dictionary<string, IReadOnlyList<string>>(
+            StringComparer.OrdinalIgnoreCase);
+
+        if (Extensions is null
+            || !Extensions.TryGetValue("errors", out var errors)
+            || errors.ValueKind != JsonValueKind.Object)
+        {
+            return result;
+        }
+
+        foreach (var field in errors.EnumerateObject())
+        {
+            var messages = new List<string>();
+
+            switch (field.Value.ValueKind)
+            {
+                case JsonValueKind.Array:
+                    foreach (var item in field.Value.EnumerateArray())
+                    {
+                        var text = item.ValueKind == JsonValueKind.String
+                            ? item.GetString()
+                            : item.GetRawText();
+
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            messages.Add(text!);
+                        }
+                    }
+
+                    break;
+
+                case JsonValueKind.String:
+                    var single = field.Value.GetString();
+                    if (!string.IsNullOrWhiteSpace(single))
+                    {
+                        messages.Add(single!);
+                    }
+
+                    break;
+            }
+
+            if (messages.Count > 0)
+            {
+                result[field.Name] = messages;
+            }
+        }
+
+        return result;
+    }
 }

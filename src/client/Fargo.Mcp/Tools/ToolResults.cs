@@ -43,7 +43,7 @@ public static class ToolResults
         dto.Description,
         dto.IsActive,
         dto.IsAdminUserGroup,
-        dto.ParentPartition);
+        dto.ParentUserGroup);
 
     public static AuditLogSummary ToSummary(this AuditLogDto dto) => new(
         dto.Guid,
@@ -99,7 +99,7 @@ public sealed record UserGroupSummary(
     string? Description,
     bool? IsActive,
     bool? IsAdminUserGroup,
-    Guid? ParentPartition);
+    Guid? ParentUserGroup);
 
 public sealed record AuditLogSummary(
     Guid? Guid,

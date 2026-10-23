@@ -43,7 +43,7 @@ public static class UserGroupTools
             }
         }, cancellationToken);
 
-        return result?.Select(g => g.ToSummary()).ToArray() ?? [];
+        return result?.Items?.Select(g => g.ToSummary()).ToArray() ?? [];
     }
 
     [McpServerTool(Name = "fargo_usergroups_get")]

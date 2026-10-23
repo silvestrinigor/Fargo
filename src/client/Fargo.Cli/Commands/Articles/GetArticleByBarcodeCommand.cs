@@ -13,7 +13,7 @@ public sealed class GetArticleByBarcodeCommand : Command
             The barcode is given as {value}:{type}.
 
             Examples:
-              fargo articles get-by-barcode 1234567890128:ean13
+              fargo article get-by-barcode 1234567890128:ean13
             """)
     {
         var barcodeArgument = new Argument<string>("barcode")
@@ -35,13 +35,7 @@ public sealed class GetArticleByBarcodeCommand : Command
                 return 1;
             }
 
-            new DetailWriter()
-                .Title("Article")
-                .Field("GUID", article.Guid)
-                .Field("Name", article.Name)
-                .Field("Type", EnumFormatting.Format<ArticleType>(article.ArticleType))
-                .Field("Description", article.Description)
-                .Write();
+            ArticleDetailRenderer.Write(article);
 
             return 0;
         });

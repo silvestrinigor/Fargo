@@ -12,8 +12,8 @@ public sealed class CreateItemCommand : Command
             Create a new item (an instance of an article).
 
             Examples:
-              fargo items create --article 11111111-1111-1111-1111-111111111111
-              fargo items create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+              fargo item create --article 11111111-1111-1111-1111-111111111111
+              fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
             """)
     {
         var articleOption = new Option<Guid?>("--article")
